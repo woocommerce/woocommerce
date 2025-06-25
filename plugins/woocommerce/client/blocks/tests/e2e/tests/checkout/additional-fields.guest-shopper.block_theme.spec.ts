@@ -23,19 +23,20 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Guest shopper', () => {
 		test.use( { storageState: guestFile } );
 
-		test.beforeEach( async ( { frontendUtils, requestUtils } ) => {
+		test.beforeEach( async ( { requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-additional-checkout-fields'
 			);
-
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
 		} );
 
 		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -122,6 +123,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.fillInCheckoutWithTestData(
 				{},
@@ -297,7 +302,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Fields with JSON schema validation show appropriate error messages', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 
 			// Required setup - get all of the required fields filled properly
@@ -357,6 +367,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			// The shipping insurance field should be hidden by default (cart total < 2000)
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
@@ -364,10 +378,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-
 			await frontendUtils.goToCheckout();
-
-			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
 			// The shipping insurance field should now be visible (cart total > 2000)
 			await expect(
