@@ -46,7 +46,7 @@
 
 			&:nth-child(2),
 			&:last-child {
-				justify-content: end;
+				justify-content: flex-end;
 				gap: $grid-unit;
 			}
 		}
