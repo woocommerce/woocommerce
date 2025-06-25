@@ -437,7 +437,7 @@ jobs:
             --repo woocommerce/woocommerce-test-reports
 
       - name: 'Add a link to test report in summary'
-        if: ${{ strategy.job-index == 0 }}
+        if: ${{ strategy.job-index == 0 }} # only add the link once
         uses: actions/github-script@v7
         with:
           script: |
