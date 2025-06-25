@@ -18,7 +18,6 @@ export type Context = {
 	productId: number;
 	productType: string;
 	selectedAttributes: CartVariationItem[];
-	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
