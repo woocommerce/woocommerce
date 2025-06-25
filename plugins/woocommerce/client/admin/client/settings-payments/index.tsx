@@ -20,7 +20,6 @@ import {
 } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { __ } from '@wordpress/i18n';
-import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -357,13 +356,6 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsOfflineWrapper = () => {
 	return (
 		<>
-			<Header
-				title={ __( 'Take offline payments', 'woocommerce' ) }
-				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout'
-				) }
-				context={ 'wc_settings_payments__offline_pms' }
-			/>
 			<div className="settings-payments-offline__container">
 				<div className="settings-payments-offline__header">
 					<BackButton
