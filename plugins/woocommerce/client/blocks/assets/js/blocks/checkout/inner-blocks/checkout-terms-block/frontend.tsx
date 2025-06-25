@@ -14,7 +14,6 @@ import { validationStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
-import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 const FrontendBlock = ( {
 	text,
@@ -41,7 +40,7 @@ const FrontendBlock = ( {
 		return select( validationStore ).getValidationError(
 			validationErrorId
 		);
-	} );
+	}, [] );
 	const hasError = !! ( error?.message && ! error?.hidden );
 
 	// Track validation errors for this input.
@@ -75,7 +74,6 @@ const FrontendBlock = ( {
 
 	return (
 		<>
-			<CheckoutOrderSummarySlot />
 			<div
 				className={ clsx(
 					'wc-block-checkout__terms',
