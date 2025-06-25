@@ -390,7 +390,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
@@ -406,7 +406,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			// Check the insurance box
 			await checkoutPageObject.page
 				.getByLabel( 'Add shipping insurance' )
-				.check();
+				.click();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
