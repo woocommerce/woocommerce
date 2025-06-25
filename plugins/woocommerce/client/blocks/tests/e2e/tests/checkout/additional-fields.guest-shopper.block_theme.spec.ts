@@ -82,7 +82,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await expect(
 				checkoutPageObject.page.getByText(
@@ -103,7 +103,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await expect(
 				checkoutPageObject.page.getByText(
@@ -153,22 +153,22 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			);
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )
-				.check();
+				.click();
 			await checkoutPageObject.page
 				.getByLabel( 'Do you want to subscribe to our newsletter?' )
-				.check();
+				.click();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
-				.check();
+				.click();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
-				.check();
+				.click();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
@@ -177,7 +177,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.uncheck();
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await checkoutPageObject.placeOrder();
 
@@ -328,7 +328,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 			await checkoutPageObject.placeOrder( false );
@@ -364,6 +364,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+
 			await frontendUtils.goToCheckout();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
@@ -372,8 +373,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Add shipping insurance' )
 			).toBeVisible();
-
-			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
 			// Fill all other required fields
 			await checkoutPageObject.fillInCheckoutWithTestData(
@@ -388,9 +387,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				}
 			);
 
+			await checkoutPageObject.waitForCheckoutToFinishUpdating();
+
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
-				.check();
+				.click();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
@@ -406,7 +407,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			// Check the insurance box
 			await checkoutPageObject.page
 				.getByLabel( 'Add shipping insurance' )
-				.check();
+				.click();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
