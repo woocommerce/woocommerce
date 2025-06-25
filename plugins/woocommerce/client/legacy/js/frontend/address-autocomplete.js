@@ -205,8 +205,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					container.id = `address_suggestions_${ type }`;
 					container.className = 'woocommerce-address-suggestions';
 					container.style.display = 'none';
-					container.setAttribute( 'role', 'region' );
-					container.setAttribute( 'aria-live', 'polite' );
 
 					const list = document.createElement( 'ul' );
 					list.className = 'suggestions-list';
@@ -815,7 +813,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						// Hide suggestions immediately for better UX.
 						hideSuggestions( type );
 						await selectAddress( type, this.dataset.id );
-						addressInput.focus();
+						// Focus is handled in selectAddress after all fields are updated
 					} );
 
 					li.addEventListener( 'mouseenter', function () {
@@ -831,15 +829,56 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					addressInputs[ type ][ 'address_1' ] = updatedInput;
 				}
 
+				// Update the listbox aria-label with item count
+				const itemCount = safeSuggestions.length;
+				const itemText = itemCount === 1 ? 'item' : 'items';
+				
+				suggestionsList.setAttribute( 
+					'aria-label', 
+					`${itemCount} ${itemText} found` 
+				);
+
 				suggestionsContainer.style.display = 'block';
 				suggestionsContainer.style.marginTop =
 					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
+				
+				// Set up ARIA attributes for combobox pattern
+				updatedInput.setAttribute( 'role', 'combobox' );
 				updatedInput.setAttribute( 'aria-expanded', 'true' );
+				updatedInput.setAttribute( 'aria-autocomplete', 'list' );
+				updatedInput.setAttribute( 'aria-haspopup', 'listbox' );
 				updatedInput.setAttribute(
-					'aria-owns',
+					'aria-controls',
 					`address_suggestions_${ type }_list`
 				);
+				
 				suggestionsList.id = `address_suggestions_${ type }_list`;
+				
+				// Create or update status region for announcements
+				let statusRegion = document.getElementById( `${type}-autocomplete-status` );
+				if ( ! statusRegion ) {
+					statusRegion = document.createElement( 'div' );
+					statusRegion.id = `${type}-autocomplete-status`;
+					statusRegion.className = 'screen-reader-text';
+					statusRegion.setAttribute( 'role', 'status' );
+					statusRegion.setAttribute( 'aria-live', 'assertive' );
+					statusRegion.setAttribute( 'aria-atomic', 'true' );
+					updatedInput.parentNode.insertBefore( statusRegion, updatedInput.nextSibling );
+				}
+				
+				// Update aria-describedby to include the status region
+				const existingDescribedBy = updatedInput.getAttribute( 'aria-describedby' ) || '';
+				const statusId = `${type}-autocomplete-status`;
+				if ( ! existingDescribedBy.includes( statusId ) ) {
+					const newDescribedBy = existingDescribedBy ? `${existingDescribedBy} ${statusId}` : statusId;
+					updatedInput.setAttribute( 'aria-describedby', newDescribedBy );
+				}
+				
+				// Clear and announce with proper timing
+				statusRegion.textContent = '';
+				setTimeout( () => {
+					statusRegion.textContent = `${itemCount} ${itemText} available. Use up and down arrows to navigate.`;
+				}, 100 );
 				// Don't auto-highlight first suggestion for better screen reader accessibility
 				activeSuggestionIndices[ type ] = -1;
 
@@ -895,7 +934,32 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			suggestionsContainer.style.display = 'none';
 			addressInput.setAttribute( 'aria-expanded', 'false' );
 			addressInput.removeAttribute( 'aria-activedescendant' );
-			addressInput.removeAttribute( 'aria-owns' );
+			addressInput.removeAttribute( 'aria-controls' );
+			addressInput.removeAttribute( 'role' );
+			addressInput.removeAttribute( 'aria-autocomplete' );
+			addressInput.removeAttribute( 'aria-haspopup' );
+			
+			// Remove status region from aria-describedby
+			const describedBy = addressInput.getAttribute( 'aria-describedby' );
+			const statusId = `${type}-autocomplete-status`;
+			if ( describedBy && describedBy.includes( statusId ) ) {
+				const newDescribedBy = describedBy
+					.split( ' ' )
+					.filter( id => id !== statusId )
+					.join( ' ' );
+				if ( newDescribedBy ) {
+					addressInput.setAttribute( 'aria-describedby', newDescribedBy );
+				} else {
+					addressInput.removeAttribute( 'aria-describedby' );
+				}
+			}
+			
+			// Clear the status region
+			const statusRegion = document.getElementById( statusId );
+			if ( statusRegion ) {
+				statusRegion.textContent = '';
+			}
+			
 			activeSuggestionIndices[ type ] = -1;
 
 			// Remove blur event listener when suggestions are hidden
@@ -1008,6 +1072,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						addressInputs[ type ][ 'state' ],
 						addressData.state
 					);
+				}
+
+				// Ensure focus returns to address_1 field after all updates
+				// This is important for screen reader users, especially VoiceOver
+				if ( addressInputs[ type ][ 'address_1' ] ) {
+					addressInputs[ type ][ 'address_1' ].focus();
 				}
 			}, 200 );
 		}
