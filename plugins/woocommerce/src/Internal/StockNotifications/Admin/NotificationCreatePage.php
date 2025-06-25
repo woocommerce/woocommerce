@@ -51,7 +51,12 @@ class NotificationCreatePage {
 
 		if ( isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ) {
 
-			$posted_data['user_id']    = absint( wp_unslash( $_POST['user_id'] ) );
+			$posted_data['user_id'] = absint( wp_unslash( $_POST['user_id'] ) );
+			if ( 0 === $posted_data['user_id'] ) {
+				NotificationsPage::add_notice( __( 'Please select a customer.', 'woocommerce' ), 'error' );
+				return;
+			}
+
 			$user                      = get_user_by( 'id', $posted_data['user_id'] );
 			$posted_data['user_email'] = is_a( $user, 'WP_User' ) ? $user->user_email : '';
 
@@ -63,8 +68,8 @@ class NotificationCreatePage {
 				return;
 			}
 
-			$user                      = get_user_by( 'email', $posted_data['user_email'] );
-			$posted_data['user_id']    = is_a( $user, 'WP_User' ) ? $user->ID : 0;
+			$user                   = get_user_by( 'email', $posted_data['user_email'] );
+			$posted_data['user_id'] = is_a( $user, 'WP_User' ) ? $user->ID : 0;
 		}
 
 		// Check if a notification already exists for the same product and customer.

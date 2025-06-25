@@ -78,6 +78,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							$user_string = '';
 							$user_id     = '';
 
+							// phpcs:disable WordPress.Security.NonceVerification.Recommended
 							if ( ! empty( $_REQUEST['user_id'] ) ) {
 
 								$user_id = wc_clean( wp_unslash( $_REQUEST['user_id'] ) );
@@ -93,6 +94,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 									);
 								}
 							}
+							// phpcs:enable WordPress.Security.NonceVerification.Recommended
 							?>
 							<select class="wc-customer-search" name="user_id" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 								<?php if ( $user_string && $user_id ) { ?>
@@ -111,23 +113,25 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							<label><?php esc_html_e( 'Product', 'woocommerce' ); ?></label>
 							<?php
 							$product_string = '';
-							$product_id     = '';
+							$product_id     = 0;
 
+							// phpcs:disable WordPress.Security.NonceVerification.Recommended
 							if ( ! empty( $_REQUEST['product_id'] ) ) {
 
-								$product_id = wc_clean( wp_unslash( $_REQUEST['product_id'] ) );
-								$product    = wc_get_product( absint( $product_id ) );
-
-								if ( is_a( $product, 'WC_Product' ) ) {
-									$product_string = sprintf(
-										/* translators: 1: product title 2: product ID */
-										esc_html__( '%1$s (#%2$s)', 'woocommerce' ),
-										$product->get_parent_id() ? $product->get_name() : $product->get_title(),
-										absint( $product->get_id() )
-									);
+								$product_id = absint( wp_unslash( $_REQUEST['product_id'] ) );
+								if ( $product_id > 0 ) {
+									$product = wc_get_product( $product_id );
+									if ( is_a( $product, 'WC_Product' ) ) {
+										$product_string = sprintf(
+											/* translators: 1: product title 2: product ID */
+											esc_html__( '%1$s (#%2$s)', 'woocommerce' ),
+											$product->get_parent_id() ? $product->get_name() : $product->get_title(),
+											absint( $product->get_id() )
+										);
+									}
 								}
 							}
-
+							// phpcs:enable WordPress.Security.NonceVerification.Recommended
 							$excluded_product_types = array_diff( array_keys( wc_get_product_types() ), array( 'simple', 'variable' ) );
 							?>
 							<select class="wc-product-search" name="product_id" data-action="woocommerce_json_search_products_and_variations" data-exclude_type="<?php echo esc_attr( implode( ',', $excluded_product_types ) ); ?>" data-display_stock="true"data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
