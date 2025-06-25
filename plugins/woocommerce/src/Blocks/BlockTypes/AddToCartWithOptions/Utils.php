@@ -84,13 +84,20 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a change event listener.
 	 *
 	 * @param string $quantity_html The quantity HTML.
 	 * @param string $wrapper_attributes Optional wrapper attributes.
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+		while ( $html->next_tag( 'input' ) ) {
+			$html->set_attribute( 'data-wp-on--input', 'actions.handleInputQuantityChange' );
+		}
+
+		$quantity_html = $html->get_updated_html();
+
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
 				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
