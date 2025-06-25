@@ -5,5 +5,4 @@ reviews:
     review_status: false
     suggested_labels: false
     suggested_reviewers: false
-    path_filters:
-        - '!docs/**'
+    poem: false
