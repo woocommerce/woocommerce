@@ -452,38 +452,29 @@ export const SettingsPaymentsChequeWrapper = () => {
 				) }
 				context={ 'wc_settings_payments__offline_pms_cheque' }
 			/>
-			<Suspense
-				fallback={
-					<>
-						<div className="settings-payments-cheque__container">
-							<div className="settings-payment-gateways">
-								<div className="settings-payments-offline__header">
-									<BackButton
-										href={ getNewPath( {}, '' ) }
-										title={ __(
-											'Return to payments settings',
-											'woocommerce'
-										) }
-										isRoute={ true }
-										from={ 'woopayments_payment_methods' }
-									/>
-									<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-										<span className="woocommerce-settings-payments-header__title">
-											{ __(
-												'Direct bank transfer',
-												'woocommerce'
-											) }
-										</span>
-									</h1>
-								</div>
-								<Placeholder />
-							</div>
-						</div>
-					</>
-				}
-			>
-				<SettingsPaymentsChequeChunk />
-			</Suspense>
+			<div className="settings-payments-cheque__container">
+				<div className="settings-payment-gateways">
+					<div className="settings-payments-offline__header">
+						<BackButton
+							href={ getNewPath( {}, '' ) }
+							title={ __(
+								'Return to payments settings',
+								'woocommerce'
+							) }
+							isRoute={ true }
+							from={ 'woopayments_payment_methods' }
+						/>
+						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+							<span className="woocommerce-settings-payments-header__title">
+								{ __( 'Direct bank transfer', 'woocommerce' ) }
+							</span>
+						</h1>
+					</div>
+					<Suspense fallback={ <Placeholder /> }>
+						<SettingsPaymentsChequeChunk />
+					</Suspense>
+				</div>
+			</div>
 		</>
 	);
 };
@@ -526,4 +517,3 @@ export const SettingsPaymentsMainWrapper = () => {
 		</>
 	);
 };
-
