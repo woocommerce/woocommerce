@@ -186,7 +186,6 @@ class WooPaymentsService {
 	 *
 	 * @return string The status of the onboarding step.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
-	 * @throws ApiException If we failed to auto-mark the step as completed in the NOX profile.
 	 */
 	public function get_onboarding_step_status( string $step_id, string $location ): string {
 		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
@@ -283,7 +282,7 @@ class WooPaymentsService {
 			// we will unmark it as started (aka clean its progress). Something went wrong with the step!
 			// This is an auto-healing measure to prevent the step from being stuck in a started state indefinitely.
 			if ( self::ONBOARDING_STEP_TEST_ACCOUNT === $step_id && ! $this->has_account() ) {
-				$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+				$statuses          = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
 				$started_timestamp = ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] )
 					? (int) $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ]
 					: 0;
@@ -2126,7 +2125,7 @@ class WooPaymentsService {
 	 *
 	 * @return array The onboarding payment methods state.
 	 */
-	private function get_onboarding_payment_methods_state( string $location, array $recommended_pms = null ): array {
+	private function get_onboarding_payment_methods_state( string $location, ?array $recommended_pms ): array {
 		// First, get the recommended payment methods details from the provider.
 		// We will use their enablement state as the default.
 		// Note: The list is validated and standardized by the provider, so we don't need to do it here.
