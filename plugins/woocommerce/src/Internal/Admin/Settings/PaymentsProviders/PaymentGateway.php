@@ -881,7 +881,15 @@ class PaymentGateway {
 				$reflector      = new \ReflectionClass( get_class( $payment_gateway ) );
 				$class_filename = $reflector->getFileName();
 			} catch ( Throwable $e ) {
-				// Bail if we couldn't get the gateway class filename.
+				// Bail but log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->debug(
+					'Failed to get gateway class filename: ' . $e->getMessage(),
+					array(
+						'gateway'   => $payment_gateway->id,
+						'source'    => 'settings-payments',
+						'exception' => $e,
+					)
+				);
 				return null;
 			}
 		}
