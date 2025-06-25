@@ -175,19 +175,14 @@ const addToCartWithOptionsStore = store(
 						? quantity[ childProductId ] || 0
 						: quantity[ context.productId ] || 0;
 
-				let inputElement: HTMLInputElement | null = null;
+				const selector =
+					productType === 'grouped' && childProductId
+						? `.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
+						: `.wc-block-components-quantity-selector__input[name="quantity"]`;
 
-				if ( productType === 'grouped' && childProductId ) {
-					// For grouped products, look for input with name="quantity[childProductId]".
-					inputElement = document.querySelector(
-						`.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
-					) as HTMLInputElement | null;
-				} else {
-					// For other product types, look for input with name="quantity".
-					inputElement = document.querySelector(
-						`.wc-block-components-quantity-selector__input[name="quantity"]`
-					) as HTMLInputElement | null;
-				}
+				const inputElement = document.querySelector(
+					selector
+				) as HTMLInputElement | null;
 
 				if ( ! inputElement ) {
 					return false;
@@ -210,19 +205,14 @@ const addToCartWithOptionsStore = store(
 						? quantity[ childProductId ] || 0
 						: quantity[ context.productId ] || 0;
 
-				let inputElement: HTMLInputElement | null = null;
+				const selector =
+					productType === 'grouped' && childProductId
+						? `.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
+						: `.wc-block-components-quantity-selector__input[name="quantity"]`;
 
-				if ( productType === 'grouped' && childProductId ) {
-					// For grouped products, look for input with name="quantity[childProductId]".
-					inputElement = document.querySelector(
-						`.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`
-					) as HTMLInputElement | null;
-				} else {
-					// For other product types, look for input with name="quantity".
-					inputElement = document.querySelector(
-						`.wc-block-components-quantity-selector__input[name="quantity"]`
-					) as HTMLInputElement | null;
-				}
+				const inputElement = document.querySelector(
+					selector
+				) as HTMLInputElement | null;
 
 				if ( ! inputElement ) {
 					return false;
