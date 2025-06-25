@@ -17,8 +17,8 @@ class NotificationCreatePage {
 	 * Render page.
 	 */
 	public function output() {
-		include __DIR__ . '/views/html-admin-notification-create.php';
 		$this->process_create_form();
+		include __DIR__ . '/views/html-admin-notification-create.php';
 	}
 
 	/**

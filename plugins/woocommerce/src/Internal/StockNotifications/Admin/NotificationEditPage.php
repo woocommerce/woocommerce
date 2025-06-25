@@ -33,6 +33,9 @@ class NotificationEditPage {
 			exit;
 		}
 
+		$this->process_edit_form( $notification );
+		$table->process_delete_action();
+
 		$signed_up_customers = $table->data_store->query(
 			array(
 				'product_id' => $notification->get_product_id(),
@@ -41,8 +44,6 @@ class NotificationEditPage {
 		);
 
 		include __DIR__ . '/views/html-admin-notification-edit.php';
-		$this->process_edit_form( $notification );
-		$table->process_delete_action();
 	}
 
 	/**
