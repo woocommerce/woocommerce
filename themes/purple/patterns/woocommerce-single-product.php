@@ -42,8 +42,6 @@
 		<div class="wp-block-column" style="flex-basis:50%">
 			<!-- wp:group {"style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->
 			<div class="wp-block-group" style="margin-top:0;margin-bottom:0">
-				<!-- wp:post-terms {"term":"product_cat","style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.4px","fontStyle":"normal","fontWeight":"500"},"spacing":{"padding":{"bottom":"0"}}},"fontSize":"small"} /-->
-
 				<!-- wp:post-title {"style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"0"}}},"fontSize":"x-large","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
 
 				<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|30"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
