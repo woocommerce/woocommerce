@@ -12,13 +12,11 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  *
  * This class handles the erasure of stock notification data for users
  * who request their personal data to be erased.
- *
  */
 class PrivacyEraser extends \WC_Abstract_Privacy {
 
 	/**
 	 * Constructor.
-	 *
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -28,7 +26,6 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 	/**
 	 * Register the eraser for stock notifications.
-	 *
 	 */
 	public function register_erasers_exporters() {
 		$this->add_eraser(

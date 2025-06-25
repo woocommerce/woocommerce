@@ -34,7 +34,7 @@ class StockNotifications {
 
 		$container = wc_get_container();
 		$container->get( EmailManager::class );
-		$container->get( PrivacyEraser::Class );
+		$container->get( PrivacyEraser::class );
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );

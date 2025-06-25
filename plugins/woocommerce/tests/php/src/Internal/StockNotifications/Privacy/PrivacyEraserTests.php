@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Automattic\WooCommerce\Tests\Internal\Privacy;
+namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Privacy;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
@@ -11,6 +11,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
  * PrivacyEraser tests.
  */
 class PrivacyEraserTests extends \WC_Unit_Test_Case {
+	/**
+	 * Test that privacy eraser makes notification data anonymous.
+	 */
 	public function test_privacy_eraser_makes_data_anonymous() {
 		$notification = new Notification();
 		$notification->set_user_email( 'jon@doe.com' );
