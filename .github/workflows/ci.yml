@@ -460,10 +460,10 @@ jobs:
             const reportUrl = getReportUrl();
 
             await core.summary
-              .addHeading('E2E Test Report')
-              .addLink('E2E Test Report', reportUrl)
+              .addHeading('Test Report', '2')
+              .addLink('See test reports', reportUrl)
               .addBreak()
-              .addRaw('Please note that it can take a few minutes for the report to be available.', true)
+              .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
               .write();
 
   report-flaky-tests:
