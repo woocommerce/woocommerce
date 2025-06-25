@@ -551,7 +551,7 @@ class PaymentGateway {
 				null,
 				array(
 					'path' => '/offline/' . strtolower( $payment_gateway->id ),
-					'from' => Payments::FROM_PAYMENTS_SETTINGS
+					'from' => Payments::FROM_PAYMENTS_SETTINGS,
 				)
 			);
 		}
