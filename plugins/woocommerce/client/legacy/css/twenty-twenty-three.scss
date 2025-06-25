@@ -449,8 +449,8 @@
 
 		a {
 			position: relative;
-			height: 1em;
-			width: 1em;
+			height: 1.2em;
+			width: 1.2em;
 			text-indent: -999em;
 			display: inline-block;
 			text-decoration: none;
@@ -466,6 +466,7 @@
 				height: 1em;
 				line-height: 1;
 				font-family: WooCommerce;
+				font-size: 24px;
 				content: "\e021";
 				text-indent: 0;
 			}

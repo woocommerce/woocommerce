@@ -59,9 +59,7 @@
 	}
 }
 
-.is-small,
-.is-medium,
-.is-mobile {
+@include cart-checkout-below-large {
 	.wp-block-woocommerce-checkout-order-summary-block {
 		margin-top: 0;
 		border: none;

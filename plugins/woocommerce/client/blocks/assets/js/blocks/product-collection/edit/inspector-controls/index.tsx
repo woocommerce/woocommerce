@@ -349,7 +349,7 @@ const CollectionSpecificControls = (
 const withCollectionSpecificControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) || ! props.isSelected ) {
+		if ( ! isProductCollection( props.name ) ) {
 			return <BlockEdit { ...props } />;
 		}
 

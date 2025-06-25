@@ -15,7 +15,8 @@ import './style.scss';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const JetpackStep: React.FC = () => {
-	const { currentStep, closeModal } = useOnboardingContext();
+	const { currentStep, closeModal, sessionEntryPoint } =
+		useOnboardingContext();
 	const [ isConnectButtonLoading, setIsConnectButtonLoading ] =
 		useState( false );
 
@@ -42,8 +43,9 @@ export const JetpackStep: React.FC = () => {
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_click',
 								{
-									step: currentStep?.id || '',
+									step: currentStep?.id || 'unknown',
 									action: 'connect_to_wpcom',
+									source: sessionEntryPoint,
 								}
 							);
 

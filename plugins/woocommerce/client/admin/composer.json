@@ -4,7 +4,7 @@
 	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
 	"version": "11.8.0-dev",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require-dev": {

@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -651,12 +652,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Empties the cart and optionally the persistent cart too.
 	 *
 	 * @since 9.7.0 Also clears shipping methods and packages since the items they are linked to are cleared.
-	 *
-	 * @param bool $clear_persistent_cart Should the persistent cart be cleared too. Defaults to true.
+	 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
 	 */
-	public function empty_cart( $clear_persistent_cart = true ) {
-
-		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
+	public function empty_cart( $deprecated = true ) {
+		/**
+		 * Fires before the cart is emptied.
+		 *
+		 * @since 9.7.0
+		 *
+		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 */
+		do_action( 'woocommerce_before_cart_emptied', $deprecated );
 
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
@@ -665,15 +671,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
 		$this->totals                     = $this->default_totals;
-
-		if ( $clear_persistent_cart ) {
-			$this->session->persistent_cart_destroy();
-		}
-
 		$this->fees_api->remove_all_fees();
 		WC()->shipping()->reset_shipping();
 
-		do_action( 'woocommerce_cart_emptied', $clear_persistent_cart );
+		/**
+		 * Fires after the cart is emptied.
+		 *
+		 * @since 9.7.0
+		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 */
+		do_action( 'woocommerce_cart_emptied', $deprecated );
 	}
 
 	/**
@@ -1633,13 +1640,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( 'store-api' === $this->cart_context ) {
-				$customer = $this->get_customer();
-
-				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
-					return false;
-				}
-			} else {
+			if ( 'shortcode' === $this->cart_context ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
@@ -1675,6 +1676,17 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
+					return false;
+				}
+			} else {
+				// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
+				if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+					return true;
+				}
+
+				$customer = $this->get_customer();
+
+				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
 					return false;
 				}
 			}

@@ -12,7 +12,7 @@ const Block = ( {
 }: {
 	className: string;
 	showRateAfterTaxName: boolean;
-} ): JSX.Element | null => {
+} ) => {
 	const { cartTotals } = useStoreCart();
 
 	const displayCartPricesIncludingTax = getSetting(

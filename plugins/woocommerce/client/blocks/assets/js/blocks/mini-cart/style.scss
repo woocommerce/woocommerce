@@ -105,6 +105,10 @@
 	max-height: fill-available;
 	display: flex;
 	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
 }
 
 .wp-block-woocommerce-empty-mini-cart-contents-block {

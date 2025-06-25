@@ -5,13 +5,14 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import {
-	PaymentProvider,
+	PaymentsEntity,
+	PaymentsProvider,
 	paymentSettingsStore,
-	woopaymentsOnboardingStore,
 	WC_ADMIN_NAMESPACE,
+	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState, useRef } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -28,18 +29,26 @@ import { PaymentGatewayList } from '~/settings-payments/components/payment-gatew
 import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface PaymentGatewaysProps {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	installedPluginSlugs: string[];
 	installingPlugin: string | null;
-	setupPlugin: (
-		id: string,
-		slug: string,
+	/**
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
+	 */
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
@@ -55,7 +64,7 @@ export const PaymentGateways = ( {
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	acceptIncentive,
 	shouldHighlightIncentive,
 	updateOrdering,
@@ -112,7 +121,7 @@ export const PaymentGateways = ( {
 		// Record the event when user clicks on the business location indicator.
 		recordPaymentsEvent( 'business_location_indicator_click', {
 			store_country: storeCountryCode,
-			business_country: businessRegistrationCountry || '',
+			business_country: businessRegistrationCountry || 'unknown',
 		} );
 
 		setIsPopoverVisible( ( prev ) => ! prev );
@@ -140,27 +149,29 @@ export const PaymentGateways = ( {
 							) ?? { key: 'US', name: 'United States (US)' }
 						}
 						options={ countryOptions }
-						onChange={ ( value: string ) => {
+						onChange={ ( currentSelectedCountry: string ) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
 							apiFetch( {
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
 								method: 'POST',
-								data: { location: value },
+								data: { location: currentSelectedCountry },
 							} ).then( () => {
 								// Update UI.
-								setBusinessRegistrationCountry( value );
+								setBusinessRegistrationCountry(
+									currentSelectedCountry
+								);
 								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
 								if (
 									window.wcSettings.admin
 										.woocommerce_payments_nox_profile
 								) {
 									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
-										value;
+										currentSelectedCountry;
 								}
 								invalidateMainStore( 'getPaymentProviders', [
-									value,
+									currentSelectedCountry,
 								] );
 								invalidateWooPaymentsOnboardingStore(
 									'getOnboardingData',
@@ -226,7 +237,7 @@ export const PaymentGateways = ( {
 																			storeCountryCode,
 																		business_country:
 																			businessRegistrationCountry ||
-																			'',
+																			'unknown',
 																	}
 																);
 															} }
@@ -249,7 +260,7 @@ export const PaymentGateways = ( {
 					providers={ providers }
 					installedPluginSlugs={ installedPluginSlugs }
 					installingPlugin={ installingPlugin }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 					acceptIncentive={ acceptIncentive }
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
