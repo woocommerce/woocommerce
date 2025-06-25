@@ -55,8 +55,16 @@
 	}
 }
 
+.is-small {
+	.wc-block-checkout__actions {
+		padding-top: $gap-larger;
+	}
+}
+
 .is-mobile {
 	.wc-block-checkout__actions {
+		padding-top: $gap-larger;
+
 		.wc-block-checkout__actions_row {
 			flex-direction: column-reverse;
 		}
