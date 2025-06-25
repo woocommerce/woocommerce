@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move const with allowed blocks back to the PHP package.
