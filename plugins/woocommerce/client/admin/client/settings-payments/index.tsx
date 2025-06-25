@@ -415,38 +415,29 @@ export const SettingsPaymentsCodWrapper = () => {
 				) }
 				context={ 'wc_settings_payments__offline_pms_cod' }
 			/>
-			<Suspense
-				fallback={
-					<>
-						<div className="settings-payments-cod__container">
-							<div className="settings-payment-gateways">
-								<div className="settings-payments-offline__header">
-									<BackButton
-										href={ getNewPath( {}, '' ) }
-										title={ __(
-											'Return to payments settings',
-											'woocommerce'
-										) }
-										isRoute={ true }
-										from={ 'woopayments_payment_methods' }
-									/>
-									<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-										<span className="woocommerce-settings-payments-header__title">
-											{ __(
-												'Cash on delivery',
-												'woocommerce'
-											) }
-										</span>
-									</h1>
-								</div>
-								<Placeholder />
-							</div>
-						</div>
-					</>
-				}
-			>
-				<SettingsPaymentsCodChunk />
-			</Suspense>
+			<div className="settings-payments-cod__container">
+				<div className="settings-payment-gateways">
+					<div className="settings-payments-offline__header">
+						<BackButton
+							href={ getNewPath( {}, '' ) }
+							title={ __(
+								'Return to payments settings',
+								'woocommerce'
+							) }
+							isRoute={ true }
+							from={ 'woopayments_payment_methods' }
+						/>
+						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
+							<span className="woocommerce-settings-payments-header__title">
+								{ __( 'Cash on delivery', 'woocommerce' ) }
+							</span>
+						</h1>
+					</div>
+					<Suspense fallback={ <Placeholder /> }>
+						<SettingsPaymentsCodChunk />
+					</Suspense>
+				</div>
+			</div>
 		</>
 	);
 };
