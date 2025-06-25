@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 
 /**
  * FulfillmentsManager class.
@@ -24,6 +25,7 @@ class FulfillmentsManager {
 	public function __construct() {
 		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'wc_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
 
 		$this->init_fulfillment_status_hooks();
 	}
@@ -124,5 +126,48 @@ class FulfillmentsManager {
 		}
 
 		$order->save();
+	}
+
+	/**
+	 * Try to parse the tracking number with additional parameters.
+	 *
+	 * @param string $tracking_number The tracking number.
+	 * @param string $shipping_from The country code from which the shipment is sent.
+	 * @param string $shipping_to The country code to which the shipment is sent.
+	 *
+	 * @return array|null An array containing the provider name and tracking URL if successful, null otherwise.
+	 */
+	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
+		/**
+		 * Filter to get the shipping provider classes.
+		 *
+		 * This filter allows us to retrieve the list of shipping provider classes that can parse tracking numbers.
+		 *
+		 * @since 9.9.0
+		 */
+		$shipping_providers = apply_filters( 'wc_fulfillment_shipping_providers', array() );
+		foreach ( $shipping_providers as $provider ) {
+			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
+				/**
+				 * Instantiate the shipping provider class.
+				 *
+				 * @var AbstractShippingProvider $provider_instance
+				 */
+				$provider_instance = new $provider();
+			} else {
+				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
+			}
+
+				$tracking_url = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			if ( ! is_null( $tracking_url ) ) {
+				return array(
+					'provider'     => $provider_instance->get_name(),
+					'tracking_url' => $tracking_url,
+				);
+			}
+		}
+
+		// If no provider could parse the tracking number, return null.
+		return null;
 	}
 }
