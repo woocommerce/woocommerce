@@ -99,7 +99,7 @@ export const Inspector = ( {
 					}
 				/>
 				<ToggleControl
-					label={ __( 'Hide terms with no products', 'woocommerce' ) }
+					label={ __( 'Hide items with no products', 'woocommerce' ) }
 					checked={ hideEmpty }
 					onChange={ ( value: boolean ) =>
 						setAttributes( { hideEmpty: value } )
