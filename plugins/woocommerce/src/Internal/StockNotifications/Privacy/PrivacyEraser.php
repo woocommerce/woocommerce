@@ -8,9 +8,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 /**
- * Privacy eraser for WooCommerce Stock Notifications.
+ * Privacy eraser for WooCommerce Customer Stock Notifications.
  *
- * This class handles the erasure of stock notification data for users
+ * This class handles the erasure of customer stock notification data for users
  * who request their personal data to be erased.
  */
 class PrivacyEraser extends \WC_Abstract_Privacy {
@@ -29,14 +29,14 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 */
 	public function register_erasers_exporters() {
 		$this->add_eraser(
-			'woocommerce-stock-notifications',
-			__( 'WooCommerce Stock Notifications', 'woocommerce' ),
+			'woocommerce-customer-stock-notifications',
+			__( 'WooCommerce Customer Stock Notifications', 'woocommerce' ),
 			array( $this, 'erase_notification_data' )
 		);
 	}
 
 	/**
-	 * Erase stock notification data for a given email address.
+	 * Erase customer stock notification data for a given email address.
 	 *
 	 * This method anonymizes the user email and sets the status of the notifications to 'cancelled'.
 	 *
