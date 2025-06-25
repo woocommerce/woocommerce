@@ -33,7 +33,7 @@
 				<!-- wp:woocommerce/product-gallery-thumbnails {"thumbnailSize":"16%","aspectRatio":"3/4"} /-->
 				<!-- wp:woocommerce/product-gallery-large-image -->
 				<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks">
-					<!-- wp:woocommerce/product-gallery-large-image-next-previous {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-3"}}}},"textColor":"theme-3","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"bottom"}} -->
+					<!-- wp:woocommerce/product-gallery-large-image-next-previous {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"bottom"}} -->
 					<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
 					<!-- /wp:woocommerce/product-gallery-large-image-next-previous -->
 				</div>
