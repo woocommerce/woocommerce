@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent Settings tab bar breaking into two lines when not needed
+Prevent Settings tab bar from breaking into two lines when not needed
