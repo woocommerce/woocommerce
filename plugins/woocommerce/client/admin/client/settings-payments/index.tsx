@@ -466,7 +466,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 						/>
 						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
 							<span className="woocommerce-settings-payments-header__title">
-								{ __( 'Direct bank transfer', 'woocommerce' ) }
+								{ __( 'Check payments', 'woocommerce' ) }
 							</span>
 						</h1>
 					</div>
