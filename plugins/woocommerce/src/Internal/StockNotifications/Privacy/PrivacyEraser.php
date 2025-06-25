@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
@@ -64,6 +65,9 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );
 			$notification->set_status( NotificationStatus::CANCELLED );
+			$notification->set_cancellation_source( NotificationCancellationSource::USER );
+			$notification->set_date_cancelled( current_time( 'mysql' ) );
+			$notification->update_meta_data( '_anonymized', 'yes' );
 			$notification->save();
 			$response['messages'][]    = sprintf(
 			/* translators: %d the numeric product ID */
