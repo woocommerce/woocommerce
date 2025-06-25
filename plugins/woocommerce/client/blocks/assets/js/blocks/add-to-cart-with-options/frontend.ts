@@ -147,11 +147,16 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { productType } = getContext< Context >();
+				const { availableVariations, selectedAttributes, productType } =
+					getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! addToCartWithOptionsStore.state.variationId;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				return !! matchedVariation?.variation_id;
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
