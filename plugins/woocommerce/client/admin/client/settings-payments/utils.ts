@@ -465,5 +465,5 @@ export const recordPaymentsOnboardingEvent = (
  */
 export const removeOriginFromURL = ( url: string ) => {
 	const parsedUrl = parseAdminUrl( url );
-	return parsedUrl.href?.replace( parsedUrl.origin, '' );
+	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
 };
