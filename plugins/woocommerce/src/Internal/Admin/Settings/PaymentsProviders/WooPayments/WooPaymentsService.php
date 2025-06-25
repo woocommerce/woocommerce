@@ -186,6 +186,7 @@ class WooPaymentsService {
 	 *
 	 * @return string The status of the onboarding step.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
+	 * @throws ApiException If we failed to auto-mark the step as completed in the NOX profile.
 	 */
 	public function get_onboarding_step_status( string $step_id, string $location ): string {
 		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
@@ -219,6 +220,11 @@ class WooPaymentsService {
 				case self::ONBOARDING_STEP_TEST_ACCOUNT:
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
+						// Since it takes a while for the account to be fully working after the test account initialization,
+						// we will force mark the step as completed here, if it is not already.
+						// This is a fail-safe to guard against the case when the frontend doesn't mark the step as completed.
+						$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 					break;
