@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert cart block e2e tests to integration tests

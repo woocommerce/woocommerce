@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\BlockifiedProductDetails;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductDetails;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
@@ -12,9 +12,9 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 // phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod.Found
 
 /**
- * BlockifiedProductDetailsMock used to test BlockifiedProductDetails block functions.
+ * ProductDetailsMock used to test ProductDetails block functions.
  */
-class BlockifiedProductDetailsMock extends BlockifiedProductDetails {
+class ProductDetailsNoRegisterMock extends ProductDetails {
 
 	/**
 	 * Initialize our mock class.
