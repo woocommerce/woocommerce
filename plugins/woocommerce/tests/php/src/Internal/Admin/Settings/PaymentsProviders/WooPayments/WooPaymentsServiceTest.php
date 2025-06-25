@@ -339,7 +339,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$wpcom_connection_return_url = 'https://example.com/payments-settings/return?wpcom_connection_return=1';
 
-		$stored_profile = array(
+		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
 					'steps' => $steps_stored_profile,
@@ -362,7 +362,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						$updated_stored_profiles[] = $value;
 
 						// Mimic the behavior of the original function.
-						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
+						$previous = empty( $updated_stored_profiles ) ? $stored_profile : end( $updated_stored_profiles );
+						if ( $value === $previous || maybe_serialize( $value ) === maybe_serialize( $previous ) ) {
 							return false;
 						}
 
