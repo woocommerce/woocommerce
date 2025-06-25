@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 ?>
 <div class="wrap woocommerce-customer-stock-notifications">
 
-	<h1 class="wp-heading-inline"><?php esc_html_e( 'Add notification', 'woocommerce' ); ?></h1>
+	<h1 class="wp-heading-inline"><?php esc_html_e( 'Add Notification', 'woocommerce' ); ?></h1>
 	<a href="<?php echo esc_url( NotificationsPage::PAGE_URL ); ?>" class="page-title-action"><?php esc_html_e( 'View All', 'woocommerce' ); ?></a>
 
 	<hr class="wp-header-end">
