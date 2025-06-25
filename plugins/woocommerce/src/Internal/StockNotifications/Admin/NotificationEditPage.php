@@ -52,29 +52,15 @@ class NotificationEditPage {
 	 * @param Notification $notification The notification object.
 	 * @return void
 	 */
-	public function process_edit_form( $notification ) {
+	public function process_edit_form( Notification $notification ) {
 
-		if ( empty( $_POST ) ) {
+		if ( empty( $_POST ) || empty( $_POST['wc_customer_stock_notification_action'] ) ) {
 			return;
 		}
 
 		check_admin_referer( 'woocommerce-customer-stock-notification-edit', 'customer_stock_notification_edit_security' );
 
-		if ( empty( $_POST['wc_customer_stock_notification_action'] ) ) {
-			return;
-		}
-
 		$action = wc_clean( wp_unslash( $_POST['wc_customer_stock_notification_action'] ) );
-
-		// Construct edit url.
-		$edit_url = add_query_arg(
-			array(
-				'notification_action' => 'edit',
-				'notification_id'     => $notification->get_id(),
-			),
-			NotificationsPage::PAGE_URL
-		);
-
 		switch ( $action ) {
 			case 'activate_notification':
 				$notification->set_status( NotificationStatus::ACTIVE );
@@ -122,6 +108,15 @@ class NotificationEditPage {
 				NotificationsPage::add_notice( $notice_message, 'success' );
 				break;
 		}
+
+		// Construct edit url.
+		$edit_url = add_query_arg(
+			array(
+				'notification_action' => 'edit',
+				'notification_id'     => $notification->get_id(),
+			),
+			NotificationsPage::PAGE_URL
+		);
 
 		wp_safe_redirect( $edit_url );
 		exit;
