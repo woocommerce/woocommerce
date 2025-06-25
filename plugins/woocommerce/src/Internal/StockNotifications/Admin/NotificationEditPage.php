@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\ListTable;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 
 /**
  * Notification create page for Customer Stock Notifications.
@@ -75,6 +76,8 @@ class NotificationEditPage {
 				break;
 			case 'cancel_notification':
 				$notification->set_status( NotificationStatus::CANCELLED );
+				$notification->set_date_cancelled( time() );
+				$notification->set_date_notified( NotificationCancellationSource::ADMIN );
 				$result = $notification->save();
 				if ( is_wp_error( $result ) ) {
 					$notice_message = $result->get_error_message();
@@ -94,6 +97,7 @@ class NotificationEditPage {
 					$email_manager = new EmailManager();
 					$email_manager->send_stock_notification_email( $notification );
 					$notification->set_status( NotificationStatus::SENT );
+					$notification->set_date_notified( time() );
 					$notification->save();
 					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
@@ -101,8 +105,6 @@ class NotificationEditPage {
 				}
 				break;
 			case 'send_verification_email':
-				$email_manager = new EmailManager();
-				$email_manager->send_stock_verification_email( $notification );
 				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 				NotificationsPage::add_notice( $notice_message, 'success' );
