@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+
 /**
  * Class FulfillmentsController
  *
@@ -27,6 +29,16 @@ class FulfillmentsController {
 	 * @return void
 	 */
 	public function register() {
+		/**
+		 * FeaturesController instance.
+		 *
+		 * @var FeaturesController $features_controller
+		 */
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			return;
+		}
+
 		$container = wc_get_container();
 		foreach ( $this->provides as $class ) {
 			$class = $container->get( $class );
