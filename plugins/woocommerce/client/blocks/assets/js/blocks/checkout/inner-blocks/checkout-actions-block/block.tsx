@@ -17,7 +17,7 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
-import { CheckoutOrderSummarySlot } from '@woocommerce/blocks/checkout/inner-blocks/checkout-order-summary-block/slotfills';
+import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 export type BlockAttributes = {
 	cartPageId: number;
