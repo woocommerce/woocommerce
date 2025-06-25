@@ -1179,6 +1179,15 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Get the old gateways class.
+	 *
+	 * @return WC_Payment_Gateways_Old
+	 */
+	public function payment_gateways_old() {
+		return WC_Payment_Gateways_Old::instance();
+	}
+
+	/**
 	 * Get shipping class.
 	 *
 	 * @return WC_Shipping
