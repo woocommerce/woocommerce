@@ -2089,16 +2089,23 @@ class WooPaymentsService {
 	/**
 	 * Get the payment methods state for onboarding.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 * @param string     $location        The location for which we are onboarding.
+	 *                                    This is an ISO 3166-1 alpha-2 country code.
+	 * @param array|null $recommended_pms Optional. The recommended payment methods to use.
 	 *
 	 * @return array The onboarding payment methods state.
 	 */
-	private function get_onboarding_payment_methods_state( string $location ): array {
+	private function get_onboarding_payment_methods_state( string $location, array $recommended_pms = null ): array {
 		// First, get the recommended payment methods details from the provider.
 		// We will use their enablement state as the default.
 		// Note: The list is validated and standardized by the provider, so we don't need to do it here.
-		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( null === $recommended_pms ) {
+			$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		}
+		if ( empty( $recommended_pms ) ) {
+			// If there are no recommended payment methods, return an empty array.
+			return array();
+		}
 
 		// Grab the stored payment methods state
 		// (a key-value array of payment method IDs and if they should be automatically enabled or not).
