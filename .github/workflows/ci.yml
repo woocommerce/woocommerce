@@ -436,6 +436,35 @@ jobs:
             -f report_title="$REPORT_TITLE" \
             --repo woocommerce/woocommerce-test-reports
 
+      - name: 'Add a link to test report in summary'
+        if: ${{ strategy.job-index == 0 }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            function getReportUrl() {
+                if (context.eventName === 'pull_request') {
+                    return `https://woocommerce.github.io/woocommerce-test-reports/#/pr/${context.issue.number}`;
+                }
+                
+                if (context.eventName === 'push') {
+                    const shortSha = context.sha.substring(0, 7);
+                    if (context.ref === 'refs/heads/trunk') {
+                        return `https://woocommerce.github.io/woocommerce-test-reports/#/trunk/trunk-${shortSha}`;
+                    }
+                }
+                
+                return 'https://woocommerce.github.io/woocommerce-test-reports/#/';
+            }
+
+            const reportUrl = getReportUrl();
+
+            await core.summary
+              .addHeading('E2E Test Report')
+              .addLink('E2E Test Report', reportUrl)
+              .addBreak()
+              .addRaw('Please note that it can take a few minutes for the report to be available.', true)
+              .write();
+
   report-flaky-tests:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
