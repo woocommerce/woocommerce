@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 
-
 return array(
 	'acs-courier'             => WooCommerce\Internal\Fulfillments\Providers\ACSCourierShippingProvider::class,
 	'amazon-logistics'        => WooCommerce\Internal\Fulfillments\Providers\AmazonLogisticsShippingProvider::class,

@@ -3,9 +3,9 @@
 namespace WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * Hrvatska Posta Shipping Provider class.
+ * Posta Moldovei Shipping Provider class.
  */
-class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
+class PostaMoldoveiShippingProvider extends AbstractShippingProvider {
 	/**
 	 * List of international shipping countries.
 	 *
@@ -26,7 +26,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_key(): string {
-		return 'hrvatska-posta';
+		return 'posta-moldovei';
 	}
 
 	/**
@@ -35,7 +35,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return 'Hrvatska Pošta';
+		return 'Poșta Moldovei';
 	}
 
 	/**
@@ -44,7 +44,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../hrvatska-posta.png';
+		return __DIR__ . '../../../posta-moldovei.png';
 	}
 
 	/**
@@ -54,7 +54,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string The tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://www.posta.hr/track/' . $tracking_number;
+		return 'https://www.posta.md/track/' . $tracking_number;
 	}
 
 	/**

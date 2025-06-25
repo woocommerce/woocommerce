@@ -5,7 +5,7 @@ namespace WooCommerce\Internal\Fulfillments\Providers;
 /**
  * HayPost Shipping Provider class.
  */
-class HayPostShippingProvider extends AbstractShippingProvider {
+class HaypostShippingProvider extends AbstractShippingProvider {
 	/**
 	 * List of international shipping countries.
 	 *

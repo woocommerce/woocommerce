@@ -3,9 +3,9 @@
 namespace WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * Hrvatska Posta Shipping Provider class.
+ * Parcelforce Shipping Provider class.
  */
-class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
+class ParcelForceShippingProvider extends AbstractShippingProvider {
 	/**
 	 * List of international shipping countries.
 	 *
@@ -26,7 +26,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_key(): string {
-		return 'hrvatska-posta';
+		return 'parcelforce';
 	}
 
 	/**
@@ -35,7 +35,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return 'Hrvatska Pošta';
+		return 'Parcelforce';
 	}
 
 	/**
@@ -44,7 +44,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../hrvatska-posta.png';
+		return __DIR__ . '../../../parcelforce.png';
 	}
 
 	/**
@@ -54,7 +54,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string The tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://www.posta.hr/track/' . $tracking_number;
+		return 'https://www.parcelforce.com/track-trace/' . $tracking_number;
 	}
 
 	/**
