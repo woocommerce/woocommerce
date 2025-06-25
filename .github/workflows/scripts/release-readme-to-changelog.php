@@ -5,15 +5,14 @@
  * file.
  *
  * Usage:
- * `php release-readme-to-changelog.php <path to source readme.txt> <path to source changelog.txt> <output file>`
+ * `php release-readme-to-changelog.php <path to source readme.txt> <path to source changelog.txt>`
  */
 
 $path_readme    = trim( $argv[1]  ?? '' );
 $path_changelog = trim( $argv[2] ?? '' );
-$path_output    = trim( $argv[3] ?? '' );
 
-if ( empty( $path_output ) || ( file_exists( $path_output ) && ! is_writable( $path_output ) ) ) {
-	echo "::error::Output file '$path_output' is not writable.";
+if ( ! is_writable( $path_changelog ) ) {
+	echo "::error::Changelog file '$path_changelog' is not writable.";
 	die( 1 );
 }
 
@@ -62,26 +61,23 @@ $version = $matches[1];
 $new_changelog = array();
 $version_changelog_inserted = false;
 
-$fp = fopen( $path_changelog, 'r' );
-while ( false !== ( $line = fgets( $fp ) ) ) {
+foreach ( file( $path_changelog ) as $line ) {
 	if ( ! $version_changelog_inserted && preg_match( '/(?<version>\d+.\d+.\d+) \d{4}-\d{2}-\d{2} =/', $line, $matches ) ) {
-		switch ( version_compare( $matches['version'], $version ) ) {
-			case 0:
-				echo "::error::Version '$version' already exists in the changelog.";
-				die ( 1 );
-				break;
-			case -1:
-				$new_changelog[] = $version_changelog;
-				$new_changelog[] = "\n\n\n";
+		$cmp = version_compare( $matches['version'], $version );
 
-				$version_changelog_inserted = true;
-				break;
-			default:
-				break;
+		if ( 0 === $cmp ) {
+			echo "::error::Version '$version' already exists in the changelog.";
+			die ( 1 );
+		}
+
+		if ( -1 === $cmp ) {
+			$new_changelog[]            = $version_changelog;
+			$new_changelog[]            = "\n\n\n";
+			$version_changelog_inserted = true;
 		}
 	}
 
 	$new_changelog[] = $line;
 }
 
-file_put_contents( $path_output, implode( '', $new_changelog ) );
+file_put_contents( $path_changelog, implode( '', $new_changelog ) );

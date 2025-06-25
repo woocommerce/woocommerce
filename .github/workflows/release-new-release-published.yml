@@ -33,14 +33,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release download  --pattern 'woocommerce.zip'
-
-          if [[ ! -e "woocommerce.zip" ]]; then
-            echo "::error::Could not download asset for release '$RELEASE_TAG'."
-            exit 1
-          fi
-
+          gh release download "$RELEASE_TAG" --pattern 'woocommerce.zip'
           unzip woocommerce.zip
+
           if [[ ! -e woocommerce/readme.txt  ]]; then
             echo "::error::Could not find readme.txt in asset for release '$RELEASE_TAG'."
             exit 1
@@ -56,26 +51,28 @@ jobs:
           path: trunk
       - name: 'Update changelog.txt'
         run: |
-          php ./trunk/.github/workflows/scripts/release-readme-to-changelog.php ./woocommerce/readme.txt ./trunk/changelog.txt ./new-changelog.txt
-      - name: 'Push changes'
+          php ./trunk/.github/workflows/scripts/release-readme-to-changelog.php ./woocommerce/readme.txt ./trunk/changelog.txt
+      - name: 'Push changes and open PR'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           # Set up Git.
           git config --global user.name 'WooCommerce Bot'
           git config --global user.email 'no-reply@woocommerce.com'
 
           # Push new changelog.txt.
+          branch_name="update-changelog-${{ github.event.release.tag_name }}-$(date +%s)"
+
           cd trunk
-          git checkout -b "update-changelog-${{ github.event.release.tag_name }}"
-          mv ../new-changelog.txt changelog.txt
+          git checkout -b "$branch_name"
           git commit -am 'Update changelog.txt after release ${{ github.event.release.tag_name }}'
-          git push origin "update-changelog-${{ github.event.release.tag_name }}"
-      - name: 'Open PR for changelog.txt updates'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
+          git push origin "$branch_name"
+
+          # Open a PR.
           gh pr create \
             --title 'Update changelog.txt after ${{ github.event.release.tag_name }}' \
             --body 'This PR updates the global changelog.txt file following the release of version ${{ github.event.release.tag_name }}.' \
             --base trunk \
-            --head "update-changelog-${{ github.event.release.tag_name }}"
+            --head "$branch_name" \
+            --reviewer "${{ github.actor }}"
