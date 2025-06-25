@@ -277,6 +277,34 @@ class WooPaymentsService {
 			}
 		}
 		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
+			// Special treatment for the test account step:
+			// If the step was marked as started more than 1 minutes ago (plenty of time for the slowest of webhooks to
+			// come through) and it is obviously not completed, and there is no account connected,
+			// we will unmark it as started (aka clean its progress). Something went wrong with the step!
+			// This is an auto-healing measure to prevent the step from being stuck in a started state indefinitely.
+			if ( self::ONBOARDING_STEP_TEST_ACCOUNT === $step_id && ! $this->has_account() ) {
+				$statuses = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+				$started_timestamp = ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] )
+					? (int) $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ]
+					: 0;
+				if ( $started_timestamp &&
+					( $this->proxy->call_function( 'time' ) - $started_timestamp ) > 60 // 1 minute.
+				) {
+					$this->clean_onboarding_step_progress( $step_id, $location );
+
+					// Record an event for the step being cleaned due to timeout.
+					$this->record_event(
+						self::EVENT_PREFIX . 'onboarding_step_progress_reset_due_to_timeout',
+						$location,
+						array(
+							'step_id' => $step_id,
+						)
+					);
+
+					return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				}
+			}
+
 			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
