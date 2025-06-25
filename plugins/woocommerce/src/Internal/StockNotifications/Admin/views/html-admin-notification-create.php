@@ -95,7 +95,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 									}
 								}
 							}
-							// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+							$email = isset( $_REQUEST['user_email'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['user_email'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 							?>
 							<select class="wc-customer-search" name="user_id" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 								<?php if ( $user_string && $user_id ) { ?>
@@ -104,7 +105,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							</select>
 							<div class="divider"></div>
 							<span class="or_relation_label"><?php esc_html_e( '&mdash;&nbsp;or&nbsp;&mdash;', 'woocommerce' ); ?></span>
-							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $_REQUEST['user_email'] ) ? esc_attr( wc_clean( wp_unslash( $_REQUEST['user_email'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended; ?>"/>
+							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo esc_attr( $email ); ?>"/>
 
 							<div class="wp-clearfix"></div>
 						</div>
