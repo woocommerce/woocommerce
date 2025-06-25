@@ -626,6 +626,11 @@
 			"title": "Header"
 		},
 		{
+			"area": "header",
+			"name": "header-alternative",
+			"title": "Header alternative"
+		},
+		{
 			"area": "footer",
 			"name": "footer",
 			"title": "Footer"
