@@ -241,9 +241,11 @@ class WC_Emails {
 		add_action( 'woocommerce_email_customer_details', array( $this, 'additional_checkout_fields' ), 30, 3 );
 		add_action( 'woocommerce_email_customer_address_section', array( $this, 'additional_address_fields' ), 30, 4 );
 
-		// Fulfillment details and meta.
-		add_action( 'woocommerce_email_fulfillment_details', array( $this, 'fulfillment_details' ), 10, 5 );
-		add_action( 'woocommerce_email_fulfillment_meta', array( $this, 'fulfillment_meta' ), 30, 4 );
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			// Fulfillment details and meta.
+			add_action( 'woocommerce_email_fulfillment_details', array( $this, 'fulfillment_details' ), 10, 5 );
+			add_action( 'woocommerce_email_fulfillment_meta', array( $this, 'fulfillment_meta' ), 30, 4 );
+		}
 
 		// Hooks for sending emails during store events.
 		add_action( 'woocommerce_low_stock_notification', array( $this, 'low_stock' ) );
@@ -270,26 +272,29 @@ class WC_Emails {
 		// Include email classes.
 		include_once __DIR__ . '/emails/class-wc-email.php';
 
-		$this->emails['WC_Email_New_Order']                    = include __DIR__ . '/emails/class-wc-email-new-order.php';
-		$this->emails['WC_Email_Cancelled_Order']              = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
-		$this->emails['WC_Email_Customer_Cancelled_Order']     = include __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php';
-		$this->emails['WC_Email_Failed_Order']                 = include __DIR__ . '/emails/class-wc-email-failed-order.php';
-		$this->emails['WC_Email_Customer_Failed_Order']        = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
-		$this->emails['WC_Email_Customer_On_Hold_Order']       = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
-		$this->emails['WC_Email_Customer_Processing_Order']    = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
-		$this->emails['WC_Email_Customer_Completed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
-		$this->emails['WC_Email_Customer_Refunded_Order']      = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
-		$this->emails['WC_Email_Customer_Invoice']             = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
-		$this->emails['WC_Email_Customer_Note']                = include __DIR__ . '/emails/class-wc-email-customer-note.php';
-		$this->emails['WC_Email_Customer_Reset_Password']      = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
-		$this->emails['WC_Email_Customer_New_Account']         = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
-		$this->emails['WC_Email_Customer_Fulfillment_Created'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
-		$this->emails['WC_Email_Customer_Fulfillment_Updated'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
-		$this->emails['WC_Email_Customer_Fulfillment_Deleted'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
+		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
+		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
+		$this->emails['WC_Email_Customer_Cancelled_Order']  = include __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php';
+		$this->emails['WC_Email_Failed_Order']              = include __DIR__ . '/emails/class-wc-email-failed-order.php';
+		$this->emails['WC_Email_Customer_Failed_Order']     = include __DIR__ . '/emails/class-wc-email-customer-failed-order.php';
+		$this->emails['WC_Email_Customer_On_Hold_Order']    = include __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php';
+		$this->emails['WC_Email_Customer_Processing_Order'] = include __DIR__ . '/emails/class-wc-email-customer-processing-order.php';
+		$this->emails['WC_Email_Customer_Completed_Order']  = include __DIR__ . '/emails/class-wc-email-customer-completed-order.php';
+		$this->emails['WC_Email_Customer_Refunded_Order']   = include __DIR__ . '/emails/class-wc-email-customer-refunded-order.php';
+		$this->emails['WC_Email_Customer_Invoice']          = include __DIR__ . '/emails/class-wc-email-customer-invoice.php';
+		$this->emails['WC_Email_Customer_Note']             = include __DIR__ . '/emails/class-wc-email-customer-note.php';
+		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
+		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
 
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$this->emails['WC_Email_Customer_POS_Completed_Order'] = include __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
 			$this->emails['WC_Email_Customer_POS_Refunded_Order']  = include __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$this->emails['WC_Email_Customer_Fulfillment_Created'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
+			$this->emails['WC_Email_Customer_Fulfillment_Updated'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
+			$this->emails['WC_Email_Customer_Fulfillment_Deleted'] = include __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
 		}
 
 		/**

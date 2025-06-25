@@ -17,8 +17,8 @@ class FulfillmentsController {
 	 * @var string[]
 	 */
 	private $provides = array(
-		FulfillmentsRenderer::class,
 		FulfillmentsManager::class,
+		FulfillmentsRenderer::class,
 		FulfillmentsSettings::class,
 		OrderFulfillmentsRestController::class,
 	);
