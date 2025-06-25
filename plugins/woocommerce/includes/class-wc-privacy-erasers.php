@@ -95,8 +95,8 @@ class WC_Privacy_Erasers {
 		 * Allow extensions to remove data for this customer and adjust the response.
 		 *
 		 * @since 3.4.0
-		 * @param array    $response Array response data. Must include messages, num_items_removed, num_items_retained, done.
-		 * @param WC_Customer $customer A customer object.
+		 * @param array  $response Array response data. Must include messages, num_items_removed, num_items_retained, done.
+		 * @param WC_Customer  $customer A customer object.
 		 */
 		return apply_filters( 'woocommerce_privacy_erase_personal_data_customer', $response, $customer );
 	}
