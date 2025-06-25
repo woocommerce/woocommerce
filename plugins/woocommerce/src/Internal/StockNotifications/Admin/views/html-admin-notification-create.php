@@ -76,22 +76,23 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							<label><?php esc_html_e( 'Customer', 'woocommerce' ); ?></label>
 							<?php
 							$user_string = '';
-							$user_id     = '';
+							$user_id     = 0;
 
 							// phpcs:disable WordPress.Security.NonceVerification.Recommended
 							if ( ! empty( $_REQUEST['user_id'] ) ) {
 
-								$user_id = wc_clean( wp_unslash( $_REQUEST['user_id'] ) );
-								$user    = get_user_by( 'id', absint( $user_id ) );
-
-								if ( $user ) {
-									$user_string = sprintf(
-										/* translators: 1: user display name 2: user ID 3: user email */
-										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-										$user->display_name,
-										absint( $user->ID ),
-										$user->user_email
-									);
+								$user_id = absint( wp_unslash( $_REQUEST['user_id'] ) );
+								if ( $user_id > 0 ) {
+									$user = get_user_by( 'id', absint( $user_id ) );
+									if ( $user ) {
+										$user_string = sprintf(
+											/* translators: 1: user display name 2: user ID 3: user email */
+											esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+											$user->display_name,
+											absint( $user->ID ),
+											$user->user_email
+										);
+									}
 								}
 							}
 							// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -103,7 +104,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							</select>
 							<div class="divider"></div>
 							<span class="or_relation_label"><?php esc_html_e( '&mdash;&nbsp;or&nbsp;&mdash;', 'woocommerce' ); ?></span>
-							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $_REQUEST['user_email'] ) ? esc_attr( wc_clean( wp_unslash( $_REQUEST['user_email'] ) ) ) : ''; ?>"/>
+							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $_REQUEST['user_email'] ) ? esc_attr( wc_clean( wp_unslash( $_REQUEST['user_email'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended; ?>"/>
 
 							<div class="wp-clearfix"></div>
 						</div>

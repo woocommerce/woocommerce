@@ -21,7 +21,7 @@ class NotificationEditPage {
 	 */
 	public function output() {
 		$table           = new ListTable();
-		$notification_id = isset( $_GET['notification_id'] ) ? absint( $_GET['notification_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$notification_id = isset( $_GET['notification_id'] ) ? absint( wp_unslash( $_GET['notification_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
 		}
