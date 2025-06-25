@@ -83,6 +83,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the initial shipping providers are loaded correctly.
 	 */
 	public function test_get_initial_shipping_providers() {
+		// Ensure the FulfillmentsManager is instantiated to load shipping providers filter.
+		new FulfillmentsManager();
+
 		/**
 		 * Filter to get initial shipping providers
 		 *
