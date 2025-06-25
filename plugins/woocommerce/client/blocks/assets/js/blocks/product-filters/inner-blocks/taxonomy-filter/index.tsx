@@ -16,7 +16,7 @@ import type { TaxonomyItem } from './types';
 
 const taxonomies = getSetting< TaxonomyItem[] >(
 	'filterableProductTaxonomies',
-	{}
+	[]
 );
 
 registerBlockType( metadata, {
