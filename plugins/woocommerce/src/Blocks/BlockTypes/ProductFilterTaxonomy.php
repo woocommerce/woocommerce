@@ -53,5 +53,4 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		return $taxonomy_data;
 	}
-
 }
