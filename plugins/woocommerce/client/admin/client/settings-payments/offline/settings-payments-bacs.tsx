@@ -11,7 +11,6 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
-import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -21,7 +20,6 @@ import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
-import { BackButton } from '../components/buttons/back-button';
 
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
@@ -143,160 +141,136 @@ export const SettingsPaymentsBacs = () => {
 	};
 
 	return (
-		<div className="settings-payments-offline__container">
-			<div className="settings-payments-offline__header">
-				<BackButton
-					href={ getNewPath( {}, '/offline' ) }
-					title={ __(
-						'Return to offline payments settings',
-						'woocommerce'
-					) }
-					isRoute={ true }
-					from={ 'woopayments_payment_methods' }
-				/>
-				<h1 className="components-truncate components-text woocommerce-layout__header-heading settings-payments-offline__header-title">
-					<span className="woocommerce-settings-payments-header__title settings-payments-offline__header-title">
-						{ __( 'Direct bank transfer', 'woocommerce' ) }
-					</span>
-				</h1>
-			</div>
-			<Settings>
-				<Settings.Layout>
-					<Settings.Form
-						onSubmit={ ( e ) => {
-							e.preventDefault();
-							saveSettings();
-						} }
+		<Settings>
+			<Settings.Layout>
+				<Settings.Form
+					onSubmit={ ( e ) => {
+						e.preventDefault();
+						saveSettings();
+					} }
+				>
+					<Settings.Section
+						title={ __( 'Enable and customise', 'woocommerce' ) }
+						description={ __(
+							'Choose how you want to present bank transfer to your customers during checkout.',
+							'woocommerce'
+						) }
 					>
-						<Settings.Section
-							title={ __(
-								'Enable and customise',
-								'woocommerce'
-							) }
-							description={ __(
-								'Choose how you want to present bank transfer to your customers during checkout.',
-								'woocommerce'
-							) }
-						>
-							{ isLoading ? (
-								<FieldPlaceholder size="small" />
-							) : (
-								<CheckboxControl
-									label={ __(
-										'Enable direct bank transfers',
-										'woocommerce'
-									) }
-									checked={ Boolean( formValues.enabled ) }
-									onChange={ ( checked ) => {
-										setFormValues( {
-											...formValues,
-											enabled: checked,
-										} );
-										setHasChanges( true );
-									} }
-								/>
-							) }
-							{ isLoading ? (
-								<FieldPlaceholder size="medium" />
-							) : (
-								<TextControl
-									label={ __( 'Title', 'woocommerce' ) }
-									help={ __(
-										'Payment method name that the customer will see during checkout.',
-										'woocommerce'
-									) }
-									placeholder={ __(
-										'Direct bank transfer payments',
-										'woocommerce'
-									) }
-									value={ String( formValues.title ) }
-									onChange={ ( value ) => {
-										setFormValues( {
-											...formValues,
-											title: value,
-										} );
-										setHasChanges( true );
-									} }
-								/>
-							) }
-							{ isLoading ? (
-								<FieldPlaceholder size="large" />
-							) : (
-								<TextareaControl
-									label={ __( 'Description', 'woocommerce' ) }
-									help={ __(
-										'Payment method description that the customer will see during checkout.',
-										'woocommerce'
-									) }
-									value={ String( formValues.description ) }
-									onChange={ ( value ) => {
-										setFormValues( {
-											...formValues,
-											description: value,
-										} );
-										setHasChanges( true );
-									} }
-								/>
-							) }
-							{ isLoading ? (
-								<FieldPlaceholder size="large" />
-							) : (
-								<TextareaControl
-									label={ __(
-										'Instructions',
-										'woocommerce'
-									) }
-									help={ __(
-										'Instructions that will be added to the thank you page and emails.',
-										'woocommerce'
-									) }
-									value={ String( formValues.instructions ) }
-									onChange={ ( value ) => {
-										setFormValues( {
-											...formValues,
-											instructions: value,
-										} );
-										setHasChanges( true );
-									} }
-								/>
-							) }
-						</Settings.Section>
+						{ isLoading ? (
+							<FieldPlaceholder size="small" />
+						) : (
+							<CheckboxControl
+								label={ __(
+									'Enable direct bank transfers',
+									'woocommerce'
+								) }
+								checked={ Boolean( formValues.enabled ) }
+								onChange={ ( checked ) => {
+									setFormValues( {
+										...formValues,
+										enabled: checked,
+									} );
+									setHasChanges( true );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="medium" />
+						) : (
+							<TextControl
+								label={ __( 'Title', 'woocommerce' ) }
+								help={ __(
+									'Payment method name that the customer will see during checkout.',
+									'woocommerce'
+								) }
+								placeholder={ __(
+									'Direct bank transfer payments',
+									'woocommerce'
+								) }
+								value={ String( formValues.title ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										title: value,
+									} );
+									setHasChanges( true );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="large" />
+						) : (
+							<TextareaControl
+								label={ __( 'Description', 'woocommerce' ) }
+								help={ __(
+									'Payment method description that the customer will see during checkout.',
+									'woocommerce'
+								) }
+								value={ String( formValues.description ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										description: value,
+									} );
+									setHasChanges( true );
+								} }
+							/>
+						) }
+						{ isLoading ? (
+							<FieldPlaceholder size="large" />
+						) : (
+							<TextareaControl
+								label={ __( 'Instructions', 'woocommerce' ) }
+								help={ __(
+									'Instructions that will be added to the thank you page and emails.',
+									'woocommerce'
+								) }
+								value={ String( formValues.instructions ) }
+								onChange={ ( value ) => {
+									setFormValues( {
+										...formValues,
+										instructions: value,
+									} );
+									setHasChanges( true );
+								} }
+							/>
+						) }
+					</Settings.Section>
 
-						<Settings.Section
-							title={ __( 'Account details', 'woocommerce' ) }
-							description={ __(
-								'Configure your bank account details.',
-								'woocommerce'
-							) }
-						>
-							{ isLoadingAccounts ? (
-								<FieldPlaceholder size="large" />
-							) : (
-								<BankAccountsList
-									accounts={ accounts }
-									onChange={ ( bankAccounts ) => {
-										setAccounts( bankAccounts );
-										setHasChanges( true );
-									} }
-									defaultCountry={ storeCountryCode }
-								/>
-							) }
-						</Settings.Section>
+					<Settings.Section
+						title={ __( 'Account details', 'woocommerce' ) }
+						description={ __(
+							'Configure your bank account details.',
+							'woocommerce'
+						) }
+					>
+						{ isLoadingAccounts ? (
+							<FieldPlaceholder size="large" />
+						) : (
+							<BankAccountsList
+								accounts={ accounts }
+								onChange={ ( bankAccounts ) => {
+									setAccounts( bankAccounts );
+									setHasChanges( true );
+								} }
+								defaultCountry={ storeCountryCode }
+							/>
+						) }
+					</Settings.Section>
 
-						<Settings.Actions>
-							<Button
-								variant="primary"
-								type="submit"
-								isBusy={ isSaving }
-								disabled={ isSaving || ! hasChanges }
-							>
-								{ __( 'Save changes', 'woocommerce' ) }
-							</Button>
-						</Settings.Actions>
-					</Settings.Form>
-				</Settings.Layout>
-			</Settings>
-		</div>
+					<Settings.Actions>
+						<Button
+							variant="primary"
+							type="submit"
+							isBusy={ isSaving }
+							disabled={ isSaving || ! hasChanges }
+						>
+							{ __( 'Save changes', 'woocommerce' ) }
+						</Button>
+					</Settings.Actions>
+				</Settings.Form>
+			</Settings.Layout>
+		</Settings>
 	);
 };
 
