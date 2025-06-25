@@ -441,19 +441,20 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const BASE_REPORT_URL = 'https://woocommerce.github.io/woocommerce-test-reports/#/';
             function getReportUrl() {
                 if (context.eventName === 'pull_request') {
-                    return `https://woocommerce.github.io/woocommerce-test-reports/#/pr/${context.issue.number}`;
+                    return `${BASE_REPORT_URL}pr/${context.issue.number}`;
                 }
                 
                 if (context.eventName === 'push') {
                     const shortSha = context.sha.substring(0, 7);
                     if (context.ref === 'refs/heads/trunk') {
-                        return `https://woocommerce.github.io/woocommerce-test-reports/#/trunk/trunk-${shortSha}`;
+                        return `${BASE_REPORT_URL}trunk/trunk-${shortSha}`;
                     }
                 }
                 
-                return 'https://woocommerce.github.io/woocommerce-test-reports/#/';
+                return BASE_REPORT_URL;
             }
 
             const reportUrl = getReportUrl();
