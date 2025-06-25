@@ -1620,32 +1620,35 @@ class WooPaymentsService {
 	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = null ): array {
 		$steps = array();
 
-		// Add the payment methods onboarding step details.
-		$steps[] = $this->standardize_onboarding_step_details(
-			array(
-				'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
-				'context' => array(
-					'recommended_pms' => $this->get_onboarding_recommended_payment_methods( $location ),
-					'pms_state'       => $this->get_onboarding_payment_methods_state( $location ),
+		// Add the payment methods onboarding step details, but only if we have recommended payment methods.
+		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( ! empty( $recommended_pms ) ) {
+			$steps[] = $this->standardize_onboarding_step_details(
+				array(
+					'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
+					'context' => array(
+						'recommended_pms' => $recommended_pms,
+						'pms_state'       => $this->get_onboarding_payment_methods_state( $location, $recommended_pms ),
+					),
+					'actions' => array(
+						'start'  => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
+						),
+						'save'   => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
+						),
+						'finish' => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
+						),
+					),
 				),
-				'actions' => array(
-					'start'  => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
-					),
-					'save'   => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
-					),
-					'finish' => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
-					),
-				),
-			),
-			$location,
-			$rest_path
-		);
+				$location,
+				$rest_path
+			);
+		}
 
 		// Add the WPCOM connection onboarding step details.
 		$wpcom_step = $this->standardize_onboarding_step_details(
