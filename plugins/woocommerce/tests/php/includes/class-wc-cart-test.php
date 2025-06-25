@@ -485,22 +485,22 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$test_cases = array(
 			// Ampersand test cases.
 			array(
-				'coupon_code' => 'AT&T-SPECIAL',
-				'user_inputs' => array( 'AT&T-SPECIAL', 'AT&amp;T-SPECIAL', 'at&t-special' ),
+				'coupon_code' => 'TEST&COUPON-SPECIAL',
+				'user_inputs' => array( 'TEST&COUPON-SPECIAL', 'TEST&amp;COUPON-SPECIAL', 'test&coupon-special' ),
 				'discount'    => 15,
 				'description' => 'Coupon with ampersand',
 			),
 			// Quote test cases.
 			array(
-				'coupon_code' => 'BEN&JERRY\'S',
-				'user_inputs' => array( 'BEN&JERRY\'S', 'BEN&amp;JERRY\'S', 'ben&jerry\'s' ),
+				'coupon_code' => 'TEST&COUPON\'S',
+				'user_inputs' => array( 'TEST&COUPON\'S', 'TEST&amp;COUPON\'S', 'test&coupon\'s' ),
 				'discount'    => 20,
 				'description' => 'Coupon with ampersand and apostrophe',
 			),
 			// Quote characters test.
 			array(
-				'coupon_code' => 'SUMMER"2024"',
-				'user_inputs' => array( 'SUMMER"2024"', 'SUMMER&quot;2024&quot;', 'summer"2024"' ),
+				'coupon_code' => 'TEST"2024"',
+				'user_inputs' => array( 'TEST"2024"', 'TEST&quot;2024&quot;', 'test"2024"' ),
 				'discount'    => 25,
 				'description' => 'Coupon with quote characters',
 			),
