@@ -455,7 +455,7 @@ class MiniCart extends AbstractBlock {
 
 		$cart = $this->get_cart_instance();
 
-		// Handle cart/checkout page rendering - similar to old get_markup logic.
+		// Either render hidden or remove the Mini Cart on cart and checkout pages.
 		if ( is_cart() || is_checkout() ) {
 			if ( $this->should_not_render_mini_cart( $attributes ) ) {
 				return '';
