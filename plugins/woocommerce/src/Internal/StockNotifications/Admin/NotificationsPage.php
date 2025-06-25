@@ -82,8 +82,13 @@ class NotificationsPage {
 		}
 
 		$notice_data = get_option( self::NOTICES_OPTION_NAME );
+		if ( false === $notice_data ) {
+			return;
+		}
 
-		if ( empty( $notice_data ) || empty( $notice_data['message'] ) ) {
+		// Check if invalid data.
+		if ( empty( $notice_data ) || ! is_array( $notice_data ) || empty( $notice_data['message'] ) ) {
+			delete_option( self::NOTICES_OPTION_NAME );
 			return;
 		}
 
