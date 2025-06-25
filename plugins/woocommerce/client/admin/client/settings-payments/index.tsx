@@ -96,6 +96,53 @@ const SettingsPaymentsChequeChunk = lazy(
 		)
 );
 
+interface OfflinePaymentGatewayWrapperProps {
+	title: string;
+	chunkComponent: React.ComponentType;
+	context: string;
+}
+
+const OfflinePaymentGatewayWrapper = ( {
+	title,
+	chunkComponent: ChunkComponent,
+	context,
+}: OfflinePaymentGatewayWrapperProps ) => {
+	return (
+		<>
+			<Header
+				title={ title }
+				backLink={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&path=/offline'
+				) }
+				context={ context }
+			/>
+			<div className="settings-payments-offline__container">
+				<div className="settings-payment-gateways">
+					<div className="settings-payments-offline__header">
+						<BackButton
+							href={ getNewPath( {}, '/offline' ) }
+							title={ __(
+								'Return to payments settings',
+								'woocommerce'
+							) }
+							isRoute={ true }
+							from={ 'woopayments_payment_methods' }
+						/>
+						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
+							<span className="woocommerce-settings-payments-header__title">
+								{ title }
+							</span>
+						</h1>
+					</div>
+					<Suspense fallback={ <Placeholder /> }>
+						<ChunkComponent />
+					</Suspense>
+				</div>
+			</div>
+		</>
+	);
+};
+
 /**
  * Hides or displays the WooCommerce navigation tab based on the provided display style.
  */
@@ -368,125 +415,23 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 	);
 };
 
-export const SettingsPaymentsBacsWrapper = () => {
-	return (
-		<>
-			<Header
-				title={ __( 'Direct bank transfer', 'woocommerce' ) }
-				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&path=/offline'
-				) }
-				context={ 'wc_settings_payments__offline_pms_bacs' }
-			/>
-			<div className="settings-payments-offline__container">
-				<div className="settings-payments-bacs__container">
-					<div className="settings-payment-gateways">
-						<div className="settings-payments-offline__header">
-							<BackButton
-								href={ getNewPath( {}, '/offline' ) }
-								title={ __(
-									'Return to payments settings',
-									'woocommerce'
-								) }
-								isRoute={ true }
-								from={ 'woopayments_payment_methods' }
-							/>
-							<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
-								<span className="woocommerce-settings-payments-header__title">
-									{ __(
-										'Direct bank transfer',
-										'woocommerce'
-									) }
-								</span>
-							</h1>
-						</div>
-						<Suspense fallback={ <Placeholder /> }>
-							<SettingsPaymentsBacsChunk />
-						</Suspense>
-					</div>
-				</div>
-			</div>
-		</>
-	);
-};
+export const SettingsPaymentsBacsWrapper = OfflinePaymentGatewayWrapper( {
+	title: __( 'Direct bank transfer', 'woocommerce' ),
+	chunkComponent: SettingsPaymentsBacsChunk,
+	context: 'wc_settings_payments__offline_pms_bacs',
+} );
 
-export const SettingsPaymentsCodWrapper = () => {
-	return (
-		<>
-			<Header
-				title={ __( 'Cash on delivery', 'woocommerce' ) }
-				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&path=/offline'
-				) }
-				context={ 'wc_settings_payments__offline_pms_cod' }
-			/>
-			<div className="settings-payments-offline__container">
-				<div className="settings-payments-cod__container">
-					<div className="settings-payment-gateways">
-						<div className="settings-payments-offline__header">
-							<BackButton
-								href={ getNewPath( {}, '/offline' ) }
-								title={ __(
-									'Return to payments settings',
-									'woocommerce'
-								) }
-								isRoute={ true }
-								from={ 'woopayments_payment_methods' }
-							/>
-							<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
-								<span className="woocommerce-settings-payments-header__title">
-									{ __( 'Cash on delivery', 'woocommerce' ) }
-								</span>
-							</h1>
-						</div>
-						<Suspense fallback={ <Placeholder /> }>
-							<SettingsPaymentsCodChunk />
-						</Suspense>
-					</div>
-				</div>
-			</div>
-		</>
-	);
-};
+export const SettingsPaymentsCodWrapper = OfflinePaymentGatewayWrapper( {
+	title: __( 'Cash on delivery', 'woocommerce' ),
+	chunkComponent: SettingsPaymentsCodChunk,
+	context: 'wc_settings_payments__offline_pms_cod',
+} );
 
-export const SettingsPaymentsChequeWrapper = () => {
-	return (
-		<>
-			<Header
-				title={ __( 'Check payments', 'woocommerce' ) }
-				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&path=/offline'
-				) }
-				context={ 'wc_settings_payments__offline_pms_cheque' }
-			/>
-			<div className="settings-payments-offline__container">
-				<div className="settings-payments-cheque__container">
-					<div className="settings-payment-gateways">
-						<div className="settings-payments-offline__header">
-							<BackButton
-								href={ getNewPath( {}, '/offline' ) }
-								title={ __(
-									'Return to payments settings',
-									'woocommerce'
-								) }
-								isRoute={ true }
-								from={ 'woopayments_payment_methods' }
-							/>
-							<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
-								<span className="woocommerce-settings-payments-header__title">
-									{ __( 'Check payments', 'woocommerce' ) }
-								</span>
-							</h1>
-						</div>
-						<Suspense fallback={ <Placeholder /> }>
-							<SettingsPaymentsChequeChunk />
-						</Suspense>
-					</div>
-				</div>
-			</div>
-		</>
-	);
-};
+export const SettingsPaymentsChequeWrapper = OfflinePaymentGatewayWrapper( {
+	title: __( 'Check payments', 'woocommerce' ),
+	chunkComponent: SettingsPaymentsChequeChunk,
+	context: 'wc_settings_payments__offline_pms_cheque',
+} );
 
 /**
  * Wraps the main payment settings and payment methods settings pages.
