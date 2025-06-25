@@ -238,34 +238,6 @@ class ListTable extends \WP_List_Table {
 	}
 
 	/**
-	 * Handles the waiting since column output.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return void
-	 */
-	public function column_waiting_since( $notification ) {
-
-		if ( ! $notification->get_date_created() || $notification->get_status() !== 'active' ) {
-			$t_time    = __( '&mdash;', 'woocommerce' );
-			$h_time    = $t_time;
-			$time_diff = 0;
-		} else {
-			$date_created_timestamp = $notification->get_date_created()->getTimestamp();
-			$t_time                 = date_i18n( _x( 'Y/m/d g:i:s a', 'list table date hover format', 'woocommerce' ), $date_created_timestamp );
-			$time_diff              = time() - $date_created_timestamp;
-
-			if ( $time_diff > 0 && $time_diff < DAY_IN_SECONDS ) {
-				/* translators: %s: human time diff */
-				$h_time = wp_kses_post( human_time_diff( $date_created_timestamp ) );
-			} else {
-				$h_time = date_i18n( wc_date_format(), $date_created_timestamp );
-			}
-		}
-
-		echo '<span title="' . esc_attr( $t_time ) . '">' . esc_html( $h_time ) . '</span>';
-	}
-
-	/**
 	 * Message to be displayed when there are no items.
 	 *
 	 * @return void
@@ -286,13 +258,12 @@ class ListTable extends \WP_List_Table {
 
 		$columns                     = array();
 		$columns['cb']               = '<input type="checkbox" />';
-		$columns['id']               = _x( 'ID', 'column_name', 'woocommerce' );
+		$columns['id']               = _x( 'Notification', 'column_name', 'woocommerce' );
 		$columns['status']           = _x( 'Status', 'column_name', 'woocommerce' );
 		$columns['user']             = _x( 'User/Email', 'column_name', 'woocommerce' );
 		$columns['product']          = _x( 'Product', 'column_name', 'woocommerce' );
 		$columns['sku']              = _x( 'SKU', 'column_name', 'woocommerce' );
 		$columns['date_created_gmt'] = _x( 'Signed Up', 'column_name', 'woocommerce' );
-		$columns['waiting_since']    = _x( 'Waiting', 'column_name', 'woocommerce' );
 
 		return $columns;
 	}
@@ -304,7 +275,8 @@ class ListTable extends \WP_List_Table {
 	 */
 	public function get_sortable_columns() {
 		$sortable_columns = array(
-			'date_created_gmt' => array( 'date_created_gmt', true ),
+			'id'      => array( 'id', true ),
+			'product' => array( 'product_id', true ),
 		);
 
 		return $sortable_columns;
