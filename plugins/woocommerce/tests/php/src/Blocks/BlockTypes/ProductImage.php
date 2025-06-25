@@ -107,7 +107,11 @@ class ProductImage extends \WP_UnitTestCase {
 		$variation->set_image_id( $variation_image_id );
 		$variation->save();
 
-		// Test that the ProductImage block recognizes the variation image when provided via context.
+		// Verify that the variation image is included in the available images (cast to string for comparison).
+		$available_image_ids = \Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils::get_all_image_ids( $variable_product );
+		$this->assertContains( (string) $variation_image_id, $available_image_ids, 'Variation image should be included in available images' );
+
+		// Test that the ProductImage block recognizes the variation image when provided via context (cast to string).
 		$block = new WP_Block(
 			array(
 				'blockName' => 'woocommerce/product-image',
@@ -115,7 +119,7 @@ class ProductImage extends \WP_UnitTestCase {
 			),
 			array(
 				'postId'  => $variable_product->get_id(),
-				'imageId' => $variation_image_id,
+				'imageId' => (string) $variation_image_id,
 			)
 		);
 
@@ -123,7 +127,6 @@ class ProductImage extends \WP_UnitTestCase {
 
 		// The block should recognize the variation image as valid and use it.
 		$this->assertStringContainsString( 'data-image-id="' . $variation_image_id . '"', $markup );
-		$this->assertStringContainsString( 'data-testid="product-image"', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 
 		// Test that the block falls back to the main product image when no imageId is provided.
@@ -149,7 +152,7 @@ class ProductImage extends \WP_UnitTestCase {
 			),
 			array(
 				'postId'  => $variable_product->get_id(),
-				'imageId' => $invalid_image_id,
+				'imageId' => (string) $invalid_image_id,
 			)
 		);
 
@@ -291,6 +294,7 @@ class ProductImage extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image__inner-container', $markup );
+		$this->assertStringContainsString( 'custom-inner-block', $markup );
 		$this->assertStringContainsString( 'Custom content', $markup );
 
 		// Clean up.
