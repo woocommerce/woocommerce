@@ -222,6 +222,9 @@ class WooPaymentsService {
 						// Since it takes a while for the account to be fully working after the test account initialization,
 						// we will force mark the step as completed here, if it is not already.
 						// This is a fail-safe to guard against the case when the frontend doesn't mark the step as completed.
+						// The step has no reason to be blocked or failed.
+						$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 						$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
