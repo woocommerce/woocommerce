@@ -294,11 +294,7 @@
 				"elements": {
 					"link": {
 						"color": {
-							"background": "var(--wp--preset--color--theme-5)",
 							"text": "var(--wp--preset--color--theme-2)"
-						},
-						"spacing": {
-							"padding": "var(--wp--preset--spacing--20)"
 						},
 						"typography": {
 							"textDecoration": "none"
