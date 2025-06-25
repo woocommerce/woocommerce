@@ -10,7 +10,13 @@
 ?>
 
 <!-- wp:group {"metadata":{"name":"Stockists"},"align":"full","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull"><!-- wp:group {"metadata":{"categories":["woocommerce"],"patternName":"woostarter/stockists"},"align":"wide","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull">
+    
+<!-- wp:spacer {"height":"var:preset|spacing|60","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:group {"metadata":{"categories":["woocommerce"],"patternName":"woostarter/stockists"},"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide">
 <!-- wp:heading {"level":1,"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
 <h1 class="wp-block-heading has-theme-2-color has-text-color has-link-color"><?php esc_html_e( 'Stockists', 'woostarter' ); ?></h1>
@@ -276,5 +282,11 @@
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
-<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|60","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+</div>
 <!-- /wp:group -->
