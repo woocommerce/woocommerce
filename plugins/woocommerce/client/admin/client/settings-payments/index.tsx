@@ -406,23 +406,23 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 	);
 };
 
-export const SettingsPaymentsBacsWrapper = OfflinePaymentGatewayWrapper( {
-	title: __( 'Direct bank transfer', 'woocommerce' ),
-	chunkComponent: SettingsPaymentsBacsChunk,
-	context: 'wc_settings_payments__offline_pms_bacs',
-} );
+export const SettingsPaymentsBacsWrapper = () =>
+	OfflinePaymentGatewayWrapper( {
+		title: __( 'Direct bank transfer', 'woocommerce' ),
+		chunkComponent: SettingsPaymentsBacsChunk,
+	} );
 
-export const SettingsPaymentsCodWrapper = OfflinePaymentGatewayWrapper( {
-	title: __( 'Cash on delivery', 'woocommerce' ),
-	chunkComponent: SettingsPaymentsCodChunk,
-	context: 'wc_settings_payments__offline_pms_cod',
-} );
+export const SettingsPaymentsCodWrapper = () =>
+	OfflinePaymentGatewayWrapper( {
+		title: __( 'Cash on delivery', 'woocommerce' ),
+		chunkComponent: SettingsPaymentsCodChunk,
+	} );
 
-export const SettingsPaymentsChequeWrapper = OfflinePaymentGatewayWrapper( {
-	title: __( 'Check payments', 'woocommerce' ),
-	chunkComponent: SettingsPaymentsChequeChunk,
-	context: 'wc_settings_payments__offline_pms_cheque',
-} );
+export const SettingsPaymentsChequeWrapper = () =>
+	OfflinePaymentGatewayWrapper( {
+		title: __( 'Check payments', 'woocommerce' ),
+		chunkComponent: SettingsPaymentsChequeChunk,
+	} );
 
 /**
  * Wraps the main payment settings and payment methods settings pages.
