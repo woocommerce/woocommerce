@@ -16,6 +16,7 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -72,6 +73,8 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const sidebarTitle = (
 		<Button
 			onClick={ () => {
+				recordEvent( 'launch_your_store_payments_back_to_hub_click' );
+
 				// Clear session flag to prevent redirect back to payments setup
 				// after exiting the flow and returning to the WC Admin home.
 				window.sessionStorage.setItem( 'lysWaiting', 'no' );

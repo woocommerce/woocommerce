@@ -34,7 +34,8 @@ const config: Config = {
 	},
 
 	plugins: [
-		'./llms-txt/index.ts'
+		'./llms-txt/index.ts',
+		'./consent-plugin/index.ts'
 	],
 
 	presets: [

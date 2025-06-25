@@ -76,7 +76,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 					[
 						'woocommerce/accordion-panel',
 						{},
-						[ [ 'woocommerce/blockified-product-reviews', {} ] ],
+						[ [ 'woocommerce/product-reviews', {} ] ],
 					],
 				],
 			],

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add e2e test for adding a grouped product to the cart using the Add to Cart With Options block

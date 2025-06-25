@@ -33,6 +33,7 @@ export type LaunchYourStoreComponentProps = {
 	className?: string;
 };
 import { SetUpPaymentsProvider } from '../data/setup-payments-context';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
@@ -76,6 +77,12 @@ const LaunchStoreController = () => {
 		);
 
 	const handlePaymentsClose = () => {
+		// We are not actually closing a modal here, but we use the same event name for consistency.
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed', {
+			from: 'lys',
+			source: 'lys',
+		} );
+
 		// Clear session flag to prevent redirect back to payments setup
 		// after exiting the flow and returning to the WC Admin home.
 		window.sessionStorage.setItem( 'lysWaiting', 'no' );

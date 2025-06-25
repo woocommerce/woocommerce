@@ -1417,10 +1417,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'title'             => 'Suggestion 1',
 			'description'       => 'Description 1',
 			'plugin'            => array(
-				'_type'  => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
-				'slug'   => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
-				'file'   => 'woocommerce/woocommerce',
-				'status' => PaymentsProviders::EXTENSION_INSTALLED,
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
 			),
 			'image'             => 'http://example.com/image1.png',
 			'icon'              => 'http://example.com/icon1.png',
@@ -1439,11 +1437,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $suggestion_id )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_id( $suggestion_id );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**
@@ -1481,11 +1486,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $slug )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_plugin_slug( $slug );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**

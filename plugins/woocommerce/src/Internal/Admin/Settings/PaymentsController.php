@@ -170,7 +170,6 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 
@@ -263,7 +262,6 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 

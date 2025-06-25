@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix of the accidentally removed publishConfig option
+
+
