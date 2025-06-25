@@ -12,19 +12,19 @@ import './style.scss';
 /**
  * Render content when no payment methods are found depending on context.
  */
-const NoPaymentMethods = () => {
+const OnlyExpressPayments = () => {
 	return (
 		<NoticeBanner
 			isDismissible={ false }
-			className="wc-block-checkout__no-payment-methods-notice"
-			status="error"
+			className="wc-block-checkout__only-express-payments-notice"
+			status="info"
 		>
 			{ __(
-				'There are no payment methods available. Please contact us for help placing your order.',
+				'Only express payment methods are available for this order. Please select one to continue.',
 				'woocommerce'
 			) }
 		</NoticeBanner>
 	);
 };
 
-export default NoPaymentMethods;
+export default OnlyExpressPayments;

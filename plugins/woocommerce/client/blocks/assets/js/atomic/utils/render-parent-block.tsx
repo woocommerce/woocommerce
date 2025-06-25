@@ -217,53 +217,64 @@ const renderInnerBlocks = ( {
 			? blockWrapper
 			: Fragment;
 
-		return (
-			<Suspense
-				key={ `${ block }_${ depth }_${ index }_suspense` }
-				fallback={ <div className="wc-block-placeholder" /> }
+		const isCheckoutBlockChild = /^woocommerce\/checkout-/.test(
+			blockName
+		);
+
+		const blockContent = (
+			<BlockErrorBoundary
+				key={ `${ block }_${ depth }_${ index }_blockerror` }
+				text={ `Unexpected error in: ${ blockName }` }
+				showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
 			>
-				{ /* Prevent third party components from breaking the entire checkout */ }
-				<BlockErrorBoundary
-					text={ `Unexpected error in: ${ blockName }` }
-					showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
-				>
-					<InnerBlockComponentWrapper>
-						<InnerBlockComponent
-							key={ componentKey }
-							{ ...componentProps }
-						>
-							{
-								/**
-								 * Within this Inner Block Component we also need to recursively render its children. This
-								 * is done here with a depth+1. The same block map and parent is used, but we pass new
-								 * children from this element.
-								 */
-								renderInnerBlocks( {
-									block,
-									blockMap,
-									children: node.childNodes,
-									depth: depth + 1,
-									blockWrapper,
-								} )
-							}
-							{
-								/**
-								 * In addition to the inner blocks, we may also need to render FORCED blocks which have not
-								 * yet been added to the inner block template. We do this by comparing the current children
-								 * to the list of registered forced blocks.
-								 *
-								 * @see registerCheckoutBlock
-								 */
-								renderForcedBlocks(
-									blockName,
-									blockMap,
-									node.childNodes,
-									blockWrapper
-								)
-							}
-						</InnerBlockComponent>
-					</InnerBlockComponentWrapper>
-				</BlockErrorBoundary>
+				<InnerBlockComponentWrapper>
+					<InnerBlockComponent
+						key={ componentKey }
+						{ ...componentProps }
+					>
+						{
+							/**
+							 * Within this Inner Block Component we also need to recursively render its children. This
+							 * is done here with a depth+1. The same block map and parent is used, but we pass new
+							 * children from this element.
+							 */
+							renderInnerBlocks( {
+								block,
+								blockMap,
+								children: node.childNodes,
+								depth: depth + 1,
+								blockWrapper,
+							} )
+						}
+						{
+							/**
+							 * In addition to the inner blocks, we may also need to render FORCED blocks which have not
+							 * yet been added to the inner block template. We do this by comparing the current children
+							 * to the list of registered forced blocks.
+							 *
+							 * @see registerCheckoutBlock
+							 */
+							renderForcedBlocks(
+								blockName,
+								blockMap,
+								node.childNodes,
+								blockWrapper
+							)
+						}
+					</InnerBlockComponent>
+				</InnerBlockComponentWrapper>
+			</BlockErrorBoundary>
+		);
+
+		// Temporary return until the Cart block is also updated
+		return isCheckoutBlockChild ? (
+			blockContent
+		) : (
+			<Suspense
+				fallback={ null }
+				key={ `${ block }_${ depth }_${ index }_suspense` }
+			>
+				{ blockContent }
 			</Suspense>
 		);
 	} );
