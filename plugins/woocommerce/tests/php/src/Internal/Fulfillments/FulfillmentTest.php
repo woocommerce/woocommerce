@@ -208,7 +208,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the fulfillment status is validated correctly.
+	 * Test that the fulfillment status is validated correctly, and the fallback doesn't change is_fulfilled flag.
 	 */
 	public function test_fulfillment_status_validation() {
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
@@ -221,12 +221,18 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'unfulfilled', $fulfillment->get_status() );
 		$this->assertEquals( false, $fulfillment->get_is_fulfilled() );
 
+		// Fallback to unfulfilled if an invalid status is set (is_fulfilled is false).
+		$fulfillment->set_status( 'invalid_status' );
+		$this->assertEquals( 'unfulfilled', $fulfillment->get_status() );
+		$this->assertEquals( false, $fulfillment->get_is_fulfilled() );
+
 		$fulfillment->set_status( 'fulfilled' );
 		$this->assertEquals( 'fulfilled', $fulfillment->get_status() );
 		$this->assertEquals( true, $fulfillment->get_is_fulfilled() );
 
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid fulfillment status: invalid_status' );
+		// Fallback to fulfilled if an invalid status is set (is_fulfilled is true).
 		$fulfillment->set_status( 'invalid_status' );
+		$this->assertEquals( 'fulfilled', $fulfillment->get_status() );
+		$this->assertEquals( true, $fulfillment->get_is_fulfilled() );
 	}
 }
