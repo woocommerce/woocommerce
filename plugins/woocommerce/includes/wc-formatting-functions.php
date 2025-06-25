@@ -375,13 +375,26 @@ function wc_format_coupon_code( $value ) {
  *
  * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
  *
+ * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
+ * and other HTML entities. This ensures that:
+ *
+ * 1. User input like "AT&amp;T-SPECIAL" gets decoded to "AT&T-SPECIAL" before sanitization
+ * 2. Quote characters in codes like "SUMMER&quot;2024&quot;" are properly handled
+ * 3. Double-encoded entities like "&amp;amp;" are correctly processed
+ * 4. Case-insensitive matching works properly regardless of how entities are encoded
+ *
+ * Without this decoding step, coupon codes with special characters would fail to match
+ * during application, causing legitimate coupons to be rejected.
+ *
+ * @see WC_Cart_Test::test_coupon_codes_with_special_characters
+ *
  * @since  3.6.0
  * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
+	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
 	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
 }
 

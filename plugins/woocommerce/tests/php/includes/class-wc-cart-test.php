@@ -467,4 +467,124 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			WC_Tax::_delete_tax_rate( $tax_rate_id );
 		}
 	}
+
+		/**
+		 * Test coupon codes with special characters (ampersands, quotes, etc.).
+		 *
+		 * This test verifies that coupon codes containing special characters work correctly
+		 * when users input them in various formats (raw, HTML-encoded, etc.).
+		 * It tests the html_entity_decode() functionality in wc_format_coupon_code().
+		 */
+	public function test_coupon_codes_with_special_characters() {
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Test cases with various special character scenarios.
+		$test_cases = array(
+			// Ampersand test cases.
+			array(
+				'coupon_code' => 'AT&T-SPECIAL',
+				'user_inputs' => array( 'AT&T-SPECIAL', 'AT&amp;T-SPECIAL', 'at&t-special' ),
+				'discount'    => 15,
+				'description' => 'Coupon with ampersand',
+			),
+			// Quote test cases.
+			array(
+				'coupon_code' => 'BEN&JERRY\'S',
+				'user_inputs' => array( 'BEN&JERRY\'S', 'BEN&amp;JERRY\'S', 'ben&jerry\'s' ),
+				'discount'    => 20,
+				'description' => 'Coupon with ampersand and apostrophe',
+			),
+			// Quote characters test.
+			array(
+				'coupon_code' => 'SUMMER"2024"',
+				'user_inputs' => array( 'SUMMER"2024"', 'SUMMER&quot;2024&quot;', 'summer"2024"' ),
+				'discount'    => 25,
+				'description' => 'Coupon with quote characters',
+			),
+		);
+
+		foreach ( $test_cases as $test_case ) {
+			$coupon_code = $test_case['coupon_code'];
+			$user_inputs = $test_case['user_inputs'];
+			$discount    = $test_case['discount'];
+			$description = $test_case['description'];
+
+			// Create coupon with special characters.
+			$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
+			$coupon->set_discount_type( 'fixed_cart' );
+			$coupon->set_amount( $discount );
+			$coupon->save();
+
+			foreach ( $user_inputs as $user_input ) {
+				// Add product to cart and clear any previously applied coupons.
+				WC()->cart->add_to_cart( $product->get_id(), 1 );
+				WC()->cart->remove_coupons();
+				WC()->cart->calculate_totals();
+
+				// Apply coupon with user input variation.
+				$applied = WC()->cart->apply_coupon( $user_input );
+				$this->assertTrue(
+					$applied,
+					sprintf(
+						'%s: Coupon should be applied successfully with user input "%s"',
+						$description,
+						$user_input
+					)
+				);
+
+				// Verify discount amount is correct.
+				$applied_coupons = WC()->cart->get_applied_coupons();
+				$this->assertNotEmpty( $applied_coupons, sprintf( '%s: Should have applied coupons', $description ) );
+
+				// Get the applied coupon code and verify discount amount.
+				$applied_coupon_code = reset( $applied_coupons );
+				$discount_amount     = WC()->cart->get_coupon_discount_amount( $applied_coupon_code );
+				$this->assertEquals(
+					(float) $discount,
+					$discount_amount,
+					sprintf(
+						'%s: Discount amount should be %s for user input "%s"',
+						$description,
+						$discount,
+						$user_input
+					)
+				);
+
+				WC()->cart->empty_cart();
+			}
+
+			$coupon->delete( true );
+		}
+
+		// Test edge case: Double-encoded input (simulating form submission issues).
+		$coupon = WC_Helper_Coupon::create_coupon( 'COMPANY&CO' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 30 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// Test with double-encoded input (what might come from a problematic form).
+		$double_encoded_input = 'COMPANY&amp;amp;CO';
+		$applied              = WC()->cart->apply_coupon( $double_encoded_input );
+		$this->assertTrue(
+			$applied,
+			'Double-encoded coupon input should still be applied successfully'
+		);
+
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$applied_coupon  = reset( $applied_coupons );
+		$discount_amount = WC()->cart->get_coupon_discount_amount( $applied_coupon );
+		$this->assertEquals( 30.0, $discount_amount, 'Double-encoded input should produce correct discount' );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
 }
