@@ -33,7 +33,7 @@ class NotificationsPage {
 		$table->process_actions();
 		self::output_admin_notice();
 		$table->prepare_items();
-		include __DIR__ . '/views/html-admin-notifications.php';
+		include __DIR__ . '/Templates/html-admin-notifications.php';
 	}
 
 	/**

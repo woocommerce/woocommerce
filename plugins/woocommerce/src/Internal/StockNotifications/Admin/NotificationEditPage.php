@@ -44,7 +44,7 @@ class NotificationEditPage {
 			)
 		);
 
-		include __DIR__ . '/views/html-admin-notification-edit.php';
+		include __DIR__ . '/Templates/html-admin-notification-edit.php';
 	}
 
 	/**
