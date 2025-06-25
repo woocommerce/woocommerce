@@ -99,23 +99,14 @@ const SettingsPaymentsChequeChunk = lazy(
 interface OfflinePaymentGatewayWrapperProps {
 	title: string;
 	chunkComponent: React.ComponentType;
-	context: string;
 }
 
 const OfflinePaymentGatewayWrapper = ( {
 	title,
 	chunkComponent: ChunkComponent,
-	context,
 }: OfflinePaymentGatewayWrapperProps ) => {
 	return (
 		<>
-			<Header
-				title={ title }
-				backLink={ getAdminLink(
-					'admin.php?page=wc-settings&tab=checkout&path=/offline'
-				) }
-				context={ context }
-			/>
 			<div className="settings-payments-offline__container">
 				<div className="settings-payment-gateways">
 					<div className="settings-payments-offline__header">
