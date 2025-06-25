@@ -456,15 +456,18 @@ class MiniCart extends AbstractBlock {
 		$cart = $this->get_cart_instance();
 
 		if ( $cart ) {
-			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
-			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
-			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-			$wrapper_styles                   = $classes_styles['styles'];
-			$template_part_contents           = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
+			$classes_styles           = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
+			$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+			$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+			$styles                   = $product_count_color ? 'background:' . $product_count_color : '';
+			$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$wrapper_styles           = $classes_styles['styles'];
+			$template_part_contents   = $this->get_template_part_contents();
+
+			// Parse blocks and remove unwanted divs.
+			$template_part_contents           = $this->process_template_contents( $template_part_contents );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -557,13 +560,86 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Get the mini cart template part contents to render inside the drawer.
+	 * Remove innerHTML from WooCommerce blocks in the parsed blocks array.
 	 *
-	 * @param string $template_name  The name of the template part to get the contents of.
+	 * @param array $blocks The parsed blocks array.
+	 * @return array The filtered blocks array.
+	 */
+	protected function remove_unwanted_blocks( $blocks ) {
+		$filtered_blocks = array();
+
+		foreach ( $blocks as $block ) {
+			// Only remove outer wrapper from WooCommerce blocks.
+			if ( $this->is_woocommerce_block( $block ) ) {
+				$block['innerHTML'] = $this->remove_outer_wrapper( $block['innerHTML'] );
+			}
+
+			// Recursively process inner blocks.
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$block['innerBlocks'] = $this->remove_unwanted_blocks( $block['innerBlocks'] );
+			}
+
+			$filtered_blocks[] = $block;
+		}
+
+		return $filtered_blocks;
+	}
+
+	/**
+	 * Remove only the outer WooCommerce div wrapper while preserving inner content.
+	 *
+	 * @param string $inner_html The innerHTML to process.
+	 * @return string The processed innerHTML with outer wrapper removed.
+	 */
+	protected function remove_outer_wrapper( $inner_html ) {
+		// Match the outer div with wp-block-woocommerce- class and extract its content.
+		if ( preg_match( '/<div[^>]*class="[^"]*wp-block-woocommerce-[^"]*"[^>]*>(.*)<\/div>\s*$/s', $inner_html, $matches ) ) {
+			return trim( $matches[1] );
+		}
+
+		// If no wrapper found, return original content.
+		return $inner_html;
+	}
+
+	/**
+	 * Check if a block is a WooCommerce block that should have its innerHTML removed.
+	 *
+	 * @param array $block The block to check.
+	 * @return bool True if the block is a WooCommerce block.
+	 */
+	protected function is_woocommerce_block( $block ) {
+		// Check if block name starts with 'woocommerce/'.
+		if ( isset( $block['blockName'] ) && strpos( $block['blockName'], 'woocommerce/' ) === 0 ) {
+			return true;
+		}
+
+		// Also check if the innerHTML contains WooCommerce block classes.
+		if ( isset( $block['innerHTML'] ) && strpos( $block['innerHTML'], 'wp-block-woocommerce-' ) !== false ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Process template contents to remove unwanted div wrappers.
+	 *
+	 * @param string $template_contents The template contents to process.
+	 * @return string The processed template contents.
+	 */
+	protected function process_template_contents( $template_contents ) {
+		$parsed_blocks   = parse_blocks( $template_contents );
+		$filtered_blocks = $this->remove_unwanted_blocks( $parsed_blocks );
+		return serialize_blocks( $filtered_blocks );
+	}
+
+	/**
+	 * Get the mini cart template part contents to render inside the drawer.
 	 *
 	 * @return string The contents of the template part.
 	 */
-	protected function get_template_part_contents( $template_name = 'mini-cart' ) {
+	protected function get_template_part_contents() {
+		$template_name          = 'mini-cart';
 		$template_part_contents = '';
 
 		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
