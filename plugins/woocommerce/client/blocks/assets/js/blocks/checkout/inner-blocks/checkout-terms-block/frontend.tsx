@@ -36,11 +36,14 @@ const FrontendBlock = ( {
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
 
-	const error = useSelect( ( select ) => {
-		return select( validationStore ).getValidationError(
-			validationErrorId
-		);
-	}, [] );
+	const error = useSelect(
+		( select ) => {
+			return select( validationStore ).getValidationError(
+				validationErrorId
+			);
+		},
+		[ validationErrorId ]
+	);
 	const hasError = !! ( error?.message && ! error?.hidden );
 
 	// Track validation errors for this input.
