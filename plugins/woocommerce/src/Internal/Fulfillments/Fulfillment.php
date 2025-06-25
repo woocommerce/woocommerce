@@ -120,13 +120,8 @@ class Fulfillment extends \WC_Data {
 	public function set_status( ?string $status ): void {
 		$statuses = FulfillmentUtils::get_fulfillment_statuses();
 		if ( ! isset( $statuses[ $status ] ) ) {
-			throw new \InvalidArgumentException(
-				sprintf(
-				/* translators: %s is the invalid fulfillment status. */
-					esc_attr__( 'Invalid fulfillment status: %s', 'woocommerce' ),
-					esc_attr( $status )
-				)
-			);
+			// Change the status to an existing one if the provided status is not valid.
+			$status = $this->get_is_fulfilled() ? 'fulfilled' : 'unfulfilled';
 		}
 		// Set the fulfillment status.
 		$this->set_is_fulfilled( $statuses[ $status ]['is_fulfilled'] ?? false );
