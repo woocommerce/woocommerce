@@ -23,7 +23,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
 
-		test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+		test.beforeEach( async ( { requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-additional-checkout-fields'
 			);
