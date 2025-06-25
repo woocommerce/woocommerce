@@ -29,6 +29,7 @@ import {
 	ReportStatObject,
 } from './types';
 import type { ReportsSelect } from './';
+import { applyFilters } from '@wordpress/hooks';
 
 type Filter = {
 	param: string;
@@ -309,6 +310,19 @@ export function getSummaryNumbers< T extends ReportStatEndpoint >(
 			secondary: null,
 		},
 	};
+
+	// Not a real filter, but a hook to allow grabbing the summary params.
+	applyFilters('woocommerce_admin_report_summary_params', {
+		endpoint,
+		query: options.query,
+		select: select,
+		limitBy: options.limitBy,
+		filters: options.filters,
+		advancedFilters: options.advancedFilters,
+		defaultDateRange: options.defaultDateRange,
+		fields: options.fields,
+		store: store,
+	  })
 
 	const primaryQuery = getRequestQuery( { ...options, dataType: 'primary' } );
 
