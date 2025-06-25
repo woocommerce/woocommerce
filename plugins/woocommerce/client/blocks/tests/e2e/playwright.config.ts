@@ -11,9 +11,9 @@ const config: PlaywrightTestConfig = {
 	maxFailures: CI ? 30 : 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
 	outputDir: `${ __dirname }/artifacts/test-results`,
-	globalSetup: fileURLToPath(
-		new URL( 'global-setup.ts', 'file:' + __filename ).href
-	),
+	// globalSetup: fileURLToPath(
+	// 	new URL( 'global-setup.ts', 'file:' + __filename ).href
+	// ),
 	testDir: './tests',
 	retries: CI ? 1 : 0,
 	workers: 1,
@@ -42,9 +42,10 @@ const config: PlaywrightTestConfig = {
 				: 'off',
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
-		storageState: STORAGE_STATE_PATH,
+		// storageState: STORAGE_STATE_PATH,
 		actionTimeout: 10_000,
 		navigationTimeout: 10_000,
+		headless: false,
 	},
 	projects: [
 		{

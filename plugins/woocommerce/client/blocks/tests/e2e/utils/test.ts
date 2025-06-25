@@ -130,16 +130,16 @@ const test = base.extend<
 		await use( page );
 
 		// Clear local storage after each test.
-		await page.evaluate( () => {
-			window.localStorage.clear();
-		} );
+		// await page.evaluate( () => {
+		// 	window.localStorage.clear();
+		// } );
 
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
-		await wpCLI( `db reset --yes` );
-		// Reset the database to the initial state via snapshot import.
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		// await wpCLI( `db reset --yes` );
+		// // Reset the database to the initial state via snapshot import.
+		// await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -172,8 +172,7 @@ const test = base.extend<
 	],
 	wpCoreVersion: [
 		async ( {}, use ) => {
-			const output = await wpCLI( 'core version' );
-			const version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+			const version = '6.8';
 
 			// We can parse this as a float because WP never updates the minor
 			// version over x.9.x. E.g., after 6.9.x, it will be 7.0.x.

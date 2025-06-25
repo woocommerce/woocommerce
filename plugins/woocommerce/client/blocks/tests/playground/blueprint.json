@@ -1,0 +1,20 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"steps": [
+		{
+			"step": "importWordPressFiles",
+			"wordPressFilesZip": {
+				"resource": "vfs",
+				"path": "/woocommerce/client/blocks/tests/playground/playground.zip"
+			}
+		},
+        {
+            "step": "unzip",
+            "zipFile": {
+                "resource": "vfs",
+                "path": "/woocommerce/woocommerce.zip"
+            },
+            "extractToPath": "/wordpress/wp-content/plugins"
+        }
+	]
+}
