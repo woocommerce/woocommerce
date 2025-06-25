@@ -69,7 +69,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			$notification->set_date_cancelled( current_time( 'mysql' ) );
 			$notification->update_meta_data( '_anonymized', 'yes' );
 			$notification->save();
-			$response['messages'][]    = sprintf(
+			$response['messages'][] = sprintf(
 			/* translators: %d the numeric product ID */
 				__( 'Removed back-in-stock notification for product id: %d', 'woocommerce' ),
 				$notification->get_product_id()
