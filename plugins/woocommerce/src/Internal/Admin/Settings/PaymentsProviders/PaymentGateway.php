@@ -545,7 +545,7 @@ class PaymentGateway {
 			);
 		}
 
-		// Special handling for BACS to use the new path-based approach
+		// Special handling for offline payment gateways to use the front-end navigation.
 		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
 			return Utils::wc_payments_settings_url(
 				null,
