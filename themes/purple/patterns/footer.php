@@ -93,7 +93,7 @@
 
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group alignfull" style="padding-right:0;padding-left:0"><!-- wp:paragraph {"align":"left","style":{"typography":{"textTransform":"uppercase"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-text-align-left has-theme-4-color has-text-color has-link-color has-small-font-size" style="text-transform:uppercase">© 2025 <?php esc_html_e('Elke', 'woostarter');?></p>
+<p class="has-text-align-left has-theme-4-color has-text-color has-link-color has-small-font-size" style="text-transform:uppercase"><?php esc_html_e('© 2025 Elke', 'woostarter');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"align":"left","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
