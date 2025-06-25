@@ -51,7 +51,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 										<option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
 									<?php elseif ( $notification->get_status() === NotificationStatus::SENT ) : ?>
 										<option value="activate_notification"><?php esc_html_e( 'Activate', 'woocommerce' ); ?></option>
-										<option value="cancel_notification"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></option>                                    
+										<option value="cancel_notification"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></option>
 									<?php endif; ?>
 								</select>
 								<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
@@ -120,12 +120,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 							<?php
 							$user_string = '&mdash;';
 							$user_id     = $notification->get_user_id();
-							if ( $user_id ) {
-
-								$user = get_user_by( 'id', $user_id );
-								if ( is_a( $user, 'WP_User' ) ) {
-									$user_string = $user->display_name;
-								}
+							$user        = $user_id ? get_user_by( 'id', $user_id ) : null;
+							if ( is_a( $user, 'WP_User' ) ) {
+								$user_string = $user->display_name;
 							} elseif ( filter_var( $notification->get_user_email(), FILTER_VALIDATE_EMAIL ) ) {
 								$user_string = $notification->get_user_email();
 							}
@@ -186,7 +183,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 											}
 										}
 										?>
-										<span title="<?php echo esc_attr( $t_time ); ?>"><?php echo esc_html( $h_time ); ?></span>								
+										<span title="<?php echo esc_attr( $t_time ); ?>"><?php echo esc_html( $h_time ); ?></span>
 									</span>
 								</div>
 								<div class="notification-data__meta-data">
