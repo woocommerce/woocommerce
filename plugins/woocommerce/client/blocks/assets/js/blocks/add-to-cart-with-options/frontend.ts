@@ -191,7 +191,11 @@ const addToCartWithOptionsStore = store(
 				const parsedMinValue = parseInt( inputElement.min, 10 );
 				const parsedStep = parseInt( inputElement.step, 10 );
 
-				const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
+				// For grouped product children, allow quantity of 0.
+				const defaultMinValue = childProductId ? 0 : 1;
+				const minValue = isNaN( parsedMinValue )
+					? defaultMinValue
+					: parsedMinValue;
 				const step = isNaN( parsedStep ) ? 1 : parsedStep;
 
 				return currentQuantity - step >= minValue;
