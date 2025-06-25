@@ -35,68 +35,59 @@ class NotificationCreatePage {
 			return;
 		}
 
-		// Posted data.
-		$args       = $_POST;
-		$query_args = array();
-
-		// Escape attributes.
-		if ( isset( $args['user_id'] ) && ! empty( $args['user_id'] ) ) {
-			$query_args['user_id'] = absint( $args['user_id'] );
-			$user                  = get_user_by( 'id', $query_args['user_id'] );
-			if ( $user && is_a( $user, 'WP_User' ) ) {
-				$query_args['user_email'] = $user->user_email;
-			}
-		} elseif ( isset( $args['user_email'] ) && ! empty( $args['user_email'] ) ) {
-			$query_args['user_email'] = sanitize_text_field( $args['user_email'] );
-			// Is there a user with this email?
-			$user = get_user_by( 'email', $query_args['user_email'] );
-			if ( $user && is_a( $user, 'WP_User' ) ) {
-				$query_args['user_id'] = $user->ID;
-			}
+		if ( ! isset( $_POST['product_id'] ) || empty( $_POST['product_id'] ) ) {
+			NotificationsPage::add_notice( __( 'Please select a product.', 'woocommerce' ), 'error' );
+			return;
 		}
 
-		if ( isset( $args['product_id'] ) && ! empty( $args['product_id'] ) ) {
-			$query_args['product_id'] = absint( $args['product_id'] );
+		if ( empty( $_POST['user_id'] ) && empty( $_POST['user_email'] ) ) {
+			NotificationsPage::add_notice( __( 'Please select a customer.', 'woocommerce' ), 'error' );
+			return;
+		}
+
+		// Posted data.
+		$posted_data               = array();
+		$posted_data['product_id'] = absint( wp_unslash( $_POST['product_id'] ) );
+
+		if ( isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ) {
+
+			$posted_data['user_id']    = absint( wp_unslash( $_POST['user_id'] ) );
+			$user                      = get_user_by( 'id', $posted_data['user_id'] );
+			$posted_data['user_email'] = is_a( $user, 'WP_User' ) ? $user->user_email : '';
+
+		} elseif ( isset( $_POST['user_email'] ) && ! empty( $_POST['user_email'] ) ) {
+
+			$posted_data['user_email'] = sanitize_text_field( wp_unslash( $_POST['user_email'] ) );
+			if ( ! filter_var( $posted_data['user_email'], FILTER_VALIDATE_EMAIL ) ) {
+				NotificationsPage::add_notice( __( 'Please enter a valid email address.', 'woocommerce' ), 'error' );
+				return;
+			}
+
+			$user                      = get_user_by( 'email', $posted_data['user_email'] );
+			$posted_data['user_id']    = is_a( $user, 'WP_User' ) ? $user->ID : 0;
 		}
 
 		// Check if a notification already exists for the same product and customer.
-		if ( ! empty( $query_args['product_id'] ) && ( ! empty( $query_args['user_id'] ) || ! empty( $query_args['user_email'] ) ) ) {
-
-			$notification_ids = \WC_Data_Store::load( 'stock_notification' )->query(
-				array(
-					'product_id' => $query_args['product_id'],
-					'user_id'    => isset( $query_args['user_id'] ) ? $query_args['user_id'] : 0,
-					'user_email' => isset( $query_args['user_email'] ) ? $query_args['user_email'] : '',
-				)
+		$notification_ids = \WC_Data_Store::load( 'stock_notification' )->query( $posted_data );
+		if ( count( $notification_ids ) > 0 ) {
+			$notice_message = sprintf(
+				// translators: %s: notification edit url.
+				__(
+					'A <a href="%s">notification</a> for the same product and customer already exists in your database.',
+					'woocommerce'
+				),
+				admin_url( NotificationsPage::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] )
 			);
-
-			if ( count( $notification_ids ) > 0 ) {
-				$notice_message = sprintf(
-					// translators: %s: notification edit url.
-					__(
-						'A <a href="%s">notification</a> for the same product and customer already exists in your database.',
-						'woocommerce'
-					),
-					admin_url( NotificationsPage::PAGE_URL . '&notification_action=edit&notification_id=' . $notification_ids[0] )
-				);
-				NotificationsPage::add_notice( $notice_message, 'error' );
-				return;
-			}
+			NotificationsPage::add_notice( $notice_message, 'error' );
+			return;
 		}
 
 		// Save notification.
 		$notification = new Notification();
-		if ( isset( $query_args['user_id'] ) ) {
-			$notification->set_user_id( $query_args['user_id'] );
-		}
-		if ( isset( $query_args['user_email'] ) ) {
-			$notification->set_user_email( $query_args['user_email'] );
-		}
-		if ( isset( $query_args['product_id'] ) ) {
-			$notification->set_product_id( $query_args['product_id'] );
-		}
-
 		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_product_id( $posted_data['product_id'] );
+		$notification->set_user_id( $posted_data['user_id'] );
+		$notification->set_user_email( $posted_data['user_email'] );
 		$result = $notification->save();
 
 		if ( is_wp_error( $result ) ) {

@@ -78,9 +78,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							$user_string = '';
 							$user_id     = '';
 
-							if ( ! empty( $args['user_id'] ) ) {
+							if ( ! empty( $_REQUEST['user_id'] ) ) {
 
-								$user_id = wc_clean( $args['user_id'] );
+								$user_id = wc_clean( wp_unslash( $_REQUEST['user_id'] ) );
 								$user    = get_user_by( 'id', absint( $user_id ) );
 
 								if ( $user ) {
@@ -101,7 +101,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							</select>
 							<div class="divider"></div>
 							<span class="or_relation_label"><?php esc_html_e( '&mdash;&nbsp;or&nbsp;&mdash;', 'woocommerce' ); ?></span>
-							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $args['user_email'] ) ? esc_attr( wc_clean( $args['user_email'] ) ) : ''; ?>"/>
+							<input type="email" class="or_relation_label__input" placeholder="<?php esc_html_e( 'Enter customer e-mail&hellip;', 'woocommerce' ); ?>" name="user_email" value="<?php echo isset( $_REQUEST['user_email'] ) ? esc_attr( wc_clean( wp_unslash( $_REQUEST['user_email'] ) ) ) : ''; ?>"/>
 
 							<div class="wp-clearfix"></div>
 						</div>
@@ -113,9 +113,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							$product_string = '';
 							$product_id     = '';
 
-							if ( ! empty( $args['product_id'] ) ) {
+							if ( ! empty( $_REQUEST['product_id'] ) ) {
 
-								$product_id = wc_clean( $args['product_id'] );
+								$product_id = wc_clean( wp_unslash( $_REQUEST['product_id'] ) );
 								$product    = wc_get_product( absint( $product_id ) );
 
 								if ( is_a( $product, 'WC_Product' ) ) {
