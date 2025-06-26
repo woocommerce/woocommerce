@@ -78,10 +78,13 @@ class Renderer {
 	 * @param string   $pre_header Email preheader.
 	 * @param string   $language Email language.
 	 * @param string   $meta_robots Email meta robots.
+	 * @param string   $template_slug Email template slug.
 	 * @return array
 	 */
-	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, $meta_robots = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
+	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( ! $template_slug ) {
+			$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
+		}
 		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
 
