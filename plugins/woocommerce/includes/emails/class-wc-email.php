@@ -1508,21 +1508,18 @@ class WC_Email extends WC_Settings_API {
 			return $attributes;
 		}
 
-		// Add skip classes to prevent lazy loading plugins from applying lazy loading.
+		// Skip classes to prevent lazy loading plugins from applying lazy loading.
 		// These are the most common skip classes used by popular lazy loading plugins.
+		$skip_classes = array( 'skip-lazy', 'no-lazyload', 'lazyload-disabled', 'no-lazy', 'skip-lazyload' );
+
+		// Add skip classes to prevent lazy loading plugins from applying lazy loading.
 		if ( isset( $attributes['class'] ) ) {
-			$classes = array_filter( array_map( 'trim', explode( ' ', $attributes['class'] ) ) );
-			// Add skip classes if they don't already exist.
-			$skip_classes = array( 'skip-lazy', 'no-lazyload', 'lazyload-disabled', 'no-lazy', 'skip-lazyload' );
-			foreach ( $skip_classes as $skip_class ) {
-				if ( ! in_array( $skip_class, $classes, true ) ) {
-					$classes[] = $skip_class;
-				}
-			}
+			$classes             = array_filter( array_map( 'trim', explode( ' ', $attributes['class'] ) ) );
+			$classes             = array_unique( array_merge( $classes, $skip_classes ) );
 			$attributes['class'] = implode( ' ', $classes );
 		} else {
 			// No class attribute exists, add one with skip classes.
-			$attributes['class'] = 'skip-lazy no-lazyload lazyload-disabled no-lazy skip-lazyload';
+			$attributes['class'] = implode( ' ', $skip_classes );
 		}
 
 		// Add data-skip-lazy attribute as an additional safeguard.
