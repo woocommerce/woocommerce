@@ -5,12 +5,11 @@ sidebar_label: Release Schedule
 
 # WooCommerce Release Schedule
 
-The schedule can be found on [this page](https://developer.woocommerce.com/release-calendar/): the page also explains the types 
+The schedule can be found on [this page](https://developer.woocommerce.com/release-calendar/), which also explains the types 
 of events in the calendar like `Releases`, `Release Candidates (RC)` and `Feature Freeze Dates`.
 
 While the calendar reflects the events made public, there are specific steps in the release process that are internal, 
-and this page aims to provide necessary context about those events for release leads and other involved parties.
-
+and this page aims to provide necessary context about those events.
 
 ## Detailed release schedule
 
@@ -18,7 +17,7 @@ This section will use the publicly available release schedule as anchors and cla
 
 ### Feature Freeze (start of the release cycle)
 
-This step is mostly automated, and in a nut-shell, it creates a dedicated release branch where the future release undergoes testing and stabilization.
+This step is mostly automated and creates a dedicated release branch where the future release undergoes testing and stabilization.
 At this point, the Developer Advocacy team publishes pre-release updates ([example](https://developer.woocommerce.com/2025/05/12/woocommerce-9-9-pre-release-updates/))
 
 ### RC1 (Feature Freeze + 1 week)
@@ -30,9 +29,7 @@ This step is where various testing processes are happening:
 
 ### RC2 (RC1 + 1 week)
 
-This step is where we release regressions fixes discovered in RC1, as part of the release stabilization.
-
-At this point, the Developer Advocacy team continues to update the pre-release announcement.
+This step is where we release regressions fixes discovered in RC1, as part of the release stabilization. At this point, the Developer Advocacy team continues to update the pre-release announcement.
 
 ### Final Release (RC2 + 1 week)
 
@@ -42,15 +39,13 @@ At this point, the Developer Advocacy team publishes release highlights that are
 
 ## Delays
 
-Due to business needs, the release dates may be subject to change. Here are some hints on approaching and effectively wrangling this situation.
+Due to business needs, the release dates may be subject to change. Below we will describe some of the internal processes for how we wrangling this situation.
 
-Once the need for changes in the release schedule is confirmed, create an internal Slack thread and communicate the necessary details.
-This thread provides an opportunity for teams to share additional context, which may help invalidate and correct the schedule changes.
+Once the need for changes in the release schedule is confirmed, the Woo team creates an internal Slack thread to communicate the necessary details. This thread provides an opportunity for teams to share additional context, which may help verify or challenge schedule changes.
 
-Once the thread feedback and release schedule changes have cleared:
+Once the feedback and release schedule changes have been finalized, we procced to:
 
 - ask the Developer Advocacy team to communicate the changes publicly ([example](https://developer.woocommerce.com/2025/06/02/woocommerce-9-9-release-is-delayed/))
 - update [the calendar](https://developer.woocommerce.com/release-calendar/) with the new release dates
 
-> Note: To minimize friction for teams, it's recommended not to change intervals between RCs and the final release but 
-> instead to shift the entire release cycle. The intervals consider multiple factors, including the capacity across teams.
+> Note: To reduce disruption for internal teams and contributors, we avoid changing the time between release candidates (RCs) and the final release. Instead, we adjust the overall release schedule. These intervals are based on several factors, including team capacity.
