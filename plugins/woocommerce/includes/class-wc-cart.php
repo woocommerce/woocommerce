@@ -1810,16 +1810,22 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array(
-			wc_strtolower( wc_format_coupon_code( $coupon_code ) ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->applied_coupons
-			),
-			true
-		) : count( $this->applied_coupons ) > 0;
+		$applied_coupons = $this->get_applied_coupons();
+
+		if ( ! $coupon_code ) {
+			return count( $applied_coupons ) > 0;
+		}
+
+		$coupon_code = wc_format_coupon_code( $coupon_code );
+
+		// Check if the coupon is in applied coupons using case-insensitive comparison.
+		foreach ( $applied_coupons as $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1908,6 +1914,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
 
+		/**
+		 * Action ran after a coupon is applied.
+		 *
+		 * @since 2.0.0
+		 * @param string $coupon_code The coupon code that was applied.
+		 */
 		do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 		return true;
@@ -1943,7 +1955,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
 		$totals          = $this->get_coupon_discount_totals();
-		$discount_amount = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
+		$discount_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$discount_amount = $value;
+				break;
+			}
+		}
 
 		if ( ! $ex_tax ) {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
@@ -1959,8 +1977,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		$totals = $this->get_coupon_discount_tax_totals();
-		return wc_cart_round_discount( isset( $totals[ $code ] ) ? $totals[ $code ] : 0, wc_get_price_decimals() );
+		$totals     = $this->get_coupon_discount_tax_totals();
+		$tax_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$tax_amount = $value;
+				break;
+			}
+		}
+		return wc_cart_round_discount( $tax_amount, wc_get_price_decimals() );
 	}
 
 	/**
@@ -1983,19 +2008,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search(
-			wc_strtolower( $coupon_code ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->get_applied_coupons()
-			),
-			true
-		);
 
-		if ( false !== $position ) {
-			unset( $this->applied_coupons[ $position ] );
+		// Find the coupon in applied coupons using case-insensitive comparison.
+		foreach ( $this->get_applied_coupons() as $key => $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				unset( $this->applied_coupons[ $key ] );
+				break;
+			}
 		}
 
 		WC()->session->set( 'refresh_totals', true );
