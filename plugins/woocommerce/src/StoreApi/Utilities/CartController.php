@@ -1003,7 +1003,7 @@ class CartController {
 				sprintf(
 					/* translators: %s coupon code */
 					esc_html__( 'Coupon code "%s" has already been applied.', 'woocommerce' ),
-					esc_html( $coupon_code )
+					esc_html( $coupon->get_code() )
 				),
 				400
 			);
@@ -1051,7 +1051,7 @@ class CartController {
 					sprintf(
 						/* translators: %s: coupon code */
 						esc_html__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ),
-						esc_html( $code )
+						esc_html( $individual_use_coupon->get_code() )
 					),
 					400
 				);

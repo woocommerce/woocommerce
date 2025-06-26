@@ -261,7 +261,21 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityInputChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, currentValue } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					currentValue,
+					childProductId
+				);
+			},
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
