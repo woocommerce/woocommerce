@@ -616,13 +616,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
-		$step_status = $this->woopayments->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $step_status ) {
-			// Mark the step as completed, if not already.
-			// This will ensure proper tracking of the step completion.
-			$this->woopayments->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-		}
-
 		return rest_ensure_response(
 			array_merge(
 				array( 'success' => true ),
