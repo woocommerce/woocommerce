@@ -140,6 +140,33 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
+	 * Filter the quantity column for grouped products to add interactive context for each child.
+	 *
+	 * @param string     $value The HTML for the quantity input.
+	 * @param WC_Product $grouped_product_child The child product object.
+	 * @return string     The wrapped HTML with interactive context.
+	 */
+	public function filter_grouped_product_quantity_column( $value, $grouped_product_child ) {
+		// Only wrap if stepper style is enabled and the child is purchasable and in stock.
+		if ( ! Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) ) {
+			return $value;
+		}
+		if ( ! $grouped_product_child->is_purchasable() || $grouped_product_child->has_options() || ! $grouped_product_child->is_in_stock() ) {
+			return $value;
+		}
+		$child_id     = $grouped_product_child->get_id();
+		$context_json = esc_attr(
+			wp_json_encode(
+				array(
+					'childProductId' => $child_id,
+					'productType'    => 'grouped',
+				)
+			)
+		);
+		return '<div data-wp-interactive="woocommerce/add-to-cart-form" data-wp-context=' . $context_json . '>' . $value . '</div>';
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -187,6 +214,11 @@ class AddToCartForm extends AbstractBlock {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
 		}
 
+		/**
+		 * Add filter for grouped product quantity column to inject context for each child.
+		 */
+		add_filter( 'woocommerce_grouped_product_list_column_quantity', array( $this, 'filter_grouped_product_quantity_column' ), 10, 2 );
+
 		ob_start();
 
 		/**
@@ -207,6 +239,8 @@ class AddToCartForm extends AbstractBlock {
 		remove_action( 'woocommerce_variation_add_to_cart', 'woocommerce_simple_add_to_cart', 10 );
 
 		$product_html = ob_get_clean();
+
+		remove_filter( 'woocommerce_grouped_product_list_column_quantity', array( $this, 'filter_grouped_product_quantity_column' ), 10 );
 
 		if ( $is_descendent_of_single_product_block ) {
 			remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );

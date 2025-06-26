@@ -4,6 +4,13 @@
 import { store, getContext } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
+export type Context = {
+	productId?: number;
+	productType?: string;
+	quantity: Record< number, number >;
+	childProductId?: number;
+};
+
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
 ) => {
@@ -32,13 +39,18 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
 	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
 	const step = isNaN( parsedStep ) ? 1 : parsedStep;
-
+	// Parse childProductId from input name if present.
+	const childProductIdMatch = inputElement.name.match( /quantity\[(\d+)\]/ );
+	const childProductId = childProductIdMatch
+		? parseInt( childProductIdMatch[ 1 ], 10 )
+		: undefined;
 	return {
 		currentValue,
 		minValue,
 		maxValue,
 		step,
 		inputElement,
+		childProductId,
 	};
 };
 
@@ -50,34 +62,56 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 store( 'woocommerce/add-to-cart-form', {
 	state: {
 		get allowsDecrease() {
+			const context = getContext< Context >();
+			const { quantity, childProductId, productType } = context;
+			let currentQuantity = 0;
+			let selector =
+				'.wc-block-components-quantity-selector__input[name="quantity"]';
+			if ( productType === 'grouped' && childProductId ) {
+				currentQuantity = quantity?.[ childProductId ] || 0;
+				selector = `.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`;
+			} else {
+				currentQuantity =
+					quantity?.[ context.productId as number ] || 0;
+			}
 			const inputElement = document.querySelector(
-				'.wc-block-components-quantity-selector__input'
+				selector
 			) as HTMLInputElement | null;
 
 			if ( ! inputElement ) {
 				return false;
 			}
-
-			const { quantity } = getContext< { quantity: number } >();
 
 			const parsedMinValue = parseInt( inputElement.min, 10 );
 			const parsedStep = parseInt( inputElement.step, 10 );
+			const defaultMinValue = childProductId ? 0 : 1;
+			const minValue = isNaN( parsedMinValue )
+				? defaultMinValue
+				: parsedMinValue;
 
-			const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
 			const step = isNaN( parsedStep ) ? 1 : parsedStep;
-
-			return quantity - step >= minValue;
+			return currentQuantity - step >= minValue;
 		},
 		get allowsIncrease() {
+			const context = getContext< Context >();
+			const { quantity, childProductId, productType } = context;
+			let currentQuantity = 0;
+			let selector =
+				'.wc-block-components-quantity-selector__input[name="quantity"]';
+			if ( productType === 'grouped' && childProductId ) {
+				currentQuantity = quantity?.[ childProductId ] || 0;
+				selector = `.wc-block-components-quantity-selector__input[name="quantity[${ childProductId }]"]`;
+			} else {
+				currentQuantity =
+					quantity?.[ context.productId as number ] || 0;
+			}
 			const inputElement = document.querySelector(
-				'.wc-block-components-quantity-selector__input'
+				selector
 			) as HTMLInputElement | null;
 
 			if ( ! inputElement ) {
 				return false;
 			}
-
-			const { quantity } = getContext< { quantity: number } >();
 
 			const parsedMaxValue = parseInt( inputElement.max, 10 );
 			const parsedStep = parseInt( inputElement.step, 10 );
@@ -86,8 +120,7 @@ store( 'woocommerce/add-to-cart-form', {
 				? undefined
 				: parsedMaxValue;
 			const step = isNaN( parsedStep ) ? 1 : parsedStep;
-
-			return maxValue === undefined || quantity + step <= maxValue;
+			return maxValue === undefined || currentQuantity + step <= maxValue;
 		},
 	},
 	actions: {
@@ -96,14 +129,28 @@ store( 'woocommerce/add-to-cart-form', {
 			if ( ! inputData ) {
 				return;
 			}
-
-			const context = getContext< { quantity: number } >();
-
-			const { currentValue, maxValue, step, inputElement } = inputData;
+			const context = getContext< Context >();
+			const {
+				currentValue,
+				maxValue,
+				step,
+				inputElement,
+				childProductId,
+			} = inputData;
 			const newValue = currentValue + step;
 
 			if ( maxValue === undefined || newValue <= maxValue ) {
-				context.quantity = newValue;
+				if ( childProductId ) {
+					context.quantity = {
+						...context.quantity,
+						[ childProductId ]: newValue,
+					};
+				} else {
+					context.quantity = {
+						...context.quantity,
+						[ context.productId as number ]: newValue,
+					};
+				}
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -113,14 +160,28 @@ store( 'woocommerce/add-to-cart-form', {
 			if ( ! inputData ) {
 				return;
 			}
-
-			const context = getContext< { quantity: number } >();
-
-			const { currentValue, minValue, step, inputElement } = inputData;
+			const context = getContext< Context >();
+			const {
+				currentValue,
+				minValue,
+				step,
+				inputElement,
+				childProductId,
+			} = inputData;
 			const newValue = currentValue - step;
 
 			if ( newValue >= minValue ) {
-				context.quantity = newValue;
+				if ( childProductId ) {
+					context.quantity = {
+						...context.quantity,
+						[ childProductId ]: newValue,
+					};
+				} else {
+					context.quantity = {
+						...context.quantity,
+						[ context.productId as number ]: newValue,
+					};
+				}
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
