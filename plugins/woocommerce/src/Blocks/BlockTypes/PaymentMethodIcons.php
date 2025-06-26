@@ -7,7 +7,7 @@ use WP_Block;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
- * PaymentMethods class.
+ * PaymentMethodIcons class.
  */
 class PaymentMethodIcons extends AbstractBlock {
 	/**
@@ -123,6 +123,8 @@ class PaymentMethodIcons extends AbstractBlock {
 
 	/**
 	 * Get the enabled card types.
+	 *
+	 * Note: This uses hardcoded cards based on the default card types provided by WooPayments. This should be updated when these icons can be accessed via an API.
 	 *
 	 * @return array Enabled card types.
 	 */
