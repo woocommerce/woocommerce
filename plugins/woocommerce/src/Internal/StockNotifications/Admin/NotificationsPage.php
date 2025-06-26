@@ -31,7 +31,7 @@ class NotificationsPage {
 	public function output() {
 		$table = new ListTable();
 		$table->process_actions();
-		self::output_admin_notice();
+		$this->output_admin_notice();
 		$table->prepare_items();
 		include __DIR__ . '/Templates/html-admin-notifications.php';
 	}
@@ -42,7 +42,7 @@ class NotificationsPage {
 	public function create() {
 		$create_page = new NotificationCreatePage();
 		$create_page->output();
-		self::output_admin_notice();
+		$this->output_admin_notice();
 	}
 
 	/**
@@ -51,7 +51,7 @@ class NotificationsPage {
 	public function edit() {
 		$edit_page = new NotificationEditPage();
 		$edit_page->output();
-		self::output_admin_notice();
+		$this->output_admin_notice();
 	}
 
 	/**
@@ -76,7 +76,7 @@ class NotificationsPage {
 	 *
 	 * @return void
 	 */
-	public static function output_admin_notice(): void {
+	public function output_admin_notice(): void {
 		if ( ! function_exists( 'wp_admin_notice' ) ) {
 			return;
 		}
