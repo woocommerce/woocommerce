@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Block;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * PaymentMethods class.
@@ -54,16 +55,26 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$output = '';
-
 		$enabled_card_types    = $this->get_enabled_card_types();
 		$other_payment_methods = $this->get_other_payment_method_icons();
 
-		if ( ! empty( $enabled_card_types ) || ! empty( $other_payment_methods ) ) {
-			$output  = '<div class="wp-block-woocommerce-payment-method-icons">';
-			$output .= $this->render_card_types( $attributes );
-			$output .= '</div>';
+		if ( empty( $enabled_card_types ) && empty( $other_payment_methods ) ) {
+			return '';
 		}
+
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => esc_attr( $classes_and_styles['classes'] ),
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
+
+		$output  = '<div ' . $wrapper_attributes . '>';
+		$output .= '<div class="wp-block-woocommerce-payment-method-icons">';
+		$output .= $this->render_card_types( $attributes );
+		$output .= '</div>';
+		$output .= '</div>';
 
 		return $output;
 	}
