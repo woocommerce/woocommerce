@@ -15,12 +15,7 @@ import './style.scss';
 registerBlockType( metadata.name, {
 	...( metadata as BlockConfiguration ),
 	icon: {
-		src: (
-			<Icon
-				icon={ paymentMethodsIcon }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
+		src: <Icon icon={ paymentMethodsIcon } />,
 	},
 	edit,
 	save: () => null,
