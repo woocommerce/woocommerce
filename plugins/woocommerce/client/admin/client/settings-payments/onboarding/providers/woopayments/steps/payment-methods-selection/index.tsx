@@ -24,7 +24,7 @@ import {
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep, navigateToNextStep, closeModal } =
+	const { currentStep, navigateToNextStep, closeModal, sessionEntryPoint } =
 		useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
@@ -232,6 +232,7 @@ export default function PaymentMethodsSelection() {
 													'unknown',
 												action: 'show_more',
 												hidden_count: hiddenCount,
+												source: sessionEntryPoint,
 											}
 										);
 
@@ -281,39 +282,51 @@ export default function PaymentMethodsSelection() {
 								url: href,
 								method: 'POST',
 							} ).then( () => {
+								const eventProps = {
+									displayed_payment_methods:
+										Object.keys( paymentMethodsState ).join(
+											', '
+										),
+									selected_payment_methods: Object.keys(
+										paymentMethodsState
+									)
+										.filter(
+											( paymentMethod ) =>
+												paymentMethodsState[
+													paymentMethod
+												]
+										)
+										.join( ', ' ),
+									deselected_payment_methods: Object.keys(
+										paymentMethodsState
+									)
+										.filter(
+											( paymentMethod ) =>
+												! paymentMethodsState[
+													paymentMethod
+												]
+										)
+										.join( ', ' ),
+									business_country:
+										window.wcSettings?.admin
+											?.woocommerce_payments_nox_profile
+											?.business_country_code ??
+										'unknown',
+									source: sessionEntryPoint,
+								};
+								recordPaymentsOnboardingEvent(
+									'woopayments_onboarding_modal_click',
+									{
+										step: 'payment_methods',
+										action: 'continue',
+										...eventProps,
+									}
+								);
+								// This is the legacy event for the continue button click.
+								// For now, trigger it for compatibility.
 								recordEvent(
 									'wcpay_settings_payment_methods_continue',
-									{
-										displayed_payment_methods:
-											Object.keys(
-												paymentMethodsState
-											).join( ', ' ),
-										selected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										deselected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													! paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										business_country:
-											window.wcSettings?.admin
-												?.woocommerce_payments_nox_profile
-												?.business_country_code ??
-											'unknown',
-									}
+									eventProps
 								);
 								setIsContinueButtonLoading( false );
 								navigateToNextStep();
