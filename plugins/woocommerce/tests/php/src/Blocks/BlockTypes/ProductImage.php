@@ -73,9 +73,9 @@ class ProductImage extends \WP_UnitTestCase {
 		// Create variation images.
 		$variation_image_ids = array();
 		$variations          = $variable_product->get_children();
-		$variations_count    = count( $variations );
+		$variations_count    = min( $variation_count, count( $variations ) );
 
-		for ( $i = 0; $i < min( $variation_count, $variations_count ); $i++ ) {
+		for ( $i = 0; $i < $variations_count; $i++ ) {
 			$variation_image_id = wp_insert_attachment(
 				array(
 					'post_title'     => 'Variation Image ' . ( $i + 1 ),
