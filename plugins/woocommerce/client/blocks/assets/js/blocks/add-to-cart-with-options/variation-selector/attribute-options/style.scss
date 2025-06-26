@@ -1,4 +1,4 @@
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
 	display: inline-flex;
 	gap: $grid-unit-10;
 	list-style: none;
@@ -7,35 +7,51 @@
 	flex-wrap: wrap;
 }
 
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
+	--pill-color: currentColor;
+	--pill-background-color: transparent;
+	background-color: var(--pill-background-color);
 	border-radius: 2px;
-	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+	border: 1px solid color-mix(in srgb, var(--pill-color) 40%, transparent);
+	color: var(--pill-color);
+	cursor: pointer;
 	font-size: 0.8em;
 	padding: 0.25em 0.75em;
-	cursor: pointer;
 	user-select: none;
 
-	&:focus {
-		outline: 1px solid currentColor;
-		outline-offset: 1px;
+	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled) {
+		color: color-mix(in srgb, var(--pill-color) 40%, transparent);
+		cursor: not-allowed;
+		text-decoration: line-through;
 	}
 
 	&:hover {
-		background-color: color-mix(
-			in srgb,
-			var(--wp--preset--color--contrast) 10%,
-			transparent
-		);
+		&:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)) {
+			background-color: color-mix(
+				in srgb,
+				var(--pill-color) 10%,
+				transparent
+			);
+		}
+	
+		&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked) {
+			background-color: color-mix(
+				in srgb,
+				var(--pill-background-color) 85%,
+				transparent
+			);
+		}
 	}
 
-	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:focus) {
-		outline: 1px solid currentColor;
+	&:focus-within {
+		outline: 1px solid var(--pill-color);
 		outline-offset: 1px;
-	}
 
-	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled) {
-		color: color-mix(in srgb,currentColor 40%,transparent);
-		text-decoration: line-through;
+		&:has(
+			.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked
+		) {
+			outline-color: var(--pill-background-color);
+		}
 	}
 
 	// We can't make it display: none, otherwise it's not focusable.
@@ -47,7 +63,7 @@
 	}
 }
 
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown) {
 	height: 3em;
 	padding: 0.25em 1em;
 }
