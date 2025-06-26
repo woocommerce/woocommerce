@@ -492,6 +492,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$this->woopayments->onboarding_step_save( $step_id, $location, $request->get_params() );
+
+			// If some step data was saved, we also ensure that the step is marked as started, if not already.
+			// This way we maintain onboarding state consistency if the frontend does not call the start endpoint.
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
