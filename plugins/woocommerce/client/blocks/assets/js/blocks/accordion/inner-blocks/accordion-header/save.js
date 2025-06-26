@@ -4,11 +4,17 @@
 import clsx from 'clsx';
 import {
 	useBlockProps,
-	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
-	__experimentalGetColorClassesAndStyles as getColorClassesAndStyles,
-	__experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles,
-	__experimentalGetShadowClassesAndStyles as getShadowClassesAndStyles,
 	RichText,
+	/* eslint-disable */
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetColorClassesAndStyles as getColorClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetShadowClassesAndStyles as getShadowClassesAndStyles,
+	/* eslint-enable */
 } from '@wordpress/block-editor';
 
 /**
