@@ -2,7 +2,10 @@
 /**
  * Title: Stockists
  * Slug: woostarter/stockists
- * Categories: 
+ * Categories: woocommerce
+ * Keywords: stockists, locations, columns
+ * Description: A column layout to display stockists.
+ * Block Types: core/columns
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Stockists","categories":["woocommerce"],"patternName":"woostarter/stockists"},"align":"full","style":{"spacing":{"padding":{"left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
