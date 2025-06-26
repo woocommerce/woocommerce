@@ -24,6 +24,13 @@ const Edit = (): JSX.Element => {
 						{
 							level: 1,
 							content: __( 'Order received', 'woocommerce' ),
+							metadata: {
+								bindings: {
+									content: {
+										source: 'woocommerce/order-status-title',
+									},
+								},
+							},
 						},
 					],
 					[
@@ -33,6 +40,13 @@ const Edit = (): JSX.Element => {
 								'Thank you. Your order has been received.',
 								'woocommerce'
 							),
+							metadata: {
+								bindings: {
+									content: {
+										source: 'woocommerce/order-status-description',
+									},
+								},
+							},
 						},
 					],
 				] }

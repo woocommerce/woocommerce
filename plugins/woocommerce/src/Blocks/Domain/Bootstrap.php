@@ -37,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
+use Automattic\WooCommerce\Blocks\BlockBindings\OrderStatusBindings;
 
 
 /**
@@ -132,6 +133,7 @@ class Bootstrap {
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
 		$this->container->get( CheckoutLink::class )->init();
+		$this->container->get( OrderStatusBindings::class )->init();
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -253,6 +255,12 @@ class Bootstrap {
 			DraftOrders::class,
 			function ( Container $container ) {
 				return new DraftOrders( $container->get( Package::class ) );
+			}
+		);
+		$this->container->register(
+			OrderStatusBindings::class,
+			function () {
+				return new OrderStatusBindings();
 			}
 		);
 		$this->container->register(
