@@ -35,19 +35,25 @@ const Edit = ( {
 	const blockProps = useBlockProps();
 	const paymentMethodData = getPaymentMethods();
 	const wooPaymentMethods =
-		paymentMethodData?.woocommerce_payments?.content?.props.upeMethods;
+		paymentMethodData?.woocommerce_payments?.content?.props?.upeMethods;
 	const { numberOfIcons } = attributes;
 
 	if ( wooPaymentMethods ) {
-		const { cardIcons } = window.wcSettings as {
-			cardIcons: Record< string, { icon: string } >;
+		const wcSettings = window.wcSettings as {
+			cardIcons?: Record< string, { icon: string } >;
 		};
-		const availableCardIcons = Object.keys( cardIcons ).map( ( type ) => {
-			return {
-				type,
-				icon: cardIcons[ type ].icon,
-			};
-		} );
+		const cardIcons = wcSettings?.cardIcons || {};
+		const availableCardIcons = Object.keys( cardIcons )
+			.map( ( type ) => {
+				if ( ! cardIcons[ type ] || ! cardIcons[ type ].icon ) {
+					return null;
+				}
+				return {
+					type,
+					icon: cardIcons[ type ].icon,
+				};
+			} )
+			.filter( Boolean );
 		const otherPaymentMethods = Object.keys( wooPaymentMethods ).filter(
 			( method ) => method !== 'card'
 		);
