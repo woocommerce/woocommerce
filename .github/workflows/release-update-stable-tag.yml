@@ -226,7 +226,7 @@ jobs:
               --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
               --body "This PR updates the stable tag to $TARGET_VERSION." \
               --base "$BRANCH_NAME" \
-              --head "$UPDATE_BRANCH"
+              --head "$UPDATE_BRANCH" \
               --reviewer ${{ github.actor }}
 
             echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
