@@ -15,7 +15,6 @@ use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
@@ -33,6 +32,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 defined( 'ABSPATH' ) || exit;
@@ -187,20 +187,13 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
-			}
-		);
-		$container->register(
 			Content_Renderer::class,
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);
@@ -217,8 +210,10 @@ class Email_Editor_Container {
 		);
 		$container->register(
 			Personalization_Tags_Registry::class,
-			function () {
-				return new Personalization_Tags_Registry();
+			function ( $container ) {
+				return new Personalization_Tags_Registry(
+					$container->get( Email_Editor_Logger::class )
+				);
 			}
 		);
 		$container->register(
@@ -253,6 +248,12 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
+			Email_Editor_Logger::class,
+			function () {
+				return new Email_Editor_Logger();
+			}
+		);
+		$container->register(
 			Email_Editor::class,
 			function ( $container ) {
 				return new Email_Editor(
@@ -261,6 +262,7 @@ class Email_Editor_Container {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);

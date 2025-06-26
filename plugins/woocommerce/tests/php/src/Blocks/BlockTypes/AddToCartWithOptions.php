@@ -8,8 +8,8 @@ use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorItemCTAMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorItemTemplateMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -35,8 +35,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsMock();
 			new AddToCartWithOptionsQuantitySelectorMock();
 			new AddToCartWithOptionsGroupedProductSelectorMock();
-			new AddToCartWithOptionsGroupedProductSelectorItemTemplateMock();
-			new AddToCartWithOptionsGroupedProductSelectorItemCTAMock();
+			new AddToCartWithOptionsGroupedProductItemMock();
+			new AddToCartWithOptionsGroupedProductItemSelectorMock();
 
 			self::$are_blocks_registered = true;
 		}

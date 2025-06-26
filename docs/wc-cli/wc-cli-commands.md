@@ -27,110 +27,39 @@ wp wc [command] --help
 
 ## Commands
 
-### wc shop_coupon
+### wc blueprint
 
-#### wc shop_coupon list
+#### wc blueprint import [schema-path]
 
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--page` - Current page of the collection.
-- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
-- `--search` - Limit results to those matching a string.
-- `--after` - Limit response to resources published after a given ISO8601 compliant date.
-- `--before` - Limit response to resources published before a given ISO8601 compliant date.
-- `--exclude` - Ensure result set excludes specific IDs.
-- `--include` - Limit result set to specific ids.
-- `--offset` - Offset the result set by a specific number of items.
-- `--order` - Order sort attribute ascending or descending.
-- `--orderby` - Sort collection by object attribute.
-- `--code` - Limit result set to resources with a specific code.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
+- `--show-messages` - Show debug messages. Supported log levels: all, error, info, debug.
+
+#### wc blueprint export [save-to-filename]
+
+- `--steps` - name of steps to export.
+
+### wc com
+
+#### wc com extension list
+
+- `--format` - Render output in a particular format.
 
 Default: table
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+Options: table, csv, json, yaml
 
-#### wc shop_coupon create
+- `--fields` - Limit the output to specific object fields.
 
-- `--code` - Coupon code. (*Required*)
-- `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
-- `--discount_type` - Determines the type of discount that will be applied.
-- `--description` - Coupon description.
-- `--date_expires` - The date the coupon expires, in the site's timezone.
-- `--date_expires_gmt` - The date the coupon expires, as GMT.
-- `--individual_use` - If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.
-- `--product_ids` - List of product IDs the coupon can be used on.
-- `--excluded_product_ids` - List of product IDs the coupon cannot be used on.
-- `--usage_limit` - How many times the coupon can be used in total.
-- `--usage_limit_per_user` - How many times the coupon can be used per customer.
-- `--limit_usage_to_x_items` - Max number of items in the cart the coupon can be applied to.
-- `--free_shipping` - If true and if the free shipping method requires a coupon, this coupon will enable free shipping.
-- `--product_categories` - List of category IDs the coupon applies to.
-- `--excluded_product_categories` - List of category IDs the coupon does not apply to.
-- `--exclude_sale_items` - If true, this coupon will not be applied to items that have sale prices.
-- `--minimum_amount` - Minimum order amount that needs to be in the cart before coupon applies.
-- `--maximum_amount` - Maximum order amount allowed when using the coupon.
-- `--email_restrictions` - List of email addresses that can use this coupon.
-- `--meta_data` - Meta data.
-- `--porcelain` - Output just the id when the operation is successful.
+Default: all
 
-#### wc shop_coupon get [id]
+Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max, sites_active, maxed
 
-- `--id` - Unique identifier for the resource.
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
+#### wc com extension install [extension]
 
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-#### wc shop_coupon update [id]
-
-- `--id` - Unique identifier for the resource.
-- `--code` - Coupon code.
-- `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
-- `--discount_type` - Determines the type of discount that will be applied.
-- `--description` - Coupon description.
-- `--date_expires` - The date the coupon expires, in the site's timezone.
-- `--date_expires_gmt` - The date the coupon expires, as GMT.
-- `--individual_use` - If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.
-- `--product_ids` - List of product IDs the coupon can be used on.
-- `--excluded_product_ids` - List of product IDs the coupon cannot be used on.
-- `--usage_limit` - How many times the coupon can be used in total.
-- `--usage_limit_per_user` - How many times the coupon can be used per customer.
-- `--limit_usage_to_x_items` - Max number of items in the cart the coupon can be applied to.
-- `--free_shipping` - If true and if the free shipping method requires a coupon, this coupon will enable free shipping.
-- `--product_categories` - List of category IDs the coupon applies to.
-- `--excluded_product_categories` - List of category IDs the coupon does not apply to.
-- `--exclude_sale_items` - If true, this coupon will not be applied to items that have sale prices.
-- `--minimum_amount` - Minimum order amount that needs to be in the cart before coupon applies.
-- `--maximum_amount` - Maximum order amount allowed when using the coupon.
-- `--email_restrictions` - List of email addresses that can use this coupon.
-- `--meta_data` - Meta data.
-- `--porcelain` - Output just the id when the operation is successful.
-
-#### wc shop_coupon delete [id]
-
-- `--id` - Unique identifier for the resource.
-- `--force` - Whether to bypass trash and force deletion.
-- `--porcelain` - Output just the id when the operation is successful.
-
-### wc customer_download
-
-#### wc customer_download list `<customer_id>`
-
-- `--customer_id` - Unique identifier for the resource.
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
-
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+- `--extension` - Install one plugin from the available extensions.Accepts a plugin slug
+- `--force` - If set, the command will overwrite any installed version of the extension without prompting for confirmation.
+- `--activate` - If set, after installation, the plugin will activate it.
+- `--activate-network` - If set, the plugin will be network activated immediately after installation
+- `--insecure` - Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack.
 
 ### wc customer
 
@@ -199,6 +128,20 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--reassign` - ID to reassign posts to.
 - `--porcelain` - Output just the id when the operation is successful.
 
+### wc customer_download
+
+#### wc customer_download list `<customer_id>`
+
+- `--customer_id` - Unique identifier for the resource.
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
 ### wc order_note
 
 #### wc order_note list `<order_id>`
@@ -241,25 +184,11 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc shop_order_refund
+### wc payment_gateway
 
-#### wc shop_order_refund list `<order_id>`
+#### wc payment_gateway list
 
-- `--order_id` - The order ID.
 - `--context` - Scope under which the request is made; determines fields present in response.
-- `--page` - Current page of the collection.
-- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
-- `--search` - Limit results to those matching a string.
-- `--after` - Limit response to resources published after a given ISO8601 compliant date.
-- `--before` - Limit response to resources published before a given ISO8601 compliant date.
-- `--exclude` - Ensure result set excludes specific IDs.
-- `--include` - Limit result set to specific ids.
-- `--offset` - Offset the result set by a specific number of items.
-- `--order` - Order sort attribute ascending or descending.
-- `--orderby` - Sort collection by object attribute.
-- `--parent` - Limit result set to those of particular parent IDs.
-- `--parent_exclude` - Limit result set to all items except those of a particular parent ID.
-- `--dp` - Number of decimal points to use in each resource.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
@@ -268,20 +197,8 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order_refund create `<order_id>`
+#### wc payment_gateway get [id]
 
-- `--order_id` - The order ID.
-- `--amount` - Refund amount.
-- `--reason` - Reason for refund.
-- `--refunded_by` - User ID of user who created the refund.
-- `--meta_data` - Meta data.
-- `--line_items` - Line items data.
-- `--api_refund` - When true, the payment gateway API is used to generate the refund.
-- `--porcelain` - Output just the id when the operation is successful.
-
-#### wc shop_order_refund get `<order_id>` [id]
-
-- `--order_id` - The order ID.
 - `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
@@ -292,16 +209,19 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order_refund delete `<order_id>` [id]
+#### wc payment_gateway update [id]
 
-- `--order_id` - The order ID.
 - `--id` - Unique identifier for the resource.
-- `--force` - Required to be true, as resource does not support trashing.
+- `--title` - Payment gateway title on checkout.
+- `--description` - Payment gateway description on checkout.
+- `--order` - Payment gateway sort order.
+- `--enabled` - Payment gateway enabled status.
+- `--settings` - Payment gateway settings.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc shop_order
+### wc product
 
-#### wc shop_order list
+#### wc product list
 
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--page` - Current page of the collection.
@@ -316,10 +236,21 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--orderby` - Sort collection by object attribute.
 - `--parent` - Limit result set to those of particular parent IDs.
 - `--parent_exclude` - Limit result set to all items except those of a particular parent ID.
-- `--status` - Limit result set to orders assigned a specific status.
-- `--customer` - Limit result set to orders assigned a specific customer.
-- `--product` - Limit result set to orders assigned a specific product.
-- `--dp` - Number of decimal points to use in each resource.
+- `--slug` - Limit result set to products with a specific slug.
+- `--status` - Limit result set to products assigned a specific status.
+- `--type` - Limit result set to products assigned a specific type.
+- `--sku` - Limit result set to products with a specific SKU.
+- `--featured` - Limit result set to featured products.
+- `--category` - Limit result set to products assigned a specific category ID.
+- `--tag` - Limit result set to products assigned a specific tag ID.
+- `--shipping_class` - Limit result set to products assigned a specific shipping class ID.
+- `--attribute` - Limit result set to products with a specific attribute.
+- `--attribute_term` - Limit result set to products with a specific attribute term ID (required an assigned attribute).
+- `--tax_class` - Limit result set to products with a specific tax class.
+- `--in_stock` - Limit result set to products in stock or out of stock.
+- `--on_sale` - Limit result set to products on sale.
+- `--min_price` - Limit result set to products based on a minimum price.
+- `--max_price` - Limit result set to products based on a maximum price.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
 - `--format` - Render response in a particular format.
@@ -328,27 +259,55 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order create
+#### wc product create
 
-- `--parent_id` - Parent order ID.
-- `--status` - Order status.
-- `--currency` - Currency the order was created with, in ISO format.
-- `--customer_id` - User ID who owns the order. 0 for guests.
-- `--customer_note` - Note left by customer during checkout.
-- `--billing` - Billing address.
-- `--shipping` - Shipping address.
-- `--payment_method` - Payment method ID.
-- `--payment_method_title` - Payment method title.
-- `--transaction_id` - Unique transaction ID.
+- `--name` - Product name.
+- `--slug` - Product slug.
+- `--type` - Product type.
+- `--status` - Product status (post status).
+- `--featured` - Featured product.
+- `--catalog_visibility` - Catalog visibility.
+- `--description` - Product description.
+- `--short_description` - Product short description.
+- `--sku` - Unique identifier.
+- `--regular_price` - Product regular price.
+- `--sale_price` - Product sale price.
+- `--date_on_sale_from` - Start date of sale price, in the site's timezone.
+- `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
+- `--date_on_sale_to` - End date of sale price, in the site's timezone.
+- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
+- `--virtual` - If the product is virtual.
+- `--downloadable` - If the product is downloadable.
+- `--downloads` - List of downloadable files.
+- `--download_limit` - Number of times downloadable files can be downloaded after purchase.
+- `--download_expiry` - Number of days until access to downloadable files expires.
+- `--external_url` - Product external URL. Only for external products.
+- `--button_text` - Product external button text. Only for external products.
+- `--tax_status` - Tax status.
+- `--tax_class` - Tax class.
+- `--manage_stock` - Stock management at product level.
+- `--stock_quantity` - Stock quantity.
+- `--in_stock` - Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.
+- `--backorders` - If managing stock, this controls if backorders are allowed.
+- `--sold_individually` - Allow one item to be bought in a single order.
+- `--weight` - Product weight (lbs).
+- `--dimensions` - Product dimensions.
+- `--shipping_class` - Shipping class slug.
+- `--reviews_allowed` - Allow reviews.
+- `--upsell_ids` - List of up-sell products IDs.
+- `--cross_sell_ids` - List of cross-sell products IDs.
+- `--parent_id` - Product parent ID.
+- `--purchase_note` - Optional note to send the customer after purchase.
+- `--categories` - List of categories.
+- `--tags` - List of tags.
+- `--images` - List of images.
+- `--attributes` - List of attributes.
+- `--default_attributes` - Defaults variation attributes.
+- `--menu_order` - Menu order, used to custom sort products.
 - `--meta_data` - Meta data.
-- `--line_items` - Line items data.
-- `--shipping_lines` - Shipping lines data.
-- `--fee_lines` - Fee lines data.
-- `--coupon_lines` - Coupons line data.
-- `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc shop_order get [id]
+#### wc product get [id]
 
 - `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -360,28 +319,56 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order update [id]
+#### wc product update [id]
 
 - `--id` - Unique identifier for the resource.
-- `--parent_id` - Parent order ID.
-- `--status` - Order status.
-- `--currency` - Currency the order was created with, in ISO format.
-- `--customer_id` - User ID who owns the order. 0 for guests.
-- `--customer_note` - Note left by customer during checkout.
-- `--billing` - Billing address.
-- `--shipping` - Shipping address.
-- `--payment_method` - Payment method ID.
-- `--payment_method_title` - Payment method title.
-- `--transaction_id` - Unique transaction ID.
+- `--name` - Product name.
+- `--slug` - Product slug.
+- `--type` - Product type.
+- `--status` - Product status (post status).
+- `--featured` - Featured product.
+- `--catalog_visibility` - Catalog visibility.
+- `--description` - Product description.
+- `--short_description` - Product short description.
+- `--sku` - Unique identifier.
+- `--regular_price` - Product regular price.
+- `--sale_price` - Product sale price.
+- `--date_on_sale_from` - Start date of sale price, in the site's timezone.
+- `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
+- `--date_on_sale_to` - End date of sale price, in the site's timezone.
+- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
+- `--virtual` - If the product is virtual.
+- `--downloadable` - If the product is downloadable.
+- `--downloads` - List of downloadable files.
+- `--download_limit` - Number of times downloadable files can be downloaded after purchase.
+- `--download_expiry` - Number of days until access to downloadable files expires.
+- `--external_url` - Product external URL. Only for external products.
+- `--button_text` - Product external button text. Only for external products.
+- `--tax_status` - Tax status.
+- `--tax_class` - Tax class.
+- `--manage_stock` - Stock management at product level.
+- `--stock_quantity` - Stock quantity.
+- `--in_stock` - Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.
+- `--backorders` - If managing stock, this controls if backorders are allowed.
+- `--sold_individually` - Allow one item to be bought in a single order.
+- `--weight` - Product weight (lbs).
+- `--dimensions` - Product dimensions.
+- `--shipping_class` - Shipping class slug.
+- `--reviews_allowed` - Allow reviews.
+- `--upsell_ids` - List of up-sell products IDs.
+- `--cross_sell_ids` - List of cross-sell products IDs.
+- `--parent_id` - Product parent ID.
+- `--purchase_note` - Optional note to send the customer after purchase.
+- `--categories` - List of categories.
+- `--tags` - List of tags.
+- `--images` - List of images.
+- `--attributes` - List of attributes.
+- `--default_attributes` - Defaults variation attributes.
+- `--menu_order` - Menu order, used to custom sort products.
 - `--meta_data` - Meta data.
-- `--line_items` - Line items data.
-- `--shipping_lines` - Shipping lines data.
-- `--fee_lines` - Fee lines data.
-- `--coupon_lines` - Coupons line data.
-- `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc shop_order delete [id]
+#### wc product delete [id]
 
 - `--id` - Unique identifier for the resource.
 - `--force` - Whether to bypass trash and force deletion.
@@ -739,161 +726,6 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc product
-
-#### wc product list
-
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--page` - Current page of the collection.
-- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
-- `--search` - Limit results to those matching a string.
-- `--after` - Limit response to resources published after a given ISO8601 compliant date.
-- `--before` - Limit response to resources published before a given ISO8601 compliant date.
-- `--exclude` - Ensure result set excludes specific IDs.
-- `--include` - Limit result set to specific ids.
-- `--offset` - Offset the result set by a specific number of items.
-- `--order` - Order sort attribute ascending or descending.
-- `--orderby` - Sort collection by object attribute.
-- `--parent` - Limit result set to those of particular parent IDs.
-- `--parent_exclude` - Limit result set to all items except those of a particular parent ID.
-- `--slug` - Limit result set to products with a specific slug.
-- `--status` - Limit result set to products assigned a specific status.
-- `--type` - Limit result set to products assigned a specific type.
-- `--sku` - Limit result set to products with a specific SKU.
-- `--featured` - Limit result set to featured products.
-- `--category` - Limit result set to products assigned a specific category ID.
-- `--tag` - Limit result set to products assigned a specific tag ID.
-- `--shipping_class` - Limit result set to products assigned a specific shipping class ID.
-- `--attribute` - Limit result set to products with a specific attribute.
-- `--attribute_term` - Limit result set to products with a specific attribute term ID (required an assigned attribute).
-- `--tax_class` - Limit result set to products with a specific tax class.
-- `--in_stock` - Limit result set to products in stock or out of stock.
-- `--on_sale` - Limit result set to products on sale.
-- `--min_price` - Limit result set to products based on a minimum price.
-- `--max_price` - Limit result set to products based on a maximum price.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
-
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-#### wc product create
-
-- `--name` - Product name.
-- `--slug` - Product slug.
-- `--type` - Product type.
-- `--status` - Product status (post status).
-- `--featured` - Featured product.
-- `--catalog_visibility` - Catalog visibility.
-- `--description` - Product description.
-- `--short_description` - Product short description.
-- `--sku` - Unique identifier.
-- `--regular_price` - Product regular price.
-- `--sale_price` - Product sale price.
-- `--date_on_sale_from` - Start date of sale price, in the site's timezone.
-- `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
-- `--date_on_sale_to` - End date of sale price, in the site's timezone.
-- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
-- `--virtual` - If the product is virtual.
-- `--downloadable` - If the product is downloadable.
-- `--downloads` - List of downloadable files.
-- `--download_limit` - Number of times downloadable files can be downloaded after purchase.
-- `--download_expiry` - Number of days until access to downloadable files expires.
-- `--external_url` - Product external URL. Only for external products.
-- `--button_text` - Product external button text. Only for external products.
-- `--tax_status` - Tax status.
-- `--tax_class` - Tax class.
-- `--manage_stock` - Stock management at product level.
-- `--stock_quantity` - Stock quantity.
-- `--in_stock` - Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.
-- `--backorders` - If managing stock, this controls if backorders are allowed.
-- `--sold_individually` - Allow one item to be bought in a single order.
-- `--weight` - Product weight (lbs).
-- `--dimensions` - Product dimensions.
-- `--shipping_class` - Shipping class slug.
-- `--reviews_allowed` - Allow reviews.
-- `--upsell_ids` - List of up-sell products IDs.
-- `--cross_sell_ids` - List of cross-sell products IDs.
-- `--parent_id` - Product parent ID.
-- `--purchase_note` - Optional note to send the customer after purchase.
-- `--categories` - List of categories.
-- `--tags` - List of tags.
-- `--images` - List of images.
-- `--attributes` - List of attributes.
-- `--default_attributes` - Defaults variation attributes.
-- `--menu_order` - Menu order, used to custom sort products.
-- `--meta_data` - Meta data.
-- `--porcelain` - Output just the id when the operation is successful.
-
-#### wc product get [id]
-
-- `--id` - Unique identifier for the resource.
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
-
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-#### wc product update [id]
-
-- `--id` - Unique identifier for the resource.
-- `--name` - Product name.
-- `--slug` - Product slug.
-- `--type` - Product type.
-- `--status` - Product status (post status).
-- `--featured` - Featured product.
-- `--catalog_visibility` - Catalog visibility.
-- `--description` - Product description.
-- `--short_description` - Product short description.
-- `--sku` - Unique identifier.
-- `--regular_price` - Product regular price.
-- `--sale_price` - Product sale price.
-- `--date_on_sale_from` - Start date of sale price, in the site's timezone.
-- `--date_on_sale_from_gmt` - Start date of sale price, as GMT.
-- `--date_on_sale_to` - End date of sale price, in the site's timezone.
-- `--date_on_sale_to_gmt` - End date of sale price, in the site's timezone.
-- `--virtual` - If the product is virtual.
-- `--downloadable` - If the product is downloadable.
-- `--downloads` - List of downloadable files.
-- `--download_limit` - Number of times downloadable files can be downloaded after purchase.
-- `--download_expiry` - Number of days until access to downloadable files expires.
-- `--external_url` - Product external URL. Only for external products.
-- `--button_text` - Product external button text. Only for external products.
-- `--tax_status` - Tax status.
-- `--tax_class` - Tax class.
-- `--manage_stock` - Stock management at product level.
-- `--stock_quantity` - Stock quantity.
-- `--in_stock` - Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.
-- `--backorders` - If managing stock, this controls if backorders are allowed.
-- `--sold_individually` - Allow one item to be bought in a single order.
-- `--weight` - Product weight (lbs).
-- `--dimensions` - Product dimensions.
-- `--shipping_class` - Shipping class slug.
-- `--reviews_allowed` - Allow reviews.
-- `--upsell_ids` - List of up-sell products IDs.
-- `--cross_sell_ids` - List of cross-sell products IDs.
-- `--parent_id` - Product parent ID.
-- `--purchase_note` - Optional note to send the customer after purchase.
-- `--categories` - List of categories.
-- `--tags` - List of tags.
-- `--images` - List of images.
-- `--attributes` - List of attributes.
-- `--default_attributes` - Defaults variation attributes.
-- `--menu_order` - Menu order, used to custom sort products.
-- `--meta_data` - Meta data.
-- `--porcelain` - Output just the id when the operation is successful.
-
-#### wc product delete [id]
-
-- `--id` - Unique identifier for the resource.
-- `--force` - Whether to bypass trash and force deletion.
-- `--porcelain` - Output just the id when the operation is successful.
-
 ### wc product_variation
 
 #### wc product_variation list `<product_id>`
@@ -1040,6 +872,31 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--value` - Setting value.
 - `--porcelain` - Output just the id when the operation is successful.
 
+### wc shipping_method
+
+#### wc shipping_method list
+
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shipping_method get [id]
+
+- `--id` - Unique identifier for the resource.
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
 ### wc shipping_zone
 
 #### wc shipping_zone list
@@ -1145,10 +1002,57 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--force` - Whether to bypass trash and force deletion.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc tax_class
+### wc shop_coupon
 
-#### wc tax_class list
+#### wc shop_coupon list
 
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--page` - Current page of the collection.
+- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
+- `--search` - Limit results to those matching a string.
+- `--after` - Limit response to resources published after a given ISO8601 compliant date.
+- `--before` - Limit response to resources published before a given ISO8601 compliant date.
+- `--exclude` - Ensure result set excludes specific IDs.
+- `--include` - Limit result set to specific ids.
+- `--offset` - Offset the result set by a specific number of items.
+- `--order` - Order sort attribute ascending or descending.
+- `--orderby` - Sort collection by object attribute.
+- `--code` - Limit result set to resources with a specific code.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shop_coupon create
+
+- `--code` - Coupon code. (*Required*)
+- `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
+- `--discount_type` - Determines the type of discount that will be applied.
+- `--description` - Coupon description.
+- `--date_expires` - The date the coupon expires, in the site's timezone.
+- `--date_expires_gmt` - The date the coupon expires, as GMT.
+- `--individual_use` - If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.
+- `--product_ids` - List of product IDs the coupon can be used on.
+- `--excluded_product_ids` - List of product IDs the coupon cannot be used on.
+- `--usage_limit` - How many times the coupon can be used in total.
+- `--usage_limit_per_user` - How many times the coupon can be used per customer.
+- `--limit_usage_to_x_items` - Max number of items in the cart the coupon can be applied to.
+- `--free_shipping` - If true and if the free shipping method requires a coupon, this coupon will enable free shipping.
+- `--product_categories` - List of category IDs the coupon applies to.
+- `--excluded_product_categories` - List of category IDs the coupon does not apply to.
+- `--exclude_sale_items` - If true, this coupon will not be applied to items that have sale prices.
+- `--minimum_amount` - Minimum order amount that needs to be in the cart before coupon applies.
+- `--maximum_amount` - Maximum order amount allowed when using the coupon.
+- `--email_restrictions` - List of email addresses that can use this coupon.
+- `--meta_data` - Meta data.
+- `--porcelain` - Output just the id when the operation is successful.
+
+#### wc shop_coupon get [id]
+
+- `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -1158,14 +1062,180 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc tax_class create
+#### wc shop_coupon update [id]
 
-- `--name` - Tax class name. (*Required*)
+- `--id` - Unique identifier for the resource.
+- `--code` - Coupon code.
+- `--amount` - The amount of discount. Should always be numeric, even if setting a percentage.
+- `--discount_type` - Determines the type of discount that will be applied.
+- `--description` - Coupon description.
+- `--date_expires` - The date the coupon expires, in the site's timezone.
+- `--date_expires_gmt` - The date the coupon expires, as GMT.
+- `--individual_use` - If true, the coupon can only be used individually. Other applied coupons will be removed from the cart.
+- `--product_ids` - List of product IDs the coupon can be used on.
+- `--excluded_product_ids` - List of product IDs the coupon cannot be used on.
+- `--usage_limit` - How many times the coupon can be used in total.
+- `--usage_limit_per_user` - How many times the coupon can be used per customer.
+- `--limit_usage_to_x_items` - Max number of items in the cart the coupon can be applied to.
+- `--free_shipping` - If true and if the free shipping method requires a coupon, this coupon will enable free shipping.
+- `--product_categories` - List of category IDs the coupon applies to.
+- `--excluded_product_categories` - List of category IDs the coupon does not apply to.
+- `--exclude_sale_items` - If true, this coupon will not be applied to items that have sale prices.
+- `--minimum_amount` - Minimum order amount that needs to be in the cart before coupon applies.
+- `--maximum_amount` - Maximum order amount allowed when using the coupon.
+- `--email_restrictions` - List of email addresses that can use this coupon.
+- `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc tax_class delete [id]
+#### wc shop_coupon delete [id]
 
-- `--slug` - Unique slug for the resource.
+- `--id` - Unique identifier for the resource.
+- `--force` - Whether to bypass trash and force deletion.
+- `--porcelain` - Output just the id when the operation is successful.
+
+### wc shop_order
+
+#### wc shop_order list
+
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--page` - Current page of the collection.
+- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
+- `--search` - Limit results to those matching a string.
+- `--after` - Limit response to resources published after a given ISO8601 compliant date.
+- `--before` - Limit response to resources published before a given ISO8601 compliant date.
+- `--exclude` - Ensure result set excludes specific IDs.
+- `--include` - Limit result set to specific ids.
+- `--offset` - Offset the result set by a specific number of items.
+- `--order` - Order sort attribute ascending or descending.
+- `--orderby` - Sort collection by object attribute.
+- `--parent` - Limit result set to those of particular parent IDs.
+- `--parent_exclude` - Limit result set to all items except those of a particular parent ID.
+- `--status` - Limit result set to orders assigned a specific status.
+- `--customer` - Limit result set to orders assigned a specific customer.
+- `--product` - Limit result set to orders assigned a specific product.
+- `--dp` - Number of decimal points to use in each resource.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shop_order create
+
+- `--parent_id` - Parent order ID.
+- `--status` - Order status.
+- `--currency` - Currency the order was created with, in ISO format.
+- `--customer_id` - User ID who owns the order. 0 for guests.
+- `--customer_note` - Note left by customer during checkout.
+- `--billing` - Billing address.
+- `--shipping` - Shipping address.
+- `--payment_method` - Payment method ID.
+- `--payment_method_title` - Payment method title.
+- `--transaction_id` - Unique transaction ID.
+- `--meta_data` - Meta data.
+- `--line_items` - Line items data.
+- `--shipping_lines` - Shipping lines data.
+- `--fee_lines` - Fee lines data.
+- `--coupon_lines` - Coupons line data.
+- `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
+- `--porcelain` - Output just the id when the operation is successful.
+
+#### wc shop_order get [id]
+
+- `--id` - Unique identifier for the resource.
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shop_order update [id]
+
+- `--id` - Unique identifier for the resource.
+- `--parent_id` - Parent order ID.
+- `--status` - Order status.
+- `--currency` - Currency the order was created with, in ISO format.
+- `--customer_id` - User ID who owns the order. 0 for guests.
+- `--customer_note` - Note left by customer during checkout.
+- `--billing` - Billing address.
+- `--shipping` - Shipping address.
+- `--payment_method` - Payment method ID.
+- `--payment_method_title` - Payment method title.
+- `--transaction_id` - Unique transaction ID.
+- `--meta_data` - Meta data.
+- `--line_items` - Line items data.
+- `--shipping_lines` - Shipping lines data.
+- `--fee_lines` - Fee lines data.
+- `--coupon_lines` - Coupons line data.
+- `--set_paid` - Define if the order is paid. It will set the status to processing and reduce stock items.
+- `--porcelain` - Output just the id when the operation is successful.
+
+#### wc shop_order delete [id]
+
+- `--id` - Unique identifier for the resource.
+- `--force` - Whether to bypass trash and force deletion.
+- `--porcelain` - Output just the id when the operation is successful.
+
+### wc shop_order_refund
+
+#### wc shop_order_refund list `<order_id>`
+
+- `--order_id` - The order ID.
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--page` - Current page of the collection.
+- `--per_page` - Maximum number of items to be returned in result set. Defaults to 100 items.
+- `--search` - Limit results to those matching a string.
+- `--after` - Limit response to resources published after a given ISO8601 compliant date.
+- `--before` - Limit response to resources published before a given ISO8601 compliant date.
+- `--exclude` - Ensure result set excludes specific IDs.
+- `--include` - Limit result set to specific ids.
+- `--offset` - Offset the result set by a specific number of items.
+- `--order` - Order sort attribute ascending or descending.
+- `--orderby` - Sort collection by object attribute.
+- `--parent` - Limit result set to those of particular parent IDs.
+- `--parent_exclude` - Limit result set to all items except those of a particular parent ID.
+- `--dp` - Number of decimal points to use in each resource.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shop_order_refund create `<order_id>`
+
+- `--order_id` - The order ID.
+- `--amount` - Refund amount.
+- `--reason` - Reason for refund.
+- `--refunded_by` - User ID of user who created the refund.
+- `--meta_data` - Meta data.
+- `--line_items` - Line items data.
+- `--api_refund` - When true, the payment gateway API is used to generate the refund.
+- `--porcelain` - Output just the id when the operation is successful.
+
+#### wc shop_order_refund get `<order_id>` [id]
+
+- `--order_id` - The order ID.
+- `--id` - Unique identifier for the resource.
+- `--context` - Scope under which the request is made; determines fields present in response.
+- `--fields` - Limit response to specific fields. Defaults to all fields.
+- `--field` - Get the value of an individual field.
+- `--format` - Render response in a particular format.
+
+Default: table
+
+Options: table, json, csv, ids, yaml, count, headers, body, envelope
+
+#### wc shop_order_refund delete `<order_id>` [id]
+
+- `--order_id` - The order ID.
+- `--id` - Unique identifier for the resource.
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
 
@@ -1240,11 +1310,10 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc webhook_delivery
+### wc tax_class
 
-#### wc webhook_delivery list
+#### wc tax_class list
 
-- `--webhook_id` - Unique identifier for the webhook.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -1254,18 +1323,16 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc webhook_delivery get [id]
+#### wc tax_class create
 
-- `--webhook_id` - Unique identifier for the webhook.
-- `--id` - Unique identifier for the resource.
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
+- `--name` - Tax class name. (*Required*)
+- `--porcelain` - Output just the id when the operation is successful.
 
-Default: table
+#### wc tax_class delete [id]
 
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
+- `--slug` - Unique slug for the resource.
+- `--force` - Required to be true, as resource does not support trashing.
+- `--porcelain` - Output just the id when the operation is successful.
 
 ### wc webhook
 
@@ -1327,10 +1394,11 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--force` - Required to be true, as resource does not support trashing.
 - `--porcelain` - Output just the id when the operation is successful.
 
-### wc shipping_method
+### wc webhook_delivery
 
-#### wc shipping_method list
+#### wc webhook_delivery list
 
+- `--webhook_id` - Unique identifier for the webhook.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
 - `--field` - Get the value of an individual field.
@@ -1340,8 +1408,9 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shipping_method get [id]
+#### wc webhook_delivery get [id]
 
+- `--webhook_id` - Unique identifier for the webhook.
 - `--id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
 - `--fields` - Limit response to specific fields. Defaults to all fields.
@@ -1351,73 +1420,3 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-### wc payment_gateway
-
-#### wc payment_gateway list
-
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
-
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-#### wc payment_gateway get [id]
-
-- `--id` - Unique identifier for the resource.
-- `--context` - Scope under which the request is made; determines fields present in response.
-- `--fields` - Limit response to specific fields. Defaults to all fields.
-- `--field` - Get the value of an individual field.
-- `--format` - Render response in a particular format.
-
-Default: table
-
-Options: table, json, csv, ids, yaml, count, headers, body, envelope
-
-#### wc payment_gateway update [id]
-
-- `--id` - Unique identifier for the resource.
-- `--title` - Payment gateway title on checkout.
-- `--description` - Payment gateway description on checkout.
-- `--order` - Payment gateway sort order.
-- `--enabled` - Payment gateway enabled status.
-- `--settings` - Payment gateway settings.
-- `--porcelain` - Output just the id when the operation is successful.
-
-### wc com
-
-#### wc com extension list
-
-- `--format` - Render output in a particular format.
-
-Default: table
-
-Options: table, csv, json, yaml
-
-- `--fields` - Limit the output to specific object fields.
-
-Default: all
-
-Options: product_slug, product_name, auto_renew, expires_on, expired, sites_max, sites_active, maxed
-
-#### wc com extension install [extension]
-
-- `--extension` - Install one plugin from the available extensions.Accepts a plugin slug
-- `--force` - If set, the command will overwrite any installed version of the extension without prompting for confirmation.
-- `--activate` - If set, after installation, the plugin will activate it.
-- `--activate-network` - If set, the plugin will be network activated immediately after installation
-- `--insecure` - Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack.
-
-### wc blueprint
-
-#### wc blueprint import [schema-path]
-
-- `--show-messages` - Show debug messages. Supported log levels: all, error, info, debug.
-
-#### wc blueprint export [save-to-filename]
-
-- `--steps` - name of steps to export.
-

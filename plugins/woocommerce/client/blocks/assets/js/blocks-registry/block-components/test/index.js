@@ -20,14 +20,14 @@ describe( 'blocks registry', () => {
 			return registerBlockComponent( args );
 		};
 		it( 'throws an error when registered block is missing `blockName`', () => {
-			expect( invokeTest( { context, blockName: null } ) ).toThrowError(
+			expect( invokeTest( { context, blockName: null } ) ).toThrow(
 				/blockName/
 			);
 		} );
 		it( 'throws an error when registered block is missing `component`', () => {
 			expect(
 				invokeTest( { context, blockName, component: null } )
-			).toThrowError( /component/ );
+			).toThrow( /component/ );
 		} );
 	} );
 
@@ -52,16 +52,16 @@ describe( 'blocks registry', () => {
 
 		it( 'throws an error when registered block is missing `main`', () => {
 			const options = { main: null };
-			expect( invokeTest( options ) ).toThrowError( /main/ );
+			expect( invokeTest( options ) ).toThrow( /main/ );
 			expect( console ).toHaveWarned();
 		} );
 		it( 'throws an error when registered block is missing `blockName`', () => {
 			const options = { main: context, blockName: null };
-			expect( invokeTest( options ) ).toThrowError( /blockName/ );
+			expect( invokeTest( options ) ).toThrow( /blockName/ );
 		} );
 		it( 'throws an error when registered block is missing `component`', () => {
 			const options = { main: context, blockName, component: null };
-			expect( invokeTest( options ) ).toThrowError( /component/ );
+			expect( invokeTest( options ) ).toThrow( /component/ );
 		} );
 	} );
 

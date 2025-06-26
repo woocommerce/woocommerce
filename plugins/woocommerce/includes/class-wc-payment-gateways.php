@@ -9,7 +9,9 @@
  */
 
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -173,31 +175,37 @@ class WC_Payment_Gateways {
 	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
-		if ( ! $this->was_gateway_enabled( $value, $old_value ) ) {
-			return;
+		if ( $this->was_gateway_disabled( $value, $old_value ) ) {
+			// This is a change to a payment gateway's settings and it was just disabled. Let's track it.
+			$this->record_gateway_event( 'disable', $gateway );
 		}
 
-		try {
-			/**
-			 * Instance of the PaymentProviders controller.
-			 *
-			 * @var PaymentProviders $payment_providers_controller
-			 */
-			$payment_providers_controller = wc_get_container()->get( PaymentProviders::class );
-			$payment_provider             = $payment_providers_controller->get_payment_gateway_provider_instance( $gateway->id );
-			if ( ! $payment_provider->is_onboarding_completed( $gateway ) || $payment_provider->is_in_test_mode_onboarding( $gateway ) ) {
-				// The gateway was enabled, but onboarding is not completed or we are doing test mode onboarding.
-				// We don't want to send an email because the gateway is not ready to be used for live payments.
-				return;
+		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
+			// Track the gateway enable.
+			$this->record_gateway_event( 'enable', $gateway );
+
+			try {
+				/**
+				 * Instance of the PaymentProviders controller.
+				 *
+				 * @var PaymentProviders $payment_providers_controller
+				 */
+				$payment_providers_controller = wc_get_container()->get( PaymentProviders::class );
+				$payment_provider             = $payment_providers_controller->get_payment_gateway_provider_instance( $gateway->id );
+				if ( ! $payment_provider->is_onboarding_completed( $gateway ) || $payment_provider->is_in_test_mode_onboarding( $gateway ) ) {
+					// The gateway was enabled, but onboarding is not completed or we are doing test mode onboarding.
+					// We don't want to send an email because the gateway is not ready to be used for live payments.
+					return;
+				}
+			} catch ( Throwable $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				// Don't do anything if we can't get the payment provider.
+				// This is to ensure that we don't break the code if the payment provider is not available.
 			}
-		} catch ( Throwable $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Don't do anything if we can't get the payment provider.
-			// This is to ensure that we don't break the code if the payment provider is not available.
-		}
 
-		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
-		// "untitled" shouldn't happen, but just in case.
-		$this->notify_admin_payment_gateway_enabled( $gateway );
+			// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+			// "untitled" shouldn't happen, but just in case.
+			$this->notify_admin_payment_gateway_enabled( $gateway );
+		}
 	}
 
 	/**
@@ -306,6 +314,30 @@ All at %6$s
 			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' ) {
 			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Determines from changes in settings if a gateway was disabled.
+	 *
+	 * @param array $value New value.
+	 * @param array $old_value Old value.
+	 * @return bool Whether the gateway was disabled or not.
+	 */
+	private function was_gateway_disabled( $value, $old_value = null ) {
+		if ( null === $old_value ) {
+			// There was no old value, so this is a new option.
+			// We don't consider a new option for determining if a gateway was disabled.
+			return false;
+		}
+
+		// There was an old value, so this is an update.
+		if (
+			ArrayUtil::get_value_or_default( $value, 'enabled' ) === 'no' &&
+			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'no' ) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -434,5 +466,83 @@ All at %6$s
 		// Eventually, we want to load this via a singleton pattern to avoid unnecessary instantiation.
 		$paypal = new WC_Gateway_Paypal();
 		return $paypal->should_load();
+	}
+
+	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string             $name    The event name.
+	 *                                    If it is not prefixed, it will be with the standard prefix.
+	 * @param WC_Payment_Gateway $gateway The payment gateway object.
+	 *
+	 * @return void
+	 */
+	private function record_gateway_event( string $name, $gateway ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		if ( ! is_a( $gateway, 'WC_Payment_Gateway' ) ) {
+			// If the gateway is not a valid payment gateway, we don't record the event.
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed, we prefix it.
+		$prefix = SettingsPaymentsService::EVENT_PREFIX . 'provider_';
+		if ( ! str_starts_with( $name, $prefix ) ) {
+			$name = $prefix . $name;
+		}
+
+		$properties = array(
+			'provider_id'      => $gateway->id,
+			'business_country' => WC()->countries->get_base_country(),
+		);
+
+		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
+			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
+			// Get the business country from the Payments Settings service.
+			$properties['business_country'] = $settings_payments_service->get_country();
+
+			/**
+			 * The Payments Providers service.
+			 *
+			 * @var PaymentsProviders $payments_providers_service
+			 */
+			$payments_providers_service = wc_get_container()->get( PaymentsProviders::class );
+
+			$gateway_details = $payments_providers_service->get_payment_gateway_details( $gateway, 0, $properties['business_country'] );
+			// If the gateway details have a suggestion ID, we add it to the properties.
+			if ( ! empty( $gateway_details['_suggestion_id'] ) ) {
+				$properties['suggestion_id'] = $gateway_details['_suggestion_id'];
+			}
+			if ( ! empty( $gateway_details['plugin']['slug'] ) ) {
+				$properties['provider_extension_slug'] = $gateway_details['plugin']['slug'];
+			}
+		} catch ( \Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to gather provider-specific details for gateway: ' . $e->getMessage(),
+				array(
+					'gateway'   => $gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		wc_admin_record_tracks_event( $name, $properties );
 	}
 }
