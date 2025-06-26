@@ -52,6 +52,8 @@ type MiniCart = {
 		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
+		drawerRole: string | null;
+		drawerTabIndex: string | null;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -103,6 +105,18 @@ store< MiniCart >(
 				);
 
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+			},
+
+			get drawerRole() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? 'dialog' : null;
+			},
+
+			get drawerTabIndex() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? '-1' : null;
 			},
 
 			get drawerOverlayClass() {
