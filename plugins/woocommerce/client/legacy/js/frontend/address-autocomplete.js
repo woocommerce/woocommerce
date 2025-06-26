@@ -55,7 +55,7 @@ function registerAddressAutocompleteProvider( provider ) {
 			throw new Error( 'Server providers configuration is invalid' );
 		}
 
-		var isRegistered = serverProviders.some( function ( serverProvider ) {
+		let isRegistered = serverProviders.some( function ( serverProvider ) {
 			return (
 				serverProvider &&
 				typeof serverProvider === 'object' &&
