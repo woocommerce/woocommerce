@@ -113,21 +113,26 @@ export default function PaymentMethodsSelection() {
 		// Depend on the state map now
 	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
 
-	const savePaymentMethodsState = ( state: Record< string, boolean > ) => {
-		// Update the local state
+	const savePaymentMethodsState = (
+		state: Record< string, boolean >
+	): Promise< void > => {
+		// Update the local state.
 		setPaymentMethodsState( state );
 
-		// Send the updated state to the server
-		const href = currentStep?.actions?.save?.href;
-		if ( href ) {
-			apiFetch( {
-				url: href,
+		// Send the updated state to the server.
+		const saveUrl = currentStep?.actions?.save?.href;
+		if ( saveUrl ) {
+			return apiFetch( {
+				url: saveUrl,
 				method: 'POST',
 				data: {
 					payment_methods: state,
 				},
 			} );
 		}
+
+		// Return a resolved promise if no API call was made.
+		return Promise.resolve();
 	};
 
 	// Check if overflow exists for Payment Methods list container.
@@ -202,11 +207,13 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											// Update the local state
-											setPaymentMethodsState( state );
-
 											// Persist the state on the backend.
-											savePaymentMethodsState( state );
+											savePaymentMethodsState(
+												state
+											).then( () => {
+												// Update the local state once we have persisted it.
+												setPaymentMethodsState( state );
+											} );
 										} }
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
@@ -266,69 +273,78 @@ export default function PaymentMethodsSelection() {
 					<Button
 						className="components-button is-primary"
 						onClick={ () => {
-							const href = currentStep?.actions?.finish?.href;
-							if ( ! href ) {
+							const finishUrl =
+								currentStep?.actions?.finish?.href;
+							if ( ! finishUrl ) {
 								return;
 							}
 
 							// Persist the final state on the backend, just in case the user didn't change anything.
-							savePaymentMethodsState( paymentMethodsState );
 							setIsContinueButtonLoading( true );
+							// First save the payment methods state.
+							savePaymentMethodsState( paymentMethodsState )
+								.then( () => {
+									// Then mark the step as completed.
+									return apiFetch( {
+										url: finishUrl,
+										method: 'POST',
+									} );
+								} )
+								.then( () => {
+									const eventProps = {
+										displayed_payment_methods:
+											Object.keys(
+												paymentMethodsState
+											).join( ', ' ),
+										selected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										deselected_payment_methods: Object.keys(
+											paymentMethodsState
+										)
+											.filter(
+												( paymentMethod ) =>
+													! paymentMethodsState[
+														paymentMethod
+													]
+											)
+											.join( ', ' ),
+										business_country:
+											window.wcSettings?.admin
+												?.woocommerce_payments_nox_profile
+												?.business_country_code ??
+											'unknown',
+										source: sessionEntryPoint,
+									};
 
-							// Mark the step as completed.
-							apiFetch( {
-								url: href,
-								method: 'POST',
-							} ).then( () => {
-								const eventProps = {
-									displayed_payment_methods:
-										Object.keys( paymentMethodsState ).join(
-											', '
-										),
-									selected_payment_methods: Object.keys(
-										paymentMethodsState
-									)
-										.filter(
-											( paymentMethod ) =>
-												paymentMethodsState[
-													paymentMethod
-												]
-										)
-										.join( ', ' ),
-									deselected_payment_methods: Object.keys(
-										paymentMethodsState
-									)
-										.filter(
-											( paymentMethod ) =>
-												! paymentMethodsState[
-													paymentMethod
-												]
-										)
-										.join( ', ' ),
-									business_country:
-										window.wcSettings?.admin
-											?.woocommerce_payments_nox_profile
-											?.business_country_code ??
-										'unknown',
-									source: sessionEntryPoint,
-								};
-								recordPaymentsOnboardingEvent(
-									'woopayments_onboarding_modal_click',
-									{
-										step: 'payment_methods',
-										action: 'continue',
-										...eventProps,
-									}
-								);
-								// This is the legacy event for the continue button click.
-								// For now, trigger it for compatibility.
-								recordEvent(
-									'wcpay_settings_payment_methods_continue',
-									eventProps
-								);
-								setIsContinueButtonLoading( false );
-								navigateToNextStep();
-							} );
+									recordPaymentsOnboardingEvent(
+										'woopayments_onboarding_modal_click',
+										{
+											step: 'payment_methods',
+											action: 'continue',
+											...eventProps,
+										}
+									);
+
+									// Legacy event
+									recordEvent(
+										'wcpay_settings_payment_methods_continue',
+										eventProps
+									);
+
+									setIsContinueButtonLoading( false );
+									navigateToNextStep();
+								} )
+								.catch( () => {
+									setIsContinueButtonLoading( false );
+								} );
 						} }
 						isBusy={ isContinueButtonLoading }
 						disabled={ isContinueButtonLoading }
