@@ -19,6 +19,7 @@ addAction( 'woocommerce_email_editor_events', 'your_plugin_namespace', ( editorE
 	const { name, ...data } = editorEvent;
 	// Replace console.log with your tracking code
   console.log( name, data );
+});
 ```
 
 ## Tracked events
