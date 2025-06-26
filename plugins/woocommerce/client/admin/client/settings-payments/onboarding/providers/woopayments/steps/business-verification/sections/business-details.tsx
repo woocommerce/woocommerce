@@ -67,6 +67,9 @@ const BusinessDetails: React.FC = () => {
 	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
 	): Promise< void > => {
+		// Update the local state with the new data.
+		setData( selfAssessmentData );
+
 		const saveUrl = currentStep?.actions?.save?.href;
 		if ( saveUrl ) {
 			// Persist the data on the backend.
@@ -76,14 +79,8 @@ const BusinessDetails: React.FC = () => {
 				data: {
 					self_assessment: selfAssessmentData,
 				},
-			} ).then( () => {
-				// Update the local state with the new data.
-				setData( selfAssessmentData );
 			} );
 		}
-
-		// If no save URL is provided, just update the local state.
-		setData( selfAssessmentData );
 
 		// Return a resolved promise to maintain consistency with the API.
 		return Promise.resolve();
@@ -92,7 +89,7 @@ const BusinessDetails: React.FC = () => {
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
+	): Promise< void > => {
 		let newData: OnboardingFields = {
 			[ name ]: selectedItem?.key,
 		};
@@ -102,19 +99,19 @@ const BusinessDetails: React.FC = () => {
 			newData = { ...newData, business_type: undefined };
 		}
 
-		updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData( newData );
 	};
 
 	const updateDataOnChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
+	): Promise< void > => {
 		const newData: OnboardingFields = {
 			...data,
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData( newData );
 	};
 
 	return (
