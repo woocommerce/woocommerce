@@ -52,6 +52,8 @@ type MiniCart = {
 		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
+		drawerRole: string | null;
+		drawerTabIndex: string | null;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -103,6 +105,18 @@ store< MiniCart >(
 				);
 
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+			},
+
+			get drawerRole() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? 'dialog' : null;
+			},
+
+			get drawerTabIndex() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? '-1' : null;
 			},
 
 			get drawerOverlayClass() {
@@ -328,20 +342,14 @@ const { state: cartItemState } = store(
 
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.regular_price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
 					cartItemState.currency
 				);
 			},
 
 			get itemPrice(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.price, 10 ),
 					cartItemState.currency
 				);
 			},
