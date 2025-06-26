@@ -7,20 +7,6 @@ namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
  */
 class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 	/**
-	 * List of international shipping countries.
-	 *
-	 * @var array
-	 */
-	public array $international_shipping_countries = array();
-
-	/**
-	 * List of domestic shipping countries.
-	 *
-	 * @var array
-	 */
-	public array $domestic_shipping_countries = array();
-
-	/**
 	 * Get the key of the shipping provider.
 	 *
 	 * @return string
@@ -55,48 +41,5 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
 		return 'https://www.amazon.com/gp/help/customer/display.html?nodeId=202064850&tracking_number=' . $tracking_number;
-	}
-
-	/**
-	 * Get the countries from which this provider can ship.
-	 *
-	 * @return array An array of country codes.
-	 */
-	public function get_shipping_from_countries(): array {
-		return $this->international_shipping_countries;
-	}
-
-	/**
-	 * Get the countries to which this provider can ship.
-	 *
-	 * @return array An array of country codes.
-	 */
-	public function get_shipping_to_countries(): array {
-		return $this->international_shipping_countries;
-	}
-
-	/**
-	 * Check if this provider can ship from a specific country.
-	 *
-	 * @param string $shipping_from The country code from which the shipment is sent.
-	 * @param string $shipping_to The country code to which the shipment is sent.
-	 *
-	 * @return bool True if this provider can ship from the country, false otherwise.
-	 */
-	public function can_ship_from_to( string $shipping_from, string $shipping_to ): bool {
-		return true;
-	}
-
-	/**
-	 * Try to parse the tracking number with additional parameters.
-	 *
-	 * @param string $tracking_number The tracking number.
-	 * @param string $shipping_from The country code from which the shipment is sent.
-	 * @param string $shipping_to The country code to which the shipment is sent.
-	 *
-	 * @return array|null The tracking URL with ambiguity score, or null if parsing fails.
-	 */
-	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
-		return null;
 	}
 }

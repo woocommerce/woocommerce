@@ -42,14 +42,18 @@ abstract class AbstractShippingProvider {
 	 *
 	 * @return array An array of country codes.
 	 */
-	abstract public function get_shipping_from_countries(): array;
+	public function get_shipping_from_countries(): array {
+		return array();
+	}
 
 	/**
 	 * Get the countries to which the shipping provider can ship.
 	 *
 	 * @return array An array of country codes.
 	 */
-	abstract public function get_shipping_to_countries(): array;
+	public function get_shipping_to_countries(): array {
+		return array();
+	}
 
 	/**
 	 * Check if the shipping provider can ship from a specific country.
@@ -90,6 +94,10 @@ abstract class AbstractShippingProvider {
 	 * @param string $shipping_to The country code to which the shipment is sent.
 	 *
 	 * @return array|null The tracking URL with ambiguity score, or null if parsing fails.
+	 *
+	 * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
 	 */
-	abstract public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array;
+	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
+		return null; // Default implementation returns null, subclasses should override this method.
+	}
 }
