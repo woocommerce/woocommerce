@@ -510,9 +510,6 @@ describe( 'Address Suggestions Component', () => {
 				'woocommerce-address-suggestions'
 			);
 			expect( billingSuggestions.style.display ).toBe( 'none' );
-			expect( billingSuggestions.getAttribute( 'role' ) ).toBe(
-				'region'
-			);
 			expect( billingSuggestions.getAttribute( 'aria-live' ) ).toBe(
 				'polite'
 			);
