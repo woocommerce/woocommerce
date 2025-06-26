@@ -23,7 +23,6 @@
 
 .wc-block-components-sidebar {
 	box-sizing: border-box;
-	margin-top: $gap-smaller;
 	padding-left: math.percentage(math.div($gap-large, 1060px));
 	width: 35%;
 
@@ -33,7 +32,7 @@
 	}
 }
 
-@include cart-checkout-below-large {
+@include cart-checkout-below-large-container {
 	.wc-block-components-sidebar-layout {
 		flex-direction: column;
 		margin: 0 auto $gap;

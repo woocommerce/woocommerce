@@ -18,7 +18,6 @@ export type Context = {
 	productId: number;
 	productType: string;
 	selectedAttributes: CartVariationItem[];
-	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -148,11 +147,16 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { productType } = getContext< Context >();
+				const { availableVariations, selectedAttributes, productType } =
+					getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! addToCartWithOptionsStore.state.variationId;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				return !! matchedVariation?.variation_id;
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -326,7 +330,21 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityInputChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, currentValue } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					currentValue,
+					childProductId
+				);
+			},
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
