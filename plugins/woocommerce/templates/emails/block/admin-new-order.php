@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.0.0
+ * @version 10.1.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -21,21 +21,17 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading">
-<?php
+<h2 class="wp-block-heading"><?php
 /* translators: %s: order number */
 printf( esc_html__( 'New order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
-?>
-</h2>
+?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>
-<?php
+<p><?php
 /* translators: %s: Customer full name */
 printf( esc_html__( 'You’ve received a new order from %s', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
