@@ -73,7 +73,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Product Rating block is not visible if ratings are disabled globally in the store', async ( {
@@ -96,6 +96,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 } );

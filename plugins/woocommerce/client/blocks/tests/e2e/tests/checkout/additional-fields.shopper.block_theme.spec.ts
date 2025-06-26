@@ -617,7 +617,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByText(
 						'Please ensure your alternative email matches the correct format.'
 					)
-			).not.toBeVisible();
+			).toBeHidden();
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
