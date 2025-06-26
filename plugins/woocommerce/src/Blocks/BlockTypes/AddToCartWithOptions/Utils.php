@@ -91,7 +91,7 @@ class Utils {
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '', $child_product_id = null ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		if (
 			$processor->next_tag( 'input' ) &&
