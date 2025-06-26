@@ -51,10 +51,8 @@
 		$( 'input#woocommerce_customer_stock_notifications_require_double_opt_in' )
 			.on( 'change', function () {
 				if ( $( this ).is( ':checked' ) ) {
-					console.log( 'Double opt-in enabled' );
 					$( this ).closest( 'tr' ).next( 'tr' ).show();
 				} else {
-					console.log( 'Double opt-in disabled' );
 					$( this ).closest( 'tr' ).next( 'tr' ).hide();
 				}
 			} )
