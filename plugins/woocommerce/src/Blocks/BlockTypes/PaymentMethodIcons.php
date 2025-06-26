@@ -74,23 +74,15 @@ class PaymentMethodIcons extends AbstractBlock {
 	 */
 	private function render_card_types( $attributes ) {
 		$output             = '';
-		$enabled_card_types = $this->get_enabled_card_types();
+		$enabled_card_types = array_values( $this->get_enabled_card_types() );
 		$number_of_icons    = $attributes['numberOfIcons'] ?? 0;
 		$number_of_icons    = $number_of_icons === 0 ? count( $enabled_card_types ) : max( 0, min( intval( $number_of_icons ), count( $enabled_card_types ) ) );
 
-		foreach ( $enabled_card_types as $card_type => $card_data ) {
-			if ( $number_of_icons > 0 ) {
-				--$number_of_icons;
-			} else {
-				break;
-			}
-
+		for ( $i = 0; $i < $number_of_icons; $i++ ) {
 			$output .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
-			$output .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . esc_url( $card_data['icon'] ) . '\');" role="img" aria-label="' . esc_attr( $card_data['name'] ) . '"></span>';
-
+			$output .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . esc_url( $enabled_card_types[ $i ]['icon'] ) . '\');" role="img" aria-label="' . esc_attr( $enabled_card_types[ $i ]['name'] ) . '"></span>';
 			$output .= '</div>';
 		}
-
 		return $output;
 	}
 
