@@ -127,20 +127,20 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	/**
 	 * Is_checkout_pay - Returns true when viewing the checkout's pay page (aka pay for order page).
 	 *
-	 * @param bool $check_order_pay_key Optional. If true, check if the key is set in the URL.
+	 * @param bool $use_query_params Whether to use query parameters to determine if this is the pay for order page.
 	 * @return bool
 	 */
-	function is_checkout_pay_page( bool $check_order_pay_key = false ): bool {
+	function is_checkout_pay_page( bool $use_query_params = false ): bool {
 		global $wp;
 
-		// Use-case: regular checkout.
+		// Use-case: attempt to identify the page based on global variables.
 		if ( ! empty( $wp->query_vars['order-pay'] ) && is_checkout() ) {
 			return true;
 		}
 
-		// Use-case: short-code checkout.
-		if ( $check_order_pay_key ) {
-			return isset( $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// Use-case: check for the presence of a specific query parameter when globals are not available.
+		if ( $use_query_params ) {
+			return isset( $_GET['pay_for_order'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		return false;
