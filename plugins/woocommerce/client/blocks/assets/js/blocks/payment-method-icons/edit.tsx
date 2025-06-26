@@ -5,11 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 const CardPreview = ( { type }: { type: string } ) => {
 	const { paymentMethodIcons } = window.wcSettings as {
 		paymentMethodIcons: Record< string, { icon: string } >;
