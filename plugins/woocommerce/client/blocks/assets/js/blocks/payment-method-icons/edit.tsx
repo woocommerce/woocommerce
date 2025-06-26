@@ -82,8 +82,9 @@ const Edit = ( {
 			</div>
 		);
 	}
+
 	return (
-		<div>
+		<div { ...blockProps }>
 			{ __(
 				'No active WooPayments payment methods found.',
 				'woocommerce'
