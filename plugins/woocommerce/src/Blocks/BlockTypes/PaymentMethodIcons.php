@@ -76,7 +76,7 @@ class PaymentMethodIcons extends AbstractBlock {
 		$output             = '';
 		$enabled_card_types = array_values( $this->get_enabled_card_types() );
 		$number_of_icons    = $attributes['numberOfIcons'] ?? 0;
-		$number_of_icons    = $number_of_icons === 0 ? count( $enabled_card_types ) : max( 0, min( intval( $number_of_icons ), count( $enabled_card_types ) ) );
+		$number_of_icons    = 0 === $number_of_icons ? count( $enabled_card_types ) : max( 0, min( intval( $number_of_icons ), count( $enabled_card_types ) ) );
 
 		for ( $i = 0; $i < $number_of_icons; $i++ ) {
 			$output .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
