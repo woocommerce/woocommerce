@@ -1,4 +1,4 @@
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
 	display: inline-flex;
 	gap: $grid-unit-10;
 	list-style: none;
@@ -7,7 +7,7 @@
 	flex-wrap: wrap;
 }
 
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
 	--pill-color: currentColor;
 	--pill-background-color: transparent;
 	background-color: var(--pill-background-color);
@@ -63,7 +63,7 @@
 	}
 }
 
-.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown {
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown) {
 	height: 3em;
 	padding: 0.25em 1em;
 }

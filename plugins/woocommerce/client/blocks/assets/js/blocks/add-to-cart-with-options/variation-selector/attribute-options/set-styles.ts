@@ -70,7 +70,7 @@ function setStyles(): void {
 	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(
 		document.createTextNode(
-			`.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked) {
+			`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
 				--pill-color: ${ selectedPillColor };
 				--pill-background-color: ${ selectedPillBackgroundColor };
 			}`

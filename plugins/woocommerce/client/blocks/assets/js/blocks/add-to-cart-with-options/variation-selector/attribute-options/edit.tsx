@@ -71,7 +71,7 @@ export default function AttributeOptionsEdit(
 	useThemeColors(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
-			.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected {
+			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
 				--pill-color: ${ editorBackgroundColor };
 				--pill-background-color: ${ editorColor };
 			}
