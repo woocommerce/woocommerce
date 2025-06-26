@@ -122,8 +122,3 @@
 		border-color: var(--button--color-background);
 	}
 }
-
-.wp-block-button__link.add_to_cart_button:disabled {
-	cursor: not-allowed;
-	opacity: 0.5;
-}
