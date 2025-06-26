@@ -1,8 +1,8 @@
 {
     "$schema": "https://schemas.wp.org/trunk/theme.json",
     "version": 3,
-    "slug": "post-terms-with-background",
-    "title": "With Background",
+    "slug": "post-terms-badge",
+    "title": "Badge",
     "blockTypes": [
         "core/post-terms"
     ],
