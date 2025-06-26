@@ -1,10 +1,7 @@
 /**
  * Internal dependencies
  */
-const {
-	webpackConfig,
-	webpackWatchOptions,
-} = require( '@woocommerce/internal-style-build' );
+const { webpackConfig } = require( '@woocommerce/internal-style-build' );
 
 /**
  * External dependencies
@@ -19,7 +16,7 @@ module.exports = {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
-			'../../../node_modules/.cache/webpack-block-templates'
+			'node_modules/.cache/webpack'
 		),
 	},
 	entry: {
@@ -33,5 +30,4 @@ module.exports = {
 		rules: webpackConfig.rules,
 	},
 	plugins: webpackConfig.plugins,
-	watchOptions: webpackWatchOptions,
 };

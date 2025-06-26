@@ -483,7 +483,6 @@ final class BlockTypesController {
 			'ProductRatingCounter',
 			'ProductRatingStars',
 			'ProductResultsCount',
-			'ProductReviews',
 			'ProductSaleBadge',
 			'ProductSearch',
 			'ProductSKU',
@@ -497,7 +496,6 @@ final class BlockTypesController {
 			'ReviewsByCategory',
 			'ReviewsByProduct',
 			'RelatedProducts',
-			'ProductDetails',
 			'SingleProduct',
 			'StockFilter',
 			'PageContentWrapper',
@@ -515,6 +513,27 @@ final class BlockTypesController {
 			'OrderConfirmation\AdditionalFieldsWrapper',
 			'OrderConfirmation\AdditionalFields',
 			'OrderConfirmation\CreateAccount',
+			'ProductDetails',
+			'ProductDescription',
+			'ProductSpecifications',
+			// Generic blocks that will be pushed upstream.
+			'Accordion\AccordionGroup',
+			'Accordion\AccordionItem',
+			'Accordion\AccordionPanel',
+			'Accordion\AccordionHeader',
+			// End: generic blocks that will be pushed upstream.
+			'Reviews\ProductReviews',
+			'Reviews\ProductReviewRating',
+			'Reviews\ProductReviewsTitle',
+			'Reviews\ProductReviewForm',
+			'Reviews\ProductReviewDate',
+			'Reviews\ProductReviewContent',
+			'Reviews\ProductReviewAuthorName',
+			'Reviews\ProductReviewsPagination',
+			'Reviews\ProductReviewsPaginationNext',
+			'Reviews\ProductReviewsPaginationPrevious',
+			'Reviews\ProductReviewsPaginationNumbers',
+			'Reviews\ProductReviewTemplate',
 		);
 
 		$block_types = array_merge(
@@ -535,33 +554,6 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-		}
-
-		// Update plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
-		// when modifying this list.
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'BlockifiedProductDetails';
-			$block_types[] = 'ProductDescription';
-			$block_types[] = 'ProductSpecifications';
-			$block_types[] = 'Reviews\ProductReviews';
-			$block_types[] = 'Reviews\ProductReviewRating';
-			$block_types[] = 'Reviews\ProductReviewsTitle';
-			$block_types[] = 'Reviews\ProductReviewForm';
-			$block_types[] = 'Reviews\ProductReviewDate';
-			$block_types[] = 'Reviews\ProductReviewContent';
-			$block_types[] = 'Reviews\ProductReviewAuthorName';
-			$block_types[] = 'Reviews\ProductReviewsPagination';
-			$block_types[] = 'Reviews\ProductReviewsPaginationNext';
-			$block_types[] = 'Reviews\ProductReviewsPaginationPrevious';
-			$block_types[] = 'Reviews\ProductReviewsPaginationNumbers';
-			$block_types[] = 'Reviews\ProductReviewTemplate';
-
-			// Generic blocks that will be pushed upstream.
-			$block_types[] = 'Accordion\AccordionGroup';
-			$block_types[] = 'Accordion\AccordionItem';
-			$block_types[] = 'Accordion\AccordionPanel';
-			$block_types[] = 'Accordion\AccordionHeader';
-			// End: generic blocks that will be pushed upstream.
 		}
 
 		/**
@@ -586,6 +578,7 @@ final class BlockTypesController {
 					'ClassicTemplate',
 					'ProductResultsCount',
 					'ProductDetails',
+					'ProductReviews',
 					'OrderConfirmation\Status',
 					'OrderConfirmation\Summary',
 					'OrderConfirmation\Totals',

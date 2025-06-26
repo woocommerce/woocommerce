@@ -187,6 +187,10 @@ final class ProductFilterStatus extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_stock_status_counts( $block ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		unset(

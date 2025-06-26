@@ -306,7 +306,7 @@ $fontSizes: (
 	}
 }
 
-@mixin cart-checkout-below-large {
+@mixin cart-checkout-below-large-container {
 	@container (max-width: 699px) {
 		@content;
 	}

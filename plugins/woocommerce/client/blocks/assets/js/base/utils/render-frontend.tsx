@@ -69,6 +69,20 @@ export const renderBlock = <
 			}
 		}, [] );
 
+		const isCheckoutBlock = container.classList.contains(
+			'wp-block-woocommerce-checkout'
+		);
+
+		// Temporary return until the Cart block is also updated
+		if ( isCheckoutBlock ) {
+			return (
+				<BlockErrorBoundary { ...errorBoundaryProps }>
+					<Block { ...props } attributes={ attributes } />
+				</BlockErrorBoundary>
+			);
+		}
+
+		// For all other blocks, use Suspense
 		return (
 			<BlockErrorBoundary { ...errorBoundaryProps }>
 				<Suspense

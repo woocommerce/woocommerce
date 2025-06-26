@@ -19,7 +19,7 @@ module.exports = {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
-			'../../../node_modules/.cache/webpack-admin-layout'
+			'node_modules/.cache/webpack'
 		),
 	},
 	entry: {
