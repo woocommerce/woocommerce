@@ -75,10 +75,10 @@ class Renderer {
 	 *
 	 * @param \WP_Post $post Post object.
 	 * @param string   $subject Email subject.
-	 * @param string   $pre_header Email preheader.
+	 * @param string   $pre_header An email preheader or preview text is the short snippet of text that follows the subject line in an inbox. See https://kb.mailpoet.com/article/418-preview-text.
 	 * @param string   $language Email language.
-	 * @param string   $meta_robots Email meta robots.
-	 * @param string   $template_slug Email template slug.
+	 * @param string   $meta_robots Can be left empty for sending, but you can provide a value (e.g. noindex, nofollow) when you want to display email html in a browser.
+	 * @param string   $template_slug A block template slug used for cases when email doesn't have associated template.
 	 * @return array
 	 */
 	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
