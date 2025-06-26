@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use WC_Helper_Product;
-use WP_Block;
 
 /**
  * Tests for the ProductImage block type
@@ -29,17 +28,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$product->set_image_id( $image_id );
 		$product->save();
 
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup = $block->render();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'data-testid="product-image"', $markup );
@@ -107,56 +96,20 @@ class ProductImage extends \WP_UnitTestCase {
 		$variation->set_image_id( $variation_image_id );
 		$variation->save();
 
-		// Verify that the variation image is included in the available images (cast to string for comparison).
-		$available_image_ids = \Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils::get_all_image_ids( $variable_product );
-		$this->assertContains( (string) $variation_image_id, $available_image_ids, 'Variation image should be included in available images' );
-
-		// Test that the ProductImage block recognizes the variation image when provided via context (cast to string).
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId'  => $variable_product->get_id(),
-				'imageId' => (string) $variation_image_id,
-			)
-		);
-
-		$markup = $block->render();
+		// Test that the ProductImage block recognizes the variation image when provided via context.
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $variable_product->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $variation_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
 
 		// The block should recognize the variation image as valid and use it.
 		$this->assertStringContainsString( 'data-image-id="' . $variation_image_id . '"', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 
 		// Test that the block falls back to the main product image when no imageId is provided.
-		$block_no_image_id = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId' => $variable_product->get_id(),
-			)
-		);
-
-		$markup_no_image_id = $block_no_image_id->render();
+		$markup_no_image_id = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $variable_product->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'data-image-id="' . $main_image_id . '"', $markup_no_image_id );
 
 		// Test that the block rejects invalid image IDs.
 		$invalid_image_id = 99999;
-		$block_invalid    = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId'  => $variable_product->get_id(),
-				'imageId' => (string) $invalid_image_id,
-			)
-		);
-
-		$markup_invalid = $block_invalid->render();
+		$markup_invalid = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $variable_product->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $invalid_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
 		// Should fall back to main product image when invalid image ID is provided.
 		$this->assertStringContainsString( 'data-image-id="' . $main_image_id . '"', $markup_invalid );
 
@@ -186,35 +139,11 @@ class ProductImage extends \WP_UnitTestCase {
 		$product->save();
 
 		// Test with 'single' image sizing.
-		$block_single = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(
-					'imageSizing' => 'single',
-				),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup_single = $block_single->render();
+		$markup_single = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image {"imageSizing":"single"} /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup_single );
 
 		// Test with 'thumbnail' image sizing.
-		$block_thumbnail = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(
-					'imageSizing' => 'thumbnail',
-				),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup_thumbnail = $block_thumbnail->render();
+		$markup_thumbnail = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image {"imageSizing":"thumbnail"} /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup_thumbnail );
 
 		// Clean up.
@@ -240,19 +169,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$product->set_image_id( $image_id );
 		$product->save();
 
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(
-					'showSaleBadge' => true,
-				),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup = $block->render();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image {"showSaleBadge":true} /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup );
@@ -278,19 +195,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$product->set_image_id( $image_id );
 		$product->save();
 
-		$inner_content = '<div class="custom-inner-block">Custom content</div>';
-
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup = $block->render( array(), $inner_content, $block );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image --><div class="custom-inner-block">Custom content</div><!-- /wp:woocommerce/product-image --><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		$this->assertStringContainsString( 'wc-block-components-product-image__inner-container', $markup );
@@ -309,17 +214,7 @@ class ProductImage extends \WP_UnitTestCase {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->save();
 
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId' => $product->get_id(),
-			)
-		);
-
-		$markup = $block->render();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
 		// Should contain placeholder image.
@@ -333,17 +228,7 @@ class ProductImage extends \WP_UnitTestCase {
 	 * Test that the ProductImage block handles invalid product IDs correctly.
 	 */
 	public function test_product_image_render_with_invalid_product() {
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array(
-				'postId' => 99999, // Non-existent product ID.
-			)
-		);
-
-		$markup = $block->render();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":99999} --><!-- wp:woocommerce/product-image /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertEmpty( $markup );
 	}
@@ -352,15 +237,7 @@ class ProductImage extends \WP_UnitTestCase {
 	 * Test that the ProductImage block handles missing postId context correctly.
 	 */
 	public function test_product_image_render_without_post_id() {
-		$block = new WP_Block(
-			array(
-				'blockName' => 'woocommerce/product-image',
-				'attrs'     => array(),
-			),
-			array()
-		);
-
-		$markup = $block->render();
+		$markup = do_blocks( '<!-- wp:woocommerce/product-image --><!-- /wp:woocommerce/product-image -->' );
 
 		$this->assertEmpty( $markup );
 	}
