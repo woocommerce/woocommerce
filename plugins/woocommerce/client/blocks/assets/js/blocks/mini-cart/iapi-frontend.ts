@@ -25,7 +25,9 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { currency } = getConfig( 'woocommerce' );
-const { addToCartBehaviour, onCartClickBehaviour, checkoutUrl } = getConfig( 'woocommerce/mini-cart' );
+const { addToCartBehaviour, onCartClickBehaviour, checkoutUrl } = getConfig(
+	'woocommerce/mini-cart'
+);
 const { displayCartPriceIncludingTax } = getConfig( 'woocommerce/mini-cart' );
 const {
 	reduceQuantityLabel,
@@ -150,7 +152,7 @@ store< MiniCart >(
 			},
 
 			openDrawer() {
-				if ( onCartClickBehaviour !== 'open_drawer' ) {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
 					window.location.href = checkoutUrl;
 					return;
 				}
