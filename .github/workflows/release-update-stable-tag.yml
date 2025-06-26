@@ -235,7 +235,7 @@ jobs:
           else
             echo "📤 Changes detected. Creating PR for $BRANCH_NAME..."
 
-            UPDATE_BRANCH="update/stable-tag-$TARGET_VERSION-$BRANCH_NAME"
+            UPDATE_BRANCH="update/stable-tag-$TARGET_VERSION-$BRANCH_NAME-$(date +%s)"
             git checkout -b "$UPDATE_BRANCH"
             git add "$README_PATH"
             git commit -m "Update stable tag to $TARGET_VERSION on $BRANCH_NAME"
