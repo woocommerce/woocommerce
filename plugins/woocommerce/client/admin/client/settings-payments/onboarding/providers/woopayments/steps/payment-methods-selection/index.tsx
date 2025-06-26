@@ -116,22 +116,25 @@ export default function PaymentMethodsSelection() {
 	const savePaymentMethodsState = (
 		state: Record< string, boolean >
 	): Promise< void > => {
-		// Update the local state.
-		setPaymentMethodsState( state );
-
-		// Send the updated state to the server.
 		const saveUrl = currentStep?.actions?.save?.href;
 		if ( saveUrl ) {
+			// Send the updated state to the backend.
 			return apiFetch( {
 				url: saveUrl,
 				method: 'POST',
 				data: {
 					payment_methods: state,
 				},
+			} ).then( () => {
+				// Update the local state.
+				setPaymentMethodsState( state );
 			} );
 		}
 
-		// Return a resolved promise if no API call was made.
+		// If there is no save URL, just update the local state.
+		setPaymentMethodsState( state );
+
+		// Return a resolved promise since no API call was made.
 		return Promise.resolve();
 	};
 
@@ -207,13 +210,7 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											// Persist the state on the backend.
-											savePaymentMethodsState(
-												state
-											).then( () => {
-												// Update the local state once we have persisted it.
-												setPaymentMethodsState( state );
-											} );
+											savePaymentMethodsState( state );
 										} }
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
