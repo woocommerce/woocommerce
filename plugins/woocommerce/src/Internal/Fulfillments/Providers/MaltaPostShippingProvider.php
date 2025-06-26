@@ -3,16 +3,16 @@
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * HayPost Shipping Provider class.
+ * MaltaPost Shipping Provider class.
  */
-class HaypostShippingProvider extends AbstractShippingProvider {
+class MaltaPostShippingProvider extends AbstractShippingProvider {
 	/**
 	 * Get the key of the shipping provider.
 	 *
 	 * @return string
 	 */
 	public function get_key(): string {
-		return 'haypost';
+		return 'maltapost';
 	}
 
 	/**
@@ -21,7 +21,7 @@ class HaypostShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return 'HayPost';
+		return 'MaltaPost';
 	}
 
 	/**
@@ -30,7 +30,7 @@ class HaypostShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/haypost.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/maltapost.png';
 	}
 
 	/**
@@ -40,6 +40,6 @@ class HaypostShippingProvider extends AbstractShippingProvider {
 	 * @return string The tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://www.haypost.am/en/track/' . $tracking_number;
+		return 'https://www.maltapost.com/track/' . $tracking_number;
 	}
 }
