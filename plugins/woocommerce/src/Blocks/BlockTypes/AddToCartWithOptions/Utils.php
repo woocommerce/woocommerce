@@ -91,7 +91,11 @@ class Utils {
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
-		while ( $processor->next_tag( 'input' ) ) {
+		if (
+			$processor->next_tag( 'input' ) &&
+			$processor->get_attribute( 'type' ) === 'number' &&
+			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
+		) {
 			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInputChange' );
 		}
 
