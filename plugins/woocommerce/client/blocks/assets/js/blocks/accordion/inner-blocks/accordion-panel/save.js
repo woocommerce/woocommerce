@@ -1,15 +1,21 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import {
 	InnerBlocks,
 	useBlockProps,
+	/* eslint-disable */
+	/* @ts-ignore module is exported as experimental */
 	__experimentalGetBorderClassesAndStyles as getBorderClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalGetColorClassesAndStyles as getColorClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalGetShadowClassesAndStyles as getShadowClassesAndStyles,
+	/* eslint-enable */
 } from '@wordpress/block-editor';
-import clsx from 'clsx';
 
 export default function save( { attributes } ) {
 	const blockProps = useBlockProps.save();
