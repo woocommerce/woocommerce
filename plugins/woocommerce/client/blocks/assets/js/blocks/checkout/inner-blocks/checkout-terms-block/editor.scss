@@ -1,6 +1,10 @@
 .edit-post-visual-editor {
-	.is-small,
-	.is-medium {
+	@include cart-checkout-small-container {
+		.wc-block-checkout__terms {
+			padding: 4px;
+		}
+	}
+	@include cart-checkout-medium-container {
 		.wc-block-checkout__terms {
 			padding: 4px;
 		}
