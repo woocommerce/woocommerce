@@ -101,9 +101,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
+		await page.getByLabel( 'Product quantity' ).fill( '1' );
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '6 in cart' );
+		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
 	test( 'allows adding variable products to cart', async ( {
