@@ -6,19 +6,29 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 
-const CardPreview = ( { type, icon }: { type: string; icon: string } ) => {
-	const CardIcon = (
-		<div className="wp-block-woocommerce-payment-method-icons__item">
-			<span
-				className="wp-block-woocommerce-payment-method-icons__icon"
-				style={ {
-					backgroundImage: `url(${ icon })`,
-				} }
-				role="img"
-				aria-label={ type }
-			/>
-		</div>
-	);
+const CardPreview = ( {
+	type,
+	icon,
+}: {
+	type: string | undefined;
+	icon: string | undefined;
+} ) => {
+	let CardIcon = null;
+
+	if ( type && icon ) {
+		CardIcon = (
+			<div className="wp-block-woocommerce-payment-method-icons__item">
+				<span
+					className="wp-block-woocommerce-payment-method-icons__icon"
+					style={ {
+						backgroundImage: `url(${ icon })`,
+					} }
+					role="img"
+					aria-label={ type }
+				/>
+			</div>
+		);
+	}
 
 	return CardIcon;
 };
@@ -54,9 +64,9 @@ const Edit = ( {
 				};
 			} )
 			.filter( Boolean );
-		const otherPaymentMethods = Object.keys( wooPaymentMethods ).filter(
-			( method ) => method !== 'card'
-		);
+		const otherPaymentMethods = Object.keys( wooPaymentMethods )
+			.filter( ( method ) => method !== 'card' )
+			.sort();
 		const otherPaymentMethodIcons = otherPaymentMethods.map( ( method ) => {
 			return {
 				type: method,
@@ -101,9 +111,9 @@ const Edit = ( {
 				<div className="wp-block-woocommerce-payment-method-icons">
 					{ availableIcons.slice( 0, iconsToShow ).map( ( icon ) => (
 						<CardPreview
-							key={ icon.type }
-							type={ icon.type }
-							icon={ icon.icon }
+							key={ icon?.type }
+							type={ icon?.type }
+							icon={ icon?.icon }
 						/>
 					) ) }
 				</div>
