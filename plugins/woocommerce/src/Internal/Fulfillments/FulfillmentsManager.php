@@ -151,12 +151,25 @@ class FulfillmentsManager {
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
 			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
-				/**
-				 * Instantiate the shipping provider class.
-				 *
-				 * @var AbstractShippingProvider $provider_instance
-				 */
-				$provider_instance = new $provider();
+				try {
+					/**
+					 * Instantiate the shipping provider class.
+					 *
+					 * @var AbstractShippingProvider $provider_instance
+					 */
+					$provider_instance = new $provider();
+				} catch ( \Throwable $e ) {
+					$logger = wc_get_logger();
+					$logger->error(
+						sprintf(
+							'Error instantiating shipping provider class %s: %s',
+							$provider,
+							$e->getMessage()
+						),
+						array( 'source' => 'woocommerce-fulfillments' )
+					);
+					continue; // Skip if the provider class cannot be instantiated.
+				}
 			} else {
 				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
 			}
@@ -177,18 +190,13 @@ class FulfillmentsManager {
 			);
 		} else {
 			// If multiple providers could parse the tracking number, find the one with the highest ambiguity score.
-			$highest_score = 0;
 			$best_provider = null;
 			foreach ( $results as $provider_name => $result ) {
 				if ( false === $result['ambiguous'] ) {
 					$best_provider = $provider_name;
 					break;
 				}
-				// TODO: Ambiguity score is currently missing on providers.
-				if ( isset( $result['ambiguity_score'] ) && $result['ambiguity_score'] > $highest_score ) {
-					$highest_score = $result['ambiguity_score'];
-					$best_provider = $provider_name;
-				}
+				// Ambiguity score will be calculated here when multiple providers can parse the tracking number.
 			}
 			if ( $best_provider ) {
 				$results = array(
@@ -197,12 +205,10 @@ class FulfillmentsManager {
 					'tracking_url'    => $results[ $best_provider ]['url'],
 				);
 			} else {
-				// If no provider has a valid ambiguity score, return an empty array.
 				$results = array();
 			}
 		}
 
-		// If no provider could parse the tracking number, return null.
 		return $results;
 	}
 }
