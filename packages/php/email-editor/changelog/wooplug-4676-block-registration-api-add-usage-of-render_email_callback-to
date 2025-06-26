@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add support for a block custom callback render_email_callback and remove Blocks_Registry class.

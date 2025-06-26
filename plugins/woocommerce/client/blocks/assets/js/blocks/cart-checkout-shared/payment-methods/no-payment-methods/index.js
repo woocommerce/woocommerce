@@ -20,7 +20,7 @@ const NoPaymentMethods = () => {
 			status="error"
 		>
 			{ __(
-				'There are no payment methods available. This may be an error on our side. Please contact us if you need any help placing your order.',
+				'There are no payment methods available. Please contact us for help placing your order.',
 				'woocommerce'
 			) }
 		</NoticeBanner>

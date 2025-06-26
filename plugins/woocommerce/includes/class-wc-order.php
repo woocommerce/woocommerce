@@ -152,7 +152,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $this                     Order object.
 			 * @since 2.7.0
 			 */
-			$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', array( OrderStatus::ON_HOLD, OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::CANCELLED ), $this );
+			$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
 			if ( $this->has_status( $valid_completed_statuses ) ) {
 				if ( ! empty( $transaction_id ) ) {
 					$this->set_transaction_id( $transaction_id );

@@ -15,7 +15,6 @@ use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
@@ -188,19 +187,13 @@ class Email_Editor_Container {
 			}
 		);
 		$container->register(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
-			}
-		);
-		$container->register(
 			Content_Renderer::class,
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);
