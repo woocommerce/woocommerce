@@ -137,9 +137,9 @@ class FulfillmentsManager {
 	 * @param string $shipping_from The country code from which the shipment is sent.
 	 * @param string $shipping_to The country code to which the shipment is sent.
 	 *
-	 * @return array|null An array containing the provider name and tracking URL if successful, null otherwise.
+	 * @return array An array containing the provider as key, and the parsing results.
 	 */
-	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
+	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): array {
 		/**
 		 * Filter to get the shipping provider classes.
 		 *
@@ -148,6 +148,7 @@ class FulfillmentsManager {
 		 * @since 9.9.0
 		 */
 		$shipping_providers = apply_filters( 'wc_fulfillment_shipping_providers', array() );
+		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
 			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
 				/**
@@ -160,16 +161,48 @@ class FulfillmentsManager {
 				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
 			}
 
-			$tracking_url = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
-			if ( ! is_null( $tracking_url ) ) {
-				return array(
-					'provider'     => $provider_instance->get_name(),
-					'tracking_url' => $tracking_url,
+			$parsing_result = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			if ( ! is_null( $parsing_result ) ) {
+				$results[ $provider_instance->get_key() ] = $parsing_result;
+			}
+		}
+
+		if ( 1 === count( $results ) ) {
+			$result  = reset( $results );
+			$key     = key( $results );
+			$results = array(
+				'provider'        => $key,
+				'tracking_number' => $tracking_number,
+				'tracking_url'    => $result['url'] ?? '',
+			);
+		} else {
+			// If multiple providers could parse the tracking number, find the one with the highest ambiguity score.
+			$highest_score = 0;
+			$best_provider = null;
+			foreach ( $results as $provider_name => $result ) {
+				if ( false === $result['ambiguous'] ) {
+					$best_provider = $provider_name;
+					break;
+				}
+				// TODO: Ambiguity score is currently missing on providers.
+				if ( isset( $result['ambiguity_score'] ) && $result['ambiguity_score'] > $highest_score ) {
+					$highest_score = $result['ambiguity_score'];
+					$best_provider = $provider_name;
+				}
+			}
+			if ( $best_provider ) {
+				$results = array(
+					'provider'        => $best_provider,
+					'tracking_number' => $tracking_number,
+					'tracking_url'    => $results[ $best_provider ]['url'],
 				);
+			} else {
+				// If no provider has a valid ambiguity score, return an empty array.
+				$results = array();
 			}
 		}
 
 		// If no provider could parse the tracking number, return null.
-		return null;
+		return $results;
 	}
 }
