@@ -187,7 +187,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => ! $product->is_type( 'variable' ),
+					'isFormValid' => function () {
+						$context = wp_interactivity_get_context();
+						$product = wc_get_product( $context['productId'] );
+						if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+							return false;
+						}
+						return true;
+					},
 					'variationId' => null,
 				)
 			);
@@ -464,7 +471,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-interactive="woocommerce/add-to-cart-with-options"
 						data-wp-bind--value="state.variationId"
 					/>
 				</div>';
