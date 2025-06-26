@@ -205,6 +205,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					container.id = `address_suggestions_${ type }`;
 					container.className = 'woocommerce-address-suggestions';
 					container.style.display = 'none';
+					container.setAttribute( 'role', 'region' );
+					container.setAttribute( 'aria-live', 'polite' );
 
 					const list = document.createElement( 'ul' );
 					list.className = 'suggestions-list';
@@ -274,7 +276,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param {boolean} reattachListeners Whether to reattach event listeners (Firefox only)
 		 * @return {HTMLInputElement} The new input element
 		 */
-		function replaceInputElement( input, attributes, shouldFocus = true, reattachListeners = false ) {
+		function replaceInputElement(
+			input,
+			attributes,
+			shouldFocus = true,
+			reattachListeners = false
+		) {
 			const parentElement = input.parentElement;
 			if ( ! parentElement ) {
 				return input;
@@ -336,9 +343,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const elementType = newElement.id.includes( 'billing' )
 				? 'billing'
 				: 'shipping';
-			if (
-				activeSuggestionIndices[ elementType ] !== undefined
-			) {
+			if ( activeSuggestionIndices[ elementType ] !== undefined ) {
 				activeSuggestionIndices[ elementType ] = -1;
 			}
 
@@ -357,20 +362,21 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			if ( needsElementCloning ) {
 				// Firefox and Safari need element cloning to clear password manager state
 				const attributes = {
-					'autocomplete': 'off',
+					autocomplete: 'off',
 					'data-lpignore': 'true',
 					'data-op-ignore': 'true',
-					'data-1p-ignore': 'true'
+					'data-1p-ignore': 'true',
 				};
 
 				// Safari needs additional attributes to fully disable autofill
 				if ( isSafari ) {
-					attributes['data-form-type'] = null;
-					attributes['data-bwignore'] = 'true';
-					attributes['data-protonpass-ignore'] = 'true';
+					attributes[ 'data-form-type' ] = null;
+					attributes[ 'data-bwignore' ] = 'true';
+					attributes[ 'data-protonpass-ignore' ] = 'true';
 					// Safari is very stubborn - use a random autocomplete value
-					attributes['autocomplete'] = 'nope-' + Math.random().toString(36).substr(2, 9);
-					attributes['readonly'] = 'true';
+					attributes[ 'autocomplete' ] =
+						'nope-' + Math.random().toString( 36 ).substr( 2, 9 );
+					attributes[ 'readonly' ] = 'true';
 				}
 
 				const newElement = replaceInputElement(
@@ -554,7 +560,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 */
 		function enableBrowserAutofill( input, shouldFocus = true ) {
 			const currentAutocomplete = input.getAttribute( 'autocomplete' );
-			
+
 			// Check if autofill is already enabled (should be 'address-line1' when enabled)
 			if ( currentAutocomplete === 'address-line1' ) {
 				// Still need to check if ignore attributes are present
@@ -569,7 +575,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			}
 
 			// For Safari, check if we're in disabled state (random autocomplete value starting with 'nope-')
-			if ( isSafari && currentAutocomplete && currentAutocomplete.startsWith( 'nope-' ) ) {
+			if (
+				isSafari &&
+				currentAutocomplete &&
+				currentAutocomplete.startsWith( 'nope-' )
+			) {
 				// Force re-enable for Safari disabled state
 				// Continue with normal re-enable logic below
 			}
@@ -577,18 +587,18 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			if ( needsElementCloning ) {
 				// Firefox and Safari need element cloning to properly re-enable password managers
 				const attributes = {
-					'autocomplete': 'address-line1',
+					autocomplete: 'address-line1',
 					'data-lpignore': null,
 					'data-op-ignore': null,
-					'data-1p-ignore': null
+					'data-1p-ignore': null,
 				};
 
 				// Safari needs additional cleanup from disable state
 				if ( isSafari ) {
-					attributes['data-bwignore'] = null;
-					attributes['data-protonpass-ignore'] = null;
-					attributes['data-form-type'] = null;
-					attributes['readonly'] = null;
+					attributes[ 'data-bwignore' ] = null;
+					attributes[ 'data-protonpass-ignore' ] = null;
+					attributes[ 'data-form-type' ] = null;
+					attributes[ 'readonly' ] = null;
 				}
 
 				return replaceInputElement(
@@ -874,16 +884,16 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				// Update the listbox aria-label with item count
 				const itemCount = safeSuggestions.length;
 				const itemText = itemCount === 1 ? 'item' : 'items';
-				
-				suggestionsList.setAttribute( 
-					'aria-label', 
-					`${itemCount} ${itemText} found` 
+
+				suggestionsList.setAttribute(
+					'aria-label',
+					`${ itemCount } ${ itemText } found`
 				);
 
 				suggestionsContainer.style.display = 'block';
 				suggestionsContainer.style.marginTop =
 					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
-				
+
 				// Set up ARIA attributes for combobox pattern
 				updatedInput.setAttribute( 'role', 'combobox' );
 				updatedInput.setAttribute( 'aria-expanded', 'true' );
@@ -893,33 +903,44 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					'aria-controls',
 					`address_suggestions_${ type }_list`
 				);
-				
+
 				suggestionsList.id = `address_suggestions_${ type }_list`;
-				
+
 				// Create or update status region for announcements
-				let statusRegion = document.getElementById( `${type}-autocomplete-status` );
+				let statusRegion = document.getElementById(
+					`${ type }-autocomplete-status`
+				);
 				if ( ! statusRegion ) {
 					statusRegion = document.createElement( 'div' );
-					statusRegion.id = `${type}-autocomplete-status`;
+					statusRegion.id = `${ type }-autocomplete-status`;
 					statusRegion.className = 'screen-reader-text';
 					statusRegion.setAttribute( 'role', 'status' );
 					statusRegion.setAttribute( 'aria-live', 'assertive' );
 					statusRegion.setAttribute( 'aria-atomic', 'true' );
-					updatedInput.parentNode.insertBefore( statusRegion, updatedInput.nextSibling );
+					updatedInput.parentNode.insertBefore(
+						statusRegion,
+						updatedInput.nextSibling
+					);
 				}
-				
+
 				// Update aria-describedby to include the status region
-				const existingDescribedBy = updatedInput.getAttribute( 'aria-describedby' ) || '';
-				const statusId = `${type}-autocomplete-status`;
+				const existingDescribedBy =
+					updatedInput.getAttribute( 'aria-describedby' ) || '';
+				const statusId = `${ type }-autocomplete-status`;
 				if ( ! existingDescribedBy.includes( statusId ) ) {
-					const newDescribedBy = existingDescribedBy ? `${existingDescribedBy} ${statusId}` : statusId;
-					updatedInput.setAttribute( 'aria-describedby', newDescribedBy );
+					const newDescribedBy = existingDescribedBy
+						? `${ existingDescribedBy } ${ statusId }`
+						: statusId;
+					updatedInput.setAttribute(
+						'aria-describedby',
+						newDescribedBy
+					);
 				}
-				
+
 				// Clear and announce with proper timing
 				statusRegion.textContent = '';
 				setTimeout( () => {
-					statusRegion.textContent = `${itemCount} ${itemText} available. Use up and down arrows to navigate.`;
+					statusRegion.textContent = `${ itemCount } ${ itemText } available. Use up and down arrows to navigate.`;
 				}, 100 );
 				// Don't auto-highlight first suggestion for better screen reader accessibility
 				activeSuggestionIndices[ type ] = -1;
@@ -1000,28 +1021,31 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			addressInput.removeAttribute( 'role' );
 			addressInput.removeAttribute( 'aria-autocomplete' );
 			addressInput.removeAttribute( 'aria-haspopup' );
-			
+
 			// Remove status region from aria-describedby
 			const describedBy = addressInput.getAttribute( 'aria-describedby' );
-			const statusId = `${type}-autocomplete-status`;
+			const statusId = `${ type }-autocomplete-status`;
 			if ( describedBy && describedBy.includes( statusId ) ) {
 				const newDescribedBy = describedBy
 					.split( ' ' )
-					.filter( id => id !== statusId )
+					.filter( ( id ) => id !== statusId )
 					.join( ' ' );
 				if ( newDescribedBy ) {
-					addressInput.setAttribute( 'aria-describedby', newDescribedBy );
+					addressInput.setAttribute(
+						'aria-describedby',
+						newDescribedBy
+					);
 				} else {
 					addressInput.removeAttribute( 'aria-describedby' );
 				}
 			}
-			
+
 			// Clear the status region
 			const statusRegion = document.getElementById( statusId );
 			if ( statusRegion ) {
 				statusRegion.textContent = '';
 			}
-			
+
 			activeSuggestionIndices[ type ] = -1;
 
 			// Remove blur event listener when suggestions are hidden
@@ -1169,6 +1193,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			if ( activeLi ) {
 				activeLi.classList.remove( 'active' );
 				activeLi.setAttribute( 'aria-selected', 'false' );
+				activeLi.setAttribute( 'tabindex', '-1' );
 			}
 
 			const newActiveLi = suggestionsList.querySelector(
@@ -1178,11 +1203,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			if ( newActiveLi ) {
 				newActiveLi.classList.add( 'active' );
 				newActiveLi.setAttribute( 'aria-selected', 'true' );
+				newActiveLi.setAttribute( 'tabindex', '0' );
 				addressInput.setAttribute(
 					'aria-activedescendant',
 					newActiveLi.id
 				);
 				activeSuggestionIndices[ type ] = index;
+				
+				// Focus has been moved to the suggestion item for better
+				// screen reader compatibility across all browsers
 			}
 		}
 
