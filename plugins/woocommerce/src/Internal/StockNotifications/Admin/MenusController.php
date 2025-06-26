@@ -103,12 +103,11 @@ class MenusController {
 	 * Displays the Notifications list table.
 	 */
 	public function notifications_page() {
-		// Select action.
-		$action = '';
 
-		// Nonce is checked in individual NotificationsPage methods.
-		if ( isset( $_GET['notification_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$action = wc_clean( wp_unslash( $_GET['notification_action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action = isset( $_GET['notification_action'] ) ? sanitize_text_field( wp_unslash( $_GET['notification_action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! in_array( $action, array( 'create', 'edit' ), true ) ) {
+			$action = '';
 		}
 
 		switch ( $action ) {
