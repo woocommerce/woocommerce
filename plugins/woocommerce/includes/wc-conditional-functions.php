@@ -125,7 +125,7 @@ if ( ! function_exists( 'is_checkout' ) ) {
 if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 
 	/**
-	 * Is_checkout_pay - Returns true when viewing the checkout's pay page.
+	 * Is_checkout_pay - Returns true when viewing the checkout's pay page (aka pay for order page).
 	 *
 	 * @param bool $check_key Optional. If true, check if the key is set in the URL.
 	 * @return bool
@@ -133,8 +133,16 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	function is_checkout_pay_page( bool $check_key = false ): bool {
 		global $wp;
 
-		$is_pay_for_order = ( is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ) || is_wc_endpoint_url( 'order-pay' ) || isset( $_GET['pay_for_order'] );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return $is_pay_for_order && ( ! $check_key || isset( $_GET['key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if (
+			! ( is_checkout() && ! empty( $wp->query_vars['order-pay'] ) ) ||
+			// Fallback for checking the query variable when $wp and $post globals are not available yet.
+			isset( $_GET['pay_for_order'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
+			return false;
+		}
+
+		// If we are checking for the key, ensure it is set in the URL.
+		return ! $check_key || isset( $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
 
