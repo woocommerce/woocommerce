@@ -72,9 +72,10 @@ class ProductImage extends \WP_UnitTestCase {
 
 		// Create variation images.
 		$variation_image_ids = array();
-		$variations = $variable_product->get_children();
+		$variations          = $variable_product->get_children();
+		$variations_count    = count( $variations );
 
-		for ( $i = 0; $i < min( $variation_count, count( $variations ) ); $i++ ) {
+		for ( $i = 0; $i < min( $variation_count, $variations_count ); $i++ ) {
 			$variation_image_id = wp_insert_attachment(
 				array(
 					'post_title'     => 'Variation Image ' . ( $i + 1 ),
@@ -91,10 +92,10 @@ class ProductImage extends \WP_UnitTestCase {
 		}
 
 		return array(
-			'product'              => $variable_product,
-			'main_image_id'        => $main_image_id,
-			'gallery_image_ids'    => $gallery_image_ids,
-			'variation_image_ids'  => $variation_image_ids,
+			'product'             => $variable_product,
+			'main_image_id'       => $main_image_id,
+			'gallery_image_ids'   => $gallery_image_ids,
+			'variation_image_ids' => $variation_image_ids,
 		);
 	}
 
@@ -122,7 +123,7 @@ class ProductImage extends \WP_UnitTestCase {
 	 * it still recognises the imageId as its own image.
 	 */
 	public function test_product_image_render_variable_product_with_variation_images() {
-		$data = $this->create_variable_product_with_images( 2, 1 );
+		$data               = $this->create_variable_product_with_images( 2, 1 );
 		$variation_image_id = $data['variation_image_ids'][0];
 
 		// Test that the ProductImage block recognizes the variation image when provided via context.
@@ -138,7 +139,7 @@ class ProductImage extends \WP_UnitTestCase {
 
 		// Test that the block rejects invalid image IDs.
 		$invalid_image_id = 99999;
-		$markup_invalid = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $invalid_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup_invalid   = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"imageId":' . $invalid_image_id . '} /--><!-- /wp:woocommerce/single-product -->' );
 		// Should fall back to main product image when invalid image ID is provided.
 		$this->assertStringContainsString( 'data-image-id="' . $data['main_image_id'] . '"', $markup_invalid );
 
