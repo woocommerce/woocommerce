@@ -40,19 +40,18 @@ class Utils {
 	 * @return string The Quantity Selector HTML with classes added.
 	 */
 	public static function add_quantity_stepper_classes( $quantity_html ) {
-		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
 		// Add classes to the form.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
+		while ( $processor->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector' );
 		}
 
-		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector__input' );
+		while ( $processor->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector__input' );
 		}
 
-		return $html->get_updated_html();
+		return $processor->get_updated_html();
 	}
 
 	/**
@@ -91,12 +90,12 @@ class Utils {
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
-		$html = new \WP_HTML_Tag_Processor( $quantity_html );
-		while ( $html->next_tag( 'input' ) ) {
-			$html->set_attribute( 'data-wp-on--input', 'actions.handleInputQuantityChange' );
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		while ( $processor->next_tag( 'input' ) ) {
+			$processor->set_attribute( 'data-wp-on--input', 'actions.handleInputQuantityChange' );
 		}
 
-		$quantity_html = $html->get_updated_html();
+		$quantity_html = $processor->get_updated_html();
 
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
