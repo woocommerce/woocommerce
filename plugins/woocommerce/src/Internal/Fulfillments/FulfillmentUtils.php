@@ -357,8 +357,16 @@ class FulfillmentUtils {
 		}
 		$shipping_providers_object = array();
 		foreach ( $shipping_providers as $shipping_provider ) {
-			if ( is_string( $shipping_provider ) && class_exists( $shipping_provider ) && is_subclass_of( $shipping_provider, AbstractShippingProvider::class ) ) {
-				$shipping_provider_instance = new $shipping_provider();
+			if ( is_string( $shipping_provider )
+			&& class_exists( $shipping_provider )
+			&& is_subclass_of( $shipping_provider, AbstractShippingProvider::class )
+			) {
+				try {
+					// Instantiate the shipping provider class.
+					$shipping_provider_instance = new $shipping_provider();
+				} catch ( \Throwable $e ) {
+					continue; // Skip if instantiation fails.
+				}
 				$shipping_providers_object[ $shipping_provider_instance->get_key() ] = array(
 					'label' => $shipping_provider_instance->get_name(),
 					'icon'  => $shipping_provider_instance->get_icon(),

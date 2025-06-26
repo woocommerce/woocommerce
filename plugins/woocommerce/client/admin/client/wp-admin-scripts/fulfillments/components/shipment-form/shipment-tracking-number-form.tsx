@@ -42,6 +42,7 @@ export default function ShipmentTrackingNumberForm() {
 	const [ trackingNumberTemp, setTrackingNumberTemp ] = useState( '' );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
+	const [ isLoading, setIsLoading ] = useState( false );
 	const { order } = useFulfillmentDrawerContext();
 	const {
 		trackingNumber,
@@ -56,6 +57,7 @@ export default function ShipmentTrackingNumberForm() {
 	const handleTrackingNumberLookup = async () => {
 		setError( null );
 		try {
+			setIsLoading( true );
 			const parsingResponse: TrackingNumberParsingResponse =
 				await apiFetch( {
 					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
@@ -79,6 +81,8 @@ export default function ShipmentTrackingNumberForm() {
 			setError(
 				__( 'Failed to fetch shipment information.', 'woocommerce' )
 			);
+		} finally {
+			setIsLoading( false );
 		}
 	};
 
@@ -116,6 +120,11 @@ export default function ShipmentTrackingNumberForm() {
 						<Button
 							variant="secondary"
 							text="Find info"
+							disabled={
+								isLoading ||
+								isEmpty( trackingNumberTemp.trim() )
+							}
+							isBusy={ isLoading }
 							onClick={ handleTrackingNumberLookup }
 							__next40pxDefaultSize
 						/>
