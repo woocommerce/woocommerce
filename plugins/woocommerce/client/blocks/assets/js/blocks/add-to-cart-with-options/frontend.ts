@@ -340,6 +340,29 @@ const addToCartWithOptionsStore = store(
 					childProductId
 				);
 			},
+			handleInputChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputElement = event.target as HTMLInputElement;
+				const value = parseInt( inputElement.value, 10 );
+				const childProductIdMatch =
+					inputElement.name.match( /quantity\[(\d+)\]/ );
+				const childProductId = childProductIdMatch
+					? parseInt( childProductIdMatch[ 1 ], 10 )
+					: undefined;
+				const context = getContext< Context >();
+				if ( childProductId ) {
+					context.quantity = {
+						...context.quantity,
+						[ childProductId ]: isNaN( value ) ? 0 : value,
+					};
+				} else {
+					context.quantity = {
+						...context.quantity,
+						[ context.productId ]: isNaN( value ) ? 0 : value,
+					};
+				}
+			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();
 

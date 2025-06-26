@@ -59,7 +59,7 @@ class AddToCartForm extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
@@ -73,16 +73,20 @@ class AddToCartForm extends AbstractBlock {
 	 * @return stringa add-to-cart form HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
+		$pattern_input     = '/(<input[^>]*id="quantity_[^\"]*"[^>]*)\/>/';
+		$replacement_input = '$1 data-wp-on--change="actions.handleInputChange" />';
+		$product_html      = preg_replace( $pattern_input, $replacement_input, $product_html );
+
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
-		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		$pattern_stepper = '/(<input[^>]*id="quantity_[^\"]*"[^>]*data-wp-on--change="actions.handleInputChange"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
-		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
+		$new_html    = preg_replace( $pattern_stepper, $plus_button, $product_html );
+		$new_html    = preg_replace( $pattern_stepper, $minus_button, $new_html );
 		return $new_html;
 	}
 
