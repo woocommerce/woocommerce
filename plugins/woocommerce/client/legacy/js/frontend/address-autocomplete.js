@@ -500,18 +500,30 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 				if ( e.key === 'ArrowDown' ) {
 					e.preventDefault();
+					e.stopPropagation();
 					newIndex =
 						( activeSuggestionIndices[ elementType ] + 1 ) %
 						items.length;
 					setActiveSuggestion( elementType, newIndex );
+					
+					// Move focus to the suggestion for better screen reader support
+					if ( items[ newIndex ] ) {
+						items[ newIndex ].focus();
+					}
 				} else if ( e.key === 'ArrowUp' ) {
 					e.preventDefault();
+					e.stopPropagation();
 					newIndex =
 						( activeSuggestionIndices[ elementType ] -
 							1 +
 							items.length ) %
 						items.length;
 					setActiveSuggestion( elementType, newIndex );
+					
+					// Move focus to the suggestion for better screen reader support
+					if ( items[ newIndex ] ) {
+						items[ newIndex ].focus();
+					}
 				} else if ( e.key === 'Enter' ) {
 					if ( activeSuggestionIndices[ elementType ] > -1 ) {
 						e.preventDefault();
@@ -819,6 +831,36 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					li.addEventListener( 'mouseenter', function () {
 						setActiveSuggestion( type, index );
 					} );
+					
+					// Add focus event to handle keyboard navigation
+					li.addEventListener( 'focus', function () {
+						setActiveSuggestion( type, index );
+					} );
+					
+					// Add keydown handler for navigation when focus is on suggestion
+					li.addEventListener( 'keydown', async function ( e ) {
+						const items = suggestionsLists[ type ].querySelectorAll( 'li' );
+						
+						if ( e.key === 'ArrowDown' ) {
+							e.preventDefault();
+							e.stopPropagation();
+							const nextIndex = ( index + 1 ) % items.length;
+							items[ nextIndex ].focus();
+						} else if ( e.key === 'ArrowUp' ) {
+							e.preventDefault();
+							e.stopPropagation();
+							const prevIndex = ( index - 1 + items.length ) % items.length;
+							items[ prevIndex ].focus();
+						} else if ( e.key === 'Enter' || e.key === ' ' ) {
+							e.preventDefault();
+							hideSuggestions( type );
+							await selectAddress( type, this.dataset.id );
+						} else if ( e.key === 'Escape' ) {
+							e.preventDefault();
+							hideSuggestions( type );
+							addressInputs[ type ][ 'address_1' ].focus();
+						}
+					} );
 
 					suggestionsList.appendChild( li );
 				} );
@@ -884,9 +926,29 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 				// Add blur event listener when suggestions are shown
 				if ( ! blurHandlers[ type ] ) {
-					blurHandlers[ type ] = function () {
+					blurHandlers[ type ] = function ( e ) {
 						// Use a small delay to allow clicks on suggestions to register
+						// and to check where focus moved to
 						setTimeout( () => {
+							// Check if focus moved to the suggestions container or any of its children
+							const suggestionsContainer = suggestionsContainers[ type ];
+							const activeElement = document.activeElement;
+							
+							// Don't hide if focus is within the suggestions container
+							if ( suggestionsContainer && 
+								 ( activeElement === suggestionsContainer || 
+								   suggestionsContainer.contains( activeElement ) ) ) {
+								return;
+							}
+							
+							// Also check if focus is on any suggestion item
+							const suggestionsList = suggestionsLists[ type ];
+							if ( suggestionsList && 
+								 ( activeElement === suggestionsList || 
+								   suggestionsList.contains( activeElement ) ) ) {
+								return;
+							}
+							
 							hideSuggestions( type );
 							const currentInput =
 								addressInputs[ type ][ 'address_1' ];
@@ -1184,18 +1246,30 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 					if ( e.key === 'ArrowDown' ) {
 						e.preventDefault();
+						e.stopPropagation();
 						newIndex =
 							( activeSuggestionIndices[ type ] + 1 ) %
 							items.length;
 						setActiveSuggestion( type, newIndex );
+						
+						// Move focus to the suggestion for better screen reader support
+						if ( items[ newIndex ] ) {
+							items[ newIndex ].focus();
+						}
 					} else if ( e.key === 'ArrowUp' ) {
 						e.preventDefault();
+						e.stopPropagation();
 						newIndex =
 							( activeSuggestionIndices[ type ] -
 								1 +
 								items.length ) %
 							items.length;
 						setActiveSuggestion( type, newIndex );
+						
+						// Move focus to the suggestion for better screen reader support
+						if ( items[ newIndex ] ) {
+							items[ newIndex ].focus();
+						}
 					} else if ( e.key === 'Enter' ) {
 						if ( activeSuggestionIndices[ type ] > -1 ) {
 							e.preventDefault();
