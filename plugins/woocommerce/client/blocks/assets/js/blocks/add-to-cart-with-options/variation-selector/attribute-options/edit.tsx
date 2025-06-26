@@ -4,16 +4,19 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { type BlockEditProps } from '@wordpress/blocks';
-import {
-	Disabled,
-	PanelBody,
-	SelectControl,
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-} from '@wordpress/components';
 import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import clsx from 'clsx';
+import {
+	Disabled,
+	PanelBody,
+	/* eslint-disable */
+	/* @ts-ignore module is exported as experimental */
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	/* eslint-enable */
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -30,7 +33,11 @@ function Pills( {
 	options,
 }: {
 	id: string;
-	options: SelectControl.Option[];
+	options: {
+		value: string;
+		label: string;
+		disabled: boolean;
+	}[];
 } ) {
 	return (
 		<ul
