@@ -23,15 +23,15 @@ class NotificationsPage {
 	/**
 	 * Notices option name.
 	 */
-	const NOTICES_OPTION_NAME = 'wc_customer_stock_notifications_action_notice';
+	const ADMIN_NOTICE_OPTION_NAME = 'wc_customer_stock_notifications_admin_notice';
 
 	/**
 	 * Render page.
 	 */
 	public function output() {
+		$this->output_admin_notice();
 		$table = new ListTable();
 		$table->process_actions();
-		$this->output_admin_notice();
 		$table->prepare_items();
 		include __DIR__ . '/Templates/html-admin-notifications.php';
 	}
@@ -62,17 +62,29 @@ class NotificationsPage {
 	 * @return void
 	 */
 	public static function add_notice( $message, $type = 'info' ) {
-		update_option(
-			self::NOTICES_OPTION_NAME,
-			array(
-				'message' => $message,
-				'type'    => $type,
-			)
+		if ( empty( $message ) ) {
+			return;
+		}
+
+		$notice_data = get_option( self::ADMIN_NOTICE_OPTION_NAME );
+		if ( false !== $notice_data ) {
+			return;
+		}
+
+		if ( ! in_array( $type, array( 'error', 'warning', 'success', 'info' ), true ) ) {
+			$type = 'info';
+		}
+
+		$notice_data = array(
+			'message' => $message,
+			'type'    => $type,
 		);
+
+		update_option( self::ADMIN_NOTICE_OPTION_NAME, $notice_data );
 	}
 
 	/**
-	 * Add admin notices.
+	 * Display admin notices.
 	 *
 	 * @return void
 	 */
@@ -81,14 +93,14 @@ class NotificationsPage {
 			return;
 		}
 
-		$notice_data = get_option( self::NOTICES_OPTION_NAME );
+		$notice_data = get_option( self::ADMIN_NOTICE_OPTION_NAME );
 		if ( false === $notice_data ) {
 			return;
 		}
 
 		// Check if invalid data.
 		if ( empty( $notice_data ) || ! is_array( $notice_data ) || empty( $notice_data['message'] ) ) {
-			delete_option( self::NOTICES_OPTION_NAME );
+			delete_option( self::ADMIN_NOTICE_OPTION_NAME );
 			return;
 		}
 
@@ -100,11 +112,11 @@ class NotificationsPage {
 			$notice_data['message'],
 			array(
 				'type'        => $type,
-				'id'          => self::NOTICES_OPTION_NAME,
+				'id'          => self::ADMIN_NOTICE_OPTION_NAME,
 				'dismissible' => false,
 			)
 		);
 
-		delete_option( self::NOTICES_OPTION_NAME );
+		delete_option( self::ADMIN_NOTICE_OPTION_NAME );
 	}
 }
