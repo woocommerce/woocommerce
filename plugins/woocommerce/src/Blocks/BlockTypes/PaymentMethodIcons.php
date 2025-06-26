@@ -42,8 +42,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'paymentMethodIcons', $this->get_enabled_card_types() );
-		$this->asset_data_registry->add( 'wooPaymentsEnabled', $this->is_woo_payments_enabled() );
+		$this->asset_data_registry->add( 'cardIcons', $this->get_enabled_card_types() );
 	}
 
 	/**
@@ -57,7 +56,10 @@ class PaymentMethodIcons extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$output = '';
 
-		if ( $this->is_woo_payments_enabled() ) {
+		$enabled_card_types    = $this->get_enabled_card_types();
+		$other_payment_methods = $this->get_other_payment_method_icons();
+
+		if ( ! empty( $enabled_card_types ) || ! empty( $other_payment_methods ) ) {
 			$output  = '<div class="wp-block-woocommerce-payment-method-icons">';
 			$output .= $this->render_card_types( $attributes );
 			$output .= '</div>';
@@ -73,17 +75,40 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	private function render_card_types( $attributes ) {
-		$output             = '';
-		$enabled_card_types = array_values( $this->get_enabled_card_types() );
-		$number_of_icons    = $attributes['numberOfIcons'] ?? 0;
-		$number_of_icons    = 0 === $number_of_icons ? count( $enabled_card_types ) : max( 0, min( intval( $number_of_icons ), count( $enabled_card_types ) ) );
+		$output = '';
 
-		for ( $i = 0; $i < $number_of_icons; $i++ ) {
-			$output .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
-			$output .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . esc_url( $enabled_card_types[ $i ]['icon'] ) . '\');" role="img" aria-label="' . esc_attr( $enabled_card_types[ $i ]['name'] ) . '"></span>';
-			$output .= '</div>';
+		$enabled_card_types         = array_values( $this->get_enabled_card_types() );
+		$other_payment_method_icons = $this->get_other_payment_method_icons();
+		$all_payment_methods        = array_merge( $enabled_card_types, $other_payment_method_icons );
+		$number_of_icons            = $attributes['numberOfIcons'] ?? 0;
+		$number_of_icons            = 0 === $number_of_icons ? count( $all_payment_methods ) : max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
+
+		if ( ! empty( $enabled_card_types ) ) {
+			for ( $i = 0; $i < $number_of_icons; $i++ ) {
+				$payment_method = $all_payment_methods[ $i ];
+				$output        .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
+				$output        .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . \esc_url( $payment_method['icon'] ) . '\');" role="img" aria-label="' . \esc_attr( $payment_method['name'] ) . '"></span>';
+				$output        .= '</div>';
+			}
 		}
+
 		return $output;
+	}
+
+	/**
+	 * Check if WooPayments is enabled.
+	 *
+	 * @return bool WooPayments enabled.
+	 */
+	private function is_woopayments_enabled() {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return false;
+		}
+
+		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+		return isset( $payment_gateways['woocommerce_payments'] ) &&
+				$payment_gateways['woocommerce_payments']->enabled === 'yes';
 	}
 
 	/**
@@ -92,6 +117,10 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return array Enabled card types.
 	 */
 	private function get_enabled_card_types() {
+		if ( ! $this->is_woopayments_enabled() ) {
+			return array();
+		}
+
 		$card_types = array(
 			'visa'       => array(
 				'name' => 'Visa',
@@ -126,12 +155,44 @@ class PaymentMethodIcons extends AbstractBlock {
 	 */
 	private function get_card_type_icon_url( $card_type ) {
 		$plugin_path = 'woocommerce-payments/assets/images/payment-method-icons/';
-		if ( ! is_dir( WP_PLUGIN_DIR . '/' . dirname( $plugin_path ) ) ) {
+		if ( ! \is_dir( \WP_PLUGIN_DIR . '/' . \dirname( $plugin_path ) ) ) {
 			return '';
 		}
 
 		$icon_url = \plugins_url( $plugin_path . $card_type . '.svg' );
 		return $icon_url;
+	}
+
+	/**
+	 * Get other payment method icons from available gateways.
+	 *
+	 * @return array Other payment method icons.
+	 */
+	private function get_other_payment_method_icons() {
+		$available_gateways    = WC()->payment_gateways->payment_gateways();
+		$other_payment_methods = array();
+
+		if ( empty( $available_gateways ) ) {
+			return $other_payment_methods;
+		}
+
+		foreach ( $available_gateways as $gateway ) {
+			if ( 'woocommerce_payments' === $gateway->id ) {
+				continue;
+			}
+
+			if ( 'yes' === $gateway->enabled ) {
+				$icon_url = $gateway->get_icon_url();
+				if ( ! empty( $icon_url ) ) {
+					$other_payment_methods[] = array(
+						'name' => $gateway->get_title(),
+						'icon' => $icon_url,
+					);
+				}
+			}
+		}
+
+		return $other_payment_methods;
 	}
 
 	/**

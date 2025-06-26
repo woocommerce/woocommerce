@@ -4,19 +4,15 @@
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
+import { getPaymentMethods } from '@woocommerce/blocks-registry';
 
-const CardPreview = ( { type }: { type: string } ) => {
-	const { paymentMethodIcons } = window.wcSettings as {
-		paymentMethodIcons: Record< string, { icon: string } >;
-	};
-	const iconUrl = paymentMethodIcons[ type ]?.icon;
-
+const CardPreview = ( { type, icon }: { type: string; icon: string } ) => {
 	const CardIcon = (
 		<div className="wp-block-woocommerce-payment-method-icons__item">
 			<span
 				className="wp-block-woocommerce-payment-method-icons__icon"
 				style={ {
-					backgroundImage: `url(${ iconUrl })`,
+					backgroundImage: `url(${ icon })`,
 				} }
 				role="img"
 				aria-label={ type }
@@ -37,18 +33,40 @@ const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
 	const blockProps = useBlockProps();
+	const paymentMethodData = getPaymentMethods();
+	const wooPaymentMethods =
+		paymentMethodData?.woocommerce_payments?.content?.props.upeMethods;
 	const { numberOfIcons } = attributes;
-	const isWooPaymentsEnabled = window.wcSettings.wooPaymentsEnabled;
 
-	if ( isWooPaymentsEnabled ) {
-		const { paymentMethodIcons } = window.wcSettings as {
-			paymentMethodIcons: Record< string, { icon: string } >;
+	if ( wooPaymentMethods ) {
+		const { cardIcons } = window.wcSettings as {
+			cardIcons: Record< string, { icon: string } >;
 		};
-		const availableTypes = Object.keys( paymentMethodIcons );
+		const availableCardIcons = Object.keys( cardIcons ).map( ( type ) => {
+			return {
+				type,
+				icon: cardIcons[ type ].icon,
+			};
+		} );
+		const otherPaymentMethods = Object.keys( wooPaymentMethods ).filter(
+			( method ) => method !== 'card'
+		);
+		const otherPaymentMethodIcons = otherPaymentMethods.map( ( method ) => {
+			return {
+				type: method,
+				icon: wooPaymentMethods[ method ].icon,
+			};
+		} );
+
+		const availableIcons = [
+			...availableCardIcons,
+			...otherPaymentMethodIcons,
+		];
+
 		const iconsToShow =
 			numberOfIcons === 0
-				? availableTypes.length
-				: Math.min( numberOfIcons, availableTypes.length );
+				? availableIcons.length
+				: Math.min( numberOfIcons, availableIcons.length );
 
 		return (
 			<div { ...blockProps }>
@@ -66,7 +84,7 @@ const Edit = ( {
 								setAttributes( { numberOfIcons: value } )
 							}
 							min={ 0 }
-							max={ availableTypes.length }
+							max={ availableIcons.length }
 							help={ __(
 								'Choose how many icons to display. To show all icons, use 0 (zero).',
 								'woocommerce'
@@ -75,8 +93,12 @@ const Edit = ( {
 					</PanelBody>
 				</InspectorControls>
 				<div className="wp-block-woocommerce-payment-method-icons">
-					{ availableTypes.slice( 0, iconsToShow ).map( ( type ) => (
-						<CardPreview key={ type } type={ type } />
+					{ availableIcons.slice( 0, iconsToShow ).map( ( icon ) => (
+						<CardPreview
+							key={ icon.type }
+							type={ icon.type }
+							icon={ icon.icon }
+						/>
 					) ) }
 				</div>
 			</div>
