@@ -1,14 +1,13 @@
 /**
  * Internal dependencies
  */
-import { editorCurrentPostId } from './constants';
 import { State } from './types';
 import { getEditorSettings, getEditorTheme, getUrls } from './settings';
 
 export function getInitialState(): State {
-	const postId = editorCurrentPostId;
 	return {
-		postId,
+		postId: window.WooCommerceEmailEditor.current_post_id,
+		postType: window.WooCommerceEmailEditor.current_post_type,
 		editorSettings: getEditorSettings(),
 		theme: getEditorTheme(),
 		styles: {
