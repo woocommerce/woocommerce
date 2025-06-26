@@ -59,8 +59,17 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 
 <!-- wp:paragraph -->
 <p><?php
-	$text = '<a data-link-href="%1$s" contenteditable="false" style="text-decoration: underline;"> %2$s </a>';
-	printf( wp_kses_post( $text ), '[woocommerce/my-account-url]', esc_html__( 'My account', 'woocommerce' ) );
+	$link_template = '<a data-link-href="%1$s" contenteditable="false" style="text-decoration: underline;">%2$s</a>';
+	printf(
+		'%s',
+		wp_kses_post(
+			sprintf(
+				$link_template,
+				esc_attr( '[woocommerce/my-account-url]' ),
+				esc_html__( 'My account', 'woocommerce' )
+			)
+		)
+	);
 ?></p>
 <!-- /wp:paragraph -->
 
