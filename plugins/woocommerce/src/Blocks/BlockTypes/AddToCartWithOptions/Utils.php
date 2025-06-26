@@ -19,20 +19,16 @@ class Utils {
 	 * @return string Quantity input HTML with increment and decrement buttons.
 	 */
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
-		$pattern_input     = '/(<input[^>]*id="quantity_[^\"]*"[^>]*)\/>/';
-		$replacement_input = '$1 data-wp-on--change="actions.handleInputChange" />';
-		$quantity_html     = preg_replace( $pattern_input, $replacement_input, $quantity_html );
-
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
-		$pattern_stepper = '/(<input[^>]*id="quantity_[^\"]*"[^>]*data-wp-on--change="actions.handleInputChange"[^>]*\/>)/';
+		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern_stepper, $plus_button, $quantity_html );
-		$new_html    = preg_replace( $pattern_stepper, $minus_button, $new_html );
+		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
+		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
 	}
 
