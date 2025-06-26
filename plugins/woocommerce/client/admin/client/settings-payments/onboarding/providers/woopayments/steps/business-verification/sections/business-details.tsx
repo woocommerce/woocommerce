@@ -66,18 +66,27 @@ const BusinessDetails: React.FC = () => {
 
 	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
-	) => {
-		const href = currentStep?.actions?.save?.href;
-		// Send POST request to the href with the Business Verification state
-		if ( href ) {
-			apiFetch( {
-				url: href,
+	): Promise< void > => {
+		const saveUrl = currentStep?.actions?.save?.href;
+		if ( saveUrl ) {
+			// Persist the data on the backend.
+			return apiFetch( {
+				url: saveUrl,
 				method: 'POST',
 				data: {
 					self_assessment: selfAssessmentData,
 				},
+			} ).then( () => {
+				// Update the local state with the new data.
+				setData( selfAssessmentData );
 			} );
 		}
+
+		// If no save URL is provided, just update the local state.
+		setData( selfAssessmentData );
+
+		// Return a resolved promise to maintain consistency with the API.
+		return Promise.resolve();
 	};
 
 	const handleTiedChange = (
@@ -92,7 +101,7 @@ const BusinessDetails: React.FC = () => {
 		} else if ( name === 'country' ) {
 			newData = { ...newData, business_type: undefined };
 		}
-		setData( newData );
+
 		updateBusinessVerificationData( newData );
 	};
 
@@ -100,8 +109,6 @@ const BusinessDetails: React.FC = () => {
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
 	) => {
-		setData( { [ name ]: selectedItem?.key } );
-
 		const newData: OnboardingFields = {
 			...data,
 			[ name ]: selectedItem?.key,
