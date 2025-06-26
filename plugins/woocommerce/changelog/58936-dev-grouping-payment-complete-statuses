@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Grouping of valid payment complete statuses in a new constant.
