@@ -118,8 +118,7 @@ class PaymentMethodIcons extends AbstractBlock {
 
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-		return isset( $payment_gateways['woocommerce_payments'] ) &&
-				$payment_gateways['woocommerce_payments']->enabled === 'yes';
+		return isset( $payment_gateways['woocommerce_payments'] ) && 'yes' === $payment_gateways['woocommerce_payments']->enabled;
 	}
 
 	/**
