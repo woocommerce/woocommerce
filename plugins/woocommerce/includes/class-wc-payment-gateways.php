@@ -186,11 +186,11 @@ class WC_Payment_Gateways {
 
 			try {
 				/**
-				 * Instance of the PaymentProviders controller.
+				 * Instance of the PaymentsProviders controller.
 				 *
-				 * @var PaymentProviders $payment_providers_controller
+				 * @var PaymentsProviders $payment_providers_controller
 				 */
-				$payment_providers_controller = wc_get_container()->get( PaymentProviders::class );
+				$payment_providers_controller = wc_get_container()->get( PaymentsProviders::class );
 				$payment_provider             = $payment_providers_controller->get_payment_gateway_provider_instance( $gateway->id );
 				if ( ! $payment_provider->is_onboarding_completed( $gateway ) || $payment_provider->is_in_test_mode_onboarding( $gateway ) ) {
 					// The gateway was enabled, but onboarding is not completed or we are doing test mode onboarding.
