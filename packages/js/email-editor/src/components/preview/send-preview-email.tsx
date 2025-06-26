@@ -37,13 +37,14 @@ function RawSendPreviewEmail() {
 		sendingPreviewStatus,
 		isModalOpened,
 		errorMessage,
-	} = useSelect( ( select ) => select( storeName ).getPreviewState(), [] );
-
-	const { postType } = useSelect( ( select ) => {
-		return {
+		postType,
+	} = useSelect(
+		( select ) => ( {
+			...select( storeName ).getPreviewState(),
 			postType: select( storeName ).getEmailPostType(),
-		};
-	}, [] );
+		} ),
+		[]
+	);
 
 	const handleSendPreviewEmail = () => {
 		void requestSendingNewsletterPreview( previewToEmail );
