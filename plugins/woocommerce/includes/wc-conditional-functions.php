@@ -140,7 +140,7 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 
 		// Use-case: short-code checkout.
 		if ( $check_order_pay_key ) {
-			return isset( $_GET['pay_for_order'], $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return isset( $_GET['key'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		return false;
