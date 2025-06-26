@@ -19,3 +19,5 @@
 <!-- wp:pattern {"slug":"woostarter/testimonials-2-columns"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/woocommerce-featured-products"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/two-columns-highlights-sections"} /-->
