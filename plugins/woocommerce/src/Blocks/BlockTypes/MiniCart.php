@@ -75,6 +75,26 @@ class MiniCart extends AbstractBlock {
 	);
 
 	/**
+	 * WooCommerce mini-cart template blocks.
+	 *
+	 * @var array
+	 */
+	const MINI_CART_TEMPLATE_BLOCKS = array(
+		'woocommerce/mini-cart-contents',
+		'woocommerce/filled-mini-cart-contents-block',
+		'woocommerce/mini-cart-title-block',
+		'woocommerce/mini-cart-title-label-block',
+		'woocommerce/mini-cart-title-items-counter-block',
+		'woocommerce/mini-cart-items-block',
+		'woocommerce/mini-cart-products-table-block',
+		'woocommerce/mini-cart-footer-block',
+		'woocommerce/mini-cart-cart-button-block',
+		'woocommerce/mini-cart-checkout-button-block',
+		'woocommerce/empty-mini-cart-contents-block',
+		'woocommerce/mini-cart-shopping-button-block',
+	);
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -590,22 +610,7 @@ class MiniCart extends AbstractBlock {
 	 * @return bool True if the block is a WooCommerce template block.
 	 */
 	protected function is_woocommerce_template_block( $block ) {
-		$mini_cart_blocks = array(
-			'woocommerce/mini-cart-contents',
-			'woocommerce/filled-mini-cart-contents-block',
-			'woocommerce/mini-cart-title-block',
-			'woocommerce/mini-cart-title-label-block',
-			'woocommerce/mini-cart-title-items-counter-block',
-			'woocommerce/mini-cart-items-block',
-			'woocommerce/mini-cart-products-table-block',
-			'woocommerce/mini-cart-footer-block',
-			'woocommerce/mini-cart-cart-button-block',
-			'woocommerce/mini-cart-checkout-button-block',
-			'woocommerce/empty-mini-cart-contents-block',
-			'woocommerce/mini-cart-shopping-button-block',
-		);
-
-		return isset( $block['blockName'] ) && in_array( $block['blockName'], $mini_cart_blocks, true );
+		return isset( $block['blockName'] ) && in_array( $block['blockName'], self::MINI_CART_TEMPLATE_BLOCKS, true );
 	}
 
 	/**
