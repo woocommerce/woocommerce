@@ -176,16 +176,8 @@ jobs:
             exit 1
           fi
 
-          echo "📋 Current stable tag line:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
-
           # Update the stable tag
           sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
-
-          echo "📝 Updated stable tag line:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
 
           # Check if there are any changes
           if svn diff --quiet; then
