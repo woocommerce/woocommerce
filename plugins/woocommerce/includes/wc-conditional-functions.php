@@ -134,7 +134,7 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 		global $wp;
 
 		// Use-case: regular checkout.
-		if ( is_checkout() && empty( $wp->query_vars['order-pay'] ) ) {
+		if ( empty( $wp->query_vars['order-pay'] ) && is_checkout() ) {
 			return true;
 		}
 
