@@ -271,6 +271,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			input.setAttribute( 'autocomplete', 'off' );
 			input.setAttribute( 'data-lpignore', 'true' );
 			input.setAttribute( 'data-op-ignore', 'true' );
+			input.setAttribute( 'data-1p-ignore', 'true' );
 
 			// To prevent 1Password/LastPass and autocomplete clashes, we need to refocus the element.
 			// This is achieved by removing and re-adding the element to trigger browser updates.
@@ -294,6 +295,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			input.setAttribute( 'autocomplete', 'address-line1' );
 			input.setAttribute( 'data-lpignore', 'false' );
 			input.setAttribute( 'data-op-ignore', 'false' );
+			input.setAttribute( 'data-1p-ignore', 'false' );
 
 			// To ensure browser updates and re-enables autofill, we need to refocus the element.
 			// This is achieved by removing and re-adding the element to trigger browser updates.
