@@ -381,7 +381,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 		/**
 		 * Handle searching and displaying autocomplete results below the address input if the value meets the criteria
-		 * of 3 or more characters. No suggestion is initially highlighted to improve screen reader accessibility.
+		 * of 3 or more characters. No suggestion is initially highlighted.
 		 * @param inputValue {string} The value entered into the address input.
 		 * @param country {string} The country code to pass to the provider's search method.
 		 * @param type {string} The address type ('billing' or 'shipping').
@@ -507,7 +507,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							enableBrowserAutofill( addressInput, false );
 						}, 200 );
 					};
-					addressInput.addEventListener( 'blur', blurHandlers[ type ] );
+					addressInput.addEventListener(
+						'blur',
+						blurHandlers[ type ]
+					);
 				}
 			} catch ( error ) {
 				console.error( 'Address search error:', error );
@@ -549,7 +552,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 			// Remove blur event listener when suggestions are hidden
 			if ( blurHandlers[ type ] ) {
-				addressInput.removeEventListener( 'blur', blurHandlers[ type ] );
+				addressInput.removeEventListener(
+					'blur',
+					blurHandlers[ type ]
+				);
 				delete blurHandlers[ type ];
 			}
 		}
@@ -613,6 +619,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					addressData.country
 				);
 			}
+			if ( addressData.address_1 ) {
+				setFieldValue(
+					addressInputs[ type ][ 'address_1' ],
+					addressData.address_1
+				);
+			}
 
 			// Note: Passing an invalid ID to clearTimeout() silently does nothing; no exception is thrown.
 			if ( addressSelectionTimeout ) {
@@ -625,12 +637,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 				// Set all available fields.
 				// Only set fields if the address data property exists and has a value.
-				if ( addressData.address_1 ) {
-					setFieldValue(
-						addressInputs[ type ][ 'address_1' ],
-						addressData.address_1
-					);
-				}
 				if ( addressData.address_2 ) {
 					setFieldValue(
 						addressInputs[ type ][ 'address_2' ],
@@ -705,20 +711,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
 			if ( addressInput && countryInput ) {
-				let inputTimeout;
-
 				addressInput.addEventListener( 'input', function () {
-					clearTimeout( inputTimeout );
-					const inputElement = this;
-					inputTimeout = setTimeout( () => {
-						if ( document.activeElement === inputElement ) {
-							displaySuggestions(
-								inputElement.value,
-								countryInput.value,
-								type
-							);
-						}
-					}, 100 );
+					displaySuggestions( this.value, countryInput.value, type );
 				} );
 
 				addressInput.addEventListener( 'keydown', async function ( e ) {
