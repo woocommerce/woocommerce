@@ -2,13 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import {
-	useBlockProps,
-	useInnerBlocksProps,
-	store as blockEditorStore,
-	__experimentalUseBlockPreview as useBlockPreview,
-	BlockContextProvider,
-} from '@wordpress/block-editor';
 import { BlockInstance, type BlockEditProps } from '@wordpress/blocks';
 import { withProduct } from '@woocommerce/block-hocs';
 import {
@@ -19,6 +12,18 @@ import {
 import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
+import {
+	useBlockProps,
+	store as blockEditorStore,
+	/* eslint-disable */
+	/* @ts-expect-error no exported member. */
+	useInnerBlocksProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseBlockPreview as useBlockPreview,
+	/* @ts-ignore module is exported as experimental */
+	BlockContextProvider,
+	/* eslint-enable */
+} from '@wordpress/block-editor';
 
 interface Attributes {
 	className?: string;
