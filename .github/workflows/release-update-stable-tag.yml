@@ -222,10 +222,6 @@ jobs:
 
           README_PATH="plugins/woocommerce/readme.txt"
 
-          echo "📋 Current stable tag line on $BRANCH_NAME:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
-
           # Update the stable tag
           sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
 
