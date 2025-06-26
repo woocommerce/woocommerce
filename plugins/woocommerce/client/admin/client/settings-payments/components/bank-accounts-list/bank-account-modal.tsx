@@ -170,9 +170,8 @@ export const BankAccountModal = ( {
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field is-required' }
+					className={ 'bank-account-modal__field' }
 					label={ __( 'Account Number', 'woocommerce' ) }
-					required
 					value={ formData.account_number }
 					onChange={ ( value ) =>
 						updateField( 'account_number', value )
