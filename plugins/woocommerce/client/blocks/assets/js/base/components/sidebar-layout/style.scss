@@ -49,7 +49,7 @@
 }
 
 @include cart-checkout-large-container {
-	.wc-block-components-sidebar {
+	.wc-block-components-sidebar.wp-block-woocommerce-checkout-totals-block {
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,
 		.wc-block-components-totals-coupon {
