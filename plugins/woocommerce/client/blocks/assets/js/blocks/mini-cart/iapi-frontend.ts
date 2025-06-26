@@ -342,20 +342,14 @@ const { state: cartItemState } = store(
 
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.regular_price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
 					cartItemState.currency
 				);
 			},
 
 			get itemPrice(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.price, 10 ),
 					cartItemState.currency
 				);
 			},
