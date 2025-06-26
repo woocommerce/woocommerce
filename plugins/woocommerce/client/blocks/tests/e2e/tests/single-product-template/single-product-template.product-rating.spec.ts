@@ -60,7 +60,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await page.click( 'text=Edit product' );
 			await page.getByRole( 'link', { name: 'Inventory' } ).click();
 			await page.getByRole( 'link', { name: 'Advanced' } ).click();
-			await page.waitForSelector( 'text=Enable reviews' );
+			await page.getByText( 'Enable reviews' ).waitFor();
 			await admin.page
 				.getByRole( 'checkbox', {
 					name: 'Enable reviews',
