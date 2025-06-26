@@ -41,36 +41,41 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
 
-	const handleContinue = () => {
+	const handleContinue = (): Promise< void > => {
 		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
-			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_kyc_sub_step_completed',
-				{
-					sub_step_id: 'business',
-					country: data.country || 'unknown',
-					business_type: data.business_type || 'unknown',
-					mcc: data.mcc || 'unknown',
-					source: sessionEntryPoint,
-				}
-			);
-
-			// Complete business sub step.
-			completeSubStep(
+			// Complete the business sub-step.
+			return completeSubStep(
 				'business',
 				currentStep?.actions?.save?.href ?? undefined,
 				currentStep?.context?.sub_steps ?? {}
-			);
+			).then( () => {
+				recordPaymentsOnboardingEvent(
+					'woopayments_onboarding_modal_kyc_sub_step_completed',
+					{
+						sub_step_id: 'business',
+						country: data.country || 'unknown',
+						business_type: data.business_type || 'unknown',
+						mcc: data.mcc || 'unknown',
+						source: sessionEntryPoint,
+					}
+				);
 
-			return nextStep();
+				return nextStep();
+			} );
 		}
+
+		// If there are errors, set all fields as touched to show validation errors.
 		setTouched( mapValues( touched, () => true ) );
+
+		// Return a resolved promise when there are errors.
+		return Promise.resolve();
 	};
 
 	return (
 		<form
-			onSubmit={ ( event ) => {
+			onSubmit={ async ( event ) => {
 				event.preventDefault();
-				handleContinue();
+				await handleContinue();
 			} }
 		>
 			{ children }
