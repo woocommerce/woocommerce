@@ -23,7 +23,7 @@ abstract class AbstractShippingProvider {
 	abstract public function get_name(): string;
 
 	/**
-	 * Get the description of the shipping provider.
+	 * Get the path of the icon of the shipping provider.
 	 *
 	 * @return string
 	 */
