@@ -21,18 +21,3 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     transition-duration: 0.15s;
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-
-/* Product categories. */
-.wp-block-post-terms:not(.taxonomy-product_cat) a {
-    background-color: var(--wp--preset--color--theme-5);
-    padding: var(--wp--preset--spacing--20);
-}
-
-/* Post terms. */
-.wp-block-post-terms:not(.taxonomy-product_cat) a {
-    margin-right: var(--wp--preset--spacing--20);
-}
-
-.wp-block-post-terms:not(.taxonomy-product_cat) a:last-child {
-    margin-right: 0;
-}

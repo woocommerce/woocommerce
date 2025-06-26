@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/theme.json",
+    "version": 3,
+    "slug": "post-terms-with-background",
+    "title": "With Background",
+    "blockTypes": [
+        "core/post-terms"
+    ],
+    "styles": {
+        "elements": {
+            "link": {
+                "color": {
+                    "background": "var(--wp--preset--color--theme-5)"
+                },
+                "spacing": {
+                    "padding": "var(--wp--preset--spacing--20)",
+                    "margin": {
+                        "right": "var(--wp--preset--spacing--20)"
+                    }
+                }
+            }
+        }
+    }
+}
