@@ -2,16 +2,22 @@
  * External dependencies
  */
 import { type BlockEditProps } from '@wordpress/blocks';
-import {
-	useBlockProps,
-	__experimentalUseColorProps as useColorProps,
-	getTypographyClassesAndStyles as useTypographyProps,
-	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
-	useSettings,
-} from '@wordpress/block-editor';
 import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import clsx from 'clsx';
+import {
+	useBlockProps,
+	/* eslint-disable */
+	/* @ts-expect-error no exported member. */
+	getTypographyClassesAndStyles as useTypographyProps,
+	/* @ts-expect-error no exported member. */
+	useSettings,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseColorProps as useColorProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
+	/* eslint-enable */
+} from '@wordpress/block-editor';
 
 interface Attributes {
 	className?: string;
