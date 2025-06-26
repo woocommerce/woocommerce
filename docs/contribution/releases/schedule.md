@@ -29,12 +29,12 @@ This step is where various testing processes are happening:
 
 ### RC2 (RC1 + 1 week)
 
-This step is where we release regressions fixes discovered in RC1, as part of the release stabilization. At this point, the Developer Advocacy team continues to update the pre-release announcement.
+This step is where we release regressions fixes discovered in RC1, as part of the release stabilization.
+At this point, the Developer Advocacy team continues to update the pre-release announcement.
 
 ### Final Release (RC2 + 1 week)
 
 This step is where the stable release version becomes available to everyone.
-
 At this point, the Developer Advocacy team publishes release highlights that are prepared in-advance ([example](https://developer.woocommerce.com/2025/06/09/woocommerce-9-9-its-fast-period/)).
 
 ## Delays
