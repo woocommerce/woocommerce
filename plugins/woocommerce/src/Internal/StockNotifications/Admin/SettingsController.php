@@ -107,7 +107,6 @@ class SettingsController {
 					'id'      => 'wc_customer_stock_notifications_delete_unverified_days_threshold',
 					'default' => 0,
 					'type'    => 'number',
-					'class'   => 'double_opt_in_required',
 				),
 
 				array(

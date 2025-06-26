@@ -57,7 +57,8 @@
 					console.log( 'Double opt-in disabled' );
 					$( this ).closest( 'tr' ).next( 'tr' ).hide();
 				}
-			} );
+			} )
+			.trigger( 'change' );
 
 		// Color picker
 		$( '.colorpick' )
