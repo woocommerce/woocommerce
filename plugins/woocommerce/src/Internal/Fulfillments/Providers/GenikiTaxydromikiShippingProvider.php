@@ -44,7 +44,7 @@ class GenikiTaxydromikiShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../geniki-taxydromiki.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/geniki-taxydromiki.png';
 	}
 
 	/**

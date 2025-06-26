@@ -44,7 +44,7 @@ class ACSCourierShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../acs-courier.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/acs-courier.png';
 	}
 
 	/**

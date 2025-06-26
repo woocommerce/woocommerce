@@ -44,7 +44,7 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../amazon-logistics.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/amazon-logistics.png';
 	}
 
 	/**

@@ -44,7 +44,7 @@ class PosteSanMarinoShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../poste-san-marino.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/poste-san-marino.png';
 	}
 
 	/**

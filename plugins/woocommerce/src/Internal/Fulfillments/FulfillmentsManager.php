@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
+use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 
 /**
  * FulfillmentsManager class.
@@ -89,6 +89,8 @@ class FulfillmentsManager {
 			include __DIR__ . '/ShippingProviders.php'
 		);
 
+		ksort( $shipping_providers );
+
 		return $shipping_providers;
 	}
 
@@ -158,7 +160,7 @@ class FulfillmentsManager {
 				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
 			}
 
-				$tracking_url = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			$tracking_url = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
 			if ( ! is_null( $tracking_url ) ) {
 				return array(
 					'provider'     => $provider_instance->get_name(),

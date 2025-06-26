@@ -44,7 +44,7 @@ class CeskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../ceska-posta.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/ceska-posta.png';
 	}
 
 	/**

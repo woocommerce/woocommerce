@@ -44,7 +44,7 @@ class CDEKShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../cdek.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/cdek.png';
 	}
 
 	/**

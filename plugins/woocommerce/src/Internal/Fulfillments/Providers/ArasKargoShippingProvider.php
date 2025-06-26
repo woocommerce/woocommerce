@@ -44,7 +44,7 @@ class ArasKargoShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../aras-kargo.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/aras-kargo.png';
 	}
 
 	/**

@@ -44,7 +44,7 @@ class YurticiKargoShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../yurtici-kargo.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/yurtici-kargo.png';
 	}
 
 	/**

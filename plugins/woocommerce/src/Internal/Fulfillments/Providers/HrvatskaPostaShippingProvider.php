@@ -44,7 +44,7 @@ class HrvatskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../hrvatska-posta.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/hrvatska-posta.png';
 	}
 
 	/**

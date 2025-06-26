@@ -44,7 +44,7 @@ class IslandsposturShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../islandspostur.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/islandspostur.png';
 	}
 
 	/**

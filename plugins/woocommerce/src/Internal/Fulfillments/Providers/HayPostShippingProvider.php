@@ -44,7 +44,7 @@ class HaypostShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../haypost.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/haypost.png';
 	}
 
 	/**

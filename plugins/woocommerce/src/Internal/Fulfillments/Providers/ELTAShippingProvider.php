@@ -44,7 +44,7 @@ class ELTAShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../elta.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/elta.png';
 	}
 
 	/**

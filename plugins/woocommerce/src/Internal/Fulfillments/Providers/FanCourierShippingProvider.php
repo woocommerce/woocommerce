@@ -44,7 +44,7 @@ class FanCourierShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../fan-courier.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/fan-courier.png';
 	}
 
 	/**

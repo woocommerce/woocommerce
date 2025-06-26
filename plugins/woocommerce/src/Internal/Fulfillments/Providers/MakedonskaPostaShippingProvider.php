@@ -44,7 +44,7 @@ class MakedonskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../makedonska-posta.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/makedonska-posta.png';
 	}
 
 	/**

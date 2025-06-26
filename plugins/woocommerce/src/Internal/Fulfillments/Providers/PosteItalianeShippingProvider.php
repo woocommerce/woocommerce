@@ -44,7 +44,7 @@ class PosteItalianeShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../poste-italiane.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/poste-italiane.png';
 	}
 
 	/**

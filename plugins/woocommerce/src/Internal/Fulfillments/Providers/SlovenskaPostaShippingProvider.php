@@ -44,7 +44,7 @@ class SlovenskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../slovenska-posta.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/slovenska-posta.png';
 	}
 
 	/**

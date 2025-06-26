@@ -44,7 +44,7 @@ class EcontShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../econt.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/econt.png';
 	}
 
 	/**

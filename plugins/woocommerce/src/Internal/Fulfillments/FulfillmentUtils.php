@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 use WC_Order;
 
 /**
@@ -327,6 +328,52 @@ class FulfillmentUtils {
 			'wc_fulfillment_fulfillment_statuses',
 			self::get_default_fulfillment_statuses()
 		);
+	}
+
+	/**
+	 * Get the shipping providers as an array of objects.
+	 *
+	 * This method retrieves the shipping providers registered in the WooCommerce Fulfillments system.
+	 * It can be filtered using the `wc_fulfillment_shipping_providers` filter.
+	 *
+	 * @return array An associative array of shipping providers with their details.
+	 */
+	public static function get_shipping_providers_object(): array {
+		/**
+		 * This filter allows plugins to modify the list of shipping providers.
+		 * It can be used to add, remove, or change the shipping providers available in the
+		 * WooCommerce Fulfillments system.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param array $shipping_providers The default list of shipping providers.
+		 */
+		$shipping_providers = apply_filters(
+			'wc_fulfillment_shipping_providers',
+			array()
+		);
+		if ( ! is_array( $shipping_providers ) ) {
+			return array();
+		}
+		$shipping_providers_object = array();
+		foreach ( $shipping_providers as $shipping_provider ) {
+			if ( is_string( $shipping_provider ) && class_exists( $shipping_provider ) && is_subclass_of( $shipping_provider, AbstractShippingProvider::class ) ) {
+				$shipping_provider_instance = new $shipping_provider();
+				$shipping_providers_object[ $shipping_provider_instance->get_key() ] = array(
+					'label' => $shipping_provider_instance->get_name(),
+					'icon'  => $shipping_provider_instance->get_icon(),
+					'value' => $shipping_provider_instance->get_key(),
+				);
+			}
+			if ( is_object( $shipping_provider ) && $shipping_provider instanceof AbstractShippingProvider ) {
+				$shipping_providers_object[ $shipping_provider->get_key() ] = array(
+					'label' => $shipping_provider->get_name(),
+					'icon'  => $shipping_provider->get_icon(),
+					'value' => $shipping_provider->get_key(),
+				);
+			}
+		}
+		return $shipping_providers_object;
 	}
 
 	/**

@@ -44,7 +44,7 @@ class AzerpostShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../azerpost.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/azerpost.png';
 	}
 
 	/**

@@ -44,7 +44,7 @@ class FastwayShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../fastway.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/fastway.png';
 	}
 
 	/**

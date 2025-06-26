@@ -103,8 +103,16 @@
 				}
 			}
 			.components-combobox-control__suggestions-container {
+				.components-form-token-field__suggestions-list {
+					.components-form-token-field__suggestion.is-empty {
+						padding: 8px 12px;
+						font-size: 13px;
+						line-height: 20px;
+						font-weight: 400;
+					}
+				}
 				.components-form-token-field__suggestions-list li {
-					padding: 0 16px;
+					padding: 0 12px;
 					.woocommerce-fulfillment-shipping-provider-list-item {
 						display: flex;
 						flex-direction: row;
@@ -115,11 +123,13 @@
 
 						&.woocommerce-fulfillment-shipping-provider-list-item-other {
 							border-top: 1px solid #e0e0e0;
+							padding-top: 16px;
+							margin-top: 8px;
 						}
 
 						.woocommerce-fulfillment-shipping-provider-list-item-icon {
-							width: 16px;
-							height: 16px;
+							width: 24px;
+							height: 24px;
 							display: flex;
 							align-items: center;
 							justify-content: center;

@@ -44,7 +44,7 @@ class RussianPostShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		return __DIR__ . '../../../russian-post.png';
+		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/russian-post.png';
 	}
 
 	/**
