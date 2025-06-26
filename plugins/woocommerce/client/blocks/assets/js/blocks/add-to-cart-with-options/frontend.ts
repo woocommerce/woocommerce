@@ -19,7 +19,6 @@ export type Context = {
 	productId: number;
 	productType: string;
 	selectedAttributes: CartVariationItem[];
-	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -157,12 +156,16 @@ const addToCartWithOptionsStore = store(
 					availableVariations,
 					selectedAttributes
 				);
+<<<<<<< feat/blockified-add-to-cart-button-disable
 
 				// Variable products must be in stock and have a selected variation
 				return Boolean(
 					matchedVariation?.is_in_stock &&
 						matchedVariation?.variation_id
 				);
+=======
+				return !! matchedVariation?.variation_id;
+>>>>>>> trunk
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -281,7 +284,21 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityInputChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, currentValue } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					currentValue,
+					childProductId
+				);
+			},
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );

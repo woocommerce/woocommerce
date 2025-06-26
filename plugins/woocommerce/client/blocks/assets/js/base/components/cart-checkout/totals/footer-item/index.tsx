@@ -158,6 +158,7 @@ const TotalsFooterItem = ( {
 					) }
 				</>
 			}
+			showSkeleton={ cart.cartIsLoading }
 		/>
 	);
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve Product Filters block performance with optimized caching for product IDs.
