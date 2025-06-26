@@ -258,18 +258,18 @@ const { state: cartItemState } = store(
 			get minimumReached(): boolean {
 				const {
 					quantity,
-					quantity_limits: { minimum },
+					quantity_limits: { minimum, multiple_of: multipleOf = 1 },
 				} = cartItemState.cartItem;
 
-				return quantity - 1 < minimum;
+				return quantity - multipleOf < minimum;
 			},
 
 			get maximumReached(): boolean {
 				const {
 					quantity,
-					quantity_limits: { maximum },
+					quantity_limits: { maximum, multiple_of: multipleOf = 1 },
 				} = cartItemState.cartItem;
-				return quantity + 1 > maximum;
+				return quantity + multipleOf > maximum;
 			},
 
 			get reduceQuantityLabel(): string {
@@ -397,16 +397,20 @@ const { state: cartItemState } = store(
 			},
 
 			*incrementQuantity(): Generator< unknown, void > {
+				const { multiple_of: multipleOf = 1 } =
+					cartItemState.cartItem.quantity_limits;
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
-					quantity: cartItemState.cartItem.quantity + 1,
+					quantity: cartItemState.cartItem.quantity + multipleOf,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
+				const { multiple_of: multipleOf = 1 } =
+					cartItemState.cartItem.quantity_limits;
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
-					quantity: cartItemState.cartItem.quantity - 1,
+					quantity: cartItemState.cartItem.quantity - multipleOf,
 				} );
 			},
 		},
