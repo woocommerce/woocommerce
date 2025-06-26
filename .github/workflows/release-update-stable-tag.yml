@@ -222,11 +222,6 @@ jobs:
 
           README_PATH="plugins/woocommerce/readme.txt"
 
-          if [ ! -f "$README_PATH" ]; then
-            echo "::error::readme.txt not found at $README_PATH"
-            exit 1
-          fi
-
           echo "📋 Current stable tag line on $BRANCH_NAME:"
           grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
           echo "=========================="
