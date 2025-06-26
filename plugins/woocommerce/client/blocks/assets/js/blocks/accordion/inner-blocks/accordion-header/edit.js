@@ -5,21 +5,32 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
-	__experimentalUseBorderProps as useBorderProps,
-	__experimentalUseColorProps as useColorProps,
-	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
-	__experimentalGetShadowClassesAndStyles as useShadowProps,
-	BlockControls,
-	HeadingLevelDropdown,
 	RichText,
 	InspectorControls,
+	/* eslint-disable */
+	/* @ts-expect-error HeadingLevelDropdown is not typed in @wordpress/block-editor */
+	HeadingLevelDropdown,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseBorderProps as useBorderProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalUseColorProps as useColorProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetSpacingClassesAndStyles as useSpacingProps,
+	/* @ts-ignore module is exported as experimental */
+	__experimentalGetShadowClassesAndStyles as useShadowProps,
+	BlockControls,
+	/* @ts-ignore module is exported as experimental */
 } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	ToolbarGroup,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	/* @ts-ignore module is exported as experimental */
 	__experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
+	/* eslint-enable */
 } from '@wordpress/components';
 /**
  * Internal dependencies
