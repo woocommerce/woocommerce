@@ -58,7 +58,7 @@ class ChronopostShippingProvider extends AbstractShippingProvider {
 	}
 
 	/**
-	 * Get the countries from which UPS can ship.
+	 * Get the countries from which this provider can ship.
 	 *
 	 * @return array An array of country codes.
 	 */
@@ -67,7 +67,7 @@ class ChronopostShippingProvider extends AbstractShippingProvider {
 	}
 
 	/**
-	 * Get the countries to which UPS can ship.
+	 * Get the countries to which this provider can ship.
 	 *
 	 * @return array An array of country codes.
 	 */
@@ -76,12 +76,12 @@ class ChronopostShippingProvider extends AbstractShippingProvider {
 	}
 
 	/**
-	 * Check if UPS can ship from a specific country.
+	 * Check if this provider can ship from a specific country.
 	 *
 	 * @param string $shipping_from The country code from which the shipment is sent.
 	 * @param string $shipping_to The country code to which the shipment is sent.
 	 *
-	 * @return bool True if UPS can ship from the country, false otherwise.
+	 * @return bool True if this provider can ship from the country, false otherwise.
 	 */
 	public function can_ship_from_to( string $shipping_from, string $shipping_to ): bool {
 		return true;
