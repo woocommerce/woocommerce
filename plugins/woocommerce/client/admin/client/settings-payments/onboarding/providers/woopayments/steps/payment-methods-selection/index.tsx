@@ -146,20 +146,20 @@ export default function PaymentMethodsSelection() {
 
 	// Check for overflow on initial render and on window resize.
 	useEffect( () => {
-		const timeoutId = checkHasOverflow();
+		let timeoutId = checkHasOverflow();
 
 		// Check for overflow on window resize.
 		const handleResize = () => {
 			// Clear any existing timeout before creating a new one.
 			clearTimeout( timeoutId );
-			checkHasOverflow();
+			timeoutId = checkHasOverflow();
 		};
 		window.addEventListener( 'resize', handleResize );
 
 		return () => {
 			// Cleanup the timeout and event listener on unmount.
 			clearTimeout( timeoutId );
-			window.removeEventListener( 'resize', checkHasOverflow );
+			window.removeEventListener( 'resize', handleResize );
 		};
 	}, [ isExpanded, initialVisibilityMap ] );
 
