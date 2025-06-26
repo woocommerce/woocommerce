@@ -5,8 +5,10 @@
  * Categories: WooCommerce
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Featured products"},"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-collection {"queryId":7,"query":{"perPage":8,"pages":"1","offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"featured":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/featured","hideControls":["inherit","featured","filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"Featured products"},"align":"wide","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
+<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --><!-- wp:woocommerce/product-collection {"queryId":7,"query":{"perPage":8,"pages":"1","offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"featured":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/featured","hideControls":["inherit","featured","filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":false,"previewMessage":"Actual products will vary depending on the page being viewed."},"align":"wide"} -->
 <div class="wp-block-woocommerce-product-collection alignwide"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}}} -->
 <h2 class="wp-block-heading has-text-align-left" style="margin-bottom:var(--wp--preset--spacing--50)"><?php esc_html_e('Featured products', 'woostarter');?></h2>
 <!-- /wp:heading -->
@@ -22,5 +24,7 @@
 <div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 <!-- /wp:woocommerce/product-template --></div>
-<!-- /wp:woocommerce/product-collection --></div>
+<!-- /wp:woocommerce/product-collection --><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
+<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:group -->

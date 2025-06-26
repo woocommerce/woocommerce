@@ -15,3 +15,7 @@
 <!-- wp:pattern {"slug":"woostarter/hero-with-text-and-one-button"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/woocommerce-best-sellers-3-columns"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/testimonials-2-columns"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/featured-products"} /-->
