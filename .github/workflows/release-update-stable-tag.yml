@@ -181,7 +181,8 @@ jobs:
 
           # Check if there are any changes
           if svn diff --quiet; then
-            echo "ℹ️ No changes detected - stable tag is already $TARGET_VERSION"
+            echo "::error::No changes detected - stable tag is already $TARGET_VERSION"
+            exit 1
           else
             echo "📤 Changes detected. Committing changes to SVN..."
             svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
