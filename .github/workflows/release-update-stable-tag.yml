@@ -109,50 +109,30 @@ jobs:
           echo "current-stable=$CURRENT_STABLE" >> $GITHUB_OUTPUT
 
       - name: Compare versions
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const compareVersions = (a, b) => {
-              const aParts = a.split('.').map(Number);
-              const bParts = b.split('.').map(Number);
-              const maxLength = Math.max(aParts.length, bParts.length);
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+          CURRENT_STABLE: ${{ steps.current-stable.outputs.current-stable }}
+          ALLOW_REVERT: ${{ github.event.inputs.allow-revert }}
+        run: |
+          echo "📋 Current stable: $CURRENT_STABLE"
+          echo "📋 Target version: $TARGET_VERSION"
 
-              for (let i = 0; i < maxLength; i++) {
-                const aPart = aParts[i] || 0;
-                const bPart = bParts[i] || 0;
+          # Use PHP's version_compare function
+          COMPARISON=$(php -r "echo version_compare('$TARGET_VERSION', '$CURRENT_STABLE');")
 
-                if (aPart > bPart) return 1;
-                if (aPart < bPart) return -1;
-              }
-              return 0;
-            };
-
-            const currentStable = '${{ steps.current-stable.outputs.current-stable }}';
-            const targetVersion = '${{ steps.extract-version.outputs.version }}';
-            const allowRevert = '${{ github.event.inputs.allow-revert }}' === 'true';
-
-            console.log(`Current stable: ${currentStable}`);
-            console.log(`Target version: ${targetVersion}`);
-
-            if (currentStable === targetVersion) {
-              core.setFailed(`Stable tag is already set to ${targetVersion}. No update needed.`);
-              return;
-            }
-
-            const comparison = compareVersions(targetVersion, currentStable);
-
-            if (comparison > 0) {
-              console.log(`✅ Normal upgrade - updating from '${currentStable}' to '${targetVersion}'`);
-              return;
-            }
-
-            console.log(`⚠️ Warning: Target version (${targetVersion}) is lower than current stable tag (${currentStable})`);
-            if (!allowRevert) {
-              core.setFailed('Cannot set stable tag to a lower version without explicit revert confirmation. Please check the "Allow revert" checkbox if this is intentional.');
-              return;
-            }
-
-            console.log(`✅ Revert confirmed - proceeding with downgrade from '${currentStable}' to '${targetVersion}'`);
+          if [ "$COMPARISON" = "0" ]; then
+            echo "::error::Stable tag is already set to $TARGET_VERSION. No update needed."
+            exit 1
+          elif [ "$COMPARISON" = "-1" ]; then
+            echo "⚠️ Warning: Target version ($TARGET_VERSION) is lower than current stable tag ($CURRENT_STABLE)"
+            if [ "$ALLOW_REVERT" != "true" ]; then
+              echo "::error::Cannot set stable tag to a lower version without explicit revert confirmation. Please check the 'Allow revert' checkbox if this is intentional."
+              exit 1
+            fi
+            echo "✅ Revert confirmed - proceeding with downgrade from '$CURRENT_STABLE' to '$TARGET_VERSION'"
+          else
+            echo "✅ Normal upgrade - updating from '$CURRENT_STABLE' to '$TARGET_VERSION'"
+          fi
 
   update-wporg-stable-tag:
     runs-on: ubuntu-latest
