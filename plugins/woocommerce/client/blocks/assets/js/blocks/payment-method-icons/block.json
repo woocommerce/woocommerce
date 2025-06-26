@@ -7,10 +7,6 @@
 	"keywords": [ "woocommerce", "payments", "payment methods" ],
 	"textdomain": "woocommerce",
 	"attributes": {
-		"className": {
-			"type": "string",
-			"default": ""
-		},
 		"numberOfIcons": {
 			"type": "number",
 			"default": 5
