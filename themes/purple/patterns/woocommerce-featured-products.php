@@ -3,6 +3,7 @@
  * Title: Featured products
  * Slug: woostarter/featured-products
  * Categories: WooCommerce
+ * Block Types: woocommerce/product-collection
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Featured products"},"align":"wide","layout":{"type":"constrained"}} -->
