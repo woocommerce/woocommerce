@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace WooCommerce\Internal\Fulfillments\Providers;
+namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
  * MRW Shipping Provider class.

@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace WooCommerce\Internal\Fulfillments\Providers;
+namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * CeskaPosta Shipping Provider class.
+ * Česká pošta Shipping Provider class.
  */
 class CeskaPostaShippingProvider extends AbstractShippingProvider {
 	/**
@@ -35,7 +35,7 @@ class CeskaPostaShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return 'Ceska Posta';
+		return 'Česká pošta';
 	}
 
 	/**

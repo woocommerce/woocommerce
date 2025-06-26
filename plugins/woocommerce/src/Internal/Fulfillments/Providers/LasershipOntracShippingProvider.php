@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace WooCommerce\Internal\Fulfillments\Providers;
+namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
  * Lasership/OnTrac Shipping Provider class.
@@ -35,7 +35,7 @@ class LasershipOntracShippingProvider extends AbstractShippingProvider {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return 'Lasership/OnTrac';
+		return 'LaserShip/OnTrac';
 	}
 
 	/**
