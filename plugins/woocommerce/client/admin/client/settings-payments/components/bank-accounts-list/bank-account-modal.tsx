@@ -20,7 +20,7 @@ import {
 	getSortCodeLabel,
 	shouldDisplaySortCode,
 } from './utils';
-import { validateRequiredField, validateNumericField } from './validation';
+import { validateRequiredField } from './validation';
 import './bank-account-modal.scss';
 
 /**
