@@ -205,29 +205,4 @@ class PaymentMethodIcons extends AbstractBlock {
 
 		return $other_payment_methods;
 	}
-
-	/**
-	 * Check if WooPayments is enabled and has card types enabled.
-	 *
-	 * @return bool WooPayments enabled and has card types enabled.
-	 */
-	private function is_woo_payments_enabled() {
-		if ( ! class_exists( 'WC_Payments' ) ) {
-			return false;
-		}
-
-		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-		if ( empty( $available_gateways ) ) {
-			return false;
-		}
-
-		foreach ( $available_gateways as $gateway_id => $gateway ) {
-			if ( 'woocommerce_payments' === $gateway_id && 'yes' === $gateway->enabled && in_array( 'card', $gateway->get_option( 'upe_enabled_payment_method_ids' ), true ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 }
