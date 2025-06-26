@@ -257,7 +257,7 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleInputQuantityChange: (
+			handleQuantityInputChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
@@ -271,7 +271,7 @@ const addToCartWithOptionsStore = store(
 					childProductId
 				);
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
