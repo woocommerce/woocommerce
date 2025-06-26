@@ -19,6 +19,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
 <!-- wp:heading -->
@@ -47,6 +49,6 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:paragraph -->
 <p><?php
 /* translators: %s: Store admin email */
-	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s,', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>
 <!-- /wp:paragraph -->

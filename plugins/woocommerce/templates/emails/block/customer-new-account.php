@@ -19,6 +19,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
 <!-- wp:heading -->
@@ -70,7 +72,7 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 			)
 		)
 	);
-?></p>
+	?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->

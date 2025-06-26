@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer note email (inital block version)
+ * Customer note email (initial block content)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -19,6 +19,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
 <!-- wp:heading -->
