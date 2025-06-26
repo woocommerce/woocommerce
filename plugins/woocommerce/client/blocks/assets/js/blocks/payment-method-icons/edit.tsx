@@ -50,7 +50,10 @@ const Edit = ( {
 			paymentMethodIcons: Record< string, { icon: string } >;
 		};
 		const availableTypes = Object.keys( paymentMethodIcons );
-		const iconsToShow = Math.min( numberOfIcons, availableTypes.length );
+		const iconsToShow =
+			numberOfIcons === 0
+				? availableTypes.length
+				: Math.min( numberOfIcons, availableTypes.length );
 
 		return (
 			<div { ...blockProps }>
@@ -67,10 +70,10 @@ const Edit = ( {
 							onChange={ ( value ) =>
 								setAttributes( { numberOfIcons: value } )
 							}
-							min={ 1 }
+							min={ 0 }
 							max={ availableTypes.length }
 							help={ __(
-								'Choose how many icons to display.',
+								'Choose how many icons to display. To show all icons, use 0 (zero).',
 								'woocommerce'
 							) }
 						/>

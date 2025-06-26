@@ -75,7 +75,8 @@ class PaymentMethodIcons extends AbstractBlock {
 	private function render_card_types( $attributes ) {
 		$output             = '';
 		$enabled_card_types = $this->get_enabled_card_types();
-		$number_of_icons    = max( 1, min( intval( $attributes['numberOfIcons'] ?? 5 ), count( $enabled_card_types ) ) );
+		$number_of_icons    = $attributes['numberOfIcons'] ?? 0;
+		$number_of_icons    = $number_of_icons === 0 ? count( $enabled_card_types ) : max( 0, min( intval( $number_of_icons ), count( $enabled_card_types ) ) );
 
 		foreach ( $enabled_card_types as $card_type => $card_data ) {
 			if ( $number_of_icons > 0 ) {
