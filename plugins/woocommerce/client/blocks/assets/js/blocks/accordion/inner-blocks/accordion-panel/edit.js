@@ -4,6 +4,8 @@
 import clsx from 'clsx';
 import {
 	useBlockProps,
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
 	/* eslint-disable */
 	/* @ts-ignore module is exported as experimental */
 	__experimentalUseBorderProps as useBorderProps,
