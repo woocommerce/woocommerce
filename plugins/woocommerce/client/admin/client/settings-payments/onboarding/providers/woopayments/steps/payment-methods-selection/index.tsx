@@ -66,7 +66,7 @@ export default function PaymentMethodsSelection() {
 
 	// Calculate and store initial visibility *once* when data is ready
 	useEffect( () => {
-		// Only proceed if the map hasn't been populated yet
+		// Only proceed if the map has been populated.
 		if ( initialVisibilityMap !== null ) {
 			return;
 		}
@@ -132,32 +132,36 @@ export default function PaymentMethodsSelection() {
 
 	// Check if overflow exists for Payment Methods list container.
 	const checkHasOverflow = () => {
-		const pmsContainer = scrollRef.current;
-
-		if ( pmsContainer ) {
-			// Compare scrollHeight and clientHeight to determine overflow.
-			setHasOverflow(
-				pmsContainer.scrollHeight > pmsContainer.clientHeight
-			);
-		}
+		// Delay the check slightly to ensure DOM is ready.
+		return setTimeout( () => {
+			const pmsContainer = scrollRef.current;
+			if ( pmsContainer ) {
+				// Compare scrollHeight and clientHeight to determine overflow
+				const hasScrollOverflow =
+					pmsContainer.scrollHeight > pmsContainer.clientHeight;
+				setHasOverflow( hasScrollOverflow );
+			}
+		}, 10 );
 	};
 
 	// Check for overflow on initial render and on window resize.
 	useEffect( () => {
-		// Use setTimeout to ensure the DOM is updated before checking for overflow.
-		const timeout = setTimeout( () => {
-			checkHasOverflow();
-		}, 0 ); // Runs after paint
+		const timeoutId = checkHasOverflow();
 
 		// Check for overflow on window resize.
-		window.addEventListener( 'resize', checkHasOverflow );
+		const handleResize = () => {
+			// Clear any existing timeout before creating a new one.
+			clearTimeout( timeoutId );
+			checkHasOverflow();
+		};
+		window.addEventListener( 'resize', handleResize );
 
 		return () => {
 			// Cleanup the timeout and event listener on unmount.
-			clearTimeout( timeout );
+			clearTimeout( timeoutId );
 			window.removeEventListener( 'resize', checkHasOverflow );
 		};
-	}, [] );
+	}, [ isExpanded, initialVisibilityMap ] );
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
@@ -237,12 +241,6 @@ export default function PaymentMethodsSelection() {
 										);
 
 										setIsExpanded( ! isExpanded );
-
-										// Check for overflow after expanding hidden payment methods.
-										// Use setTimeout to ensure the DOM is updated before checking for overflow.
-										setTimeout( () => {
-											checkHasOverflow();
-										}, 0 );
 									} }
 									tabIndex={ 0 }
 									aria-expanded={ isExpanded }
