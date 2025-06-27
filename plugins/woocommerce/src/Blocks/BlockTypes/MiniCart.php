@@ -508,9 +508,9 @@ class MiniCart extends AbstractBlock {
 			$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
 			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
 
-			$button_role = 'open_drawer' === $on_cart_click_behaviour
-				? ''
-				: 'role="link"';
+			$button_role = 'navigate_to_checkout' === $on_cart_click_behaviour
+				? 'role="link"'
+				: '';
 
 			ob_start();
 			?>
