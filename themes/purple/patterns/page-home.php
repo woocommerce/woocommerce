@@ -22,4 +22,4 @@
 
 <!-- wp:pattern {"slug":"woostarter/social-media-call-to-action-with-hero-image"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/store-features-row-icons-4-columns"} /-->
+<!-- wp:pattern {"slug":"woostarter/store-features-four-columns"} /-->
