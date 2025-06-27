@@ -77,9 +77,7 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-medium,
-.is-small,
-.is-mobile {
+@include cart-checkout-below-large-container {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;

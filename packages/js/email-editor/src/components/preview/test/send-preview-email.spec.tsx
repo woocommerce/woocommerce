@@ -91,6 +91,7 @@ const setupUseSelectMock = ( overrides: Partial< PreviewState > = {} ) => {
 			selector: (
 				select: ( storeName: string ) => {
 					getPreviewState: () => PreviewState;
+					getEmailPostType: () => string;
 				}
 			) => unknown
 		) =>
@@ -103,6 +104,7 @@ const setupUseSelectMock = ( overrides: Partial< PreviewState > = {} ) => {
 					errorMessage: '',
 					...overrides,
 				} ),
+				getEmailPostType: () => 'post',
 			} ) )
 	);
 };

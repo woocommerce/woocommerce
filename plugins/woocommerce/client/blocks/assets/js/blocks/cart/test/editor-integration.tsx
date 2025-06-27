@@ -23,6 +23,7 @@ async function setup( attributes: BlockAttributes ) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
 	return initializeEditor( testBlock );
 }
+
 describe( 'Cart block editor integration', () => {
 	beforeAll( () => {
 		// Register a checkout filter to allow `core/table` block in all Cart inner blocks,
@@ -113,5 +114,73 @@ describe( 'Cart block editor integration', () => {
 			name: /Audio/i,
 		} );
 		expect( filledCartAudioOption ).not.toBeInTheDocument();
+	} );
+
+	it( 'can convert to Empty Cart block', async () => {
+		// Setup the cart block with default attributes (filled cart view)
+		await setup( {} );
+
+		// Verify Cart block is properly initialized in the editor
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+
+		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
+		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
+
+		expect( filledCartBlock ).toBeInTheDocument();
+		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).toBeInTheDocument();
+		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+
+		await selectBlock( /Block: Filled Cart/i );
+
+		const selectParentBlockButton = screen.getByRole( 'button', {
+			name: /Select parent block: Cart/i,
+		} );
+
+		await act( async () => {
+			await userEvent.click( selectParentBlockButton );
+		} );
+
+		const switchViewButton = screen.getByRole( 'button', {
+			name: /Switch view/i,
+		} );
+
+		await act( async () => {
+			await userEvent.click( switchViewButton );
+		} );
+
+		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		const emptyCartButton = screen.getByRole( 'menuitem', {
+			name: /Empty Cart/i,
+		} );
+
+		await act( async () => {
+			await userEvent.click( emptyCartButton );
+		} );
+
+		expect(
+			screen.getByLabelText( /^Block: Empty Cart$/i )
+		).toBeInTheDocument();
+		expect( emptyCartBlock ).toHaveAttribute( 'hidden', '' );
+		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+
+		// Go back to filled cart
+		await act( async () => {
+			await userEvent.click( switchViewButton );
+		} );
+
+		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		const filledCartButton = screen.getByRole( 'menuitem', {
+			name: /Filled Cart/i,
+		} );
+
+		await act( async () => {
+			await userEvent.click( filledCartButton );
+		} );
+
+		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 	} );
 } );

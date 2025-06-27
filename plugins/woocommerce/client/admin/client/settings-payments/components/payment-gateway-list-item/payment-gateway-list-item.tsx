@@ -62,17 +62,31 @@ export const PaymentGatewayListItem = ( {
 			! gateway.onboarding.state.completed );
 
 	const determineGatewayStatus = () => {
-		if ( ! gateway.state.enabled && gateway.state.needs_setup ) {
+		// If the gateway needs onboarding then it also needs setup.
+		// If the gateway is not enabled but needs setup, it should be considered as needing setup.
+		if (
+			gatewayNeedsOnboarding ||
+			( ! gateway.state.enabled && gateway.state.needs_setup )
+		) {
 			return 'needs_setup';
 		}
-		if ( gateway.state.enabled ) {
-			// A test account also implies test mode.
-			if ( gateway.onboarding.state.test_mode ) {
-				return 'test_account';
-			}
 
-			if ( gateway.state.test_mode ) {
-				return 'test_mode';
+		// If the gateway is enabled then it is in an active state, regardless if it needs setup or not.
+		// If it was allowed to be enabled, we assume the needs setup state is not critical.
+		// We will try and determine more specific statuses.
+		if ( gateway.state.enabled ) {
+			// If we have an account connected, we can surface test statuses.
+			if ( gateway.state.account_connected ) {
+				// The test account status badge supersedes the test mode badge since, obviously,
+				// a test account is always in test mode payments.
+				if ( gateway.onboarding.state.test_mode ) {
+					return 'test_account';
+				}
+
+				// Determine if only test payments are being processed.
+				if ( gateway.state.test_mode ) {
+					return 'test_mode';
+				}
 			}
 
 			return 'active';
@@ -165,8 +179,7 @@ export const PaymentGatewayListItem = ( {
 						{ ! gateway.state.enabled &&
 							! gatewayNeedsOnboarding && (
 								<EnableGatewayButton
-									gatewayId={ gateway.id }
-									gatewayState={ gateway.state }
+									gatewayProvider={ gateway }
 									settingsHref={
 										gateway.management._links.settings.href
 									}
@@ -189,7 +202,7 @@ export const PaymentGatewayListItem = ( {
 
 						{ ! gatewayNeedsOnboarding && (
 							<SettingsButton
-								gatewayId={ gateway.id }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}
@@ -199,9 +212,7 @@ export const PaymentGatewayListItem = ( {
 
 						{ gatewayNeedsOnboarding && (
 							<CompleteSetupButton
-								gatewayId={ gateway.id }
-								gatewayState={ gateway.state }
-								onboardingState={ gateway.onboarding.state }
+								gatewayProvider={ gateway }
 								settingsHref={
 									gateway.management._links.settings.href
 								}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent URLs being texturized in customer and private order notes.

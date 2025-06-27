@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Exposes customers/stats endpoint in the analytic reports.
