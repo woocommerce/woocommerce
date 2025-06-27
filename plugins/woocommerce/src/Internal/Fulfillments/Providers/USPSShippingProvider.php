@@ -62,17 +62,6 @@ class USPSShippingProvider extends AbstractShippingProvider {
 	}
 
 	/**
-	 * Check if the provider can ship from the specified country to the specified country.
-	 *
-	 * @param string $shipping_from The country code from which the shipment is sent.
-	 * @param string $shipping_to   The country code to which the shipment is sent.
-	 * @return bool True if the provider can ship from the specified country to the specified country, false otherwise.
-	 */
-	public function can_ship_from_to( string $shipping_from, string $shipping_to ): bool {
-		return strtoupper( $shipping_from ) === 'US' && in_array( strtoupper( $shipping_to ), $this->get_shipping_to_countries(), true );
-	}
-
-	/**
 	 * Get the tracking URL for a given tracking number with additional parameters.
 	 *
 	 * @param string $tracking_number The tracking number.
@@ -95,25 +84,31 @@ class USPSShippingProvider extends AbstractShippingProvider {
 		$is_domestic      = 'US' === $shipping_to;
 		$is_international = ! $is_domestic;
 
-		$match     = false;
-		$ambiguous = false;
-
-		if ( $is_international ) {
+		$match = false;
+		if ( $is_international && $is_upu_format ) {
 			// For international shipments, we only consider UPU format.
-			$match = $is_upu_format;
+			$match           = true;
+			$ambiguity_score = 100; // UPU format is unambiguous.
 		} elseif ( $is_domestic ) {
 			// For domestic shipments, we allow multiple formats.
-			if ( $is_upu_format || $is_certified || $is_confirm ) {
-				$match = true;
+			if ( $is_upu_format ) {
+				$match           = true;
+				$ambiguity_score = 60; // Domestic UPU format can be shared with some other services.
+			} elseif ( $is_certified ) {
+				$match           = true;
+				$ambiguity_score = 90; // Certified format is specific to USPS.
+			} elseif ( $is_confirm ) {
+				$match           = true;
+				$ambiguity_score = 85; // Confirm format is specific to USPS.
 			} elseif ( $is_9x_format ) {
-				$match     = true;
-				$ambiguous = true;
+				$match           = true;
+				$ambiguity_score = 50; // 9x format is ambiguous but common in USPS.
 			}
 		}
 
 		return $match ? array(
-			'url'       => $this->get_tracking_url( $tracking_number ),
-			'ambiguous' => $ambiguous,
+			'url'             => $this->get_tracking_url( $tracking_number ),
+			'ambiguity_score' => $ambiguity_score,
 		) : null;
 	}
 }
