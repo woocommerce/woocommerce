@@ -36,4 +36,4 @@
 <div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
- <!-- wp:template-part {"slug":"shipping-and-returns-info"} /-->
+ <!-- wp:template-part {"slug":"single-product-info"} /-->
