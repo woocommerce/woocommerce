@@ -34,7 +34,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release download "$RELEASE_TAG" --pattern 'woocommerce.zip'
-          unzip woocommerce.zip
+          unzip -qq woocommerce.zip
 
           if [[ ! -e woocommerce/readme.txt  ]]; then
             echo "::error::Could not find readme.txt in asset for release '$RELEASE_TAG'."
