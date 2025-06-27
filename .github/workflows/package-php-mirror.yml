@@ -20,7 +20,7 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-            
+
             - name: Build package for mirroring
               run: |
                   pnpm --filter "${{ github.event.inputs.package }}" build:composer-package
