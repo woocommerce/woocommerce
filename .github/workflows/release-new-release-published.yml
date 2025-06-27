@@ -57,16 +57,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          # Set up Git.
-          git config --global user.name 'WooCommerce Bot'
-          git config --global user.email 'no-reply@woocommerce.com'
+          # Configure Git.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # Push new changelog.txt.
           branch_name="update-changelog-${{ github.event.release.tag_name }}-$(date +%s)"
 
           cd trunk
           git checkout -b "$branch_name"
-          git commit -am 'Update changelog.txt after release ${{ github.event.release.tag_name }}'
+          git commit \
+            --all    \
+            --message 'Update changelog.txt after release ${{ github.event.release.tag_name }}'
           git push origin "$branch_name"
 
           # Open a PR.
