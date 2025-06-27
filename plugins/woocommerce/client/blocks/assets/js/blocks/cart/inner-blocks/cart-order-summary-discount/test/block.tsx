@@ -27,7 +27,7 @@ jest.mock( '@woocommerce/blocks-checkout', () => {
 		...actual,
 		ExperimentalDiscountsMeta: {
 			...actual.ExperimentalDiscountsMeta,
-			Slot: ( props: any ) => {
+			Slot: ( props: unknown ) => {
 				mockSlotRender( props );
 				// Return a testable element that represents the slot
 				return <div data-testid="discount-slot" />;
