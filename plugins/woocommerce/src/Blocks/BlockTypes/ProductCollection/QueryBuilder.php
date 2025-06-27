@@ -219,7 +219,7 @@ class QueryBuilder {
 	 * @param array $tax_query Query to filter products by taxonomies.
 	 * @return array Query to filter products by taxonomies.
 	 */
-	public function get_filter_by_taxonomies_query( $tax_query ): array {
+	private function get_filter_by_taxonomies_query( $tax_query ): array {
 		if ( ! is_array( $tax_query ) ) {
 			return array();
 		}
@@ -260,6 +260,7 @@ class QueryBuilder {
 		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
 		$featured_query   = $this->get_featured_query( $query['featured'] ?? false );
 		$attributes_query = $this->get_product_attributes_query( $query['product_attributes'] );
+		$taxonomies_query = $this->get_filter_by_taxonomies_query( $query['taxonomies_query'] ) ?? array();
 		$taxonomies_query = $query['taxonomies_query'] ?? array();
 		$tax_query        = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
 		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );

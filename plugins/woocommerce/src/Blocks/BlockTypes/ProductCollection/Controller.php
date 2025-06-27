@@ -309,7 +309,7 @@ class Controller extends AbstractBlock {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
-				'taxonomies_query'    => $this->query_builder->get_filter_by_taxonomies_query( $raw_tax_query_from_rest_params ),
+				'taxonomies_query'    => $raw_tax_query_from_rest_params,
 			)
 		);
 	}
