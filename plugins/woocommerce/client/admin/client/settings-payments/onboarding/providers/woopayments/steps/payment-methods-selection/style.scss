@@ -137,13 +137,14 @@
 		overflow: hidden; // Prevent content from spilling out
 		padding: 0 !important; // There is a padding on the parent container that we need to override.
 		border-bottom: none !important;
+		position: fixed;
 
 		@media screen and (max-width: $break-medium) {
 			height: calc(100% - 100px); // Account for small screen content being longer on the page.
-			margin-top: $gap-larger;
+			margin-top: -2px; // Compensate for the border on the header.
 		}
 
-		.woocommerce-layout__header-wrapper {
+		&__header {
 			// This is the padding for the header. Controlling each side to adapt to the content.
 			padding: calc($gap-large / 2) $gap-large $gap-large $gap-large * 1.5;
 			border-bottom: 1px solid $gray-200;
@@ -151,6 +152,36 @@
 			background: $white;
 			position: relative;
 			z-index: 1;
+			min-height: 40px;
+			gap: 8px;
+			display: flex;
+			align-items: center;
+			flex-wrap: wrap;
+
+			&--title {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				width: 100%;
+
+				h1 {
+					padding: 0;
+					height: auto;
+					margin-top: 0;
+					margin-bottom: 0;
+					font-weight: 590;
+					font-size: 16px;
+					color: #070707;
+				}
+			}
+
+			&--description {
+				font-size: 13px;
+				font-weight: 400;
+				line-height: 20px;
+				color: #757575;
+				flex-basis: 100%;
+			}
 
 			@media screen and (max-width: $break-medium) {
 				padding: $gap $gap-large;
@@ -160,13 +191,6 @@
 				@media screen and (max-width: $break-medium) {
 					padding: 0 !important;
 				}
-			}
-
-			.woocommerce-layout__header-title-and-close {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				width: 100%;
 			}
 		}
 

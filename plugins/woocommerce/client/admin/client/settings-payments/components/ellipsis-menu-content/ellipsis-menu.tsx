@@ -50,15 +50,9 @@ export const EllipsisMenuWrapper = ( {
 				label={ label }
 				renderContent={ ( { onToggle } ) => (
 					<EllipsisMenuContent
-						providerId={ provider.id }
+						provider={ provider }
 						pluginFile={ provider.plugin.file }
 						isSuggestion={ provider._type === 'suggestion' }
-						suggestionId={ provider._suggestion_id || '' }
-						suggestionHideUrl={
-							provider._type === 'suggestion'
-								? provider._links?.hide?.href
-								: ''
-						}
 						links={ provider.links }
 						onToggle={ onToggle }
 						isEnabled={ provider.state?.enabled }

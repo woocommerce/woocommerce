@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Social_Links_Helper;
 /**
  * Renders the social links block.
@@ -32,12 +32,12 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$attrs = $parsed_block['attrs'] ?? array();
 
 		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
@@ -168,7 +168,7 @@ class Social_Links extends Abstract_Block_Renderer {
 					<tbody><tr>
 						<td style="vertical-align:middle;">
 						<a href="%2$s" %5$s class="wp-block-social-link-anchor">
-							<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
+							<img height="%8$s" src="%3$s" style="display:block;margin-right:0;" width="%8$s" alt="%4$s">
 						</a>
 						</td>
 					</tr>

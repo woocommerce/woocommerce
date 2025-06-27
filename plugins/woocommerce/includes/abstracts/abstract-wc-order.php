@@ -1287,7 +1287,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Check to make sure coupon is not already applied.
 		$applied_coupons = $this->get_items( 'coupon' );
 		foreach ( $applied_coupons as $applied_coupon ) {
-			if ( $applied_coupon->get_code() === $coupon->get_code() ) {
+			if ( wc_is_same_coupon( $applied_coupon->get_code(), $coupon->get_code() ) ) {
 				return new WP_Error(
 					'invalid_coupon',
 					sprintf(

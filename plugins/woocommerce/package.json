@@ -2,13 +2,13 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.0.0",
+	"version": "10.1.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"license": "GPL-3.0+",
+	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:admin": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/admin-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
@@ -768,7 +768,6 @@
 		"axios": "^0.24.0",
 		"buildkite-test-collector": "^1.7.1",
 		"config": "3.3.7",
-		"cross-env": "6.0.3",
 		"dotenv": "^10.0.0",
 		"eslint": "^8.55.0",
 		"eslint-config-wpcalypso": "5.0.0",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CYS: Prevent crash during rare font installation edge case.

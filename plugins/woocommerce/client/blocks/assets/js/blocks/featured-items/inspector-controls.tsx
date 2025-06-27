@@ -19,6 +19,7 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	TextareaControl,
 	ExternalLink,
+	Notice,
 } from '@wordpress/components';
 import { LooselyMustHave, ProductResponseItem } from '@woocommerce/types';
 import type { ComponentType } from 'react';
@@ -63,6 +64,10 @@ interface WithInspectorControlsRequiredProps< T > {
 	attributes: InspectorControlsRequiredAttributes &
 		EditorBlock< T >[ 'attributes' ];
 	setAttributes: InspectorControlsProps[ 'setAttributes' ];
+	backgroundColorVisibilityStatus: {
+		isBackgroundVisible: boolean;
+		message: string | null;
+	};
 }
 
 interface WithInspectorControlsCategoryProps< T >
@@ -96,6 +101,8 @@ export const InspectorControls = ( {
 	setAttributes,
 	setGradient,
 	showDesc,
+	backgroundColorVisibilityStatus,
+	backgroundColor,
 }: InspectorControlsProps ) => {
 	// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 	// so we need to check if it exists before using it.
@@ -104,168 +111,203 @@ export const InspectorControls = ( {
 	const isImgElement = ! isRepeated && ! hasParallax;
 
 	return (
-		<GutenbergInspectorControls key="inspector">
-			<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-				<ToggleControl
-					label={ __( 'Show description', 'woocommerce' ) }
-					checked={ showDesc }
-					onChange={ () => setAttributes( { showDesc: ! showDesc } ) }
-				/>
-				{ contentPanel }
-			</PanelBody>
-			{ !! backgroundImageSrc && (
-				<>
-					{ focalPointPickerExists && (
-						<PanelBody
-							title={ __( 'Media settings', 'woocommerce' ) }
-						>
-							<ToggleControl
-								label={ __(
-									'Fixed background',
-									'woocommerce'
-								) }
-								checked={ hasParallax }
-								onChange={ () => {
-									setAttributes( {
-										hasParallax: ! hasParallax,
-									} );
-								} }
-							/>
-							<ToggleControl
-								label={ __(
-									'Repeated background',
-									'woocommerce'
-								) }
-								checked={ isRepeated }
-								onChange={ () => {
-									setAttributes( {
-										isRepeated: ! isRepeated,
-									} );
-								} }
-							/>
-							{ ! isRepeated && (
-								<ToggleGroupControl
-									help={
-										<>
-											<span
-												style={ {
-													display: 'block',
-													marginBottom: '1em',
-												} }
-											>
-												{ __(
-													'Select “Cover” to have the image automatically fit its container.',
-													'woocommerce'
-												) }
-											</span>
-											<span>
-												{ __(
-													'This may affect your ability to freely move the focal point of the image.',
-													'woocommerce'
-												) }
-											</span>
-										</>
-									}
-									label={ __( 'Image fit', 'woocommerce' ) }
-									isBlock
-									value={ imageFit }
-									onChange={ ( value: ImageFit ) =>
-										setAttributes( {
-											imageFit: value,
-										} )
-									}
-								>
-									<ToggleGroupControlOption
-										label={ __( 'None', 'woocommerce' ) }
-										value="none"
-									/>
-									<ToggleGroupControlOption
-										/* translators: "Cover" is a verb that indicates an image covering the entire container. */
-										label={ __( 'Cover', 'woocommerce' ) }
-										value="cover"
-									/>
-								</ToggleGroupControl>
-							) }
-							<FocalPointPicker
-								label={ __(
-									'Focal Point Picker',
-									'woocommerce'
-								) }
-								url={ backgroundImageSrc }
-								value={ focalPoint }
-								onChange={ ( value ) =>
-									setAttributes( {
-										focalPoint: value,
-									} )
-								}
-							/>
-							{ isImgElement && (
-								<TextareaControl
+		<>
+			<GutenbergInspectorControls key="inspector">
+				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __( 'Show description', 'woocommerce' ) }
+						checked={ showDesc }
+						onChange={ () =>
+							setAttributes( { showDesc: ! showDesc } )
+						}
+					/>
+					{ contentPanel }
+				</PanelBody>
+				{ !! backgroundImageSrc && (
+					<>
+						{ focalPointPickerExists && (
+							<PanelBody
+								title={ __( 'Media settings', 'woocommerce' ) }
+							>
+								<ToggleControl
 									label={ __(
-										'Alt text (alternative text)',
+										'Fixed background',
 										'woocommerce'
 									) }
-									value={ alt }
-									onChange={ ( value: string ) => {
-										setAttributes( { alt: value } );
+									checked={ hasParallax }
+									onChange={ () => {
+										setAttributes( {
+											hasParallax: ! hasParallax,
+										} );
 									} }
-									help={
-										<>
-											<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
-												{ __(
-													'Describe the purpose of the image',
-													'woocommerce'
-												) }
-											</ExternalLink>
-										</>
+								/>
+								<ToggleControl
+									label={ __(
+										'Repeated background',
+										'woocommerce'
+									) }
+									checked={ isRepeated }
+									onChange={ () => {
+										setAttributes( {
+											isRepeated: ! isRepeated,
+										} );
+									} }
+								/>
+								{ ! isRepeated && (
+									<ToggleGroupControl
+										help={
+											<>
+												<span
+													style={ {
+														display: 'block',
+														marginBottom: '1em',
+													} }
+												>
+													{ __(
+														'Select “Cover” to have the image automatically fit its container.',
+														'woocommerce'
+													) }
+												</span>
+												<span>
+													{ __(
+														'This may affect your ability to freely move the focal point of the image.',
+														'woocommerce'
+													) }
+												</span>
+											</>
+										}
+										label={ __(
+											'Image fit',
+											'woocommerce'
+										) }
+										isBlock
+										value={ imageFit }
+										onChange={ ( value: ImageFit ) =>
+											setAttributes( {
+												imageFit: value,
+											} )
+										}
+									>
+										<ToggleGroupControlOption
+											label={ __(
+												'None',
+												'woocommerce'
+											) }
+											value="none"
+										/>
+										<ToggleGroupControlOption
+											/* translators: "Cover" is a verb that indicates an image covering the entire container. */
+											label={ __(
+												'Cover',
+												'woocommerce'
+											) }
+											value="cover"
+										/>
+									</ToggleGroupControl>
+								) }
+								<FocalPointPicker
+									label={ __(
+										'Focal Point Picker',
+										'woocommerce'
+									) }
+									url={ backgroundImageSrc }
+									value={ focalPoint }
+									onChange={ ( value ) =>
+										setAttributes( {
+											focalPoint: value,
+										} )
 									}
 								/>
-							) }
-						</PanelBody>
-					) }
-					<PanelColorGradientSettings
-						__experimentalHasMultipleOrigins
-						__experimentalIsRenderedInSidebar
-						title={ __( 'Overlay', 'woocommerce' ) }
-						initialOpen={ true }
-						settings={ [
-							{
-								colorValue: overlayColor,
-								gradientValue: overlayGradient,
-								onColorChange: ( value: string ) =>
-									setAttributes( { overlayColor: value } ),
-								onGradientChange: ( value: string ) => {
-									setGradient( value );
-									setAttributes( {
-										overlayGradient: value,
-									} );
+								{ isImgElement && (
+									<TextareaControl
+										label={ __(
+											'Alt text (alternative text)',
+											'woocommerce'
+										) }
+										value={ alt }
+										onChange={ ( value: string ) => {
+											setAttributes( { alt: value } );
+										} }
+										help={
+											<>
+												<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
+													{ __(
+														'Describe the purpose of the image',
+														'woocommerce'
+													) }
+												</ExternalLink>
+											</>
+										}
+									/>
+								) }
+							</PanelBody>
+						) }
+						<PanelColorGradientSettings
+							__experimentalHasMultipleOrigins
+							__experimentalIsRenderedInSidebar
+							title={ __( 'Overlay', 'woocommerce' ) }
+							initialOpen={ true }
+							settings={ [
+								{
+									colorValue: overlayColor,
+									gradientValue: overlayGradient,
+									onColorChange: ( value: string ) =>
+										setAttributes( {
+											overlayColor: value,
+										} ),
+									onGradientChange: ( value: string ) => {
+										setGradient( value );
+										setAttributes( {
+											overlayGradient: value,
+										} );
+									},
+									label: __( 'Color', 'woocommerce' ),
 								},
-								label: __( 'Color', 'woocommerce' ),
-							},
-						] }
-					>
-						<RangeControl
-							label={ __( 'Opacity', 'woocommerce' ) }
-							value={ dimRatio }
-							onChange={ ( value ) =>
-								setAttributes( { dimRatio: value as number } )
-							}
-							min={ 0 }
-							max={ 100 }
-							step={ 10 }
-							required
-						/>
-					</PanelColorGradientSettings>
-				</>
-			) }
-		</GutenbergInspectorControls>
+							] }
+						>
+							<RangeControl
+								label={ __( 'Opacity', 'woocommerce' ) }
+								value={ dimRatio }
+								onChange={ ( value ) =>
+									setAttributes( {
+										dimRatio: value as number,
+									} )
+								}
+								min={ 0 }
+								max={ 100 }
+								step={ 10 }
+								required
+							/>
+						</PanelColorGradientSettings>
+					</>
+				) }
+			</GutenbergInspectorControls>
+			<GutenbergInspectorControls group="color">
+				{ backgroundColorVisibilityStatus &&
+					backgroundColorVisibilityStatus.isBackgroundVisible ===
+						false &&
+					backgroundColorVisibilityStatus.message &&
+					backgroundColor && (
+						<div className="image-bg-color-warning">
+							<Notice status="warning" isDismissible={ false }>
+								{ backgroundColorVisibilityStatus.message }
+							</Notice>
+						</div>
+					) }
+			</GutenbergInspectorControls>
+		</>
 	);
 };
 
 export const withInspectorControls =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: WithInspectorControlsProps< T > ) => {
-		const { attributes, name, setAttributes } = props;
+		const {
+			attributes,
+			name,
+			setAttributes,
+			backgroundColorVisibilityStatus,
+		} = props;
 		const {
 			alt,
 			dimRatio,
@@ -279,6 +321,8 @@ export const withInspectorControls =
 			overlayGradient,
 			showDesc,
 			showPrice,
+			backgroundColor,
+			style,
 		} = attributes;
 
 		const item =
@@ -289,12 +333,6 @@ export const withInspectorControls =
 		const { setGradient } = useGradient( {
 			gradientAttribute: 'overlayGradient',
 			customGradientAttribute: 'overlayGradient',
-		} );
-		const { backgroundImageSrc } = useBackgroundImage( {
-			item,
-			mediaId,
-			mediaSrc,
-			blockName: name,
 		} );
 
 		const contentPanel =
@@ -309,6 +347,13 @@ export const withInspectorControls =
 					}
 				/>
 			) : undefined;
+
+		const { backgroundImageSrc } = useBackgroundImage( {
+			item,
+			mediaId,
+			mediaSrc,
+			blockName: name,
+		} );
 
 		return (
 			<>
@@ -326,6 +371,12 @@ export const withInspectorControls =
 					setAttributes={ setAttributes }
 					setGradient={ setGradient }
 					showDesc={ showDesc }
+					backgroundColorVisibilityStatus={
+						backgroundColorVisibilityStatus
+					}
+					backgroundColor={
+						backgroundColor || style?.color?.background
+					}
 				/>
 				<Component { ...props } />
 			</>

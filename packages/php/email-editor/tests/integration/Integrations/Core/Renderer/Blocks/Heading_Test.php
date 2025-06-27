@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Heading class
@@ -52,11 +53,11 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	);
 
 	/**
-	 * Settings controller instance
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -64,15 +65,16 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->heading_renderer    = new Text();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->heading_renderer  = new Text();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders content
 	 */
 	public function testItRendersContent(): void {
-		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
+		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'This is Heading 1', $rendered );
 		$this->assertStringContainsString( 'width:100%;', $rendered );
 		$this->assertStringContainsString( 'font-size:24px;', $rendered );
@@ -83,7 +85,7 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders block attributes
 	 */
 	public function testItRendersBlockAttributes(): void {
-		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
+		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'text-transform:lowercase;', $rendered );
 		$this->assertStringContainsString( 'text-align:center;', $rendered );
 	}
@@ -94,7 +96,7 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersCustomSetColors(): void {
 		$this->parsed_heading['attrs']['style']['color']['background'] = '#000000';
 		$this->parsed_heading['attrs']['style']['color']['text']       = '#ff0000';
-		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
+		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'background-color:#000000', $rendered );
 		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
 	}
@@ -103,7 +105,7 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it replaces fluid font size in content
 	 */
 	public function testItReplacesFluidFontSizeInContent(): void {
-		$rendered = $this->heading_renderer->render( '<h1 style="font-size:clamp(10px, 20px, 24px)">This is Heading 1</h1>', $this->parsed_heading, $this->settings_controller );
+		$rendered = $this->heading_renderer->render( '<h1 style="font-size:clamp(10px, 20px, 24px)">This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'font-size:24px', $rendered );
 	}
 }

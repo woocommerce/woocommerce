@@ -4,7 +4,7 @@
 import 'core-js/features/object/assign';
 import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { DayPickerRangeController } from 'react-dates';
 import moment from 'moment';
@@ -182,7 +182,7 @@ class DateRange extends Component {
 		const isDoubleCalendar = isViewportMobile && ! isViewportSmall;
 		return (
 			<div
-				className={ classnames( 'woocommerce-calendar', {
+				className={ clsx( 'woocommerce-calendar', {
 					'is-mobile': isViewportMobile,
 				} ) }
 			>

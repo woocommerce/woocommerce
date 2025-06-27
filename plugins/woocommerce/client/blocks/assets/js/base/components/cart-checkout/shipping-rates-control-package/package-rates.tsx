@@ -4,7 +4,6 @@
 import { useState, useEffect } from '@wordpress/element';
 import { RadioControl } from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
-import { usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -35,7 +34,6 @@ const PackageRates = ( {
 	highlightChecked = false,
 }: PackageRates ): JSX.Element => {
 	const selectedRateId = selectedRate?.rate_id;
-	const previousSelectedRateId = usePrevious( selectedRateId );
 
 	// Store selected rate ID in local state so shipping rates changes are shown in the UI instantly.
 	const [ selectedOption, setSelectedOption ] = useState<
@@ -58,14 +56,13 @@ const PackageRates = ( {
 
 	// Update the selected option if cart state changes in the data store.
 	useEffect( () => {
-		if (
-			selectedRateId &&
-			selectedRateId !== previousSelectedRateId &&
-			selectedRateId !== selectedOption
-		) {
+		if ( selectedRateId && selectedRateId !== selectedOption ) {
 			setSelectedOption( selectedRateId );
 		}
-	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
+		// We want to explicitly react to changes in the data store only here, local state is managed
+		// through different code path.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ selectedRateId ] );
 
 	if ( rates.length === 0 ) {
 		return noResultsMessage;

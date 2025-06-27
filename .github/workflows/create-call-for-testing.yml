@@ -31,9 +31,9 @@ jobs:
             
             const payload = {
               action: 'rc1',
-              version: inputs.version,
-              build_zip: inputs.build_zip,
-              post_status: inputs.post_status
+              version: context.payload.inputs.version,
+              build_zip: context.payload.inputs.build_zip,
+              post_status: context.payload.inputs.post_status
             };
 
             const requestBody = JSON.stringify({
@@ -57,5 +57,5 @@ jobs:
               core.setFailed(`Request failed with status ${response.status}`);
             }
         env:
-          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }} 
-          WPCOM_WEBHOOK_URL: ${{ secrets.WPCOM_WEBHOOK_URL }}
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
+          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}

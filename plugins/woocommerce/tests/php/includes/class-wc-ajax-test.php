@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Class WC_AJAX_Test file.
@@ -192,5 +193,139 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 108, $order->get_total() );
+	}
+
+	/**
+	 * Describe JSON search, particularly as it relates to handling searches for users in a
+	 * multisite context (it should generally not be possible to retrieve information about
+	 * users who have not been added to the current blog).
+	 *
+	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
+	 */
+	public function test_json_search_customers(): void {
+		// This class does not inherit from WC_Unit_Test_Case, so we're handling the legacy proxy mechanics ourselves.
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->reset();
+
+		$is_member_of_blog = true;
+		$is_multisite      = false;
+
+		$legacy_proxy->register_function_mocks(
+			array(
+				'check_ajax_referer'     => fn () => true,
+				'is_multisite'           => function () use ( &$is_multisite ) {
+					return $is_multisite;
+				},
+				'is_user_member_of_blog' => function () use ( &$is_member_of_blog ) {
+					return $is_member_of_blog;
+				},
+			)
+		);
+
+		$customer_id = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' )->get_id();
+		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$_GET['term'] = $customer_id;
+
+		$response = $this->do_ajax( 'woocommerce_json_search_customers' );
+		$this->assertEquals(
+			$customer_id,
+			key( $response ),
+			'If an admin searches for a specific customer ID, and the customer is part of the same blog, it should be possible to retrieve their details.'
+		);
+
+		// Let's repeat the test, but simulate being inside a multisite network where the user is not a member of the blog.
+		$is_member_of_blog = false;
+		$is_multisite      = true;
+		$response          = $this->do_ajax( 'woocommerce_json_search_customers' );
+		$this->assertEmpty(
+			$response,
+			'If an admin searches for a specific customer ID, and the customer is not part of the same blog, then it should be possible to retrieve their details.'
+		);
+
+		// Clean-up.
+		$legacy_proxy->reset();
+	}
+
+	/**
+	 * Describes the behavior of the `get_customer_details` ajax endpoint, particularly in relation to
+	 * permissions of the requesting user.
+	 *
+	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
+	 */
+	public function test_get_customer_details(): void {
+		// This class does not inherit from WC_Unit_Test_Case, so we're handling the legacy proxy mechanics ourselves.
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->reset();
+
+		$customer_id       = 0;
+		$is_member_of_blog = true;
+		$is_multisite      = true;
+
+		$legacy_proxy->register_function_mocks(
+			array(
+				'check_ajax_referer'     => fn () => true,
+				'is_multisite'           => function () use ( &$is_multisite ) {
+					return $is_multisite;
+				},
+				'is_user_member_of_blog' => function () use ( &$is_member_of_blog ) {
+					return $is_member_of_blog;
+				},
+				'filter_input'           => function ( int $method, string $key, int $filter = FILTER_DEFAULT, $options = 0 ) use ( &$customer_id ) {
+					if ( INPUT_POST === $method && 'user_id' === $key ) {
+						return $customer_id;
+					}
+
+					return filter_input( $method, $key, $filter, $options );
+				},
+				'wp_die'                 => fn () => '',
+			)
+		);
+
+		$customer_id = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' )->get_id();
+		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		wp_set_current_user( $admin_id );
+		$_POST['user_id'] = $customer_id;
+
+		$response = $this->do_ajax( 'woocommerce_get_customer_details' );
+		$this->assertIsArray(
+			$response,
+			'If the customer is part of the blog, an array of information is supplied.'
+		);
+
+		$is_member_of_blog = false;
+		$response          = $this->do_ajax( 'woocommerce_get_customer_details' );
+		$this->assertNull(
+			$response,
+			'If the customer is not part of the blog, we do not get back any customer information (in reality, the request was ended with wp_die).'
+		);
+	}
+
+	/**
+	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
+	 *
+	 * @param string $ajax_action The action to be triggered.
+	 *
+	 * @return array|null
+	 */
+	private function do_ajax( string $ajax_action ) {
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering...
+			$this->_handleAjax( $ajax_action );
+		} catch ( Exception $e ) {
+			// ...However, if an exception is raised, it may not be able to clean-up,
+			// which can lead to PhpUnit emitting risky test warnings.
+			if ( ob_get_level() === $output_buffering_level + 1 ) {
+				ob_get_clean();
+			}
+		}
+
+		$result               = json_decode( $this->_last_response, true );
+		$this->_last_response = false;
+
+		return $result;
 	}
 }

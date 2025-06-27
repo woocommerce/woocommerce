@@ -9,7 +9,7 @@ import { useProductDataContext } from '@woocommerce/shared-context';
  * Internal dependencies
  */
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
-import { ATTRIBUTE_ITEM_TEMPLATE } from './attribute-item-template/constants';
+import { ATTRIBUTE_ITEM_TEMPLATE } from './attribute/constants';
 
 interface Attributes {
 	className?: string;
