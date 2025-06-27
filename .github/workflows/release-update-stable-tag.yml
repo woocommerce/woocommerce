@@ -231,3 +231,17 @@ jobs:
 
             echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
           fi
+
+  notify-release:
+    runs-on: ubuntu-latest
+    needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
+    if: ${{ github.event.inputs.allow-revert != 'true' }}
+    steps:
+      - name: 'Notify to announcements channel'
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
