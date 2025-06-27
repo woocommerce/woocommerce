@@ -75,7 +75,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		apiFetch.mockResolvedValueOnce( {
 			tracking_number_details: {
 				tracking_number: '1Z12345E0291980793',
-				provider: 'ups',
+				shipping_provider: 'ups',
 				tracking_url:
 					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
 			},
