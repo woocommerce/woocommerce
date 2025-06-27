@@ -39,7 +39,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$cycle_state_service = new CycleStateService();
 		$email_manager       = new EmailManager();
 		$this->sut           = new NotificationsProcessor();
-		$this->sut->init( $email_manager, $eligibility_service, $job_manager, $cycle_state_service );
+		$this->sut->init( $eligibility_service, $job_manager, $cycle_state_service, $email_manager );
 	}
 
 		/**
