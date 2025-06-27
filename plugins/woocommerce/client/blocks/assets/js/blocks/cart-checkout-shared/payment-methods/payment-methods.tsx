@@ -11,6 +11,7 @@ import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/p
  * Internal dependencies
  */
 import NoPaymentMethods from './no-payment-methods';
+import OnlyExpressPayments from './only-express-payments';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
 import './style.scss';
@@ -20,18 +21,26 @@ import './style.scss';
  */
 const PaymentMethods = ( {
 	noPaymentMethods = <NoPaymentMethods />,
+	onlyExpressPayments = <OnlyExpressPayments />,
 }: {
 	noPaymentMethods?: JSX.Element | undefined;
+	onlyExpressPayments?: JSX.Element | undefined;
 } ) => {
 	const {
 		paymentMethodsInitialized,
+		expressPaymentMethodsInitialized,
 		availablePaymentMethods,
+		availableExpressPaymentMethods,
 		savedPaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
 		return {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),
+			expressPaymentMethodsInitialized:
+				store.expressPaymentMethodsInitialized(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
+			availableExpressPaymentMethods:
+				store.getAvailableExpressPaymentMethods(),
 			savedPaymentMethods: store.getSavedPaymentMethods(),
 		};
 	} );
@@ -40,11 +49,19 @@ const PaymentMethods = ( {
 		return <CheckoutPaymentSkeleton />;
 	}
 
-	if (
+	const hasPaymentMethods =
 		paymentMethodsInitialized &&
-		Object.keys( availablePaymentMethods ).length === 0
-	) {
+		Object.keys( availablePaymentMethods ).length > 0;
+	const hasExpressPaymentMethods =
+		expressPaymentMethodsInitialized &&
+		Object.keys( availableExpressPaymentMethods ).length > 0;
+
+	if ( ! hasPaymentMethods && ! hasExpressPaymentMethods ) {
 		return noPaymentMethods;
+	}
+
+	if ( hasExpressPaymentMethods && ! hasPaymentMethods ) {
+		return onlyExpressPayments;
 	}
 
 	return (
