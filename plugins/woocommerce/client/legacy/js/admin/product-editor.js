@@ -3,6 +3,13 @@ jQuery( function ( $ ) {
 	$( function () {
 		var editorWrapper = $( '#postdivrich' );
 
+		/**
+		 * In the Product Editor context, the footer needs to be hidden otherwise the computation of the postbox position is wrong.
+		 * For more details,
+		 */
+		$( '#wpfooter' ).css( 'visibility', 'hidden' );
+		$( '#wpfooter' ).css( 'display', 'unset' );
+
 		if ( editorWrapper.length ) {
 			editorWrapper.addClass( 'postbox woocommerce-product-description' );
 			editorWrapper.prepend(
