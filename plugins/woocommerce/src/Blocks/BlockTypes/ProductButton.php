@@ -98,16 +98,6 @@ class ProductButton extends AbstractBlock {
 
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		wp_interactivity_state(
-			'woocommerce/product-button',
-			array(
-				'addToCartText' => function () {
-					$context = wp_interactivity_get_context();
-					return $context['addToCartText'];
-				},
-			)
-		);
-
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
@@ -156,13 +146,7 @@ class ProductButton extends AbstractBlock {
 			'quantityToAdd'    => $default_quantity,
 			'productId'        => $product->get_id(),
 			'productType'      => $product->get_type(),
-			'addToCartText'    => $number_of_items_in_cart > 0
-				? sprintf(
-					/* translators: %s: product quantity. */
-					__( '%s in cart', 'woocommerce' ),
-					$number_of_items_in_cart
-				)
-				: $add_to_cart_text,
+			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
 			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
@@ -184,6 +168,21 @@ class ProductButton extends AbstractBlock {
 				'rel'  => 'nofollow',
 			);
 		}
+
+		wp_interactivity_state(
+			'woocommerce/product-button',
+			array(
+				'addToCartText' => function () use ( $add_to_cart_text, $number_of_items_in_cart ) {
+					return $number_of_items_in_cart > 0
+					? sprintf(
+						/* translators: %s: product quantity. */
+						__( '%s in cart', 'woocommerce' ),
+						$number_of_items_in_cart
+					)
+					: $add_to_cart_text;
+				},
+			)
+		);
 
 		/**
 		 * Allow filtering of the add to cart button arguments.
