@@ -35,7 +35,7 @@ jobs:
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify !== false) {
+                  if (event.inputs.skip_verify === 'true') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
