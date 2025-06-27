@@ -168,7 +168,7 @@ class Social_Links extends Abstract_Block_Renderer {
 					<tbody><tr>
 						<td style="vertical-align:middle;">
 						<a href="%2$s" %5$s class="wp-block-social-link-anchor">
-							<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
+							<img height="%8$s" src="%3$s" style="display:block;margin-right:0;" width="%8$s" alt="%4$s">
 						</a>
 						</td>
 					</tr>
