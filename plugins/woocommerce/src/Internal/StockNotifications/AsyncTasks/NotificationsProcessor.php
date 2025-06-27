@@ -55,12 +55,6 @@ class NotificationsProcessor {
 	 */
 	private $cycle_state_service;
 
-	/*
-	|--------------------------------------------------------------------------
-	| Constants.
-	|--------------------------------------------------------------------------
-	*/
-
 	/**
 	 * The batch size for processing notifications.
 	 */

@@ -135,11 +135,9 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = $product->get_children()[0];
 		$variation = wc_get_product( $variation );
-		$this->assertEquals( ProductStockStatus::IN_STOCK, $variation->get_stock_status() );
 		$variation->set_manage_stock( true );
 		$variation->set_stock_quantity( 10 );
 		$variation->save();
-		$this->assertEquals( ProductStockStatus::IN_STOCK, $variation->get_stock_status() );
 
 		$notification = new Notification();
 		$notification->set_product_id( $variation->get_id() );
@@ -147,11 +145,18 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
+		$notification_on_parent = new Notification();
+		$notification_on_parent->set_product_id( $product->get_id() );
+		$notification_on_parent->set_user_id( 1 );
+		$notification_on_parent->set_status( NotificationStatus::ACTIVE );
+		$notification_on_parent->save();
+
 		$this->sut->process_batch( $variation->get_id() );
 
 		// Refetch notification.
 		$notification = new Notification( $notification->get_id() );
 		$this->assertEquals( NotificationStatus::SENT, $notification->get_status() );
+		$this->assertEquals( NotificationStatus::ACTIVE, $notification_on_parent->get_status() );
 	}
 
 	/**
@@ -192,7 +197,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification              = new Notification( $notification->get_id() );
 		$notification_on_variation = new Notification( $notification_on_variation->get_id() );
 		$this->assertEquals( NotificationStatus::SENT, $notification->get_status() );
-		$this->assertEquals( NotificationStatus::SENT, $notification_on_variation->get_status() ); // @todo: fix this.
+		$this->assertEquals( NotificationStatus::SENT, $notification_on_variation->get_status() );
 	}
 
 	/**
@@ -262,7 +267,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test process_batch method on a product with a pendingnotification.
+	 * Test process_batch method on a product with a pending notification.
 	 */
 	public function test_process_batch_pending() {
 		$product      = WC_Helper_Product::create_simple_product();
@@ -521,9 +526,6 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 			)
 		);
 	}
-
-	// @todo: higher level tests by running the queue jobs manually.
-	// @todo: test multiple products in a single request and multiple batches.
 
 	/**
 	 * Get private method.

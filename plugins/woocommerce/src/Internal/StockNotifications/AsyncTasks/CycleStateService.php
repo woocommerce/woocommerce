@@ -106,19 +106,29 @@ class CycleStateService {
 	 *
 	 * @param int   $product_id The product ID.
 	 * @param array $cycle_state The cycle state.
-	 * @return void
+	 * @return bool Whether the state was saved.
 	 */
-	public function save_cycle_state( int $product_id, array $cycle_state ): void {
+	public function save_cycle_state( int $product_id, array $cycle_state ): bool {
 		if ( $product_id <= 0 ) {
-			return;
+			return false;
+		}
+
+		$current_cycle_state = $this->get_raw_cycle_state( $product_id );
+		if ( $current_cycle_state === $cycle_state ) {
+			return false;
 		}
 
 		if ( empty( $cycle_state ) ) {
-			delete_option( $this->get_option_name( $product_id ) );
-			return;
+			$result = delete_option( $this->get_option_name( $product_id ) );
+		} else {
+			$result = update_option( $this->get_option_name( $product_id ), $cycle_state, false );
 		}
 
-		update_option( $this->get_option_name( $product_id ), $cycle_state, false );
+		if ( ! $result ) {
+			$this->logger->error( sprintf( 'Failed to save cycle state for product %d. Cycle state: %s', $product_id, wc_print_r( $cycle_state, true ) ), array( 'source' => JobManager::AS_JOB_GROUP ) );
+		}
+
+		return $result;
 	}
 
 	/**

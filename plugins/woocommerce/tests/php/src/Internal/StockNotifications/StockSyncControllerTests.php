@@ -178,7 +178,32 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $this->get_private_property( $this->sut, 'queue' ) );
 	}
 
-	// @todo: Test when variation manages stock and has notification. The parent goes in stock. the variation should not be in the queue.
+	/**
+	 * Test that the controller doesn't handle a variation that manages stock and the parent goes in stock.
+	 */
+	public function test_handle_variation_manages_stock_and_parent_goes_in_stock() {
+		$product = \WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+
+		$variation_id = $product->get_children()[0];
+		$variation = wc_get_product( $variation_id );
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 10 );
+		$variation->save();
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$this->assertArrayNotHasKey( $variation_id, $this->get_private_property( $this->sut, 'queue' ) );
+	}
 
 	/**
 	 * Get a private property of an object.
