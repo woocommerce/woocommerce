@@ -31,18 +31,21 @@ export function DefaultNotice( { block }: { block: string } ) {
 	// Everything below works the same for Cart/Checkout
 	const { saveEntityRecord } = useDispatch( coreStore );
 	const { editPost, savePost } = useDispatch( editorStore );
-	const { slug, postPublished, currentPostId } = useSelect( ( select ) => {
-		const { getEntityRecord } = select( coreStore );
-		const { isCurrentPostPublished, getCurrentPostId } =
-			select( editorStore );
-		return {
-			slug:
-				getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )?.slug ||
-				block,
-			postPublished: isCurrentPostPublished(),
-			currentPostId: getCurrentPostId(),
-		};
-	}, [] );
+	const { slug, postPublished, currentPostId } = useSelect(
+		( select ) => {
+			const { getEntityRecord } = select( coreStore );
+			const { isCurrentPostPublished, getCurrentPostId } =
+				select( editorStore );
+			return {
+				slug:
+					getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )
+						?.slug || block,
+				postPublished: isCurrentPostPublished(),
+				currentPostId: getCurrentPostId(),
+			};
+		},
+		[ ORIGINAL_PAGE_ID, block ]
+	);
 	const [ settingStatus, setStatus ] = useState( 'pristine' );
 	const updatePage = useCallback( () => {
 		setStatus( 'updating' );

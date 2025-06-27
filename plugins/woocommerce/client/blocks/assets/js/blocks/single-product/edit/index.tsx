@@ -103,7 +103,7 @@ const Editor = ( {
 		if ( isInvalidProductId && ! isEditing ) {
 			setIsEditing( true );
 		}
-	}, [ isInvalidProductId ] );
+	}, [ isInvalidProductId, isEditing ] );
 
 	if ( error && ! isInvalidProductId ) {
 		return (

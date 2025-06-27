@@ -6,7 +6,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/client-api';
 import { useDispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -217,14 +217,16 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
-	const getFormattedValue = (
-		val: string | number | readonly string[] | undefined
-	) => {
-		const stringVal = typeof val === 'string' ? val : String( val || '' );
-		return args.customFormatter
-			? args.customFormatter( stringVal )
-			: stringVal;
-	};
+	const getFormattedValue = useCallback(
+		( val: string | number | readonly string[] | undefined ) => {
+			const stringVal =
+				typeof val === 'string' ? val : String( val || '' );
+			return args.customFormatter
+				? args.customFormatter( stringVal )
+				: stringVal;
+		},
+		[ args ]
+	);
 
 	const [ inputValue, setInputValue ] = useState(
 		getFormattedValue( args.value )
@@ -234,7 +236,7 @@ const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 
 	useEffect( () => {
 		setInputValue( getFormattedValue( args.value ) );
-	}, [ args.value, args.customFormatter ] );
+	}, [ args.value, args.customFormatter, getFormattedValue ] );
 
 	const onChange = ( newValue: string ) => {
 		const formattedValue = args.customFormatter
