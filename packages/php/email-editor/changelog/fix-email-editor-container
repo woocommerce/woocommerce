@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactor Email Editor Container to use email editor container instead of Blocks registry container for better library export compatibility.
