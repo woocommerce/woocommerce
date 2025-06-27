@@ -79,16 +79,15 @@ $gutenberg-blueberry-focus: #1d35b4;
 			&__wrapper {
 				width: 620px;
 				max-width: 620px;
-				margin: 56px auto 0;
+				margin: 56px auto;
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				margin-bottom: $gap-large;
 
 				@media screen and ( max-width: $break-xlarge ) {
 					width: 100%;
 					padding: 0 $gap;
-					margin: $gap auto 0;
+					margin: $gap auto;
 				}
 			}
 
@@ -121,7 +120,6 @@ $gutenberg-blueberry-focus: #1d35b4;
 			}
 
 			&__content {
-				max-width: 615px;
 				width: 100%;
 			}
 
