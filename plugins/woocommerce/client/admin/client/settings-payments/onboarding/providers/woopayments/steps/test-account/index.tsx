@@ -610,6 +610,59 @@ const TestAccountStep = () => {
 		);
 	}
 
+	const isAccountAlreadyExistsError =
+		errorCode === TEST_ACCOUNT_ERROR_CODES.ACCOUNT_ALREADY_EXISTS;
+
+	const actions = isAccountAlreadyExistsError
+		? [
+				{
+					label: __( 'Reset Account', 'woocommerce' ),
+					variant: 'primary' as const,
+					onClick: () => {
+						setIsResetAccountModalOpen( true );
+					},
+				},
+		  ]
+		: [
+				{
+					label: __( 'Try Again', 'woocommerce' ),
+					variant: 'primary' as const,
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'try_again_on_error',
+								retries: retryCounter + 1,
+								source: sessionEntryPoint,
+							}
+						);
+
+						resetState();
+						setRetryCounter( ( c ) => c + 1 );
+					},
+				},
+				{
+					label: __( 'Cancel', 'woocommerce' ),
+					variant: 'secondary' as const,
+					className:
+						'woocommerce-payments-test-account-step__error-cancel-button',
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'cancel_on_error',
+								retries: retryCounter,
+								source: sessionEntryPoint,
+							}
+						);
+
+						closeModal();
+					},
+				},
+		  ];
+
 	// Render loading/error state.
 	return (
 		<div className="woocommerce-payments-test-account-step">
@@ -622,51 +675,7 @@ const TestAccountStep = () => {
 					isDismissible={ false }
 					actions={
 						// Only show actions if the step is not blocked.
-						status !== 'blocked'
-							? [
-									{
-										label: __( 'Try Again', 'woocommerce' ),
-										variant: 'primary',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'try_again_on_error',
-													retries: retryCounter + 1,
-													source: sessionEntryPoint,
-												}
-											);
-
-											resetState();
-											setRetryCounter( ( c ) => c + 1 );
-										},
-									},
-									{
-										label: __( 'Cancel', 'woocommerce' ),
-										variant: 'secondary',
-										className:
-											'woocommerce-payments-test-account-step__error-cancel-button',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'cancel_on_error',
-													retries: retryCounter,
-													source: sessionEntryPoint,
-												}
-											);
-
-											closeModal();
-										},
-									},
-							  ]
-							: []
+						status !== 'blocked' ? actions : []
 					}
 					className="woocommerce-payments-test-account-step__error"
 				>
