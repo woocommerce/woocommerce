@@ -58,7 +58,7 @@
 				"performance": "Address performance issues",
 				"enhancement": "Improve existing functionality"
 			},
-			"changelog": "CHANGELOG.md"
+			"changelog": "changelog.md"
 		}
 	}
 }

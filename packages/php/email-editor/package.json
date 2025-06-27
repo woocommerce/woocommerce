@@ -16,7 +16,7 @@
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration",
-		"build:composer-package": "./tasks/build-package.sh"
+		"build:composer-package": "bash tasks/build-package.sh"
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
