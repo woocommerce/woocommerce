@@ -29,7 +29,7 @@ jobs:
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@4dfc139699dff77d96af45b2aaf70888c8cd963d #v2.2.2
               with:
-                  token: ${{ secrets.API_TOKEN_GITHUB }}
+                  token: ${{ secrets.PR_ASSIGN_TOKEN }}
                   username: woocommercebot
                   working-directory: ${{ env.mirror_dir }}
                   commit-message: 'Mirror package ${{ github.event.inputs.package }} from WooCommerce'
