@@ -2,11 +2,11 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
+use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\ShippingProviderMock;
 use WC_Order;
 
 /**

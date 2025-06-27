@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
+namespace Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 
