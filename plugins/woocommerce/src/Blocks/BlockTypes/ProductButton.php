@@ -143,9 +143,9 @@ class ProductButton extends AbstractBlock {
 		}
 
 		$context = array(
-			'quantityToAdd'   => $default_quantity,
-			'productId'       => $product->get_id(),
-			'productType'     => $product->get_type(),
+			'quantityToAdd'    => $default_quantity,
+			'productId'        => $product->get_id(),
+			'productType'      => $product->get_type(),
 			'addToCartText'    => $number_of_items_in_cart > 0
 				? sprintf(
 					/* translators: %s: product quantity. */
@@ -153,8 +153,8 @@ class ProductButton extends AbstractBlock {
 					$number_of_items_in_cart
 				)
 				: $add_to_cart_text,
-			'tempQuantity'    => $number_of_items_in_cart,
-			'animationStatus' => 'IDLE',
+			'tempQuantity'     => $number_of_items_in_cart,
+			'animationStatus'  => 'IDLE',
 			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
 			'noticeId'         => '',
 			'hasPressedButton' => false,
