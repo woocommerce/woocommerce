@@ -20,9 +20,11 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesCont
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 
 /**
  * Service provider for Back in Stock Notification classes.
@@ -49,6 +51,8 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		AdminManager::class,
 		SettingsController::class,
 		MenusController::class,
+		NotificationsPage::class,
+		PrivacyEraser::class,
 	);
 
 	/**
@@ -91,6 +95,7 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		// Admin.
 		$this->share( AdminManager::class );
 		$this->share( SettingsController::class );
-		$this->share( MenusController::class );
+		$this->share( MenusController::class )->addArguments( array( NotificationsPage::class ) );
+		$this->share( PrivacyEraser::class );
 	}
 }
