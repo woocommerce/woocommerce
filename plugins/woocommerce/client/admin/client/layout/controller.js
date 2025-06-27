@@ -374,6 +374,9 @@ export function usePages() {
 		const namespace = `woocommerce/woocommerce/watch_${ PAGES_FILTER }`;
 		addAction( 'hookAdded', namespace, handleHookAdded );
 
+		// Refresh pages to catch any hooks added between initial getPages and this effect
+		setPages( getPages() );
+
 		return () => {
 			removeAction( 'hookAdded', namespace );
 		};

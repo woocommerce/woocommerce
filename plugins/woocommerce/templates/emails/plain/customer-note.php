@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 3.7.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ echo esc_html__( 'The following note has been added to your order:', 'woocommerc
 
 echo "----------\n\n";
 
-echo wptexturize( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo wc_wptexturize_order_note( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 echo "----------\n\n";
 

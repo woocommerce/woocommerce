@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure Add to Cart button state updates when changing variation in the Add to Cart + Options block

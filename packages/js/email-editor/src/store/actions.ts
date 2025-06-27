@@ -8,7 +8,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { storeName, editorCurrentPostType } from './constants';
+import { storeName } from './constants';
 import { SendingPreviewStatus, State, PersonalizationTag } from './types';
 import { recordEvent } from '../events';
 
@@ -30,9 +30,10 @@ export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {
 		const postId = registry.select( storeName ).getEmailPostId();
+		const postType = registry.select( storeName ).getEmailPostType();
 		registry
 			.dispatch( coreDataStore )
-			.editEntityRecord( 'postType', editorCurrentPostType, postId, {
+			.editEntityRecord( 'postType', postType, postId, {
 				template: templateSlug,
 			} );
 	};
