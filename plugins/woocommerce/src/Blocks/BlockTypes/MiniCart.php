@@ -590,6 +590,7 @@ class MiniCart extends AbstractBlock {
 			// Only remove outer wrapper from WooCommerce blocks.
 			if ( $this->is_woocommerce_template_block( $block ) ) {
 				$block['innerContent'] = $this->remove_outer_wrapper( $block['innerContent'] );
+				// $block['innerHTML']    = $this->remove_outer_wrapper( $block['innerHTML'] );
 			}
 
 			// Recursively process inner blocks.
@@ -620,12 +621,18 @@ class MiniCart extends AbstractBlock {
 	 * @return array The filtered inner content array.
 	 */
 	protected function remove_outer_wrapper( $inner_content_arr ) {
-		// array item 0 and last item are the outer wrapper.
-		return array_slice( $inner_content_arr, 1, -1 );
+		if ( ! empty( $inner_content_arr ) ) {
+			$inner_content_arr[0]                                 = '';
+			$inner_content_arr[ count( $inner_content_arr ) - 1 ] = '';
+		}
+		return $inner_content_arr;
 	}
 
 	/**
-	 * Process template contents to remove unwanted div wrappers.
+	 * Process template contents to remove unwanted div wrappers. This is to handle the old
+	 * Mini Cart template which has extra divs nested within the block tags, that are no longer
+	 * needed since we don't render the Mini Cart with React. To maintain compatibility with
+	 * edited templates that have these wrapper divs we must remove them.
 	 *
 	 * @param string $template_contents The template contents to process.
 	 * @return string The processed template contents.
