@@ -8,7 +8,6 @@
  * Post Types: page, wp_template
  * Viewport width: 1400
  * Description: A shop homepage pattern.
- *
  */
 ?>
 <!-- wp:pattern {"slug":"woostarter/two-columns-full-width-categories"} /-->
@@ -19,4 +18,4 @@
 
 <!-- wp:pattern {"slug":"woostarter/left-aligned-image-description-button"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/store-features-row-icons-4-columns"} /-->
+<!-- wp:pattern {"slug":"woostarter/store-features-four-columns-alternative"} /-->
