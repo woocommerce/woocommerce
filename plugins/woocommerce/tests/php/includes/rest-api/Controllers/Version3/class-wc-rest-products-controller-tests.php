@@ -408,6 +408,130 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `search_name_sku_or_gtin` param works correctly.
+	 */
+	public function test_products_search_with_search_name_sku_or_gtin_param() {
+		// Create a product with name, SKU, and GTIN.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Blue Test Shirt' );
+		$product->set_sku( 'test-blue-123' );
+		$product->set_global_unique_id( '1234567890123' );
+		$product->save();
+
+		// Test search by name token.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Blue' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Test search by SKU token.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'test-blue' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Test search by GTIN.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => '1234567890123' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Test tokenized search.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Blue test' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Clean up.
+		$product->delete( true );
+	}
+
+	/**
+	 * Test that the `search_name_sku_or_gtin` param supersedes other search params.
+	 */
+	public function test_products_search_name_sku_or_gtin_supersedes_other_params() {
+		// Create test products.
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Blue Shirt' );
+		$product1->set_sku( 'blue-shirt-123' );
+		$product1->set_global_unique_id( '1111111111111' );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Red Shirt' );
+		$product2->set_sku( 'red-shirt-456' );
+		$product2->set_global_unique_id( '2222222222222' );
+		$product2->save();
+
+		// Test that search_name_sku_or_gtin supersedes search_name_or_sku.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_name_sku_or_gtin' => 'Blue',
+				'search_name_or_sku'      => 'Red',
+				'search_sku'              => 'red-shirt',
+				'search'                  => 'Red',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product1->get_id(), $response_products[0]['id'] );
+
+		// Clean up.
+		$product1->delete( true );
+		$product2->delete( true );
+	}
+
+	/**
+	 * Test that the `search_name_sku_or_gtin` param works when SKUs are disabled.
+	 */
+	public function test_products_search_name_sku_or_gtin_when_skus_disabled() {
+		add_filter( 'wc_product_sku_enabled', '__return_false' );
+
+		// Create a product with name and GTIN (SKU disabled).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Special Test Product' );
+		$product->set_global_unique_id( '9999999999999' );
+		$product->save();
+
+		// Test search by name.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Special' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Test search by GTIN.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_name_sku_or_gtin' => '9999999999999' ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
+
+		// Clean up.
+		$product->delete( true );
+		remove_filter( 'wc_product_sku_enabled', '__return_false' );
+	}
+
+	/**
 	 * Test that the `include_meta` param filters the `meta_data` prop correctly.
 	 */
 	public function test_collection_param_include_meta() {

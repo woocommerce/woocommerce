@@ -53,6 +53,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_name_or_sku_tokens = null;
 
 	/**
+	 * If the 'search_name_sku_or_gtin' argument is present this will be set
+	 * to an array of the (space-separated) tokens that form the argument value.
+	 *
+	 * @var array|null
+	 */
+	private $search_name_sku_or_gtin_tokens = null;
+
+	/**
 	 * Suggested product ids.
 	 *
 	 * @var array
@@ -311,9 +319,20 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
-		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';
+		$search_name_sku_or_gtin_arg = $request['search_name_sku_or_gtin'] ?? '';
+		$search_name_or_sku_arg      = $request['search_name_or_sku'] ?? '';
 
-		if ( '' !== $search_name_or_sku_arg ) {
+		if ( '' !== $search_name_sku_or_gtin_arg ) {
+			// Do a tokenized search for name, SKU, or GTIN. Supersedes all other search arguments.
+			$tokens                               = array_filter( array_map( 'trim', explode( ' ', $search_name_sku_or_gtin_arg ) ) );
+			$this->search_name_sku_or_gtin_tokens = array_map( 'esc_sql', $tokens );
+
+			unset( $request['search'] );
+			unset( $args['s'] );
+			unset( $request['search_sku'] );
+			unset( $request['sku'] );
+			unset( $request['search_name_or_sku'] );
+		} elseif ( '' !== $search_name_or_sku_arg ) {
 			// Do a tokenized search for name or SKU. Supersedes the 'search', 'search_sku' and 'sku' arguments.
 			$tokens                          = array_filter( array_map( 'trim', explode( ' ', $search_name_or_sku_arg ) ) );
 			$this->search_name_or_sku_tokens = array_map( 'esc_sql', $tokens );
@@ -401,7 +420,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || $this->search_name_or_sku_tokens ) {
+		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || $this->search_name_or_sku_tokens || $this->search_name_sku_or_gtin_tokens ) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
@@ -438,7 +457,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens;
+		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_name_sku_or_gtin_tokens;
 
 		// Add filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -458,7 +477,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			remove_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
 			remove_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 
-			$this->search_sku_arg_value = '';
+			$this->search_sku_arg_value           = '';
+			$this->search_name_or_sku_tokens      = null;
+			$this->search_name_sku_or_gtin_tokens = null;
 		}
 
 		// Remove filters for excluding product statuses.
@@ -472,19 +493,35 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Join `wc_product_meta_lookup` table when SKU search query is present.
+	 * Join `wc_product_meta_lookup` table when a search query requires it (e.g., for SKU or GTIN).
 	 *
 	 * @param string $join Join clause used to search posts.
 	 * @return string
 	 */
 	public function add_search_criteria_to_wp_query_join( $join ) {
-		if ( $this->search_name_or_sku_tokens ) {
-			if ( ! wc_product_sku_enabled() ) {
-				// The argument is effectively a tokenized name search: we don't need to join the meta lookup table.
-				return $join;
+		// Check if already joined to avoid duplicate joins.
+		if ( strstr( $join, 'wc_product_meta_lookup' ) ) {
+			return $join;
+		}
+
+		// Determine if we need to join based on search criteria.
+		$needs_join = false;
+
+		if ( $this->search_name_sku_or_gtin_tokens ) {
+			// For GTIN search, we always need the meta lookup table.
+			$needs_join = true;
+		} elseif ( $this->search_name_or_sku_tokens ) {
+			if ( wc_product_sku_enabled() ) {
+				// For name or SKU search with SKU enabled, we need the meta lookup table.
+				$needs_join = true;
 			}
-		} elseif ( empty( $this->search_sku_arg_value ) || strstr( $join, 'wc_product_meta_lookup' ) ) {
-			return;
+		} elseif ( ! empty( $this->search_sku_arg_value ) ) {
+			// For SKU search, we need the meta lookup table.
+			$needs_join = true;
+		}
+
+		if ( ! $needs_join ) {
+			return $join;
 		}
 
 		global $wpdb;
@@ -496,7 +533,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Add a where clause for matching the SKU field.
+	 * Add a where clause for matching the search criteria.
 	 *
 	 * @param string $where Where clause used to search posts.
 	 * @return string
@@ -504,7 +541,33 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	public function add_search_criteria_to_wp_query_where( $where ) {
 		global $wpdb;
 
-		if ( $this->search_name_or_sku_tokens ) {
+		if ( $this->search_name_sku_or_gtin_tokens ) {
+			$use_sku                  = wc_product_sku_enabled();
+			$posts_clause_parts       = array();
+			$meta_lookup_clause_parts = array();
+			$gtin_lookup_clause_parts = array();
+
+			foreach ( $this->search_name_sku_or_gtin_tokens as $token ) {
+				$like_search          = '%' . $wpdb->esc_like( $token ) . '%';
+				$posts_clause_parts[] = $wpdb->prepare( "($wpdb->posts.post_title LIKE %s)", $like_search );
+
+				if ( $use_sku ) {
+					$meta_lookup_clause_parts[] = $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
+				}
+
+				$gtin_lookup_clause_parts[] = $wpdb->prepare( '(wc_product_meta_lookup.global_unique_id LIKE %s)', $like_search );
+			}
+
+			$post_clause = implode( ' AND ', $posts_clause_parts );
+			$gtin_clause = implode( ' AND ', $gtin_lookup_clause_parts );
+
+			if ( $use_sku ) {
+				$meta_lookup_clause = implode( ' AND ', $meta_lookup_clause_parts );
+				$where             .= " AND (($post_clause) OR ($meta_lookup_clause) OR ($gtin_clause))";
+			} else {
+				$where .= " AND (($post_clause) OR ($gtin_clause))";
+			}
+		} elseif ( $this->search_name_or_sku_tokens ) {
 			$use_sku                  = wc_product_sku_enabled();
 			$posts_clause_parts       = array();
 			$meta_lookup_clause_parts = array();
@@ -1794,6 +1857,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		$params['search_name_or_sku'] = array(
 			'description'       => __( "Limit results to those with a name or SKU that partial matches a string. This argument takes precedence over 'search', 'sku' and 'search_sku'.", 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['search_name_sku_or_gtin'] = array(
+			'description'       => __( "Limit results to those with a name, SKU, or GTIN that partial matches a string. This argument takes precedence over 'search', 'sku', 'search_sku', and 'search_name_or_sku'.", 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
