@@ -105,6 +105,10 @@ jobs:
         with:
           ref: ${{ inputs.branch || github.ref }}
           path: checkout-branch
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+            /plugins/woocommerce/readme.txt
+          sparse-checkout-cone-mode: false
         if: ${{ inputs.create_github_release && ! inputs.skip_verify }}
 
       - name: 'Pre-build verification'
