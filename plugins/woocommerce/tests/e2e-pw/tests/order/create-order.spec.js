@@ -424,7 +424,7 @@ test.describe(
 			order.id = await getOrderIdFromPage( page );
 
 			// Select customer
-			await page.getByText( 'Guest' ).click();
+			await page.locator( '#select2-customer_user-container' ).click();
 			await page
 				.locator( 'input[aria-owns="select2-customer_user-results"]' )
 				.fill( customer.username );
