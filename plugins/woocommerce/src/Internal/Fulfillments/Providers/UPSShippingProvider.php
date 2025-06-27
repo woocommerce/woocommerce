@@ -113,24 +113,24 @@ class UPSShippingProvider extends AbstractShippingProvider {
 		$is_t_format          = preg_match( '/^T\d{10}$/i', $tracking_number );
 		$is_h_format          = preg_match( '/^H\d{10}$/i', $tracking_number );
 		$is_domestic_shipping = $shipping_from === $shipping_to;
-		$is_possibly_ups      = preg_match( '/^9\d{21,34}$/i', $tracking_number );
+		$is_9x_format         = preg_match( '/^9\d{21,34}$/i', $tracking_number );
 
-		$match     = false;
-		$ambiguous = false;
+		$match = false;
 
 		if ( $is_1z_format ) {
-			$match = true;
+			$match           = true;
+			$ambiguity_score = 100;
 		} elseif ( ( $is_t_format || $is_h_format ) && 'US' === $shipping_from && $is_domestic_shipping ) {
-			$match     = true;
-			$ambiguous = true;
-		} elseif ( $is_possibly_ups ) {
-			$match     = true;
-			$ambiguous = true;
+			$match           = true;
+			$ambiguity_score = 75;
+		} elseif ( $is_9x_format ) {
+			$match           = true;
+			$ambiguity_score = 'CA' === $shipping_from ? 60 : 40;
 		}
 
 		return $match ? array(
-			'url'       => $this->get_tracking_url( $tracking_number ),
-			'ambiguous' => $ambiguous,
+			'url'             => $this->get_tracking_url( $tracking_number ),
+			'ambiguity_score' => $ambiguity_score,
 		) : null;
 	}
 }
