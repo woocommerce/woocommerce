@@ -8,6 +8,7 @@ import { store as coreDataStore } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { BLOCK_NAMES } from './constants';
+import { ProductPostType } from './types';
 
 interface UseFeaturedItemProps {
 	itemId: number | undefined;
@@ -42,8 +43,15 @@ export const useFeaturedItemStatus = ( {
 			} = selectFunc( coreDataStore );
 
 			if ( itemType === BLOCK_NAMES.featuredProduct ) {
-				const productArgs = [ 'postType', 'product', itemId ];
-				const product = getEntityRecord( ...productArgs );
+				const productArgs: [ string, string, number ] = [
+					'postType',
+					'product',
+					itemId,
+				];
+				const product: ProductPostType | undefined = getEntityRecord(
+					...productArgs
+				);
+
 				const saveError = getLastEntitySaveError( ...productArgs );
 				const isResolved = hasFinishedResolution(
 					'getEntityRecord',
@@ -67,11 +75,8 @@ export const useFeaturedItemStatus = ( {
 			}
 
 			if ( itemType === BLOCK_NAMES.featuredCategory ) {
-				const categoryArgs = [
-					'taxonomy',
-					'product_cat',
-					{ include: [ itemId ] },
-				];
+				const categoryArgs: [ string, string, { include: number[] } ] =
+					[ 'taxonomy', 'product_cat', { include: [ itemId ] } ];
 				const categories = getEntityRecords( ...categoryArgs );
 				const isResolved = hasFinishedResolution(
 					'getEntityRecords',
