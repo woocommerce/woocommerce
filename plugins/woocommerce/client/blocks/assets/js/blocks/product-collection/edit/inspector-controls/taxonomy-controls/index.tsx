@@ -14,9 +14,7 @@ import {
  * Internal dependencies
  */
 import TaxonomyItem from './taxonomy-item';
-import {
-	QueryControlProps,
-} from '../../../types';
+import { QueryControlProps } from '../../../types';
 import useTaxonomyControls from './use-taxonomy-controls';
 
 /**
