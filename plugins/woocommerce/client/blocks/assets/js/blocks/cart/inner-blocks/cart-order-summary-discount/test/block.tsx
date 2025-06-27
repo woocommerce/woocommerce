@@ -3,6 +3,10 @@
  */
 import { render, screen } from '@testing-library/react';
 import { SlotFillProvider } from '@wordpress/components';
+import {
+	useStoreCart,
+	useStoreCartCoupons,
+} from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -14,12 +18,6 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	useStoreCart: jest.fn(),
 	useStoreCartCoupons: jest.fn(),
 } ) );
-
-// Import mocked hooks
-import {
-	useStoreCart,
-	useStoreCartCoupons,
-} from '@woocommerce/base-context/hooks';
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered
 const mockSlotRender = jest.fn();
