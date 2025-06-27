@@ -49,7 +49,7 @@ class AmazonLogisticsShippingProviderTest extends \WP_UnitTestCase {
 		} else {
 			$this->assertNotNull( $result );
 			$this->assertEquals( $expected_score, $result['ambiguity_score'] );
-			$this->assertStringContainsString( rawurlencode( $tracking_number ), $result['url'] );
+			$this->assertStringContainsString( rawurlencode( strtoupper( $tracking_number ) ), $result['url'] );
 		}
 	}
 
@@ -60,13 +60,24 @@ class AmazonLogisticsShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function trackingNumberProvider(): array {
 		return array(
-			array( 'TBA1234567890', 'US', 'US', true, 95 ),
-			array( 'TBA987654321X', 'GB', 'GB', true, 95 ),
-			array( 'TBA00000000', 'DE', 'FR', true, 95 ),
-			array( 'tba111222333', 'US', 'CA', true, 95 ),
-			array( 'TBA1234567890', 'US', 'BR', false ),
-			array( 'INVALID123456', 'US', 'US', false ),
-			array( 'TBX1234567890', 'US', 'US', false ),
+			// TBA (always accepted, high confidence).
+			array( 'TBA1234567890', 'US', 'US', true, 100 ),
+			array( 'TBAabcdef1234', 'DE', 'DE', true, 100 ),
+
+			// TBC (contextual confidence).
+			array( 'TBC1234567890', 'CA', 'CA', true, 90 ),
+			array( 'TBC1234567890', 'GB', 'GB', true, 90 ),
+			array( 'TBC1234567890', 'US', 'US', true, 60 ),
+
+			// TBM (lower confidence outside India/MX).
+			array( 'TBM9876543210', 'IN', 'IN', true, 85 ),
+			array( 'TBM9876543210', 'MX', 'MX', true, 85 ),
+			array( 'TBM9876543210', 'GB', 'GB', true, 50 ),
+
+			// Invalids.
+			array( 'TBC12345', 'CA', 'CA', false, 0 ),
+			array( 'XYZ1234567890', 'US', 'US', false, 0 ),
+			array( '1234567890', 'US', 'US', false, 0 ),
 		);
 	}
 }

@@ -39,7 +39,7 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 	 * @return array An array of country codes.
 	 */
 	public function get_shipping_from_countries(): array {
-		return array( 'US', 'CA', 'GB', 'DE', 'FR', 'IT', 'ES', 'IN', 'JP' );
+		return array( 'US', 'CA', 'GB', 'DE', 'IT', 'IN', 'MX' );
 	}
 
 	/**
@@ -89,15 +89,23 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 
 		$tracking_number = strtoupper( $tracking_number );
 
-		$is_amazon_tba = preg_match( '/^TBA[0-9A-Z]{10,}$/', $tracking_number );
+		$is_tba = preg_match( '/^TBA[0-9A-Z]{10,}$/', $tracking_number );
+		$is_tbc = preg_match( '/^TBC[0-9A-Z]{10,}$/', $tracking_number );
+		$is_tbm = preg_match( '/^TBM[0-9A-Z]{10,}$/', $tracking_number );
 
-		if ( $is_amazon_tba ) {
-			return array(
-				'url'             => $this->get_tracking_url( $tracking_number ),
-				'ambiguity_score' => 95,
-			);
+		if ( $is_tba ) {
+			$ambiguity_score = 100;
+		} elseif ( $is_tbc ) {
+			$ambiguity_score = in_array( $shipping_from, array( 'CA', 'GB' ), true ) ? 90 : 60;
+		} elseif ( $is_tbm ) {
+			$ambiguity_score = in_array( $shipping_from, array( 'IN', 'MX' ), true ) ? 85 : 50;
+		} else {
+			return null;
 		}
 
-		return null;
+		return array(
+			'url'             => $this->get_tracking_url( $tracking_number ),
+			'ambiguity_score' => $ambiguity_score,
+		);
 	}
 }
