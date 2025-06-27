@@ -24,4 +24,10 @@
 
 <!-- wp:pattern {"slug":"woostarter/about-2-columns-with-heading"} /-->
 
+<!-- wp:pattern {"slug":"woostarter/store-features-three-columns"} /-->
+
+<!-- wp:separator {"align":"full"} -->
+<hr class="wp-block-separator alignfull has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
 <!-- wp:pattern {"slug":"woostarter/subscribe-to-newsletter"} /-->
