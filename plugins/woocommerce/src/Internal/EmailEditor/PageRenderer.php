@@ -122,21 +122,27 @@ class PageRenderer {
 		);
 		// End of replacing Rich Text package.
 
-		$file_name     = 'index';
-		$assets_params = require $email_editor_assets_path . "{$file_name}.asset.php";
-
-		wp_enqueue_script(
-			'woocommerce_email_editor',
-			$email_editor_assets_url . "{$file_name}.js",
-			$assets_params['dependencies'],
-			$assets_params['version'],
-			true
-		);
+		$assets_params = require $email_editor_assets_path . 'index.asset.php';
 		wp_enqueue_style(
-			'woocommerce_email_editor',
-			$email_editor_assets_url . "style-{$file_name}.css",
+			'wc-admin-email-editor-integration',
+			$email_editor_assets_url . 'style.css',
 			array(),
 			$assets_params['version']
+		);
+
+		// The email editor needs to load block categories to avoid warning and missing category names.
+		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L116-L120.
+		wp_add_inline_script(
+			'wp-blocks',
+			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $edited_item ) ) ),
+			'after'
+		);
+
+		// Preload server-registered block schemas to avoid warning about missing block titles.
+		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L144C1-L148C3.
+		wp_add_inline_script(
+			'wp-blocks',
+			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings() ) )
 		);
 
 		$current_user_email = wp_get_current_user()->user_email;
@@ -162,7 +168,7 @@ class PageRenderer {
 		$email_editor_settings['displaySendEmailButton'] = false;
 
 		wp_localize_script(
-			'woocommerce_email_editor',
+			'wc-admin-email-editor-integration',
 			'WooCommerceEmailEditor',
 			array(
 				'current_post_type'     => esc_js( $post_type ),

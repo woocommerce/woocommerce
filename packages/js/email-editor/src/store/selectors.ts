@@ -12,7 +12,7 @@ import { Post } from '@wordpress/core-data/build-types/entity-types/post';
 /**
  * Internal dependencies
  */
-import { storeName, editorCurrentPostType } from './constants';
+import { storeName } from './constants';
 import { State, EmailTemplate, EmailEditorPostType, Feature } from './types';
 
 function getContentFromEntity( entity ): string {
@@ -62,9 +62,10 @@ export const isFeatureActive = createRegistrySelector(
 
 export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 	const postId = select( storeName ).getEmailPostId();
+	const postType = select( storeName ).getEmailPostType();
 	return !! select( coreDataStore ).hasEditsForEntityRecord(
 		'postType',
-		editorCurrentPostType,
+		postType,
 		postId
 	);
 } );
@@ -72,10 +73,11 @@ export const hasEdits = createRegistrySelector( ( select ) => (): boolean => {
 export const hasEmptyContent = createRegistrySelector(
 	( select ) => (): boolean => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 
 		const post = select( coreDataStore ).getEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		);
 		if ( ! post ) {
@@ -91,10 +93,11 @@ export const hasEmptyContent = createRegistrySelector(
 export const isEmailSent = createRegistrySelector(
 	( select ) => (): boolean => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 
 		const post = select( coreDataStore ).getEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		);
 		if ( ! post ) {
@@ -116,9 +119,10 @@ export const isEmailSent = createRegistrySelector(
 export const getEditedEmailContent = createRegistrySelector(
 	( select ) => (): string => {
 		const postId = select( storeName ).getEmailPostId();
+		const postType = select( storeName ).getEmailPostType();
 		const record = select( coreDataStore ).getEditedEntityRecord(
 			'postType',
-			editorCurrentPostType,
+			postType,
 			postId
 		) as unknown as
 			| { content: string | unknown; blocks: BlockInstance[] }
@@ -132,15 +136,19 @@ export const getEditedEmailContent = createRegistrySelector(
 );
 
 export const getSentEmailEditorPosts = createRegistrySelector(
-	( select ) => () =>
-		select( coreDataStore )
-			.getEntityRecords( 'postType', editorCurrentPostType, {
-				per_page: 30, // show a maximum of 30 for now
-				status: 'publish,sent', // show only sent emails
-			} )
-			?.filter(
-				( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
-			) || []
+	( select ) => () => {
+		const postType = select( storeName ).getEmailPostType();
+		return (
+			select( coreDataStore )
+				.getEntityRecords( 'postType', postType, {
+					per_page: 30, // show a maximum of 30 for now
+					status: 'publish,sent', // show only sent emails
+				} )
+				?.filter(
+					( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
+				) || []
+		);
+	}
 );
 
 export const getBlockPatternsForEmailTemplate = createRegistrySelector(
@@ -294,24 +302,30 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector(
-	( select ) => () =>
+export const getEmailTemplates = createRegistrySelector( ( select ) => () => {
+	const postType = select( storeName ).getEmailPostType();
+	return (
 		select( coreDataStore )
 			.getEntityRecords( 'postType', 'wp_template', {
 				per_page: -1,
-				post_type: editorCurrentPostType,
+				post_type: postType,
 				context: 'view',
 			} )
 			// We still need to filter the templates because, in some cases, the API also returns custom templates
 			// ignoring the post_type filter in the query
 			?.filter( ( template ) =>
 				// @ts-expect-error Missing property in type
-				template.post_types.includes( editorCurrentPostType )
+				template.post_types.includes( postType )
 			)
-);
+	);
+} );
 
 export function getEmailPostId( state: State ): number | string {
 	return state.postId;
+}
+
+export function getEmailPostType( state: State ): string {
+	return state.postType;
 }
 
 export function getInitialEditorSettings(

@@ -100,9 +100,13 @@ const prepareFormFields = (
 	return fieldKeys
 		.map( ( field ) => {
 			const defaultConfig =
-				field in defaultFields ? defaultFields[ field ] : {};
+				defaultFields && field in defaultFields
+					? defaultFields[ field ]
+					: {};
 			const localeConfig =
-				field in localeConfigs ? localeConfigs[ field ] : {};
+				localeConfigs && field in localeConfigs
+					? localeConfigs[ field ]
+					: {};
 
 			return {
 				key: field,

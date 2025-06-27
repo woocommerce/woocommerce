@@ -12,6 +12,7 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
+.claude
 
 # Grunt
 none

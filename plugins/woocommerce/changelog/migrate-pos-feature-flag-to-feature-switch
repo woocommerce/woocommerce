@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Migrate Point of Sale admin feature flag to core feature switch.

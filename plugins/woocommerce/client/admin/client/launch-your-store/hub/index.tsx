@@ -3,6 +3,8 @@
  */
 import { useMachine } from '@xstate5/react';
 import { useEffect } from 'react';
+import { useDispatch } from '@wordpress/data';
+import { onboardingStore } from '@woocommerce/data';
 import clsx from 'clsx';
 
 /**
@@ -31,6 +33,7 @@ export type LaunchYourStoreComponentProps = {
 	className?: string;
 };
 import { SetUpPaymentsProvider } from '../data/setup-payments-context';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
@@ -43,6 +46,8 @@ const LaunchStoreController = () => {
 		window.sessionStorage.setItem( 'lysWaiting', 'no' );
 	}, [] );
 	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
+	const { invalidateResolutionForStoreSelector } =
+		useDispatch( onboardingStore );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
 		useMachine( mainContentMachine, {
@@ -72,6 +77,21 @@ const LaunchStoreController = () => {
 		);
 
 	const handlePaymentsClose = () => {
+		// We are not actually closing a modal here, but we use the same event name for consistency.
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed', {
+			from: 'lys',
+			source: 'lys',
+		} );
+
+		// Clear session flag to prevent redirect back to payments setup
+		// after exiting the flow and returning to the WC Admin home.
+		window.sessionStorage.setItem( 'lysWaiting', 'no' );
+
+		// Invalidate the task lists to ensure they are refreshed
+		// when the user returns to the main flow.
+		invalidateResolutionForStoreSelector( 'getTaskLists' );
+		invalidateResolutionForStoreSelector( 'getTaskListsByIds' );
+
 		// Navigate back to the main flow
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};

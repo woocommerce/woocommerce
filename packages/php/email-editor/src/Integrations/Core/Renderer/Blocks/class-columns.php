@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use WP_Style_Engine;
 
@@ -20,11 +20,12 @@ class Columns extends Abstract_Block_Renderer {
 	 * Override this method to disable spacing (block gap) for columns.
 	 * Spacing is applied on wrapping columns block. Columns are rendered side by side so no spacer is needed.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content = '';
 		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
 			$content .= render_block( $block );
@@ -33,24 +34,24 @@ class Columns extends Abstract_Block_Renderer {
 		return str_replace(
 			'{columns_content}',
 			$content,
-			$this->getBlockWrapper( $block_content, $parsed_block, $settings_controller )
+			$this->getBlockWrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Based on MJML <mj-section>
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function getBlockWrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function getBlockWrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 		$block_attributes           = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'align' => null,
-				'width' => $settings_controller->get_layout_width_without_padding(),
+				'width' => $rendering_context->get_layout_width_without_padding(),
 				'style' => array(),
 			)
 		);

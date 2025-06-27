@@ -15,11 +15,8 @@ import { isBoolean } from '@woocommerce/types';
  * Internal dependencies
  */
 import { QuantitySelectorStyle, AddToCartFormSettings } from './settings';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../add-to-cart-with-options/utils';
 import { UpgradeNotice } from './components/upgrade-notice';
 import type { Attributes } from './';
-
-export type UpdateFeaturesType = ( key: FeaturesKeys, value: boolean ) => void;
 
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { setAttributes } = props;
@@ -53,7 +50,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 
 	return (
 		<>
-			{ shouldBlockifiedAddToCartWithOptionsBeRegistered && (
+			{ isBlockTheme && (
 				<InspectorControls>
 					<UpgradeNotice blockClientId={ props?.clientId } />
 				</InspectorControls>

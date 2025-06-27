@@ -173,7 +173,7 @@ Finally, return true if we make it to the end of the `validate()` method.
 }
 ```
 
-#### Step 2: Provide get\_ And set\_ Methods For Extra Data
+#### Step 2: Provide `get_` And `set_` Methods For Extra Data
 
 You can now add your own methods for each piece of data you would like to expose. Handy functions are provided to you to make storing and retrieving data easy. All data is stored in a meta table so you do not need to make your own table or add new fields to an existing one.
 

@@ -24,7 +24,7 @@ import {
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep, navigateToNextStep, closeModal } =
+	const { currentStep, navigateToNextStep, closeModal, sessionEntryPoint } =
 		useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
@@ -161,10 +161,10 @@ export default function PaymentMethodsSelection() {
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<div className="woocommerce-layout__header-title-and-close">
-						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align woocommerce-settings-payments-header__title">
+			<div className="woocommerce-recommended-payment-methods">
+				<div className="woocommerce-recommended-payment-methods__header">
+					<div className="woocommerce-recommended-payment-methods__header--title">
+						<h1 className="components-truncate components-text">
 							{ __(
 								'Choose your payment methods',
 								'woocommerce'
@@ -177,8 +177,7 @@ export default function PaymentMethodsSelection() {
 							<Icon icon={ close } />
 						</Button>
 					</div>
-
-					<div className="woocommerce-settings-payments-header__description">
+					<div className="woocommerce-recommended-payment-methods__header--description">
 						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
 							'woocommerce'
@@ -233,6 +232,7 @@ export default function PaymentMethodsSelection() {
 													'unknown',
 												action: 'show_more',
 												hidden_count: hiddenCount,
+												source: sessionEntryPoint,
 											}
 										);
 
@@ -282,39 +282,51 @@ export default function PaymentMethodsSelection() {
 								url: href,
 								method: 'POST',
 							} ).then( () => {
+								const eventProps = {
+									displayed_payment_methods:
+										Object.keys( paymentMethodsState ).join(
+											', '
+										),
+									selected_payment_methods: Object.keys(
+										paymentMethodsState
+									)
+										.filter(
+											( paymentMethod ) =>
+												paymentMethodsState[
+													paymentMethod
+												]
+										)
+										.join( ', ' ),
+									deselected_payment_methods: Object.keys(
+										paymentMethodsState
+									)
+										.filter(
+											( paymentMethod ) =>
+												! paymentMethodsState[
+													paymentMethod
+												]
+										)
+										.join( ', ' ),
+									business_country:
+										window.wcSettings?.admin
+											?.woocommerce_payments_nox_profile
+											?.business_country_code ??
+										'unknown',
+									source: sessionEntryPoint,
+								};
+								recordPaymentsOnboardingEvent(
+									'woopayments_onboarding_modal_click',
+									{
+										step: 'payment_methods',
+										action: 'continue',
+										...eventProps,
+									}
+								);
+								// This is the legacy event for the continue button click.
+								// For now, trigger it for compatibility.
 								recordEvent(
 									'wcpay_settings_payment_methods_continue',
-									{
-										displayed_payment_methods:
-											Object.keys(
-												paymentMethodsState
-											).join( ', ' ),
-										selected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										deselected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													! paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										business_country:
-											window.wcSettings?.admin
-												?.woocommerce_payments_nox_profile
-												?.business_country_code ??
-											'unknown',
-									}
+									eventProps
 								);
 								setIsContinueButtonLoading( false );
 								navigateToNextStep();

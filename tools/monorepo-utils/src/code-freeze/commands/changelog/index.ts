@@ -42,6 +42,11 @@ export const changelogCommand = new Command( 'changelog' )
 		'-b, --branch <branch>',
 		'Branch to use for the changelog. Default: "release/[version]".'
 	)
+	.option(
+		'-a, --append-changelog',
+		'Append changelog to the existing one instead of replacing it.',
+		false
+	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
 		const { owner, name, version, branch, devRepoPath } = options;
