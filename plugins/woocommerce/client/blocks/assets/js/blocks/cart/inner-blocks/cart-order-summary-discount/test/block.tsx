@@ -3,8 +3,6 @@
  */
 import { render, screen } from '@testing-library/react';
 import { SlotFillProvider } from '@wordpress/components';
-import { dispatch } from '@wordpress/data';
-import { CART_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -18,7 +16,10 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 } ) );
 
 // Import mocked hooks
-import { useStoreCart, useStoreCartCoupons } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useStoreCartCoupons,
+} from '@woocommerce/base-context/hooks';
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered
 const mockSlotRender = jest.fn();
@@ -70,11 +71,7 @@ describe( 'Cart Order Summary Discount Block', () => {
 	} );
 
 	const renderWithProviders = ( ui: React.ReactElement ) => {
-		return render(
-			<SlotFillProvider>
-				{ ui }
-			</SlotFillProvider>
-		);
+		return render( <SlotFillProvider>{ ui }</SlotFillProvider> );
 	};
 
 	it( 'renders only the DiscountSlotFill when there are no coupons', () => {
@@ -100,21 +97,21 @@ describe( 'Cart Order Summary Discount Block', () => {
 		);
 
 		// Verify receiveCart was not passed to the slot
-		const slotProps = mockSlotRender.mock.calls[0][0];
+		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 	} );
 
 	it( 'renders both TotalsDiscount and DiscountSlotFill when there are coupons', () => {
 		const mockCoupons = [
-			{ 
+			{
 				code: 'TEST10',
 				label: 'TEST10', // The label is what gets displayed
-				discount_type: 'percent', 
+				discount_type: 'percent',
 				amount: '10',
 				totals: {
 					total_discount: '1000',
 					total_discount_tax: '0',
-				}
+				},
 			},
 		];
 
@@ -131,7 +128,7 @@ describe( 'Cart Order Summary Discount Block', () => {
 
 		// With real components, look for the discount text/coupon code
 		expect( screen.getByText( 'TEST10' ) ).toBeInTheDocument();
-		
+
 		// Verify the slot is still rendered
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
 
@@ -148,7 +145,9 @@ describe( 'Cart Order Summary Discount Block', () => {
 
 	it( 'always renders the ExperimentalDiscountsMeta.Slot regardless of coupon state', () => {
 		// Test with no coupons
-		const { rerender } = renderWithProviders( <Block className="test-class" /> );
+		const { rerender } = renderWithProviders(
+			<Block className="test-class" />
+		);
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
 		expect( mockSlotRender ).toHaveBeenCalledTimes( 1 );
 
@@ -158,14 +157,16 @@ describe( 'Cart Order Summary Discount Block', () => {
 		// Test with coupons
 		( useStoreCart as jest.Mock ).mockReturnValue( {
 			...mockCartData,
-			cartCoupons: [ { 
-				code: 'TEST',
-				label: 'TEST', // Add label for display
-				totals: {
-					total_discount: '500',
-					total_discount_tax: '0',
-				}
-			} ],
+			cartCoupons: [
+				{
+					code: 'TEST',
+					label: 'TEST', // Add label for display
+					totals: {
+						total_discount: '500',
+						total_discount_tax: '0',
+					},
+				},
+			],
 		} );
 
 		rerender(
@@ -173,13 +174,13 @@ describe( 'Cart Order Summary Discount Block', () => {
 				<Block className="test-class" />
 			</SlotFillProvider>
 		);
-		
+
 		// Should still have the slot
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
-		
+
 		// Verify it was called with correct props both times
 		expect( mockSlotRender ).toHaveBeenCalledTimes( 1 );
-		
+
 		// Check the props structure
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -190,23 +191,25 @@ describe( 'Cart Order Summary Discount Block', () => {
 				} ),
 			} )
 		);
-		
+
 		// Verify receiveCart is not passed
-		const slotProps = mockSlotRender.mock.calls[0][0];
+		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 	} );
 
 	it( 'handles missing className prop gracefully', () => {
 		( useStoreCart as jest.Mock ).mockReturnValue( {
 			...mockCartData,
-			cartCoupons: [ { 
-				code: 'TEST',
-				label: 'TEST', // Add label for display
-				totals: {
-					total_discount: '500',
-					total_discount_tax: '0',
-				}
-			} ],
+			cartCoupons: [
+				{
+					code: 'TEST',
+					label: 'TEST', // Add label for display
+					totals: {
+						total_discount: '500',
+						total_discount_tax: '0',
+					},
+				},
+			],
 		} );
 
 		// @ts-expect-error Testing without required prop
