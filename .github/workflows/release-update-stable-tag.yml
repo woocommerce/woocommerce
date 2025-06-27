@@ -156,16 +156,8 @@ jobs:
             exit 1
           fi
 
-          echo "📋 Current stable tag line:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
-
           # Update the stable tag
           sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
-
-          echo "📝 Updated stable tag line:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
 
           # Check if there are any changes
           if svn diff --quiet; then
@@ -210,15 +202,6 @@ jobs:
           git checkout "$BRANCH_NAME"
 
           README_PATH="plugins/woocommerce/readme.txt"
-
-          if [ ! -f "$README_PATH" ]; then
-            echo "::error::readme.txt not found at $README_PATH"
-            exit 1
-          fi
-
-          echo "📋 Current stable tag line on $BRANCH_NAME:"
-          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
-          echo "=========================="
 
           # Update the stable tag
           sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
