@@ -372,7 +372,7 @@ class FulfillmentUtils {
 			) {
 				try {
 					// Instantiate the shipping provider class.
-					$shipping_provider_instance = new $shipping_provider();
+					$shipping_provider_instance = wc_get_container()->get( $shipping_provider() );
 				} catch ( \Throwable $e ) {
 					continue; // Skip if instantiation fails.
 				}

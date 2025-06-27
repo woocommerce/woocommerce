@@ -150,7 +150,7 @@ class FulfillmentsManager {
 					 *
 					 * @var AbstractShippingProvider $provider_instance
 					 */
-					$provider_instance = new $provider();
+					$provider_instance = wc_get_container()->get( $provider );
 				} catch ( \Throwable $e ) {
 					$logger = wc_get_logger();
 					$logger->error(
