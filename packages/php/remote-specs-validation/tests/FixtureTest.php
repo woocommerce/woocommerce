@@ -32,12 +32,6 @@ class FixtureTest extends TestCase {
 		$this->assertTrue( $result->is_valid() );
 	}
 
-	public function test_wcpay_promotions() {
-		$validator = RemoteSpecValidator::create_from_bundle( 'wc-pay-promotions' );
-		$result = $validator->validate( $this->get_fixture( 'wc-pay-promotions.json' ) );
-		$this->assertTrue( $result->is_valid() );
-	}
-
 	public function test_shipping_partner_suggestions() {
 		$validator = RemoteSpecValidator::create_from_bundle( 'shipping-partner-suggestions' );
 		$result = $validator->validate( $this->get_fixture( 'shipping-partner-suggestions.json' ) );

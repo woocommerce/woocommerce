@@ -18,7 +18,6 @@ class RemoteSpecValidator {
 
 	private static $supported_bundles = [
 		'remote-inbox-notification' => 'remote-inbox-notification.json',
-		'wc-pay-promotions'   => 'wc-pay-promotions.json',
 		'shipping-partner-suggestions' => 'shipping-partner-suggestions.json',
 		'payment-gateway-suggestions' => 'payment-gateway-suggestions.json',
 		'obw-free-extensions' => 'obw-free-extensions.json',
