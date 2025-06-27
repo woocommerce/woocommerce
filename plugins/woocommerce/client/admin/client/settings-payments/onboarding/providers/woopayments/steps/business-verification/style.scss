@@ -193,7 +193,7 @@ $gutenberg-blueberry-focus: #1d35b4;
 
 			// Use :after to force the list to take on more vertical space so that when opened in a container with scroll,
 			// the list does not sit flush with the bottom.
-			&:after {
+			&::after {
 				content: " ";
 				position: absolute;
 				top: 0;
