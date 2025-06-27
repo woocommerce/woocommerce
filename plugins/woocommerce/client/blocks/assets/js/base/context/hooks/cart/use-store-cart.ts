@@ -178,7 +178,7 @@ export const useStoreCart = (
 				? cartData.coupons.map(
 						( coupon: CartResponseCouponItem ) => ( {
 							...coupon,
-							label: coupon.code,
+							label: decodeEntities( coupon.code ),
 						} )
 				  )
 				: EMPTY_CART_COUPONS,

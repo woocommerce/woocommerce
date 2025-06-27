@@ -31,7 +31,7 @@ class VariationSelector extends AbstractBlock {
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
-		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+		if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) && ! Utils::is_not_purchasable_product( $product ) ) {
 			return $content;
 		}
 

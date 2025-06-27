@@ -93,6 +93,13 @@ class CheckoutFieldsFrontend {
 			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
 
+		$context = array(
+			'caller' => 'CheckoutFieldsFrontend::render_order_other_fields',
+			'order'  => $order,
+		);
+
+		$fields = $this->checkout_fields_controller->filter_fields_for_order_confirmation( $fields, $context );
+
 		if ( ! $fields ) {
 			return;
 		}
