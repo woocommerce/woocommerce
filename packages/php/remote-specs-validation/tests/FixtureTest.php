@@ -18,14 +18,6 @@ class FixtureTest extends TestCase {
 		$this->assertTrue( $result->is_valid() );
 	}
 
-	public function test_payment_gateway_suggestions() {
-		$validator = RemoteSpecValidator::create_from_bundle( 'payment-gateway-suggestions' );
-		$result = $validator->validate( $this->get_fixture( 'payment-gateway-suggestions.json' ) );
-		// This is expected to fail as the payment-gateway-suggestions contains invalid format.
-		// We should fix them and update this test.
-		$this->assertFalse( $result->is_valid() );
-	}
-
 	public function test_obw_free_extensions() {
 		$validator = RemoteSpecValidator::create_from_bundle( 'obw-free-extensions' );
 		$result = $validator->validate( $this->get_fixture( 'obw-free-extensions.json' ) );

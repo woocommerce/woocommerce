@@ -11,7 +11,6 @@ composer require woocommerce/remote-specs-validation
 | Filename                          | Endpoint                                                                                               | Bundle                       |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------- |
 | remote-inbox-notification.json    | <https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json>                     | remote-inbox-notification    |
-| payment-gateway-suggestions.json  | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json>               | payment-gateway-suggestions  |
 | obw-free-extensions.json          | <https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json>                        | obw-free-extensions          |
 | shipping-partner-suggestions.json | <https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/2.0/suggestions.json>              | shipping-partner-suggestions |
 
