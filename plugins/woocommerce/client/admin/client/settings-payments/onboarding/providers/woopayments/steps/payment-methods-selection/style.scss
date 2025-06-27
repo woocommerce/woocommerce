@@ -124,12 +124,6 @@
 	}
 
 	.woocommerce-recommended-payment-methods {
-		// Width to fill available space.
-		width: 100% !important;
-		width: -webkit-fill-available !important; /* Mozilla-based browsers will ignore this. */
-		width: fill-available !important;
-		width: -moz-available !important; /* WebKit-based browsers will ignore this. */
-		margin-right: $gap-small + $gap-smallest;
 		display: flex;
 		flex-direction: column;
 		height: calc(100% - 60px); // Account for continue button
@@ -138,8 +132,13 @@
 		padding: 0 !important; // There is a padding on the parent container that we need to override.
 		border-bottom: none !important;
 		position: fixed;
+		// Positioning the container to the right side of the screen.
+		right: 16px;
+		left: 296px; // Account for the sidebar width + the gap between the sidebar and the content.
 
-		@media screen and (max-width: $break-medium) {
+		@media screen and (max-width: 768px) {
+			left: 16px; // Reset left position for smaller screens.
+			right: 16px; // Reset right position for smaller screens.
 			height: calc(100% - 100px); // Account for small screen content being longer on the page.
 			margin-top: -2px; // Compensate for the border on the header.
 		}
