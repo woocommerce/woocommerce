@@ -23,7 +23,7 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button BEFORE the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
@@ -40,19 +40,18 @@ class Utils {
 	 * @return string The Quantity Selector HTML with classes added.
 	 */
 	public static function add_quantity_stepper_classes( $quantity_html ) {
-		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
 		// Add classes to the form.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
+		while ( $processor->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector' );
 		}
 
-		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector__input' );
+		while ( $processor->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector__input' );
 		}
 
-		return $html->get_updated_html();
+		return $processor->get_updated_html();
 	}
 
 	/**
@@ -84,13 +83,24 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
 	 *
 	 * @param string $quantity_html The quantity HTML.
 	 * @param string $wrapper_attributes Optional wrapper attributes.
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		if (
+			$processor->next_tag( 'input' ) &&
+			$processor->get_attribute( 'type' ) === 'number' &&
+			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
+		) {
+			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInputChange' );
+		}
+
+		$quantity_html = $processor->get_updated_html();
+
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
 				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
@@ -125,13 +135,19 @@ class Utils {
 	}
 
 	/**
-	 * Check if a product is a simple product that is not purchasable or not in stock.
+	 * Check if a product is not purchasable or not in stock.
 	 *
 	 * @param \WC_Product $product The product to check.
-	 * @return bool True if the product is a simple product that is not purchasable or not in stock.
+	 * @return bool True if the product is not purchasable or not in stock.
 	 */
-	public static function is_not_purchasable_simple_product( $product ) {
-		return ProductType::SIMPLE === $product->get_type() && ( ! $product->is_in_stock() || ! $product->is_purchasable() );
+	public static function is_not_purchasable_product( $product ) {
+		if ( $product->is_type( 'simple' ) ) {
+			return ! $product->is_in_stock() || ! $product->is_purchasable();
+		} elseif ( $product->is_type( 'variable' ) ) {
+			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
+		}
+
+		return false;
 	}
 
 	/**

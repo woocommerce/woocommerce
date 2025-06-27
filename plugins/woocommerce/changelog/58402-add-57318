@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add E2E test to verify error notice displays correctly when adding out-of-stock products from Product Collection
+

@@ -25,7 +25,6 @@ registerBlockType( metadata, {
 		) {
 			return <InnerBlocks.Content />;
 		}
-
 		return <div className={ clsx( 'is-loading', attributes.className ) } />;
 	},
 } );

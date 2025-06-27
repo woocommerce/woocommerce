@@ -24,9 +24,10 @@ import {
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
 			page,
+			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -152,7 +153,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
 		await page.getByLabel( 'Testing' ).last().check();
 
@@ -179,9 +180,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await page
 			.getByLabel( 'Email address' )
 			.fill( 'thisShouldRemainHere@mail.com' );
@@ -189,39 +188,25 @@ test.describe( 'Shopper → Local pickup', () => {
 			'thisShouldRemainHere@mail.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Ship' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'thisShouldRemainHere@mail.com'
 		);
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Ship' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
-
-		// Wait for the shipping rate selection request to complete
-		await page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wc/store/v1/cart/select-shipping-rate'
-					) && response.status() === 200
-		);
 
 		await checkoutPageObject.placeOrder();
 

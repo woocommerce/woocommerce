@@ -10,7 +10,7 @@ sidebar_label: Extend analytics reports
 
 This document serves as a guide to extending WC-Admin Reports with a basic UI dropdown, added query parameters, and modification of SQL queries and resulting report data. This example will create a currency selector for viewing the Orders Report based on a specific currency.
 
-Code from this guide can be viewed in the [wc-admin code repository](https://github.com/woocommerce/woocommerce-admin/tree/main/docs/examples/extensions/sql-modification).
+Code from this guide can be viewed in the [woocommerce code repository](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/admin/docs/examples/extensions/sql-modification).
 
 ## Getting started
 
@@ -20,8 +20,8 @@ In your local install, clone and start WC-Admin if you haven't already.
 
 ```sh
 cd wp-content/plugins
-git clone git@github.com:woocommerce/woocommerce-admin.git
-cd woocommerce-admin
+git clone git@github.com:woocommerce/woocommerce.git
+cd plugins/woocommerce/client/admin
 npm run build
 ```
 
@@ -68,7 +68,7 @@ LIMIT 3
 
 ## Add a UI dropdown
 
-In order to view reports in differing currencies, a filter or dropdown will be needed. We can add a basic filter to reports by adding a configuration object similar to [this one from the Orders Report](https://github.com/woocommerce/woocommerce-admin/blob/main/client/analytics/report/orders/config.js#L50-L62).
+In order to view reports in differing currencies, a filter or dropdown will be needed. We can add a basic filter to reports by adding a configuration object similar to [this one from the Orders Report](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/client/analytics/report/orders/config.js#L50-L62).
 
 First, we need to populate the client with data to render the dropdown. The best way to do this is to add data to the `wcSettings` global. This global can be useful for transferring static configuration data from PHP to the client. In the main PHP file, add currency settings to the Data Registry to populate `window.wcSettings.multiCurrency`.
 

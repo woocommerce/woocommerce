@@ -191,6 +191,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_context = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
+			'groupLabel' => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
@@ -253,6 +254,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		if ( 'and' !== strtolower( $query_type ) ) {

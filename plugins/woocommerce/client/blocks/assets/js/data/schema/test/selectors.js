@@ -42,13 +42,13 @@ describe( 'getRoute', () => {
 	describe( 'with throwing errors', () => {
 		beforeEach( () => mockHasFinishedResolution.mockReturnValue( true ) );
 		it( 'throws an error if there is no route for the given namespace', () => {
-			expect( invokeTest( 'invalid' ) ).toThrowError( /given namespace/ );
+			expect( invokeTest( 'invalid' ) ).toThrow( /given namespace/ );
 		} );
 		it(
 			'throws an error if there are routes for the given namespace, but no ' +
 				'route for the given resource',
 			() => {
-				expect( invokeTest( 'wc/blocks', 'invalid' ) ).toThrowError();
+				expect( invokeTest( 'wc/blocks', 'invalid' ) ).toThrow();
 			}
 		);
 		it(
@@ -57,7 +57,7 @@ describe( 'getRoute', () => {
 			() => {
 				expect(
 					invokeTest( 'wc/blocks', 'products/attributes', [ 10 ] )
-				).toThrowError( /number of ids you included/ );
+				).toThrow( /number of ids you included/ );
 			}
 		);
 	} );
@@ -69,7 +69,7 @@ describe( 'getRoute', () => {
 			${ 'are no routes for the given namespace, but no route for the given resource' }            | ${ [ 'wc/blocks', 'invalid' ] }
 			${ 'are routes for the given namespace and resource name, but no routes for the given ids' } | ${ [ 'wc/blocks', 'products/attributes', [ 10 ] ] }
 		`( 'does not throw an error if there $description', ( { args } ) => {
-			expect( invokeTest( ...args ) ).not.toThrowError();
+			expect( invokeTest( ...args ) ).not.toThrow();
 		} );
 	} );
 	describe( 'returns expected value for given valid arguments', () => {
@@ -96,7 +96,7 @@ describe( 'getRoutes', () => {
 	};
 	it( 'throws an error if there is no route for the given namespace', () => {
 		mockHasFinishedResolution.mockReturnValue( true );
-		expect( invokeTest( 'invalid' ) ).toThrowError( /given namespace/ );
+		expect( invokeTest( 'invalid' ) ).toThrow( /given namespace/ );
 	} );
 	it( 'returns expected routes for given namespace', () => {
 		expect( invokeTest( 'wc/blocks' )() ).toEqual( [

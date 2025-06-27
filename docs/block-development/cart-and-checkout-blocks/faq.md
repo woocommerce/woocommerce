@@ -17,7 +17,7 @@ If you have questions that aren't addressed here, we invite you to ask them on [
 
 ### How do I react to changes to the Cart or Checkout e.g. shipping method selection, or address changes?
 
-The Cart and Checkout blocks read all their data from [`@wordpress/data` data stores](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-data/). We also have [documentation for the data stores WooCommerce Blocks uses](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/data-store).
+The Cart and Checkout blocks read all their data from [`@wordpress/data` data stores](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-data/). We also have [documentation for the data stores WooCommerce Blocks uses](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store).
 
 It is common for developers to want to react to changes in the cart or checkout. For example, if a user changes their shipping method, or changes a line of their address.
 
@@ -25,7 +25,7 @@ There are two ways to do this, depending on how your code is running.
 
 #### If your code is running in a React component
 
-If your component is an inner block of the Cart/Checkout, or rendered in a [Slot/Fill](./slot-fills.md), you can directly select the data you need from the relevant data store and perform any necessary actions when the data changes. For more information on available selectors, refer to the [documentation for the relevant data store](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/data-store).
+If your component is an inner block of the Cart/Checkout, or rendered in a [Slot/Fill](./slot-fills.md), you can directly select the data you need from the relevant data store and perform any necessary actions when the data changes. For more information on available selectors, refer to the [documentation for the relevant data store](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store).
 
 ```js
 /**
