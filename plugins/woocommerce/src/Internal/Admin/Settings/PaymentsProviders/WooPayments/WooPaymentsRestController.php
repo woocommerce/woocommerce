@@ -616,6 +616,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
+		$step_status = $this->woopayments->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $step_status ) {
+			// Mark the step as completed, if not already.
+			// This will ensure proper tracking of the step completion.
+			$this->woopayments->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		}
+
 		return rest_ensure_response(
 			array_merge(
 				array( 'success' => true ),
@@ -632,7 +639,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
 	protected function handle_onboarding_business_verification_kyc_session_init( WP_REST_Request $request ) {
-		// If we receive self assessment data with the request, we will use it.
+		// If we receive self-assessment data with the request, we will use it.
 		$self_assessment = ! empty( $request->get_param( 'self_assessment' ) ) ? wc_clean( wp_unslash( $request->get_param( 'self_assessment' ) ) ) : array();
 
 		$location = $request->get_param( 'location' );
