@@ -5,7 +5,6 @@
  * Categories: text, about, media
  * Keywords: about, text
  * Description: A section with two columns of text, heading and an image.
- *
  */
 ?>
 <!-- wp:group {"metadata":{"name":"About 2 columns with heading"},"align":"full","layout":{"type":"constrained"}} -->
