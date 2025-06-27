@@ -23,3 +23,5 @@
 <!-- wp:pattern {"slug":"woostarter/two-columns-highlights-sections"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/about-2-columns-with-heading"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/subscribe-to-newsletter"} /-->

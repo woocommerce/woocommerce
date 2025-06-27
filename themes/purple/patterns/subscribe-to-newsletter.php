@@ -1,8 +1,8 @@
 <?php
 /**
- * Title: Title on the left, form on the right
- * Slug: woostarter/title-on-the-left-form-on-the-right
- * Categories: 
+ * Title: Subscribe to newsletter section
+ * Slug: woostarter/subscribe-to-newsletter
+ * Categories: text, call-to-action
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Title on the left, form on the right"},"align":"full","layout":{"type":"constrained"}} -->
