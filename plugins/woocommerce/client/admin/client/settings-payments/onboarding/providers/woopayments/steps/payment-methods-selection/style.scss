@@ -1,5 +1,9 @@
 #payment_methods.settings-payments-onboarding-modal__step .settings-payments-onboarding-modal__step--content {
-	padding: 16px 32px 16px 0;
+	padding: 16px 0 12px;
+
+	@media screen and (max-width: $break-medium) {
+		padding: 16px 0 0 0;
+	}
 }
 
 .settings-payments-onboarding-modal__step--content {
@@ -129,18 +133,17 @@
 		width: -webkit-fill-available !important; /* Mozilla-based browsers will ignore this. */
 		width: fill-available !important;
 		width: -moz-available !important; /* WebKit-based browsers will ignore this. */
-		margin-right: $gap-small + $gap-smallest;
 		display: flex;
 		flex-direction: column;
-		height: calc(100% - 60px); // Account for continue button
+		height: 100%;
 		max-height: 100%; // Ensure it doesn't grow beyond parent
 		overflow: hidden; // Prevent content from spilling out
 		padding: 0 !important; // There is a padding on the parent container that we need to override.
 		border-bottom: none !important;
-		position: fixed;
+		position: relative;
+		box-sizing: border-box;
 
 		@media screen and (max-width: $break-medium) {
-			height: calc(100% - 100px); // Account for small screen content being longer on the page.
 			margin-top: -2px; // Compensate for the border on the header.
 		}
 
