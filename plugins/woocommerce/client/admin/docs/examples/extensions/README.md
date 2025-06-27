@@ -28,4 +28,3 @@ You can make changes to Javascript and PHP files in the example and see changes 
 - `dashboard-section` - Adding a custom "section" to the new dashboard area.
 - `table-column` - An example of how to add column(s) to any report.
 - `sql-modification` - An example of how to modify SQL statements.
-- `payment-gateway-suggestions` - An example of how to add a new payment gateway suggestion
