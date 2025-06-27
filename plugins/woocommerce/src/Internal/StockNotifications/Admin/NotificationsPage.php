@@ -29,9 +29,9 @@ class NotificationsPage {
 	 * Render page.
 	 */
 	public function output() {
-		$this->output_admin_notice();
 		$table = new ListTable();
 		$table->process_actions();
+		$this->output_admin_notice();
 		$table->prepare_items();
 		include __DIR__ . '/Templates/html-admin-notifications.php';
 	}
