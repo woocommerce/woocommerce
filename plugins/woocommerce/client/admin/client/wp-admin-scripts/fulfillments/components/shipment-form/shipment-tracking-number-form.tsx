@@ -22,7 +22,7 @@ interface TrackingNumberParsingResponse {
 	tracking_number_details: {
 		tracking_number: string;
 		tracking_url: string;
-		provider: string;
+		shipping_provider: string;
 	};
 }
 
@@ -76,7 +76,7 @@ export default function ShipmentTrackingNumberForm() {
 			}
 			setTrackingNumber( tracking_number_details.tracking_number );
 			setTrackingUrl( tracking_number_details.tracking_url );
-			setShipmentProvider( tracking_number_details.provider );
+			setShipmentProvider( tracking_number_details.shipping_provider );
 			setProviderName( '' );
 			setEditMode( false );
 		} catch ( err ) {
