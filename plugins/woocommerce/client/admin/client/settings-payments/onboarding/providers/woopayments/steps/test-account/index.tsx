@@ -20,6 +20,7 @@ import {
 	disableWooPaymentsTestAccount,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
+import { WooPaymentsResetAccountModal } from '~/settings-payments/components/modals/woo-payments-reset-account-modal';
 import './style.scss';
 
 const TEST_ACCOUNT_ERROR_CODES = {
@@ -697,6 +698,15 @@ const TestAccountStep = () => {
 					message={ getPhaseMessage( pollingPhase ) }
 				/>
 			) }
+
+			<WooPaymentsResetAccountModal
+				isOpen={ isResetAccountModalOpen }
+				onClose={ () => {
+					setIsResetAccountModalOpen( false );
+					refreshStoreData(); // Force the step to reset.
+				} }
+				isTestMode={ true }
+			/>
 		</div>
 	);
 };
