@@ -98,6 +98,16 @@ class ProductButton extends AbstractBlock {
 
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
+		wp_interactivity_state(
+			'woocommerce/product-button',
+			array(
+				'addToCartText' => function () {
+					$context = wp_interactivity_get_context();
+					return $context['addToCartText'];
+				},
+			)
+		);
+
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
