@@ -16,7 +16,7 @@ describe( 'TotalsCoupon', () => {
 		const user = userEvent.setup();
 		const { rerender } = render( <TotalsCoupon instanceId={ 'coupon' } /> );
 
-		const openCouponFormButton = screen.getByText( 'Add a coupon' );
+		const openCouponFormButton = screen.getByText( 'Add coupons' );
 		expect( openCouponFormButton ).toBeInTheDocument();
 		await act( async () => {
 			await user.click( openCouponFormButton );

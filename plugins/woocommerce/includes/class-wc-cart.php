@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -651,12 +652,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Empties the cart and optionally the persistent cart too.
 	 *
 	 * @since 9.7.0 Also clears shipping methods and packages since the items they are linked to are cleared.
-	 *
-	 * @param bool $clear_persistent_cart Should the persistent cart be cleared too. Defaults to true.
+	 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
 	 */
-	public function empty_cart( $clear_persistent_cart = true ) {
-
-		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
+	public function empty_cart( $deprecated = true ) {
+		/**
+		 * Fires before the cart is emptied.
+		 *
+		 * @since 9.7.0
+		 *
+		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 */
+		do_action( 'woocommerce_before_cart_emptied', $deprecated );
 
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
@@ -665,15 +671,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
 		$this->totals                     = $this->default_totals;
-
-		if ( $clear_persistent_cart ) {
-			$this->session->persistent_cart_destroy();
-		}
-
 		$this->fees_api->remove_all_fees();
 		WC()->shipping()->reset_shipping();
 
-		do_action( 'woocommerce_cart_emptied', $clear_persistent_cart );
+		/**
+		 * Fires after the cart is emptied.
+		 *
+		 * @since 9.7.0
+		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 */
+		do_action( 'woocommerce_cart_emptied', $deprecated );
 	}
 
 	/**
@@ -1511,7 +1518,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		$this->set_shipping_total( array_sum( $shipping_costs ) );
+		$this->set_shipping_total( array_sum( array_filter( $shipping_costs ) ) );
 		$this->set_shipping_tax( array_sum( $merged_taxes ) );
 		$this->set_shipping_taxes( $merged_taxes );
 
@@ -1633,13 +1640,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
-			if ( 'store-api' === $this->cart_context ) {
-				$customer = $this->get_customer();
-
-				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
-					return false;
-				}
-			} else {
+			if ( 'shortcode' === $this->cart_context ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
@@ -1675,6 +1676,17 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
+					return false;
+				}
+			} else {
+				// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
+				if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+					return true;
+				}
+
+				$customer = $this->get_customer();
+
+				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {
 					return false;
 				}
 			}
@@ -1804,16 +1816,22 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
-		return $coupon_code ? in_array(
-			wc_strtolower( wc_format_coupon_code( $coupon_code ) ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->applied_coupons
-			),
-			true
-		) : count( $this->applied_coupons ) > 0;
+		$applied_coupons = $this->get_applied_coupons();
+
+		if ( ! $coupon_code ) {
+			return count( $applied_coupons ) > 0;
+		}
+
+		$coupon_code = wc_format_coupon_code( $coupon_code );
+
+		// Check if the coupon is in applied coupons using case-insensitive comparison.
+		foreach ( $applied_coupons as $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1902,6 +1920,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		$the_coupon->add_coupon_message( WC_Coupon::WC_COUPON_SUCCESS );
 
+		/**
+		 * Action ran after a coupon is applied.
+		 *
+		 * @since 2.0.0
+		 * @param string $coupon_code The coupon code that was applied.
+		 */
 		do_action( 'woocommerce_applied_coupon', $coupon_code );
 
 		return true;
@@ -1937,7 +1961,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
 		$totals          = $this->get_coupon_discount_totals();
-		$discount_amount = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
+		$discount_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$discount_amount = $value;
+				break;
+			}
+		}
 
 		if ( ! $ex_tax ) {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
@@ -1953,8 +1983,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
-		$totals = $this->get_coupon_discount_tax_totals();
-		return wc_cart_round_discount( isset( $totals[ $code ] ) ? $totals[ $code ] : 0, wc_get_price_decimals() );
+		$totals     = $this->get_coupon_discount_tax_totals();
+		$tax_amount = 0;
+		foreach ( $totals as $key => $value ) {
+			if ( wc_is_same_coupon( $key, $code ) ) {
+				$tax_amount = $value;
+				break;
+			}
+		}
+		return wc_cart_round_discount( $tax_amount, wc_get_price_decimals() );
 	}
 
 	/**
@@ -1977,19 +2014,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
-		$position    = array_search(
-			wc_strtolower( $coupon_code ),
-			array_map(
-				function ( $code ) {
-					return wc_strtolower( wc_format_coupon_code( $code ) );
-				},
-				$this->get_applied_coupons()
-			),
-			true
-		);
 
-		if ( false !== $position ) {
-			unset( $this->applied_coupons[ $position ] );
+		// Find the coupon in applied coupons using case-insensitive comparison.
+		foreach ( $this->get_applied_coupons() as $key => $applied_coupon ) {
+			if ( wc_is_same_coupon( $applied_coupon, $coupon_code ) ) {
+				unset( $this->applied_coupons[ $key ] );
+				break;
+			}
 		}
 
 		WC()->session->set( 'refresh_totals', true );

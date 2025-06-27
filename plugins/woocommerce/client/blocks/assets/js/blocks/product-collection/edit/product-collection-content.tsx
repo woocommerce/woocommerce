@@ -88,9 +88,12 @@ const ProductCollectionContent = ( {
 	} );
 
 	const blockProps = useBlockProps();
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		template: INNER_BLOCKS_TEMPLATE,
-	} );
+	const innerBlocksProps = useInnerBlocksProps(
+		{},
+		{
+			template: INNER_BLOCKS_TEMPLATE,
+		}
+	);
 
 	const queryId = useQueryId(
 		clientId,

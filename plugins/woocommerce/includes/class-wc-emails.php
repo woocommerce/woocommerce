@@ -11,7 +11,6 @@
 declare( strict_types = 1 );
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -280,7 +279,7 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_Reset_Password']   = include __DIR__ . '/emails/class-wc-email-customer-reset-password.php';
 		$this->emails['WC_Email_Customer_New_Account']      = include __DIR__ . '/emails/class-wc-email-customer-new-account.php';
 
-		if ( Features::is_enabled( 'point-of-sale' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$this->emails['WC_Email_Customer_POS_Completed_Order'] = include __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
 			$this->emails['WC_Email_Customer_POS_Refunded_Order']  = include __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
 		}
@@ -327,7 +326,13 @@ class WC_Emails {
 	 * @param mixed $email_heading Heading for the email.
 	 */
 	public function email_header( $email_heading ) {
-		wc_get_template( 'emails/email-header.php', array( 'email_heading' => $email_heading ) );
+		wc_get_template(
+			'emails/email-header.php',
+			array(
+				'email_heading' => $email_heading,
+				'store_name'    => get_bloginfo( 'name', 'display' ),
+			)
+		);
 	}
 
 	/**
@@ -520,7 +525,9 @@ class WC_Emails {
 		 * Filter the columns of the order downloads table.
 		 *
 		 * @since 3.2.0
-		 * @param array $columns Array of columns.
+		 * @since 10.0.0 Added $order parameter.
+		 * @param array    $columns Array of columns.
+		 * @param WC_Order $order  Order object.
 		 */
 		$columns = apply_filters(
 			'woocommerce_email_downloads_columns',
@@ -528,7 +535,8 @@ class WC_Emails {
 				'download-product' => __( 'Product', 'woocommerce' ),
 				'download-expires' => __( 'Expires', 'woocommerce' ),
 				'download-file'    => __( 'Download', 'woocommerce' ),
-			)
+			),
+			$order
 		);
 
 		if ( $plain_text ) {
@@ -703,11 +711,25 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Service class managing checkout fields and its related extensibility points.
+		 *
+		 * @var CheckoutFields $checkout_fields
+		 */
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = array_merge(
 			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
 			$checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
+
+		$context = array(
+			'caller'        => 'WC_Email::additional_checkout_fields',
+			'order'         => $order,
+			'sent_to_admin' => $sent_to_admin,
+			'plain_text'    => $plain_text,
+		);
+
+		$fields = $checkout_fields->filter_fields_for_order_confirmation( $fields, $context );
 
 		if ( ! $fields ) {
 			return;
@@ -741,8 +763,23 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Service class managing checkout fields and its related extensibility points.
+		 *
+		 * @var CheckoutFields $checkout_fields
+		 */
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' );
+
+		$context = array(
+			'caller'        => 'WC_Email::additional_address_fields',
+			'address_type'  => $address_type,
+			'order'         => $order,
+			'sent_to_admin' => $sent_to_admin,
+			'plain_text'    => $plain_text,
+		);
+
+		$fields = $checkout_fields->filter_fields_for_order_confirmation( $fields, $context );
 
 		if ( ! $fields ) {
 			return;
@@ -808,6 +845,22 @@ class WC_Emails {
 	}
 
 	/**
+	 * Add email sender filters.
+	 */
+	private function add_email_sender_filters() {
+		add_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+	}
+
+	/**
+	 * Remove email sender filters.
+	 */
+	private function remove_email_sender_filters() {
+		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
+	}
+
+	/**
 	 * Low stock notification email.
 	 *
 	 * @param WC_Product $product Product instance.
@@ -843,6 +896,8 @@ class WC_Emails {
 			html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ) )
 		);
+
+		$this->add_email_sender_filters();
 
 		wp_mail(
 			/**
@@ -891,6 +946,8 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'low_stock', $product, null )
 		);
+
+		$this->remove_email_sender_filters();
 	}
 
 	/**
@@ -925,6 +982,8 @@ class WC_Emails {
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
 		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+
+		$this->add_email_sender_filters();
 
 		wp_mail(
 			/**
@@ -973,6 +1032,8 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'no_stock', $product, null )
 		);
+
+		$this->remove_email_sender_filters();
 	}
 
 	/**
@@ -1000,9 +1061,14 @@ class WC_Emails {
 			return;
 		}
 
+		$stock_before         = $args['quantity'] + $args['product']->get_stock_quantity();
+		$backordered_quantity = $args['quantity'] - max( 0, $stock_before );
+
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
-		/* translators: 1: product quantity 2: product name 3: order number */
-		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+		/* translators: 1: backordered quantity 2: product name 3: order number */
+		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $backordered_quantity, html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+
+		$this->add_email_sender_filters();
 
 		wp_mail(
 			/**
@@ -1051,6 +1117,8 @@ class WC_Emails {
 			 */
 			apply_filters( 'woocommerce_email_attachments', array(), 'backorder', $args, null )
 		);
+
+		$this->remove_email_sender_filters();
 	}
 
 	/**

@@ -3,7 +3,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
-use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -83,7 +83,7 @@ class Authentication {
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || JsonWebToken::validate( $this->get_cart_token( $request ), $this->get_cart_token_secret() ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
@@ -113,15 +113,6 @@ class Authentication {
 	 */
 	protected function get_cart_token( \WP_REST_Request $request ) {
 		return wc_clean( wp_unslash( $request->get_header( 'Cart-Token' ) ?? '' ) );
-	}
-
-	/**
-	 * Gets the secret for the cart token using wp_salt.
-	 *
-	 * @return string
-	 */
-	protected function get_cart_token_secret() {
-		return '@' . wp_salt();
 	}
 
 	/**

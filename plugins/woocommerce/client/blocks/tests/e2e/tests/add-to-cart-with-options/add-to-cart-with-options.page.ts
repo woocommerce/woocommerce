@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin, RequestUtils } from '@woocommerce/e2e-utils';
+import { Editor, Admin } from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private requestUtils: RequestUtils;
 	BLOCK_SLUG = 'woocommerce/add-to-cart-with-options';
 	BLOCK_NAME = 'Add to Cart + Options (Beta)';
 
@@ -16,25 +15,14 @@ class AddToCartWithOptionsPage {
 		page,
 		admin,
 		editor,
-		requestUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		requestUtils: RequestUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.requestUtils = requestUtils;
-	}
-
-	async setFeatureFlags() {
-		await this.requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await this.requestUtils.setFeatureFlag(
-			'blockified-add-to-cart',
-			true
-		);
 	}
 
 	async switchProductType( productType: string ) {

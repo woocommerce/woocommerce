@@ -131,19 +131,24 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * @group core-only
 	 */
 	public function test_get_tables() {
-		global $wpdb;
+		// Make WC_Install::get_schema() accessible.
+		$wc_install = new \ReflectionClass( WC_Install::class );
+		$get_schema = $wc_install->getMethod( 'get_schema' );
+		$get_schema->setAccessible( true );
+		$schema = $get_schema->invoke( null );
+		preg_match_all( '/CREATE TABLE (.*?)\s*\(/i', $schema, $matches, PREG_PATTERN_ORDER );
 
-		$tables = $wpdb->get_col(
-			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%'
-			OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
-		);
-		$result = WC_Install::get_tables();
-		$diff   = array_diff( $result, $tables );
+		$this->assertNotEmpty( $matches );
+		$this->assertNotEmpty( $matches[1] );
+
+		$tables_from_schema = $matches[1];
+		$tables_to_remove   = WC_Install::get_tables();
+		$diff               = array_diff( $tables_from_schema, $tables_to_remove );
 
 		$this->assertEmpty(
 			$diff,
 			sprintf(
-				'The following table(s) were returned from WC_Install::get_tables() but do not exist: %s',
+				'The following table(s) were returned from WC_Install::get_schema() but are not listed in WC_Install::get_tables(): %s',
 				implode( ', ', $diff )
 			)
 		);

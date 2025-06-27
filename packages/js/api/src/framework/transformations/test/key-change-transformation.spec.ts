@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { KeyChangeTransformation } from '../key-change-transformation';
-import { DummyModel } from '../../../__test_data__/dummy-model';
+import { DummyModel } from '../../../test/dummy-model';
 
 describe( 'KeyChangeTransformation', () => {
 	let transformation: KeyChangeTransformation< DummyModel >;

@@ -103,10 +103,18 @@ const Block = ( {
 	);
 
 	// Get the body background color to use as the sticky container background color.
-	const backgroundColor = useMemo(
-		() => getComputedStyle( document.body ).backgroundColor,
-		[]
-	);
+	const backgroundColor = useMemo( () => {
+		const computedColor = getComputedStyle( document.body ).backgroundColor;
+		if (
+			! computedColor ||
+			computedColor === 'rgba(0, 0, 0, 0)' ||
+			computedColor === 'transparent'
+		) {
+			return '#fff'; // default fallback
+		}
+
+		return computedColor;
+	}, [] );
 
 	const displayStickyContainer = positionRelativeToViewport === 'below';
 

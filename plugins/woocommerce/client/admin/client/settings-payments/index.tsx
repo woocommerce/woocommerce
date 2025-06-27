@@ -68,10 +68,10 @@ const SettingsPaymentsOfflineChunk = lazy(
 /**
  * Lazy-loaded chunk for the WooPayments settings page.
  */
-const SettingsPaymentsWooCommercePaymentsChunk = lazy(
+const SettingsPaymentsWooPaymentsChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woocommerce-payments'
+			/* webpackChunkName: "settings-payments-woocommerce-payments" */ './settings-payments-woopayments'
 		)
 );
 
@@ -104,7 +104,7 @@ const hideWooCommerceNavTab = ( display: string ) => {
 		'.woo-nav-tab-wrapper'
 	);
 
-	// Add the 'hidden' class to hide the element
+	// Add the 'hidden' class to hide the element.
 	if ( externalElement ) {
 		externalElement.style.display = display;
 	}
@@ -200,15 +200,18 @@ export const SettingsPaymentsMethods = () => {
 		return {
 			isFetching: select( paymentSettingsStore ).isFetching(),
 			providers:
-				select( paymentSettingsStore ).getPaymentProviders() || [],
+				select( paymentSettingsStore ).getPaymentProviders(
+					window.wcSettings?.admin?.woocommerce_payments_nox_profile
+						?.business_country_code || null
+				) || [],
 		};
 	}, [] );
 
-	// Retrieve wooPayments gateway
+	// Retrieve the WooPayments gateway.
 	const wooPayments = getWooPaymentsFromProviders( providers );
 
 	const onPaymentMethodsContinueClick = useCallback( () => {
-		// Record the event along with payment methods selected
+		// Record the event along with payment methods selected.
 		recordEvent( 'wcpay_settings_payment_methods_continue', {
 			displayed_payment_methods:
 				Object.keys( paymentMethodsState ).join( ', ' ),
@@ -222,16 +225,16 @@ export const SettingsPaymentsMethods = () => {
 					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
 				)
 				.join( ', ' ),
-			store_country:
+			business_country:
 				window.wcSettings?.admin?.woocommerce_payments_nox_profile
 					?.business_country_code ?? 'unknown',
 		} );
 
 		setIsCompleted( true );
 
-		// Get the onboarding URL or fallback to the test drive account link
+		// Get the onboarding URL or fallback to the test drive account link.
 		const onboardUrl =
-			wooPayments?.onboarding?._links.onboard.href ||
+			wooPayments?.onboarding?._links?.onboard?.href ||
 			getWooPaymentsTestDriveAccountLink();
 
 		// Combine the onboard URL with the query string and redirect to the onboard URL.
@@ -242,7 +245,7 @@ export const SettingsPaymentsMethods = () => {
 	}, [ paymentMethodsState, wooPayments ] );
 
 	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page
+		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page.
 
 		if ( location.pathname === '/payment-methods' ) {
 			hideWooCommerceNavTab( 'none' );
@@ -256,8 +259,12 @@ export const SettingsPaymentsMethods = () => {
 				<div className="woocommerce-layout__header-wrapper">
 					<BackButton
 						href={ getNewPath( {}, '' ) }
-						title={ __( 'Return to gateways', 'woocommerce' ) }
+						title={ __(
+							'Return to payments settings',
+							'woocommerce'
+						) }
 						isRoute={ true }
+						from={ 'woopayments_payment_methods' }
 					/>
 					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
 						<span className="woocommerce-settings-payments-header__title">
@@ -312,7 +319,10 @@ export const SettingsPaymentsMethods = () => {
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<Header
+				title={ __( 'Settings', 'woocommerce' ) }
+				context={ 'wc_settings_payments__main' }
+			/>
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
 					<Route
@@ -337,6 +347,7 @@ export const SettingsPaymentsOfflineWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout'
 				) }
+				context={ 'wc_settings_payments__offline_pms' }
 			/>
 			<Suspense
 				fallback={
@@ -366,12 +377,15 @@ export const SettingsPaymentsOfflineWrapper = () => {
 /**
  * Wraps the WooPayments settings page.
  */
-export const SettingsPaymentsWooCommercePaymentsWrapper = () => {
+export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<Header
+				title={ __( 'Settings', 'woocommerce' ) }
+				context={ 'wc_settings_payments__woopayments' }
+			/>
 			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
-				<SettingsPaymentsWooCommercePaymentsChunk />
+				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
 		</>
 	);
@@ -385,6 +399,7 @@ export const SettingsPaymentsBacsWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_bacs' }
 			/>
 			<Suspense
 				fallback={
@@ -419,6 +434,7 @@ export const SettingsPaymentsCodWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_cod' }
 			/>
 			<Suspense
 				fallback={
@@ -453,6 +469,7 @@ export const SettingsPaymentsChequeWrapper = () => {
 				backLink={ getAdminLink(
 					'admin.php?page=wc-settings&tab=checkout&section=offline'
 				) }
+				context={ 'wc_settings_payments__offline_pms_cheque' }
 			/>
 			<Suspense
 				fallback={

@@ -112,7 +112,7 @@ const ThemeCards = ( {
 						className="woocommerce-browse-themes-card__title"
 					>
 						{ __(
-							'Visit the Official WooCommerce Theme Marketplace',
+							'Visit the WooCommerce Theme Marketplace',
 							'woocommerce'
 						) }
 					</Text>

@@ -804,7 +804,44 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_rand_hash() {
-		$this->assertNotEquals( wc_rand_hash(), wc_rand_hash() );
+		// Unique hashes.
+		$h1 = wc_rand_hash();
+		$h2 = wc_rand_hash();
+		$this->assertNotEquals( $h1, $h2 );
+		$this->assertIsString( $h1 );
+		$this->assertEquals( 40, strlen( $h1 ) );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{40}$/', $h1 );
+
+		// Length param.
+		$h = wc_rand_hash( '', 16 );
+		$this->assertEquals( 16, strlen( $h ) );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{16}$/', $h );
+
+		// Prefix param.
+		$h = wc_rand_hash( 'foo_' );
+		$this->assertStringStartsWith( 'foo_', $h );
+		$this->assertEquals( 44, strlen( $h ) );
+		$this->assertMatchesRegularExpression( '/^foo_[a-f0-9]{40}$/', $h );
+
+		// Prefix + length param.
+		$h = wc_rand_hash( 'bar', 20 );
+		$this->assertStringStartsWith( 'bar', $h );
+		$this->assertEquals( 23, strlen( $h ) );
+		$this->assertMatchesRegularExpression( '/^bar[a-f0-9]{20}$/', $h );
+
+		// Prefix + length param (shorter hash).
+		$h = wc_rand_hash( 'foo_', 16 );
+		$this->assertStringStartsWith( 'foo_', $h );
+		$this->assertEquals( 20, strlen( $h ) );
+		$this->assertMatchesRegularExpression( '/^foo_[a-f0-9]{16}$/', $h );
+
+		// length = 0 should use default length.
+		$h = wc_rand_hash( '', 0 );
+		$this->assertEquals( 40, strlen( $h ) );
+
+		// negative length should use default length.
+		$h = wc_rand_hash( '', -5 );
+		$this->assertEquals( 40, strlen( $h ) );
 	}
 
 	/**

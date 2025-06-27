@@ -8,13 +8,17 @@
 		padding: 8px;
 		line-height: 20px;
 
-		&__danger {
+		&:disabled {
+			cursor: not-allowed;
+		}
+
+		&__danger:enabled {
 			color: $studio-red-50;
 		}
-	}
 
-	.components-button__danger:hover {
-		color: $studio-red-70;
+		&__danger:enabled:hover {
+			color: $studio-red-70;
+		}
 	}
 
 	.components-card__divider {
