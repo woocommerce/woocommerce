@@ -23,7 +23,7 @@ return array(
 	'dpd'                     => ShippingProviders\DPDShippingProvider::class,
 	'econt'                   => ShippingProviders\EcontShippingProvider::class,
 	'eimskip'                 => ShippingProviders\EimskipShippingProvider::class,
-	'elta'                    => ShippingProviders\EltaShippingProvider::class,
+	'elta'                    => ShippingProviders\ELTAShippingProvider::class,
 	'evri-hermes'             => ShippingProviders\EvriHermesShippingProvider::class,
 	'fan-courier'             => ShippingProviders\FanCourierShippingProvider::class,
 	'fastway'                 => ShippingProviders\FastwayShippingProvider::class,
