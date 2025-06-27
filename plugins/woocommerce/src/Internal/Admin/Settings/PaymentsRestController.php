@@ -77,7 +77,7 @@ class PaymentsRestController extends RestApiControllerBase {
 			'/' . $this->rest_base . '/providers',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_providers' ),
 					'validation_callback' => 'rest_validate_request_arg',
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
@@ -209,13 +209,13 @@ class PaymentsRestController extends RestApiControllerBase {
 		$offline_payment_providers = array_values(
 			array_filter(
 				$providers,
-				fn( $provider ) => PaymentProviders::TYPE_OFFLINE_PM === $provider['_type']
+				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM === $provider['_type']
 			)
 		);
 		$providers                 = array_values(
 			array_filter(
 				$providers,
-				fn( $provider ) => PaymentProviders::TYPE_OFFLINE_PM !== $provider['_type']
+				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM !== $provider['_type']
 			)
 		);
 
@@ -478,7 +478,8 @@ class PaymentsRestController extends RestApiControllerBase {
 	private function prepare_payment_providers_response( array $response ): array {
 		$response = $this->prepare_payment_providers_response_recursive( $response, $this->get_schema_for_get_payment_providers() );
 
-		$response['providers'] = $this->add_provider_links( $response['providers'] );
+		$response['providers']   = $this->add_provider_links( $response['providers'] );
+		$response['suggestions'] = $this->add_suggestion_links( $response['suggestions'] );
 
 		return $response;
 	}
@@ -538,7 +539,7 @@ class PaymentsRestController extends RestApiControllerBase {
 
 			// If this is a suggestion, add dedicated links.
 			if ( ! empty( $provider['_type'] ) &&
-				PaymentProviders::TYPE_SUGGESTION === $provider['_type'] &&
+				PaymentsProviders::TYPE_SUGGESTION === $provider['_type'] &&
 				! empty( $provider['_suggestion_id'] )
 			) {
 				$providers[ $key ]['_links']['attach'] = array(
@@ -562,6 +563,34 @@ class PaymentsRestController extends RestApiControllerBase {
 		}
 
 		return $providers;
+	}
+
+	/**
+	 * Add links to suggestions list items.
+	 *
+	 * @param array $suggestions The suggestions list.
+	 *
+	 * @return array The suggestions list with added links.
+	 */
+	private function add_suggestion_links( array $suggestions ): array {
+		foreach ( $suggestions as $key => $suggestion ) {
+			if ( empty( $suggestion['id'] ) ) {
+				continue;
+			}
+
+			if ( empty( $suggestion['_links'] ) ) {
+				$suggestions[ $key ]['_links'] = array();
+			}
+
+			$suggestions[ $key ]['_links']['attach'] = array(
+				'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $suggestion['id'] ) ),
+			);
+			$suggestions[ $key ]['_links']['hide']   = array(
+				'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/hide', $this->route_namespace, $this->rest_base, $suggestion['id'] ) ),
+			);
+		}
+
+		return $suggestions;
 	}
 
 	/**
@@ -699,10 +728,10 @@ class PaymentsRestController extends RestApiControllerBase {
 						'_type'  => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_TYPE_WPORG,
-								PaymentProviders::EXTENSION_TYPE_MU_PLUGIN,
-								PaymentProviders::EXTENSION_TYPE_THEME,
-								PaymentProviders::EXTENSION_TYPE_UNKNOWN,
+								PaymentsProviders::EXTENSION_TYPE_WPORG,
+								PaymentsProviders::EXTENSION_TYPE_MU_PLUGIN,
+								PaymentsProviders::EXTENSION_TYPE_THEME,
+								PaymentsProviders::EXTENSION_TYPE_UNKNOWN,
 							),
 							'description' => esc_html__( 'The type of the containing entity. Generally this is a regular plugin but it can also be a non-standard entity like a theme or a must-user plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -723,9 +752,9 @@ class PaymentsRestController extends RestApiControllerBase {
 						'status' => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_NOT_INSTALLED,
-								PaymentProviders::EXTENSION_INSTALLED,
-								PaymentProviders::EXTENSION_ACTIVE,
+								PaymentsProviders::EXTENSION_NOT_INSTALLED,
+								PaymentsProviders::EXTENSION_INSTALLED,
+								PaymentsProviders::EXTENSION_ACTIVE,
 							),
 							'description' => esc_html__( 'The status of the containing entity.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -1044,7 +1073,7 @@ class PaymentsRestController extends RestApiControllerBase {
 					'properties' => array(
 						'_type'  => array(
 							'type'        => 'string',
-							'enum'        => array( PaymentProviders::EXTENSION_TYPE_WPORG ),
+							'enum'        => array( PaymentsProviders::EXTENSION_TYPE_WPORG ),
 							'description' => esc_html__( 'The type of the plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1058,9 +1087,9 @@ class PaymentsRestController extends RestApiControllerBase {
 						'status' => array(
 							'type'        => 'string',
 							'enum'        => array(
-								PaymentProviders::EXTENSION_NOT_INSTALLED,
-								PaymentProviders::EXTENSION_INSTALLED,
-								PaymentProviders::EXTENSION_ACTIVE,
+								PaymentsProviders::EXTENSION_NOT_INSTALLED,
+								PaymentsProviders::EXTENSION_INSTALLED,
+								PaymentsProviders::EXTENSION_ACTIVE,
 							),
 							'description' => esc_html__( 'The status of the plugin.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -1118,6 +1147,41 @@ class PaymentsRestController extends RestApiControllerBase {
 					'description' => esc_html__( 'The category of the suggestion.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'_links'      => array(
+					'type'       => 'object',
+					'context'    => array( 'view', 'edit' ),
+					'readonly'   => true,
+					'properties' => array(
+						'attach' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to mark the suggestion as attached. This should be called when an extension is installed.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to attach the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'hide'   => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to hide the suggestion.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to hide the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+					),
 				),
 			),
 		);

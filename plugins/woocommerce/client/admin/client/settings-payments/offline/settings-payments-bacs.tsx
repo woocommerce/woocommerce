@@ -16,11 +16,10 @@ import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
+import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
-import { Settings } from '~/settings-payments/components/settings';
-
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
  */

@@ -159,6 +159,56 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders post wrapped withing a template associated with the post via _wp_page_template post meta.
+	 */
+	public function testItRendersPostWithinAssociatedTemplate(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+		update_post_meta( $this->email_post->ID, '_wp_page_template', 'test-email-template' );
+
+		$rendered = $this->renderer->render(
+			$this->email_post,
+			'Subject',
+			'Preheader content',
+			'en'
+		);
+		$this->assertStringContainsString( 'test-template-class', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders post wrapped withing a template passed as parameter.
+	 */
+	public function testItRendersPostWithinTemplatePassedAsParameter(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-extra',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-extra"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+		update_post_meta( $this->email_post->ID, '_wp_page_template', 'test-email-template-extra' );
+
+		$rendered = $this->renderer->render(
+			$this->email_post,
+			'Subject',
+			'Preheader content',
+			'en',
+			'',
+			'test-email-template-extra'
+		);
+		$this->assertStringContainsString( 'test-template-class-extra', $rendered['html'] );
+	}
+
+	/**
 	 * Returns the value of the style attribute for the first tag that matches the query.
 	 *
 	 * @param string $html HTML content.

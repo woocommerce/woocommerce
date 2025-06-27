@@ -3,7 +3,7 @@
  */
 import { Button, Tooltip } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import ChevronDownIcon from 'gridicons/dist/chevron-down';
 import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
@@ -52,11 +52,11 @@ const SummaryNumber = ( {
 	value,
 	onLinkClickCallback = noop,
 } ) => {
-	const liClasses = classnames( 'woocommerce-summary__item-container', {
+	const liClasses = clsx( 'woocommerce-summary__item-container', {
 		'is-dropdown-button': onToggle,
 		'is-dropdown-expanded': isOpen,
 	} );
-	const classes = classnames( 'woocommerce-summary__item', {
+	const classes = clsx( 'woocommerce-summary__item', {
 		'is-selected': selected,
 		'is-good-trend': reverseTrend ? delta < 0 : delta > 0,
 		'is-bad-trend': reverseTrend ? delta > 0 : delta < 0,

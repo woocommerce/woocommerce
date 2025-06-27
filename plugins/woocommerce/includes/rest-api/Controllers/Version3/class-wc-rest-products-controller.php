@@ -67,6 +67,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $exclude_status = array();
 
 	/**
+	 * Stores attachment IDs processed during the current request for potential cleanup.
+	 *
+	 * @var array
+	 */
+	private $processed_attachment_ids_for_request = array();
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -561,6 +568,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			foreach ( $images as $index => $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+				// The request can contain an attachment ID, if it doesn't, it's a new upload.
+				$is_new_upload = false;
 
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
@@ -574,11 +583,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					}
 
 					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
+					$is_new_upload = true;
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
 					/* translators: %s: image ID */
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
+				}
+
+				if ( $is_new_upload && $attachment_id > 0 ) {
+					// Tracking this for rollback purposes.
+					$this->processed_attachment_ids_for_request[] = $attachment_id;
 				}
 
 				$featured_image = $product->get_image_id();
@@ -2020,5 +2035,31 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Create a single item.
+	 * Handles cleanup of orphaned images if product creation fails.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function create_item( $request ) {
+		$this->processed_attachment_ids_for_request = array();
+
+		$response = parent::create_item( $request );
+
+		if ( is_wp_error( $response ) ) {
+			if ( ! empty( $this->processed_attachment_ids_for_request ) ) {
+				// Handle deletion of orphaned images.
+				foreach ( $this->processed_attachment_ids_for_request as $attachment_id ) {
+					wp_delete_attachment( (int) $attachment_id, true );
+				}
+			}
+		}
+
+		$this->processed_attachment_ids_for_request = array();
+
+		return $response;
 	}
 }

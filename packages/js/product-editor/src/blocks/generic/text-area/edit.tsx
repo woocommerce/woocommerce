@@ -8,7 +8,7 @@ import { createElement, useRef } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -138,7 +138,7 @@ export function TextAreaBlockEdit( {
 						value={ content || '' }
 						onChange={ setContent }
 						data-empty={ Boolean( content ) }
-						className={ classNames( 'components-summary-control', {
+						className={ clsx( 'components-summary-control', {
 							[ `has-text-align-${ align }` ]: align,
 						} ) }
 						dir={ direction }

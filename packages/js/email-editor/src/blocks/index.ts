@@ -26,6 +26,9 @@ import { alterSupportConfiguration } from './core/general-block-support';
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
+import { modifyMoveToTrashAction } from './core/move-to-trash';
+
+export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
 	filterSetUrlAttribute();
@@ -45,5 +48,6 @@ export function initBlocks() {
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
+	modifyMoveToTrashAction();
 	registerCoreBlocks();
 }

@@ -13,8 +13,8 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import {
-	PaymentIncentive,
-	PaymentProvider,
+	PaymentsProviderIncentive,
+	PaymentsProvider,
 	PaymentsEntity,
 } from '@woocommerce/data';
 
@@ -33,11 +33,11 @@ interface IncentiveModalProps {
 	/**
 	 * Incentive data.
 	 */
-	incentive: PaymentIncentive;
+	incentive: PaymentsProviderIncentive;
 	/**
-	 * Payment provider.
+	 * Payments provider.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 	/**
 	 * Onboarding URL (if available).
 	 */
@@ -66,11 +66,13 @@ interface IncentiveModalProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__incentive_modal').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 }
 
@@ -102,7 +104,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 	}, [ incentive, provider ] );
@@ -123,7 +125,7 @@ export const IncentiveModal = ( {
 		recordPaymentsEvent( 'incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
-			suggestion_id: provider._suggestion_id ?? '',
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 
@@ -138,7 +140,8 @@ export const IncentiveModal = ( {
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
 				? provider._links?.attach?.href ?? null
-				: null
+				: null,
+			'wc_settings_payments__incentive_modal'
 		);
 		setIsBusy( false );
 	};

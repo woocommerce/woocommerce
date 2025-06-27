@@ -67,8 +67,9 @@ class EmailApiController {
 		}
 
 		$form_fields = $email->get_form_fields();
+		$enabled     = $email->get_option( 'enabled' );
 		return array(
-			'enabled'         => $email->is_enabled(),
+			'enabled'         => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
 			'is_manual'       => $email->is_manual(),
 			'subject'         => $email->get_option( 'subject' ),
 			'subject_full'    => $email->get_option( 'subject_full' ), // For customer_refunded_order email type because it has two different subjects.
@@ -102,6 +103,10 @@ class EmailApiController {
 		$email_type = $this->post_manager->get_email_type_from_post_id( $post->ID );
 		$email      = $this->get_email_by_type( $email_type ?? '' );
 
+		if ( ! $email ) {
+			return null; // not saving of type wc_email. Allow process to continue.
+		}
+
 		// Handle customer_refunded_order email type because it has two different subjects.
 		if ( 'customer_refunded_order' === $email_type ) {
 			if ( array_key_exists( 'subject_full', $data ) ) {
@@ -119,7 +124,7 @@ class EmailApiController {
 		}
 
 		if ( array_key_exists( 'enabled', $data ) ) {
-			$email->update_option( $data['enabled'] ? 'yes' : 'no' );
+			$email->update_option( 'enabled', $data['enabled'] ? 'yes' : 'no' );
 		}
 		if ( array_key_exists( 'recipient', $data ) ) {
 			$email->update_option( 'recipient', $data['recipient'] );

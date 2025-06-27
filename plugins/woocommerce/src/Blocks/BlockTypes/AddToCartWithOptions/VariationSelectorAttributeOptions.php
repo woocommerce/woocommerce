@@ -46,7 +46,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
-		if ( empty( $block->context ) ) {
+		if (
+			! isset(
+				$block->context['woocommerce/attributeName'],
+				$block->context['woocommerce/attributeId'],
+				$block->context['woocommerce/attributeTerms']
+			)
+		) {
 			return '';
 		}
 
@@ -173,7 +179,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
 					'role'                => 'radiogroup',
 					'id'                  => $attribute_id,
-					'aria-labeledby'      => $attribute_id . '_label',
+					'aria-labelledby'     => $attribute_id . '_label',
 					'data-wp-interactive' => $this->get_full_block_name() . '__pills',
 					'data-wp-context'     => array(
 						'name'          => $attribute_slug,
@@ -213,18 +219,24 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
+			$option_attributes = array(
+				'value'                  => $attribute_term['value'],
+				'data-wp-bind--disabled' => 'state.isOptionDisabled',
+				'data-wp-context'        => array(
+					'option'  => $attribute_term,
+					'name'    => $attribute_slug,
+					'options' => $attribute_terms,
+				),
+			);
+
+			if ( $attribute_term['isSelected'] ) {
+				$option_attributes['selected'] = 'selected';
+			}
+
 			$options .= sprintf(
 				'<option %s>%s</option>',
 				$this->get_normalized_attributes(
-					array(
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--disabled' => 'state.isOptionDisabled',
-						'data-wp-context'        => array(
-							'option'  => $attribute_term,
-							'name'    => $attribute_slug,
-							'options' => $attribute_terms,
-						),
-					),
+					$option_attributes
 				),
 				$attribute_term['label']
 			);

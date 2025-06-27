@@ -33,6 +33,10 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 			disabled: true,
 		},
 		{
+			value: 'auto',
+			label: __( 'Auto', 'woocommerce' ),
+		},
+		{
 			value: '1',
 			label: __( 'Square - 1:1', 'woocommerce' ),
 		},

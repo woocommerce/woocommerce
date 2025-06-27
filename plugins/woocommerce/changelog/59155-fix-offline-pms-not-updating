@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix a bug where the offline payment gateways page was not updated when a gateway is enabled

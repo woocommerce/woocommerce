@@ -3,8 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -56,11 +56,11 @@ class PaymentsController {
 	public function add_menu() {
 		global $menu;
 
-		// When WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
+		// When the WooPayments account is onboarded, WooPayments will own the Payments menu item since it is the native Woo payments solution.
 		if ( $this->is_woopayments_account_onboarded() ) {
 			return;
 		} else {
-			// Otherwise, remove Payments menu item linking to the connect page to avoid Payments menu item duplication.
+			// Otherwise, remove the Payments menu item linking to the Connect page to avoid Payments menu item duplication.
 			remove_menu_page( 'wc-admin&path=/payments/connect' );
 		}
 
@@ -83,7 +83,7 @@ class PaymentsController {
 		if ( $this->store_has_providers_with_incentive() ) {
 			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			foreach ( $menu as $index => $menu_item ) {
-				// Only add the badge markup if not already present and the menu item is the Payments menu item.
+				// Only add the badge markup if not already present, and the menu item is the Payments menu item.
 				if ( 0 === strpos( $menu_item[0], $menu_title )
 					&& $menu_path === $menu_item[2]
 					&& false === strpos( $menu_item[0], $badge ) ) {
@@ -98,16 +98,16 @@ class PaymentsController {
 	}
 
 	/**
-	 * Adds body classes when on the Payments Settings admin area.
+	 * Adds body classes when in the Payments Settings admin area.
 	 *
 	 * @param string $classes The existing body classes for the admin area.
 	 *
 	 * @return string The modified body classes for the admin area.
 	 */
-	public function add_body_classes( $classes ) {
+	public function add_body_classes( $classes = '' ) {
 		global $current_tab;
 
-		// Bail if it is not a string.
+		// Bail if the type is invalid.
 		if ( ! is_string( $classes ) ) {
 			return $classes;
 		}
@@ -128,10 +128,15 @@ class PaymentsController {
 	 *
 	 * @return array Settings array with additional settings added.
 	 */
-	public function preload_settings( array $settings ): array {
+	public function preload_settings( $settings = array() ) {
 		// We only preload settings in the WP admin.
 		if ( ! is_admin() ) {
 			return $settings;
+		}
+
+		// Reset the received value if the type is invalid.
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
 		}
 
 		// Add the business location country to the settings.
@@ -150,9 +155,14 @@ class PaymentsController {
 	 *
 	 * @return array The updated list of allowed promo note IDs.
 	 */
-	public function add_allowed_promo_notes( array $promo_notes = array() ): array {
+	public function add_allowed_promo_notes( $promo_notes = array() ): array {
+		// Reset the value if the type is invalid.
+		if ( ! is_array( $promo_notes ) ) {
+			$promo_notes = array();
+		}
+
 		try {
-			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
+			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.
@@ -160,7 +170,6 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 
@@ -184,11 +193,21 @@ class PaymentsController {
 	 *
 	 * @return array The filtered sections.
 	 */
-	public function handle_sections( array $sections ): array {
+	public function handle_sections( $sections = array() ): array {
 		global $current_section;
 
+		// Reset the value if the type is invalid.
+		if ( ! is_array( $sections ) ) {
+			$sections = array();
+		}
+
+		// Bail if the current section global is empty or of the wrong type.
+		if ( empty( $current_section ) || ! is_string( $current_section ) ) {
+			return $sections;
+		}
+
 		// For WooPayments and offline payment methods settings pages, we don't want any section navigation.
-		if ( in_array( $current_section, array( 'woocommerce_payments', WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) ) {
+		if ( in_array( $current_section, array( WooPaymentsService::GATEWAY_ID, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true ) ) {
 			return array();
 		}
 
@@ -201,7 +220,7 @@ class PaymentsController {
 	 * @return void
 	 */
 	public function handle_incentive_dismissed(): void {
-		// Just clear the transient to force a new check for providers with an incentive.
+		// Clear the transient to force a new check for providers with an incentive.
 		delete_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY );
 	}
 
@@ -235,7 +254,7 @@ class PaymentsController {
 		}
 
 		try {
-			$providers = $this->payments->get_payment_providers( $this->payments->get_country() );
+			$providers = $this->payments->get_payment_providers( $this->payments->get_country(), false );
 		} catch ( Throwable $e ) {
 			// Catch everything since we don't want to break all the WP admin pages.
 			// Log so we can investigate.
@@ -243,11 +262,11 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 
 			// In case of an error, default to false.
+			// Set the transient to avoid repeated errors.
 			set_transient( self::TRANSIENT_HAS_PROVIDERS_WITH_INCENTIVE_KEY, 'no', HOUR_IN_SECONDS );
 			return false;
 		}
@@ -332,21 +351,24 @@ class PaymentsController {
 	 * @return boolean
 	 */
 	private function is_woopayments_account_onboarded(): bool {
-		// If WooPayments is active right now, we will not get to this point since the plugin is active check is done first.
+		// Sanity check: the WooPayments extension must be active.
 		if ( ! class_exists( '\WC_Payments' ) ) {
 			return false;
 		}
 
 		$account_data = get_option( 'wcpay_account_data', array() );
+
+		// The account ID must be present.
 		if ( empty( $account_data['data']['account_id'] ) ) {
 			return false;
 		}
 
+		// We consider the store to have an onboarded WooPayments account if account data in the WooPayments account cache
+		// contains a details_submitted = true entry. This implies that WooPayments is also connected.
 		if ( empty( $account_data['data']['details_submitted'] ) ) {
 			return false;
 		}
-		// We consider the store to have WooPayments account connected if account data in the WooPayments account cache
-		// contains details_submitted = true entry. This implies that WooPayments was connected.
-		return $account_data['data']['details_submitted'];
+
+		return filter_var( $account_data['data']['details_submitted'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
 	}
 }

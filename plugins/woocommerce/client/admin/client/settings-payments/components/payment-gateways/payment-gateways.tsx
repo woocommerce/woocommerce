@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import {
 	PaymentsEntity,
-	PaymentProvider,
+	PaymentsProvider,
 	paymentSettingsStore,
 	WC_ADMIN_NAMESPACE,
 	woopaymentsOnboardingStore,
@@ -29,7 +29,7 @@ import { PaymentGatewayList } from '~/settings-payments/components/payment-gatew
 import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface PaymentGatewaysProps {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	installedPluginSlugs: string[];
 	installingPlugin: string | null;
 	/**
@@ -38,15 +38,17 @@ interface PaymentGatewaysProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	acceptIncentive: ( id: string ) => void;
 	shouldHighlightIncentive: boolean;
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
@@ -119,7 +121,7 @@ export const PaymentGateways = ( {
 		// Record the event when user clicks on the business location indicator.
 		recordPaymentsEvent( 'business_location_indicator_click', {
 			store_country: storeCountryCode,
-			business_country: businessRegistrationCountry || '',
+			business_country: businessRegistrationCountry || 'unknown',
 		} );
 
 		setIsPopoverVisible( ( prev ) => ! prev );
@@ -235,7 +237,7 @@ export const PaymentGateways = ( {
 																			storeCountryCode,
 																		business_country:
 																			businessRegistrationCountry ||
-																			'',
+																			'unknown',
 																	}
 																);
 															} }

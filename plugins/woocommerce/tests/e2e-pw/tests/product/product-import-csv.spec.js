@@ -100,19 +100,8 @@ const productAttributes = [ 'Color', 'Size' ];
 
 const errorMessage = 'File is empty. Please upload something more substantial.';
 
-//todo remove serial mode
-test.describe.serial( 'Import Products from a CSV file', () => {
+test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
-
-	test.beforeAll( async ( { restApi } ) => {
-		// make sure the currency is USD
-		await restApi.put(
-			`${ WC_API_PATH }/settings/general/woocommerce_currency`,
-			{
-				value: 'USD',
-			}
-		);
-	} );
 
 	test.afterAll( async ( { restApi } ) => {
 		// get a list of all products
