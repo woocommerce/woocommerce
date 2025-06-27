@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/email-editor-php-config",
+	"name": "@woocommerce/email-editor-config",
 	"description": "Email editor based on WordPress Gutenberg package.",
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -15,7 +15,8 @@
 		"env:dev": "pnpm wp-env start --update",
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
-		"test:integration": "composer run-script test:integration"
+		"test:integration": "composer run-script test:integration",
+		"build:composer-package": "bash tasks/build-package.sh"
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
