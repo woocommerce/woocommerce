@@ -590,7 +590,6 @@ class MiniCart extends AbstractBlock {
 			// Only remove outer wrapper from WooCommerce blocks.
 			if ( $this->is_woocommerce_template_block( $block ) ) {
 				$block['innerContent'] = $this->remove_outer_wrapper( $block['innerContent'] );
-				// $block['innerHTML']    = $this->remove_outer_wrapper( $block['innerHTML'] );
 			}
 
 			// Recursively process inner blocks.
