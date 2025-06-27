@@ -59,7 +59,7 @@ class AddToCartForm extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = array() ) {
+	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
@@ -73,20 +73,16 @@ class AddToCartForm extends AbstractBlock {
 	 * @return stringa add-to-cart form HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
-		$pattern_input     = '/(<input[^>]*id="quantity_[^\"]*"[^>]*)\/>/';
-		$replacement_input = '$1 data-wp-on--change="actions.handleInputChange" />';
-		$product_html      = preg_replace( $pattern_input, $replacement_input, $product_html );
-
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
-		$pattern_stepper = '/(<input[^>]*id="quantity_[^\"]*"[^>]*data-wp-on--change="actions.handleInputChange"[^>]*\/>)/';
+		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern_stepper, $plus_button, $product_html );
-		$new_html    = preg_replace( $pattern_stepper, $minus_button, $new_html );
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
+		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
 	}
 
@@ -144,33 +140,6 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
-	 * Filter the quantity column for grouped products to add interactive context for each child.
-	 *
-	 * @param string     $value The HTML for the quantity input.
-	 * @param WC_Product $grouped_product_child The child product object.
-	 * @return string     The wrapped HTML with interactive context.
-	 */
-	public function filter_grouped_product_quantity_column( $value, $grouped_product_child ) {
-		// Only wrap if stepper style is enabled and the child is purchasable and in stock.
-		if ( ! Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) ) {
-			return $value;
-		}
-		if ( ! $grouped_product_child->is_purchasable() || $grouped_product_child->has_options() || ! $grouped_product_child->is_in_stock() ) {
-			return $value;
-		}
-		$child_id     = $grouped_product_child->get_id();
-		$context_json = esc_attr(
-			wp_json_encode(
-				array(
-					'childProductId' => $child_id,
-					'productType'    => 'grouped',
-				)
-			)
-		);
-		return '<div data-wp-interactive="woocommerce/add-to-cart-form" data-wp-context=' . $context_json . '>' . $value . '</div>';
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -218,11 +187,6 @@ class AddToCartForm extends AbstractBlock {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
 		}
 
-		/**
-		 * Add filter for grouped product quantity column to inject context for each child.
-		 */
-		add_filter( 'woocommerce_grouped_product_list_column_quantity', array( $this, 'filter_grouped_product_quantity_column' ), 10, 2 );
-
 		ob_start();
 
 		/**
@@ -243,8 +207,6 @@ class AddToCartForm extends AbstractBlock {
 		remove_action( 'woocommerce_variation_add_to_cart', 'woocommerce_simple_add_to_cart', 10 );
 
 		$product_html = ob_get_clean();
-
-		remove_filter( 'woocommerce_grouped_product_list_column_quantity', array( $this, 'filter_grouped_product_quantity_column' ), 10 );
 
 		if ( $is_descendent_of_single_product_block ) {
 			remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
@@ -284,26 +246,10 @@ class AddToCartForm extends AbstractBlock {
 			)
 		);
 
-		/**
-		 * Filters the change the quantity to add to cart.
-		 *
-		 * @since 10.9.0
-		 * @param number $default_quantity The default quantity.
-		 * @param number $product_id The product id.
-		 */
-		$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', 1, $product->get_id() );
-
 		$form = sprintf(
-			'<div %1$s %2$s %3$s>%4$s</div>',
+			'<div %1$s %2$s>%3$s</div>',
 			$wrapper_attributes,
 			$is_stepper_style ? 'data-wp-interactive="woocommerce/add-to-cart-form"' : '',
-			$is_stepper_style ? sprintf(
-				'data-wp-context=\'%s\'',
-				wp_json_encode(
-					array( 'quantity' => $default_quantity ),
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				)
-			) : '',
 			$product_html
 		);
 
