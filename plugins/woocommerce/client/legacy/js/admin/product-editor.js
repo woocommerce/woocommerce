@@ -5,7 +5,7 @@ jQuery( function ( $ ) {
 
 		/**
 		 * In the Product Editor context, the footer needs to be hidden otherwise the computation of the postbox position is wrong.
-		 * For more details,
+		 * For more details, see https://github.com/woocommerce/woocommerce/pull/59212.
 		 */
 		$( '#wpfooter' ).css( 'visibility', 'hidden' );
 		$( '#wpfooter' ).css( 'display', 'unset' );
