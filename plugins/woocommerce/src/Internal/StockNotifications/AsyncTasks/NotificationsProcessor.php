@@ -4,16 +4,16 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\CycleStateService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
-use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
-use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use WC_Product;
-use Exception;
 
 /**
  * The async processor for sending stock notifications in bulk.
@@ -71,22 +71,22 @@ class NotificationsProcessor {
 	 *
 	 * @internal
 	 *
-	 * @param EmailManager       $email_manager The email manager.
 	 * @param EligibilityService $eligibility_service The eligibility service.
 	 * @param JobManager         $job_manager The job manager.
 	 * @param CycleStateService  $cycle_state_service The cycle state service.
+	 * @param EmailManager       $email_manager The email manager.
 	 * @return void
 	 */
 	final public function init(
-		EmailManager $email_manager,
 		EligibilityService $eligibility_service,
 		JobManager $job_manager,
-		CycleStateService $cycle_state_service
+		CycleStateService $cycle_state_service,
+		EmailManager $email_manager
 	): void {
-		$this->email_manager       = $email_manager;
 		$this->eligibility_service = $eligibility_service;
 		$this->job_manager         = $job_manager;
 		$this->cycle_state_service = $cycle_state_service;
+		$this->email_manager       = $email_manager;
 	}
 
 	/**

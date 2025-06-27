@@ -85,10 +85,10 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		);
 		$this->share( NotificationsProcessor::class )->addArguments(
 			array(
-				EmailManager::class,
 				EligibilityService::class,
 				JobManager::class,
 				CycleStateService::class,
+				EmailManager::class,
 			)
 		);
 
