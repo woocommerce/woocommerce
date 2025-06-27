@@ -1,15 +1,15 @@
 <?php
 /**
- * Title: Product features, 2 columns
- * Slug: woostarter/product-features-2-columns
+ * Title: Heading, image and list of features
+ * Slug: woostarter/about-features-2-columns
  * Categories: text, about, media
- * Keywords: about, text, icons
- * Description: A section with a heading, paragraph, product features with icons and product photo.
+ * Keywords: about, text
+ * Description: A section with a heading, paragraph, a list of features with icons and an image.
  *
  */
 ?>
 
-<!-- wp:group {"metadata":{"categories":["intro"],"name":"Heading, image and product features","patternName":"a8c/intro-two-column-with-image-and-content"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<!-- wp:group {"metadata":{"categories":["intro"],"name":"Heading, image and list of features","patternName":"woostarter/about-features-2-columns"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|70"} -->
 <div style="height:var(--wp--preset--spacing--70)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
