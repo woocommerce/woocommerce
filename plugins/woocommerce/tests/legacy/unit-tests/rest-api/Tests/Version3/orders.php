@@ -1004,7 +1004,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_coupon', $data['code'] );
-		$this->assertEquals( 'Coupon &quot;NON_EXISTING_COUPON&quot; cannot be applied because it does not exist.', $data['message'] );
+		$this->assertEquals( 'Coupon &quot;non_existing_coupon&quot; cannot be applied because it does not exist.', $data['message'] );
 	}
 
 	/**
