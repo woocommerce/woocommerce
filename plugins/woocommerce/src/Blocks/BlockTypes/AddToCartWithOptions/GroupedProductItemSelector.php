@@ -34,12 +34,34 @@ class GroupedProductItemSelector extends AbstractBlock {
 		ob_start();
 
 		woocommerce_quantity_input(
-			array_merge(
-				AddToCartWithOptionsUtils::get_quantity_input_args( $product ),
-				array(
-					'input_name' => 'quantity[' . $product->get_id() . ']',
-					'input_id'   => 'quantity_' . $product->get_id(),
-				)
+			array(
+				'input_name'  => 'quantity[' . $product->get_id() . ']',
+				'input_id'    => 'quantity_' . $product->get_id(),
+				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				/**
+				 * Filter the minimum quantity value allowed for the product.
+				 *
+				 * @since 2.0.0
+				 * @param int        $min_value Minimum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
+				/**
+				 * Filter the maximum quantity value allowed for the product.
+				 *
+				 * @since 2.0.0
+				 * @param int        $max_value Maximum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+				/**
+				 * Filter the placeholder value allowed for the product.
+				 *
+				 * @since 3.10.0
+				 * @param int        $max_value Maximum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				'placeholder' => apply_filters( 'woocommerce_quantity_input_placeholder', 0, $product ),
 			)
 		);
 
@@ -109,7 +131,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleCheckboxQuantityChange" />';
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleQuantityCheckboxChange" />';
 	}
 
 	/**

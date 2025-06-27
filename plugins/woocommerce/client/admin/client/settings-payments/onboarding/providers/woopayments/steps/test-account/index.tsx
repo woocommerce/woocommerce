@@ -17,7 +17,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import {
-	disableWooPaymentsTestMode,
+	disableWooPaymentsTestAccount,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import './style.scss';
@@ -29,8 +29,9 @@ interface StepCheckResponse {
 
 const TestDriveLoader: React.FunctionComponent< {
 	progress: number;
+	title?: string;
 	message?: string;
-} > = ( { progress, message } ) => (
+} > = ( { progress, title, message } ) => (
 	<Loader className="woocommerce-payments-test-account-step__preloader">
 		<Loader.Layout className="woocommerce-payments-test-account-step__preloader-layout">
 			<Loader.Illustration>
@@ -42,7 +43,7 @@ const TestDriveLoader: React.FunctionComponent< {
 			</Loader.Illustration>
 
 			<Loader.Title>
-				{ __( 'Finishing payments setup', 'woocommerce' ) }
+				{ title || __( 'Finishing payments setup', 'woocommerce' ) }
 			</Loader.Title>
 			<Loader.ProgressBar progress={ progress ?? 0 } />
 			<Loader.Sequence interval={ 0 }>
@@ -56,20 +57,21 @@ const TestDriveLoader: React.FunctionComponent< {
 	</Loader>
 );
 
-// Constants for polling intervals and phase durations
-const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling interval
-const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1
-const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2
-const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1
-const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase
-const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1
-const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase
-const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1
-const INIT_PROGRESS_START = 10; // Start progress at 10% during init
-const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init
-const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init
+// Constants for polling intervals and phase durations.
+const POLLING_INTERVAL_INITIAL = 3000; // 3 seconds is the initial polling interval.
+const POLLING_INTERVAL_EXTENDED_1 = 5000; // 5 seconds is the extended polling interval for phase 1.
+const POLLING_INTERVAL_EXTENDED_2 = 7000; // 7 seconds is the extended polling interval for phase 2.
+const EXTENDED_POLLING_PHASE_1_DURATION = 30000; // 30 seconds is the duration of phase 1.
+const MAX_INITIAL_PROGRESS = 90; // Cap progress at 90% for the initial phase.
+const MAX_EXTENDED_PHASE_1_PROGRESS = 96; // Cap progress at 96% for the extended phase 1.
+const INITIAL_PHASE_INCREMENT = 5; // Increment progress by 20% for the initial phase.
+const EXTENDED_PHASE_1_INCREMENT = 1; // Increment progress by 1% for the extended phase 1.
+const INIT_PROGRESS_START = 10; // Start progress at 10% during init.
+const INIT_PROGRESS_INCREMENT = 2; // Increment by 2% every second during init.
+const INIT_PROGRESS_MAX = 30; // Cap progress at 30% during init.
+const TITLE_CHANGE_INTERVAL = 5000; // The time interval for the title to change.
 
-// Status types for the component
+// Status types for the component.
 type Status =
 	| 'idle'
 	| 'initializing'
@@ -79,6 +81,12 @@ type Status =
 	| 'blocked'
 	| 'failed';
 
+const PHASE_MESSAGES = [
+	__( 'Setting up your test account', 'woocommerce' ),
+	__( 'Finishing payments setup', 'woocommerce' ),
+	__( 'Almost there!', 'woocommerce' ),
+];
+
 const TestAccountStep = () => {
 	const {
 		currentStep,
@@ -86,21 +94,63 @@ const TestAccountStep = () => {
 		closeModal,
 		refreshStoreData,
 		setJustCompletedStepId,
+		sessionEntryPoint,
 	} = useOnboardingContext();
 
-	// Component State
+	// Component State.
 	const [ status, setStatus ] = useState< Status >( 'idle' );
 	const [ progress, setProgress ] = useState( 20 );
 	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
 	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
 	const [ retryCounter, setRetryCounter ] = useState( 0 );
+	const [ loaderTitle, setLoaderTitle ] = useState< string | undefined >(
+		PHASE_MESSAGES[ 0 ]
+	);
 
-	// Refs for timers and phase tracking
+	// Refs for timers and phase tracking.
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
+	const titlePhaseRef = useRef< number >( 0 );
 
-	// Helper to clear timers
+	// Update loader title based on time intervals
+	useEffect( () => {
+		if ( status === 'success' ) {
+			// This is a pseudo-sub-step so we need to record the event manually.
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_step_view',
+				{
+					step: currentStep?.id || 'unknown',
+					sub_step_id: 'ready_to_test_payments',
+					source: sessionEntryPoint,
+				}
+			);
+		}
+
+		if ( status !== 'polling' && status !== 'initializing' ) {
+			titlePhaseRef.current = 0;
+			return;
+		}
+
+		// Start with first title
+		if ( titlePhaseRef.current === 0 ) {
+			setLoaderTitle( PHASE_MESSAGES[ 0 ] );
+		}
+
+		// Increment title phase every TITLE_CHANGE_INTERVAL
+		const timer = setTimeout( () => {
+			titlePhaseRef.current += 1;
+			if ( titlePhaseRef.current < PHASE_MESSAGES.length ) {
+				setLoaderTitle( PHASE_MESSAGES[ titlePhaseRef.current ] );
+			}
+		}, TITLE_CHANGE_INTERVAL );
+
+		return () => {
+			clearTimeout( timer );
+		};
+	}, [ status ] );
+
+	// Helper to clear timers.
 	const clearTimers = () => {
 		if ( pollingTimeoutRef.current !== null ) {
 			clearTimeout( pollingTimeoutRef.current );
@@ -119,30 +169,28 @@ const TestAccountStep = () => {
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
 			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
+			source: sessionEntryPoint,
 		} );
 
-		// Set the continue button loading state to true.
 		setIsContinueButtonLoading( true );
 
-		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode()
+		// Disable test account and proceed to live KYC.
+		disableWooPaymentsTestAccount()
 			.then( () => {
-				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );
 
-				// This will refresh the steps and move the modal to the next step
+				// This will refresh the steps and move the modal to the next step.
 				navigateToNextStep();
 
-				// Refresh the store data
 				return refreshStoreData();
 			} )
 			.catch( () => {
 				// Handle any errors that occur during the process.
 				setIsContinueButtonLoading( false );
+				// Error tracking is handled on the backend, so we don't need to do anything here.
 			} );
 	};
 
-	// Reset state function
 	const resetState = useCallback( () => {
 		setStatus( 'idle' );
 		setProgress( 0 );
@@ -152,7 +200,7 @@ const TestAccountStep = () => {
 		clearTimers();
 	}, [ setStatus, setProgress, setErrorMessage, setPollingPhase ] );
 
-	// Main effect for handling initialization and polling loop
+	// Main effect for handling initialization and polling loop.
 	useEffect( () => {
 		// -- Initialization Phase --
 		if ( status === 'idle' ) {
@@ -160,7 +208,7 @@ const TestAccountStep = () => {
 				setStatus( 'success' );
 				setJustCompletedStepId( currentStep.id );
 
-				setProgress( 100 ); // Show success state immediately
+				setProgress( 100 ); // Show success state immediately.
 				return;
 			}
 
@@ -176,13 +224,13 @@ const TestAccountStep = () => {
 				return;
 			}
 
-			// If this step is not started or previously failed, try to initialize it
+			// If this step is not started or previously failed, try to initialize it.
 			if (
 				currentStep?.status === 'not_started' ||
 				currentStep?.status === 'failed'
 			) {
 				setStatus( 'initializing' );
-				setProgress( INIT_PROGRESS_START ); // Start at 10%
+				setProgress( INIT_PROGRESS_START );
 
 				const cleanStepIfNeeded = async () => {
 					// We only need to clean the step if it has been retried or failed.
@@ -200,7 +248,7 @@ const TestAccountStep = () => {
 					}
 				};
 
-				// First clean the step if needed, then initialize
+				// First clean the step if needed, then initialize.
 				cleanStepIfNeeded()
 					.then( () => {
 						return apiFetch< {
@@ -213,7 +261,7 @@ const TestAccountStep = () => {
 					} )
 					.then( ( response ) => {
 						if ( response?.success ) {
-							// Start polling immediately after successful init
+							// Start polling immediately after successful init.
 							setStatus( 'polling' );
 						} else {
 							setErrorMessage(
@@ -231,7 +279,7 @@ const TestAccountStep = () => {
 						setStatus( 'error' );
 					} );
 			} else {
-				// If status is neither 'not_started' nor 'completed', assume we can start polling
+				// If status is neither 'not_started' nor 'completed', assume we can start polling.
 				setStatus( 'polling' );
 			}
 		}
@@ -239,7 +287,7 @@ const TestAccountStep = () => {
 		// -- Polling Phase --
 		if ( status === 'polling' ) {
 			const poll = () => {
-				// Clear any existing timeout before starting a new one
+				// Clear any existing timeout before starting a new one.
 				clearTimers();
 
 				apiFetch< StepCheckResponse >( {
@@ -248,85 +296,85 @@ const TestAccountStep = () => {
 				} )
 					.then( ( response ) => {
 						if ( response?.status === 'completed' ) {
-							// Use timeout for smoother transition to success UI
+							// Use timeout for smoother transition to success UI.
 							pollingTimeoutRef.current = window.setTimeout(
 								() => {
 									setStatus( 'success' );
-									setProgress( 100 ); // Visually complete
+									setProgress( 100 ); // Visually complete.
 									setJustCompletedStepId(
 										currentStep?.id || ''
 									);
 								},
 								1000
 							);
-							return; // Stop polling loop
+							return; // Stop polling loop.
 						}
 
-						// Still pending, update progress and determine next poll
-						let nextPhase = pollingPhase;
-						let nextInterval = POLLING_INTERVAL_INITIAL;
+						// Still pending, update progress and determine next poll.
+						let nextPhase: number;
+						let nextInterval: number;
 						let newProgress = 0;
 
-						// Use functional update to ensure we always increment from the latest progress
+						// Use functional update to ensure we always increment from the latest progress.
 						setProgress( ( currentProgress ) => {
-							// Apply different increment logic based on phase
+							// Apply different increment logic based on phase.
 							if ( pollingPhase === 0 ) {
-								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS
+								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS.
 								newProgress = Math.min(
 									currentProgress + INITIAL_PHASE_INCREMENT,
 									MAX_INITIAL_PROGRESS
 								);
 							} else if ( pollingPhase === 1 ) {
-								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%
+								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%.
 								newProgress = Math.min(
 									currentProgress +
 										EXTENDED_PHASE_1_INCREMENT,
 									MAX_EXTENDED_PHASE_1_PROGRESS
 								);
 							} else {
-								// Phase 2: Do not increment progress
+								// Phase 2: Do not increment progress.
 								newProgress = currentProgress;
 							}
 							return newProgress;
 						} );
 
-						// Update next phase and interval based on current phase and progress
+						// Update next phase and interval based on current phase and progress.
 						if (
 							pollingPhase === 0 &&
 							newProgress >= MAX_INITIAL_PROGRESS
 						) {
-							// Transition to phase 1 when first reaching MAX_INITIAL_PROGRESS while in phase 0
+							// Transition to phase 1 when first reaching MAX_INITIAL_PROGRESS while in phase 0.
 							nextPhase = 1;
 							nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							phase1StartTimeRef.current = Date.now();
 						} else if ( pollingPhase === 1 ) {
-							// Already in phase 1, check if duration exceeded
+							// Already in phase 1, check if duration exceeded.
 							if (
 								phase1StartTimeRef.current &&
 								Date.now() - phase1StartTimeRef.current >
 									EXTENDED_POLLING_PHASE_1_DURATION
 							) {
-								// Transition to phase 2
+								// Transition to phase 2.
 								nextPhase = 2;
 								nextInterval = POLLING_INTERVAL_EXTENDED_2;
 							} else {
-								// Stay in phase 1
+								// Stay in phase 1.
 								nextPhase = 1;
 								nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							}
 						} else if ( pollingPhase === 2 ) {
-							// Stay in phase 2
+							// Stay in phase 2.
 							nextPhase = 2;
 							nextInterval = POLLING_INTERVAL_EXTENDED_2;
 						} else {
-							// Stay in phase 0
+							// Stay in phase 0.
 							nextPhase = 0;
 							nextInterval = POLLING_INTERVAL_INITIAL;
 						}
 
-						setPollingPhase( nextPhase ); // Update phase state
+						setPollingPhase( nextPhase ); // Update phase state.
 
-						// Schedule the next poll
+						// Schedule the next poll.
 						pollingTimeoutRef.current = window.setTimeout(
 							poll,
 							nextInterval
@@ -339,13 +387,13 @@ const TestAccountStep = () => {
 					} );
 			};
 
-			// Start the first poll
+			// Start the first poll.
 			poll();
 		}
 
 		// -- Progress animation during Initializing Phase --
 		if ( status === 'initializing' ) {
-			// Start progress animation from 10% to 30%, increment by 2% every second
+			// Start progress animation from 10% to 30%, increment by 2% every second.
 			if ( initializingTimeoutRef.current === null ) {
 				initializingTimeoutRef.current = window.setInterval( () => {
 					setProgress( ( current ) => {
@@ -360,7 +408,7 @@ const TestAccountStep = () => {
 				}, 1000 );
 			}
 		}
-		// Clear the initializing timer if not in initializing phase
+		// Clear the initializing timer if not in initializing phase.
 		if (
 			status !== 'initializing' &&
 			initializingTimeoutRef.current !== null
@@ -369,9 +417,9 @@ const TestAccountStep = () => {
 			initializingTimeoutRef.current = null;
 		}
 
-		// Cleanup function for the effect
+		// Cleanup function for the effect.
 		return () => {
-			clearTimers(); // Clear any pending timeouts
+			clearTimers(); // Clear any pending timeouts.
 		};
 	}, [
 		status,
@@ -398,7 +446,7 @@ const TestAccountStep = () => {
 	};
 
 	if ( status === 'success' ) {
-		// Render success state
+		// Render success state.
 		return (
 			<>
 				<WooPaymentsStepHeader onClose={ closeModal } />
@@ -451,18 +499,52 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Continue your store setup',
+												'Continue setting up your store',
 												'woocommerce'
 											) }
 										</h3>
 										<div>
 											{ __(
-												'Finish completing the tasks required to launch your store.',
+												'Test payments and finish off any other tasks required to launch your store.',
 												'woocommerce'
 											) }
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="primary"
+									onClick={ () => {
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'continue_store_setup',
+												source: sessionEntryPoint,
+											}
+										);
+
+										// Navigate to wc-admin page
+										navigateTo( {
+											url: getNewPath( {}, '', {
+												page: 'wc-admin',
+											} ),
+										} );
+									} }
+								>
+									{ __(
+										'Continue store setup',
+										'woocommerce'
+									) }
+								</Button>
+
+								<div className="woocommerce-payments-test-account-step__success_content_or-divider">
+									<hr />
+									{ __( 'OR', 'woocommerce' ) }
+									<hr />
+								</div>
+
 								<div className="woocommerce-woopayments-modal__content__item-flex">
 									<img
 										src={
@@ -474,7 +556,7 @@ const TestAccountStep = () => {
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
 											{ __(
-												'Activate payments',
+												'Activate real payments',
 												'woocommerce'
 											) }
 										</h3>
@@ -482,7 +564,7 @@ const TestAccountStep = () => {
 											<p>
 												{ interpolateComponents( {
 													mixedString: __(
-														'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
+														'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 														'woocommerce'
 													),
 													components: {
@@ -500,42 +582,15 @@ const TestAccountStep = () => {
 										</div>
 									</div>
 								</div>
+								<Button
+									variant="secondary"
+									isBusy={ isContinueButtonLoading }
+									disabled={ isContinueButtonLoading }
+									onClick={ handleContinue }
+								>
+									{ __( 'Activate payments', 'woocommerce' ) }
+								</Button>
 							</div>
-							<Button
-								variant="primary"
-								onClick={ () => {
-									recordPaymentsOnboardingEvent(
-										'woopayments_onboarding_modal_click',
-										{
-											step: currentStep?.id || 'unknown',
-											action: 'continue_store_setup',
-										}
-									);
-
-									// Navigate to wc-admin page
-									navigateTo( {
-										url: getNewPath( {}, '', {
-											page: 'wc-admin',
-										} ),
-									} );
-								} }
-							>
-								{ __( 'Continue store setup', 'woocommerce' ) }
-							</Button>
-							<div className="woocommerce-payments-test-account-step__success_content_or-divider">
-								<hr />
-								{ __( 'OR', 'woocommerce' ) }
-								<hr />
-							</div>
-
-							<Button
-								variant="secondary"
-								isBusy={ isContinueButtonLoading }
-								disabled={ isContinueButtonLoading }
-								onClick={ handleContinue }
-							>
-								{ __( 'Activate payments', 'woocommerce' ) }
-							</Button>
 						</div>
 					</div>
 				</div>
@@ -543,7 +598,7 @@ const TestAccountStep = () => {
 		);
 	}
 
-	// Render loading/error state
+	// Render loading/error state.
 	return (
 		<div className="woocommerce-payments-test-account-step">
 			<WooPaymentsStepHeader onClose={ closeModal } />
@@ -554,7 +609,7 @@ const TestAccountStep = () => {
 					status={ status === 'blocked' ? 'error' : 'warning' }
 					isDismissible={ false }
 					actions={
-						// Only show actions if the step is not blocked
+						// Only show actions if the step is not blocked.
 						status !== 'blocked'
 							? [
 									{
@@ -569,6 +624,7 @@ const TestAccountStep = () => {
 														'unknown',
 													action: 'try_again_on_error',
 													retries: retryCounter + 1,
+													source: sessionEntryPoint,
 												}
 											);
 
@@ -590,6 +646,7 @@ const TestAccountStep = () => {
 														'unknown',
 													action: 'cancel_on_error',
 													retries: retryCounter,
+													source: sessionEntryPoint,
 												}
 											);
 
@@ -615,6 +672,7 @@ const TestAccountStep = () => {
 			{ ( status === 'initializing' || status === 'polling' ) && (
 				<TestDriveLoader
 					progress={ progress }
+					title={ loaderTitle }
 					message={ getPhaseMessage( pollingPhase ) }
 				/>
 			) }

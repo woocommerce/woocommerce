@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Change to use a more specific locator to click on the Customer field when creating an order, as the current method fails the QIT woo-e2e test due to a plugin resolving multiple elements with the text "Guest".

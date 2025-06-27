@@ -28,7 +28,7 @@ export const TotalsShipping = ( {
 	placeholder = null,
 	collaterals = null,
 }: TotalShippingProps ): JSX.Element | null => {
-	const { cartTotals, shippingRates } = useStoreCart();
+	const { cartTotals, cartIsLoading, shippingRates } = useStoreCart();
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const hasMultipleRates = rateNames.length > 1;
@@ -55,6 +55,7 @@ export const TotalsShipping = ( {
 					</>
 				}
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
+				showSkeleton={ cartIsLoading }
 			/>
 		</div>
 	);
