@@ -637,9 +637,14 @@ class MiniCart extends AbstractBlock {
 	 * @return string The processed template contents.
 	 */
 	protected function process_template_contents( $template_contents ) {
-		$parsed_blocks   = parse_blocks( $template_contents );
-		$filtered_blocks = $this->remove_unwanted_blocks( $parsed_blocks );
-		return serialize_blocks( $filtered_blocks );
+		$parsed_blocks = parse_blocks( $template_contents );
+
+		// If the template is not just Gutenberg tags, remove the wrapper divs.
+		if ( strpos( $template_contents, '<div' ) !== false ) {
+			$parsed_blocks = $this->remove_unwanted_blocks( $parsed_blocks );
+		}
+
+		return serialize_blocks( $parsed_blocks );
 	}
 
 	/**
