@@ -212,29 +212,21 @@ jobs:
 
       - name: Create draft release
         id: create_release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: ${{ steps.get_version.outputs.version }}
-          draft: true
-          prerelease: ${{ contains(steps.get_version.outputs.version, '-rc') }}
-          commitish: ${{ inputs.branch || github.ref }}
-          body: ''
-
-      - name: Upload ZIP to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./woocommerce.zip
-          asset_name: woocommerce.zip
-          asset_content_type: application/zip
-
-      - name: Show link to release.
-        env:
-          RELEASE_URL: ${{ steps.create_release.outputs.html_url }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          IS_PRERELEASE: ${{ contains(steps.get_version.outputs.version, '-rc') }}
         run: |
-          echo "::notice::Draft release available at ${RELEASE_URL}."
+          FLAGS=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            FLAGS="--prerelease=true"
+          fi
+
+          gh release create ${{ steps.get_version.outputs.version }} \
+            './woocommerce.zip' \
+            --title '${{ steps.get_version.outputs.version }}' \
+            --notes '' \
+            --target '${{ inputs.branch || github.ref }}' \
+            --latest=false \
+            --draft \
+            $FLAGS
