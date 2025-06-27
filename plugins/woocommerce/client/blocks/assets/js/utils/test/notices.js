@@ -116,7 +116,7 @@ describe( 'Notice utils', () => {
 				removeNotice: jest.fn(),
 			} );
 			removeNoticesByStatus( 'empty' );
-			expect( dispatch().removeNotice ).not.toBeCalled();
+			expect( dispatch().removeNotice ).not.toHaveBeenCalled();
 		} );
 	} );
 } );

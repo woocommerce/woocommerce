@@ -27,6 +27,9 @@ $products_title = __( 'Bestsellers', 'woocommerce' );
 	<div class="wp-block-woocommerce-product-collection alignwide">
 		<!-- wp:woocommerce/product-template -->
 		<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true,"aspectRatio":"3/4"} /-->
+		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"isDescendentOfQueryLoop":true,"aspectRatio":"3/4"} -->
+			<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+		<!-- /wp:woocommerce/product-image -->
 
 		<!-- wp:post-title {"textAlign":"center","level":6,"isLink":true,"style":{"typography":{"textTransform":"capitalize"},"spacing":{"margin":{"top":"12px","bottom":"8px"}}}} /-->
 

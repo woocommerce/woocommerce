@@ -45,7 +45,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when their order has failed and what to do next.', 'woocommerce' )
+				? __( 'Receive an email notification when an order that was processing or on hold fails', 'woocommerce' )
 				: __( 'Order failed emails are sent to customers when their orders are marked as failed.', 'woocommerce' );
 		}
 

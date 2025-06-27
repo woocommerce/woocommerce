@@ -703,7 +703,13 @@ function wc_create_refund( $args = array() ) {
 			 * @param int  $order_id The order id.
 			 * @param int  $refund_id The refund id.
 			 */
-			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) ) {
+			if ( (bool) apply_filters(
+				'woocommerce_order_is_partially_refunded',
+				( $remaining_refund_amount - $args['amount'] ) > 0 ||
+				( ! empty( $args['line_items'] ) && $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ),
+				$order->get_id(),
+				$refund->get_id()
+			) ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
@@ -1271,4 +1277,43 @@ function wc_delete_order_note( $note_id ) {
 	}
 
 	return false;
+}
+
+/**
+ * Apply wptexturize while preserving URLs to prevent their content from being altered.
+ *
+ * @since 10.1.0
+ * @param string $content The order note content.
+ * @return string The processed content.
+ */
+function wc_wptexturize_order_note( $content ) {
+	// Pattern to match URLs (http, https protocols).
+	$url_pattern = '/\b(?:https?):\/\/[^\s<>"{}|\\^`\[\]]+/i';
+
+	// Find all URLs in the content.
+	preg_match_all( $url_pattern, $content, $urls );
+
+	if ( empty( $urls[0] ) ) {
+		// No URLs found, safe to apply wptexturize.
+		return wptexturize( $content );
+	}
+
+	// Get unique URLs to avoid issues with duplicate URLs.
+	$unique_urls = array_unique( $urls[0] );
+
+	// Replace URLs with placeholders.
+	$placeholders        = array();
+	$placeholder_content = $content;
+
+	foreach ( $unique_urls as $index => $url ) {
+		$placeholder                  = sprintf( '___WC_URL_PLACEHOLDER_%d___', $index );
+		$placeholders[ $placeholder ] = $url;
+		$placeholder_content          = str_replace( $url, $placeholder, $placeholder_content );
+	}
+
+	// Apply wptexturize to content with placeholders.
+	$texturized_content = wptexturize( $placeholder_content );
+
+	// Restore original URLs.
+	return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $texturized_content );
 }

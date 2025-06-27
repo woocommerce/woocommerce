@@ -285,7 +285,7 @@ class FeaturesController {
 				'description'        => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
 					__( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ),
-					'https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/docs/rate-limiting.md'
+					'https://developer.woocommerce.com/docs/apis/store-api/rate-limiting/'
 				),
 				'is_experimental'    => false,
 				'disable_ui'         => false,
@@ -440,6 +440,26 @@ class FeaturesController {
 				*/
 				'is_legacy'          => true,
 				'enabled_by_default' => false,
+			),
+			'point_of_sale'          => array(
+				'name'               => __( 'Point of Sale', 'woocommerce' ),
+				'description'        => __(
+					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
+					'woocommerce'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+
+				/*
+				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				* feature.
+				*
+				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				*/
+				'is_legacy'          => true,
+				'is_experimental'    => true,
 			),
 		);
 

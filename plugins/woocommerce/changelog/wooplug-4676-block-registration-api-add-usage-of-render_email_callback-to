@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Migrate the WooContent block to the render_email_callback.

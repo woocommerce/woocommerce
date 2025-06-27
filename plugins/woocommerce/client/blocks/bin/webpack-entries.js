@@ -22,9 +22,8 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
 	},
-	'add-to-cart-with-options-variation-selector-item': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-item-template',
+	'add-to-cart-with-options-variation-selector-attribute': {
+		customDir: 'add-to-cart-with-options/variation-selector/attribute',
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
@@ -36,13 +35,18 @@ const blocks = {
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item': {
+	'add-to-cart-with-options-grouped-product-item': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-template',
+			'add-to-cart-with-options/grouped-product-selector/product-item',
 	},
-	'add-to-cart-with-options-grouped-product-selector-item-cta': {
+	'add-to-cart-with-options-grouped-product-item-selector': {
 		customDir:
-			'add-to-cart-with-options/grouped-product-selector/product-item-cta',
+			'add-to-cart-with-options/grouped-product-selector/product-item-selector',
+	},
+
+	'add-to-cart-with-options-grouped-product-item-label': {
+		customDir:
+			'add-to-cart-with-options/grouped-product-selector/product-item-label',
 	},
 	'all-products': {
 		customDir: 'products/all-products',
@@ -52,12 +56,6 @@ const blocks = {
 	},
 	'attribute-filter': {},
 	breadcrumbs: {},
-	'blockified-product-details': {
-		customDir: 'product-details',
-	},
-	'product-description': {
-		customDir: 'product-description',
-	},
 	'catalog-sorting': {},
 	'coming-soon': {},
 	'customer-account': {},
@@ -189,12 +187,10 @@ const blocks = {
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
 	},
-	'blockified-product-reviews': {
-		customDir: 'product-reviews',
-	},
-	'product-specifications': {
-		customDir: 'product-specifications',
-	},
+	'product-details': {},
+	'product-description': {},
+	'product-specifications': {},
+	'product-reviews': {},
 	'product-review-rating': {
 		customDir: 'product-reviews/inner-blocks/review-rating',
 	},
@@ -330,10 +326,6 @@ const entries = {
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
-		'product-reviews':
-			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
-		'product-details':
-			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 
 		...blockStylingEntries,
 

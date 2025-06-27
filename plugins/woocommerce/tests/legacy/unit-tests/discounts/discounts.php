@@ -123,6 +123,103 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set items from cart/order and sorting them by price.
+	 */
+	public function test_set_items_and_sort_by_price() {
+		// Create dummy product - price will be 10.
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$this->store_product( $product_1 );
+
+		// Create a more expensive product.
+		$product_2 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$this->store_product( $product_2 );
+
+		// Add products to the cart.
+		WC()->cart->add_to_cart( $product_1->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_2->get_id(), 1 );
+
+		$discounts = new WC_Discounts();
+
+		// 'sort_by_price' is called when setting items from the cart.
+		$discounts->set_items_from_cart( WC()->cart );
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		WC()->cart->empty_cart();
+
+		// Add products to the cart.
+		// This time add the cheaper product 5 times to the cart, so that
+		// the subtotal of product 1 > product 2.
+		WC()->cart->add_to_cart( $product_1->get_id(), 5 );
+		WC()->cart->add_to_cart( $product_2->get_id(), 1 );
+
+		// 'sort_by_price' is called when setting items from the cart.
+		$discounts->set_items_from_cart( WC()->cart );
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is still sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		// Add products to a dummy order.
+		$order = new WC_Order();
+		$order->add_product( $product_1, 1 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$this->store_order( $order );
+
+		// 'sort_by_price' is called when setting items from the order.
+		$discounts->set_items_from_order( $order );
+
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		// Add products to a dummy order.
+		$order = new WC_Order();
+		$order->add_product( $product_1, 5 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$this->store_order( $order );
+
+		// 'sort_by_price' is called when setting items from the order.
+		$discounts->set_items_from_order( $order );
+
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is still sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+	}
+
+	/**
 	 * Test applying a coupon (make sure it changes prices).
 	 */
 	public function test_apply_coupon() {

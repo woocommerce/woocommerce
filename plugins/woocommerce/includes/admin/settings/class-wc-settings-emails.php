@@ -851,7 +851,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			?>
 			<hr class="wc-settings-email-color-palette-separator" />
 			<a href="?page=wc-settings&tab=email&try-new-templates" class="components-button is-link">
-				<?php esc_html_e( 'Try new email templates!', 'woocommerce' ); ?>
+				<?php esc_html_e( 'Try our new email templates!', 'woocommerce' ); ?>
 			</a>
 			<?php
 			return;
@@ -867,7 +867,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			<hr class="wc-settings-email-color-palette-separator" />
 			<a href="<?php echo esc_url( add_query_arg( $disable_feature_args ) ); ?>"
 				class="components-button is-link"
-				onclick="return confirm('<?php esc_attr_e( 'Would you like to go back to the legacy email templates?', 'woocommerce' ); ?>');"
+				onclick="return confirm('<?php esc_attr_e( 'Are you sure want to revert to legacy? Doing so will erase any changes you’ve made to your new email templates, and will restore your previous email designs.', 'woocommerce' ); ?>');"
 			>
 				<?php esc_html_e( 'Revert to legacy template', 'woocommerce' ); ?>
 			</a>

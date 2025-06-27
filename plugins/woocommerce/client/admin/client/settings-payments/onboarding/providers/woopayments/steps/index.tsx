@@ -54,3 +54,29 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		content: <FinishStep />,
 	},
 ];
+
+export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
+	{
+		id: 'payment_methods',
+		order: 1,
+		type: 'backend',
+		label: 'Choose your payment methods',
+		content: <PaymentMethodsSelection />,
+	},
+	{
+		id: 'wpcom_connection',
+		order: 2,
+		type: 'backend',
+		label: 'Connect with WordPress.com',
+		content: <WordPressComStep />,
+		dependencies: [ 'payment_methods' ],
+	},
+	{
+		id: 'business_verification',
+		order: 3,
+		type: 'backend',
+		label: 'Activate Payments',
+		dependencies: [ 'wpcom_connection' ],
+		content: <BusinessVerificationStep />,
+	},
+];

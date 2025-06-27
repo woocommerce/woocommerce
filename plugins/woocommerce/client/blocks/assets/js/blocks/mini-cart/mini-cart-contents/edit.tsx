@@ -9,7 +9,6 @@ import {
 } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
 import type { TemplateArray } from '@wordpress/blocks';
-import { useEffect } from '@wordpress/element';
 import type { FocusEvent, ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
@@ -25,6 +24,7 @@ import { useForcedLayout } from '../../cart-checkout-shared';
 import { MiniCartInnerBlocksStyle } from './inner-blocks-style';
 import './editor.scss';
 import { attributes as defaultAttributes } from './attributes';
+import { useThemeColors } from '../../../shared/hooks/use-theme-colors';
 
 // Array of allowed block names.
 const ALLOWED_BLOCKS = [
@@ -59,58 +59,16 @@ const Edit = ( {
 		defaultTemplate,
 	} );
 
-	/**
-	 * This is a workaround for the Site Editor to set the correct
-	 * background color of the Mini-Cart Contents block base on
-	 * the main background color set by the theme.
-	 */
-	useEffect( () => {
-		const canvasEl = document.querySelector(
-			'.edit-site-visual-editor__editor-canvas'
-		);
-		if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
-			return;
-		}
-		const canvas =
-			canvasEl.contentDocument || canvasEl.contentWindow?.document;
-		if ( ! canvas ) {
-			return;
-		}
-		if ( canvas.getElementById( 'mini-cart-contents-background-color' ) ) {
-			return;
-		}
-		const styles = canvas.querySelectorAll( 'style' );
-		const [ cssRule ] = Array.from( styles )
-			.map( ( style ) => Array.from( style.sheet?.cssRules || [] ) )
-			.flatMap( ( style ) => style )
-			.filter( Boolean )
-			.filter(
-				( rule ) =>
-					rule.selectorText === '.editor-styles-wrapper' &&
-					rule.style.backgroundColor
-			);
-		if ( ! cssRule ) {
-			return;
-		}
-		const backgroundColor = cssRule.style.backgroundColor;
-		if ( ! backgroundColor ) {
-			return;
-		}
-		const style = document.createElement( 'style' );
-		style.id = 'mini-cart-contents-background-color';
-		style.appendChild(
-			document.createTextNode(
-				`:where(.wp-block-woocommerce-mini-cart-contents) {
-				background-color: ${ backgroundColor };
-			}`
-			)
-		);
-		const body = canvas.querySelector( '.editor-styles-wrapper' );
-		if ( ! body ) {
-			return;
-		}
-		body.appendChild( style );
-	}, [] );
+	// Apply the Mini-Cart Contents block base styles based on Site Editor's background and text colors.
+	useThemeColors(
+		'mini-cart-contents',
+		( { editorBackgroundColor, editorColor } ) => `
+				:where(.wp-block-woocommerce-mini-cart-contents) {
+					background-color: ${ editorBackgroundColor };
+					color: ${ editorColor };
+				}
+			`
+	);
 
 	return (
 		<>

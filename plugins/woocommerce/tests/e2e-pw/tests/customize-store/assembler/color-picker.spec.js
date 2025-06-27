@@ -1,12 +1,9 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
-const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
-const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
-const { admin } = require( '../../../test-data/data' );
 const { tags } = require( '../../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../../playwright.config' );
 
@@ -245,22 +242,9 @@ test.describe(
 						response.status() === 200
 				);
 
-				const wordPressVersion = await getInstalledWordPressVersion();
-
 				await saveButton.click();
 
-				await Promise.all( [
-					waitResponseGlobalStyles,
-					wordPressVersion < 6.6
-						? page.waitForResponse(
-								( response ) =>
-									response.url().includes(
-										// When CYS will support all block themes, this URL will change.
-										'wp-json/wp/v2/templates/twentytwentyfour//home'
-									) && response.status() === 200
-						  )
-						: Promise.resolve(),
-				] );
+				await Promise.all( [ waitResponseGlobalStyles ] );
 
 				await page.goto( baseURL );
 
@@ -325,36 +309,12 @@ test.describe(
 		test(
 			'Create "your own" pickers should be visible',
 			{ tag: tags.SKIP_ON_PRESSABLE },
-			async ( { assemblerPageObject, baseURL }, testInfo ) => {
+			async ( { assemblerPageObject }, testInfo ) => {
 				testInfo.snapshotSuffix = '';
-				const wordPressVersion = await getInstalledWordPressVersion();
-
 				const assembler = await assemblerPageObject.getAssembler();
 				const colorPicker = assembler.getByText( 'Create your own' );
 
 				await colorPicker.click();
-
-				// Check if Gutenberg is installed
-				const apiContext = await request.newContext( {
-					baseURL,
-					extraHTTPHeaders: {
-						Authorization: `Basic ${ encodeCredentials(
-							admin.username,
-							admin.password
-						) }`,
-						cookie: '',
-					},
-				} );
-				const listPluginsResponse = await apiContext.get(
-					`./wp-json/wp/v2/plugins`,
-					{
-						failOnStatusCode: true,
-					}
-				);
-				const pluginsList = await listPluginsResponse.json();
-				const gutenbergPlugin = pluginsList.find(
-					( { textdomain } ) => textdomain === 'gutenberg'
-				);
 
 				const mapTypeFeatures = {
 					background: [ 'solid', 'gradient' ],
@@ -378,14 +338,6 @@ test.describe(
 				const gradientColorSelector =
 					'.components-custom-gradient-picker__gradient-bar-background';
 
-				const mapFeatureSelectors = {
-					solid: customColorSelector,
-					text: customColorSelector,
-					background: customColorSelector,
-					default: customColorSelector,
-					hover: customColorSelector,
-					gradient: gradientColorSelector,
-				};
 				const mapFeatureSelectorsGutenberg = {
 					color: customColorSelector,
 					text: customColorSelector,
@@ -403,44 +355,21 @@ test.describe(
 						.getByText( type )
 						.click();
 
-					// eslint-disable-next-line playwright/no-conditional-in-test
-					if ( gutenbergPlugin || wordPressVersion >= 6.6 ) {
-						for ( const feature of mapTypeFeaturesGutenberg[
-							type
-						] ) {
-							const container = assembler.locator(
-								'.block-editor-panel-color-gradient-settings__dropdown-content'
-							);
-							await container
-								.getByRole( 'tab', {
-									name: feature,
-								} )
-								.click();
+					for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
+						const container = assembler.locator(
+							'.block-editor-panel-color-gradient-settings__dropdown-content'
+						);
+						await container
+							.getByRole( 'tab', {
+								name: feature,
+							} )
+							.click();
 
-							const selector =
-								mapFeatureSelectorsGutenberg[ feature ];
-							const featureSelector =
-								container.locator( selector );
+						const selector =
+							mapFeatureSelectorsGutenberg[ feature ];
+						const featureSelector = container.locator( selector );
 
-							await expect( featureSelector ).toBeVisible();
-						}
-					} else {
-						for ( const feature of mapTypeFeatures[ type ] ) {
-							const container = assembler.locator(
-								'.block-editor-panel-color-gradient-settings__dropdown-content'
-							);
-							await container
-								.getByRole( 'tab', {
-									name: feature,
-								} )
-								.click();
-
-							const selector = mapFeatureSelectors[ feature ];
-							const featureSelector =
-								container.locator( selector );
-
-							await expect( featureSelector ).toBeVisible();
-						}
+						await expect( featureSelector ).toBeVisible();
 					}
 				}
 			}

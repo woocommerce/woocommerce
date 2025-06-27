@@ -104,6 +104,34 @@ class OrderTagsProvider extends AbstractTagProvider {
 
 		$registry->register(
 			new Personalization_Tag(
+				__( 'Order Discount', 'woocommerce' ),
+				'woocommerce/order-discount',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return wc_price( $context['order']->get_discount_total(), array( 'currency' => $context['order']->get_currency() ) );
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Shipping', 'woocommerce' ),
+				'woocommerce/order-shipping',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return wc_price( $context['order']->get_shipping_total(), array( 'currency' => $context['order']->get_currency() ) );
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
 				__( 'Order Total', 'woocommerce' ),
 				'woocommerce/order-total',
 				__( 'Order', 'woocommerce' ),
@@ -141,6 +169,108 @@ class OrderTagsProvider extends AbstractTagProvider {
 					}
 					return $context['order']->get_checkout_payment_url() ?? '';
 				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Transaction ID', 'woocommerce' ),
+				'woocommerce/order-transaction-id',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_transaction_id() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Shipping Method', 'woocommerce' ),
+				'woocommerce/order-shipping-method',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_shipping_method() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Shipping Address', 'woocommerce' ),
+				'woocommerce/order-shipping-address',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_formatted_shipping_address() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Billing Address', 'woocommerce' ),
+				'woocommerce/order-billing-address',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_formatted_billing_address() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order View URL', 'woocommerce' ),
+				'woocommerce/order-view-url',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_view_order_url() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Admin URL', 'woocommerce' ),
+				'woocommerce/order-admin-url',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return $context['order']->get_edit_order_url() ?? '';
+				},
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Order Custom Field', 'woocommerce' ),
+				'woocommerce/order-custom-field',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context, array $parameters = array() ): string {
+					if ( ! isset( $context['order'] ) || ! isset( $parameters['key'] ) ) {
+						return '';
+					}
+					$field_key = sanitize_text_field( $parameters['key'] );
+					return $context['order']->get_meta( $field_key ) ?? '';
+				},
+				array(
+					'key' => '',
+				),
 			)
 		);
 	}
