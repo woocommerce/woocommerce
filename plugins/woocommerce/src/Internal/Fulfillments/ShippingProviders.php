@@ -16,7 +16,7 @@ return array(
 	'ceska-posta'             => ShippingProviders\CeskaPostaShippingProvider::class,
 	'chronopost'              => ShippingProviders\ChronopostShippingProvider::class,
 	'correos'                 => ShippingProviders\CorreosShippingProvider::class,
-	'ctt'                     => ShippingProviders\CttShippingProvider::class,
+	'ctt'                     => ShippingProviders\CTTShippingProvider::class,
 	'cyprus-post'             => ShippingProviders\CyprusPostShippingProvider::class,
 	'deutsche-post'           => ShippingProviders\DeutschePostShippingProvider::class,
 	'dhl'                     => ShippingProviders\DHLShippingProvider::class,
