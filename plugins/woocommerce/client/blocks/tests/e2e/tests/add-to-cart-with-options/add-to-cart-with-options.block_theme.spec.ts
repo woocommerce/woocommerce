@@ -180,6 +180,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'Increase quantity of Beanie'
 		);
 		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
 
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
@@ -187,7 +188,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
