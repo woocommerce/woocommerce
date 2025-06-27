@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Round individual taxes in fee lines items in orders REST endpoint

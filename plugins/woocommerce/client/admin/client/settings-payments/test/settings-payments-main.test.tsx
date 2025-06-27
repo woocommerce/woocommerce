@@ -23,9 +23,9 @@ describe( 'SettingsPaymentsMain', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_pageview',
-			{
+			expect.objectContaining( {
 				business_country: expect.any( String ),
-			}
+			} )
 		);
 	} );
 
@@ -36,10 +36,10 @@ describe( 'SettingsPaymentsMain', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_recommendations_other_options',
-			{
+			expect.objectContaining( {
 				available_payment_methods: expect.any( String ),
 				business_country: expect.any( String ),
-			}
+			} )
 		);
 	} );
 

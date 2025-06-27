@@ -711,11 +711,25 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Service class managing checkout fields and its related extensibility points.
+		 *
+		 * @var CheckoutFields $checkout_fields
+		 */
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = array_merge(
 			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
 			$checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
+
+		$context = array(
+			'caller'        => 'WC_Email::additional_checkout_fields',
+			'order'         => $order,
+			'sent_to_admin' => $sent_to_admin,
+			'plain_text'    => $plain_text,
+		);
+
+		$fields = $checkout_fields->filter_fields_for_order_confirmation( $fields, $context );
 
 		if ( ! $fields ) {
 			return;
@@ -749,8 +763,23 @@ class WC_Emails {
 			return;
 		}
 
+		/**
+		 * Service class managing checkout fields and its related extensibility points.
+		 *
+		 * @var CheckoutFields $checkout_fields
+		 */
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = $checkout_fields->get_order_additional_fields_with_values( $order, 'address', $address_type, 'view' );
+
+		$context = array(
+			'caller'        => 'WC_Email::additional_address_fields',
+			'address_type'  => $address_type,
+			'order'         => $order,
+			'sent_to_admin' => $sent_to_admin,
+			'plain_text'    => $plain_text,
+		);
+
+		$fields = $checkout_fields->filter_fields_for_order_confirmation( $fields, $context );
 
 		if ( ! $fields ) {
 			return;

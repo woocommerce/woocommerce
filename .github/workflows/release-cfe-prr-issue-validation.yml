@@ -160,7 +160,7 @@ jobs:
             }
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         if: ${{ failure() && (steps.verify-pr.outputs.SLACK_MESSAGE != '' || steps.extract-release.outputs.SLACK_MESSAGE != '') }}
         id: notify
         with:
@@ -233,7 +233,7 @@ jobs:
             core.setOutput('SLACK_MESSAGE', slackMessage);
             core.setOutput('GITHUB_COMMENT', githubComment);
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -302,7 +302,7 @@ jobs:
             core.setOutput('SLACK_MESSAGE', message);
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -340,7 +340,7 @@ jobs:
 
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}

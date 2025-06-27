@@ -3,17 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import {
+	OfflinePaymentMethodProvider,
+	PaymentGatewayProvider,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { recordPaymentsEvent } from '~/settings-payments/utils';
+import { recordPaymentsProviderEvent } from '~/settings-payments/utils';
 
 interface SettingsButtonProps {
 	/**
-	 * ID of the associated gateway.
+	 * The details of the payment gateway to enable.
 	 */
-	gatewayId: string;
+	gatewayProvider: PaymentGatewayProvider | OfflinePaymentMethodProvider;
 
 	/**
 	 * The settings URL to navigate to when the enable gateway button is clicked.
@@ -34,15 +38,13 @@ interface SettingsButtonProps {
  * Used for managing settings for a payment gateway.
  */
 export const SettingsButton = ( {
-	gatewayId,
+	gatewayProvider,
 	settingsHref,
 	isInstallingPlugin,
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
 	const recordButtonClickEvent = () => {
-		recordPaymentsEvent( 'provider_manage_click', {
-			provider_id: gatewayId,
-		} );
+		recordPaymentsProviderEvent( 'provider_manage_click', gatewayProvider );
 	};
 
 	return (

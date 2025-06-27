@@ -187,7 +187,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => ! $product->is_type( 'variable' ),
+					'isFormValid' => function () {
+						$context = wp_interactivity_get_context();
+						$product = wc_get_product( $context['productId'] );
+						if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+							return false;
+						}
+						return true;
+					},
 					'variationId' => null,
 				)
 			);
@@ -261,13 +268,13 @@ class AddToCartWithOptions extends AbstractBlock {
 			* This hook allows to disable the compatibility layer for the blockified.
 			*
 			* @since 7.6.0
-			* @param boolean.
+			* @param boolean $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
 			*/
 			$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-			if ( ! $is_disabled_compatibility_layer ) {
+			if ( ! $is_disabled_compatibility_layer && ! Utils::is_not_purchasable_product( $product ) ) {
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
+				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
@@ -350,7 +357,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$hooks_before = ob_get_clean();
 
 				ob_start();
-				if ( ProductType::SIMPLE === $product_type && $product->is_in_stock() && $product->is_purchasable() ) {
+				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_after_add_to_cart_quantity.
 					 *
@@ -464,7 +471,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-interactive="woocommerce/add-to-cart-with-options"
 						data-wp-bind--value="state.variationId"
 					/>
 				</div>';
