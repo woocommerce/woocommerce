@@ -112,6 +112,10 @@ const TestAccountStep = () => {
 		PHASE_MESSAGES[ 0 ]
 	);
 
+	const [ isResetAccountModalOpen, setIsResetAccountModalOpen ] =
+		useState( false );
+	const [ errorCode, setErrorCode ] = useState< string | undefined >();
+
 	// Refs for timers and phase tracking.
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
@@ -259,6 +263,7 @@ const TestAccountStep = () => {
 						return apiFetch< {
 							success: boolean;
 							message?: string;
+							code?: string;
 						} >( {
 							url: currentStep?.actions?.init?.href,
 							method: 'POST',
@@ -269,6 +274,7 @@ const TestAccountStep = () => {
 							// Start polling immediately after successful init.
 							setStatus( 'polling' );
 						} else {
+							setErrorCode( response?.code || '' );
 							setErrorMessage(
 								response?.message ||
 									__(
@@ -280,6 +286,7 @@ const TestAccountStep = () => {
 						}
 					} )
 					.catch( ( error ) => {
+						setErrorCode( error?.code || '' );
 						setErrorMessage( error.message );
 						setStatus( 'error' );
 					} );
