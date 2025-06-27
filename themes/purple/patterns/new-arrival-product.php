@@ -5,9 +5,14 @@
  * Categories: WooCommerce
  */
 ?>
-<!-- wp:group {"metadata":{"name":"New arrival product"},"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-glass-dark-bg.webp" alt="" class=""/></figure>
+<!-- wp:group {"metadata":{"name":"New arrival product"},"align":"full","backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-theme-5-background-color has-background"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
+<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide"><!-- wp:image {"width":"220px","aspectRatio":"3/4","scale":"cover","sizeSlug":"full","linkDestination":"none","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/socks.webp" alt="" style="aspect-ratio:3/4;object-fit:cover;width:220px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|40"} -->
@@ -15,12 +20,21 @@
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"textAlign":"center","fontSize":"xx-large"} -->
-<h2 class="wp-block-heading has-text-align-center has-xx-large-font-size"><?php esc_html_e('New arrival: Glassware', 'woostarter');?></h2>
+<h2 class="wp-block-heading has-text-align-center has-xx-large-font-size"><?php esc_html_e('New arrival: Socks', 'woostarter');?></h2>
 <!-- /wp:heading -->
 
+<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"spacing":{"padding":{"left":"var:preset|spacing|40","right":"var:preset|spacing|40","top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"fontSize":"medium"} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-medium-font-size has-custom-font-size wp-element-button" style="padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--40)"><?php esc_html_e('Shop now', 'woostarter');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"fontSize":"medium"} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Shop now', 'woostarter');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
+<!-- /wp:group -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|50"} -->
+<div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:group -->
