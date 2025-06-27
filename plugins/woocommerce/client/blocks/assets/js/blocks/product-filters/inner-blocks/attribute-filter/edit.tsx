@@ -128,6 +128,7 @@ const Edit = ( props: EditProps ) => {
 		hideEmpty,
 		isTermsLoading,
 		isFilterCountsLoading,
+		attributeObject?.taxonomy,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

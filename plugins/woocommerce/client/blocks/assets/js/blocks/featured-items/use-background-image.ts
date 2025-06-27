@@ -143,7 +143,7 @@ export function useBackgroundImage( {
 				shadowImgRef.current.onload = null; // Clean up image onload event on unmount.
 			}
 		};
-	}, [ backgroundImageSrc ] );
+	}, [ backgroundImageSrc, isImageBgTransparent ] );
 
 	return {
 		backgroundImageId,
