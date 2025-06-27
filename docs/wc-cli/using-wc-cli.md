@@ -1,8 +1,11 @@
 ---
-post_title: How to Use WooCommerce CLI
-menu_title: Using WooCommerce CLI
-tags: how-to
+post_title: How to use WooCommerce CLI
+sidebar_label: Using WooCommerce CLI
+sidebar_position: 2
+
 ---
+
+# How to Use WooCommerce CLI
 
 ## Introduction
 

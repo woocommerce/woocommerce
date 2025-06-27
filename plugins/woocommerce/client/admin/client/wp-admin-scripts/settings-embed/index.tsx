@@ -17,7 +17,7 @@ import {
 	SettingsPaymentsCodWrapper,
 	SettingsPaymentsMainWrapper,
 	SettingsPaymentsOfflineWrapper,
-	SettingsPaymentsWooCommercePaymentsWrapper,
+	SettingsPaymentsWooPaymentsWrapper,
 } from '~/settings-payments';
 
 import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
@@ -29,7 +29,7 @@ import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings
 import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-email-image-url-slotfill';
 import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
-import { registerSettingsEmailListingFill } from '../../settings-email/settings-email-listing-slotfill';
+import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
 
 const renderPaymentsSettings = () => {
 	const pages = [
@@ -55,7 +55,7 @@ const renderPaymentsSettings = () => {
 		},
 		{
 			id: 'experimental_wc_settings_payments_woocommerce_payments',
-			component: <SettingsPaymentsWooCommercePaymentsWrapper />,
+			component: <SettingsPaymentsWooPaymentsWrapper />,
 		},
 	];
 
@@ -63,9 +63,9 @@ const renderPaymentsSettings = () => {
 	pages.forEach( ( { id, component } ) => {
 		const root = document.getElementById( id );
 		if ( root ) {
-			createRoot(
-				root.insertBefore( document.createElement( 'div' ), null )
-			).render( component );
+			const newDiv = document.createElement( 'div' );
+			newDiv.className = 'wc-settings-prevent-change-event';
+			createRoot( root.insertBefore( newDiv, null ) ).render( component );
 		}
 	} );
 };

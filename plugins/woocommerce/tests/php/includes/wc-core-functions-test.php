@@ -76,6 +76,8 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [2, 1.23456789, false, 123.456789]
 	 *           [2, 1.23456789, true, 123.4568]
+	 *           [2, 1.235, false, 123.5]
+	 *           [2, 1.235, true, 123.5]
 	 *           [4, 1.23456789, false, 12345.6789]
 	 *           [4, 1.23456789, true, 12345.68]
 	 *           [5, 1.23456789, false, 123456.789]
@@ -104,6 +106,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testWith [2, 123.4567, 1.234567]
+	 *           [2, 123.5, 1.235]
 	 *           [5, 123.4567, 0.001234567]
 	 *           [2, null, 0]
 	 *

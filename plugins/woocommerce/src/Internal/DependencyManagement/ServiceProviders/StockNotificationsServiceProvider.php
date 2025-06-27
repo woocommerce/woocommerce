@@ -12,14 +12,22 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
 use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\CycleStateService;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailTemplatesController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\MenusController;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 
 /**
  * Service provider for Back in Stock Notification classes.
@@ -35,27 +43,69 @@ class StockNotificationsServiceProvider extends AbstractServiceProvider {
 		StockNotifications::class,
 		StockNotificationsDataStore::class,
 		StockNotificationsMetaDataStore::class,
+		JobManager::class,
 		NotificationsProcessor::class,
+		CycleStateService::class,
 		StockSyncController::class,
+		StockManagementHelper::class,
+		EligibilityService::class,
 		EmailManager::class,
 		EmailTemplatesController::class,
+		AdminManager::class,
 		SettingsController::class,
 		ProductPageIntegration::class,
 		FormHandlerService::class,
 		SignupService::class,
+		MenusController::class,
+		NotificationsPage::class,
+		PrivacyEraser::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
+
+		// Main.
 		$this->share( StockNotifications::class );
-		$this->share( StockNotificationsDataStore::class )->addArguments( array( StockNotificationsMetaDataStore::class, DatabaseUtil::class ) );
+
+		// Data stores.
+		$this->share( StockNotificationsDataStore::class )->addArguments(
+			array(
+				StockNotificationsMetaDataStore::class,
+				DatabaseUtil::class,
+			)
+		);
+
+		// Email.
 		$this->share( EmailManager::class );
 		$this->share( EmailTemplatesController::class );
-		$this->share( StockSyncController::class );
-		$this->share( NotificationsProcessor::class )->addArguments( array( EmailManager::class ) );
+
+		// Stock management.
+		$this->share( EligibilityService::class )->addArguments( array( StockManagementHelper::class ) );
+		$this->share( StockSyncController::class )->addArguments(
+			array(
+				EligibilityService::class,
+				JobManager::class,
+			)
+		);
+		$this->share( NotificationsProcessor::class )->addArguments(
+			array(
+				EligibilityService::class,
+				JobManager::class,
+				CycleStateService::class,
+				EmailManager::class,
+			)
+		);
+
+		// Admin.
+		$this->share( AdminManager::class );
 		$this->share( SettingsController::class );
+		$this->share( MenusController::class )->addArguments( array( NotificationsPage::class ) );
+		$this->share( PrivacyEraser::class );
+
+		// Frontend.
+		$this->share( SignupService::class );
 		$this->share( ProductPageIntegration::class );
 		$this->share( FormHandlerService::class )->addArguments( array( SignupService::class ) );
 	}

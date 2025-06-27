@@ -6,16 +6,16 @@
  * Internal dependencies
  */
 import reducer from '../reducer';
-import { PaymentSettingsState } from '../types';
+import { PaymentsSettingsState } from '../types';
 import { ACTION_TYPES } from '../action-types';
 import {
 	providersStub,
 	offlinePaymentGatewaysStub,
 	suggestionsStub,
 	suggestionCategoriesStub,
-} from '../test-helpers/stub';
+} from './helpers/stub';
 
-const defaultState: PaymentSettingsState = {
+const defaultState: PaymentsSettingsState = {
 	providers: [],
 	offlinePaymentGateways: [],
 	suggestions: [],

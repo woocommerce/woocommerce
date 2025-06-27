@@ -52,7 +52,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let your shoppers know when you’ve added a note to their order.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when you’ve added a note to their order', 'woocommerce' )
 				: __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
 		}
 

@@ -13,20 +13,20 @@ final class CatalogVisibility {
 	 *
 	 * @var string
 	 */
-	const VISIBLE = 'visible';
+	public const VISIBLE = 'visible';
 
 	/**
 	 * Product is visible on the shop page only.
 	 */
-	const CATALOG = 'catalog';
+	public const CATALOG = 'catalog';
 
 	/**
 	 * Product visible in the search results only.
 	 */
-	const SEARCH = 'search';
+	public const SEARCH = 'search';
 
 	/**
 	 * Product is invisible on both shop and search results, but can still be accessed directly.
 	 */
-	const HIDDEN = 'hidden';
+	public const HIDDEN = 'hidden';
 }

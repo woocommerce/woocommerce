@@ -106,6 +106,25 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await deleteProductsAddedByTests();
 	} );
 
+	async function gotToVariationsTab( page ) {
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await expect( async () => {
+				await page
+					.getByRole( 'link', { name: 'Variations' } )
+					.last()
+					.click();
+
+				// Sometimes the click on link is too fast and the initial tab (General) is still visible
+				// so we need to wait make sure some content from the variations tab is visible.
+				const expandButton = page
+					.getByRole( 'link', { name: 'Expand' } )
+					.first();
+
+				await expect( expandButton ).toBeVisible();
+			} ).toPass();
+		} );
+	}
+
 	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
 		const firstVariation = variationRows.filter( {
@@ -124,18 +143,12 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations.', async () => {
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )
 				.first();
-			await expandButton.waitFor( { state: 'visible' } );
 			await expandButton.click();
 		} );
 
@@ -211,18 +224,12 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await expect( saveButton ).toBeDisabled();
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations.', async () => {
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )
 				.first();
-			await expandButton.waitFor( { state: 'visible' } );
 			await expandButton.click();
 		} );
 
@@ -306,12 +313,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Select the \'Toggle "Downloadable"\' bulk action.', async () => {
 			await page
@@ -323,7 +325,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )
 				.first();
-			await expandButton.waitFor( { state: 'visible' } );
 			await expandButton.click();
 		} );
 
@@ -346,13 +347,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
-
+		await gotToVariationsTab( page );
 		await test.step( 'Select the bulk action "Delete all variations".', async () => {
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			await page.locator( '#field_to_edit' ).selectOption( 'delete_all' );
@@ -372,15 +367,12 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations', async () => {
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )
 				.first();
-			await expandButton.waitFor( { state: 'visible' } );
 			await expandButton.click();
 		} );
 
@@ -435,7 +427,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			const expandButton = page
 				.getByRole( 'link', { name: 'Expand' } )
 				.first();
-			await expandButton.waitFor( { state: 'visible' } );
 			await expandButton.click();
 		} );
 
@@ -467,12 +458,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
 			await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
@@ -526,12 +512,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Click "Remove" on a variation', async () => {
 			page.on( 'dialog', ( dialog ) => dialog.accept() );

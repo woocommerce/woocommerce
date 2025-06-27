@@ -52,8 +52,10 @@ export interface QuantitySelectorProps {
 	disabled: boolean;
 	/**
 	 * Whether the component should be editable
+	 *
+	 * @default true
 	 */
-	editable: boolean;
+	editable?: boolean;
 }
 
 const QuantitySelector = ( {
@@ -65,7 +67,7 @@ const QuantitySelector = ( {
 	step = 1,
 	itemName = '',
 	disabled,
-	editable,
+	editable = true,
 }: QuantitySelectorProps ): JSX.Element => {
 	const classes = clsx( 'wc-block-components-quantity-selector', className );
 

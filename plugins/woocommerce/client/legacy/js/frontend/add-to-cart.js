@@ -17,6 +17,7 @@ jQuery( function( $ ) {
 		$( document.body )
 			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
+			.on( 'keydown', '.remove_from_cart_button', this.onKeydownRemoveFromCart )
 			.on( 'added_to_cart', { addToCartHandler: this }, this.onAddedToCart )
 			.on( 'removed_from_cart', { addToCartHandler: this }, this.onRemovedFromCart )
 			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton );
@@ -167,6 +168,18 @@ jQuery( function( $ ) {
 			},
 			dataType: 'json'
 		});
+	};
+
+	/**
+	 * Handle when pressing the Space key on the remove item link.
+	 * This is necessary because the link got the role="button" attribute
+	 * and needs to act like a button.
+	 */
+	AddToCartHandler.prototype.onKeydownRemoveFromCart = function( event ) {
+		if ( event.key === ' ' ) {
+			event.preventDefault();
+			$( this ).trigger( 'click' );
+		}
 	};
 
 	/**

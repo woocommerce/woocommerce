@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix new Payments Settings page compatibility with extensions filtering the available payment methods.

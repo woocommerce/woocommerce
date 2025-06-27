@@ -1,0 +1,124 @@
+/* Cookie Banner styling */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  color: #000;
+  padding: 20px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cookie-banner * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.cookie-banner-content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.cookie-banner h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.cookie-banner p {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  color: #000;
+}
+
+.cookie-preferences {
+  margin-top: 1rem;
+}
+
+.cookie-option {
+  margin-bottom: 1rem;
+}
+
+.cookie-option label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cookie-option p {
+  margin: 0.25rem 0 0 1.5rem;
+  font-size: 0.8rem;
+  color: #000;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cookie-accept-all,
+.cookie-save-preferences {
+  background: #6108CE;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 110px;
+}
+
+.cookie-accept-all:hover,
+.cookie-save-preferences:hover {
+  opacity: 0.9;
+}
+
+.cookie-details-button {
+  background: transparent;
+  color: #6108CE;
+  border: 1px solid #6108CE;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  min-width: 110px;
+}
+
+.cookie-details-button:hover {
+  background: rgba(97, 8, 206, 0.1);
+}
+
+@media only screen and (max-width: 900px) {
+  .cookie-actions {
+    flex-direction: column;
+  }
+
+  .cookie-accept-all,
+  .cookie-save-preferences,
+  .cookie-details-button {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+}
+
+.cookie-banner__customized-modal-background {
+  background: rgba(0,0,0,.6);
+  bottom: 0;
+  content: "";
+  left: 0;
+  display: block;
+  right: 0;
+  top: 0;
+  z-index: 100000;
+} 

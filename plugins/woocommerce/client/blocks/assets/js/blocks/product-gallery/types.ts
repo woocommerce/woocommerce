@@ -1,5 +1,4 @@
 export interface ProductGalleryBlockAttributes {
-	cropImages: boolean;
 	hoverZoom: boolean;
 	fullScreenOnClick: boolean;
 }

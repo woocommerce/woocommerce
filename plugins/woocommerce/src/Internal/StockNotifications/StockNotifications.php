@@ -5,12 +5,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
+use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
+use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 
 /**
  * The controller for the stock notifications.
@@ -37,12 +38,13 @@ class StockNotifications {
 		$container->get( EmailManager::class );
 		$container->get( StockSyncController::class );
 		$container->get( NotificationsProcessor::class );
+		$container->get( PrivacyEraser::class );
 
 		$container->get( ProductPageIntegration::class );
 		$container->get( FormHandlerService::class );
 
 		if ( is_admin() ) {
-			$container->get( SettingsController::class );
+			$container->get( AdminManager::class );
 		}
 	}
 

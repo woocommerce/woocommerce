@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import type { ChangeEvent, KeyboardEvent } from 'react';
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import type { ChangeEvent } from 'react';
+import { store, getContext } from '@wordpress/interactivity';
 import type { CartVariationItem } from '@woocommerce/types';
 
 /**
@@ -28,10 +28,6 @@ type Context = {
 	options: Option[];
 };
 
-type PillsContext = Context & {
-	focused?: string;
-};
-
 // Set selected pill styles for proper contrast.
 setStyles();
 
@@ -54,7 +50,7 @@ function setAttribute( name: string, value: string | null ) {
 }
 
 function setDefaultSelectedAttribute() {
-	const context = getContext< PillsContext >();
+	const context = getContext< Context >();
 	setAttribute( context.name, context.selectedValue );
 }
 
@@ -94,12 +90,8 @@ const isAttributeValueValid = ( {
 	return availableVariations.some( ( availableVariation ) => {
 		// Skip variations that don't match the current attribute value.
 		if (
-			availableVariation.attributes[
-				'attribute_' + attributeName.toLowerCase()
-			] !== attributeValue &&
-			availableVariation.attributes[
-				'attribute_' + attributeName.toLowerCase()
-			] !== '' // "" is used for "any".
+			availableVariation.attributes[ attributeName ] !== attributeValue &&
+			availableVariation.attributes[ attributeName ] !== '' // "" is used for "any".
 		) {
 			return false;
 		}
@@ -109,7 +101,7 @@ const isAttributeValueValid = ( {
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
 					availableVariation.attributes[
-						'attribute_' + selectedAttribute.attribute.toLowerCase()
+						selectedAttribute.attribute
 					];
 				// If the current available variation matches the selected
 				// value, count it.
@@ -124,8 +116,7 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute.toLowerCase() !==
-							attributeName.toLowerCase() ||
+						selectedAttribute.attribute !== attributeName ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -139,16 +130,16 @@ const isAttributeValueValid = ( {
 	} );
 };
 
-const { state, actions } = store(
+const { state } = store(
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
 	{
 		state: {
 			get isPillSelected() {
-				const { selectedValue, option } = getContext< PillsContext >();
+				const { selectedValue, option } = getContext< Context >();
 				return selectedValue === option.value;
 			},
 			get isPillDisabled() {
-				const { name, option } = getContext< PillsContext >();
+				const { name, option } = getContext< Context >();
 				const { selectedAttributes, availableVariations } =
 					getContext< AddToCartWithOptionsStoreContext >(
 						'woocommerce/add-to-cart-with-options'
@@ -161,31 +152,8 @@ const { state, actions } = store(
 					availableVariations,
 				} );
 			},
-			get pillTabIndex() {
-				const { selectedValue, focused, option, options } =
-					getContext< PillsContext >();
-
-				if ( state.isPillDisabled ) {
-					return -1;
-				}
-
-				// Allow the first pill to be focused when no option is selected.
-				if (
-					! selectedValue &&
-					! focused &&
-					options[ 0 ]?.value === option.value
-				) {
-					return 0;
-				}
-
-				if ( state.isPillSelected || focused === option.value ) {
-					return 0;
-				}
-
-				return -1;
-			},
 			get index() {
-				const context = getContext< PillsContext >();
+				const context = getContext< Context >();
 				return context.options.findIndex(
 					( option ) => option.value === context.option.value
 				);
@@ -196,125 +164,17 @@ const { state, actions } = store(
 				if ( state.isPillDisabled ) {
 					return;
 				}
-				const context = getContext< PillsContext >();
+				const context = getContext< Context >();
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
-				context.focused = context.option.value;
 				setAttribute( context.name, context.selectedValue );
-			},
-			handleKeyDown( event: KeyboardEvent< HTMLElement > ) {
-				let keyWasProcessed = false;
-
-				switch ( event.key ) {
-					case ' ':
-						keyWasProcessed = true;
-						actions.toggleSelected();
-						break;
-
-					case 'Up':
-					case 'ArrowUp':
-					case 'Left':
-					case 'ArrowLeft': {
-						keyWasProcessed = true;
-						const context = getContext< PillsContext >();
-						const { selectedAttributes, availableVariations } =
-							getContext< AddToCartWithOptionsStoreContext >(
-								'woocommerce/add-to-cart-with-options'
-							);
-						const { index } = state;
-						if ( index <= 0 ) {
-							return;
-						}
-
-						for ( let i = index - 1; i >= 0; i-- ) {
-							if (
-								isAttributeValueValid( {
-									attributeName: context.name,
-									attributeValue: context.options[ i ].value,
-									selectedAttributes,
-									availableVariations,
-								} )
-							) {
-								context.selectedValue =
-									context.options[ i ].value;
-								context.focused = context.selectedValue;
-
-								setAttribute(
-									context.name,
-									context.selectedValue
-								);
-
-								return;
-							}
-						}
-						break;
-					}
-
-					case 'Down':
-					case 'ArrowDown':
-					case 'Right':
-					case 'ArrowRight': {
-						keyWasProcessed = true;
-						const context = getContext< PillsContext >();
-						const { selectedAttributes, availableVariations } =
-							getContext< AddToCartWithOptionsStoreContext >(
-								'woocommerce/add-to-cart-with-options'
-							);
-						const { index } = state;
-						if ( index >= context.options.length - 1 ) {
-							return;
-						}
-
-						for (
-							let i = index + 1;
-							i < context.options.length;
-							i++
-						) {
-							if (
-								isAttributeValueValid( {
-									attributeName: context.name,
-									attributeValue: context.options[ i ].value,
-									selectedAttributes,
-									availableVariations,
-								} )
-							) {
-								context.selectedValue =
-									context.options[ i ].value;
-								context.focused = context.selectedValue;
-
-								setAttribute(
-									context.name,
-									context.selectedValue
-								);
-
-								return;
-							}
-						}
-						break;
-					}
-					default:
-						break;
-				}
-
-				if ( keyWasProcessed ) {
-					event.stopPropagation();
-					event.preventDefault();
-				}
 			},
 		},
 		callbacks: {
 			setDefaultSelectedAttribute,
-			watchSelected() {
-				const { focused } = getContext< PillsContext >();
-
-				if ( state.pillTabIndex === 0 && focused ) {
-					const { ref } = getElement();
-					ref?.focus();
-				}
-			},
 		},
 	},
 	{ lock: true }
@@ -325,7 +185,7 @@ store(
 	{
 		state: {
 			get isOptionDisabled() {
-				const { name, option } = getContext< PillsContext >();
+				const { name, option } = getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;

@@ -7,7 +7,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockSyncController;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
 
 /**
  * StockSyncControllerTests data tests.
@@ -24,7 +26,11 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new StockSyncController();
+		$this->sut           = new StockSyncController();
+		$eligibility_service = new EligibilityService();
+		$eligibility_service->init( new StockManagementHelper() );
+		$job_manager = new JobManager();
+		$this->sut->init( $eligibility_service, $job_manager );
 	}
 
 	/**
@@ -61,17 +67,17 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $this->get_private_property( $this->sut, 'queue' ) );
 
 		// Check that the product runs the sync.
-		$run_product_id = false;
-		tests_add_filter(
-			'woocommerce_stock_notifications_product_sync',
-			function ( $product_id ) use ( &$run_product_id ) {
-				$run_product_id = $product_id;
+		$run_product_ids = array();
+		\add_action(
+			'woocommerce_customer_stock_notifications_product_sync',
+			function ( $product_ids ) use ( &$run_product_ids ) {
+				$run_product_ids = $product_ids;
 			},
 			100,
 			3
 		);
 		$this->sut->process_queue();
-		$this->assertEquals( $product->get_id(), $run_product_id );
+		$this->assertContains( $product->get_id(), $run_product_ids );
 	}
 
 	/**
@@ -172,7 +178,32 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $this->get_private_property( $this->sut, 'queue' ) );
 	}
 
-	// @todo: Test when variation manages stock and has notification. The parent goes in stock. the variation should not be in the queue.
+	/**
+	 * Test that the controller doesn't handle a variation that manages stock and the parent goes in stock.
+	 */
+	public function test_handle_variation_manages_stock_and_parent_goes_in_stock() {
+		$product = \WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 10 );
+		$variation->save();
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$this->assertArrayNotHasKey( $variation_id, $this->get_private_property( $this->sut, 'queue' ) );
+	}
 
 	/**
 	 * Get a private property of an object.

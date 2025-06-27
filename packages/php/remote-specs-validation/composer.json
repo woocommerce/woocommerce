@@ -3,7 +3,7 @@
 	"version": "1.0.2",
 	"description": "Remote specs testing suite",
 	"type": "library",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"autoload": {
 		"psr-4": {
 			"Automattic\\WooCommerce\\RemoteSpecsValidation\\": "src/"

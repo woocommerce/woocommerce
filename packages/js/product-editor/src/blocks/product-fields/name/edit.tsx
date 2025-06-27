@@ -14,7 +14,7 @@ import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	Button,
 	BaseControl,
@@ -190,7 +190,7 @@ export function NameBlockEdit( {
 					label={
 						<Label label={ __( 'Name', 'woocommerce' ) } required />
 					}
-					className={ classNames( {
+					className={ clsx( {
 						'has-error': nameValidationError,
 					} ) }
 					help={ help }

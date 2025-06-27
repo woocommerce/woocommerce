@@ -38,12 +38,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-		$use_old_container = false;
-		if ( getenv( 'USE_OLD_DI_CONTAINER' ) ) {
-			define( 'WOOCOMMERCE_USE_OLD_DI_CONTAINER', true );
-			$use_old_container = true;
-		}
-
 		$this->tests_dir  = __DIR__;
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
@@ -105,7 +99,7 @@ class WC_Unit_Tests_Bootstrap {
 		$this->includes();
 
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
-		$this->initialize_dependency_injection( $use_old_container );
+		$this->initialize_dependency_injection();
 
 		if ( getenv( 'HPOS' ) ) {
 			$this->initialize_hpos();
@@ -198,11 +192,9 @@ class WC_Unit_Tests_Bootstrap {
 	 *
 	 * Note also that TestingContainer replaces the instance of LegacyProxy with an instance of MockableLegacyProxy.
 	 *
-	 * @param bool $use_old_container The underlying container is the old ExtendedContainer class. This parameter will disappear in WooCommerce 10.0.
-	 *
 	 * @throws \Exception The Container class doesn't have a 'container' property.
 	 */
-	private function initialize_dependency_injection( bool $use_old_container ) {
+	private function initialize_dependency_injection() {
 		try {
 			$inner_container_property = new \ReflectionProperty( \Automattic\WooCommerce\Container::class, 'container' );
 		} catch ( ReflectionException $ex ) {
@@ -213,12 +205,8 @@ class WC_Unit_Tests_Bootstrap {
 
 		$container       = wc_get_container();
 		$inner_container = $inner_container_property->getValue( $container );
-		if ( $use_old_container ) {
-			$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
-		} else {
-			$inner_container = new TestingContainer( $inner_container );
-			$inner_container_property->setValue( $container, $inner_container );
-		}
+		$inner_container = new TestingContainer( $inner_container );
+		$inner_container_property->setValue( $container, $inner_container );
 
 		$GLOBALS['wc_container'] = $inner_container;
 	}
