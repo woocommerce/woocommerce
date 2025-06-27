@@ -471,6 +471,7 @@ class MiniCart extends AbstractBlock {
 			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 			$formatted_subtotal               = '';
 			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
+			$on_cart_click_behaviour          = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
 
 			if ( $html->next_tag( 'bdi' ) ) {
 				while ( $html->next_token() ) {
@@ -498,12 +499,18 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour' => $attributes['addToCartBehaviour'],
+					'addToCartBehaviour'   => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour' => $on_cart_click_behaviour,
+					'checkoutUrl'          => wc_get_checkout_url(),
 				)
 			);
 
 			$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
 			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
+
+			$button_role = 'navigate_to_checkout' === $on_cart_click_behaviour
+				? 'role="link"'
+				: '';
 
 			ob_start();
 			?>
@@ -516,7 +523,12 @@ class MiniCart extends AbstractBlock {
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button data-wp-on--click="callbacks.openDrawer" class="wc-block-mini-cart__button" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">
+				<button 
+					data-wp-on--click="callbacks.openDrawer"
+					class="wc-block-mini-cart__button"
+					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
+				>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
