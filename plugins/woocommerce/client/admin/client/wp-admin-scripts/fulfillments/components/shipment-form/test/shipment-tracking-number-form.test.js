@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -17,6 +18,8 @@ jest.mock( '../../../context/shipment-form-context', () => ( {
 jest.mock( '../../../utils/icons', () => ( {
 	EditIcon: () => <span data-testid="edit-icon" />,
 } ) );
+
+jest.mock( '@wordpress/api-fetch' );
 
 jest.mock( '@wordpress/components', () => ( {
 	...jest.requireActual( '@wordpress/components' ),
@@ -58,45 +61,61 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	} );
 
 	it( 'renders tracking number and provider in view mode', () => {
-		mockContext.trackingNumber = '12345678';
+		mockContext.trackingNumber = '1Z12345E0291980793';
 		mockContext.shipmentProvider = 'ups';
 		render( <ShipmentTrackingNumberForm /> );
-		expect( screen.getByText( '12345678' ) ).toBeInTheDocument();
+		expect( screen.getByText( '1Z12345E0291980793' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'UPS' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'edit-icon' ) ).toBeInTheDocument();
 	} );
 
-	it( 'calls setTrackingNumber and switches to view mode on valid lookup', () => {
+	it( 'calls setTrackingNumber and switches to view mode on valid lookup', async () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '1Z12345E0291980793',
+				provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
+			},
+		} );
 		render( <ShipmentTrackingNumberForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
-		fireEvent.change( input, { target: { value: '12345678' } } );
+		fireEvent.change( input, { target: { value: '1Z12345E0291980793' } } );
 		fireEvent.click( screen.getByText( 'Find info' ) );
-		expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
-			'12345678'
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
+				'1Z12345E0291980793'
+			);
+		} );
+		await expect( mockContext.setShipmentProvider ).toHaveBeenCalledWith(
+			'ups'
 		);
-		expect( mockContext.setShipmentProvider ).toHaveBeenCalledWith( 'ups' );
-		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
-			'https://www.ups.com/track?tracknum=12345678&some-other-long-query-string-for-testing-ellipsis'
+		await expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?tracknum=1Z12345E0291980793'
 		);
-		expect(
+		await expect(
 			screen.queryByPlaceholderText( 'Enter tracking number' )
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'shows error message on invalid lookup', () => {
+	it( 'shows error message on invalid lookup', async () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( { tracking_number_details: [] } );
 		render( <ShipmentTrackingNumberForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
 		fireEvent.change( input, { target: { value: 'invalid' } } );
 		fireEvent.click( screen.getByText( 'Find info' ) );
-		expect(
-			screen.getByText(
-				'No information found for this tracking number. Check the number or enter the details manually.'
-			)
-		).toBeInTheDocument();
+		await waitFor( () => {
+			expect(
+				screen.getByText(
+					'No information found for this tracking number. Check the number or enter the details manually.'
+				)
+			).toBeInTheDocument();
+		} );
 	} );
 
 	it( 'switches back to edit mode when edit button is clicked', () => {
