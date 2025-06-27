@@ -188,7 +188,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$variation_id = $product->get_children()[0];
-		$variation = wc_get_product( $variation_id );
+		$variation    = wc_get_product( $variation_id );
 		$variation->set_manage_stock( true );
 		$variation->set_stock_quantity( 10 );
 		$variation->save();
