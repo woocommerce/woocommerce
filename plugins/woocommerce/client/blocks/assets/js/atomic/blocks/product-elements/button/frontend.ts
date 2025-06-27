@@ -52,7 +52,7 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const areAttributeSetsEqual = ( cartItem:OptimisticCartItem, selectedItem:CartVariationItem[] ) => {
+const getMatchedCartItem = ( cartItem:OptimisticCartItem, selectedItem:CartVariationItem[] ) => {
 	if (
 		! Array.isArray( cartItem.variation ) ||
 		! Array.isArray( selectedItem )
@@ -92,11 +92,11 @@ const productButtonStore = {
 				}
 			} );
 
-			const foundProduct = product.find( ( item ) =>
-				areAttributeSetsEqual( item, selectedAttribute )
+			const selectedProduct = product.find( ( item ) =>
+				getMatchedCartItem( item, selectedAttribute )
 			);
 
-			return foundProduct?.quantity || 0;
+			return selectedProduct?.quantity || 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
