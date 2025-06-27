@@ -39,7 +39,7 @@ const reducer = (
 					isFetching: false,
 					errors: {
 						...state.errors,
-						getPaymentGatewaySuggestions: payload.error,
+						getPaymentProviders: payload.error,
 					},
 				};
 			case ACTION_TYPES.UPDATE_PROVIDER_ORDERING:

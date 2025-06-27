@@ -51,9 +51,7 @@ describe( 'payment settings reducer', () => {
 			error: restApiError,
 		} );
 
-		expect( state.errors.getPaymentGatewaySuggestions ).toBe(
-			restApiError
-		);
+		expect( state.errors.getPaymentProviders ).toBe( restApiError );
 	} );
 
 	it( 'should handle GET_PAYMENT_PROVIDERS_SUCCESS', () => {
