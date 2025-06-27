@@ -339,11 +339,15 @@ class Notification extends \WC_Data {
 	 */
 	protected function validate_props() {
 		if ( empty( $this->get_prop( 'product_id' ) ) ) {
-			$this->error( 'stock_notification_product_id_required', __( 'Product ID is required', 'woocommerce' ) );
+			$this->error( 'stock_notification_product_id_required', __( 'Product ID is required.', 'woocommerce' ) );
 		}
 
 		if ( empty( $this->get_prop( 'user_id' ) ) && empty( $this->get_prop( 'user_email' ) ) ) {
-			$this->error( 'stock_notification_user_id_or_user_email_required', __( 'User ID or User Email is required', 'woocommerce' ) );
+			$this->error( 'stock_notification_user_id_or_user_email_required', __( 'User ID or User Email is required.', 'woocommerce' ) );
+		}
+
+		if ( ! empty( $this->get_prop( 'user_email' ) ) && ! filter_var( $this->get_prop( 'user_email' ), FILTER_VALIDATE_EMAIL ) ) {
+			$this->error( 'stock_notification_user_email_invalid', __( 'User Email is invalid.', 'woocommerce' ) );
 		}
 	}
 
