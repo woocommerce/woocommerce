@@ -13,6 +13,7 @@
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"env:test": "pnpm env:dev",
 		"env:dev": "pnpm wp-env start --update",
+		"env:dev:stop": "pnpm wp-env stop",
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration",
