@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Featured products
- * Slug: woostarter/featured-products
+ * Slug: woostarter/woocommerce-featured-products
  * Categories: WooCommerce
  * Block Types: woocommerce/product-collection
  */
