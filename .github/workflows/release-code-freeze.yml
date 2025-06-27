@@ -1,5 +1,7 @@
 name: 'Release: Enforce Code Freeze'
 on:
+  schedule:
+    - cron: '0 18 * * *' # Every day at 18h UTC
   workflow_dispatch:
 
 permissions: {}
@@ -11,8 +13,58 @@ env:
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
 jobs:
+  check-feature-freeze-event:
+    name: Check for Feature Freeze events today
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+      - name: Check for Feature Freeze events today
+        id: check-feature-freeze-event
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const shouldSkipCalendarCheck = '${{ github.event_name }}' !== 'schedule';
+            if (shouldSkipCalendarCheck) {
+              console.log('Skip calendar event check, since the workflow was triggered manually.');
+              core.setOutput('should-run', 'true');
+              return;
+            }
+
+            const ical = require('node-ical');
+
+            console.log('Checking for Feature Freeze events today...');
+
+            try {
+              const today = new Date();
+              const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
+              const dayEvents = Object.values(events)
+                .filter(event => event.type === 'VEVENT')
+                .filter(event => {
+                  if (!event.start) return false;
+                  return new Date(event.start).toDateString() === new Date(today).toDateString();
+                });
+              const ffEvent = dayEvents.find(event => {
+                if (!event.summary) return false;
+                const pattern = /^WooCommerce \d+\.\d+ Feature Freeze$/i;
+                return pattern.test(event.summary);
+              });
+              if (ffEvent) {
+                console.log(`Found Feature Freeze event: ${ffEvent.summary}`);
+                core.setOutput('should-run', 'true');
+              } else {
+                core.setFailed('No Feature Freeze events found for today. Code freeze will not proceed.');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
   prepare-for-code-freeze:
     name: Calculate versions and confirm repo is in a good state
+    needs: check-feature-freeze-event
+    if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
@@ -79,7 +131,7 @@ jobs:
       - name: Install prerequisites
         run: |
             pnpm install --filter monorepo-utils --ignore-scripts
-            # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+            # ignore scripts speeds up setup significantly, but we still need to build monorepo utils
             pnpm build
         working-directory: tools/monorepo-utils
 
