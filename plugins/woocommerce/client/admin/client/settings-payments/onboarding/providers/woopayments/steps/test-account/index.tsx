@@ -22,6 +22,11 @@ import {
 } from '~/settings-payments/utils';
 import './style.scss';
 
+const TEST_ACCOUNT_ERROR_CODES = {
+	ACCOUNT_ALREADY_EXISTS:
+		'woocommerce_woopayments_test_account_already_exists',
+};
+
 interface StepCheckResponse {
 	status: string;
 	success: boolean;
