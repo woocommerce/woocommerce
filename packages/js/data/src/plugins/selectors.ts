@@ -2,11 +2,7 @@
  * Internal dependencies
  */
 import { WPDataSelector, WPDataSelectors } from '../types';
-import {
-	PluginsState,
-	RecommendedTypes,
-	SelectorKeysWithActions,
-} from './types';
+import { PluginsState, SelectorKeysWithActions } from './types';
 
 export const getActivePlugins = ( state: PluginsState ) => {
 	return state.active || [];
@@ -59,19 +55,11 @@ export const getPluginInstallState = (
 export const getPaypalOnboardingStatus = ( state: PluginsState ) =>
 	state.paypalOnboardingStatus;
 
-export const getRecommendedPlugins = (
-	state: PluginsState,
-	type: RecommendedTypes
-) => {
-	return state.recommended[ type ];
-};
-
 // Types
 export type PluginSelectors = {
 	getActivePlugins: WPDataSelector< typeof getActivePlugins >;
 	getInstalledPlugins: WPDataSelector< typeof getInstalledPlugins >;
 	getPluginInstallState: WPDataSelector< typeof getPluginInstallState >;
-	getRecommendedPlugins: WPDataSelector< typeof getRecommendedPlugins >;
 	getJetpackConnectionData: WPDataSelector< typeof getJetpackConnectionData >;
 	isJetpackConnected: WPDataSelector< typeof isJetpackConnected >;
 	isPluginsRequesting: WPDataSelector< typeof isPluginsRequesting >;

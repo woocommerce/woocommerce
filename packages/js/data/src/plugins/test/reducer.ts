@@ -16,7 +16,6 @@ const defaultState: PluginsState = {
 	requesting: {},
 	errors: {},
 	jetpackConnectUrls: {},
-	recommended: {},
 };
 
 describe( 'plugins reducer', () => {

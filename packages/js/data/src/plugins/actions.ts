@@ -16,13 +16,11 @@ import { isRestApiError } from '../types';
 import {
 	PaypalOnboardingStatus,
 	SelectorKeysWithActions,
-	RecommendedTypes,
 	InstallPluginsResponse,
 	ActivatePluginsResponse,
 	PluginsResponse,
 	PluginNames,
 	JetpackConnectionDataResponse,
-	Plugin,
 } from './types';
 
 class PluginError extends Error {
@@ -150,21 +148,6 @@ export function setPaypalOnboardingStatus(
 	return {
 		type: TYPES.SET_PAYPAL_ONBOARDING_STATUS as const,
 		paypalOnboardingStatus: status,
-	};
-}
-
-export function setRecommendedPlugins(
-	type: string,
-	plugins: Plugin[]
-): {
-	type: TYPES.SET_RECOMMENDED_PLUGINS;
-	recommendedType: string;
-	plugins: Plugin[];
-} {
-	return {
-		type: TYPES.SET_RECOMMENDED_PLUGINS as const,
-		recommendedType: type,
-		plugins,
 	};
 }
 
@@ -426,36 +409,6 @@ export function* connectToJetpackWithFailureRedirect(
 	}
 }
 
-const SUPPORTED_TYPES = [ 'payments' ];
-
-export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
-	if ( ! SUPPORTED_TYPES.includes( type ) ) {
-		return [];
-	}
-	const plugins: Plugin[] = yield controls.resolveSelect(
-		STORE_NAME,
-		'getRecommendedPlugins',
-		type
-	);
-	yield setRecommendedPlugins( type, [] );
-
-	let success: boolean;
-	try {
-		const url = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions/dismiss';
-		success = yield apiFetch( {
-			path: url,
-			method: 'POST',
-		} );
-	} catch ( error ) {
-		success = false;
-	}
-	if ( ! success ) {
-		// Reset recommended plugins
-		yield setRecommendedPlugins( type, plugins );
-	}
-	return success;
-}
-
 export function* deactivatePlugin( pluginFile: string ) {
 	try {
 		yield apiFetch( {
@@ -477,7 +430,6 @@ export type Actions = ReturnType<
 	| typeof updateJetpackConnectUrl
 	| typeof updateJetpackConnectionData
 	| typeof setPaypalOnboardingStatus
-	| typeof setRecommendedPlugins
 	| typeof createErrorNotice
 >;
 
@@ -488,6 +440,5 @@ export type ActionDispatchers = DispatchFromMap< {
 	installJetpackAndConnect: typeof installJetpackAndConnect;
 	installAndActivatePlugins: typeof installAndActivatePlugins;
 	connectToJetpackWithFailureRedirect: typeof connectToJetpackWithFailureRedirect;
-	dismissRecommendedPlugins: typeof dismissRecommendedPlugins;
 	deactivatePlugin: typeof deactivatePlugin;
 } >;

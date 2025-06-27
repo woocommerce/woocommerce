@@ -20,14 +20,8 @@ import {
 	updateJetpackConnectUrl,
 	updateJetpackConnectionData,
 	setPaypalOnboardingStatus,
-	setRecommendedPlugins,
 } from './actions';
-import {
-	PaypalOnboardingStatus,
-	RecommendedTypes,
-	JetpackConnectionDataResponse,
-	Plugin,
-} from './types';
+import { PaypalOnboardingStatus, JetpackConnectionDataResponse } from './types';
 import { checkUserCapability } from '../utils';
 import { store } from './';
 
@@ -215,26 +209,4 @@ export function* getPaypalOnboardingStatus() {
 	}
 
 	yield setIsRequesting( 'getPaypalOnboardingStatus', false );
-}
-
-const SUPPORTED_TYPES = [ 'payments' ];
-export function* getRecommendedPlugins( type: RecommendedTypes ) {
-	if ( ! SUPPORTED_TYPES.includes( type ) ) {
-		return [];
-	}
-	yield setIsRequesting( 'getRecommendedPlugins', true );
-
-	try {
-		const url = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions';
-		const results: Plugin[] = yield apiFetch( {
-			path: url,
-			method: 'GET',
-		} );
-
-		yield setRecommendedPlugins( type, results );
-	} catch ( error ) {
-		yield setError( 'getRecommendedPlugins', error );
-	}
-
-	yield setIsRequesting( 'getRecommendedPlugins', false );
 }

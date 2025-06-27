@@ -4,14 +4,11 @@
 import { pluginNames } from './constants';
 import { WPError } from '../types';
 
-export type RecommendedTypes = 'payments';
-
 export type PluginNames = keyof typeof pluginNames;
 
 export type SelectorKeysWithActions =
 	| 'getActivePlugins'
 	| 'getInstalledPlugins'
-	| 'getRecommendedPlugins'
 	| 'installPlugins'
 	| 'activatePlugins'
 	| 'isJetpackConnected'
@@ -26,7 +23,6 @@ export type PluginsState = {
 	jetpackConnectUrls: Record< string, unknown >;
 	jetpackConnection?: boolean;
 	jetpackConnectionData?: JetpackConnectionDataResponse;
-	recommended: Partial< Record< RecommendedTypes, Plugin[] > >;
 	paypalOnboardingStatus?: Partial< PaypalOnboardingStatus >;
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;

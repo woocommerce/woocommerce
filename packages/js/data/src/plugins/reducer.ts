@@ -18,7 +18,6 @@ const reducer: Reducer< PluginsState, Actions > = (
 		requesting: {},
 		errors: {},
 		jetpackConnectUrls: {},
-		recommended: {},
 	},
 	payload
 ) => {
@@ -113,15 +112,6 @@ const reducer: Reducer< PluginsState, Actions > = (
 				state = {
 					...state,
 					paypalOnboardingStatus: payload.paypalOnboardingStatus,
-				};
-				break;
-			case TYPES.SET_RECOMMENDED_PLUGINS:
-				state = {
-					...state,
-					recommended: {
-						...state.recommended,
-						[ payload.recommendedType ]: payload.plugins,
-					},
 				};
 				break;
 		}
