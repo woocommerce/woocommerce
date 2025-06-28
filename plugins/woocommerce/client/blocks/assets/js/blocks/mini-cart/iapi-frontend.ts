@@ -25,7 +25,9 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { currency } = getConfig( 'woocommerce' );
-const { addToCartBehaviour } = getConfig( 'woocommerce/mini-cart' );
+const { addToCartBehaviour, onCartClickBehaviour, checkoutUrl } = getConfig(
+	'woocommerce/mini-cart'
+);
 const { displayCartPriceIncludingTax } = getConfig( 'woocommerce/mini-cart' );
 const {
 	reduceQuantityLabel,
@@ -164,6 +166,10 @@ store< MiniCart >(
 			},
 
 			openDrawer() {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+					window.location.href = checkoutUrl;
+					return;
+				}
 				const ctx = getContext< MiniCartContext >();
 				ctx.isOpen = true;
 			},
@@ -342,20 +348,14 @@ const { state: cartItemState } = store(
 
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.regular_price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
 					cartItemState.currency
 				);
 			},
 
 			get itemPrice(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.price, 10 ),
 					cartItemState.currency
 				);
 			},
