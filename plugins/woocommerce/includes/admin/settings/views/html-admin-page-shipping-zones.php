@@ -23,7 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		'woocommerce'
 	);
 
-
 	if ( CartCheckoutUtils::is_checkout_block_default() ) {
 		echo wp_kses_post(
 			sprintf(
