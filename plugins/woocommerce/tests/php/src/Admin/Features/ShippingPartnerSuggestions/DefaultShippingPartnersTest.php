@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\ShippingPartnerSuggestions;
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
+use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\DefaultShippingPartners;
 use WC_Unit_Test_Case;
 

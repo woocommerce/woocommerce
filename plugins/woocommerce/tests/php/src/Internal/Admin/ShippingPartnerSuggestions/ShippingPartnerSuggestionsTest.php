@@ -3,11 +3,10 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ShippingPartnerSuggestions;
 
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\DefaultShippingPartners;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\ShippingPartnerSuggestions;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\ShippingPartnerSuggestionsDataSourcePoller;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
+use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\EvaluateSuggestion;
 use WC_Unit_Test_Case;
 
 /**
