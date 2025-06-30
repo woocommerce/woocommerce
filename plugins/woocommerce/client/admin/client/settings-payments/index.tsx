@@ -359,7 +359,11 @@ export const SettingsPaymentsOfflineWrapper = () => {
 			<div className="settings-payments-offline__container">
 				<div className="settings-payments-offline__header">
 					<BackButton
-						href={ getNewPath( {}, '' ) }
+						href={ getNewPath(
+							{ page: 'wc-settings', tab: 'checkout' },
+							'/',
+							{}
+						) }
 						title={ __(
 							'Return to payments settings',
 							'woocommerce'
