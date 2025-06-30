@@ -127,7 +127,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 											</div>
 										</div>
 										<div class="wc-block-cart-item__quantity">
-											<div class="wc-block-components-quantity-selector">
+											<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
 												<input 
 													data-wp-on--input="actions.overrideInvalidQuantity"
 													data-wp-on--change="actions.changeQuantity" 

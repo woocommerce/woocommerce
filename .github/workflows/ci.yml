@@ -436,6 +436,36 @@ jobs:
             -f report_title="$REPORT_TITLE" \
             --repo woocommerce/woocommerce-test-reports
 
+      - name: 'Add a link to test report in summary'
+        if: ${{ strategy.job-index == 0 }} # only add the link once
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const BASE_REPORT_URL = 'https://woocommerce.github.io/woocommerce-test-reports/#/';
+            function getReportUrl() {
+                if (context.eventName === 'pull_request') {
+                    return `${BASE_REPORT_URL}pr/${context.issue.number}`;
+                }
+                
+                if (context.eventName === 'push') {
+                    const shortSha = context.sha.substring(0, 7);
+                    if (context.ref === 'refs/heads/trunk') {
+                        return `${BASE_REPORT_URL}trunk/trunk-${shortSha}`;
+                    }
+                }
+                
+                return BASE_REPORT_URL;
+            }
+
+            const reportUrl = getReportUrl();
+
+            await core.summary
+              .addHeading('Test Report', '2')
+              .addLink('See test reports', reportUrl)
+              .addBreak()
+              .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
+              .write();
+
   report-flaky-tests:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
