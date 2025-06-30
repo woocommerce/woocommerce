@@ -104,14 +104,14 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 
 		// Amazon Logistics tracking number patterns.
 		$patterns = array(
-			'/^TBA\d{12}$/'          => fn() => 'US' === $shipping_from ? 100 : 95,  // US standard format.
-			'/^TBC\d{12}$/'          => fn() => 'CA' === $shipping_from ? 100 : 90,  // Canada standard format.
-			'/^TBM\d{12}$/'          => fn() => 'MX' === $shipping_from ? 100 : 85,  // Mexico standard format.
-			'/^CC\d{12}$/'           => fn() => in_array( $shipping_from, array( 'FR', 'BE', 'NL', 'DE' ), true ) ? 95 : 80,  // Europe.
-			'/^GBA\d{12}$/'          => fn() => 'GB' === $shipping_from ? 100 : 85,  // United Kingdom.
-			'/^RB\d{12}$/'           => fn() => in_array( $shipping_from, array( 'CN', 'HK' ), true ) ? 95 : 75,  // China/Hong Kong.
-			'/^ZZ\d{12}$/'           => fn() => 'AU' === $shipping_from ? 100 : 80,  // Australia.
-			'/^ZX\d{12}$/'           => fn() => 'IN' === $shipping_from ? 100 : 85,  // India.
+			'/^TBA\d{12}$/' => fn() => 'US' === $shipping_from ? 100 : 95,  // US standard format.
+			'/^TBC\d{12}$/' => fn() => 'CA' === $shipping_from ? 100 : 90,  // Canada standard format.
+			'/^TBM\d{12}$/' => fn() => 'MX' === $shipping_from ? 100 : 85,  // Mexico standard format.
+			'/^CC\d{12}$/'  => fn() => in_array( $shipping_from, array( 'FR', 'BE', 'NL', 'DE' ), true ) ? 95 : 80,  // Europe.
+			'/^GBA\d{12}$/' => fn() => 'GB' === $shipping_from ? 100 : 85,  // United Kingdom.
+			'/^RB\d{12}$/'  => fn() => in_array( $shipping_from, array( 'CN', 'HK' ), true ) ? 95 : 75,  // China/Hong Kong.
+			'/^ZZ\d{12}$/'  => fn() => 'AU' === $shipping_from ? 100 : 80,  // Australia.
+			'/^ZX\d{12}$/'  => fn() => 'IN' === $shipping_from ? 100 : 85,  // India.
 		);
 
 		foreach ( $patterns as $pattern => $score_callback ) {
