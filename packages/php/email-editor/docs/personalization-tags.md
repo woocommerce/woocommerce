@@ -190,13 +190,13 @@ Main engine for replacing tags with values in email content.
 **Example Usage:**
 
 ```php
-$personalizer = new Personalizer($registry);
+$personalizer = new Personalizer( $registry );
 $personalizer->set_context([
     'order' => $order,
     'recipient_email' => 'customer@example.com'
 ]);
 
-$personalized_content = $personalizer->personalize_content($email_content);
+$personalized_content = $personalizer->personalize_content( $email_content );
 ```
 
 ## Creating Custom Tags
@@ -220,9 +220,9 @@ add_filter('woocommerce_email_editor_register_personalization_tags', function( $
                     $customer_id = $context['order']->get_customer_id();
                     if ( $customer_id ) {
                         $birth_date = get_user_meta( $customer_id, 'birth_date', true );
-                        if ($birth_date) {
+                        if ( $birth_date ) {
                             $age = date_diff( date_create( $birth_date ), date_create( 'today' ) )->y;
-                            return (string)$age;
+                            return (string) $age;
                         }
                     }
                 }
