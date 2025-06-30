@@ -1,5 +1,6 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\Blocks\Utils;
+use Automattic\Block_Delimiter;
 
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
@@ -147,13 +148,42 @@ class CartCheckoutUtils {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
-				if ( has_block( 'woocommerce/cart', $template->content ) ) {
+				if ( self::is_block_present( 'woocommerce/cart', $template->content ) ) {
 					return true;
 				}
 			}
 		}
 		$cart_page_id = wc_get_page_id( 'cart' );
-		return $cart_page_id && has_block( 'woocommerce/cart', $cart_page_id );
+		if ( -1 === $cart_page_id ) {
+			return false;
+
+		}
+		$cart_page = get_post( $cart_page_id );
+		if ( null === $cart_page ) {
+			return false;
+		}
+		$cart_page_content = $cart_page->post_content;
+		return self::is_block_present( 'woocommerce/cart', $cart_page_content );
+	}
+
+	/**
+	 * Checks if a specific block type is present in the post content.
+	 *
+	 * @param string $block_type   Block type to check for, e.g. 'woocommerce/cart'.
+	 * @param string $post_content The post content to check in.
+	 *
+	 * @return bool true if the block type is present, false otherwise.
+	 */
+	private static function is_block_present( $block_type, $post_content ) {
+		if ( ! $post_content ) {
+			return false;
+		}
+		foreach ( Block_Delimiter::scan_delimiters( $post_content ) as $where => $delimiter ) {
+			if ( $delimiter->is_block_type( $block_type ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -166,13 +196,22 @@ class CartCheckoutUtils {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
-				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
+				if ( self::is_block_present( 'woocommerce/checkout', $template->content ) ) {
 					return true;
 				}
 			}
 		}
 		$checkout_page_id = wc_get_page_id( 'checkout' );
-		return $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
+		if ( -1 === $checkout_page_id ) {
+			return false;
+
+		}
+		$checkout_page = get_post( $checkout_page_id );
+		if ( null === $checkout_page ) {
+			return false;
+		}
+		$checkout_page_content = $checkout_page->post_content;
+		return self::is_block_present( 'woocommerce/checkout', $checkout_page_content );
 	}
 
 	/**
