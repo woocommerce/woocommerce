@@ -5,17 +5,16 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments\Providers;
 use Automattic\WooCommerce\Internal\Fulfillments\Providers\UPSShippingProvider;
 
 /**
- * Tests for UPSShippingProvider class.
+ * Unit tests for UPSShippingProvider class.
  */
 class UPSShippingProviderTest extends \WP_UnitTestCase {
 	/**
 	 * Test the get_tracking_url method.
 	 */
 	public function test_get_tracking_url(): void {
-		$provider        = new UPSShippingProvider();
 		$tracking_number = '1Z12345E0205271688';
 		$expected_url    = 'https://www.ups.com/track?tracknum=' . rawurlencode( $tracking_number );
-
+		$provider        = new UPSShippingProvider();
 		$this->assertEquals( $expected_url, $provider->get_tracking_url( $tracking_number ) );
 	}
 
@@ -24,54 +23,148 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function trackingNumberDataProvider(): array {
+	public function trackingNumberProvider(): array {
 		return array(
-			// 1Z format (unambiguous, 100)
-			array( '1Z12345E0205271688', 'US', 'US', true, 100 ),
-			array( '1z12345e0205271688', 'CA', 'US', true, 100 ),
+			// 1Z format - Universal UPS format (100).
+			array( '1Z12345E0205271688', 'US', 'DE', true, 100 ),
+			array( '1Z12345E0205271688', 'CA', 'US', true, 100 ),
+			array( '1Z12345E0205271688', 'GB', 'FR', true, 100 ),
+			array( '1z12345e0205271688', 'DE', 'IT', true, 100 ),
+			array( '1Z12345E020527168', 'US', 'DE', true, 100 ),
 
-			// T/H format (domestic US only, 75).
-			array( 'T1234567890', 'US', 'US', true, 75 ),
-			array( 't1234567890', 'US', 'US', true, 75 ),
-			array( 'H1234567890', 'US', 'US', true, 75 ),
+			// SurePost format (95).
+			array( '9212345678901234567890', 'US', 'US', true, 95 ),
+			array( '9212345678901234567890', 'CA', 'CA', true, 95 ),
 
-			// 9x format (ambiguous: CA origin = 60, other = 40)
-			array( '9123456789012345678901234567890123', 'CA', 'US', true, 60 ),
-			array( '9123456789012345678901234567890123', 'US', 'CA', true, 40 ),
+			// InfoNotice format (85).
+			array( 'J1234567890', 'US', 'US', true, 85 ),
+			array( 'J1234567890', 'CA', 'CA', true, 85 ),
+			array( 'j1234567890', 'DE', 'DE', true, 85 ),
+			array( 'J1234567890', 'US', 'CA', true, 85 ),
 
-			// Invalid formats (should not match).
-			array( '1234567890', 'US', 'US', false, null ),
-			array( 'INVALID123', 'CA', 'CA', false, null ),
+			// T/H format (90).
+			array( 'T1234567890', 'US', 'US', true, 90 ),
+			array( 'H1234567890', 'US', 'US', true, 90 ),
+			array( 't1234567890', 'US', 'US', true, 90 ),
+			array( 'h1234567890', 'US', 'US', true, 90 ),
+			array( 'T1234567890', 'CA', 'CA', true, 90 ),
+			array( 'T1234567890', 'GB', 'GB', true, 90 ),
+			array( 'T1234567890', 'US', 'CA', true, 90 ),
 
-			// T/H used in invalid lanes.
-			array( 'T1234567890', 'US', 'CA', false, null ),
-			array( 'H1234567890', 'CA', 'US', false, null ),
+			// Mail Innovations formats (65-80).
+			array( '9123456789012345678901234567890123', 'CA', 'US', true, 80 ),
+			array( '9123456789012345678901234567890123', 'US', 'CA', true, 80 ),
+			array( '1234567890123456789012', 'US', 'CA', true, 65 ),
+			array( '1234567890123456789012', 'CA', 'US', true, 65 ),
+
+			// Domestic numeric formats (70-75).
+			array( '123456789012', 'US', 'US', true, 75 ),
+			array( '123456789', 'US', 'US', true, 70 ),
+			array( '1234567890', 'US', 'US', true, 70 ),
+
+			// Domestic-but-international-tracking countries.
+			array( '1Z12345E0205271688', 'IN', 'IN', true, 105 ),
+			array( 'T1234567890', 'HK', 'HK', true, 95 ),
+
+			// Invalid formats.
+			array( 'INVALID123', 'CA', 'US', false, null ),
+			array( '1Y12345E0205271688', 'US', 'DE', false, null ),
+			array( '1Z12345E020527', 'US', 'DE', false, null ),
+
+			// Invalid countries.
+			array( '1Z12345E0205271688', 'ZZ', 'US', false, null ),
+			array( '1Z12345E0205271688', 'US', 'ZZ', false, null ),
 		);
 	}
 
 	/**
-	 * Test tracking number parsing.
+	 * Test tracking number parsing with various scenarios.
 	 *
 	 * @param string   $tracking_number The tracking number to test.
-	 * @param string   $shipping_from   The shipping origin country code.
-	 * @param string   $shipping_to     The shipping destination country code.
-	 * @param bool     $has_match       Whether the tracking number should match.
-	 * @param int|null $expected_score Expected ambiguity score, or null if no match.
+	 * @param string   $shipping_from The country code from which the shipment is sent.
+	 * @param string   $shipping_to The country code to which the shipment is sent.
+	 * @param bool     $has_match Whether the tracking number should match a known format.
+	 * @param int|null $expected_score The expected ambiguity score if a match is found.
 	 *
-	 * @return void
-	 *
-	 * @dataProvider trackingNumberDataProvider
+	 * @dataProvider trackingNumberProvider
 	 */
-	public function test_tracking_number_parsing( string $tracking_number, string $shipping_from, string $shipping_to, bool $has_match, ?int $expected_score ): void {
+	public function test_tracking_number_parsing(
+		string $tracking_number,
+		string $shipping_from,
+		string $shipping_to,
+		bool $has_match,
+		?int $expected_score
+	): void {
 		$provider = new UPSShippingProvider();
 		$result   = $provider->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
 
 		if ( $has_match ) {
 			$this->assertNotNull( $result );
-			$this->assertEquals( 'https://www.ups.com/track?tracknum=' . rawurlencode( $tracking_number ), $result['url'] );
+			$this->assertEquals(
+				'https://www.ups.com/track?tracknum=' . rawurlencode( strtoupper( $tracking_number ) ),
+				$result['url']
+			);
 			$this->assertEquals( $expected_score, $result['ambiguity_score'] );
 		} else {
 			$this->assertNull( $result );
+		}
+	}
+
+	/**
+	 * Test T/H format global validity.
+	 */
+	public function test_th_format_global_validity(): void {
+		$provider = new UPSShippingProvider();
+
+		// Should work globally.
+		$us_domestic   = $provider->try_parse_tracking_number( 'T1234567890', 'US', 'US' );
+		$ca_domestic   = $provider->try_parse_tracking_number( 'T1234567890', 'CA', 'CA' );
+		$international = $provider->try_parse_tracking_number( 'T1234567890', 'US', 'CA' );
+
+		$this->assertNotNull( $us_domestic );
+		$this->assertNotNull( $ca_domestic );
+		$this->assertNotNull( $international );
+		$this->assertEquals( 90, $us_domestic['ambiguity_score'] );
+	}
+
+	/**
+	 * Test SurePost format recognition.
+	 */
+	public function test_surepost_format(): void {
+		$provider = new UPSShippingProvider();
+		$result   = $provider->try_parse_tracking_number( '9212345678901234567890', 'US', 'US' );
+
+		$this->assertNotNull( $result );
+		$this->assertEquals( 95, $result['ambiguity_score'] );
+	}
+
+	/**
+	 * Test domestic-but-international-tracking score boost.
+	 */
+	public function test_domestic_international_tracking_boost(): void {
+		$provider = new UPSShippingProvider();
+
+		// India (IN) is in domestic_but_international_tracking.
+		$result = $provider->try_parse_tracking_number( '1Z12345E0205271688', 'IN', 'IN' );
+		$this->assertNotNull( $result );
+		$this->assertEquals( 105, $result['ambiguity_score'] ); // 100 + 5 boost.
+	}
+
+	/**
+	 * Test case insensitivity.
+	 */
+	public function test_case_insensitivity(): void {
+		$provider = new UPSShippingProvider();
+
+		$results = array(
+			$provider->try_parse_tracking_number( '1Z12345E0205271688', 'US', 'DE' ),
+			$provider->try_parse_tracking_number( '1z12345e0205271688', 'US', 'DE' ),
+			$provider->try_parse_tracking_number( '1z12345E0205271688', 'US', 'DE' ),
+		);
+
+		foreach ( $results as $result ) {
+			$this->assertNotNull( $result );
+			$this->assertEquals( 100, $result['ambiguity_score'] );
 		}
 	}
 }
