@@ -5,6 +5,7 @@
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
+	"version": "1.0.0",
 	"autoload": {
 		"classmap": [
 			"src/"
@@ -46,7 +47,7 @@
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"filename": "../../../tools/changelogger/class-package-formatter.php"
+				"filename": "../../../tools/changelogger/class-php-package-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",
@@ -57,7 +58,7 @@
 				"performance": "Address performance issues",
 				"enhancement": "Improve existing functionality"
 			},
-			"changelog": "CHANGELOG.md"
+			"changelog": "changelog.md"
 		}
 	}
 }

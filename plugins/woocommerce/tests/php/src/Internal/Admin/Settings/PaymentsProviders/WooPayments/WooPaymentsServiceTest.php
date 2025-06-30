@@ -339,22 +339,38 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$wpcom_connection_return_url = 'https://example.com/payments-settings/return?wpcom_connection_return=1';
 
-		$stored_profile = array(
+		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
 					'steps' => $steps_stored_profile,
 				),
 			),
 		);
-
+		$updated_stored_profiles = array();
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile, &$updated_stored_profiles ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
+						// Chain the responses to simulate the sequence of DB updates.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
 					}
 
 					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						$previous = empty( $updated_stored_profiles ) ? $stored_profile : end( $updated_stored_profiles );
+						if ( $value === $previous || maybe_serialize( $value ) === maybe_serialize( $previous ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
 				},
 			)
 		);
@@ -1141,10 +1157,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'stored statuses (blocked) - working WPCOM connection, test account' => array(
 				array(
-					// The PMs step is force-completd on valid accounts.
-					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
-					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
-					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					// The PMs step is force-completed on valid accounts.
+					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION      => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT          => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
 				),
 				array(
@@ -1980,7 +1996,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$location = 'US';
 
 		// Arrange.
-		$stored_profile = array(
+		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
 					'steps' => array(
@@ -1991,15 +2007,31 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				),
 			),
 		);
-
+		$updated_stored_profiles = array();
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option' => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile, &$updated_stored_profiles ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
+						// Chain the responses to simulate the sequence of DB updates.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
 					}
 
 					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+
+						// Mimic the behavior of the original function.
+						$previous = empty( $updated_stored_profiles ) ? $stored_profile : end( $updated_stored_profiles );
+						if ( $value === $previous || maybe_serialize( $value ) === maybe_serialize( $previous ) ) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return true;
 				},
 			)
 		);
