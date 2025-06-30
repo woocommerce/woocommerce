@@ -175,7 +175,7 @@ jobs:
           pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
-        # if: ${{ inputs.artifactName != '' }}
+        if: ${{ inputs.artifactName != '' }}
         env:
           RELEASE_TAG: ${{ inputs.refName != '' && inputs.refName || github.ref_name }}
           ARTIFACT_NAME: ${{ inputs.artifactName }}
