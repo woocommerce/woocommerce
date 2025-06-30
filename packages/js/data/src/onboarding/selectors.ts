@@ -16,7 +16,6 @@ import {
 	CoreProfilerCompletedSteps,
 } from './types';
 import { WPDataSelectors } from '../types';
-import { Plugin } from '../plugins/types';
 
 export const getFreeExtensions = (
 	state: OnboardingState
@@ -73,12 +72,6 @@ export const getTask = (
 		},
 		undefined
 	);
-};
-
-export const getPaymentGatewaySuggestions = (
-	state: OnboardingState
-): Plugin[] => {
-	return state.paymentMethods || [];
 };
 
 export const getOnboardingError = (
@@ -143,9 +136,6 @@ export const getMostRecentCoreProfilerStep = createSelector(
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
 	getProfileProgress: () => ReturnType< typeof getProfileProgress >;
-	getPaymentGatewaySuggestions: () => ReturnType<
-		typeof getPaymentGatewaySuggestions
-	>;
 	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
 	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;
 	getTaskListsByIds: (

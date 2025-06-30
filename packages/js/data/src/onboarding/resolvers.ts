@@ -16,7 +16,6 @@ import {
 	getTaskListsSuccess,
 	setProfileItems,
 	setError,
-	setPaymentMethods,
 	setEmailPrefill,
 	getProductTypesSuccess,
 	getProductTypesError,
@@ -32,7 +31,6 @@ import {
 	ProfileItems,
 	TaskListType,
 } from './types';
-import { Plugin } from '../plugins/types';
 import { checkUserCapability } from '../utils';
 
 const resolveSelect =
@@ -121,25 +119,6 @@ export function* getTaskList() {
 
 export function* getTask() {
 	yield resolveSelect( STORE_NAME, 'getTaskLists' );
-}
-
-export function* getPaymentGatewaySuggestions(
-	forceDefaultSuggestions = false
-) {
-	let path = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions';
-	if ( forceDefaultSuggestions ) {
-		path += '?force_default_suggestions=true';
-	}
-	try {
-		const results: Plugin[] = yield apiFetch( {
-			path,
-			method: 'GET',
-		} );
-
-		yield setPaymentMethods( results );
-	} catch ( error ) {
-		yield setError( 'getPaymentGatewaySuggestions', error );
-	}
 }
 
 export function* getFreeExtensions() {
