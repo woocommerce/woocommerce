@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Brands Unit tests suit
+ * WooCommerce Brands Unit tests suite
  *
  * @package woocommerce-brands
  */
