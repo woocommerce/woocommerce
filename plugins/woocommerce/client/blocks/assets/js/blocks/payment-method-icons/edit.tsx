@@ -66,7 +66,7 @@ const Edit = ( {
 			.filter( Boolean );
 		const otherPaymentMethods = Object.keys( wooPaymentMethods )
 			.filter( ( method ) => method !== 'card' )
-			.sort();
+			.sort( ( a, b ) => a.localeCompare( b ) );
 		const otherPaymentMethodIcons = otherPaymentMethods.map( ( method ) => {
 			return {
 				type: method,
