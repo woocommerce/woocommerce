@@ -237,6 +237,7 @@
 		"stylelint": "^16.8.2",
 		"stylelint-scss": "^6.4.0",
 		"typescript": "5.7.x",
+		"unzipper": "^0.12.3",
 		"utility-types": "3.10.0",
 		"webpack": "5.97.x",
 		"webpack-bundle-analyzer": "4.9.x",

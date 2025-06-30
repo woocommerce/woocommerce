@@ -4135,6 +4135,9 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.2
+      unzipper:
+        specifier: ^0.12.3
+        version: 0.12.3
       utility-types:
         specifier: 3.10.0
         version: 3.10.0
@@ -14458,6 +14461,9 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
+  duplexer2@0.1.4:
+    resolution: {integrity: sha512-asLFVfWWtJ90ZyOUHMqk7/S2w2guQKxUI2itj3d92ADHhxUSbCMGi1f1cBcJ7xM1To+pE/Khbwo1yuNbMEPKeA==}
+
   duplexer3@0.1.5:
     resolution: {integrity: sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA==}
 
@@ -23527,6 +23533,9 @@ packages:
   unzip-response@2.0.1:
     resolution: {integrity: sha512-N0XH6lqDtFH84JxptQoZYmloF4nzrQqqrAymNj+/gW60AO2AZgOcf4O/nUXJcYfyQkqvMo9lSupBZmmgvuVXlw==}
     engines: {node: '>=4'}
+
+  unzipper@0.12.3:
+    resolution: {integrity: sha512-PZ8hTS+AqcGxsaQntl3IRBw65QrBI6lxzqDEL7IAo/XCEqRTKGfOX56Vea5TH9SZczRVxuzk1re04z/YjuYCJA==}
 
   upath@1.2.0:
     resolution: {integrity: sha512-aZwGpamFO61g3OlfT7OQCHqhGnW43ieH9WZeP7QxN/G/jS4jfqUkZxoryvJgVPEcrl5NL/ggHsSmLMHuH64Lhg==}
@@ -41930,6 +41939,10 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
+  duplexer2@0.1.4:
+    dependencies:
+      readable-stream: 2.3.8
+
   duplexer3@0.1.5:
     optional: true
 
@@ -54878,6 +54891,14 @@ snapshots:
 
   unzip-response@2.0.1:
     optional: true
+
+  unzipper@0.12.3:
+    dependencies:
+      bluebird: 3.7.2
+      duplexer2: 0.1.4
+      fs-extra: 11.2.0
+      graceful-fs: 4.2.11
+      node-int64: 0.4.0
 
   upath@1.2.0:
     optional: true
