@@ -1,0 +1,29 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"plugins": [ "woocommerce" ],
+	"steps": [
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/wordpress/blueprints/trunk/blueprints/stylish-press/woo-products.wxr"
+			}
+		},
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/wordpress/blueprints/trunk/blueprints/stylish-press/site-content.wxr"
+			}
+		},
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"woocommerce_onboarding_profile": {
+					"complete": true,
+					"skipped": true
+				}
+			}
+		}
+	]
+}
