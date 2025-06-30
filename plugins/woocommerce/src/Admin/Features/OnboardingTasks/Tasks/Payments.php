@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Gateway_BACS;
@@ -232,8 +231,21 @@ class Payments extends Task {
 			return in_array( $country_code, $supported_countries, true );
 		}
 
-		// WooPayments is not installed and active, use core's list of supported countries.
-		$supported_countries = DefaultPaymentGateways::get_wcpay_countries();
+		// WooPayments is not installed and active, get the list of countries where it is suggested.
+		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
+			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
+
+			$supported_countries = $settings_payments_service->get_payment_extension_suggestion_countries( PaymentsExtensionSuggestions::WOOPAYMENTS );
+		} catch ( \Throwable $e ) {
+			// In case of any error, use an empty array.
+			$supported_countries = array();
+		}
+
 		return in_array( $country_code, $supported_countries, true );
 	}
 
