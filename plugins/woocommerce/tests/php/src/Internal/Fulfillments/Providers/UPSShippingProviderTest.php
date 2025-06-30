@@ -33,8 +33,8 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 			array( '1Z12345E020527168', 'US', 'DE', true, 100 ),
 
 			// SurePost format (95).
-			array( '9212345678901234567890', 'US', 'US', true, 95 ),
-			array( '9212345678901234567890', 'CA', 'CA', true, 95 ),
+			array( '9274345678901234567890', 'US', 'US', true, 95 ),
+			array( '9274345678901234567890', 'CA', 'CA', true, 95 ),
 
 			// InfoNotice format (85).
 			array( 'J1234567890', 'US', 'US', true, 85 ),
@@ -132,7 +132,7 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function test_surepost_format(): void {
 		$provider = new UPSShippingProvider();
-		$result   = $provider->try_parse_tracking_number( '9212345678901234567890', 'US', 'US' );
+		$result   = $provider->try_parse_tracking_number( '9274345678901234567890', 'US', 'US' );
 
 		$this->assertNotNull( $result );
 		$this->assertEquals( 95, $result['ambiguity_score'] );
