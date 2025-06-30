@@ -3,6 +3,8 @@
  * Controller Tests.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
@@ -87,8 +89,8 @@ class CartApplyCoupon extends ControllerTestCase {
 		wc()->cart->remove_coupons();
 
 		$fixtures = new FixtureData();
-		
-		// Create additional coupons like in the e2e test
+
+		// Create additional coupons like in the e2e test.
 		$coupon_fixed = $fixtures->get_coupon(
 			array(
 				'code'          => '5fixedcheckout',
@@ -96,7 +98,7 @@ class CartApplyCoupon extends ControllerTestCase {
 				'amount'        => 5,
 			)
 		);
-		
+
 		$coupon_percent = $fixtures->get_coupon(
 			array(
 				'code'          => '50percoffcheckout',
@@ -104,7 +106,7 @@ class CartApplyCoupon extends ControllerTestCase {
 				'amount'        => 50,
 			)
 		);
-		
+
 		$coupon_fixed_product = $fixtures->get_coupon(
 			array(
 				'code'          => '10fixedproductcheckout',
@@ -113,56 +115,59 @@ class CartApplyCoupon extends ControllerTestCase {
 			)
 		);
 
-		// Apply first coupon (fixed cart)
+		// Apply first coupon (fixed cart).
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params( array( 'code' => $coupon_fixed->get_code() ) );
-		
+
 		$this->assertAPIResponse(
 			$request,
 			200,
 			array(
 				'totals' => array(
-					'total_price' => '5000', // $55 - $5 = $50
+					'total_price' => '5000', // $55 - $5 = $50.
 				),
 			)
 		);
 
-		// Apply second coupon (percent)
+		// Apply second coupon (percent).
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params( array( 'code' => $coupon_percent->get_code() ) );
-		
+
 		$this->assertAPIResponse(
 			$request,
 			200,
 			array(
 				'totals' => array(
 					// After 50% off: ($55 - $5) * 0.5 = $25 - but percent is calculated on original price
-					// So: $55 - $5 - ($55 * 0.5) = $55 - $5 - $27.50 = $22.50
+					// So: $55 - $5 - ($55 * 0.5) = $55 - $5 - $27.50 = $22.50.
 					'total_price' => '2250',
 				),
 			)
 		);
 
-		// Apply third coupon (fixed product)
+		// Apply third coupon (fixed product).
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params( array( 'code' => $coupon_fixed_product->get_code() ) );
-		
+
 		$this->assertAPIResponse(
 			$request,
 			200,
 			array(
-				'totals' => array(
-					// After fixed product discount: $22.50 - $10 = $12.50
+				'totals'  => array(
+					// After fixed product discount: $22.50 - $10 = $12.50.
 					'total_price' => '1250',
 				),
-				'coupons' => function( $coupons ) use ( $coupon_fixed, $coupon_percent, $coupon_fixed_product ) {
+				'coupons' => function ( $coupons ) use ( $coupon_fixed, $coupon_percent, $coupon_fixed_product ) {
 					$this->assertCount( 3, $coupons );
-					$coupon_codes = array_map( function( $coupon ) {
-						return is_object( $coupon ) ? $coupon->code : $coupon['code'];
-					}, $coupons );
+					$coupon_codes = array_map(
+						function ( $coupon ) {
+							return is_object( $coupon ) ? $coupon->code : $coupon['code'];
+						},
+						$coupons
+					);
 					$this->assertContains( $coupon_fixed->get_code(), $coupon_codes );
 					$this->assertContains( $coupon_percent->get_code(), $coupon_codes );
 					$this->assertContains( $coupon_fixed_product->get_code(), $coupon_codes );
@@ -178,7 +183,7 @@ class CartApplyCoupon extends ControllerTestCase {
 	public function test_prevent_duplicate_coupon() {
 		wc()->cart->remove_coupons();
 
-		// Apply coupon first time
+		// Apply coupon first time.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
@@ -190,7 +195,7 @@ class CartApplyCoupon extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Try to apply same coupon again
+		// Try to apply same coupon again.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
@@ -214,21 +219,21 @@ class CartApplyCoupon extends ControllerTestCase {
 		wc()->cart->remove_coupons();
 
 		$fixtures = new FixtureData();
-		
-		// Create a coupon with usage limit
+
+		// Create a coupon with usage limit.
 		$limited_coupon = $fixtures->get_coupon(
 			array(
-				'code'         => '10fixedcheckoutlimited',
+				'code'          => '10fixedcheckoutlimited',
 				'discount_type' => 'fixed_cart',
-				'amount'       => 10,
-				'usage_limit'  => 1,
+				'amount'        => 10,
+				'usage_limit'   => 1,
 			)
 		);
-		
-		// Manually increment usage count to simulate it being used
+
+		// Manually increment usage count to simulate it being used.
 		$limited_coupon->increase_usage_count();
 
-		// Try to apply the limited coupon
+		// Try to apply the limited coupon.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
@@ -251,7 +256,7 @@ class CartApplyCoupon extends ControllerTestCase {
 	public function test_apply_coupon_when_disabled() {
 		wc()->cart->remove_coupons();
 
-		// Disable coupons
+		// Disable coupons.
 		update_option( 'woocommerce_enable_coupons', 'no' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
@@ -268,7 +273,7 @@ class CartApplyCoupon extends ControllerTestCase {
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_coupon_disabled', $data['code'] );
 
-		// Re-enable coupons for other tests
+		// Re-enable coupons for other tests.
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 	}
 
@@ -297,9 +302,9 @@ class CartApplyCoupon extends ControllerTestCase {
 	 * Test schema retrieval.
 	 */
 	public function test_get_item_schema() {
-		$request = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/cart/apply-coupon' );
+		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/cart/apply-coupon' );
 		$response = rest_get_server()->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'schema', $data );
