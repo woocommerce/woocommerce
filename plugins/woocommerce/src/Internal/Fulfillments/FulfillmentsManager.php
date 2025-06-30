@@ -140,6 +140,20 @@ class FulfillmentsManager {
 	 * @return array An array containing the provider as key, and the parsing results.
 	 */
 	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): array {
+		// Validate the tracking number format and length.
+		if ( ! is_string( $tracking_number ) || empty( $tracking_number ) || strlen( $tracking_number ) > 50 ) {
+			$tracking_number = is_string( $tracking_number ) && ! empty( $tracking_number ) ? substr( $tracking_number, 0, 50 ) : '';
+			return array(
+				'tracking_number'   => $tracking_number,
+				'shipping_provider' => '',
+				'tracking_url'      => '',
+			);
+		}
+
+		// Normalize the tracking number to uppercase.
+		$tracking_number = strtoupper( $tracking_number );
+		$tracking_number = preg_replace( '/[^A-Z0-9]/', '', $tracking_number ); // Remove non-alphanumeric characters.
+
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
@@ -181,9 +195,11 @@ class FulfillmentsManager {
 				'shipping_provider' => $key,
 				'tracking_url'      => $result['url'] ?? '',
 			);
-		} else {
+		} elseif ( 1 < count( $results ) ) {
 			// If multiple providers could parse the tracking number, find the one with the highest ambiguity score.
-			$results = $this->get_best_parsing_result( $results, $tracking_number );
+			$possibilities            = $results;
+			$results                  = $this->get_best_parsing_result( $results, $tracking_number );
+			$results['possibilities'] = $possibilities; // Include all possibilities for reference.
 		}
 
 		return $results;

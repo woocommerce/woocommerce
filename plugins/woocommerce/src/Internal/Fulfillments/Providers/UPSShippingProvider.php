@@ -121,7 +121,7 @@ class UPSShippingProvider extends AbstractShippingProvider {
 		$is_t_format        = preg_match( '/^T\d{10}$/', $tracking_number );
 		$is_h_format        = preg_match( '/^H\d{10}$/', $tracking_number );
 		$is_9x_format       = preg_match( '/^9\d{21,34}$/', $tracking_number );
-		$is_surepost_format = preg_match( '/^92\d{20}$/', $tracking_number );
+		$is_surepost_format = preg_match( '/^9274\d{18}$/', $tracking_number );
 		$is_9_digit         = preg_match( '/^\d{9}$/', $tracking_number );
 		$is_10_digit        = preg_match( '/^\d{10}$/', $tracking_number );
 		$is_12_digit        = preg_match( '/^\d{12}$/', $tracking_number );
