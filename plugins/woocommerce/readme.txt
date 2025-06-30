@@ -365,6 +365,20 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Update MercadoPago SVG icon for better visual consistency in WooCommerce Payments onboarding [#58669](https://github.com/woocommerce/woocommerce/pull/58669)
 * Enhancement - [Experimental] Blockified Add to Cart with Option: Improved layout of template part [#57979](https://github.com/woocommerce/woocommerce/pull/57979)
 * Enhancement - [Experimental] Blockified Add to Cart with Options block: Add product selector label block [#57927](https://github.com/woocommerce/woocommerce/pull/57927)
-
+* Fix - Allow non-numeric characters in bank account numbers for the Direct bank transfer payment method to support international banking formats. [#59218](https://github.com/woocommerce/woocommerce/pull/59218)
+* Fix - Ensure discount meta slot fill shows when no coupons are applied to the cart. [#59221](https://github.com/woocommerce/woocommerce/pull/59221)
+* Fix - Fix a bug where the offline payment gateways page was not updated when a gateway is enabled [#59103](https://github.com/woocommerce/woocommerce/pull/59103)
+* Fix - Fix desktop structure of the Order summary title [#59081](https://github.com/woocommerce/woocommerce/pull/59081)
+* Fix - Made coupon code discount total lookup case insensitive [#58918](https://github.com/woocommerce/woocommerce/pull/58918)
+* Fix - Product Gallery: fix large image that may be displaying single image all over for variable products [#59157](https://github.com/woocommerce/woocommerce/pull/59157)
+* Add - Adds a preload call when installing WooPayments in LYS.`` [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
+* Update - Improve payment gateway status badge logic for the Payments Settings page. [#59103](https://github.com/woocommerce/woocommerce/pull/59103)
+* Update - Update Product Details block to the new version supporting inner blocks. [#59005](https://github.com/woocommerce/woocommerce/pull/59005)
+* Update - Update the test step title when polling is happening to communicate progress to the merchant [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
+* Update - Update the “Ready to test payments” screen for clarity [#59087](https://github.com/woocommerce/woocommerce/pull/59087)
+* Dev - e2e tests: fix broken test [#59087](https://github.com/woocommerce/woocommerce/pull/59087)
+* Dev - Resolved SCSS load order warnings between Payments Settings and Launch Your Store chunks. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
+* Enhancement - Enhanced styling of NOX In-context sidebar stepper for visual consistency and improved contrast. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
+* Enhancement - Use NOX-specific styles in PMs selection step header instead of global WooCommerce classes. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
