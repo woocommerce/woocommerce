@@ -32,7 +32,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 		$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
@@ -214,6 +214,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'variation_id' => $variation['variation_id'],
 							'attributes'   => $variation['attributes'],
 							'price_html'   => $variation['price_html'],
+							'is_in_stock'  => $variation['is_in_stock'],
 						);
 					},
 					$available_variations
