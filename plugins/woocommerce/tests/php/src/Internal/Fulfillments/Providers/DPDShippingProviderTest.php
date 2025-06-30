@@ -381,8 +381,8 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertSame( 75, $result_no_boost['ambiguity_score'] );
 		$this->assertGreaterThan( $result_no_boost['ambiguity_score'], $result_boost['ambiguity_score'] );
 
-		// Destination boost should give score of 80 for DE origin (75+5).
-		$this->assertSame( 80, $result_boost['ambiguity_score'] );
+		// Destination boost should give score of 95 for DE origin (75+5+15).
+		$this->assertSame( 95, $result_boost['ambiguity_score'] );
 	}
 
 	/**
@@ -414,6 +414,6 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		// Test German patterns.
 		$de_14_digits = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'FR' );
 		$this->assertIsArray( $de_14_digits );
-		$this->assertSame( 80, $de_14_digits['ambiguity_score'] ); // DE with FR destination gets boost (75+5).
+		$this->assertSame( 95, $de_14_digits['ambiguity_score'] ); // DE with FR destination gets boost (75+5+15).
 	}
 }

@@ -336,9 +336,15 @@ class DPDShippingProvider extends AbstractShippingProvider {
 		if ( $this->validate_country_pattern( $normalized, $shipping_from ) ) {
 			$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'];
 
-			// Boost confidence for intra-DPD shipments.
+			// Boost confidence for intra-European shipments.
 			if ( in_array( $shipping_to, $this->get_shipping_to_countries(), true ) ) {
 				$confidence = min( 98, $confidence + 5 );
+			}
+
+			// Extra boost for major DPD markets shipping within Europe.
+			if ( in_array( $shipping_from, array( 'DE', 'FR', 'NL', 'BE' ), true ) &&
+			in_array( $shipping_to, $this->get_shipping_to_countries(), true ) ) {
+				$confidence = min( 98, $confidence + 15 );
 			}
 
 			return array(

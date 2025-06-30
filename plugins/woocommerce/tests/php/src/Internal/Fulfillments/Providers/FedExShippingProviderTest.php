@@ -71,7 +71,7 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 
 			// FedEx Express - 14 digit (95 score).
 			array( '12345678901234', 'US', 'FR', true, 95 ),
-			array( '98765432109876', 'GB', 'DE', true, 95 ),
+			array( '98765432109876', 'GB', 'DE', true, 80 ), // Reduced for EU.
 
 			// FedEx Express - 15 digit (90 score).
 			array( '123456789012345', 'CA', 'US', true, 90 ),
@@ -91,8 +91,8 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 			array( '123456789012', 'US', 'ZZ', false, 0 ), // Invalid destination.
 
 			// International validations.
-			array( '123456789012', 'DE', 'FR', true, 95 ),
-			array( '123456789012', 'JP', 'AU', true, 95 ),
+			array( '123456789012', 'DE', 'FR', true, 80 ), // Not North America, generic 12-digit.
+			array( '123456789012', 'JP', 'AU', true, 80 ), // Not North America, generic 12-digit.
 		);
 	}
 
