@@ -168,7 +168,11 @@ ${ blockjson.description || '' }
 
 -	**Name:** ${ blockjson.name }
 -	**Category:** ${ blockjson.category || '' }
--   **Ancestor:** ${ blockjson.ancestor || '' }
+-   **Ancestor:** ${
+		( Array.isArray( blockjson.ancestor ) &&
+			blockjson.ancestor.join( ', ' ) ) ||
+		''
+	}
 -   **Parent:** ${ blockjson.parent || '' }
 -	**Supports:** ${ supportsList && supportsList.sort().join( ', ' ) }
 -	**Attributes:** ${ attributes && attributes.sort().join( ', ' ) }

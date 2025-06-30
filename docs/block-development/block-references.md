@@ -26,7 +26,7 @@ Display a call to action button which either adds the product to the cart, or li
 
 -	**Name:** woocommerce/product-button
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,core/post-template,woocommerce/product-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, core/post-template, woocommerce/product-template
 -   **Parent:** 
 -	**Supports:** align (full, wide), color (background, text, ~~link~~), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
@@ -37,7 +37,7 @@ Display the main product image.
 
 -	**Name:** woocommerce/product-image
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** dimensions (aspectRatio), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~html~~
 -	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
@@ -48,7 +48,7 @@ Display the price of a product.
 
 -	**Name:** woocommerce/product-price
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, text, ~~link~~), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
@@ -81,7 +81,7 @@ Display the average rating of a product.
 
 -	**Name:** woocommerce/product-rating
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (text, ~~background~~, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize)
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
@@ -125,7 +125,7 @@ Displays an on-sale badge if the product is on-sale.
 
 -	**Name:** woocommerce/product-sale-badge
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/single-product,woocommerce/product-template,core/post-template,woocommerce/product-gallery
+-   **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 -   **Parent:** 
 -	**Supports:** align, color (background, gradients, text, ~~link~~), interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId
@@ -136,7 +136,7 @@ Displays the SKU of a product.
 
 -	**Name:** woocommerce/product-sku
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/product-meta,woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/product-meta, woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendantOfAllProducts, prefix, productId, showProductSelector, suffix
@@ -147,7 +147,7 @@ Let shoppers know when products are out of stock or on backorder. This block is 
 
 -	**Name:** woocommerce/product-stock-indicator
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop
@@ -158,7 +158,7 @@ Display a short description about a product.
 
 -	**Name:** woocommerce/product-summary
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight)
 -	**Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
@@ -1302,7 +1302,7 @@ Displays the description of the product.
 
 -	**Name:** woocommerce/product-description
 -	**Category:** woocommerce
--   **Ancestor:** woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradients, heading, link, text), dimensions (minHeight), interactivity (clientNavigation), layout, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** 
@@ -1368,7 +1368,7 @@ Display a list of filter options.
 
 -	**Name:** woocommerce/product-filter-checkbox-list
 -	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-filter-attribute,woocommerce/product-filter-status,woocommerce/product-filter-rating
+-   **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status, woocommerce/product-filter-rating
 -   **Parent:** 
 -	**Supports:** interactivity
 -	**Attributes:** customLabelElement, customOptionElement, customOptionElementBorder, customOptionElementSelected, labelElement, optionElement, optionElementBorder, optionElementSelected
@@ -1379,7 +1379,7 @@ Display filter options as chips.
 
 -	**Name:** woocommerce/product-filter-chips
 -	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-filter-attribute,woocommerce/product-filter-status
+-   **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status
 -   **Parent:** 
 -	**Supports:** interactivity
 -	**Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
@@ -1665,7 +1665,7 @@ Display product weight, dimensions, and attributes.
 
 -	**Name:** woocommerce/product-specifications
 -	**Category:** woocommerce
--   **Ancestor:** woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** align (full, wide), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** showAttributes, showDimensions, showWeight
