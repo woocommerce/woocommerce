@@ -28,7 +28,7 @@ export function ButtonWithDropdownMenu( {
 	},
 	className,
 	renderMenu,
-	onToggle = () => {},
+	onToggle,
 	...props
 }: ButtonWithDropdownMenuProps ) {
 	return (
@@ -60,7 +60,6 @@ export function ButtonWithDropdownMenu( {
 					label={ dropdownButtonLabel }
 					popoverProps={ {
 						placement,
-						// @ts-expect-error no exported member.
 						position,
 						offset,
 					} }

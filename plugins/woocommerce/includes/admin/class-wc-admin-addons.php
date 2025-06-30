@@ -26,8 +26,8 @@ class WC_Admin_Addons {
 	 */
 	public static function fetch_featured() {
 		$transient_name = 'wc_addons_featured';
-		// Important: WCCOM Extensions API v3.0 is used.
-		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/featured';
+		// Important: WCCOM Extensions API v4.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/4.0/featured';
 		$locale   = get_user_locale();
 		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
@@ -39,49 +39,32 @@ class WC_Admin_Addons {
 			);
 			$raw_featured  = self::fetch( $url, $fetch_options );
 
-			if ( is_wp_error( $raw_featured ) ) {
-				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
+			$featured = self::process_api_response( $raw_featured, 'featured' );
 
-				$message = self::is_ssl_error( $raw_featured->get_error_message() )
-					? __( 'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.', 'woocommerce' )
-					: $raw_featured->get_error_message();
-
-				return new WP_Error( 'wc-addons-connection-error', $message );
-			}
-
-			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
-			if ( 200 !== $response_code ) {
-				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-
-				/* translators: %d: HTTP error code. */
-				$message = sprintf(
-					esc_html(
-						/* translators: Error code  */
-						__(
-							'Our request to the featured API got error code %d.',
-							'woocommerce'
-						)
-					),
-					$response_code
-				);
-
-				return new WP_Error( 'wc-addons-connection-error', $message );
-			}
-
-			$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
-			if ( empty( $featured ) || ! is_array( $featured ) ) {
-				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
-
-				return new WP_Error( 'wc-addons-connection-error', $message );
-			}
-
-			if ( $featured ) {
+			if ( ! is_wp_error( $featured ) && $featured ) {
 				self::set_locale_data_in_transient( $transient_name, $featured, $locale, DAY_IN_SECONDS );
 			}
 		}
 
 		return $featured;
+	}
+
+	/**
+	 * Fetch markup and other info for the preview of a product.
+	 *
+	 * @param int $product_id The ID of the product to fetch preview for.
+	 * @return array|WP_Error Preview data or error object.
+	 */
+	public static function fetch_product_preview( int $product_id ) {
+		$url = 'https://woocommerce.com/wp-json/wccom-extensions/1.0/product-previews?product_id=' . $product_id;
+
+		$fetch_options = array(
+			'locale' => true,
+		);
+
+		$raw_preview = self::fetch( $url, $fetch_options );
+
+		return self::process_api_response( $raw_preview, 'product preview', true );
 	}
 
 	/**
@@ -198,7 +181,13 @@ class WC_Admin_Addons {
 		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
 
 		if ( 'helper' === $section ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) );
+			$url = admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' );
+
+			if ( isset( $_GET['connect'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$url .= '&connect';
+			}
+
+			wp_safe_redirect( $url );
 			exit();
 		}
 
@@ -312,6 +301,77 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Process API response from WooCommerce.com endpoints.
+	 *
+	 * @param array|WP_Error $response    The response from the API request.
+	 * @param string         $context     Context for error messages (e.g. 'featured', 'product-preview').
+	 * @param bool           $associative Whether to decode the JSON as an associative array.
+	 *
+	 * @return array|WP_Error Processed API data or WP_Error on failure.
+	 */
+	private static function process_api_response( $response, $context = 'api', $associative = false ) {
+		if ( is_wp_error( $response ) ) {
+			/**
+			 * Hook fired when there is a connection error with WooCommerce.com.
+			 *
+			 * @since 6.1.0
+			 * @param string $error_message The error message.
+			 */
+			do_action( 'woocommerce_page_wc_addons_connection_error', $response->get_error_message() );
+
+			$message = self::is_ssl_error( $response->get_error_message() )
+				? __(
+					'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.',
+					'woocommerce'
+				)
+				: $response->get_error_message();
+
+			return new WP_Error( 'wc-addons-connection-error', $message );
+		}
+
+		$response_code = (int) wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $response_code ) {
+			/**
+			 * Hook fired when there is a connection error with WooCommerce.com.
+			 *
+			 * @since 6.1.0
+			 * @param int $response_code The HTTP response code.
+			 */
+			do_action( 'woocommerce_page_wc_addons_connection_error', $response_code );
+
+			$message = sprintf(
+				/* translators: 1: Context (e.g. 'featured', 'product-preview') 2: HTTP error code */
+				__( 'Our request to the %1$s API got error code %2$d.', 'woocommerce' ),
+				$context,
+				$response_code
+			);
+
+			return new WP_Error( 'wc-addons-connection-error', $message );
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $response ), $associative );
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			/**
+			 * Hook fired when there is a connection error with WooCommerce.com.
+			 *
+			 * @since 6.1.0
+			 * @param string $error_message The error message.
+			 */
+			do_action( 'woocommerce_page_wc_addons_connection_error', 'Empty or malformed response' );
+
+			$message = sprintf(
+				/* translators: %s: Context (e.g. 'featured', 'product-preview') */
+				__( 'Our request to the %s API got a malformed response.', 'woocommerce' ),
+				$context
+			);
+
+			return new WP_Error( 'wc-addons-connection-error', $message );
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Make wp_safe_remote_get request to WooCommerce.com endpoint.
 	 * Optionally pass user auth token, locale or country.
 	 *
@@ -345,7 +405,9 @@ class WC_Admin_Addons {
 			}
 		}
 
-		$query_string = ! empty( $parameters ) ? '?' . http_build_query( $parameters ) : '';
+		// Check if URL already has query parameters.
+		$connector    = strpos( $url, '?' ) !== false ? '&' : '?';
+		$query_string = ! empty( $parameters ) ? $connector . http_build_query( $parameters ) : '';
 
 		return wp_safe_remote_get(
 			$url . $query_string,

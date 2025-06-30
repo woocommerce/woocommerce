@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { Button, Fill } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { TABS_SLOT_NAME } from '../../../components/tabs/constants';
-import { TabsFillProps } from '../../../components/tabs';
 
 export const DEFAULT_TAB_ORDER = 100;
 
@@ -33,7 +32,7 @@ export function TabButton( {
 	selected?: boolean;
 	order?: number;
 } ) {
-	const classes = classnames(
+	const classes = clsx(
 		'wp-block-woocommerce-product-tab__button',
 		className,
 		{ 'is-selected': selected }
@@ -41,7 +40,7 @@ export function TabButton( {
 
 	return (
 		<Fill name={ TABS_SLOT_NAME }>
-			{ ( fillProps: TabsFillProps ) => {
+			{ ( fillProps ) => {
 				const { onClick } = fillProps;
 				return (
 					<OrderedWrapper order={ order }>

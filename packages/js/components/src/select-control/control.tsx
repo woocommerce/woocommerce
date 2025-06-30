@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { Icon, search } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isArray } from 'lodash';
 import {
 	RefObject,
@@ -29,7 +29,7 @@ type Props = {
 	/**
 	 * Help text to be appended beneath the input.
 	 */
-	help?: string | JSX.Element;
+	help?: React.ReactNode;
 	/**
 	 * Render tags inside input, otherwise render below input.
 	 */
@@ -305,7 +305,11 @@ class Control extends Component< Props, State > {
 			selected,
 		} = this.props;
 		const selectedValue =
-			isArray( selected ) && selected.length ? selected[ 0 ].label : '';
+			isArray( selected ) &&
+			selected.length &&
+			typeof selected[ 0 ].label === 'string'
+				? selected[ 0 ].label
+				: '';
 
 		// Show the selected value for simple select dropdowns.
 		if ( ! multiple && ! isFocused && ! inlineTags ) {
@@ -344,7 +348,7 @@ class Control extends Component< Props, State > {
 			// for the benefit of sighted users.
 			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 			<div
-				className={ classnames(
+				className={ clsx(
 					'components-base-control',
 					'woocommerce-select-control__control',
 					className,

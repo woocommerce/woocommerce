@@ -1,8 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use WP_Query;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -178,9 +182,11 @@ class ProductQuery extends AbstractBlock {
 		if ( self::is_woocommerce_variation( $parsed_block ) ) {
 			// Indicate to interactivity powered components that this block is on the page
 			// and needs refresh to update data.
-			$this->asset_data_registry->add(
-				'needsRefreshForInteractivityAPI',
-				true
+			wp_interactivity_config(
+				'woocommerce',
+				[
+					'needsRefreshForInteractivityAPI' => true,
+				]
 			);
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'hasFilterableProducts', true );
@@ -189,7 +195,7 @@ class ProductQuery extends AbstractBlock {
 				'query_loop_block_query_vars',
 				array( $this, 'build_query' ),
 				10,
-				1
+				2
 			);
 		}
 
@@ -239,11 +245,13 @@ class ProductQuery extends AbstractBlock {
 	 * Return a custom query based on attributes, filters and global WP_Query.
 	 *
 	 * @param WP_Query $query The WordPress Query.
+	 * @param WP_Block $block The block being rendered.
 	 * @return array
 	 */
-	public function build_query( $query ) {
-		$parsed_block = $this->parsed_block;
-		if ( ! $this->is_woocommerce_variation( $parsed_block ) ) {
+	public function build_query( $query, $block = null ) {
+		$parsed_block                = $this->parsed_block;
+		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
+		if ( ! $this->is_woocommerce_variation( $parsed_block ) || $is_product_collection_block ) {
 			return $query;
 		}
 
@@ -254,7 +262,7 @@ class ProductQuery extends AbstractBlock {
 			'order'          => $query['order'],
 			'offset'         => $query['offset'],
 			'post__in'       => array(),
-			'post_status'    => 'publish',
+			'post_status'    => ProductStatus::PUBLISH,
 			'post_type'      => 'product',
 			'tax_query'      => array(),
 		);
@@ -284,7 +292,7 @@ class ProductQuery extends AbstractBlock {
 	private function merge_queries( ...$queries ) {
 		$merged_query = array_reduce(
 			$queries,
-			function( $acc, $query ) {
+			function ( $acc, $query ) {
 				if ( ! is_array( $query ) ) {
 					return $acc;
 				}
@@ -451,7 +459,7 @@ class ProductQuery extends AbstractBlock {
 		 * @see get_product_visibility_query()
 		 */
 		$diff = array_diff( $stock_status_options, $stock_statii );
-		if ( count( $diff ) === 1 && in_array( 'outofstock', $diff, true ) ) {
+		if ( count( $diff ) === 1 && in_array( ProductStockStatus::OUT_OF_STOCK, $diff, true ) ) {
 			return array();
 		}
 
@@ -479,7 +487,7 @@ class ProductQuery extends AbstractBlock {
 
 		// Hide out of stock products.
 		if ( empty( $stock_query ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+			$product_visibility_not_in[] = $product_visibility_terms[ ProductStockStatus::OUT_OF_STOCK ];
 		}
 
 		return array(
@@ -502,8 +510,8 @@ class ProductQuery extends AbstractBlock {
 	private function get_query_vars_from_filter_blocks() {
 		$attributes_filter_query_args = array_reduce(
 			array_values( $this->get_filter_by_attributes_query_vars() ),
-			function( $acc, $array ) {
-				return array_merge( array_values( $array ), $acc );
+			function ( $acc, $arr ) {
+				return array_merge( array_values( $arr ), $acc );
 			},
 			array()
 		);
@@ -514,7 +522,6 @@ class ProductQuery extends AbstractBlock {
 			'attributes_filter_query_args' => $attributes_filter_query_args,
 			'rating_filter_query_args'     => array( RatingFilter::RATING_QUERY_VAR ),
 		);
-
 	}
 
 	/**
@@ -528,7 +535,7 @@ class ProductQuery extends AbstractBlock {
 
 		return array_reduce(
 			array_values( $query_vars ),
-			function( $acc, $query_vars_filter_block ) {
+			function ( $acc, $query_vars_filter_block ) {
 				return array_merge( $query_vars_filter_block, $acc );
 			},
 			$public_query_vars
@@ -559,7 +566,7 @@ class ProductQuery extends AbstractBlock {
 
 		$this->attributes_filter_query_args = array_reduce(
 			wc_get_attribute_taxonomies(),
-			function( $acc, $attribute ) {
+			function ( $acc, $attribute ) {
 				$acc[ $attribute->attribute_name ] = array(
 					'filter'     => AttributeFilter::FILTER_QUERY_VAR_PREFIX . $attribute->attribute_name,
 					'query_type' => AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute->attribute_name,
@@ -655,7 +662,7 @@ class ProductQuery extends AbstractBlock {
 
 		$queries = array_reduce(
 			$attributes_filter_query_args,
-			function( $acc, $query_args ) {
+			function ( $acc, $query_args ) {
 				$attribute_name       = $query_args['filter'];
 				$attribute_query_type = $query_args['query_type'];
 
@@ -709,7 +716,7 @@ class ProductQuery extends AbstractBlock {
 
 		$filtered_stock_status_values = array_filter(
 			explode( ',', $filter_stock_status_values ),
-			function( $stock_status ) {
+			function ( $stock_status ) {
 				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
 			}
 		);
@@ -822,15 +829,13 @@ class ProductQuery extends AbstractBlock {
 		foreach ( $new as $key => $value ) {
 			if ( is_numeric( $key ) ) {
 				$base[] = $value;
-			} else {
-				if ( is_array( $value ) ) {
-					if ( ! isset( $base[ $key ] ) ) {
-						$base[ $key ] = array();
-					}
-					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
-				} else {
-					$base[ $key ] = $value;
+			} elseif ( is_array( $value ) ) {
+				if ( ! isset( $base[ $key ] ) ) {
+					$base[ $key ] = array();
 				}
+					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
+			} else {
+				$base[ $key ] = $value;
 			}
 		}
 
@@ -895,7 +900,7 @@ class ProductQuery extends AbstractBlock {
 		}
 
 		$rating_terms = array_map(
-			function( $rating ) use ( $product_visibility_terms ) {
+			function ( $rating ) use ( $product_visibility_terms ) {
 				return $product_visibility_terms[ 'rated-' . $rating ];
 			},
 			$parsed_filter_rating_values
@@ -950,7 +955,7 @@ class ProductQuery extends AbstractBlock {
 		$product_taxonomies = array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_visibility', 'product_shipping_class' ) );
 		$result             = array_filter(
 			$tax_query,
-			function( $item ) use ( $product_taxonomies ) {
+			function ( $item ) use ( $product_taxonomies ) {
 				return isset( $item['taxonomy'] ) && in_array( $item['taxonomy'], $product_taxonomies, true );
 			}
 		);

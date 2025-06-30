@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -10,6 +10,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { ALLOW_TRACKING_OPTION_NAME } from '../constants';
+import store from '../store';
 
 interface AdminWindow extends Window {
 	pagenow?: string;
@@ -42,7 +43,7 @@ export const getExitPageData = () => {
  * @return boolean
  */
 const isTrackingAllowed = async () => {
-	const trackingOption = await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+	const trackingOption = await resolveSelect( optionsStore ).getOption(
 		ALLOW_TRACKING_OPTION_NAME
 	);
 
@@ -137,15 +138,7 @@ export const removeCustomerEffortScoreExitPageListener = ( pageId: string ) => {
  *
  * @param {string} pageId page id.
  */
-function getExitPageCESCopy( pageId: string ): {
-	action: string;
-	title: string;
-	firstQuestion: string;
-	secondQuestion: string;
-	noticeLabel?: string;
-	description?: string;
-	icon?: string;
-} | null {
+function getExitPageCESCopy( pageId: string ) {
 	switch ( pageId ) {
 		case 'product_edit_view':
 		case 'editing_new_product':
@@ -305,7 +298,7 @@ export function triggerExitPageCesSurvey() {
 		const copy = getExitPageCESCopy( exitPageItems[ 0 ] );
 
 		if ( copy?.title?.length ) {
-			dispatch( 'wc/customer-effort-score' ).addCesSurvey( {
+			dispatch( store ).addCesSurvey( {
 				...copy,
 				pageNow: window.pagenow,
 				adminPage: window.adminpage,

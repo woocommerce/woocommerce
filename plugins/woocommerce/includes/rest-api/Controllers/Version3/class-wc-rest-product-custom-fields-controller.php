@@ -84,12 +84,8 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 			'%' . $wpdb->esc_like( $search ) . '%'
 		);
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already and $order is a static value.
-		$query = $wpdb->prepare(
-			"$base_query ORDER BY post_metas.meta_key $order LIMIT %d, %d",
-			$offset,
-			$limit
-		);
+		$query  = $base_query;
+		$query .= $wpdb->prepare( " ORDER BY post_metas.meta_key $order LIMIT %d, %d", $offset, $limit ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order is safe.
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already.
 		$total_query = "SELECT COUNT(1) FROM ($base_query) AS total";

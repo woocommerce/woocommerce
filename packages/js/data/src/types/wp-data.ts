@@ -16,7 +16,7 @@ export type WPDataSelectors = {
 export type WPDataActions = {
 	startResolution: ( selector: string, args?: unknown[] ) => void;
 	finishResolution: ( selector: string, args?: unknown[] ) => void;
-	invalidateResolution: ( selector: string ) => void;
+	invalidateResolution: ( selector: string, args?: unknown[] ) => void;
 	invalidateResolutionForStore: ( selector: string ) => void;
 	invalidateResolutionForStoreSelector: ( selector: string ) => void;
 };

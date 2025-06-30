@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Shortcodes
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+
 /**
  * Class WC_Test_Shortcode_Products.
  */
@@ -29,7 +32,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'terms_operator' => 'IN',
 			'tag'            => '',
 			'tag_operator'   => 'IN',
-			'visibility'     => 'visible',
+			'visibility'     => CatalogVisibility::VISIBLE,
 			'class'          => '',
 			'rows'           => '',
 			'page'           => 1,
@@ -59,7 +62,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'terms_operator' => 'IN',
 			'tag'            => '',
 			'tag_operator'   => 'IN',
-			'visibility'     => 'visible',
+			'visibility'     => CatalogVisibility::VISIBLE,
 			'class'          => '',
 			'rows'           => '',
 			'page'           => 1,
@@ -81,7 +84,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -102,7 +105,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected2  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'ID',
@@ -122,7 +125,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected3                 = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -155,7 +158,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected4                = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
@@ -189,7 +192,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected4_id                = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
@@ -223,7 +226,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected5  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'date ID',
@@ -246,7 +249,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected6  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -274,7 +277,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected7  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
@@ -300,7 +303,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected8  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'meta_value_num',
@@ -328,7 +331,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected9  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'meta_value_num',
@@ -356,7 +359,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected10  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'date ID',
@@ -394,7 +397,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected11  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
@@ -431,7 +434,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected11_id  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'title',
@@ -457,12 +460,12 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		// Check for visibility shortcode.
 		$shortcode12 = new WC_Shortcode_Products(
 			array(
-				'visibility' => 'hidden',
+				'visibility' => CatalogVisibility::HIDDEN,
 			)
 		);
 		$expected12  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -485,12 +488,12 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 
 		$shortcode13 = new WC_Shortcode_Products(
 			array(
-				'visibility' => 'catalog',
+				'visibility' => CatalogVisibility::CATALOG,
 			)
 		);
 		$expected13  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -520,12 +523,12 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 
 		$shortcode14 = new WC_Shortcode_Products(
 			array(
-				'visibility' => 'search',
+				'visibility' => CatalogVisibility::SEARCH,
 			)
 		);
 		$expected14  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -562,7 +565,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected15  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -595,7 +598,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 		$expected16  = array(
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ProductStatus::PUBLISH,
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
 			'orderby'             => 'menu_order title',
@@ -649,7 +652,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 
 		$shortcode2 = new WC_Shortcode_Products(
 			array(
-				'visibility' => 'hidden',
+				'visibility' => CatalogVisibility::HIDDEN,
 			)
 		);
 		$this->assertTrue( $shortcode2->set_product_as_visible( false ) );

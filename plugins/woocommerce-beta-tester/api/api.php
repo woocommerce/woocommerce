@@ -66,3 +66,6 @@ require 'remote-spec-validator/class-wca-test-helper-remote-spec-validator.php';
 require 'remote-inbox-notifications/class-wca-test-helper-remote-inbox-notifications.php';
 require 'remote-logging/remote-logging.php';
 require 'tools/wccom-request-errors.php';
+require 'tools/set-wccom-base-url.php';
+require 'tools/reset-launch-your-store.php';
+require 'tools/load-template-version.php';

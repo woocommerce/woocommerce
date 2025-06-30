@@ -10,12 +10,18 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Order item class.
  */
 class WC_Order_Item extends WC_Data implements ArrayAccess {
+	use CogsAwareTrait;
+
 	/**
 	 * Legacy cart item values.
 	 *
@@ -81,6 +87,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
 	 */
 	public function __construct( $item = 0 ) {
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->data['cogs_value'] = null;
+		}
+
 		parent::__construct( $item );
 
 		if ( $item instanceof WC_Order_Item ) {
@@ -89,6 +99,11 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			$this->set_id( $item );
 		} else {
 			$this->set_object_read( true );
+		}
+
+		if ( $this->get_id() && __CLASS__ === get_class( $this ) ) {
+			wc_doing_it_wrong( __METHOD__, 'WC_Order_Item should not be instantiated directly.', '9.9.0' );
+			return;
 		}
 
 		$type             = 'line_item' === $this->get_type() ? 'product' : $this->get_type();
@@ -107,13 +122,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @since 3.2.0
 	 */
 	public function apply_changes() {
-		if ( function_exists( 'array_replace' ) ) {
-			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_replaceFound
-		} else { // PHP 5.2 compatibility.
-			foreach ( $this->changes as $key => $change ) {
-				$this->data[ $key ] = $change;
-			}
-		}
+		$this->data    = array_replace( $this->data, $this->changes );
 		$this->changes = array();
 	}
 
@@ -167,7 +176,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return string
 	 */
 	public function get_tax_status() {
-		return 'taxable';
+		return ProductTaxStatus::TAXABLE;
 	}
 
 	/**
@@ -239,7 +248,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
-		if ( '0' !== $this->get_tax_class() && 'taxable' === $this->get_tax_status() && wc_tax_enabled() ) {
+		if ( '0' !== $this->get_tax_class() && ProductTaxStatus::TAXABLE === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
 			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
 			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
@@ -314,7 +323,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
 				continue;
 			}
 
@@ -443,5 +452,183 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Indicates if the current order item has an associated Cost of Goods Sold value.
+	 *
+	 * Derived classes representing line items that have a COGS value
+	 * should override this method to return "true" and also the 'calculate_cogs_value_core' method.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return bool True if this line item has an associated Cost of Goods Sold value.
+	 */
+	public function has_cogs(): bool {
+		return false;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value and set it as the actual value for this line item.
+	 *
+	 * @since 9.5.0
+	 *
+	 * @return bool True if the value has been calculated successfully (and set as the actual value), false otherwise (and the value hasn't changed).
+	 * @throws Exception The class doesn't implement its own version of calculate_cogs_value_core. Derived classes are expected to override that method when has_cogs returns true.
+	 */
+	public function calculate_cogs_value(): bool {
+		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return false;
+		}
+
+		$value = $this->calculate_cogs_value_core();
+
+		/**
+		 * Filter to modify the Cost of Goods Sold value that gets calculated for a given order item.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $value The value originally calculated, null if it was not possible to calculate it.
+		 * @param WC_Order_Item $line_item The order item for which the value is calculated.
+		 */
+		$value = apply_filters( 'woocommerce_calculated_order_item_cogs_value', $value, $this );
+
+		if ( is_null( $value ) ) {
+			return false;
+		}
+
+		$this->set_cogs_value( (float) $value );
+		return true;
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
+
+	/**
+	 * Core method to calculate the Cost of Goods Sold value for this line item:
+	 * it doesn't check if COGS is enabled at class or system level, doesn't fire hooks, and doesn't set the value as the current one for the line item.
+	 *
+	 * @return float|null The calculated value, or null if the value can't be calculated for some reason.
+	 * @throws Exception The class doesn't implement its own version of this method. Derived classes are expected to override this method when has_cogs returns true.
+	 */
+	protected function calculate_cogs_value_core(): ?float {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		throw new Exception(
+			sprintf(
+				// translators: %1$s = class and method name.
+				__( 'Method %1$s is not implemented. Classes overriding has_cogs must override this method too.', 'woocommerce' ),
+				__METHOD__
+			)
+		);
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+
+	/**
+	 * Get the value of the Cost of Goods Sold for this order item.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will always return zero.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return float The current value for this order item.
+	 */
+	public function get_cogs_value( $context = 'view' ): float {
+		return (float) ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ? $this->get_prop( 'cogs_value', $context ) : 0 );
+	}
+
+	/**
+	 * Set the value of the Cost of Goods Sold for this order item.
+	 * Usually you'll want to use calculate_cogs_value instead.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
+	 *
+	 * @param float $value The value to set for this order item.
+	 *
+	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_value.
+	 */
+	public function set_cogs_value( float $value ): void {
+		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
+			$this->set_prop( 'cogs_value', $value );
+		}
+	}
+
+	/**
+	 * Returns the Cost of Goods Sold value in html format.
+	 *
+	 * @return string
+	 */
+	public function get_cogs_value_html(): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) ) {
+			return '';
+		}
+
+		if ( ! $this->has_cogs() ) {
+			/**
+			 * Filter to customize how a non-existing Cost of Goods Sold value for an order item (whose has_cogs method returns false) gets rendered to HTML.
+			 *
+			 * @param string $html The rendered HTML.
+			 * @param WC_Order_Item $product The order item for which the "there's no cost" indication is rendered.
+			 *
+			 * @since 9.9.0
+			 */
+			return apply_filters( 'woocommerce_order_item_no_cogs_html', "<span class='na'>&ndash;</span>", $this );
+		}
+
+		$cogs_value      = $this->get_cogs_value();
+		$cogs_value_html = wc_price( $cogs_value, array( 'currency' => $this->get_order()->get_currency() ) );
+
+		/**
+		 * Filter to customize how the Cost of Goods Sold value for an order item gets rendered to HTML.
+		 *
+		 * @param string $html The rendered HTML.
+		 * @param float $value The cost value that is being rendered.
+		 * @param WC_Order_Item $product The order item.
+		 *
+		 * @since 9.9.0
+		 */
+		return apply_filters( 'woocommerce_order_item_cogs_html', $cogs_value_html, $cogs_value, $this );
+	}
+
+	/**
+	 * Get the "cost per unit" tooltip text for the "Cost" (of Goods Sold) column in the order details page.
+	 *
+	 * @return string "Cost per unit: (formatted cost with currency)" text.
+	 */
+	public function get_cogs_value_per_unit_tooltip_text(): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		$tooltip_text            = '';
+		$quantity                = $this->get_quantity();
+		$cogs_value              = $this->get_cogs_value();
+		$cost_per_item           = 0;
+		$formatted_cost_per_item = '';
+
+		if ( $quantity > 0 && $cogs_value > 0 ) {
+			$cost_per_item           = $cogs_value / $quantity;
+			$formatted_cost_per_item = wc_price(
+				$cost_per_item,
+				array(
+					'currency' => $this->get_order()->get_currency(),
+					'in_span'  => false,
+				)
+			);
+			/* translators: %s = formatted cost with currency symbol. */
+			$tooltip_text = sprintf( __( 'Cost per unit: %s', 'woocommerce' ), $formatted_cost_per_item );
+		}
+
+		/**
+		 * Filter to customize the text of the "Cost per unit" tooltip for the "Cost" (of Goods Sold) column in the order details page.
+		 * If an empty string is returned then the tooltip won't be rendered.
+		 *
+		 * @param string $tooltip_text Original tooltip text, may be an empty string.
+		 * @param float $cost_per_item The numerical value of the unit Cost of Goods Sold of the product.
+		 * @param string $formatted_cost_per_item The unit Cost of Goods Sold of the product already formatted for display.
+		 * @param WC_Order_Item $order_item The order item this filter is being fired for.
+		 *
+		 * @since 9.9.0
+		 */
+		return apply_filters( 'woocommerce_order_item_cogs_per_item_tooltip', $tooltip_text, $cost_per_item, $formatted_cost_per_item, $this );
 	}
 }

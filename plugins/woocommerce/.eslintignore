@@ -25,3 +25,6 @@
 /includes/gateways/**
 /tests/e2e/**
 /vendor/**
+
+/client/admin/** 
+/client/blocks/**

@@ -7,6 +7,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -72,7 +74,7 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
-		return 'completed';
+		return OrderStatus::COMPLETED;
 	}
 
 	/**
@@ -240,5 +242,17 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	public function get_refund_reason() {
 		wc_deprecated_function( 'get_refund_reason', '3.0', 'get_reason' );
 		return $this->get_reason();
+	}
+
+	/**
+	 * Indicates if the current order has an associated Cost of Goods Sold value.
+	 * For refunds the cost will be sum of the cost of the refunded items.
+	 *
+	 * @since 9.9.0
+	 *
+	 * @return bool True if this order has an associated Cost of Goods Sold value.
+	 */
+	public function has_cogs() {
+		return true;
 	}
 }

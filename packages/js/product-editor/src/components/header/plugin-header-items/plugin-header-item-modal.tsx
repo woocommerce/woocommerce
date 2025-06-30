@@ -4,10 +4,7 @@
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 import { plugins } from '@wordpress/icons';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 
 /**
  * Internal dependencies
@@ -15,12 +12,12 @@ import { PinnedItems } from '@wordpress/interface';
 import { HEADER_PINNED_ITEMS_SCOPE } from '../../../constants';
 import { PluginHeaderItemModalProps } from './types';
 
-export const PluginHeaderItemModal: React.FC< PluginHeaderItemModalProps > = ( {
+export const PluginHeaderItemModal = ( {
 	children,
 	label,
 	icon,
 	title,
-} ) => {
+}: PluginHeaderItemModalProps ) => {
 	const [ isOpen, setOpen ] = useState( false );
 	const childrenToRender =
 		typeof children === 'function'

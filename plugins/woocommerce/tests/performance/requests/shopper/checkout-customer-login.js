@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -15,7 +14,7 @@ import {
  */
 import {
 	base_url,
-	customer_username,
+	customer_email,
 	customer_password,
 	addresses_customer_billing_first_name,
 	addresses_customer_billing_last_name,
@@ -37,6 +36,8 @@ import {
 	payment_method,
 	think_time_min,
 	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -47,9 +48,9 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function checkoutCustomerLogin() {
-	let response;
 	let woocommerce_process_checkout_nonce_customer;
 	let woocommerce_login_nonce;
 	let update_order_review_nonce_guest;
@@ -64,27 +65,15 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/checkout`, {
+		const response = http.get( `${ base_url }/checkout`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - View Checkout' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
-			'body contains checkout class': ( response ) =>
-				response.body.includes(
-					'class="checkout woocommerce-checkout"'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+
+		checkResponse( response, 200, {
+			title: `Checkout – ${ STORE_NAME }`,
+			body: 'class="checkout woocommerce-checkout"',
+			footer: FOOTER_TEXT,
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -107,7 +96,7 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const updateResponse = http.post(
 			`${ base_url }/?wc-ajax=update_order_review`,
 			{
 				security: `${ update_order_review_nonce_guest }`,
@@ -131,7 +120,7 @@ export function checkoutCustomerLogin() {
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
-		check( response, {
+		check( updateResponse, {
 			'is status 200': ( r ) => r.status === 200,
 		} );
 	} );
@@ -147,10 +136,10 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/checkout`,
 			{
-				username: `${ customer_username }`,
+				username: `${ customer_email }`,
 				password: `${ customer_password }`,
 				'woocommerce-login-nonce': `${ woocommerce_login_nonce }`,
 				_wp_http_referer: '%2Fcheckout',
@@ -186,7 +175,7 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const updateResponse = http.post(
 			`${ base_url }/?wc-ajax=update_order_review`,
 			{
 				security: `${ update_order_review_nonce_customer }`,
@@ -210,7 +199,7 @@ export function checkoutCustomerLogin() {
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
-		check( response, {
+		check( updateResponse, {
 			'is status 200': ( r ) => r.status === 200,
 		} );
 	} );
@@ -226,7 +215,7 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/?wc-ajax=checkout`,
 			{
 				billing_first_name: `${ addresses_customer_billing_first_name }`,
@@ -252,8 +241,8 @@ export function checkoutCustomerLogin() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: order-received': ( response ) =>
-				response.body.includes( 'order-received' ),
+			'body contains: order-received': ( r ) =>
+				r.body.includes( 'order-received' ),
 		} );
 	} );
 
@@ -268,28 +257,14 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/checkout/order-received/`, {
+		const response = http.get( `${ base_url }/checkout/order-received/`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - Order Received' },
 		} );
-		check( response, {
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
-			"body contains: 'Thank you. Your order has been received.'": (
-				response
-			) =>
-				response.body.includes(
-					'Thank you. Your order has been received.'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `Order received – ${ STORE_NAME }`,
+			body: 'Thank you. Your order has been received.',
+			footer: FOOTER_TEXT,
 		} );
 
 		const requestHeadersPost = Object.assign(
@@ -300,14 +275,14 @@ export function checkoutCustomerLogin() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const refreshResponse = http.post(
 			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
 			{
 				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
 			}
 		);
-		check( response, {
+		check( refreshResponse, {
 			'is status 200': ( r ) => r.status === 200,
 		} );
 	} );

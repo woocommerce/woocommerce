@@ -1,0 +1,15 @@
+.wc-block-components-product-sku {
+	display: block;
+	overflow-wrap: break-word;
+
+	&__prefix {
+		color: var(--wp--preset--color--contrast-2);
+	}
+	&__suffix {
+		display: none;
+
+		.wc-block-components-product-sku.is-selected & {
+			display: inline;
+		}
+	}
+}

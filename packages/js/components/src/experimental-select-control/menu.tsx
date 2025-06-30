@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Popover } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	useEffect,
@@ -17,12 +17,13 @@ import {
  */
 import { getMenuPropsType } from './types';
 
+type PopoverProps = React.ComponentProps< typeof Popover >;
 type MenuProps = {
 	children?: JSX.Element | JSX.Element[];
 	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
 	className?: string;
-	position?: Popover.Position;
+	position?: PopoverProps[ 'position' ];
 	scrollIntoViewOnOpen?: boolean;
 };
 
@@ -74,10 +75,9 @@ export const Menu = ( {
 		>
 			<div>
 				<Popover
-					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
 					__unstableSlotName="woocommerce-select-control-menu"
 					focusOnMount={ false }
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-experimental-select-control__popover-menu',
 						{
 							'is-open': isOpen,
@@ -91,7 +91,7 @@ export const Menu = ( {
 				>
 					<ul
 						{ ...getMenuProps() }
-						className={ classnames(
+						className={ clsx(
 							'woocommerce-experimental-select-control__popover-menu-container',
 							className
 						) }
@@ -109,7 +109,7 @@ export const Menu = ( {
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
 
-export const MenuSlot: React.FC = () =>
+export const MenuSlot = () =>
 	createPortal(
 		<div aria-live="off">
 			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }

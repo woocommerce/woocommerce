@@ -6,15 +6,16 @@
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"resolveJsonModule": true,
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"
 		]
 	},
 	"include": [
-		"**/*.d.ts",
+		"typings/**/*",
 		"src/**/*",
-		"src/**/*.json"
+	],
+	"exclude": [
+		"**/test/**",
 	]
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+`@woocommerce/data`: Fix types and enable TS check.

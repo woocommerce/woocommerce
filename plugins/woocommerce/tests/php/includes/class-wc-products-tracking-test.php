@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * Class WC_Products_Tracking_Test.
  */
@@ -34,10 +36,10 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	public function test_product_add_publish(): void {
 		$product = new WC_Product_Simple();
 		$product->set_name( 'New name' );
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_add_publish' );
-		$product->set_status( 'publish' );
+		$product->set_status( ProductStatus::PUBLISH );
 		$product->save();
 		$this->assertRecordedTracksEvent( 'wcadmin_product_add_publish' );
 	}
@@ -73,12 +75,12 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		$product->save();
 		$this->assertRecordedTracksEvent( 'wcadmin_product_add_publish' );
 		$this->clear_tracks_events();
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->set_name( 'New name - updated' );
 		$product->save();
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_add_publish' );
 		$product->set_price( '10.00' );
-		$product->set_status( 'publish' );
+		$product->set_status( ProductStatus::PUBLISH );
 		$product->save();
 		$this->assertRecordedTracksEvent( 'wcadmin_product_add_publish' );
 	}

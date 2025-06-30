@@ -24,6 +24,7 @@ type WooProductFieldItemProps = {
 	id: string;
 	sections: ProductFillLocationType[];
 	pluginId: string;
+	children: ReactNode;
 };
 
 type WooProductFieldSlotProps = {
@@ -39,12 +40,12 @@ type WooProductFieldFillProps = {
 
 const DEFAULT_FIELD_ORDER = 20;
 
-const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
+const WooProductFieldFill = ( {
 	fieldName,
 	sectionName,
 	order,
 	children,
-} ) => {
+}: WooProductFieldFillProps ) => {
 	const { registerFill, getFillHelpers } = useSlotContext();
 
 	const fieldId = `product_field/${ sectionName }/${ fieldName }`;
@@ -58,12 +59,11 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ ( fillProps: Fill.Props ) =>
+			{ ( fillProps ) =>
 				createOrderedChildren<
-					Fill.Props &
-						SlotContextHelpersType & {
-							sectionName: string;
-						},
+					SlotContextHelpersType & {
+						sectionName: string;
+					},
 					{ _id: string }
 				>(
 					children,
@@ -80,9 +80,11 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
-	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
-} = ( { children, sections, id } ) => {
+export const WooProductFieldItem = ( {
+	children,
+	sections,
+	id,
+}: WooProductFieldItemProps ) => {
 	return (
 		<>
 			{ sections.map(
@@ -101,7 +103,12 @@ export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
 	);
 };
 
-WooProductFieldItem.Slot = ( { fillProps, section } ) => {
+WooProductFieldItem.Slot = ( {
+	fillProps,
+	section,
+}: WooProductFieldSlotProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const { filterRegisteredFills } = useSlotContext();
 
@@ -116,6 +123,7 @@ WooProductFieldItem.Slot = ( { fillProps, section } ) => {
 				}
 
 				return Children.map(
+					// @ts-expect-error The type definitions for Slot are incorrect.
 					sortFillsByOrder( filterRegisteredFills( fills ) )?.props
 						.children,
 					( child ) => (

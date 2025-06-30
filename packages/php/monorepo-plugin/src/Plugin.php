@@ -69,6 +69,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 		return array(
 			// Make sure this event will run after the Jetpack Autoloader plugin.
 			ScriptEvents::POST_AUTOLOAD_DUMP => array( 'onPostAutoloadDump', -100000 ),
+			ScriptEvents::PRE_AUTOLOAD_DUMP  => array( 'onPreAutoloadDump', -100000 ),
 		);
 	}
 
@@ -84,5 +85,23 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
 		// preferentially over other packages that may provide the same autoloads.
 		$manifest_editor = new JetpackManifestEditor( $this->composer, $this->io );
 		$manifest_editor->update_autoload_manifests( $root_package );
+	}
+
+	/**
+	 * An event handler that runs before the autoload dump event.
+	 *
+	 * @param Event $event The event to handle.
+	 */
+	public function onPreAutoloadDump( Event $event ) {
+		$root_package = $this->composer->getPackage();
+
+		// Inject out custom autoloader for picking up new classes without re-running autoload dump.
+		$dev_autoload          = $root_package->getDevAutoload();
+		$dev_autoload['files'] = array_merge(
+			$dev_autoload['files'] ?? array(),
+			array( 'vendor/woocommerce/monorepo-plugin/autoload-dev.php' )
+		);
+
+		$root_package->setDevAutoload( $dev_autoload );
 	}
 }

@@ -10,6 +10,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -91,7 +93,7 @@ class WC_Meta_Box_Product_Images {
 	 */
 	public static function save( $post_id, $post ) {
 		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
+		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
 		$product        = new $classname( $post_id );
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
 

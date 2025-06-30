@@ -28,7 +28,7 @@ export const PaymentCardIcon = () => (
 			/>
 		</mask>
 		<g mask="url(#mask0_5908_1374)">
-			<rect width="24" height="24" fill="#674399" />
+			<rect width="24" height="24" fill="#720EEC" />
 		</g>
 	</svg>
 );

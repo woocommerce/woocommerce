@@ -3,35 +3,12 @@
  * Container class file.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce;
 
-use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EnginesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LoggingServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketplaceServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ObjectCacheServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersDataStoreServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OptionSanitizerServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAttributionServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductImageBySKUServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LayoutTemplatesServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ComingSoonServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\StatsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
+use Automattic\WooCommerce\Internal\DependencyManagement\RuntimeContainer;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -46,49 +23,16 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\StatsS
  * Classes in the `includes` directory should use the `wc_get_container` function to get the instance of the container when
  * they need to get an instance of a class from the `src` directory.
  *
- * Class registration should be done via service providers that inherit from Automattic\WooCommerce\Internal\DependencyManagement
- * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
- * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
+ * Internally, an instance of RuntimeContainer will be used for the actual class resolution. This class uses reflection
+ * to instantiate classes and figure out dependencies, so there's no need for explicit class registration.
+ * When running the unit tests suite this will be replaced with an instance of TestingContainer,
+ * which provides additional functionality.
  */
 final class Container {
 	/**
-	 * The list of service provider classes to register.
-	 *
-	 * @var string[]
-	 */
-	private $service_providers = array(
-		AssignDefaultCategoryServiceProvider::class,
-		DownloadPermissionsAdjusterServiceProvider::class,
-		OptionSanitizerServiceProvider::class,
-		OrdersDataStoreServiceProvider::class,
-		ProductAttributesLookupServiceProvider::class,
-		ProductDownloadsServiceProvider::class,
-		ProductImageBySKUServiceProvider::class,
-		ProductReviewsServiceProvider::class,
-		ProxiesServiceProvider::class,
-		RestockRefundedItemsAdjusterServiceProvider::class,
-		UtilsClassesServiceProvider::class,
-		COTMigrationServiceProvider::class,
-		OrdersControllersServiceProvider::class,
-		OrderAttributionServiceProvider::class,
-		ObjectCacheServiceProvider::class,
-		BatchProcessingServiceProvider::class,
-		OrderMetaBoxServiceProvider::class,
-		OrderAdminServiceProvider::class,
-		FeaturesServiceProvider::class,
-		MarketingServiceProvider::class,
-		MarketplaceServiceProvider::class,
-		LayoutTemplatesServiceProvider::class,
-		LoggingServiceProvider::class,
-		EnginesServiceProvider::class,
-		ComingSoonServiceProvider::class,
-		StatsServiceProvider::class,
-	);
-
-	/**
 	 * The underlying container.
 	 *
-	 * @var \League\Container\Container
+	 * @var RuntimeContainer
 	 */
 	private $container;
 
@@ -96,40 +40,37 @@ final class Container {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->container = new ExtendedContainer();
-
-		// Add ourselves as the shared instance of ContainerInterface,
-		// register everything else using service providers.
-
-		$this->container->share( __CLASS__, $this );
-
-		foreach ( $this->service_providers as $service_provider_class ) {
-			$this->container->addServiceProvider( $service_provider_class );
-		}
+		// When the League container was in use we allowed to retrieve the container itself
+		// by using 'Psr\Container\ContainerInterface' as the class identifier,
+		// we continue allowing that for compatibility.
+		$this->container = new RuntimeContainer(
+			array(
+				__CLASS__                          => $this,
+				'Psr\Container\ContainerInterface' => $this,
+			)
+		);
 	}
 
 	/**
-	 * Finds an entry of the container by its identifier and returns it.
+	 * Returns an instance of the specified class.
+	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @param string $id Class name.
 	 *
-	 * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-	 * @throws Psr\Container\ContainerExceptionInterface Error while retrieving the entry.
+	 * @return object Object instance.
 	 *
-	 * @return mixed Entry.
+	 * @throws ContainerException Error when resolving the class to an object instance, or class not found.
+	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.
 	 */
 	public function get( string $id ) {
 		return $this->container->get( $id );
 	}
 
 	/**
-	 * Returns true if the container can return an entry for the given identifier.
-	 * Returns false otherwise.
+	 * Returns true if the container can return an instance of the given class or false otherwise.
+	 * See the comment in RuntimeContainer::has.
 	 *
-	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-	 * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
-	 *
-	 * @param string $id Identifier of the entry to look for.
+	 * @param class-string $id Class name.
 	 *
 	 * @return bool
 	 */

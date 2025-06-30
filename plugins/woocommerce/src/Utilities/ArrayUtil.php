@@ -3,6 +3,7 @@
  * A class of utilities for dealing with arrays.
  */
 
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Utilities;
 
 /**
@@ -345,5 +346,25 @@ class ArrayUtil {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Check if all items in an array pass a callback.
+	 *
+	 * @param array    $items The array to check.
+	 * @param callable $callback The callback to check each item.
+	 *
+	 * @return bool true if all items pass the callback, false otherwise.
+	 */
+	public static function array_all( array $items, callable $callback ): bool {
+		if ( function_exists( 'array_all' ) ) {
+			return array_all( $items, $callback );
+		}
+		foreach ( $items as $item ) {
+			if ( ! $callback( $item ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

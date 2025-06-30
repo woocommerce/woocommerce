@@ -1,0 +1,35 @@
+.wc-block-order-confirmation-status-description {
+	.woocommerce-verify-email {
+		margin-top: $gap-larger;
+		#verify-email {
+			width: 50%;
+
+			@include breakpoint("<782px") {
+				width: 100%;
+			}
+		}
+	}
+}
+
+.wc-block-order-confirmation-status {
+	margin-top: $gap;
+	margin-bottom: $gap;
+	p {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+	&.has-background {
+		padding: $gap;
+	}
+	.wc-block-order-confirmation-status__actions {
+		margin-top: $gap;
+
+		a {
+			margin-right: $gap;
+
+			&.has-link-color {
+				color: inherit;
+			}
+		}
+	}
+}

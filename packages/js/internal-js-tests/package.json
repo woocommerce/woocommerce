@@ -5,8 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "9.1.3"
+		"node": "^20.11.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-js-tests/README.md",
 	"repository": {
@@ -30,7 +29,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -42,25 +41,30 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-		"@testing-library/jest-dom": "5.16.2",
-		"@testing-library/react": "12.1.3",
-		"@wordpress/data": "wp-6.0",
-		"@wordpress/i18n": "wp-6.0",
+		"@testing-library/jest-dom": "^6.x.x",
+		"@testing-library/react": "^16.x.x",
+		"@wordpress/i18n": "wp-6.6",
 		"@wordpress/jest-console": "^5.4.0",
 		"regenerator-runtime": "^0.13.11"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
+		"@babel/core": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"babel-jest": "~27.5.1",
+		"babel-jest": "27.5.x",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "5.0.5",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
-		"wireit": "0.14.3"
+		"ts-jest": "29.1.x",
+		"lib0": "0.2.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.12"
+	},
+	"peerDependencies": {
+		"@wordpress/data": "wp-6.6",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -77,7 +81,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -92,7 +96,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -117,10 +121,10 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
+				"package.json",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
+				"node_modules/@woocommerce/eslint-plugin/index.js"
 			]
 		}
 	}

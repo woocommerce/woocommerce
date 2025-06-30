@@ -60,4 +60,17 @@ class McStats extends A8c_Mc_Stats {
 
 		return parent::do_server_side_stat( $url );
 	}
+
+	/**
+	 * Pings the stats server for the current stats and empty the stored stats from the object
+	 *
+	 * @return void
+	 */
+	public function do_server_side_stats() {
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			return;
+		}
+
+		parent::do_server_side_stats();
+	}
 }

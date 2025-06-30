@@ -1,7 +1,7 @@
 export type QueryProps = {
 	orderby?: string;
 	order?: string;
-	page?: number;
+	page?: string;
 	per_page?: number;
 	/**
 	 * Allowing string for backward compatibility
@@ -142,6 +142,10 @@ export type TableCardProps = CommonTableProps & {
 	 * If a search is provided in actions and should reorder actions on mobile.
 	 */
 	hasSearch?: boolean;
+	/**
+	 * Content to be displayed before the table but after the header.
+	 */
+	tablePreface?: React.ReactNode;
 	/**
 	 * A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ].
 	 */

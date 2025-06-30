@@ -1,20 +1,20 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
+
+const { BASE_URL } = process.env;
 
 test.describe( 'Payment Gateways API tests', () => {
+	test.beforeAll( async () => {
+		await resetGatewayOrder( BASE_URL );
+	} );
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
-		const response = await request.get( '/wp-json/wc/v3/payment_gateways' );
+		const response = await request.get(
+			'./wp-json/wc/v3/payment_gateways'
+		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
-
-		const localPickupKey =
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			process.env.BASE_URL &&
-			! process.env.BASE_URL.includes( 'localhost' )
-				? 'pickup_location'
-				: 'local_pickup';
-		console.log( 'localPickupKey=', localPickupKey );
 
 		expect( responseJSON ).toEqual(
 			expect.arrayContaining( [
@@ -54,7 +54,11 @@ test.describe( 'Payment Gateways API tests', () => {
 						},
 					},
 				} ),
+			] )
+		);
 
+		expect( responseJSON ).toEqual(
+			expect.arrayContaining( [
 				expect.objectContaining( {
 					id: 'cheque',
 					title: 'Check payments',
@@ -91,7 +95,11 @@ test.describe( 'Payment Gateways API tests', () => {
 						},
 					},
 				} ),
+			] )
+		);
 
+		expect( responseJSON ).toEqual(
+			expect.arrayContaining( [
 				expect.objectContaining( {
 					id: 'cod',
 					title: 'Cash on delivery',
@@ -100,76 +108,82 @@ test.describe( 'Payment Gateways API tests', () => {
 					enabled: false,
 					method_title: 'Cash on delivery',
 					method_description:
-						'Have your customers pay with cash (or by other means) upon delivery.',
+						'Let your shoppers pay upon delivery — by cash or other methods of payment.',
 					method_supports: [ 'products' ],
-					settings: {
-						title: {
-							id: 'title',
-							label: 'Title',
-							description:
-								'Payment method description that the customer will see on your checkout.',
-							type: 'safe_text',
-							value: 'Cash on delivery',
-							default: 'Cash on delivery',
-							tip: 'Payment method description that the customer will see on your checkout.',
-							placeholder: '',
-						},
-						instructions: {
-							id: 'instructions',
-							label: 'Instructions',
-							description:
-								'Instructions that will be added to the thank you page.',
-							type: 'textarea',
-							value: 'Pay with cash upon delivery.',
-							default: 'Pay with cash upon delivery.',
-							tip: 'Instructions that will be added to the thank you page.',
-							placeholder: '',
-						},
-						enable_for_methods: {
-							id: 'enable_for_methods',
-							label: 'Enable for shipping methods',
-							description:
-								'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-							type: 'multiselect',
-							value: '',
-							default: '',
-							tip: 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-							placeholder: '',
-							options: expect.objectContaining( {
-								'Flat rate': {
-									flat_rate:
-										'Any &quot;Flat rate&quot; method',
-								},
-								'Free shipping': {
-									free_shipping:
-										'Any &quot;Free shipping&quot; method',
-								},
-								'Local pickup': expect.objectContaining( {
-									[ localPickupKey ]:
-										'Any &quot;Local pickup&quot; method',
-								} ),
-							} ),
-						},
-						enable_for_virtual: {
-							id: 'enable_for_virtual',
-							label: 'Accept COD if the order is virtual',
-							description: '',
-							type: 'checkbox',
-							value: 'yes',
-							default: 'yes',
-							tip: '',
-							placeholder: '',
-						},
-					},
 				} ),
 			] )
+		);
+
+		const codSettings = responseJSON.find(
+			( p ) => p.id === 'cod'
+		).settings;
+
+		expect( codSettings ).toEqual(
+			expect.objectContaining( {
+				title: {
+					id: 'title',
+					label: 'Title',
+					description:
+						'Payment method description that the customer will see on your checkout.',
+					type: 'safe_text',
+					value: 'Cash on delivery',
+					default: 'Cash on delivery',
+					tip: 'Payment method description that the customer will see on your checkout.',
+					placeholder: '',
+				},
+				instructions: {
+					id: 'instructions',
+					label: 'Instructions',
+					description:
+						'Instructions that will be added to the thank you page.',
+					type: 'textarea',
+					value: 'Pay with cash upon delivery.',
+					default: 'Pay with cash upon delivery.',
+					tip: 'Instructions that will be added to the thank you page.',
+					placeholder: '',
+				},
+				enable_for_methods: {
+					id: 'enable_for_methods',
+					label: 'Enable for shipping methods',
+					description:
+						'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
+					type: 'multiselect',
+					value: '',
+					default: '',
+					tip: 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
+					placeholder: '',
+					options: expect.objectContaining( {
+						'Flat rate': {
+							flat_rate: 'Any &quot;Flat rate&quot; method',
+						},
+						'Free shipping': {
+							free_shipping:
+								'Any &quot;Free shipping&quot; method',
+						},
+						'Local pickup': {
+							pickup_location:
+								'Any &quot;Local pickup&quot; method',
+						},
+					} ),
+				},
+				enable_for_virtual: {
+					id: 'enable_for_virtual',
+					label: 'Accept COD if the order is virtual',
+					description: '',
+					type: 'checkbox',
+					value: 'yes',
+					default: 'yes',
+					tip: '',
+					placeholder: '',
+				},
+			} )
 		);
 	} );
 
 	test( 'can view a payment gateway', async ( { request } ) => {
 		// call API to retrieve a single payment gateway
 		const response = await request.get(
-			'/wp-json/wc/v3/payment_gateways/bacs'
+			'./wp-json/wc/v3/payment_gateways/bacs'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -218,7 +232,7 @@ test.describe( 'Payment Gateways API tests', () => {
 	test( 'can update a payment gateway', async ( { request } ) => {
 		// call API to update a payment gateway
 		const response = await request.put(
-			'/wp-json/wc/v3/payment_gateways/bacs',
+			'./wp-json/wc/v3/payment_gateways/bacs',
 			{
 				data: {
 					enabled: true,
@@ -235,7 +249,7 @@ test.describe( 'Payment Gateways API tests', () => {
 		);
 
 		// reset payment gateway setting
-		await request.put( '/wp-json/wc/v3/payment_gateways/bacs', {
+		await request.put( './wp-json/wc/v3/payment_gateways/bacs', {
 			data: {
 				enabled: false,
 			},

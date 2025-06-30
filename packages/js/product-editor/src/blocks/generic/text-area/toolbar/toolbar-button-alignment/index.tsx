@@ -38,7 +38,7 @@ export const ALIGNMENT_CONTROLS = [
 	},
 ];
 
-export default function AligmentToolbarButton( {
+export default function AlignmentToolbarButton( {
 	align,
 	setAlignment,
 }: AlignmentControl ) {

@@ -64,12 +64,12 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 
 		if ( is_multisite() ) {
 			$this->assertCount( 2, $active_valid_plugins );
-			$this->assertContains( WP_PLUGIN_DIR . '/test3/test3.php', $active_valid_plugins );
+			$this->assertContains( 'test3/test3.php', $active_valid_plugins );
 		} else {
 			$this->assertCount( 1, $active_valid_plugins );
 		}
 
-		$this->assertContains( WP_PLUGIN_DIR . '/test1/test1.php', $active_valid_plugins );
+		$this->assertContains( 'test1/test1.php', $active_valid_plugins );
 
 		if ( false === $orig_local_plugins ) {
 			delete_option( 'active_plugins' );

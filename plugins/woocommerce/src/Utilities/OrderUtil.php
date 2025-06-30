@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
@@ -34,6 +35,15 @@ final class OrderUtil {
 	 */
 	public static function custom_orders_table_usage_is_enabled() : bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Helper function to get whether custom order tables are enabled or not.
+	 *
+	 * @return bool
+	 */
+	public static function custom_orders_table_datastore_cache_enabled(): bool {
+		return wc_get_container()->get( CustomOrdersTableController::class )->hpos_data_caching_is_enabled();
 	}
 
 	/**
@@ -196,10 +206,10 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
-		$cache_key        = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'order-count-' . $order_type;
-		$count_per_status = wp_cache_get( $cache_key, 'counts' );
+		$order_count_cache = new OrderCountCache();
+		$count_per_status  = $order_count_cache->get( $order_type );
 
-		if ( false === $count_per_status ) {
+		if ( null === $count_per_status ) {
 			if ( self::custom_orders_table_usage_is_enabled() ) {
 				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				$results = $wpdb->get_results(
@@ -212,17 +222,20 @@ final class OrderUtil {
 				// phpcs:enable
 
 				$count_per_status = array_map( 'absint', array_column( $results, 'count', 'status' ) );
+
 			} else {
 				$count_per_status = (array) wp_count_posts( $order_type );
 			}
 
 			// Make sure all order statuses are included just in case.
 			$count_per_status = array_merge(
-				array_fill_keys( array_keys( wc_get_order_statuses() ), 0 ),
+				array_fill_keys( $order_count_cache->get_default_statuses(), 0 ),
 				$count_per_status
 			);
 
-			wp_cache_set( $cache_key, $count_per_status, 'counts' );
+			foreach ( $count_per_status as $order_status => $count ) {
+				$order_count_cache->set( $order_type, $order_status, $count );
+			}
 		}
 
 		return $count_per_status;

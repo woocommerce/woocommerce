@@ -6,7 +6,8 @@ import { Slot, Fill } from '@wordpress/components';
 
 type WooOnboardingTaskListHeaderProps = {
 	id: string;
-};
+	// The name prop is derived from the id and should not be passed by users.
+} & Omit< React.ComponentProps< typeof Fill >, 'name' >;
 
 /**
  * A Fill for adding Onboarding Task List headers.
@@ -19,7 +20,7 @@ type WooOnboardingTaskListHeaderProps = {
 export const WooOnboardingTaskListHeader = ( {
 	id,
 	...props
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: WooOnboardingTaskListHeaderProps ) => (
 	<Fill
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }
@@ -29,7 +30,9 @@ export const WooOnboardingTaskListHeader = ( {
 WooOnboardingTaskListHeader.Slot = ( {
 	id,
 	fillProps,
-}: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+}: WooOnboardingTaskListHeaderProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		fillProps={ fillProps }

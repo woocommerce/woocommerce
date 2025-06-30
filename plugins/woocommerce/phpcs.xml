@@ -6,6 +6,7 @@
 
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
+	<exclude-pattern>client/admin/docs/examples/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/legacy/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
@@ -55,9 +56,14 @@
 		<include-pattern>tests/php/src/</include-pattern>
 		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Internal/DependencyManagement/ExampleClasses/</exclude-pattern>
 		<properties>
 			<property name="composerJsonPath" value="composer.json"/>
 		</properties>
+	</rule>
+
+	<rule ref="Generic.CodeAnalysis.UselessOverridingMethod.Found">
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Blocks/Mocks/</exclude-pattern>
 	</rule>
 
 	<rule ref="Generic.PHP.RequireStrictTypes">

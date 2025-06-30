@@ -1,7 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint;
+namespace Automattic\WooCommerce\Blueprint\ResultFormatters;
 
+use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use function WP_CLI\Utils\format_items;
 
 /**
@@ -30,6 +31,8 @@ class CliResultFormatter {
 	 * @param string $message_type The message type to format.
 	 *
 	 * @return void
+	 *
+	 * @throws \Exception If WP CLI Utils is not found.
 	 */
 	public function format( $message_type = 'debug' ) {
 		$header = array( 'Step Processor', 'Type', 'Message' );
@@ -44,6 +47,12 @@ class CliResultFormatter {
 					'Message'        => $message['message'],
 				);
 			}
+		}
+
+		$format_items_exist = function_exists( '\WP_CLI\Utils\format_items' );
+
+		if ( ! $format_items_exist ) {
+			throw new \Exception( 'WP CLI Utils not found' );
 		}
 
 		format_items( 'table', $items, $header );

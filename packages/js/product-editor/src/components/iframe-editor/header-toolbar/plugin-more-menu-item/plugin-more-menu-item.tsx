@@ -4,10 +4,7 @@
 import { compose } from '@wordpress/compose';
 import { MenuItem } from '@wordpress/components';
 import { withPluginContext } from '@wordpress/plugins';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { ActionItem } from '@wordpress/interface';
+import ActionItem from '@wordpress/interface/build-module/components/action-item';
 
 /**
  * Internal dependencies
@@ -20,6 +17,7 @@ type PluginMoreMenuItemProps = {
 };
 
 export const PluginMoreMenuItem = compose(
+	// @ts-expect-error The type defintion of withPluginContext is incorrect.
 	withPluginContext( ( context, ownProps: PluginMoreMenuItemProps ) => {
 		return {
 			as: ownProps.as ?? MenuItem,

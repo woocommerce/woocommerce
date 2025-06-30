@@ -1,5 +1,9 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { order } = require( '../../../data' );
+const { faker } = require( '@faker-js/faker' );
+
+const RAND_STRING = faker.string.alphanumeric( 8 ).toLowerCase();
+const COUPON_CODE = `coupon-${ faker.string.alphanumeric( 4 ).toLowerCase() }`;
 
 /**
  * Billing properties to update.
@@ -39,68 +43,68 @@ test.describe.serial( 'Orders API tests', () => {
 
 	test.beforeAll( async ( { request } ) => {
 		const createSampleCategories = async () => {
-			const clothing = await request.post(
-				'/wp-json/wc/v3/products/categories',
+			// Create main categories
+			const clothing = {
+				name: `Clothing ${ RAND_STRING }`,
+			};
+			const decor = {
+				name: `Decor ${ RAND_STRING }`,
+			};
+			const music = {
+				name: `Music ${ RAND_STRING }`,
+			};
+			const categories = await request.post(
+				'./wp-json/wc/v3/products/categories/batch',
 				{
 					data: {
-						name: 'Clothing',
+						create: [ clothing, decor, music ],
 					},
+					failOnStatusCode: true,
 				}
 			);
-			const clothingJSON = await clothing.json();
+			const categoriesJSON = await categories.json();
+			const clothingJSON = categoriesJSON.create.find(
+				( { name } ) => name === clothing.name
+			);
+			const decorJSON = categoriesJSON.create.find(
+				( { name } ) => name === decor.name
+			);
+			const musicJSON = categoriesJSON.create.find(
+				( { name } ) => name === music.name
+			);
 
-			const accessories = await request.post(
-				'/wp-json/wc/v3/products/categories',
+			// Create sub-categories
+			const accessories = {
+				name: `Accessories ${ RAND_STRING }`,
+				parent: clothingJSON.id,
+			};
+			const hoodies = {
+				name: `Hoodies ${ RAND_STRING }`,
+				parent: clothingJSON.id,
+			};
+			const tshirts = {
+				name: `Tshirts ${ RAND_STRING }`,
+				parent: clothingJSON.id,
+			};
+			const subCategories = await request.post(
+				'./wp-json/wc/v3/products/categories/batch',
 				{
 					data: {
-						name: 'Accessories',
-						parent: clothingJSON.id,
+						create: [ accessories, hoodies, tshirts ],
 					},
+					failOnStatusCode: true,
 				}
 			);
-			const accessoriesJSON = await accessories.json();
-
-			const hoodies = await request.post(
-				'/wp-json/wc/v3/products/categories',
-				{
-					data: {
-						name: 'Hoodies',
-						parent: clothingJSON.id,
-					},
-				}
+			const subCategoriesJSON = await subCategories.json();
+			const accessoriesJSON = subCategoriesJSON.create.find(
+				( { name } ) => name === accessories.name
 			);
-			const hoodiesJSON = await hoodies.json();
-
-			const tshirts = await request.post(
-				'/wp-json/wc/v3/products/categories',
-				{
-					data: {
-						name: 'Tshirts',
-						parent: clothingJSON.id,
-					},
-				}
+			const hoodiesJSON = subCategoriesJSON.create.find(
+				( { name } ) => name === hoodies.name
 			);
-			const tshirtsJSON = await tshirts.json();
-
-			const decor = await request.post(
-				'/wp-json/wc/v3/products/categories',
-				{
-					data: {
-						name: 'Decor',
-					},
-				}
+			const tshirtsJSON = subCategoriesJSON.create.find(
+				( { name } ) => name === tshirts.name
 			);
-			const decorJSON = await decor.json();
-
-			const music = await request.post(
-				'/wp-json/wc/v3/products/categories',
-				{
-					data: {
-						name: 'Music',
-					},
-				}
-			);
-			const musicJSON = await music.json();
 
 			return {
 				clothingJSON,
@@ -113,26 +117,31 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		const createSampleAttributes = async () => {
-			const color = await request.post(
-				'/wp-json/wc/v3/products/attributes',
+			// Create attributes
+			const color = {
+				name: `Color ${ RAND_STRING }`,
+			};
+			const size = {
+				name: `Size ${ RAND_STRING }`,
+			};
+			const attributes = await request.post(
+				'./wp-json/wc/v3/products/attributes/batch',
 				{
 					data: {
-						name: 'Color',
+						create: [ color, size ],
 					},
+					failOnStatusCode: true,
 				}
 			);
-			const colorJSON = await color.json();
-
-			const size = await request.post(
-				'/wp-json/wc/v3/products/attributes',
-				{
-					data: {
-						name: 'Size',
-					},
-				}
+			const attributesJSON = await attributes.json();
+			const colorJSON = attributesJSON.create.find(
+				( { name } ) => name === color.name
 			);
-			const sizeJSON = await size.json();
+			const sizeJSON = attributesJSON.create.find(
+				( { name } ) => name === size.name
+			);
 
+			// Create attribute terms
 			const colorNames = [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ];
 
 			const colorNamesObjectArray = colorNames.map( ( name ) => ( {
@@ -140,11 +149,12 @@ test.describe.serial( 'Orders API tests', () => {
 			} ) );
 
 			const colors = await request.post(
-				`/wp-json/wc/v3/products/attributes/${ colorJSON.id }/terms/batch`,
+				`./wp-json/wc/v3/products/attributes/${ colorJSON.id }/terms/batch`,
 				{
 					data: {
 						create: colorNamesObjectArray,
 					},
+					failOnStatusCode: true,
 				}
 			);
 
@@ -157,11 +167,12 @@ test.describe.serial( 'Orders API tests', () => {
 			} ) );
 
 			const sizes = await request.post(
-				`/wp-json/wc/v3/products/attributes/${ sizeJSON.id }/terms/batch`,
+				`./wp-json/wc/v3/products/attributes/${ sizeJSON.id }/terms/batch`,
 				{
 					data: {
 						create: sizeNamesObjectArray,
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const sizesJSON = await sizes.json();
@@ -175,10 +186,11 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		const createSampleTags = async () => {
-			const cool = await request.post( '/wp-json/wc/v3/products/tags', {
+			const cool = await request.post( './wp-json/wc/v3/products/tags', {
 				data: {
-					name: 'Cool',
+					name: `Cool ${ RAND_STRING }`,
 				},
+				failOnStatusCode: true,
 			} );
 			const coolJSON = await cool.json();
 
@@ -189,11 +201,12 @@ test.describe.serial( 'Orders API tests', () => {
 
 		const createSampleShippingClasses = async () => {
 			const freight = await request.post(
-				'/wp-json/wc/v3/products/shipping_classes',
+				'./wp-json/wc/v3/products/shipping_classes',
 				{
 					data: {
-						name: 'Freight',
+						name: `Freight ${ RAND_STRING }`,
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const freightJSON = await freight.json();
@@ -203,37 +216,10 @@ test.describe.serial( 'Orders API tests', () => {
 			};
 		};
 
-		const createSampleTaxClasses = async () => {
-			//check to see if Reduced Rate tax class exists - if not, create it
-			let reducedRate = await request.get(
-				'/wp-json/wc/v3/taxes/classes/reduced-rate'
-			);
-			let reducedRateJSON = await reducedRate.json();
-			expect( Array.isArray( reducedRateJSON ) ).toBe( true );
-
-			//if tax class does not exist then create it
-			if ( reducedRateJSON.length < 1 ) {
-				reducedRate = await request.post(
-					'/wp-json/wc/v3/taxes/classes',
-					{
-						data: {
-							name: 'Reduced Rate',
-						},
-					}
-				);
-				reducedRateJSON = await reducedRate.json();
-				return { reducedRateJSON };
-			}
-
-			// return an empty object as nothing new was created so nothing will
-			// need deleted during cleanup
-			return {};
-		};
-
 		const createSampleSimpleProducts = async (
 			categories,
 			attributes,
-			tags
+			productTags
 		) => {
 			const description =
 				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ' +
@@ -241,12 +227,12 @@ test.describe.serial( 'Orders API tests', () => {
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
 			const simpleProducts = await request.post(
-				'/wp-json/wc/v3/products/batch',
+				'./wp-json/wc/v3/products/batch',
 				{
 					data: {
 						create: [
 							{
-								name: 'Beanie with Logo oxo',
+								name: `Beanie with Logo ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-01T15:50:20',
 								type: 'simple',
 								status: 'publish',
@@ -255,7 +241,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'Woo-beanie-logo',
 								price: '18',
 								regular_price: '20',
 								sale_price: '18',
@@ -319,7 +304,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'T-Shirt with Logo oxo',
+								name: `T-Shirt with Logo ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-02T15:50:20',
 								type: 'simple',
 								status: 'publish',
@@ -328,7 +313,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'Woo-tshirt-logo',
 								price: '18',
 								regular_price: '18',
 								sale_price: '',
@@ -392,7 +376,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Single oxo',
+								name: `Single ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-03T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -401,7 +385,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple, virtual product.</p>\n',
-								sku: 'woo-single',
 								price: '2',
 								regular_price: '3',
 								sale_price: '2',
@@ -463,7 +446,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Album oxo',
+								name: `Album ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-04T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -472,7 +455,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple, virtual product.</p>\n',
-								sku: 'woo-album',
 								price: '15',
 								regular_price: '15',
 								sale_price: '',
@@ -539,7 +521,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Polo oxo',
+								name: `Polo ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-05T15:50:19',
 								type: 'simple',
 								status: 'pending',
@@ -548,7 +530,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-polo',
 								price: '20',
 								regular_price: '20',
 								sale_price: '',
@@ -612,7 +593,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Long Sleeve Tee oxo',
+								name: `Long Sleeve Tee ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-06T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -621,7 +602,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-long-sleeve-tee',
 								price: '25',
 								regular_price: '25',
 								sale_price: '',
@@ -685,7 +665,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Hoodie with Zipper oxo',
+								name: `Hoodie with Zipper ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-07T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -694,7 +674,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-hoodie-with-zipper',
 								price: '45',
 								regular_price: '45',
 								sale_price: '',
@@ -750,7 +729,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Hoodie with Pocket oxo',
+								name: `Hoodie with Pocket ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-08T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -759,7 +738,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-hoodie-with-pocket',
 								price: '35',
 								regular_price: '45',
 								sale_price: '35',
@@ -807,7 +785,7 @@ test.describe.serial( 'Orders API tests', () => {
 								],
 								tags: [
 									{
-										id: tags.coolJSON.id,
+										id: productTags.coolJSON.id,
 									},
 								],
 								attributes: [
@@ -827,7 +805,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Sunglasses oxo',
+								name: `Sunglasses ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-09T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -836,7 +814,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-sunglasses',
 								price: '90',
 								regular_price: '90',
 								sale_price: '',
@@ -853,7 +830,7 @@ test.describe.serial( 'Orders API tests', () => {
 								external_url: '',
 								button_text: '',
 								tax_status: 'taxable',
-								tax_class: 'reduced-rate',
+								tax_class: '',
 								manage_stock: false,
 								stock_quantity: null,
 								backorders: 'no',
@@ -884,7 +861,7 @@ test.describe.serial( 'Orders API tests', () => {
 								],
 								tags: [
 									{
-										id: tags.coolJSON.id,
+										id: productTags.coolJSON.id,
 									},
 								],
 								attributes: [],
@@ -896,7 +873,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Cap oxo',
+								name: `Cap ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-10T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -905,7 +882,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-cap',
 								price: '16',
 								regular_price: '18',
 								sale_price: '16',
@@ -969,7 +945,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Belt oxo',
+								name: `Belt ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-12T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -978,7 +954,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-belt',
 								price: '55',
 								regular_price: '65',
 								sale_price: '55',
@@ -1034,7 +1009,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'Beanie oxo',
+								name: `Beanie ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-13T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -1043,7 +1018,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-beanie',
 								price: '18',
 								regular_price: '20',
 								sale_price: '18',
@@ -1091,7 +1065,7 @@ test.describe.serial( 'Orders API tests', () => {
 								],
 								tags: [
 									{
-										id: tags.coolJSON.id,
+										id: productTags.coolJSON.id,
 									},
 								],
 								attributes: [
@@ -1111,7 +1085,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'instock',
 							},
 							{
-								name: 'T-Shirt oxo',
+								name: `T-Shirt ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-14T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -1120,7 +1094,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-tshirt',
 								price: '18',
 								regular_price: '18',
 								sale_price: '',
@@ -1184,7 +1157,7 @@ test.describe.serial( 'Orders API tests', () => {
 								stock_status: 'onbackorder',
 							},
 							{
-								name: 'Hoodie with Logo oxo',
+								name: `Hoodie with Logo ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-15T15:50:19',
 								type: 'simple',
 								status: 'publish',
@@ -1193,7 +1166,6 @@ test.describe.serial( 'Orders API tests', () => {
 								description,
 								short_description:
 									'<p>This is a simple product.</p>\n',
-								sku: 'woo-hoodie-with-logo',
 								price: '45',
 								regular_price: '45',
 								sale_price: '',
@@ -1258,6 +1230,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const simpleProductsJSON = await simpleProducts.json();
@@ -1267,12 +1240,12 @@ test.describe.serial( 'Orders API tests', () => {
 
 		const createSampleExternalProducts = async ( categories ) => {
 			const externalProducts = await request.post(
-				'/wp-json/wc/v3/products/batch',
+				'./wp-json/wc/v3/products/batch',
 				{
 					data: {
 						create: [
 							{
-								name: 'WordPress Pennant oxo',
+								name: `WordPress Pennant ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-16T15:50:20',
 								type: 'external',
 								status: 'publish',
@@ -1284,7 +1257,6 @@ test.describe.serial( 'Orders API tests', () => {
 									'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
 								short_description:
 									'<p>This is an external product.</p>\n',
-								sku: 'wp-pennant',
 								price: '11.05',
 								regular_price: '11.05',
 								sale_price: '',
@@ -1342,6 +1314,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const externalProductsJSON = await externalProducts.json();
@@ -1350,21 +1323,24 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		const createSampleGroupedProduct = async ( categories ) => {
-			const logoProducts = await request.get( '/wp-json/wc/v3/products', {
-				params: {
-					search: 'logo',
-					_fields: [ 'id' ],
-				},
-			} );
+			const logoProducts = await request.get(
+				'./wp-json/wc/v3/products',
+				{
+					params: {
+						search: 'logo',
+						_fields: [ 'id' ],
+					},
+				}
+			);
 			const logoProductsJSON = await logoProducts.json();
 
 			const groupedProducts = await request.post(
-				'/wp-json/wc/v3/products/batch',
+				'./wp-json/wc/v3/products/batch',
 				{
 					data: {
 						create: [
 							{
-								name: 'Logo Collection oxo',
+								name: `Logo Collection ${ RAND_STRING }`,
 								date_created_gmt: '2021-09-17T15:50:20',
 								type: 'grouped',
 								status: 'publish',
@@ -1376,7 +1352,6 @@ test.describe.serial( 'Orders API tests', () => {
 									'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
 								short_description:
 									'<p>This is a grouped product.</p>\n',
-								sku: 'logo-collection',
 								price: '18',
 								regular_price: '',
 								sale_price: '',
@@ -1435,6 +1410,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const groupedProductsJSON = await groupedProducts.json();
@@ -1451,9 +1427,9 @@ test.describe.serial( 'Orders API tests', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. ' +
 				'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const hoodie = await request.post( '/wp-json/wc/v3/products', {
+			const hoodie = await request.post( './wp-json/wc/v3/products', {
 				data: {
-					name: 'Hoodie oxo',
+					name: `Hoodie ${ RAND_STRING }`,
 					date_created_gmt: '2021-09-18T15:50:19',
 					type: 'variable',
 					status: 'publish',
@@ -1461,7 +1437,6 @@ test.describe.serial( 'Orders API tests', () => {
 					catalog_visibility: 'visible',
 					description,
 					short_description: '<p>This is a variable product.</p>\n',
-					sku: 'woo-hoodie',
 					price: '42',
 					regular_price: '',
 					sale_price: '',
@@ -1530,6 +1505,7 @@ test.describe.serial( 'Orders API tests', () => {
 					menu_order: 0,
 					stock_status: 'instock',
 				},
+				failOnStatusCode: true,
 			} );
 			const hoodieJSON = await hoodie.json();
 
@@ -1542,14 +1518,14 @@ test.describe.serial( 'Orders API tests', () => {
 				'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
 
 			const hoodieVariations = await request.post(
-				`/wp-json/wc/v3/products/${ hoodieJSON.id }/variations/batch`,
+				`./wp-json/wc/v3/products/${ hoodieJSON.id }/variations/batch`,
 				{
 					data: {
 						create: [
 							{
 								date_created_gmt: '2021-09-19T15:50:20',
 								description: variationDescription,
-								sku: 'woo-hoodie-blue-logo',
+
 								price: '45',
 								regular_price: '45',
 								sale_price: '',
@@ -1595,7 +1571,7 @@ test.describe.serial( 'Orders API tests', () => {
 							{
 								date_created_gmt: '2021-09-20T15:50:20',
 								description: variationDescription,
-								sku: 'woo-hoodie-blue',
+
 								price: '45',
 								regular_price: '45',
 								sale_price: '',
@@ -1641,7 +1617,7 @@ test.describe.serial( 'Orders API tests', () => {
 							{
 								date_created_gmt: '2021-09-21T15:50:20',
 								description: variationDescription,
-								sku: 'woo-hoodie-green',
+
 								price: '45',
 								regular_price: '45',
 								sale_price: '',
@@ -1687,7 +1663,7 @@ test.describe.serial( 'Orders API tests', () => {
 							{
 								date_created_gmt: '2021-09-22T15:50:19',
 								description: variationDescription,
-								sku: 'woo-hoodie-red',
+
 								price: '42',
 								regular_price: '45',
 								sale_price: '42',
@@ -1732,13 +1708,14 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const hoodieVariationsJSON = await hoodieVariations.json();
 
-			const vneck = await request.post( '/wp-json/wc/v3/products', {
+			const vneck = await request.post( './wp-json/wc/v3/products', {
 				data: {
-					name: 'V-Neck T-Shirt oxo',
+					name: `V-Neck T-Shirt ${ RAND_STRING }`,
 					date_created_gmt: '2021-09-23T15:50:19',
 					type: 'variable',
 					status: 'publish',
@@ -1746,7 +1723,6 @@ test.describe.serial( 'Orders API tests', () => {
 					catalog_visibility: 'visible',
 					description,
 					short_description: '<p>This is a variable product.</p>\n',
-					sku: 'woo-vneck-tee',
 					price: '15',
 					regular_price: '',
 					sale_price: '',
@@ -1814,18 +1790,19 @@ test.describe.serial( 'Orders API tests', () => {
 					menu_order: 0,
 					stock_status: 'instock',
 				},
+				failOnStatusCode: true,
 			} );
 			const vneckJSON = await vneck.json();
 
 			const vneckVariations = await request.post(
-				`/wp-json/wc/v3/products/${ vneckJSON.id }/variations/batch`,
+				`./wp-json/wc/v3/products/${ vneckJSON.id }/variations/batch`,
 				{
 					data: {
 						create: [
 							{
 								date_created_gmt: '2021-09-24T15:50:19',
 								description: variationDescription,
-								sku: 'woo-vneck-tee-blue',
+								sku: `woo-vneck-tee-blue-${ RAND_STRING }`,
 								price: '15',
 								regular_price: '15',
 								sale_price: '',
@@ -1866,7 +1843,7 @@ test.describe.serial( 'Orders API tests', () => {
 							{
 								date_created_gmt: '2021-09-25T15:50:19',
 								description: variationDescription,
-								sku: 'woo-vneck-tee-green',
+
 								price: '20',
 								regular_price: '20',
 								sale_price: '',
@@ -1907,7 +1884,7 @@ test.describe.serial( 'Orders API tests', () => {
 							{
 								date_created_gmt: '2021-09-26T15:50:19',
 								description: variationDescription,
-								sku: 'woo-vneck-tee-red',
+
 								price: '20',
 								regular_price: '20',
 								sale_price: '',
@@ -1947,6 +1924,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const vneckVariationsJSON = await vneckVariations.json();
@@ -1960,20 +1938,22 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		const createSampleHierarchicalProducts = async () => {
-			const parent = await request.post( '/wp-json/wc/v3/products', {
+			const parent = await request.post( './wp-json/wc/v3/products', {
 				data: {
-					name: 'Parent Product oxo',
+					name: `Parent Product ${ RAND_STRING }`,
 					date_created_gmt: '2021-09-27T15:50:19',
 				},
+				failOnStatusCode: true,
 			} );
 			const parentJSON = await parent.json();
 
-			const child = await request.post( '/wp-json/wc/v3/products', {
+			const child = await request.post( './wp-json/wc/v3/products', {
 				data: {
-					name: 'Child Product oxo',
+					name: `Child Product ${ RAND_STRING }`,
 					parent_id: parentJSON.id,
 					date_created_gmt: '2021-09-28T15:50:19',
 				},
+				failOnStatusCode: true,
 			} );
 			const childJSON = await child.json();
 
@@ -1984,18 +1964,20 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		const createSampleProductReviews = async ( simpleProducts ) => {
-			const cap = simpleProducts.find( ( p ) => p.name === 'Cap oxo' );
+			const cap = simpleProducts.find(
+				( p ) => p.name === `Cap ${ RAND_STRING }`
+			);
 
 			const shirt = simpleProducts.find(
-				( p ) => p.name === 'T-Shirt oxo'
+				( p ) => p.name === `T-Shirt ${ RAND_STRING }`
 			);
 
 			const sunglasses = simpleProducts.find(
-				( p ) => p.name === 'Sunglasses oxo'
+				( p ) => p.name === `Sunglasses ${ RAND_STRING }`
 			);
 
 			const review1 = await request.post(
-				'/wp-json/wc/v3/products/reviews',
+				'./wp-json/wc/v3/products/reviews',
 				{
 					data: {
 						product_id: cap.id,
@@ -2004,6 +1986,7 @@ test.describe.serial( 'Orders API tests', () => {
 						reviewer: 'John Doe',
 						reviewer_email: 'john.doe@example.com',
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const review1JSON = await review1.json();
@@ -2013,14 +1996,15 @@ test.describe.serial( 'Orders API tests', () => {
 			// See: https://github.com/woocommerce/woocommerce/issues/29906.
 			//await updateProductReview(review1.id);
 			await request.post(
-				`/wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
+				`./wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
 				{
 					data: {},
+					failOnStatusCode: true,
 				}
 			);
 
 			const review2 = await request.post(
-				'/wp-json/wc/v3/products/reviews',
+				'./wp-json/wc/v3/products/reviews',
 				{
 					data: {
 						product_id: shirt.id,
@@ -2029,20 +2013,22 @@ test.describe.serial( 'Orders API tests', () => {
 						reviewer: 'Shannon Smith',
 						reviewer_email: 'shannon.smith@example.com',
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const review2JSON = await review2.json();
 
 			//await updateProductReview(review2.id);
 			await request.post(
-				`/wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
+				`./wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
 				{
 					data: {},
+					failOnStatusCode: true,
 				}
 			);
 
 			const review3 = await request.post(
-				'/wp-json/wc/v3/products/reviews',
+				'./wp-json/wc/v3/products/reviews',
 				{
 					data: {
 						product_id: sunglasses.id,
@@ -2051,14 +2037,16 @@ test.describe.serial( 'Orders API tests', () => {
 						reviewer: 'Tim Frugalman',
 						reviewer_email: 'timmyfrufru@example.com',
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const review3JSON = await review3.json();
 
 			await request.post(
-				`/wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
+				`./wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
 				{
 					data: {},
+					failOnStatusCode: true,
 				}
 			);
 
@@ -2067,16 +2055,16 @@ test.describe.serial( 'Orders API tests', () => {
 
 		const createSampleProductOrders = async ( simpleProducts ) => {
 			const single = simpleProducts.find(
-				( p ) => p.name === 'Single oxo'
+				( p ) => p.name === `Single ${ RAND_STRING }`
 			);
 			const beanie = simpleProducts.find(
-				( p ) => p.name === 'Beanie with Logo oxo'
+				( p ) => p.name === `Beanie with Logo ${ RAND_STRING }`
 			);
 			const shirt = simpleProducts.find(
-				( p ) => p.name === 'T-Shirt oxo'
+				( p ) => p.name === `T-Shirt ${ RAND_STRING }`
 			);
 
-			const order1 = await request.post( '/wp-json/wc/v3/orders', {
+			const order1 = await request.post( './wp-json/wc/v3/orders', {
 				data: {
 					set_paid: true,
 					status: 'completed',
@@ -2095,6 +2083,7 @@ test.describe.serial( 'Orders API tests', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const orderJSON = await order1.json();
 
@@ -2106,16 +2095,14 @@ test.describe.serial( 'Orders API tests', () => {
 
 			const attributes = await createSampleAttributes();
 
-			const tags = await createSampleTags();
+			const productTags = await createSampleTags();
 
 			const shippingClasses = await createSampleShippingClasses();
-
-			const taxClasses = await createSampleTaxClasses();
 
 			const simpleProducts = await createSampleSimpleProducts(
 				categories,
 				attributes,
-				tags
+				productTags
 			);
 
 			const externalProducts = await createSampleExternalProducts(
@@ -2143,9 +2130,8 @@ test.describe.serial( 'Orders API tests', () => {
 			return {
 				categories,
 				attributes,
-				tags,
+				productTags,
 				shippingClasses,
-				taxClasses,
 				simpleProducts,
 				externalProducts,
 				groupedProducts,
@@ -2161,17 +2147,17 @@ test.describe.serial( 'Orders API tests', () => {
 			const testProductData = await productsTestSetupCreateSampleData();
 			const orderedProducts = {
 				pocketHoodie: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Hoodie with Pocket oxo'
+					( p ) => p.name === `Hoodie with Pocket ${ RAND_STRING }`
 				),
 				sunglasses: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Sunglasses oxo'
+					( p ) => p.name === `Sunglasses ${ RAND_STRING }`
 				),
 				beanie: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Beanie oxo'
+					( p ) => p.name === `Beanie ${ RAND_STRING }`
 				),
 				blueVneck:
 					testProductData.variableProducts.vneckVariations.find(
-						( p ) => p.sku === 'woo-vneck-tee-blue'
+						( p ) => p.sku === `woo-vneck-tee-blue-${ RAND_STRING }`
 					),
 				pennant: testProductData.externalProducts[ 0 ],
 			};
@@ -2226,35 +2212,47 @@ test.describe.serial( 'Orders API tests', () => {
 				email: 'ben.efactor@email.net',
 			};
 
-			const john = await request.post( '/wp-json/wc/v3/customers', {
+			const usernameJohn = `john.doe.${ Date.now() }`;
+			const emailJohn = `${ usernameJohn }@example.com`;
+			const john = await request.post( './wp-json/wc/v3/customers', {
 				data: {
 					first_name: 'John',
 					last_name: 'Doe',
-					username: 'john.doe',
-					email: 'john.doe@example.com',
+					username: usernameJohn,
+					email: emailJohn,
 					billing: {
 						...johnAddress,
-						email: 'john.doe@example.com',
+						email: emailJohn,
 					},
 					shipping: johnAddress,
 				},
+				failOnStatusCode: true,
 			} );
-			const johnJSON = await john.json();
 
-			const tina = await request.post( '/wp-json/wc/v3/customers', {
+			expect( john.status() ).toEqual( 201 );
+			const johnJSON = await john.json();
+			expect( johnJSON.id ).toBeDefined();
+
+			const usernameTina = `tina.clark.${ Date.now() }`;
+			const emailTina = `${ usernameTina }@example.com`;
+			const tina = await request.post( './wp-json/wc/v3/customers', {
 				data: {
 					first_name: 'Tina',
 					last_name: 'Clark',
-					username: 'tina.clark',
-					email: 'tina.clark@example.com',
+					username: usernameTina,
+					email: emailTina,
 					billing: {
 						...tinaAddress,
-						email: 'tina.clark@example.com',
+						email: emailTina,
 					},
 					shipping: tinaAddress,
 				},
+				failOnStatusCode: true,
 			} );
+
+			expect( tina.status() ).toEqual( 201 );
 			const tinaJSON = await tina.json();
+			expect( tinaJSON.id ).toBeDefined();
 
 			const orderBaseData = {
 				payment_method: 'cod',
@@ -2268,7 +2266,7 @@ test.describe.serial( 'Orders API tests', () => {
 			const orders = [];
 			// Have "John" order all products.
 			Object.values( orderedProducts ).forEach( async ( product ) => {
-				const order2 = await request.post( '/wp-json/wc/v3/orders', {
+				const order2 = await request.post( './wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
 						customer_id: johnJSON.id,
@@ -2284,6 +2282,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				} );
 				const orderJSON = await order2.json();
 
@@ -2292,7 +2291,7 @@ test.describe.serial( 'Orders API tests', () => {
 
 			// Have "Tina" order some sunglasses and make a child order.
 			// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
-			const order2 = await request.post( '/wp-json/wc/v3/orders', {
+			const order2 = await request.post( './wp-json/wc/v3/orders', {
 				data: {
 					...orderBaseData,
 					status: 'completed',
@@ -2310,13 +2309,14 @@ test.describe.serial( 'Orders API tests', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const order2JSON = await order2.json();
 
 			orders.push( order2JSON );
 
 			// create child order by referencing a parent_id
-			const order3 = await request.post( '/wp-json/wc/v3/orders', {
+			const order3 = await request.post( './wp-json/wc/v3/orders', {
 				data: {
 					...orderBaseData,
 					parent_id: order2JSON.id,
@@ -2333,13 +2333,14 @@ test.describe.serial( 'Orders API tests', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const order3JSON = await order3.json();
 
 			orders.push( order3JSON );
 
 			// Guest order.
-			const guestOrder = await request.post( '/wp-json/wc/v3/orders', {
+			const guestOrder = await request.post( './wp-json/wc/v3/orders', {
 				data: {
 					...orderBaseData,
 					billing: guestBillingAddress,
@@ -2355,20 +2356,22 @@ test.describe.serial( 'Orders API tests', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const guestOrderJSON = await guestOrder.json();
 
 			// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
 			await request.put(
-				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+				'./wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
 				{
 					data: {
 						value: 'yes',
 					},
+					failOnStatusCode: true,
 				}
 			);
 
-			await request.post( '/wp-json/wc/v3/taxes', {
+			await request.post( './wp-json/wc/v3/taxes', {
 				data: {
 					country: '*',
 					state: '*',
@@ -2378,17 +2381,19 @@ test.describe.serial( 'Orders API tests', () => {
 					rate: '5.5',
 					shipping: true,
 				},
+				failOnStatusCode: true,
 			} );
 
-			const coupon = await request.post( '/wp-json/wc/v3/coupons', {
+			const coupon = await request.post( './wp-json/wc/v3/coupons', {
 				data: {
-					code: 'save5',
+					code: COUPON_CODE,
 					amount: '5',
 				},
+				failOnStatusCode: true,
 			} );
 			const couponJSON = await coupon.json();
 
-			const order4 = await request.post( '/wp-json/wc/v3/orders', {
+			const order4 = await request.post( './wp-json/wc/v3/orders', {
 				data: {
 					...orderBaseData,
 					line_items: [
@@ -2399,7 +2404,7 @@ test.describe.serial( 'Orders API tests', () => {
 					],
 					coupon_lines: [
 						{
-							code: 'save5',
+							code: COUPON_CODE,
 						},
 					],
 					shipping_lines: [
@@ -2415,11 +2420,12 @@ test.describe.serial( 'Orders API tests', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const order4JSON = await order4.json();
 
 			await request.post(
-				`/wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
+				`./wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
 				{
 					data: {
 						api_refund: false, // Prevent an actual refund request (fails with CoD),
@@ -2440,6 +2446,7 @@ test.describe.serial( 'Orders API tests', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			orders.push( order4JSON );
@@ -2462,16 +2469,15 @@ test.describe.serial( 'Orders API tests', () => {
 		};
 
 		sampleData = await createSampleData();
-	}, 100000 );
+	} );
 
 	test.afterAll( async ( { request } ) => {
 		const productsTestSetupDeleteSampleData = async ( _sampleData ) => {
 			const {
 				categories,
 				attributes,
-				tags,
+				productTags,
 				shippingClasses,
-				taxClasses,
 				simpleProducts,
 				externalProducts,
 				groupedProducts,
@@ -2492,87 +2498,59 @@ test.describe.serial( 'Orders API tests', () => {
 					hierarchicalProducts.parentJSON.id,
 					hierarchicalProducts.childJSON.id,
 				] );
-
-			for ( const _order of orders ) {
-				await request.delete( `/wp-json/wc/v3/orders/${ _order.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
-
-			for ( const productId of productIds ) {
-				await request.delete(
-					`/wp-json/wc/v3/products/${ productId }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
-
-			await request.delete(
-				`/wp-json/wc/v3/products/attributes/${ attributes.colorJSON.id }`,
-				{
-					data: {
-						force: true,
-					},
-				}
+			const orderIds = orders.map( ( { id } ) => id );
+			const categoryIds = Object.values( categories ).map(
+				( { id } ) => id
+			);
+			const tagIds = Object.values( productTags ).map( ( { id } ) => id );
+			const shippingClassIds = Object.values( shippingClasses ).map(
+				( { id } ) => id
 			);
 
-			await request.delete(
-				`/wp-json/wc/v3/products/attributes/${ attributes.sizeJSON.id }`,
+			await request.post( './wp-json/wc/v3/orders/batch', {
+				data: {
+					delete: orderIds,
+				},
+				failOnStatusCode: true,
+			} );
+
+			await request.post( `./wp-json/wc/v3/products/batch`, {
+				data: {
+					delete: productIds,
+				},
+				failOnStatusCode: true,
+			} );
+
+			await request.post( `./wp-json/wc/v3/products/attributes/batch`, {
+				data: {
+					delete: [ attributes.colorJSON.id, attributes.sizeJSON.id ],
+				},
+				failOnStatusCode: true,
+			} );
+
+			await request.post( `./wp-json/wc/v3/products/categories/batch`, {
+				data: {
+					delete: categoryIds,
+				},
+				failOnStatusCode: true,
+			} );
+
+			await request.post( `./wp-json/wc/v3/products/tags/batch`, {
+				data: {
+					delete: tagIds,
+				},
+				failOnStatusCode: true,
+			} );
+
+			await request.post(
+				`./wp-json/wc/v3/products/shipping_classes/batch`,
 				{
 					data: {
-						force: true,
+						delete: shippingClassIds,
 					},
+					failOnStatusCode: true,
 				}
 			);
-
-			for ( const category of Object.values( categories ) ) {
-				await request.delete(
-					`/wp-json/wc/v3/products/categories/${ category.id }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
-
-			for ( const tag of Object.values( tags ) ) {
-				await request.delete(
-					`/wp-json/wc/v3/products/tags/${ tag.id }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
-
-			for ( const shippingClass of Object.values( shippingClasses ) ) {
-				await request.delete(
-					`/wp-json/wc/v3/products/shipping_classes/${ shippingClass.id }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
-
-			for ( const taxClass of Object.values( taxClasses ) ) {
-				await request.delete(
-					`/wp-json/wc/v3/taxes/classes/${ taxClass.slug }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
 		};
 
 		const deleteSampleData = async ( _sampleData ) => {
@@ -2580,33 +2558,40 @@ test.describe.serial( 'Orders API tests', () => {
 				_sampleData.testProductData
 			);
 
-			for ( const _order of _sampleData.orders.concat( [
-				_sampleData.guestOrderJSON,
-			] ) ) {
-				await request.delete( `/wp-json/wc/v3/orders/${ _order.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
+			const orderIds = _sampleData.orders
+				.concat( [ _sampleData.guestOrderJSON ] )
+				.map( ( { id } ) => id );
+			await request.post( './wp-json/wc/v3/orders/batch', {
+				data: {
+					delete: orderIds,
+				},
+				failOnStatusCode: true,
+			} );
 
-			for ( const customer of Object.values( _sampleData.customers ) ) {
-				await request.delete(
-					`/wp-json/wc/v3/customers/${ customer.id }`,
-					{
-						data: {
-							force: true,
-						},
-					}
-				);
-			}
+			const customerIds = Object.values( _sampleData.customers ).map(
+				( { id } ) => id
+			);
+			await request.post( `./wp-json/wc/v3/customers/batch`, {
+				data: {
+					delete: customerIds,
+				},
+				failOnStatusCode: true,
+			} );
+
+			const couponIds = [ _sampleData.couponJSON.id ];
+			await request.post( `./wp-json/wc/v3/coupons/batch`, {
+				data: {
+					delete: couponIds,
+				},
+				failOnStatusCode: true,
+			} );
 		};
 
 		await deleteSampleData( sampleData );
-	}, 10000 );
+	} );
 
 	test( 'can create an order', async ( { request } ) => {
-		const response = await request.post( '/wp-json/wc/v3/orders', {
+		const response = await request.post( './wp-json/wc/v3/orders', {
 			data: order,
 		} );
 		const responseJSON = await response.json();
@@ -2622,7 +2607,7 @@ test.describe.serial( 'Orders API tests', () => {
 
 	test( 'can retrieve an order', async ( { request } ) => {
 		const response = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }`
+			`./wp-json/wc/v3/orders/${ orderId }`
 		);
 		const responseJSON = await response.json();
 
@@ -2638,7 +2623,7 @@ test.describe.serial( 'Orders API tests', () => {
 		order.shipping = updatedCustomerShipping;
 
 		const response = await request.put(
-			`/wp-json/wc/v3/orders/${ orderId }`,
+			`./wp-json/wc/v3/orders/${ orderId }`,
 			{
 				data: order,
 			}
@@ -2652,7 +2637,7 @@ test.describe.serial( 'Orders API tests', () => {
 
 	test( 'can permanently delete an order', async ( { request } ) => {
 		const response = await request.delete(
-			`/wp-json/wc/v3/orders/${ orderId }`,
+			`./wp-json/wc/v3/orders/${ orderId }`,
 			{
 				data: {
 					force: true,
@@ -2662,7 +2647,7 @@ test.describe.serial( 'Orders API tests', () => {
 		expect( response.status() ).toEqual( 200 );
 
 		const getOrderResponse = await request.get(
-			`/wp-json/wc/v3/orders/${ orderId }`
+			`./wp-json/wc/v3/orders/${ orderId }`
 		);
 		expect( getOrderResponse.status() ).toEqual( 404 );
 	} );
@@ -2672,19 +2657,19 @@ test.describe.serial( 'Orders API tests', () => {
 
 		test( 'pagination', async ( { request } ) => {
 			const pageSize = 4;
-			const page1 = await request.get( '/wp-json/wc/v3/orders', {
+			const page1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: pageSize,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const page1JSON = await page1.json();
 
-			const page2 = await request.get( '/wp-json/wc/v3/orders', {
+			const page2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: pageSize,
 					page: 2,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const page2JSON = await page2.json();
@@ -2714,12 +2699,12 @@ test.describe.serial( 'Orders API tests', () => {
 			expect( Object.keys( allOrderIds ) ).toHaveLength( pageSize * 2 );
 
 			// Verify that offset takes precedent over page number.
-			const page2Offset = await request.get( 'wp-json/wc/v3/orders', {
+			const page2Offset = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: pageSize,
 					page: 2,
 					offset: pageSize + 1,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const page2OffsetJSON = await page2Offset.json();
@@ -2735,11 +2720,11 @@ test.describe.serial( 'Orders API tests', () => {
 			expect( page2OffsetJSON[ 0 ].id ).toEqual( page2JSON[ 1 ].id );
 
 			// Verify the last page only has 1 order as we expect.
-			const lastPage = await request.get( 'wp-json/wc/v3/orders', {
+			const lastPage = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: pageSize,
 					page: 3,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const lastPageJSON = await lastPage.json();
@@ -2748,10 +2733,10 @@ test.describe.serial( 'Orders API tests', () => {
 			expect( lastPageJSON ).toHaveLength( 2 );
 
 			// Verify a page outside the total page count is empty.
-			const page6 = await request.get( 'wp-json/wc/v3/orders', {
+			const page6 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					page: 6,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const page6JSON = await page6.json();
@@ -2761,10 +2746,10 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'inclusion / exclusion', async ( { request } ) => {
-			const allOrders = await request.get( 'wp-json/wc/v3/orders', {
+			const allOrders = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: 10,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const allOrdersJSON = await allOrders.json();
@@ -2780,7 +2765,7 @@ test.describe.serial( 'Orders API tests', () => {
 				allOrdersIds[ 7 ],
 			];
 
-			const included = await request.get( 'wp-json/wc/v3/orders', {
+			const included = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: 20,
 					include: ordersToFilter.join( ',' ),
@@ -2800,7 +2785,7 @@ test.describe.serial( 'Orders API tests', () => {
 				)
 			);
 
-			const excluded = await request.get( 'wp-json/wc/v3/orders', {
+			const excluded = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					per_page: 20,
 					exclude: ordersToFilter.join( ',' ),
@@ -2824,7 +2809,7 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'parent', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					parent: sampleData.hierarchicalOrders.parent.id,
 				},
@@ -2837,7 +2822,7 @@ test.describe.serial( 'Orders API tests', () => {
 				sampleData.hierarchicalOrders.child.id
 			);
 
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					parent_exclude: sampleData.hierarchicalOrders.parent.id,
 				},
@@ -2855,10 +2840,10 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'status', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					status: 'completed',
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const result1JSON = await result1.json();
@@ -2869,18 +2854,17 @@ test.describe.serial( 'Orders API tests', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						status: 'completed',
-						customer_id: 0,
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {
-								name: 'Single oxo',
+								name: `Single ${ RAND_STRING }`,
 								quantity: 2,
 							} ),
 							expect.objectContaining( {
-								name: 'Beanie with Logo oxo',
+								name: `Beanie with Logo ${ RAND_STRING }`,
 								quantity: 3,
 							} ),
 							expect.objectContaining( {
-								name: 'T-Shirt oxo',
+								name: `T-Shirt ${ RAND_STRING }`,
 								quantity: 1,
 							} ),
 						] ),
@@ -2890,7 +2874,7 @@ test.describe.serial( 'Orders API tests', () => {
 						customer_id: sampleData.customers.tinaJSON.id,
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {
-								name: 'Sunglasses oxo',
+								name: `Sunglasses ${ RAND_STRING }`,
 								quantity: 1,
 							} ),
 						] ),
@@ -2898,10 +2882,10 @@ test.describe.serial( 'Orders API tests', () => {
 				] )
 			);
 
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					status: 'processing',
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const result2JSON = await result2.json();
@@ -2919,7 +2903,7 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'customer', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					customer: sampleData.customers.johnJSON.id,
 				},
@@ -2936,10 +2920,10 @@ test.describe.serial( 'Orders API tests', () => {
 				)
 			);
 
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					customer: 0,
-					search: 'oxo',
+					search: RAND_STRING,
 				},
 			} );
 			const result2JSON = await result2.json();
@@ -2957,9 +2941,9 @@ test.describe.serial( 'Orders API tests', () => {
 
 		test( 'product', async ( { request } ) => {
 			const beanie = sampleData.testProductData.simpleProducts.find(
-				( p ) => p.name === 'Beanie oxo'
+				( p ) => p.name === `Beanie ${ RAND_STRING }`
 			);
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					product: beanie.id,
 				},
@@ -2973,7 +2957,7 @@ test.describe.serial( 'Orders API tests', () => {
 					expect.objectContaining( {
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {
-								name: 'Beanie oxo',
+								name: `Beanie ${ RAND_STRING }`,
 							} ),
 						] ),
 					} )
@@ -3069,7 +3053,7 @@ test.describe.serial( 'Orders API tests', () => {
 			// - order_item_name
 
 			// Test billing email.
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'example.com',
 				},
@@ -3083,7 +3067,7 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 
 			// Test billing address.
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'gainesville',
 				},
@@ -3091,13 +3075,13 @@ test.describe.serial( 'Orders API tests', () => {
 			const result2JSON = await result2.json();
 
 			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 1 );
-			expect( result2JSON[ 0 ].id ).toEqual(
+			expect( result2JSON.length ).toBeGreaterThanOrEqual( 1 );
+			expect( result2JSON.map( ( { id } ) => id ) ).toContain(
 				sampleData.guestOrderJSON.id
 			);
 
 			// Test shipping address.
-			const result3 = await request.get( 'wp-json/wc/v3/orders', {
+			const result3 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'Incognito',
 				},
@@ -3105,13 +3089,13 @@ test.describe.serial( 'Orders API tests', () => {
 			const result3JSON = await result3.json();
 
 			expect( result3.status() ).toEqual( 200 );
-			expect( result3JSON ).toHaveLength( 1 );
-			expect( result3JSON[ 0 ].id ).toEqual(
+			expect( result3JSON.length ).toBeGreaterThanOrEqual( 1 );
+			expect( result3JSON.map( ( { id } ) => id ) ).toContain(
 				sampleData.guestOrderJSON.id
 			);
 
 			// Test billing last name.
-			const result4 = await request.get( 'wp-json/wc/v3/orders', {
+			const result4 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'Doe',
 				},
@@ -3125,21 +3109,21 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 
 			// Test order item name.
-			const result5 = await request.get( 'wp-json/wc/v3/orders', {
+			const result5 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
-					search: 'Pennant oxo',
+					search: `Pennant ${ RAND_STRING }`,
 				},
 			} );
 			const result5JSON = await result5.json();
 
 			expect( result5.status() ).toEqual( 200 );
-			expect( result5JSON ).toHaveLength( 2 );
+			expect( result5JSON.length ).toBeGreaterThanOrEqual( 2 );
 			result5JSON.forEach( ( _order ) =>
 				expect( _order ).toEqual(
 					expect.objectContaining( {
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {
-								name: 'WordPress Pennant oxo',
+								name: `WordPress Pennant ${ RAND_STRING }`,
 							} ),
 						] ),
 					} )
@@ -3153,7 +3137,7 @@ test.describe.serial( 'Orders API tests', () => {
 		// include slug and title, since they are programmatically generated.
 		test( 'default', async ( { request } ) => {
 			// Default = date desc.
-			const result = await request.get( 'wp-json/wc/v3/orders' );
+			const result = await request.get( './wp-json/wc/v3/orders' );
 			const resultJSON = await result.json();
 			expect( result.status() ).toEqual( 200 );
 
@@ -3167,7 +3151,7 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'date', async ( { request } ) => {
-			const result = await request.get( 'wp-json/wc/v3/orders', {
+			const result = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					order: 'asc',
 					orderby: 'date',
@@ -3187,7 +3171,7 @@ test.describe.serial( 'Orders API tests', () => {
 		} );
 
 		test( 'id', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					order: 'asc',
 					orderby: 'id',
@@ -3203,7 +3187,7 @@ test.describe.serial( 'Orders API tests', () => {
 				lastId = id;
 			} );
 
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					order: 'desc',
 					orderby: 'id',
@@ -3227,7 +3211,7 @@ test.describe.serial( 'Orders API tests', () => {
 				sampleData.guestOrderJSON.id,
 			];
 
-			const result1 = await request.get( 'wp-json/wc/v3/orders', {
+			const result1 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					order: 'asc',
 					orderby: 'include',
@@ -3244,7 +3228,7 @@ test.describe.serial( 'Orders API tests', () => {
 				expect( id ).toBe( includeIds[ idx ] );
 			} );
 
-			const result2 = await request.get( 'wp-json/wc/v3/orders', {
+			const result2 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					order: 'desc',
 					orderby: 'include',

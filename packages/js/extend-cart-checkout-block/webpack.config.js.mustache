@@ -42,6 +42,7 @@ module.exports = {
 						options: {
 							sassOptions: {
 								includePaths: [ 'src/css' ],
+								loadPaths: [ 'src/css', '.' ],
 							},
 							additionalData: ( content, loaderContext ) => {
 								const {

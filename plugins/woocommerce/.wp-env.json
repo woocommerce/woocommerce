@@ -1,6 +1,6 @@
 {
-	"core": null,
-	"phpVersion": "7.4",
+	"core": "https://wordpress.org/wordpress-latest.zip",
+	"phpVersion": "8.1",
 	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
@@ -8,16 +8,9 @@
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
 	},
-	"mappings": {
-		"wp-cli.yml": "./tests/wp-cli.yml",
-		"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
-		"wp-content/plugins/process-waiting-actions.php": "./tests/e2e-pw/bin/process-waiting-actions.php",
-		"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php",
-		"test-data/images/": "./tests/e2e-pw/test-data/images/"
-	},
 	"lifecycleScripts": {
-		"afterStart": "wp-env run tests-cli bash wp-content/plugins/woocommerce/tests/e2e-pw/bin/test-env-setup.sh",
-		"afterClean": "wp-env run tests-cli bash wp-content/plugins/woocommerce/tests/e2e-pw/bin/test-env-setup.sh"
+		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
+		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
 	},
 	"env": {
 		"development": {
@@ -36,6 +29,14 @@
 			"config": {
 				"WP_TESTS_DOMAIN": "localhost",
 				"ALTERNATE_WP_CRON": false
+			},
+			"mappings": {
+				"wp-cli.yml": "./tests/wp-cli.yml",
+				"test-env-setup.sh": "./tests/e2e-pw/bin/test-env-setup.sh",
+				"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
+				"wp-content/plugins/process-waiting-actions.php": "./tests/e2e-pw/bin/process-waiting-actions.php",
+				"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php",
+				"test-data/images/": "./tests/e2e-pw/test-data/images/"
 			}
 		}
 	}

@@ -6,6 +6,8 @@
  * @version  3.2.4
  */
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -126,7 +128,7 @@ class WC_Shortcode_Products {
 				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 				'tag'            => '',        // Comma separated tag slugs.
 				'tag_operator'   => 'IN',      // Operator to compare tags. Possible values are 'IN', 'NOT IN', 'AND'.
-				'visibility'     => 'visible', // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
+				'visibility'     => CatalogVisibility::VISIBLE, // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
 				'class'          => '',        // HTML class.
 				'page'           => 1,         // Page for pagination.
 				'paginate'       => false,     // Should results be paginated.
@@ -641,8 +643,13 @@ class WC_Shortcode_Products {
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
-			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				/**
+				 * Fire the standard shop hooks when paginating so we can display result counts etc.
+				 * If the pagination is not enabled, this hook will not be fired.
+				 *
+				 * @since 3.3.1
+				 */
 				do_action( 'woocommerce_before_shop_loop' );
 			}
 
@@ -667,8 +674,13 @@ class WC_Shortcode_Products {
 			$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			woocommerce_product_loop_end();
 
-			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
+				/**
+				 * Fire the standard shop hooks when paginating so we can display the pagination.
+				 * If the pagination is not enabled, this hook will not be fired.
+				 *
+				 * @since 3.3.1
+				 */
 				do_action( 'woocommerce_after_shop_loop' );
 			}
 

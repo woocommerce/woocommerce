@@ -122,7 +122,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	 *
 	 * @return void
 	 */
-	public function add_error( string $plugin_name, string $error_message = null ) {
+	public function add_error( string $plugin_name, ?string $error_message = null ) {
 		$option = $this->get();
 
 		$option['plugins'][ $plugin_name ]['errors'][] = $error_message;

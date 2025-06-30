@@ -38,7 +38,7 @@ class DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname;
+	protected static $facade_over_classname = '';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -58,7 +58,9 @@ class DeprecatedClassFacade {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->instance = new static::$facade_over_classname();
+		if ( '' !== static::$facade_over_classname ) {
+			$this->instance = new static::$facade_over_classname();
+		}
 	}
 
 	/**
@@ -73,6 +75,13 @@ class DeprecatedClassFacade {
 			static::$deprecated_in_version,
 			static::$facade_over_classname . '::' . $function
 		);
+
+		if ( '' !== static::$facade_over_classname ) {
+			$message = $message . sprintf(
+				' Use %s instead.',
+				static::$facade_over_classname . '::' . $function
+			);
+		}
 
 		// Only log when the message has not been logged before.
 		if ( ! in_array( $message, self::$logged_messages, true ) ) {
@@ -89,6 +98,10 @@ class DeprecatedClassFacade {
 	 */
 	public function __call( $name, $arguments ) {
 		self::log_deprecation( $name );
+
+		if ( ! isset( $this->instance ) ) {
+			return;
+		}
 
 		return call_user_func_array(
 			array(
@@ -107,6 +120,10 @@ class DeprecatedClassFacade {
 	 */
 	public static function __callStatic( $name, $arguments ) {
 		self::log_deprecation( $name );
+
+		if ( '' === static::$facade_over_classname ) {
+			return;
+		}
 
 		return call_user_func_array(
 			array(

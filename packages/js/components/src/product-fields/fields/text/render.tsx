@@ -11,11 +11,7 @@ import { BaseProductFieldProps } from '../types';
 
 type TextFieldProps = BaseProductFieldProps< string >;
 
-const TextField: React.FC< TextFieldProps > = ( {
-	label,
-	value,
-	onChange,
-} ) => {
+const TextField = ( { label, value, onChange }: TextFieldProps ) => {
 	return (
 		<TextControl label={ label } onChange={ onChange } value={ value } />
 	);

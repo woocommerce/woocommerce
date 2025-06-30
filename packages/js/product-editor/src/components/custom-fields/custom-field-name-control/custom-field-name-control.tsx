@@ -26,7 +26,7 @@ import type { CustomFieldNameControlProps } from './types';
  * the arbitrary value into an option so it can be selected as
  * a valid value
  *
- * @param search The seraching criteria.
+ * @param search The search criteria.
  * @return The list of filtered custom field names as a Promise.
  */
 async function searchCustomFieldNames( search?: string ) {
@@ -87,7 +87,7 @@ export const CustomFieldNameControl = forwardRef(
 			useCallback(
 				function onFilterValueChange( search: string ) {
 					searchCustomFieldNames(
-						search === '' ? value : search
+						search === '' ? ( value as string ) : search
 					).then( setCustomFieldNames );
 				},
 				[ value ]

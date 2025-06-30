@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Exporter.
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 /**
  * Class WC_Product_CSV_Exporter_Test
  */
@@ -43,7 +45,7 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_column_value_published() {
 		$product = WC_Helper_Product::create_variation_product();
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 
 		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );
@@ -53,6 +55,10 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		$this->product_ids = array_merge( array( $product->get_id() ), $product->get_children( 'edit' ) );
 
 		add_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
+
+		// Required for brands to be registered because wc-admin-brands.php adds a filter that depends on it.
+		WC_Brands::init_taxonomy();
+
 		$exporter = new WC_Product_CSV_Exporter();
 		$exporter->prepare_data_to_export();
 		$data = $get_data_to_export->invoke( $exporter );
@@ -62,5 +68,4 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		}
 		remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 	}
-
 }

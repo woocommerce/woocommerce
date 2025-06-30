@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks\Templates;
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksTestBlock;
 use WP_UnitTestCase;

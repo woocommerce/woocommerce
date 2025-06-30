@@ -1,0 +1,41 @@
+.wc-block-checkout__add-note {
+	margin: 0 0 $gap-largest 0;
+	line-height: 1;
+	padding: 0;
+
+	.wc-block-components-checkbox {
+		line-height: 1;
+		margin-top: 0;
+		margin-bottom: -3px;
+	}
+}
+
+.wc-block-checkout__add-note .wc-block-components-textarea {
+	margin-top: $gap;
+
+	&:focus {
+		background-color: $input-background-light;
+		color: $input-text-light;
+		outline: 0;
+		box-shadow: 0 0 0 1px $input-text-light;
+	}
+
+	.has-dark-controls & {
+		&:focus {
+			color: $input-text-dark;
+			box-shadow: 0 0 0 1px currentColor;
+			background-color: $input-background-dark;
+		}
+	}
+}
+
+.wc-block-components-form
+	.wc-block-checkout__order-notes.wc-block-components-checkout-step {
+	padding-left: 0;
+	margin-bottom: $gap-largest;
+
+	@include cart-checkout-below-large-container {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+}

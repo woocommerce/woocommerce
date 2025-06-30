@@ -43,7 +43,7 @@ class EvaluationLogger {
 	 * @param string|null               $source Logger source.
 	 * @param \WC_Logger_Interface|null $logger Logger class to use. Default to using the WC logger.
 	 */
-	public function __construct( $slug, $source = null, \WC_Logger_Interface $logger = null ) {
+	public function __construct( $slug, $source = null, ?\WC_Logger_Interface $logger = null ) {
 		$this->slug = $slug;
 		if ( null === $logger ) {
 			$logger = wc_get_logger();

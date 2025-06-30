@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, useEffect, Fragment } from '@wordpress/element';
-import { KeyboardEvent, ReactElement, useMemo } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -71,18 +71,13 @@ export function Tabs( { selected, onChange }: TabsProps ) {
 		'id'
 	);
 
-	function selectTabOnNavigate(
-		_childIndex: number,
-		child: HTMLButtonElement
-	) {
+	function selectTabOnNavigate( _childIndex: number, child: HTMLElement ) {
 		child.focus();
 	}
-
-	function handleKeyDown( event: KeyboardEvent< HTMLDivElement > ) {
-		const tabs =
-			event.currentTarget.querySelectorAll< HTMLButtonElement >(
-				'[role="tab"]'
-			);
+	function handleKeyDown( event: KeyboardEvent ) {
+		const tabs = (
+			event?.currentTarget as HTMLElement
+		 )?.querySelectorAll< HTMLButtonElement >( '[role="tab"]' );
 
 		switch ( event.key ) {
 			case 'Home':
@@ -102,10 +97,10 @@ export function Tabs( { selected, onChange }: TabsProps ) {
 		}
 	}
 
-	function renderFills( fills: readonly ( readonly ReactElement[] )[] ) {
+	function renderFills( fills: ReactNode ) {
 		return (
 			<TabFills
-				fills={ fills }
+				fills={ fills as readonly ( readonly ReactElement[] )[] }
 				selected={ selected }
 				onChange={ onChange }
 			/>

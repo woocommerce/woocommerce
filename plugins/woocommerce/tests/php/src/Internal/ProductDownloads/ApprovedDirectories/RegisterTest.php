@@ -1,9 +1,9 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads;
+namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads\ApprovedDirectories;
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register;
-
 use WC_Unit_Test_Case;
 
 /**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an error with the Email Editor not loading Global Styles for non-admin WordPress users and ensure permissions are correctly checked when required.

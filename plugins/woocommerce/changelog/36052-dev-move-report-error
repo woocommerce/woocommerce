@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Move `ReportError` to `@woocommerce/components` as `AnalyticsError`

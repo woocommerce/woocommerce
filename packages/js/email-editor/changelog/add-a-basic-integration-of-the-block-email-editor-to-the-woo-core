@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update package json. Move copy assets commands to the @woocommerce/plugin-woocommerce package. The command will run when required.

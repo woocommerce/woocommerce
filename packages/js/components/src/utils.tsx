@@ -1,13 +1,16 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
+import { isValidElement, Fragment, Children } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
 type ChildrenProps = {
 	order: number;
 };
+
+type FillProps = React.ComponentProps< typeof Fill >;
+type SlotProps = React.ComponentProps< typeof Slot >;
 
 /**
  * Returns an object with the children and props that will be used by `cloneElement`. They will change depending on the
@@ -19,8 +22,10 @@ type ChildrenProps = {
  * @param {Object} injectProps - Props to inject.
  * @return {Object} Object with the keys: children and props.
  */
-function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
+function getChildrenAndProps< T = FillProps, S = Record< string, unknown > >(
+	children:
+		| React.ReactNode
+		| ( ( props: T & { order: number } ) => React.ReactNode ),
 	order: number,
 	props: T,
 	injectProps?: S
@@ -59,15 +64,23 @@ function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
  * @param {Object} injectProps - Props to inject.
  * @return {Node} Node.
  */
-function createOrderedChildren< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
+function createOrderedChildren< T = FillProps, S = Record< string, unknown > >(
+	children:
+		| React.ReactNode
+		| ( ( props: T & { order: number } ) => React.ReactNode ),
 	order: number,
 	props: T,
 	injectProps?: S
-): React.ReactElement {
+): React.ReactNode {
 	const { children: childrenToRender, props: propsToRender } =
 		getChildrenAndProps( children, order, props, injectProps );
-	return cloneElement( childrenToRender, propsToRender );
+	if ( ! childrenToRender || typeof childrenToRender === 'string' ) {
+		return childrenToRender;
+	}
+	return cloneElement(
+		childrenToRender as React.ReactElement,
+		propsToRender
+	);
 }
 export { createOrderedChildren };
 
@@ -77,10 +90,18 @@ export { createOrderedChildren };
  * @param {Array} fills - slot's `Fill`s.
  * @return {Node} Node.
  */
-export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
+export const sortFillsByOrder: SlotProps[ 'children' ] = ( fills ) => {
 	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
-	const sortedFills = [ ...fills ].sort( ( a, b ) => {
-		return a[ 0 ].props.order - b[ 0 ].props.order;
+	const sortedFills = Children.toArray( fills ).sort( ( a, b ) => {
+		if (
+			typeof a === 'object' &&
+			'key' in a &&
+			typeof b === 'object' &&
+			'key' in b
+		) {
+			return a.props.order - b.props.order;
+		}
+		return 0;
 	} );
 
 	return <Fragment>{ sortedFills }</Fragment>;

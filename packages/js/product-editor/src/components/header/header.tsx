@@ -17,13 +17,10 @@ import { Button, Tooltip } from '@wordpress/components';
 import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Tag } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { PinnedItems } from '@wordpress/interface';
+import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
 
 /**
  * Internal dependencies
@@ -66,13 +63,12 @@ export function Header( {
 		{ enabled: productId !== -1 }
 	);
 
-	const lastPersistedProduct = useSelect< Product | null >(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return productId !== -1
-				? getEntityRecord( 'postType', productType, productId )
+				? // @ts-expect-error getEntityRecord is not typed correctly.
+				  getEntityRecord( 'postType', productType, productId )
 				: null;
 		},
 		[ productType, productId ]
@@ -199,12 +195,9 @@ export function Header( {
 				) }
 
 				<div
-					className={ classNames(
-						'woocommerce-product-header-title-bar',
-						{
-							'is-variation': isVariation,
-						}
-					) }
+					className={ clsx( 'woocommerce-product-header-title-bar', {
+						'is-variation': isVariation,
+					} ) }
 				>
 					<div className="woocommerce-product-header-title-bar__image">
 						{ isHeaderImageVisible ? (

@@ -1,0 +1,48 @@
+.wc-block-order-confirmation-additional-fields
+	.wc-block-components-additional-fields-list {
+	border: 1px solid $universal-border-light;
+	border-radius: $universal-border-radius;
+	padding: 0;
+	display: grid;
+	grid-template-columns: 1fr max-content;
+	dt,
+	dd {
+		border-bottom: 1px solid $universal-border-light;
+
+		&:last-of-type {
+			border-bottom: 0;
+		}
+	}
+	dt {
+		font-style: normal;
+		font-weight: bold;
+		padding: $gap;
+		box-sizing: border-box;
+		margin: 0;
+
+		&::after {
+			display: none;
+		}
+	}
+	dd {
+		padding: $gap;
+		box-sizing: border-box;
+		margin: 0;
+		text-align: right;
+	}
+}
+@media screen and (max-width: 768px) {
+	.wc-block-order-confirmation-additional-fields
+		.wc-block-components-additional-fields-list {
+		display: block;
+		dt {
+			border-bottom: 0;
+			padding-bottom: 0;
+		}
+		dd {
+			text-align: left;
+			border-bottom: 1px solid $universal-border-light;
+			padding-top: 0;
+		}
+	}
+}

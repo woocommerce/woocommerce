@@ -13,6 +13,8 @@ import {
 	REMOTE_LOGGING_ERROR_DATA_FILTER,
 	REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
 	REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+	sanitiseRequestUriParams,
+	REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER,
 } from '../remote-logger';
 import { fetchMock } from './__mocks__/fetch';
 
@@ -380,3 +382,24 @@ describe( 'captureException', () => {
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
+
+describe( 'sanitiseRequestUriParams', () => {
+	afterEach(() => {
+		removeFilter(REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER, 'test' );
+	})
+	it( 'should replace non-whitelisted params with xxxxxx', () => {
+		expect(sanitiseRequestUriParams('?path=home&user=admin&token=abc123')).toEqual('path=home&user=xxxxxx&token=xxxxxx')
+	})
+	it( 'should not replace whitelisted params with xxxxxx', () => {
+		expect(sanitiseRequestUriParams('?path=home')).toEqual('path=home')
+	})
+	it( 'should not do anything if empty string is passed in', () => {
+		expect(sanitiseRequestUriParams('')).toEqual('')
+	})
+	it( 'should apply filters correctly', () => {
+		addFilter( REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER, 'test', (defaultWhitelist) => {
+			return [ ... defaultWhitelist, 'foo' ];
+		})
+		expect(sanitiseRequestUriParams('?path=home&foo=bar&user=admin&token=abc123')).toEqual('path=home&foo=bar&user=xxxxxx&token=xxxxxx')
+	})
+})

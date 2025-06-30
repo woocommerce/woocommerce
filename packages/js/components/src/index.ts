@@ -37,7 +37,7 @@ export { default as Rating } from './rating';
 export { default as ReportFilters } from './filters';
 export { default as ReviewRating } from './rating/review';
 export { RichTextEditor as __experimentalRichTextEditor } from './rich-text-editor';
-export { default as Search } from './search';
+export * from './search';
 export { default as SearchListControl } from './search-list-control';
 export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';
@@ -86,9 +86,6 @@ export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
 export { createOrderedChildren, sortFillsByOrder, escapeHTML } from './utils';
-export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
-export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
-export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
 export * from './product-fields';
 export {
 	SlotContextProvider,
@@ -103,12 +100,6 @@ export {
 export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 export { default as PhoneNumberInput } from './phone-number-input';
-
-// Exports below can be removed once the @woocommerce/product-editor package is released.
-export {
-	ProductSectionLayout as __experimentalProductSectionLayout,
-	ProductFieldSection as __experimentalProductFieldSection,
-} from './product-section-layout';
 export { DisplayState } from './display-state';
 export { ProgressBar } from './progress-bar';
 export { ConfettiAnimation } from './confetti-animation';

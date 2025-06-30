@@ -1,0 +1,30 @@
+.wc-block-checkout__terms {
+	margin: 0 0 $gap-largest;
+
+	@include cart-checkout-below-large-container {
+		margin-bottom: $gap-larger;
+		padding-top: $gap-largest;
+
+		&.wc-block-checkout__terms--with-separator {
+			padding-top: $gap-larger;
+		}
+	}
+
+	&.wc-block-checkout__terms--with-separator {
+		padding-top: $gap-largest;
+		border-top: 1px solid $universal-border-light;
+
+		@include cart-checkout-below-large-container {
+			border-top: 0;
+		}
+	}
+
+	textarea {
+		top: -5px;
+		position: relative;
+	}
+
+	&.wc-block-checkout__terms--disabled {
+		opacity: 0.6;
+	}
+}

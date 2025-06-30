@@ -52,6 +52,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = null;
+		WC()->cart->empty_cart();
 	}
 
 	/**

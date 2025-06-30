@@ -1,0 +1,103 @@
+@import "~@wordpress/base-styles/colors";
+
+.spinner-container {
+	align-items: center;
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	width: 100%;
+}
+
+// Temporary styles for Rich Text HTML comments from the PR: https://github.com/WordPress/gutenberg/pull/62128/files
+[data-rich-text-comment],
+[data-rich-text-format-boundary] {
+	border-radius: 2px;
+}
+
+[data-rich-text-comment] {
+	background-color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
+
+	span {
+		color: var(--wp-components-color-accent-inverted, #fff);
+		filter: none;
+		padding: 0 2px;
+	}
+}
+
+.woocommerce-settings-panel-preheader-text {
+	margin-top: 9px;
+}
+
+.woocommerce-email-editor__settings-panel {
+	.woocommerce-settings-panel-richtext {
+		border: 1px solid var(--wp-components-color-gray-600, #949494);
+		border-radius: 2px;
+		box-shadow: transparent 0 0 0;
+		display: block;
+		min-height: 80px;
+		padding: 9px 11px;
+		width: 100%;
+	}
+
+	.woocommerce-settings-panel-personalization-tags-button.components-button.has-icon {
+		display: inline-block;
+		float: right;
+		height: 14px;
+		line-height: 14px;
+		padding: 0 5px;
+
+		span {
+			height: 11px;
+		}
+	}
+
+	.woocommerce-settings-panel-subject .components-base-control__label {
+		width: 100%;
+
+		.components-external-link {
+			float: right;
+		}
+	}
+
+	.woocommerce-settings-panel-help {
+		margin-bottom: 20px;
+
+		.components-text {
+			color: #757575;
+		}
+	}
+
+	.woocommerce-settings-panel-preview-text .components-base-control__label {
+		width: 100%;
+	}
+
+	.woocommerce-settings-panel-preview-text-length {
+		color: $black;
+		display: inline-block;
+		float: right;
+		padding: 3px;
+	}
+
+	.woocommerce-settings-panel-preview-text-length-warning {
+		color: $alert-yellow;
+	}
+
+	.woocommerce-settings-panel-preview-text-length-error {
+		color: $alert-red;
+	}
+}
+
+// Hide the advanced settings in the sidebar.
+// This panel is not used in the email editor at this moment.
+.block-editor-block-inspector__advanced {
+	display: none;
+}
+
+// Enforce hidden state.
+// This is used to hide the publish button when there are no email edits.
+.force-hidden {
+	display: none !important;
+}

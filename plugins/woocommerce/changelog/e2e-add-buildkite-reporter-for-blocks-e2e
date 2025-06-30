@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: add buildkite-test-collector for blocks e2e tests

@@ -24,7 +24,6 @@ export function Edit( {
 		property,
 		label,
 		note,
-		placeholder,
 		help,
 		tooltip,
 		disabled,
@@ -46,6 +45,30 @@ export function Edit( {
 		}
 	}
 
+	// This check is necessary to fix the issue with the SelectControl component types.
+	// The SelectControl component does not handle the value prop correctly when it is an array or a string.
+	if ( Array.isArray( value ) ) {
+		return (
+			<div { ...blockProps }>
+				<SelectControl
+					value={ value }
+					disabled={ disabled }
+					label={
+						<Label
+							label={ label }
+							note={ note }
+							tooltip={ tooltip }
+						/>
+					}
+					onChange={ setValue }
+					help={ renderHelp() }
+					options={ options }
+					multiple={ multiple as never }
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<div { ...blockProps }>
 			<SelectControl
@@ -56,7 +79,6 @@ export function Edit( {
 				}
 				onChange={ setValue }
 				help={ renderHelp() }
-				placeholder={ placeholder }
 				options={ options }
 				multiple={ multiple as never }
 			/>

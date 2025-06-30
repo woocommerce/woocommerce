@@ -48,7 +48,11 @@ class WC_CLI_COM_Command {
 	 * @param  array $assoc_args  WP-CLI associative arguments.
 	 */
 	public static function list_extensions( array $args, array $assoc_args ) {
-		$data = WC_Helper::get_subscriptions();
+		try {
+			$data = WC_Helper::get_subscriptions();
+		} catch ( Exception $e ) {
+			$data = array();
+		}
 
 		$data = array_values( $data );
 
@@ -137,7 +141,7 @@ class WC_CLI_COM_Command {
 	 *     # force connecting to WCCOM even if site is already connected.
 	 *     $ wp wc com connect --force
 	 *
-	 *     # Pass password to comman.
+	 *     # Pass password to command.
 	 *     $ wp wc com connect --password=PASSWORD
 	 *
 	 * @param array $args Positional arguments to include when calling the command.

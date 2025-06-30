@@ -28,11 +28,10 @@ type ReadOnlyProperties = 'id';
 
 type MutableProperties = Omit< ProductShippingClass, ReadOnlyProperties >;
 
-type ProductShippingClassActions = CrudActions<
+export type ProductShippingClassActions = CrudActions<
 	'ProductShippingClass',
 	ProductShippingClass,
-	MutableProperties,
-	'name'
+	MutableProperties
 >;
 
 export type ProductShippingClassSelectors = CrudSelectors<

@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Summary component omits disallowed tags and attributes: <p class="some-class">Lorem ipsum dolor sit amet <h1 style="color: red;">Heading</h1><ul><li>List item</li></ul><img src="https://example.com/image.jpg" alt="Image" /></p> 1`] = `
+<div>
+  <div
+    class="test-class"
+  >
+    <p
+      class="some-class"
+    >
+      Lorem ipsum dolor sit amet 
+    </p>
+    
+
+  </div>
+</div>
+`;
+
+exports[`Summary component renders rich HTML with the allowed tags and attributes: <p class="some-class">Lorem ipsum dolor sit amet <h1 style="color: red;">Heading</h1><ul><li>List item</li></ul><img src="https://example.com/image.jpg" alt="Image" /></p> 1`] = `
+<div>
+  <div
+    class="test-class"
+  >
+    <p
+      class="some-class"
+    >
+      Lorem ipsum dolor sit amet 
+    </p>
+    
+
+    <h1
+      style="color: red;"
+    >
+      Heading
+    </h1>
+    
+
+    <ul>
+      
+
+      <li>
+        List item
+      </li>
+      
+
+    </ul>
+    
+
+    <p>
+      <img
+        alt="Image"
+        src="https://example.com/image.jpg"
+      />
+    </p>
+    
+
+  </div>
+</div>
+`;

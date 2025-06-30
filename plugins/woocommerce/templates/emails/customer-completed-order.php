@@ -12,21 +12,39 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 3.7.0
+ * @version 9.9.0
  */
+
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
 /*
  * @hooked WC_Emails::email_header() Output the email header
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<?php /* translators: %s: Customer first name */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
+<?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
+<p>
+<?php
+if ( ! empty( $order->get_billing_first_name() ) ) {
+	/* translators: %s: Customer first name */
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
+} else {
+	printf( esc_html__( 'Hi,', 'woocommerce' ) );
+}
+?>
+</p>
 <p><?php esc_html_e( 'We have finished processing your order.', 'woocommerce' ); ?></p>
+<?php if ( $email_improvements_enabled ) : ?>
+	<p><?php esc_html_e( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?></p>
+<?php endif; ?>
+<?php echo $email_improvements_enabled ? '</div>' : ''; ?>
+
 <?php
 
 /*
@@ -52,7 +70,9 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
+	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content">' : '';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
 /*

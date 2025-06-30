@@ -8,6 +8,8 @@
  * @since 8.6.0
  */
 
+declare( strict_types = 1 );
+
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
 use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 
@@ -34,7 +36,7 @@ abstract class WC_REST_WCCOM_Site_Controller extends WC_REST_Controller {
 	 * @param WP_USER $user User object.
 	 * @return bool
 	 */
-	abstract protected function user_has_permission( $user ) : bool;
+	abstract protected function user_has_permission( $user ): bool;
 
 	/**
 	 * Check permissions.
@@ -74,5 +76,18 @@ abstract class WC_REST_WCCOM_Site_Controller extends WC_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Create a WP_REST_Response.
+	 *
+	 * @param array $data response data.
+	 * @param int   $status HTTP response status.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	protected function get_response( array $data, int $status = 200 ) {
+		$response = rest_ensure_response( $data );
+		$response->set_status( $status );
+		return $response;
 	}
 }

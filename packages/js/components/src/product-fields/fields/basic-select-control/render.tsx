@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 
 /**
@@ -9,25 +9,29 @@ import { SelectControl } from '@wordpress/components';
  */
 import { BaseProductFieldProps } from '../types';
 
+type SelectControlProps = React.ComponentProps< typeof SelectControl >;
 type SelectControlFieldProps = BaseProductFieldProps< string | string[] > & {
 	multiple?: boolean;
-	options: SelectControl.Option[];
+	options: SelectControlProps[ 'options' ];
 };
-const SelectControlField: React.FC< SelectControlFieldProps > = ( {
+const SelectControlField = ( {
 	label,
 	value,
 	onChange,
 	multiple,
 	options = [],
-} ) => {
+}: SelectControlFieldProps ) => {
 	return (
-		<SelectControl
-			multiple={ multiple }
-			label={ label }
-			options={ options }
-			onChange={ onChange }
-			value={ value }
-		/>
+		<>
+			{ /* @ts-expect-error wrong type for multiple, should be boolean but explicitly set to true/false */ }
+			<SelectControl
+				multiple={ multiple }
+				label={ label }
+				options={ options }
+				onChange={ onChange }
+				value={ value }
+			/>
+		</>
 	);
 };
 

@@ -2,11 +2,11 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
-use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\TemplateOptions;
 use WP_UnitTestCase;
 
 /**
@@ -30,6 +30,10 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
 		$this->container = Package::container();
+
+		// We need to manually register the BlockTemplatesRegistry and
+		// TemplateOptions classes because they are conditionally registered
+		// in Bootstrap.php so they wouldn't run in the test environment.
 		$this->container->register(
 			BlockTemplatesRegistry::class,
 			function () {
@@ -37,6 +41,13 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			}
 		);
 		$this->container->get( BlockTemplatesRegistry::class )->init();
+		$this->container->register(
+			TemplateOptions::class,
+			function () {
+				return new TemplateOptions();
+			}
+		);
+		$this->container->get( TemplateOptions::class )->init();
 
 		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
@@ -365,7 +376,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 */
 	public function update_plugin(): void {
 		update_option( Options::WC_BLOCK_VERSION, 1 );
-		Migration::wc_blocks_update_1030_blockified_product_grid_block();
+		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
 	}
 
 	/**

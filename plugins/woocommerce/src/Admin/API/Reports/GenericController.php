@@ -175,7 +175,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	/**
 	 * Get the report data.
 	 *
-	 * Prepares query params, fetches the report data from the Query object,
+	 * Prepares query params, fetches the report data from the data store,
 	 * prepares it for the response, and packs it into the convention-conforming response object.
 	 *
 	 * @throws \WP_Error When the queried data is invalid.
@@ -237,7 +237,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Maps query arguments from the REST request, to be fed to Query.
+	 * Maps query arguments from the REST request, to be used to query the datastore.
 	 *
 	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
 	 * as it does for `$request['param']` accessor.
@@ -256,5 +256,32 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 		);
 
 		return $args;
+	}
+
+	/**
+	 * Apply a filter for custom orderby enum.
+	 *
+	 * @param array $orderby_enum An array of orderby enum options.
+	 *
+	 * @return array An array of filtered orderby enum options.
+	 *
+	 * @since 9.4.0
+	 */
+	protected function apply_custom_orderby_filters( $orderby_enum ) {
+		/**
+		 * Filter orderby query parameter enum.
+		 *
+		 * There was an initial concern about potential SQL injection with the custom orderby.
+		 * However, testing shows it is safely blocked by validation in the controller,
+		 * which results in an "Invalid parameter(s): orderby" error.
+		 *
+		 * Additionally, it's the responsibility of the merchant/developer to ensure the custom orderby is valid,
+		 * or a WordPress database error will occur for unknown columns.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param array $orderby_enum The orderby query parameter enum.
+		 */
+		return apply_filters( "woocommerce_analytics_orderby_enum_{$this->rest_base}", $orderby_enum );
 	}
 }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 type FormSectionProps = {
 	title: JSX.Element | string;
@@ -10,14 +10,14 @@ type FormSectionProps = {
 	className?: string;
 };
 
-export const FormSection: React.FC< FormSectionProps > = ( {
+export const FormSection = ( {
 	title,
 	description,
 	className,
 	children,
-} ) => {
+}: React.PropsWithChildren< FormSectionProps > ) => {
 	return (
-		<div className={ classnames( 'woocommerce-form-section', className ) }>
+		<div className={ clsx( 'woocommerce-form-section', className ) }>
 			<div className="woocommerce-form-section__header">
 				<h3 className="woocommerce-form-section__title">{ title }</h3>
 				<div className="woocommerce-form-section__description">

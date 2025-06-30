@@ -8,7 +8,7 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -46,7 +46,8 @@ const Tag = forwardRef(
 	) => {
 		const [ isVisible, setIsVisible ] = useState( false );
 
-		const instanceId = useInstanceId( Tag ) as string;
+		const instanceId = useInstanceId( Tag ).toString();
+		const labelId = `woocommerce-tag__label-${ instanceId }`;
 
 		screenReaderLabel = screenReaderLabel || label;
 		if ( ! label ) {
@@ -55,10 +56,9 @@ const Tag = forwardRef(
 			return null;
 		}
 		label = decodeEntities( label );
-		const classes = classnames( 'woocommerce-tag', className, {
+		const classes = clsx( 'woocommerce-tag', className, {
 			'has-remove': !! remove,
 		} );
-		const labelId = `woocommerce-tag__label-${ instanceId }`;
 		const labelTextNode = (
 			<Fragment>
 				<span className="screen-reader-text">

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: tweak Webpack loaders paths filtering for better build perfromance.

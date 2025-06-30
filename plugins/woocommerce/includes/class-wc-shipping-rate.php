@@ -8,84 +8,93 @@
  * @since   2.6.0
  */
 
+declare( strict_types=1 );
+
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 /**
  * Shipping rate class.
  */
-class WC_Shipping_Rate {
+class WC_Shipping_Rate implements JsonSerializable {
 
 	/**
 	 * Stores data for this rate.
 	 *
-	 * @since 3.2.0
-	 * @var   array
+	 * @since 9.2.0 Added description and delivery_time.
+	 * @var array
 	 */
 	protected $data = array(
-		'id'          => '',
-		'method_id'   => '',
-		'instance_id' => 0,
-		'label'       => '',
-		'cost'        => 0,
-		'taxes'       => array(),
+		'id'            => '',
+		'method_id'     => '',
+		'instance_id'   => 0,
+		'label'         => '',
+		'cost'          => 0,
+		'taxes'         => array(),
+		'tax_status'    => ProductTaxStatus::TAXABLE,
+		'description'   => '',
+		'delivery_time' => '',
 	);
 
 	/**
 	 * Stores meta data for this rate.
 	 *
-	 * @since 2.6.0
-	 * @var   array
+	 * @var array
 	 */
 	protected $meta_data = array();
 
 	/**
 	 * Constructor.
 	 *
-	 * @param string  $id          Shipping rate ID.
-	 * @param string  $label       Shipping rate label.
-	 * @param integer $cost        Cost.
-	 * @param array   $taxes       Taxes applied to shipping rate.
-	 * @param string  $method_id   Shipping method ID.
-	 * @param int     $instance_id Shipping instance ID.
+	 * @param string  $id            Shipping rate ID.
+	 * @param string  $label         Shipping rate label.
+	 * @param integer $cost          Cost.
+	 * @param array   $taxes         Taxes applied to shipping rate.
+	 * @param string  $method_id     Shipping method ID.
+	 * @param int     $instance_id   Shipping instance ID.
+	 * @param string  $tax_status    Tax status.
+	 * @param string  $description   Shipping rate description.
+	 * @param string  $delivery_time Shipping rate delivery time.
 	 */
-	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0 ) {
+	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0, $tax_status = ProductTaxStatus::TAXABLE, $description = '', $delivery_time = '' ) {
 		$this->set_id( $id );
 		$this->set_label( $label );
 		$this->set_cost( $cost );
 		$this->set_taxes( $taxes );
 		$this->set_method_id( $method_id );
 		$this->set_instance_id( $instance_id );
+		$this->set_tax_status( $tax_status );
+		$this->set_description( $description );
+		$this->set_delivery_time( $delivery_time );
 	}
 
 	/**
-	 * Magic methods to support direct access to props.
+	 * Magic method to support direct access to data prop.
 	 *
-	 * @since 3.2.0
 	 * @param string $key Key.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		if ( 'meta_data' === $key ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Use `array_key_exists` to check for meta_data on WC_Shipping_Rate to get the correct result.', 'woocommerce' ), '6.0' );
-		}
 		return isset( $this->data[ $key ] );
 	}
 
 	/**
 	 * Magic methods to support direct access to props.
 	 *
-	 * @since 3.2.0
 	 * @param string $key Key.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
 		if ( is_callable( array( $this, "get_{$key}" ) ) ) {
 			return $this->{"get_{$key}"}();
-		} elseif ( isset( $this->data[ $key ] ) ) {
-			return $this->data[ $key ];
-		} else {
-			return '';
 		}
+
+		if ( isset( $this->data[ $key ] ) ) {
+			return $this->data[ $key ];
+		}
+
+		return '';
 	}
 
 	/**
@@ -101,6 +110,19 @@ class WC_Shipping_Rate {
 		} else {
 			$this->data[ $key ] = $value;
 		}
+	}
+
+	/**
+	 * When converted to JSON.
+	 *
+	 * @return object|array
+	 */
+	#[\ReturnTypeWillChange]
+	public function jsonSerialize() {
+		return array(
+			'data'      => $this->data,
+			'meta_data' => $this->meta_data,
+		);
 	}
 
 	/**
@@ -165,12 +187,51 @@ class WC_Shipping_Rate {
 	}
 
 	/**
+	 * Set tax status.
+	 *
+	 * @since 9.6.0
+	 * @param string $value Tax status.
+	 */
+	public function set_tax_status( $value ) {
+		if ( in_array( $value, array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ), true ) ) {
+			$this->data['tax_status'] = $value;
+		}
+	}
+
+	/**
+	 * Set rate description.
+	 *
+	 * @since 9.2.0
+	 * @param string $description Shipping rate description.
+	 */
+	public function set_description( $description ) {
+		$this->data['description'] = (string) $description;
+	}
+
+	/**
+	 * Set rate delivery time.
+	 *
+	 * @since 9.2.0
+	 * @param string $delivery_time Shipping rate delivery time.
+	 */
+	public function set_delivery_time( $delivery_time ) {
+		$this->data['delivery_time'] = (string) $delivery_time;
+	}
+
+	/**
 	 * Get ID for the rate. This is usually a combination of the method and instance IDs.
 	 *
 	 * @since 3.2.0
 	 * @return string
 	 */
 	public function get_id() {
+		/**
+		 * Filter the shipping rate ID.
+		 *
+		 * @since 3.2.0
+		 * @param string $id The shipping rate ID.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_id', $this->data['id'], $this );
 	}
 
@@ -181,6 +242,13 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_method_id() {
+		/**
+		 * Filter the shipping method ID.
+		 *
+		 * @since 3.2.0
+		 * @param string $method_id The shipping method ID.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_method_id', $this->data['method_id'], $this );
 	}
 
@@ -191,6 +259,13 @@ class WC_Shipping_Rate {
 	 * @return int
 	 */
 	public function get_instance_id() {
+		/**
+		 * Filter the shipping rate instance ID.
+		 *
+		 * @since 3.2.0
+		 * @param int $instance_id The shipping rate instance ID.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_instance_id', $this->data['instance_id'], $this );
 	}
 
@@ -200,6 +275,13 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_label() {
+		/**
+		 * Filter the shipping rate label.
+		 *
+		 * @since 3.2.0
+		 * @param string $label The shipping rate label.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_label', $this->data['label'], $this );
 	}
 
@@ -210,6 +292,13 @@ class WC_Shipping_Rate {
 	 * @return string
 	 */
 	public function get_cost() {
+		/**
+		 * Filter the shipping rate cost.
+		 *
+		 * @since 3.2.0
+		 * @param string $cost The shipping rate cost.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_cost', $this->data['cost'], $this );
 	}
 
@@ -220,6 +309,13 @@ class WC_Shipping_Rate {
 	 * @return array
 	 */
 	public function get_taxes() {
+		/**
+		 * Filter the shipping rate taxes.
+		 *
+		 * @since 3.2.0
+		 * @param array $taxes The shipping rate taxes.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
 		return apply_filters( 'woocommerce_shipping_rate_taxes', $this->data['taxes'], $this );
 	}
 
@@ -229,7 +325,68 @@ class WC_Shipping_Rate {
 	 * @return float
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_get_shipping_tax', count( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? (float) array_sum( $this->taxes ) : 0.0, $this );
+		$taxes = $this->get_taxes();
+
+		/**
+		 * Filter the shipping rate taxes.
+		 *
+		 * @since 3.2.0
+		 * @param array $taxes The shipping rate taxes.
+		 * @param WC_Shipping_Rate $this The shipping rate object.
+		 */
+		return apply_filters( 'woocommerce_get_shipping_tax', count( $taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? (float) array_sum( $taxes ) : 0.0, $this );
+	}
+
+	/**
+	 * Get tax status.
+	 *
+	 * @return string
+	 */
+	public function get_tax_status() {
+		/**
+		 * Filter to allow tax status to be overridden for a shipping rate.
+		 *
+		 * @since 9.9.0
+		 * @param string $tax_status Tax status.
+		 * @param WC_Shipping_Rate $this Shipping rate object.
+		 */
+		return apply_filters( 'woocommerce_shipping_rate_tax_status', $this->data['tax_status'], $this );
+	}
+
+	/**
+	 * Get rate description.
+	 *
+	 * @since 9.2.0
+	 * @return string
+	 */
+	public function get_description() {
+		/**
+		 * Filter the shipping rate description.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param string            $description The current description.
+		 * @param WC_Shipping_Rate  $this        The shipping rate.
+		 */
+		return apply_filters( 'woocommerce_shipping_rate_description', $this->data['description'], $this );
+	}
+
+	/**
+	 * Get rate delivery time.
+	 *
+	 * @since 9.2.0
+	 * @return string
+	 */
+	public function get_delivery_time() {
+		/**
+		 * Filter the shipping rate delivery time.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param string            $delivery_time The current description.
+		 * @param WC_Shipping_Rate  $this          The shipping rate.
+		 */
+		return apply_filters( 'woocommerce_shipping_rate_delivery_time', $this->data['delivery_time'], $this );
 	}
 
 	/**

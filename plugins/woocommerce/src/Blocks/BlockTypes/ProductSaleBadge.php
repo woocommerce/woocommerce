@@ -20,50 +20,7 @@ class ProductSaleBadge extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
-
-	/**
-	 * Get block attributes.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-			array(
-				'gradients'  => true,
-				'background' => true,
-				'link'       => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                        => true,
-				'lineHeight'                      => true,
-				'__experimentalFontFamily'        => true,
-				'__experimentalFontWeight'        => true,
-				'__experimentalFontStyle'         => true,
-				'__experimentalLetterSpacing'     => true,
-				'__experimentalTextTransform'     => true,
-				'__experimentalTextDecoration'    => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalBorder'   =>
-			array(
-				'color'  => true,
-				'radius' => true,
-				'width'  => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'padding'                         => true,
-				'__experimentalSkipSerialization' => true,
-
-			),
-			'__experimentalSelector' => '.wc-block-components-product-sale-badge',
-
-		);
-	}
+	protected $api_version = '3';
 
 	/**
 	 * Overwrite parent method to prevent script registration.
@@ -91,12 +48,6 @@ class ProductSaleBadge extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
@@ -110,14 +61,27 @@ class ProductSaleBadge extends AbstractBlock {
 			return null;
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+
+		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 
 		$align = isset( $attributes['align'] ) ? $attributes['align'] : '';
 
+		/**
+		 * Filters the product sale badge text.
+		 *
+		 * @hook woocommerce_sale_badge_text
+		 * @since 10.0.0
+		 *
+		 * @param string $sale_text The sale badge text.
+		 * @param WC_Product $product The product object.
+		 * @return string The filtered sale badge text.
+		 */
+		$sale_text = apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product );
+
 		$output  = '<div class="wp-block-woocommerce-product-sale-badge ' . esc_attr( $classname ) . '">';
 		$output .= sprintf( '<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">', esc_attr( $classes_and_styles['classes'] ), esc_attr( $align ), esc_attr( $classes_and_styles['styles'] ) );
-		$output .= '<span class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . __( 'Sale', 'woocommerce' ) . '</span>';
+		$output .= '<span class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . esc_html( $sale_text ) . '</span>';
 		$output .= '<span class="screen-reader-text">'
 						. __( 'Product on sale', 'woocommerce' )
 					. '</span>';

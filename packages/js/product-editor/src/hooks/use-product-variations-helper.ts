@@ -5,13 +5,17 @@ import { dispatch, resolveSelect, useSelect } from '@wordpress/data';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { getNewPath, getPath, navigateTo } from '@woocommerce/navigation';
 import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
 	ProductDefaultAttribute,
 	ProductVariation,
+	experimentalProductVariationsStore,
 } from '@woocommerce/data';
 import { applyFilters } from '@wordpress/hooks';
-import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
+import {
+	useEntityProp,
+	useEntityRecord,
+	store as coreStore,
+} from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -22,18 +26,22 @@ async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
 	try {
-		const { attributes } = await resolveSelect(
-			'core'
-		).getEntityRecord< Product >( 'postType', 'product', productId );
+		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
+		const { attributes } = await resolveSelect( 'core' ).getEntityRecord(
+			'postType',
+			'product',
+			productId
+		);
 		const alreadyHasVariableAttribute = attributes.some(
-			( attr ) => attr.variation
+			( attr: Product ) => attr.variation
 		);
 		if ( ! alreadyHasVariableAttribute ) {
 			return {};
 		}
+
 		const products = await resolveSelect(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-		).getProductVariations< ProductVariation[] >( {
+			experimentalProductVariationsStore
+		).getProductVariations( {
 			product_id: productId,
 			per_page: 1,
 			has_price: true,
@@ -73,11 +81,10 @@ export function useProductVariationsHelper() {
 			const {
 				isGeneratingVariations: getIsGeneratingVariations,
 				generateProductVariationsError,
-			} = select( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+			} = select( experimentalProductVariationsStore );
+
 			return {
-				isGeneratingVariations: getIsGeneratingVariations<
-					boolean | undefined
-				>( {
+				isGeneratingVariations: getIsGeneratingVariations( {
 					product_id: productId,
 				} ),
 				generateError: generateProductVariationsError( {
@@ -99,9 +106,10 @@ export function useProductVariationsHelper() {
 	) {
 		setIsGenerating( true );
 
+		// @ts-expect-error TODO react-18-upgrade: core.getEntityRecord type is not typed yet
 		const { status: lastStatus, variations } = await resolveSelect(
 			'core'
-		).getEditedEntityRecord< Product >( 'postType', 'product', productId );
+		).getEditedEntityRecord( 'postType', 'product', productId );
 		const hasVariableAttribute = attributes.some(
 			( attr ) => attr.variation
 		);
@@ -111,19 +119,17 @@ export function useProductVariationsHelper() {
 		);
 
 		await Promise.all(
-			variations.map( ( variationId ) =>
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
+			variations.map( ( variationId: number ) =>
+				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
+				dispatch( coreStore ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
 					variationId,
 				] )
 			)
 		);
-
 		await dispatch(
-			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			experimentalProductVariationsStore
 		).invalidateResolutionForStore();
 		/**
 		 * Filters the meta_data array for generated variations.
@@ -138,11 +144,8 @@ export function useProductVariationsHelper() {
 			product
 		);
 
-		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
-			.generateProductVariations< {
-				count: number;
-				deleted_count: number;
-			} >(
+		return dispatch( experimentalProductVariationsStore )
+			.generateProductVariations(
 				{
 					product_id: productId,
 				},
@@ -154,25 +157,24 @@ export function useProductVariationsHelper() {
 				{
 					delete: true,
 					default_values: defaultVariationValues,
-					meta_data,
+					meta_data: meta_data as Product[ 'meta_data' ],
 				}
 			)
 			.then( async ( response ) => {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				await dispatch( 'core' ).invalidateResolution(
+				// @ts-expect-error invalidateResolution is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
+				await dispatch( coreStore ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]
 				);
 
-				await resolveSelect( 'core' ).getEntityRecord(
+				await resolveSelect( coreStore ).getEntityRecord(
 					'postType',
 					'product',
 					productId
 				);
 
 				await dispatch(
-					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+					experimentalProductVariationsStore
 				).invalidateResolutionForStore();
 
 				return response;

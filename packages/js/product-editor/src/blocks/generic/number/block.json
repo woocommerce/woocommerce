@@ -14,7 +14,7 @@
 	"attributes": {
 		"label": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"property": {
 			"type": "string"

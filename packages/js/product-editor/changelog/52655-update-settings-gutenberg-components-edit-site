@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove exported Gutenberg components from `@woocommerce/product-editor`

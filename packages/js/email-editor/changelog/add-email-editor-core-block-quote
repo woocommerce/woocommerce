@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add filter to remove the alignment controls for core/quote block

@@ -1,0 +1,108 @@
+.woocommerce-order-attribution-install-banner {
+
+	margin: 0 15px 10px 0;
+	animation: isLoaded;
+	animation-duration: 250ms;
+
+	&.components-card {
+		box-shadow: none;
+		border: 1px solid $table-border;
+		border-radius: 8px;
+
+		&.small {
+			border: 0;
+			border-top: 1px solid #c3c4c7;
+			border-radius: 0;
+			margin: 20px -12px -12px;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__body {
+		display: flex;
+		align-items: center;
+
+		&.small {
+			padding: 0;
+			padding-top: 16px;
+
+			@media (max-width: $break-small) {
+				margin-left: 12px;
+			}
+		}
+
+		@media (max-width: $break-small) {
+			flex-direction: column;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__image_container {
+		display: flex;
+		padding-left: 15px;
+	}
+
+	.woocommerce-order-attribution-install-banner__text_container {
+		margin-inline: 24px;
+
+		> * {
+			margin-block: 1rem;
+		}
+
+		p {
+			margin-block: 0.1rem;
+		}
+
+		&.small {
+			margin-inline: 0;
+			margin-inline-end: 16px;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__text-badge {
+		display: inline-flex;
+		justify-content: center;
+		background: $studio-gray-0;
+		border-radius: 2px;
+		padding: 2px 5px;
+
+		p {
+			color: $studio-gray-80;
+		}
+	}
+
+	.woocommerce-order-attribution-install-banner__text-title {
+		color: $studio-gray-90;
+		line-height: 24px;
+		font-weight: 600;
+	}
+
+	.woocommerce-order-attribution-install-banner__text-description {
+		color: $studio-gray-90;
+		line-height: 16px;
+		max-width: 580px;
+	}
+}
+
+.components-button.woocommerce-order-attribution-install-header-banner {
+	margin-right: 12px;
+
+	@media (max-width: $break-small) {
+		text-wrap: wrap;
+		font-size: 11px;
+
+		svg {
+			display: none;
+		}
+	}
+}
+
+.components-button {
+	&.small {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
+
+	&.has-icon.has-text {
+		justify-content: center;
+	}
+}

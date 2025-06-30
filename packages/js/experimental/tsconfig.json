@@ -1,13 +1,20 @@
 {
 	"extends": "../tsconfig",
-	"include": [ "src/", "typings/" ],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
-		"target": "es2019",
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"typeRoots": [ "./typings", "./node_modules/@types" ]
-	}
+		"typeRoots": [ "./typings", "./node_modules/@types" ],
+		"types": [ "jest" ]
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**",
+		"**/stories/**"
+	]
 }

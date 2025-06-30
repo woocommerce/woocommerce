@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixing box shadow behavior on WooCommerce table component when scrolling.

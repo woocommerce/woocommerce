@@ -1,17 +1,19 @@
 <?php
-/**
- * File containing the class WP_Test_WC_Order_Refund.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableRefundDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use WC_Order_Refund;
+use WC_Order_Refund_Data_Store_CPT;
 
 /**
  * Class OrdersTableRefundDataStoreTests.
  */
-class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
+class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 	use \Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 	/**

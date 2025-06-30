@@ -75,6 +75,7 @@ admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
 admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_ACC_LOGIN`
 customer_username | username for customer user | yes `__ENV.C_USER`
+customer_email | email for customer user | yes `__ENV.C_EMAIL`
 customer_password | password for customer user | yes `__ENV.C_PW`
 customer_user_id | user id for customer user | yes `__ENV.C_UID`
 hpos_status | set to true if site is using order tables | yes `__ENV.HPOS`
@@ -85,7 +86,6 @@ addresses_guest_billing_* | billing address details for guest customer user | no
 payment_method | payment method (currently only `cod` supported) | no
 product_sku | SKU of product to be used in cart and checkout flow | yes `__ENV.P_SKU`
 product_url | the `product-name` portion of product permalink of the product to be used in cart and checkout flow | yes `__ENV.P_URL`
-product_id | the product ID of of product to be used in cart and checkout flow | yes `__ENV.P_ID`
 product_search_term | search term to return product to be used in cart and checkout flow | yes `__ENV.P_TERM`
 product_category | category of product to be used for browsing category products | yes `__ENV.P_CAT`
 coupon_code | coupon code to be used in applying coupon flow | yes `__ENV.P_COUPON`

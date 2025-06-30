@@ -1,0 +1,142 @@
+.wc-block-components-checkbox {
+	@include reset-color();
+	@include reset-typography();
+	margin-top: em($gap);
+	line-height: 1;
+
+	// Validated checkbox is set to grid because we need to display the validation error below the checkbox, the flex
+	// layout doesn't allow for that without extra markup.
+	&.wc-block-components-validated-checkbox-control label {
+		display: grid;
+		grid-template-columns: auto 1fr;
+
+		.wc-block-components-validation-error {
+			grid-column: 1 / -1;
+		}
+	}
+
+	label {
+		align-items: flex-start;
+		display: inline-flex;
+		position: relative;
+		cursor: pointer;
+		@include font-size(small);
+		margin-bottom: 0 !important;
+
+		input[type="checkbox"] {
+			cursor: inherit;
+		}
+	}
+
+	.wc-block-components-checkbox__input[type="checkbox"] {
+		font-size: 1em;
+		appearance: none;
+		border: 1px solid $universal-border-medium;
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		height: em(24px);
+		width: em(24px);
+		margin: 0;
+		margin-right: em($gap);
+		min-height: em(24px);
+		min-width: em(24px);
+		overflow: hidden;
+		position: static;
+		vertical-align: middle;
+		background-color: $input-background-light;
+
+		&:checked {
+			background: $input-background-light;
+		}
+
+		&:focus {
+			outline: 1.5px solid $universal-border-strong;
+			outline-offset: 1.5px;
+		}
+
+		&::before,
+		&::after {
+			content: "";
+		}
+
+		&:not(:checked) + .wc-block-components-checkbox__mark {
+			display: none;
+		}
+
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+			background-color: $input-background-dark;
+			color: $input-text-dark;
+
+			&:checked {
+				background: $input-background-dark;
+				border-color: currentColor;
+			}
+
+			&:focus {
+				outline: 1.5px solid currentColor;
+				outline-offset: 1.5px;
+			}
+		}
+	}
+
+	&.has-error {
+		color: $alert-red;
+
+		a {
+			color: $alert-red;
+		}
+		.wc-block-components-checkbox__input {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				border-color: $alert-red;
+			}
+			&:focus {
+				outline: 2px solid $alert-red;
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	.wc-block-components-checkbox__mark {
+		fill: #000;
+		position: absolute;
+		margin-left: em(3px);
+		margin-top: em(1px);
+		width: em(18px);
+		height: em(18px);
+		pointer-events: none;
+
+		.has-dark-controls & {
+			fill: $input-text-dark;
+		}
+	}
+
+	> span,
+	.wc-block-components-checkbox__label {
+		vertical-align: middle;
+		line-height: em(24px);
+	}
+}
+
+.theme-twentytwentyone {
+	.wc-block-components-checkbox__input[type="checkbox"],
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"] {
+		background-color: $input-background-light;
+		border-color: var(--form--border-color);
+		position: relative;
+	}
+
+	.wc-block-components-checkbox__input[type="checkbox"]:checked,
+	.has-dark-controls
+		.wc-block-components-checkbox__input[type="checkbox"]:checked {
+		background-color: $input-background-light;
+		border-color: var(--form--border-color);
+	}
+
+	.wc-block-components-checkbox__mark {
+		display: none;
+	}
+}

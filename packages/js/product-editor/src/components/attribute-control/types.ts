@@ -32,7 +32,9 @@ export type AttributeControlProps = {
 	onEditModalClose?: ( attribute?: ProductProductAttribute ) => void;
 	onEditModalOpen?: ( attribute?: ProductProductAttribute ) => void;
 	onNoticeDismiss?: () => void;
-	renderCustomEmptyState?: ( props: AttributeControlEmptyStateProps ) => void;
+	renderCustomEmptyState?: (
+		props: AttributeControlEmptyStateProps
+	) => undefined | JSX.Element;
 	createNewAttributesAsGlobal?: boolean;
 	useRemoveConfirmationModal?: boolean;
 	disabledAttributeIds?: number[];

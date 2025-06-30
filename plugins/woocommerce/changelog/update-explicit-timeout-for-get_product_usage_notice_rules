@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Set timeout to 2 seconds for helper product-usage-notice-rules endpoint request

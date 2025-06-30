@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 class MailchimpScheduler {
 
 	const SUBSCRIBE_ENDPOINT     = 'https://woocommerce.com/wp-json/wccom/v1/subscribe';
-	const SUBSCRIBE_ENDPOINT_DEV = 'http://woocommerce.test/wp-json/wccom/v1/subscribe';
+	const SUBSCRIBE_ENDPOINT_DEV = 'https://woocommerce.test/wp-json/wccom/v1/subscribe';
 
 	const SUBSCRIBED_OPTION_NAME             = 'woocommerce_onboarding_subscribed_to_mailchimp';
 	const SUBSCRIBED_ERROR_COUNT_OPTION_NAME = 'woocommerce_onboarding_subscribed_to_mailchimp_error_count';
@@ -31,7 +31,7 @@ class MailchimpScheduler {
 	 * @internal
 	 * @param \WC_Logger_Interface|null $logger Logger instance.
 	 */
-	public function __construct( \WC_Logger_Interface $logger = null ) {
+	public function __construct( ?\WC_Logger_Interface $logger = null ) {
 		if ( null === $logger ) {
 			$logger = wc_get_logger();
 		}
@@ -65,10 +65,7 @@ class MailchimpScheduler {
 		}
 
 		$country_code = WC()->countries->get_base_country();
-		$country_name = WC()->countries->countries[ $country_code ] ?? 'N/A';
-
-		$state      = WC()->countries->get_base_state();
-		$state_name = WC()->countries->states[ $country_code ][ $state ] ?? 'N/A';
+		$state        = WC()->countries->get_base_state();
 
 		$address = array(
 			// Setting N/A for addr1, city, state, zipcode and country as they are
@@ -76,9 +73,9 @@ class MailchimpScheduler {
 			'addr1'   => 'N/A',
 			'addr2'   => '',
 			'city'    => 'N/A',
-			'state'   => $state_name,
+			'state'   => $state ?? 'N/A',
 			'zip'     => 'N/A',
-			'country' => $country_name,
+			'country' => $country_code ?? 'N/A',
 		);
 
 		$response = $this->make_request( $profile_data['store_email'], $address );

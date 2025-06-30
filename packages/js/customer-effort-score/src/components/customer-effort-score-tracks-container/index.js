@@ -5,14 +5,20 @@ import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import PropTypes from 'prop-types';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { CustomerEffortScoreTracks } from '../';
+import { CustomerEffortScoreTracks } from '..';
 import { QUEUE_OPTION_NAME, STORE_KEY } from '../../store';
+
+/**
+ * @typedef {Object} CustomerEffortScoreTracksContainerProps
+ * @property {Array<Object>} queue      - The queue of CES tracks surveys to display
+ * @property {boolean}       resolving  - If the queue option is being resolved
+ * @property {Function}      clearQueue - Set up clearing the queue on the next page load
+ */
 
 /**
  * Maps the queue of CES tracks surveys to CustomerEffortScoreTracks
@@ -20,10 +26,8 @@ import { QUEUE_OPTION_NAME, STORE_KEY } from '../../store';
  * however this is designed to be flexible if multiple surveys per page are
  * added in the future.
  *
- * @param {Object}   props            Component props.
- * @param {Array}    props.queue      The queue of surveys.
- * @param {boolean}  props.resolving  Whether the queue is resolving.
- * @param {Function} props.clearQueue Sets up clearing of the queue on the next page load.
+ * @param {CustomerEffortScoreTracksContainerProps} props Component props
+ * @return {JSX.Element|null} The rendered component
  */
 function _CustomerEffortScoreTracksContainer( {
 	queue,
@@ -65,21 +69,7 @@ function _CustomerEffortScoreTracksContainer( {
 	);
 }
 
-_CustomerEffortScoreTracksContainer.propTypes = {
-	/**
-	 * The queue of CES tracks surveys to display.
-	 */
-	queue: PropTypes.arrayOf( PropTypes.object ),
-	/**
-	 * If the queue option is being resolved.
-	 */
-	resolving: PropTypes.bool,
-	/**
-	 * Set up clearing the queue on the next page load.
-	 */
-	clearQueue: PropTypes.func,
-};
-
+/** @type {import('react').ComponentType<CustomerEffortScoreTracksContainerProps>} */
 export const CustomerEffortScoreTracksContainer = compose(
 	withSelect( ( select ) => {
 		const { getCesSurveyQueue, isResolving } = select( STORE_KEY );
@@ -89,7 +79,7 @@ export const CustomerEffortScoreTracksContainer = compose(
 		return { queue, resolving };
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
+		const { updateOptions } = dispatch( optionsStore );
 
 		return {
 			clearQueue: () => {

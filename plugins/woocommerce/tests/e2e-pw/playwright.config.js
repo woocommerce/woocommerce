@@ -1,31 +1,33 @@
-const { devices } = require( '@playwright/test' );
+/**
+ * External dependencies
+ */
+import { defineConfig, devices } from '@playwright/test';
+
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
-const testsRootPath = __dirname;
-const testsResultsPath = `${ testsRootPath }/test-results`;
-
 if ( ! process.env.BASE_URL ) {
-	console.log( 'BASE_URL is not set. Using default.' );
-	process.env.BASE_URL = 'http://localhost:8086';
+	process.env.BASE_URL =
+		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+	console.log(
+		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
+	);
 }
 
-const {
-	ALLURE_RESULTS_DIR,
-	BASE_URL,
-	CI,
-	DEFAULT_TIMEOUT_OVERRIDE,
-	E2E_MAX_FAILURES,
-	REPEAT_EACH,
-} = process.env;
+const { BASE_URL, CI, E2E_MAX_FAILURES, REPEAT_EACH } = process.env;
+
+export const TESTS_ROOT_PATH = __dirname;
+export const TESTS_RESULTS_PATH = `${ TESTS_ROOT_PATH }/test-results`;
+export const STORAGE_DIR_PATH = `${ TESTS_ROOT_PATH }/.state/`;
+export const ADMIN_STATE_PATH = `${ STORAGE_DIR_PATH }/admin.json`;
+export const CUSTOMER_STATE_PATH = `${ STORAGE_DIR_PATH }/customer.json`;
+export const CONSUMER_KEY = { name: '', key: '', secret: '' };
 
 const reporter = [
 	[ 'list' ],
 	[
 		'allure-playwright',
 		{
-			outputFolder:
-				ALLURE_RESULTS_DIR ??
-				`${ testsRootPath }/test-results/allure-results`,
+			resultsDir: `${ TESTS_ROOT_PATH }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
 		},
@@ -33,41 +35,57 @@ const reporter = [
 	[
 		'json',
 		{
-			outputFile: `${ testsRootPath }/test-results/test-results-${ Date.now() }.json`,
+			outputFile: `${ TESTS_ROOT_PATH }/test-results/test-results-${ Date.now() }.json`,
 		},
 	],
 	[
-		`${ testsRootPath }/reporters/environment-reporter.js`,
-		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
+		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
+		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
 	[
-		`${ testsRootPath }/reporters/flaky-tests-reporter.js`,
-		{ outputFolder: `${ testsRootPath }/test-results/flaky-tests` },
+		`${ TESTS_ROOT_PATH }/reporters/flaky-tests-reporter.js`,
+		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/flaky-tests` },
 	],
 ];
 
 if ( process.env.CI ) {
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
-	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
+	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
 } else {
 	reporter.push( [
 		'html',
 		{
-			outputFolder: `${ testsRootPath }/playwright-report`,
+			outputFolder: `${ TESTS_ROOT_PATH }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
 }
 
-const config = {
-	timeout: DEFAULT_TIMEOUT_OVERRIDE
-		? Number( DEFAULT_TIMEOUT_OVERRIDE )
-		: 120 * 1000,
-	expect: { timeout: 20 * 1000 },
-	outputDir: testsResultsPath,
-	globalSetup: require.resolve( './global-setup' ),
-	globalTeardown: require.resolve( './global-teardown' ),
-	testDir: `${ testsRootPath }/tests`,
+export const setupProjects = [
+	{
+		name: 'install wc',
+		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+		testMatch: 'install-wc.setup.js',
+	},
+	{
+		name: 'global authentication',
+		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+		testMatch: 'auth.setup.js',
+		dependencies: [ 'install wc' ],
+	},
+	{
+		name: 'site setup',
+		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
+		testMatch: `site.setup.js`,
+		dependencies: [ 'global authentication' ],
+	},
+];
+
+export default defineConfig( {
+	timeout: 120 * 1000,
+	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
+	outputDir: TESTS_RESULTS_PATH,
+	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
@@ -76,31 +94,31 @@ const config = {
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	forbidOnly: !! CI,
 	use: {
-		baseURL: BASE_URL,
+		baseURL: `${ BASE_URL }/`.replace( /\/+$/, '/' ),
 		screenshot: { mode: 'only-on-failure', fullPage: true },
-		stateDir: `${ testsRootPath }/.state/`,
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
 				? 'retain-on-first-failure'
 				: 'off',
 		video: 'retain-on-failure',
-		viewport: { width: 1280, height: 720 },
-		actionTimeout: 20 * 1000,
-		navigationTimeout: 20 * 1000,
+		actionTimeout: CI ? 20 * 1000 : 10 * 1000,
+		navigationTimeout: CI ? 20 * 1000 : 10 * 1000,
+		channel: 'chrome',
+		...devices[ 'Desktop Chrome' ],
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
+
 	projects: [
+		...setupProjects,
 		{
-			name: 'ui',
-			use: { ...devices[ 'Desktop Chrome' ] },
+			name: 'e2e',
 			testIgnore: '**/api-tests/**',
+			dependencies: [ 'site setup' ],
 		},
 		{
 			name: 'api',
-			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: '**/api-tests/**',
+			dependencies: [ 'site setup' ],
 		},
 	],
-};
-
-module.exports = config;
+} );

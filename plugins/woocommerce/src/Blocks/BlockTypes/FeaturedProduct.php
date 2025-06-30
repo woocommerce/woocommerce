@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * FeaturedProduct class.
  */
@@ -22,7 +25,7 @@ class FeaturedProduct extends FeaturedItem {
 		$id = absint( $attributes['productId'] ?? 0 );
 
 		$product = wc_get_product( $id );
-		if ( ! $product || ( 'publish' !== $product->get_status() && ! current_user_can( 'read_product', $id ) ) ) {
+		if ( ! $product || ( ProductStatus::PUBLISH !== $product->get_status() && ! current_user_can( 'read_product', $id ) ) ) {
 			return null;
 		}
 
@@ -73,7 +76,7 @@ class FeaturedProduct extends FeaturedItem {
 			wp_kses_post( $product->get_title() )
 		);
 
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$title .= sprintf(
 				'<h3 class="wc-block-featured-product__variation">%s</h3>',
 				wp_kses_post( wc_get_formatted_variation( $product, true, true, false ) )

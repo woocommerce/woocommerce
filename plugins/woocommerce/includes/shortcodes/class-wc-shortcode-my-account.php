@@ -89,6 +89,19 @@ class WC_Shortcode_My_Account {
 			/* translators: %s: logout url */
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
+
+		if ( get_user_option( 'default_password_nag' ) && ( wc_is_current_account_menu_item( 'dashboard' ) || wc_is_current_account_menu_item( 'edit-account' ) ) ) {
+			wc_add_notice(
+				sprintf(
+					// translators: %s: site name.
+					__( 'Your account with %s is using a temporary password. We emailed you a link to change your password.', 'woocommerce' ),
+					esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) )
+				),
+				'notice',
+				array(),
+				true
+			);
+		}
 	}
 
 	/**
@@ -298,12 +311,6 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
-
-			return false;
-		}
-
 		// Redefining user_login ensures we return the right case in the email.
 		$user_login = $user_data->user_login;
 
@@ -358,16 +365,21 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles resetting the user's password.
 	 *
+	 * @since 9.4.0 This will log the user in after resetting the password/session.
+	 *
 	 * @param object $user     The user.
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
+		wc_set_customer_auth_cookie( $user->ID );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}

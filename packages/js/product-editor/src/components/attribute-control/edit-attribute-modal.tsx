@@ -48,7 +48,7 @@ type EditAttributeModalProps = {
 	attributes: EnhancedProductAttribute[];
 };
 
-export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
+export const EditAttributeModal = ( {
 	title = __( 'Edit attribute', 'woocommerce' ),
 	nameLabel = __( 'Name', 'woocommerce' ),
 	globalAttributeHelperMessage,
@@ -81,7 +81,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 	onEdit,
 	attribute,
 	attributes,
-} ) => {
+}: EditAttributeModalProps ) => {
 	const [ editableAttribute, setEditableAttribute ] = useState<
 		EnhancedProductAttribute | undefined
 	>( { ...attribute } );

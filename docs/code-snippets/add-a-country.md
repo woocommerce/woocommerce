@@ -1,10 +1,12 @@
 ---
 post_title: Add a country
-menu_title: Add a country
-tags: code-snippet
+sidebar_label: Add a country
+
 ---
 
-Add this code to your child theme's `functions.php` file or via a plugin that allows custom functions to be added, such as the [Code Snippets](https://wordpress.org/plugins/code-snippets/) plugin. Avoid adding custom code directly to your parent theme's functions.php file, as this will be wiped entirely when you update the theme.
+# Add a country
+
+Add a country using to your countries list using this code snippet:
 
 ```php
 if ( ! function_exists( 'YOUR_PREFIX_add_country_to_countries_list' ) ) {

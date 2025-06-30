@@ -71,7 +71,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			};
 
 			// call API to create an order
-			const response = await request.post( '/wp-json/wc/v3/orders', {
+			const response = await request.post( './wp-json/wc/v3/orders', {
 				data: requestPayload,
 			} );
 			const responseJSON = await response.json();
@@ -94,7 +94,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 					status: expectedStatus,
 				};
 				//create order with status
-				const response = await request.post( '/wp-json/wc/v3/orders', {
+				const response = await request.post( './wp-json/wc/v3/orders', {
 					data: requestPayload,
 				} );
 				const responseJSON = await response.json();
@@ -104,7 +104,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 
 				// Cleanup: Delete this order
 				await request.delete(
-					`/wp-json/wc/v3/orders/${ responseJSON.id }`,
+					`./wp-json/wc/v3/orders/${ responseJSON.id }`,
 					{
 						data: {
 							force: true,
@@ -119,7 +119,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( 'can create a order note', async ( { request } ) => {
 				// call API to create an order note on the previously created order
 				const response = await request.post(
-					`/wp-json/wc/v3/orders/${ orderId }/notes`,
+					`./wp-json/wc/v3/orders/${ orderId }/notes`,
 					{
 						data: {
 							note: 'Order ok!!!',
@@ -141,7 +141,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( 'can retrieve an order note', async ( { request } ) => {
 				// call API to retrieve the previously saved order note
 				const response = await request.get(
-					`/wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`
+					`./wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -164,7 +164,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( 'can retrieve all order notes', async ( { request } ) => {
 				// call API to retrieve all order notes
 				const response = await request.get(
-					`/wp-json/wc/v3/orders/${ orderId }/notes`
+					`./wp-json/wc/v3/orders/${ orderId }/notes`
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
@@ -175,7 +175,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( `cannot update an order note`, async ( { request } ) => {
 				// attempt to update order note should fail
 				const response = await request.put(
-					`/wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`,
+					`./wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`,
 					{
 						data: {
 							name: 'Not able to update order note',
@@ -195,7 +195,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			} ) => {
 				// Delete the order note.
 				const response = await request.delete(
-					`/wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`,
+					`./wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`,
 					{
 						data: {
 							force: true,
@@ -206,7 +206,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 
 				// Verify that the order note can no longer be retrieved
 				const getDeletedOrderNoteResponse = await request.get(
-					`/wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`
+					`./wp-json/wc/v3/orders/${ orderId }/notes/${ orderNoteId }`
 				);
 				expect( getDeletedOrderNoteResponse.status() ).toEqual( 404 );
 			} );
@@ -217,7 +217,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 		test( 'can retrieve an order', async ( { request } ) => {
 			// call API to retrieve the previously saved order
 			const response = await request.get(
-				`/wp-json/wc/v3/orders/${ orderId }`
+				`./wp-json/wc/v3/orders/${ orderId }`
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -228,7 +228,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 	test.describe( 'Update an order', () => {
 		test.beforeAll( async ( { request } ) => {
 			// Create the product and save its id
-			const response = await request.post( '/wp-json/wc/v3/products', {
+			const response = await request.post( './wp-json/wc/v3/products', {
 				data: simpleProduct,
 			} );
 			const responseJSON = await response.json();
@@ -238,7 +238,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 		test.afterAll( async ( { request } ) => {
 			// Delete the created product
 			await request.delete(
-				`/wp-json/wc/v3/products/${ simpleProduct.id }`,
+				`./wp-json/wc/v3/products/${ simpleProduct.id }`,
 				{
 					data: {
 						force: true,
@@ -266,7 +266,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 				};
 
 				const response = await request.put(
-					`/wp-json/wc/v3/orders/${ orderId }`,
+					`./wp-json/wc/v3/orders/${ orderId }`,
 					{
 						data: requestPayload,
 					}
@@ -286,7 +286,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			order.shipping = updatedCustomerShipping;
 
 			const response = await request.put(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`./wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: order,
 				}
@@ -307,7 +307,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 				],
 			};
 			const response = await request.put(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`./wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: requestPayload,
 				}
@@ -327,7 +327,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 
 		test( 'can pay for an order', async ( { request } ) => {
 			// Setup: Set order status to 'pending'
-			await request.put( `/wp-json/wc/v3/orders/${ orderId }`, {
+			await request.put( `./wp-json/wc/v3/orders/${ orderId }`, {
 				data: {
 					status: 'pending',
 				},
@@ -338,7 +338,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 				set_paid: true,
 			};
 			const response = await request.put(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`./wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: updateRequestPayload,
 				}
@@ -361,7 +361,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 		test( 'can permanently delete an order', async ( { request } ) => {
 			// Delete the order.
 			const response = await request.delete(
-				`/wp-json/wc/v3/orders/${ orderId }`,
+				`./wp-json/wc/v3/orders/${ orderId }`,
 				{
 					data: {
 						force: true,
@@ -372,7 +372,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 
 			// Verify that the order can no longer be retrieved.
 			const getOrderResponse = await request.get(
-				`/wp-json/wc/v3/orders/${ orderId }`
+				`./wp-json/wc/v3/orders/${ orderId }`
 			);
 			expect( getOrderResponse.status() ).toEqual( 404 );
 		} );

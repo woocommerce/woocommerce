@@ -16,13 +16,33 @@ class ExportInstallThemeSteps implements StepExporter {
 	use UseWPFunctions;
 
 	/**
+	 * Filter callback.
+	 *
+	 * @var callable
+	 */
+	private $filter_callback;
+
+	/**
+	 * Register a filter callback to filter the plugins to export.
+	 *
+	 * @param callable $callback Filter callback.
+	 *
+	 * @return void
+	 */
+	public function filter( callable $callback ) {
+		$this->filter_callback = $callback;
+	}
+	/**
 	 * Export the steps.
 	 *
 	 * @return array
 	 */
 	public function export() {
-		$steps        = array();
-		$themes       = $this->wp_get_themes();
+		$steps  = array();
+		$themes = $this->wp_get_themes();
+		if ( is_callable( $this->filter_callback ) ) {
+			$themes = call_user_func( $this->filter_callback, $themes );
+		}
 		$active_theme = $this->wp_get_theme();
 
 		foreach ( $themes as $slug => $theme ) {
@@ -59,5 +79,14 @@ class ExportInstallThemeSteps implements StepExporter {
 	 */
 	public function get_step_name() {
 		return InstallTheme::get_step_name();
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return current_user_can( 'switch_themes' );
 	}
 }

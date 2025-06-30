@@ -1350,7 +1350,11 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 */
 	private function toggle_compat_mode( bool $enabled ): void {
 		if ( ! $this->synchronizer->check_orders_table_exists() ) {
-			WP_CLI::error( __( 'HPOS tables do not exist.', 'woocommerce' ) );
+			if ( $enabled ) {
+				$this->synchronizer->create_database_tables();
+			} else {
+				WP_CLI::error( __( 'HPOS tables do not exist.', 'woocommerce' ) );
+			}
 		}
 
 		$currently_enabled = $this->synchronizer->data_sync_is_enabled();

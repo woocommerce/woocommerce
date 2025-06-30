@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
@@ -48,7 +49,7 @@ class WC_Shortcode_Checkout {
 			$order_id = absint( $_GET['order'] ); // WPCS: input var ok.
 			$order    = wc_get_order( $order_id );
 
-			if ( $order && $order->has_status( 'pending' ) ) {
+			if ( $order && $order->has_status( OrderStatus::PENDING ) ) {
 				$wp->query_vars['order-pay'] = absint( $_GET['order'] ); // WPCS: input var ok.
 			} else {
 				$wp->query_vars['order-received'] = absint( $_GET['order'] ); // WPCS: input var ok.
@@ -156,7 +157,7 @@ class WC_Shortcode_Checkout {
 								}
 
 								// We only need to check products managing stock, with a limited stock qty.
-								if ( ! $product->managing_stock() || $product->backorders_allowed()  ) {
+								if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
 									continue;
 								}
 

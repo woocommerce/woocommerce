@@ -70,6 +70,7 @@ export const getRecommendedPlugins = (
 export type PluginSelectors = {
 	getActivePlugins: WPDataSelector< typeof getActivePlugins >;
 	getInstalledPlugins: WPDataSelector< typeof getInstalledPlugins >;
+	getPluginInstallState: WPDataSelector< typeof getPluginInstallState >;
 	getRecommendedPlugins: WPDataSelector< typeof getRecommendedPlugins >;
 	getJetpackConnectionData: WPDataSelector< typeof getJetpackConnectionData >;
 	isJetpackConnected: WPDataSelector< typeof isJetpackConnected >;

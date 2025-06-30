@@ -13,7 +13,7 @@ const setFeatureFlag = async ( request, baseURL, flagName, enable ) => {
 		},
 	} );
 
-	await apiContext.post( '/wp-json/e2e-feature-flags/update', {
+	await apiContext.post( './wp-json/e2e-feature-flags/update', {
 		failOnStatusCode: true,
 		data: { [ flagName ]: enable },
 	} );
@@ -31,7 +31,7 @@ const resetFeatureFlags = async ( request, baseURL ) => {
 		},
 	} );
 
-	await apiContext.get( '/wp-json/e2e-feature-flags/reset', {
+	await apiContext.get( './wp-json/e2e-feature-flags/reset', {
 		failOnStatusCode: true,
 	} );
 };

@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use Automattic\WooCommerce\Blueprint\Steps\ActivatePlugin;
 use Automattic\WooCommerce\Blueprint\Steps\ActivateTheme;
 use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
@@ -30,8 +29,13 @@ class ImportActivateTheme implements StepProcessor {
 		// phpcs:ignore
 		$name   = $schema->themeName;
 
-		$switch = $this->wp_switch_theme( $name );
-		$switch && $result->add_debug( "Switched theme to '{$name}'." );
+		$this->wp_switch_theme( $name );
+
+		$current_theme = $this->wp_get_theme()->get_stylesheet();
+
+		if ( $current_theme === $name ) {
+			$result->add_debug( "Switched theme to '$name'." );
+		}
 
 		return $result;
 	}
@@ -43,5 +47,16 @@ class ImportActivateTheme implements StepProcessor {
 	 */
 	public function get_step_class(): string {
 		return ActivateTheme::class;
+	}
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @param object $schema The schema to process.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities( $schema ): bool {
+		return current_user_can( 'switch_themes' );
 	}
 }

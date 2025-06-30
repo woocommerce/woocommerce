@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use WP_Error;
+use WP_Theme;
+
 /**
  * Trait UseWPFunctions
  */
@@ -119,6 +122,9 @@ trait UseWPFunctions {
 	 * @return WP_Theme The theme object.
 	 */
 	public function wp_get_theme( $stylesheet = null ) {
+		if ( ! function_exists( 'wp_get_theme' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
 		return wp_get_theme( $stylesheet );
 	}
 
@@ -157,7 +163,7 @@ trait UseWPFunctions {
 	 * Deletes plugins.
 	 *
 	 * @param array $plugins List of plugins to delete.
-	 * @return array|WP_Error Array of results or WP_Error on failure.
+	 * @return array|WP_Error|null Array of results or WP_Error on failure, null if filesystem credentials are required to proceed.
 	 */
 	public function wp_delete_plugins( $plugins ) {
 		if ( ! function_exists( 'delete_plugins' ) ) {
@@ -196,7 +202,10 @@ trait UseWPFunctions {
 	 * @param string $name The name of the theme to switch to.
 	 */
 	public function wp_switch_theme( $name ) {
-		return switch_theme( $name );
+		if ( ! function_exists( 'switch_theme' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
+		switch_theme( $name );
 	}
 
 	/**
@@ -210,8 +219,9 @@ trait UseWPFunctions {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 			}
 
-			WP_Filesystem();
-			$this->filesystem_initialized = true;
+			$initialized                  = WP_Filesystem();
+			$this->filesystem_initialized = $initialized;
+			return $initialized;
 		}
 
 		return true;
@@ -276,12 +286,38 @@ trait UseWPFunctions {
 	 * @param string $file_path The path to the file to write.
 	 * @param mixed  $content    The data to write to the file.
 	 *
-	 * @return mixed
+	 * @return bool True on success, false on failure.
 	 */
 	public function wp_filesystem_put_contents( $file_path, $content ) {
 		global $wp_filesystem;
-		$this->wp_init_filesystem();
+		if ( ! $this->wp_init_filesystem() ) {
+			return false;
+		}
 
 		return $wp_filesystem->put_contents( $file_path, $content );
+	}
+
+	/**
+	 * Alias for WP_Filesystem::get_contents().
+	 *
+	 * @param string $file_path The path to the file to read.
+	 * @return string|false The contents of the file, or false on failure.
+	 */
+	public function wp_filesystem_get_contents( $file_path ) {
+		global $wp_filesystem;
+		if ( ! $this->wp_init_filesystem() ) {
+			return false;
+		}
+
+		return $wp_filesystem->get_contents( $file_path );
+	}
+
+	/**
+	 * Retrieves the current user's ID.
+	 *
+	 * @return int The current user's ID.
+	 */
+	public function wp_get_current_user_id() {
+		return get_current_user_id();
 	}
 }

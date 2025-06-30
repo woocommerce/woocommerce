@@ -1,5 +1,6 @@
 const base = require( '@playwright/test' );
 const { admin } = require( '../test-data/data' );
+const { tags } = require( './fixtures' );
 
 exports.test = base.test.extend( {
 	extraHTTPHeaders: {
@@ -11,3 +12,5 @@ exports.test = base.test.extend( {
 } );
 
 exports.expect = base.expect;
+exports.tags = tags;
+exports.request = base.request;

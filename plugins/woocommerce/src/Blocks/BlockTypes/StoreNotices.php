@@ -45,36 +45,26 @@ class StoreNotices extends AbstractBlock {
 			return;
 		}
 
-		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-
-		if ( isset( $attributes['align'] ) ) {
-			$classname .= " align{$attributes['align']}";
-		}
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		return sprintf(
-			'<div class="woocommerce wc-block-store-notices %1$s %2$s">%3$s</div>',
-			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes(
+				array(
+					'class' => 'wc-block-store-notices woocommerce ' . esc_attr( $classes_and_styles['classes'] ),
+				)
+			),
 			wc_kses_notice( $notices )
 		);
 	}
 
 	/**
-	 * Get the frontend script handle for this block type.
+	 * Disable frontend script for this block type, it's a script module.
 	 *
 	 * @param string $key Data to get, or default to everything.
+	 * @return array|string|null
 	 */
 	protected function get_block_type_script( $key = null ) {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
 		return null;
 	}
 }

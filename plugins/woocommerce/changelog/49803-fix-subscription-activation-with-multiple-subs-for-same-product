@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix activating the installed subscription when the user has multiple active licenses for the same product.

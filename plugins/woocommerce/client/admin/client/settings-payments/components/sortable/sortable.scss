@@ -1,0 +1,32 @@
+.sortable-container {
+	.sortable-item.is-dragging {
+		z-index: 100;
+		position: relative;
+		box-shadow: 0 0 1px 1px #e0e0e0;
+	}
+
+	.drag-handle-wrapper {
+		margin-right: $gap;
+		align-self: stretch;
+		align-content: center;
+
+		&:hover {
+			cursor: grab;
+		}
+		&:focus-visible {
+			box-shadow: inset 0 0 0 1px
+				var(--wp-components-color-background, #fff),
+				0 0 0 var(--wp-admin-border-width-focus)
+				var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		}
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+
+	.drag-handle {
+		line-height: 0;
+		align-content: center;
+	}
+}

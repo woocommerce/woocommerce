@@ -2,10 +2,19 @@
 /**
  * Structured data's handler and generator using JSON-LD format.
  *
+ * When making changes to this file, please make sure to test the generated
+ * markup with Schema Markup Validator and Google Search Console.
+ * * https://validator.schema.org/
+ * * https://search.google.com/test/rich-results
+ *
  * @package WooCommerce\Classes
  * @since   3.0.0
  * @version 3.0.0
  */
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -214,9 +223,9 @@ class WC_Structured_Data {
 			$markup['sku'] = $product->get_id();
 		}
 
-		// Add GTIN only if it's a valid number.
-		$gtin = $product->get_global_unique_id();
-		if ( $gtin && is_numeric( $gtin ) ) {
+		// Prepare GTIN and load it if it's valid.
+		$gtin = $this->prepare_gtin( $product->get_global_unique_id() );
+		if ( $this->is_valid_gtin( $gtin ) ) {
 			$markup['gtin'] = $gtin;
 		}
 
@@ -224,19 +233,21 @@ class WC_Structured_Data {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
-			if ( $product->is_type( 'variable' ) ) {
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
 				$highest = $product->get_variation_price( 'max', false );
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
 						'@type'              => 'Offer',
-						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-						'priceValidUntil'    => $price_valid_until,
 						'priceSpecification' => array(
-							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+							array(
+								'@type'                 => 'UnitPriceSpecification',
+								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+								'priceCurrency'         => $currency,
+								'valueAddedTaxIncluded' => wc_prices_include_tax(),
+								'validThrough'          => $price_valid_until,
+							),
 						),
 					);
 				} else {
@@ -246,19 +257,48 @@ class WC_Structured_Data {
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
 						'offerCount' => count( $product->get_children() ),
 					);
-				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
-				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
-					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
-				}
 
+					if ( $product->is_on_sale() ) {
+						$children                = array_map( 'wc_get_product', $product->get_children() );
+						$lowest_child_sale_price = $highest;
+
+						foreach ( $children as $child ) {
+							$child_sale_price = $child->get_sale_price();
+
+							if ( empty( $child_sale_price ) || (int) $child_sale_price > (int) $lowest_child_sale_price ) {
+								continue;
+							}
+
+							$lowest_child_sale_price = $child_sale_price;
+							$date_on_sale_to         = $child->get_date_on_sale_to();
+							$sale_price_valid_until  = $date_on_sale_to
+								? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
+								: null;
+						}
+
+						$markup_offer['priceSpecification'] = array(
+							array(
+								'@type'                 => 'UnitPriceSpecification',
+								'priceType'             => 'https://schema.org/SalePrice',
+								'price'                 => wc_format_decimal( $lowest_child_sale_price, wc_get_price_decimals() ),
+								'priceCurrency'         => $currency,
+								'valueAddedTaxIncluded' => wc_prices_include_tax(),
+								'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+							),
+						);
+					}
+				}
+			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 				$children         = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 				$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 				foreach ( $children as $child ) {
-					if ( '' !== $child->get_price() ) {
-						$child_prices[] = $price_function( $child );
+					if ( '' !== $child->get_regular_price() ) {
+						$child_prices[] = $price_function( $child, array( 'price' => $child->get_regular_price() ) );
+					}
+					if ( '' !== $child->get_sale_price() ) {
+						$child_sale_prices[] = $price_function( $child, array( 'price' => $child->get_sale_price() ) );
 					}
 				}
 				if ( empty( $child_prices ) ) {
@@ -266,49 +306,113 @@ class WC_Structured_Data {
 				} else {
 					$min_price = min( $child_prices );
 				}
+				if ( empty( $child_sale_prices ) ) {
+					$min_sale_price = 0;
+				} else {
+					$min_sale_price = min( $child_sale_prices );
+				}
 
-				$markup_offer = array(
-					'@type'              => 'Offer',
-					'price'              => wc_format_decimal( $min_price, wc_get_price_decimals() ),
-					'priceValidUntil'    => $price_valid_until,
-					'priceSpecification' => array(
-						'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
-						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-					),
+				$unit_price_specification = array(
+					'@type'                 => 'UnitPriceSpecification',
+					'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
+					'priceCurrency'         => $currency,
+					'valueAddedTaxIncluded' => wc_prices_include_tax(),
+					'validThrough'          => $price_valid_until,
 				);
-			} else {
-				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
-					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+				if ( $product->is_on_sale() && $min_price !== $min_sale_price ) {
+					// `priceType` should only be specified in prices which are not the current offer.
+					// https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
+					$unit_price_specification['priceType'] = 'https://schema.org/ListPrice';
 				}
 				$markup_offer = array(
 					'@type'              => 'Offer',
-					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-					'priceValidUntil'    => $price_valid_until,
 					'priceSpecification' => array(
-						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
-						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
+						$unit_price_specification,
 					),
 				);
+
+				if ( $product->is_on_sale() && $min_price !== $min_sale_price ) {
+					if ( $product->get_date_on_sale_to() ) {
+						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+					}
+
+					// We add the sale price to the top of the array so it's the first offer.
+					// See https://github.com/woocommerce/woocommerce/issues/55043.
+					array_unshift(
+						$markup_offer['priceSpecification'],
+						array(
+							'@type'                 => 'UnitPriceSpecification',
+							'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+						)
+					);
+				}
+			} else {
+				$unit_price_specification = array(
+					'@type'                 => 'UnitPriceSpecification',
+					'price'                 => wc_format_decimal( $product->get_regular_price(), wc_get_price_decimals() ),
+					'priceCurrency'         => $currency,
+					'valueAddedTaxIncluded' => wc_prices_include_tax(),
+					'validThrough'          => $price_valid_until,
+				);
+				if ( $product->is_on_sale() ) {
+					// `priceType` should only be specified in prices which are not the current offer.
+					// https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
+					$unit_price_specification['priceType'] = 'https://schema.org/ListPrice';
+				}
+				$markup_offer = array(
+					'@type'              => 'Offer',
+					'priceSpecification' => array(
+						$unit_price_specification,
+					),
+				);
+
+				if ( $product->is_on_sale() ) {
+					if ( $product->get_date_on_sale_to() ) {
+						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+					}
+
+					// We add the sale price to the top of the array so it's the first offer.
+					// See https://github.com/woocommerce/woocommerce/issues/55043.
+					array_unshift(
+						$markup_offer['priceSpecification'],
+						array(
+							'@type'                 => 'UnitPriceSpecification',
+							'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
+							'priceCurrency'         => $currency,
+							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
+						)
+					);
+				}
 			}
 
 			if ( $product->is_in_stock() ) {
-				$stock_status_schema = ( 'onbackorder' === $product->get_stock_status() ) ? 'BackOrder' : 'InStock';
+				$stock_status_schema = ( ProductStockStatus::ON_BACKORDER === $product->get_stock_status() ) ? 'BackOrder' : 'InStock';
 			} else {
 				$stock_status_schema = 'OutOfStock';
 			}
 
 			$markup_offer += array(
-				'priceCurrency' => $currency,
-				'availability'  => 'http://schema.org/' . $stock_status_schema,
-				'url'           => $permalink,
-				'seller'        => array(
+				'priceValidUntil' => $sale_price_valid_until ?? $price_valid_until,
+				'availability'    => 'http://schema.org/' . $stock_status_schema,
+				'url'             => $permalink,
+				'seller'          => array(
 					'@type' => 'Organization',
 					'name'  => $shop_name,
 					'url'   => $shop_url,
 				),
 			);
+			if (
+				( ! empty( $markup_offer['price'] ) ||
+					! empty( $markup_offer['lowPrice'] ) ||
+					! empty( $markup_offer['highPrice'] )
+				) && empty( $markup_offer['priceCurrency'] )
+			) {
+				$markup_offer['priceCurrency'] = $currency;
+			}
 
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
@@ -486,13 +590,13 @@ class WC_Structured_Data {
 		$shop_url       = home_url();
 		$order_url      = $sent_to_admin ? $order->get_edit_order_url() : $order->get_view_order_url();
 		$order_statuses = array(
-			'pending'    => 'https://schema.org/OrderPaymentDue',
-			'processing' => 'https://schema.org/OrderProcessing',
-			'on-hold'    => 'https://schema.org/OrderProblem',
-			'completed'  => 'https://schema.org/OrderDelivered',
-			'cancelled'  => 'https://schema.org/OrderCancelled',
-			'refunded'   => 'https://schema.org/OrderReturned',
-			'failed'     => 'https://schema.org/OrderProblem',
+			OrderStatus::PENDING    => 'https://schema.org/OrderPaymentDue',
+			OrderStatus::PROCESSING => 'https://schema.org/OrderProcessing',
+			OrderStatus::ON_HOLD    => 'https://schema.org/OrderProblem',
+			OrderStatus::COMPLETED  => 'https://schema.org/OrderDelivered',
+			OrderStatus::CANCELLED  => 'https://schema.org/OrderCancelled',
+			OrderStatus::REFUNDED   => 'https://schema.org/OrderReturned',
+			OrderStatus::FAILED     => 'https://schema.org/OrderProblem',
 		);
 
 		$markup_offers = array();
@@ -576,5 +680,31 @@ class WC_Structured_Data {
 		);
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_order', $markup, $sent_to_admin, $order ), true );
+	}
+
+	/**
+	 * Check if a GTIN is valid.
+	 * A valid GTIN is a string containing 8,12,13 or 14 digits.
+	 *
+	 * @see https://schema.org/gtin
+	 * @param string $gtin The GTIN to check.
+	 * @return bool True if valid. False otherwise.
+	 */
+	public function is_valid_gtin( $gtin ) {
+		return is_string( $gtin ) && preg_match( '/^(\d{8}|\d{12,14})$/', $gtin );
+	}
+
+	/**
+	 * Prepare a GTIN input removing everything except numbers.
+	 *
+	 * @param string $gtin The GTIN to prepare.
+	 * @return string Empty string if no GTIN is provided or the string with the replacements.
+	 */
+	public function prepare_gtin( $gtin ) {
+		if ( ! $gtin || ! is_string( $gtin ) ) {
+			return '';
+		}
+
+		return preg_replace( '/[^0-9]/', '', $gtin );
 	}
 }

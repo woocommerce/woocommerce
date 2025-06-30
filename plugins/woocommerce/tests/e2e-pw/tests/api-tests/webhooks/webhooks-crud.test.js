@@ -6,7 +6,7 @@ test.describe( 'Webhooks API tests', () => {
 	test.describe( 'Create a webhook', () => {
 		test( 'can create a webhook', async ( { request } ) => {
 			// call API to create a webhook
-			const response = await request.post( '/wp-json/wc/v3/webhooks', {
+			const response = await request.post( './wp-json/wc/v3/webhooks', {
 				data: {
 					name: 'Order updated',
 					topic: 'order.updated',
@@ -37,7 +37,7 @@ test.describe( 'Webhooks API tests', () => {
 		test( 'can retrieve a webhook', async ( { request } ) => {
 			// call API to retrieve the previously saved webhook
 			const response = await request.get(
-				`/wp-json/wc/v3/webhooks/${ webhookId }`
+				`./wp-json/wc/v3/webhooks/${ webhookId }`
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -59,7 +59,7 @@ test.describe( 'Webhooks API tests', () => {
 
 		test( 'can retrieve all webhooks', async ( { request } ) => {
 			// call API to retrieve all webhooks
-			const response = await request.get( '/wp-json/wc/v3/webhooks' );
+			const response = await request.get( './wp-json/wc/v3/webhooks' );
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -71,7 +71,7 @@ test.describe( 'Webhooks API tests', () => {
 		test( `can update a web hook`, async ( { request } ) => {
 			// update webhook
 			const response = await request.put(
-				`/wp-json/wc/v3/webhooks/${ webhookId }`,
+				`./wp-json/wc/v3/webhooks/${ webhookId }`,
 				{
 					data: {
 						status: 'paused',
@@ -88,7 +88,7 @@ test.describe( 'Webhooks API tests', () => {
 		test( 'can permanently delete a webhook', async ( { request } ) => {
 			// Delete the webhook
 			const response = await request.delete(
-				`/wp-json/wc/v3/webhooks/${ webhookId }`,
+				`./wp-json/wc/v3/webhooks/${ webhookId }`,
 				{
 					data: {
 						force: true,
@@ -99,7 +99,7 @@ test.describe( 'Webhooks API tests', () => {
 
 			// Verify that the webhook can no longer be retrieved
 			const getDeletedWebhookResponse = await request.get(
-				`/wp-json/wc/v3/webhooks/${ webhookId }`
+				`./wp-json/wc/v3/webhooks/${ webhookId }`
 			);
 
 			expect( getDeletedWebhookResponse.status() ).toEqual( 404 );
@@ -190,7 +190,7 @@ test.describe( 'Webhooks API tests', () => {
 
 			// Verify that the deleted webhook can no longer be retrieved
 			const getDeletedWebhookResponse = await request.get(
-				`/wp-json/wc/v3/webhooks/${ webhookId2 }`
+				`./wp-json/wc/v3/webhooks/${ webhookId2 }`
 			);
 			expect( getDeletedWebhookResponse.status() ).toEqual( 404 );
 		} );

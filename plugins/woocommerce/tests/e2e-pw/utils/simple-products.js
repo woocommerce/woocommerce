@@ -52,6 +52,10 @@ async function toggleBlockProductEditor( action = 'enable', page ) {
 			name: 'Save changes',
 		} )
 		.click();
+
+	await expect(
+		page.locator( '#message' ).getByText( 'Your settings have been saved' )
+	).toBeVisible();
 }
 
 /**

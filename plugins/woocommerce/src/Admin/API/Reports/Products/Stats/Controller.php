@@ -48,7 +48,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'products-stats'` Query.
+	 * Get data from `'products-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -61,7 +61,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Maps query arguments from the REST request, to be fed to Query.
+	 * Maps query arguments from the REST request to be used to query the datastore.
 	 *
 	 * @param \WP_REST_Request $request Full request object.
 	 * @return array Simplified array of params.
@@ -197,16 +197,18 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'net_revenue',
-			'coupons',
-			'refunds',
-			'shipping',
-			'taxes',
-			'net_revenue',
-			'orders_count',
-			'items_sold',
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'net_revenue',
+				'coupons',
+				'refunds',
+				'shipping',
+				'taxes',
+				'net_revenue',
+				'orders_count',
+				'items_sold',
+			)
 		);
 		$params['categories']      = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),

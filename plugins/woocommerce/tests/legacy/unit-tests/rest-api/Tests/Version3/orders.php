@@ -9,6 +9,8 @@
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
 require_once __DIR__ . '/date-filtering.php';
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
@@ -77,10 +79,10 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order1 = OrderHelper::create_order( $this->user );
 		$order2 = OrderHelper::create_order( $this->user );
 
-		$order1->set_status( 'completed' );
+		$order1->set_status( OrderStatus::COMPLETED );
 		$order1->save();
 		sleep( 1 );
-		$order2->set_status( 'completed' );
+		$order2->set_status( OrderStatus::COMPLETED );
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
@@ -275,7 +277,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
 			array(
-				'payment_method'       => 'bacs',
+				'payment_method'       => WC_Gateway_BACS::ID,
 				'payment_method_title' => 'Direct Bank Transfer',
 				'set_paid'             => true,
 				'billing'              => array(
@@ -399,7 +401,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
 			array(
-				'payment_method'       => 'bacs',
+				'payment_method'       => WC_Gateway_BACS::ID,
 				'payment_method_title' => '<h1>Sanitize this <script>alert(1);</script></h1>',
 				'set_paid'             => true,
 				'billing'              => array(
@@ -451,7 +453,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $data['id'] );
 		$request->set_body_params(
 			array(
-				'payment_method'       => 'bacs',
+				'payment_method'       => WC_Gateway_BACS::ID,
 				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>',
 			)
 		);
@@ -475,7 +477,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
 			array(
-				'payment_method'       => 'bacs',
+				'payment_method'       => WC_Gateway_BACS::ID,
 				'payment_method_title' => 'Direct Bank Transfer',
 				'set_paid'             => true,
 				'customer_id'          => 99999,
@@ -585,7 +587,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$fee->set_props(
 			array(
 				'name'       => 'Some Fee',
-				'tax_status' => 'taxable',
+				'tax_status' => ProductTaxStatus::TAXABLE,
 				'total'      => '100',
 				'tax_class'  => '',
 			)
@@ -719,7 +721,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'order_has_coupon_before_request'          => false,
 				'expected_request_result'                  => array(
 					'code'    => 400,
-					'message' => 'Coupon "not-existing-coupon" does not exist!',
+					'message' => 'Coupon &quot;not-existing-coupon&quot; cannot be applied because it does not exist.',
 				),
 				'expected_order_coupon_code_after_request' => null,
 			),
@@ -736,7 +738,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'order_has_coupon_before_request'          => true,
 				'expected_request_result'                  => array(
 					'code'    => 400,
-					'message' => 'Coupon "not-existing-coupon" does not exist!',
+					'message' => 'Coupon &quot;not-existing-coupon&quot; cannot be applied because it does not exist.',
 				),
 				'expected_order_coupon_code_after_request' => 'fake-coupon',
 			),
@@ -1002,7 +1004,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_coupon', $data['code'] );
-		$this->assertEquals( 'Coupon "non_existing_coupon" does not exist!', $data['message'] );
+		$this->assertEquals( 'Coupon &quot;non_existing_coupon&quot; cannot be applied because it does not exist.', $data['message'] );
 	}
 
 	/**

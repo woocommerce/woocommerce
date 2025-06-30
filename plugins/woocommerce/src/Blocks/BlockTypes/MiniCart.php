@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
@@ -11,6 +13,8 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 
 /**
  * Mini-Cart class.
@@ -19,6 +23,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
+	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -90,7 +95,33 @@ class MiniCart extends AbstractBlock {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
+		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+	}
+
+	/**
+	 * Callback for the Block Hooks API to modify the attributes of the hooked block.
+	 *
+	 * @param array|null                      $parsed_hooked_block The parsed block array for the given hooked block type, or null to suppress the block.
+	 * @param string                          $hooked_block_type   The hooked block type name.
+	 * @param string                          $relative_position   The relative position of the hooked block.
+	 * @param array                           $parsed_anchor_block The anchor block, in parsed block array format.
+	 * @param WP_Block_Template|WP_Post|array $context             The block template, template part, `wp_navigation` post type,
+	 *                                                             or pattern that the anchor block belongs to.
+	 * @return array|null
+	 */
+	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+		$mini_cart_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/mini-cart', 'typography', 'fontSize' ) );
+
+		if ( ! is_string( $mini_cart_block_font_size ) ) {
+			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
+
+			if ( is_string( $navigation_block_font_size ) ) {
+				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
+			}
+		}
+
+		return $parsed_hooked_block;
 	}
 
 	/**
@@ -116,7 +147,7 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
-		if ( is_cart() || is_checkout() ) {
+		if ( is_cart() || is_checkout() || Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
 			return;
 		}
 
@@ -173,7 +204,7 @@ class MiniCart extends AbstractBlock {
 
 		if (
 			current_user_can( 'edit_theme_options' ) &&
-			( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) )
+			( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) )
 		) {
 			$theme_slug = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 
@@ -220,6 +251,10 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			return;
+		}
+
 		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
@@ -367,9 +402,9 @@ class MiniCart extends AbstractBlock {
 		if ( isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice'] ) {
 			return;
 		}
-		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
+		$price_color = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
 
-		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
+		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . '"></span>' . $this->get_include_tax_label_markup( $attributes );
 	}
 
 	/**
@@ -383,13 +418,13 @@ class MiniCart extends AbstractBlock {
 		if ( empty( $this->tax_label ) ) {
 			return '';
 		}
-		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
+		$price_color = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
 
 		return '<small class="wc-block-mini-cart__tax-label" style="color:' . esc_attr( $price_color ) . ' " hidden>' . esc_html( $this->tax_label ) . '</small>';
 	}
 
 	/**
-	 * Append frontend scripts when rendering the Mini-Cart block.
+	 * Render the Mini-Cart block.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content    Block content.
@@ -397,7 +432,180 @@ class MiniCart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
+		}
+
 		return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
+	}
+
+
+	/**
+	 * Render an experimental interactivity API powered Mini-Cart block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content    Block content.
+	 * @param WP_Block $block      Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
+		wp_enqueue_script_module( $this->get_full_block_name() );
+		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		$cart = $this->get_cart_instance();
+
+		if ( $cart ) {
+			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
+			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$wrapper_styles                   = $classes_styles['styles'];
+			$template_part_contents           = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
+			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
+			$formatted_subtotal               = '';
+			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
+			$on_cart_click_behaviour          = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
+
+			if ( $html->next_tag( 'bdi' ) ) {
+				while ( $html->next_token() ) {
+					if ( '#text' === $html->get_token_name() ) {
+						$formatted_subtotal .= $html->get_modifiable_text();
+					}
+				}
+			}
+
+			wp_interactivity_state(
+				$this->get_full_block_name(),
+				array(
+					'totalItemsInCart'  => $cart_item_count,
+					'badgeIsVisible'    => $badge_is_visible,
+					'formattedSubtotal' => $formatted_subtotal,
+				)
+			);
+
+			$context = array(
+				'isOpen'                       => false,
+				'productCountVisibility'       => $product_count_visibility,
+				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+			);
+
+			wp_interactivity_config(
+				$this->get_full_block_name(),
+				array(
+					'addToCartBehaviour'   => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour' => $on_cart_click_behaviour,
+					'checkoutUrl'          => wc_get_checkout_url(),
+				)
+			);
+
+			$cart_always_shows_price = isset( $attributes['hasHiddenPrice'] ) && false === $attributes['hasHiddenPrice'];
+			$price_color             = isset( $attributes['priceColor']['color'] ) ? $attributes['priceColor']['color'] : '';
+
+			$button_role = 'navigate_to_checkout' === $on_cart_click_behaviour
+				? 'role="link"'
+				: '';
+
+			ob_start();
+			?>
+		
+			<div
+				data-wp-interactive="woocommerce/mini-cart"
+				data-wp-init="callbacks.setupOpenDrawerListener"
+				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo wp_interactivity_data_wp_context( $context ); ?>
+				class="<?php echo esc_attr( $wrapper_classes ); ?>"
+				style="<?php echo esc_attr( $wrapper_styles ); ?>"
+			>
+				<button 
+					data-wp-on--click="callbacks.openDrawer"
+					class="wc-block-mini-cart__button"
+					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
+				>
+					<span class="wc-block-mini-cart__quantity-badge">
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $icon;
+						?>
+						<?php if ( 'never' !== $product_count_visibility ) : ?>
+							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+							</span>
+						<?php endif; ?>
+					</span>
+					<?php if ( $cart_always_shows_price ) : ?>
+						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+						</span>
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $this->get_include_tax_label_markup( $attributes );
+						?>
+					<?php endif; ?>
+				</button>
+				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
+					<div 
+						data-wp-bind--role="state.drawerRole"
+						data-wp-bind--aria-modal="context.isOpen"
+						data-wp-bind--aria-hidden="!context.isOpen"
+						data-wp-bind--tab-index="state.drawerTabIndex"
+						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
+					>
+						<div class="wc-block-components-drawer__content">
+							<div class="wc-block-mini-cart__template-part">
+								<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									echo $template_part_contents;
+								?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the mini cart template part contents to render inside the drawer.
+	 *
+	 * @param string $template_name  The name of the template part to get the contents of.
+	 *
+	 * @return string The contents of the template part.
+	 */
+	protected function get_template_part_contents( $template_name = 'mini-cart' ) {
+		$template_part_contents = '';
+
+		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
+		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $template_name ), 'wp_template_part' );
+		if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
+			$template_slug_to_load = $templates_from_db[0]->theme;
+		} else {
+			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( $template_name );
+			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
+		}
+		$template_part = get_block_template( $template_slug_to_load . '//' . $template_name, 'wp_template_part' );
+
+		if ( $template_part && ! empty( $template_part->content ) ) {
+			$template_part_contents = do_blocks( $template_part->content );
+		}
+
+		if ( '' === $template_part_contents ) {
+			$template_part_contents = do_blocks(
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' )
+			);
+		}
+
+		return $template_part_contents;
 	}
 
 	/**
@@ -414,44 +622,22 @@ class MiniCart extends AbstractBlock {
 			return '';
 		}
 
-		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family' ) );
+		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
-		if ( ! empty( $attributes['className'] ) ) {
-			$wrapper_classes .= ' ' . $attributes['className'];
-		}
-		$wrapper_styles = $classes_styles['styles'];
+		$wrapper_styles  = $classes_styles['styles'];
 
-		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
+		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
+		$styles              = $product_count_color ? 'background:' . $product_count_color : '';
+		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
-		// Default "Cart" icon.
-		$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="' . $icon_color . '" xmlns="http://www.w3.org/2000/svg">
-					<circle cx="12.6667" cy="24.6667" r="2" fill="' . $icon_color . '"/>
-					<circle cx="23.3333" cy="24.6667" r="2" fill="' . $icon_color . '"/>
-					<path fill-rule="evenodd" clip-rule="evenodd" d="M9.28491 10.0356C9.47481 9.80216 9.75971 9.66667 10.0606 9.66667H25.3333C25.6232 9.66667 25.8989 9.79247 26.0888 10.0115C26.2787 10.2305 26.3643 10.5211 26.3233 10.8081L24.99 20.1414C24.9196 20.6341 24.4977 21 24 21H12C11.5261 21 11.1173 20.6674 11.0209 20.2034L9.08153 10.8701C9.02031 10.5755 9.09501 10.269 9.28491 10.0356ZM11.2898 11.6667L12.8136 19H23.1327L24.1803 11.6667H11.2898Z" fill="' . $icon_color . '"/>
-					<path fill-rule="evenodd" clip-rule="evenodd" d="M5.66669 6.66667C5.66669 6.11438 6.1144 5.66667 6.66669 5.66667H9.33335C9.81664 5.66667 10.2308 6.01229 10.3172 6.48778L11.0445 10.4878C11.1433 11.0312 10.7829 11.5517 10.2395 11.6505C9.69614 11.7493 9.17555 11.3889 9.07676 10.8456L8.49878 7.66667H6.66669C6.1144 7.66667 5.66669 7.21895 5.66669 6.66667Z" fill="' . $icon_color . '"/>
-				</svg>';
+		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 
-		if ( isset( $attributes['miniCartIcon'] ) ) {
-			if ( 'bag' === $attributes['miniCartIcon'] ) {
-				$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M12.4444 14.2222C12.9354 14.2222 13.3333 14.6202 13.3333 15.1111C13.3333 15.8183 13.6143 16.4966 14.1144 16.9967C14.6145 17.4968 15.2927 17.7778 16 17.7778C16.7072 17.7778 17.3855 17.4968 17.8856 16.9967C18.3857 16.4966 18.6667 15.8183 18.6667 15.1111C18.6667 14.6202 19.0646 14.2222 19.5555 14.2222C20.0465 14.2222 20.4444 14.6202 20.4444 15.1111C20.4444 16.2898 19.9762 17.4203 19.1427 18.2538C18.3092 19.0873 17.1787 19.5555 16 19.5555C14.8212 19.5555 13.6908 19.0873 12.8573 18.2538C12.0238 17.4203 11.5555 16.2898 11.5555 15.1111C11.5555 14.6202 11.9535 14.2222 12.4444 14.2222Z" fill="' . $icon_color . '"/>
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M11.2408 6.68254C11.4307 6.46089 11.7081 6.33333 12 6.33333H20C20.2919 6.33333 20.5693 6.46089 20.7593 6.68254L24.7593 11.3492C25.0134 11.6457 25.0717 12.0631 24.9085 12.4179C24.7453 12.7727 24.3905 13 24 13H8.00001C7.60948 13 7.25469 12.7727 7.0915 12.4179C6.92832 12.0631 6.9866 11.6457 7.24076 11.3492L11.2408 6.68254ZM12.4599 8.33333L10.1742 11H21.8258L19.5401 8.33333H12.4599Z" fill="' . $icon_color . '"/>
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M7 12C7 11.4477 7.44772 11 8 11H24C24.5523 11 25 11.4477 25 12V25.3333C25 25.8856 24.5523 26.3333 24 26.3333H8C7.44772 26.3333 7 25.8856 7 25.3333V12ZM9 13V24.3333H23V13H9Z" fill="' . $icon_color . '"/>
-						</svg>';
-			} elseif ( 'bag-alt' === $attributes['miniCartIcon'] ) {
-				$icon = '<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M19.5556 12.3333C19.0646 12.3333 18.6667 11.9354 18.6667 11.4444C18.6667 10.7372 18.3857 8.05893 17.8856 7.55883C17.3855 7.05873 16.7073 6.77778 16 6.77778C15.2928 6.77778 14.6145 7.05873 14.1144 7.55883C13.6143 8.05893 13.3333 10.7372 13.3333 11.4444C13.3333 11.9354 12.9354 12.3333 12.4445 12.3333C11.9535 12.3333 11.5556 11.9354 11.5556 11.4444C11.5556 10.2657 12.0238 7.13524 12.8573 6.30175C13.6908 5.46825 14.8213 5 16 5C17.1788 5 18.3092 5.46825 19.1427 6.30175C19.9762 7.13524 20.4445 10.2657 20.4445 11.4444C20.4445 11.9354 20.0465 12.3333 19.5556 12.3333Z" fill="' . $icon_color . '"/>
-							<path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 12C7.5 11.4477 7.94772 11 8.5 11H23.5C24.0523 11 24.5 11.4477 24.5 12V25.3333C24.5 25.8856 24.0523 26.3333 23.5 26.3333H8.5C7.94772 26.3333 7.5 25.8856 7.5 25.3333V12ZM9.5 13V24.3333H22.5V13H9.5Z" fill="' . $icon_color . '" />
-						</svg>';
-			}
-		}
-
-		$button_html = $this->get_cart_price_markup( $attributes ) . '
-		<span class="wc-block-mini-cart__quantity-badge">
+		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
-			<span class="wc-block-mini-cart__badge" style="background:' . $product_count_color . '"></span>
-		</span>';
+			' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
+		</span>
+		' . $this->get_cart_price_markup( $attributes );
 
 		if ( is_cart() || is_checkout() ) {
 			if ( $this->should_not_render_mini_cart( $attributes ) ) {
@@ -464,28 +650,7 @@ class MiniCart extends AbstractBlock {
 			</div>';
 		}
 
-		$template_part_contents = '';
-
-		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
-		$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'mini-cart' ), 'wp_template_part' );
-		if ( is_countable( $templates_from_db ) && count( $templates_from_db ) > 0 ) {
-			$template_slug_to_load = $templates_from_db[0]->theme;
-		} else {
-			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
-			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
-		}
-		$template_part = get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
-
-		if ( $template_part && ! empty( $template_part->content ) ) {
-			$template_part_contents = do_blocks( $template_part->content );
-		}
-
-		if ( '' === $template_part_contents ) {
-			$template_part_contents = do_blocks(
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/mini-cart.html' )
-			);
-		}
+		$template_part_contents = $this->get_template_part_contents();
 
 		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '">
 			<button class="wc-block-mini-cart__button" aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>

@@ -9,6 +9,7 @@
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports product stats tests class
@@ -33,7 +34,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -42,7 +43,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -98,7 +99,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$date_created_2 = $date_created + 5;
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -109,7 +110,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->save();
 
 		$order_2 = WC_Helper_Order::create_order( 1, $product_2 );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( OrderStatus::COMPLETED );
 		$order_2->set_shipping_total( 10 );
 		$order_2->set_discount_total( 20 );
 		$order_2->set_discount_tax( 0 );
@@ -119,7 +120,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order_2->set_date_created( $date_created_2 );
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -211,7 +212,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		wp_set_object_terms( $product->get_id(), $term['term_id'], 'product_cat' );
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -220,7 +221,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -292,7 +293,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		wp_set_object_terms( $product->get_id(), $term['term_id'], 'product_cat' );
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -301,7 +302,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -357,7 +358,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -383,7 +384,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			break;
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -432,7 +433,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 20 );
 		$order->set_discount_tax( 0 );
@@ -441,7 +442,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$term = wp_insert_term( 'Unused Category', 'product_cat' );
 

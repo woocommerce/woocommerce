@@ -36,7 +36,7 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/taxes';
 
 	/**
-	 * Get data from `'taxes'` Query.
+	 * Get data from `'taxes'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -195,15 +195,17 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'tax_rate_id';
-		$params['orderby']['enum']    = array(
-			'name',
-			'tax_rate_id',
-			'tax_code',
-			'rate',
-			'order_tax',
-			'total_tax',
-			'shipping_tax',
-			'orders_count',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
+			array(
+				'name',
+				'tax_rate_id',
+				'tax_code',
+				'rate',
+				'order_tax',
+				'total_tax',
+				'shipping_tax',
+				'orders_count',
+			)
 		);
 		$params['taxes']              = array(
 			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce' ),
@@ -242,7 +244,15 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		return array(
-			'tax_code'     => \WC_Tax::get_rate_code( $item['tax_rate_id'] ),
+			'tax_code'     => \WC_Tax::get_rate_code(
+				(object) array(
+					'tax_rate_id'       => $item['tax_rate_id'],
+					'tax_rate_country'  => $item['country'],
+					'tax_rate_state'    => $item['state'],
+					'tax_rate_name'     => $item['name'],
+					'tax_rate_priority' => $item['priority'],
+				)
+			),
 			'rate'         => $item['tax_rate'],
 			'total_tax'    => self::csv_number_format( $item['total_tax'] ),
 			'order_tax'    => self::csv_number_format( $item['order_tax'] ),

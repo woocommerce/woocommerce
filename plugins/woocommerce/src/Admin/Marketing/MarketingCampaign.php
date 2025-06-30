@@ -65,7 +65,7 @@ class MarketingCampaign {
 	 * @param Price|null            $cost       The cost of the marketing campaign with the currency.
 	 * @param Price|null            $sales      The sales of the marketing campaign with the currency.
 	 */
-	public function __construct( string $id, MarketingCampaignType $type, string $title, string $manage_url, Price $cost = null, Price $sales = null ) {
+	public function __construct( string $id, MarketingCampaignType $type, string $title, string $manage_url, ?Price $cost = null, ?Price $sales = null ) {
 		$this->id         = $id;
 		$this->type       = $type;
 		$this->title      = $title;

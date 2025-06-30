@@ -1,0 +1,290 @@
+.wc-block-components-radio-control--highlight-checked {
+	position: relative;
+
+	div.wc-block-components-radio-control-accordion-option {
+		position: relative;
+
+		// This ::after element is to fake a transparent border-top on each option.
+		// We can't just use border-top on the option itself because of the border around the entire accordion.
+		// Both borders have transparency so there's an overlap where the border is darker (due to adding two
+		// transparent colours together). Doing it with an ::after lets us bring the "border" in by one pixel on each
+		// side to avoid the overlap.
+		&::after {
+			content: "";
+			background: $universal-border-light;
+			height: 1px;
+			right: 1px;
+			left: 1px;
+			top: 0;
+			position: absolute;
+		}
+
+		.has-dark-controls & {
+			&::after {
+				background: $input-border-dark;
+			}
+		}
+
+		// The first child doesn't need a fake border-top because it's handled by its parent's border-top. This stops
+		// a double border.
+		&:first-child::after {
+			display: none;
+		}
+
+		// This rule removes the fake border-top from the selected element to prevent a double border.
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted
+			+ div.wc-block-components-radio-control-accordion-option::after {
+			display: none;
+		}
+	}
+
+	// Adds a "border" around the selected option. This is done with a box-shadow to prevent a double border on the left
+	// and right of the selected element, and top and bottom of the first/last elements.
+	label.wc-block-components-radio-control__option--checked-option-highlighted,
+	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
+		box-shadow: 0 0 0 1.5px currentColor inset;
+		border-radius: 4px;
+	}
+
+	// Defines a border around the radio control. Cannot be done with normal CSS borders or outlines because when
+	// selecting an item we get a double border on the left and right. It's not possible to remove the outer border just
+	// for the selected element, but using a pseudo element gives us more control.
+	&::after {
+		content: "";
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		pointer-events: none;
+		position: absolute;
+		border: 1px solid $universal-border-light;
+		border-radius: 4px;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.has-dark-controls & {
+		&::after {
+			border-color: $input-border-dark;
+		}
+	}
+
+	// Remove the top border when the first element is selected, this is so we don't get a double border with the
+	// box-shadow.
+	&.wc-block-components-radio-control--highlight-checked--first-selected::after {
+		border-top: 0;
+		margin-top: 2px;
+	}
+
+	// Remove the bottom border when the last element is selected, this is so we don't get a double border with the
+	// box-shadow.
+	&.wc-block-components-radio-control--highlight-checked--last-selected::after {
+		margin-bottom: 2px;
+		border-bottom: 0;
+	}
+
+	// Remove the fake border-top from the item after the selected element, this is to prevent a double border with the
+	// selected element's box-shadow.
+	.wc-block-components-radio-control__option--checked-option-highlighted
+		+ .wc-block-components-radio-control__option::after {
+		display: none;
+	}
+
+	.wc-block-components-radio-control__option {
+		// Add a fake border to the top of each radio option. This is because using CSS borders would result in an
+		// overlap and two transparent borders combining to make a darker pixel. This fake border allows us to bring the
+		// border in by one pixel on each side to avoid the overlap.
+		&::after {
+			content: "";
+			background: $universal-border-light;
+			height: 1px;
+			right: 1px;
+			left: 1px;
+			top: 0;
+			position: absolute;
+		}
+
+		.has-dark-controls & {
+			&::after {
+				background: $input-border-dark;
+			}
+		}
+
+		// The first child doesn't need a fake border-top because it's handled by its parent's border-top.
+		&:first-child::after {
+			display: none;
+		}
+	}
+}
+
+.wc-block-components-radio-control__option {
+	@include reset-color();
+	@include reset-typography();
+	display: block;
+	margin: em($gap) 0;
+	margin-top: 0;
+	// padding-left here is aligned with the size of the radio input element,
+	// we need to reserve at least this amount of space for the label to not
+	// overflow the input. Input has position: absolute set, so it doesn't
+	// take any space on its own.
+	padding: 0 calc($gap + em(24px)) 0 em($gap-huge);
+	position: relative;
+	cursor: pointer;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.wc-block-components-radio-control__option-layout {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.wc-block-components-radio-control__option
+	.wc-block-components-radio-control__option-layout {
+	&::after {
+		display: none;
+	}
+}
+
+.wc-block-components-radio-control__label-group,
+.wc-block-components-radio-control__description-group {
+	display: flex;
+	justify-content: space-between;
+
+	.wc-block-components-radio-control__label,
+	.wc-block-components-radio-control__description {
+		flex-grow: 1;
+	}
+
+	.wc-block-components-radio-control__secondary-label,
+	.wc-block-components-radio-control__secondary-description {
+		text-align: right;
+		flex: 0 0 50%;
+	}
+}
+
+// For column description stacking we need to apply some layout changes.
+// There is no variant handling row stacking as it is applied by default.
+.wc-block-components-radio-control__description-group--column {
+	flex-direction: column;
+
+	// Use balance as this is not a good candidate for pretty. Pretty is
+	// intended  for body copy which this is not.
+	text-wrap: balance;
+
+	.wc-block-components-radio-control__description {
+		margin: $gap-smaller 0;
+	}
+
+	.wc-block-components-radio-control__secondary-description {
+		text-align: left;
+		// Leaves a bit less space causing longer description to wrap nicer on
+		// smaller screens.
+		padding-right: $gap-small;
+	}
+}
+
+.wc-block-components-radio-control__label,
+.wc-block-components-radio-control__secondary-label {
+	// Currently, max() CSS function calls need to be wrapped with unquote.
+	// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
+	// These values should be the same as the control input height.
+	line-height: string.unquote("max(1.5rem, 24px)");
+}
+
+.wc-block-components-radio-control__description,
+.wc-block-components-radio-control__secondary-description {
+	@include font-size(small);
+	line-height: 1.55;
+}
+
+// Extra class for specificity.
+.wc-block-components-radio-control {
+	.wc-block-components-radio-control__input {
+		appearance: none;
+		background: $input-background-light;
+		border: 1px solid $universal-border-medium;
+		border-radius: 50%;
+		display: inline-block;
+		height: em(24px); // =1.5rem
+		min-height: 24px;
+		min-width: 24px;
+		width: em(24px);
+		// The code belows centers the input vertically.
+		position: absolute;
+		left: $gap;
+		top: 50%;
+		transform: translate(0, -45%);
+		margin: inherit;
+		cursor: pointer;
+		&:checked {
+			border: 1px solid $universal-border-strong;
+		}
+
+		&:focus {
+			outline: 1px solid $universal-border-strong;
+			outline-offset: 2px;
+		}
+
+		&:checked::before {
+			background: #000;
+			border-radius: 50%;
+			content: "";
+			display: block;
+			height: em(12px);
+			left: 50%;
+			margin: 0;
+			min-height: 12px;
+			min-width: 12px;
+			position: absolute;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: em(12px);
+		}
+
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+			background-color: $input-background-dark;
+
+			&:checked {
+				border-color: $input-text-dark;
+			}
+
+			&:checked::before {
+				background: $input-text-dark;
+			}
+
+			&:focus {
+				outline: 1px solid $input-text-dark;
+				outline-offset: 1px;
+			}
+		}
+
+		&[aria-disabled="true"],
+		&[disabled] {
+			cursor: not-allowed;
+			opacity: 0.5;
+			transition: opacity 200ms ease;
+		}
+	}
+}
+
+.theme-twentytwentyone {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__input {
+		&:checked {
+			border-width: 2px;
+
+			&::before {
+				background-color: var(--form--color-text);
+			}
+		}
+
+		&::after {
+			display: none;
+		}
+	}
+}

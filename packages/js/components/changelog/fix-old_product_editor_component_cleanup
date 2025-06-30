@@ -1,0 +1,4 @@
+Significance: major
+Type: dev
+
+Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection.

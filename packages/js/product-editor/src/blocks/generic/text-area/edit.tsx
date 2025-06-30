@@ -8,7 +8,7 @@ import { createElement, useRef } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ import type {
 	TextAreaBlockEditAttributes,
 	TextAreaBlockEditProps,
 } from './types';
-import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
+import AlignmentToolbarButton from './toolbar/toolbar-button-alignment';
 import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { Label } from '../../../components/label/label';
@@ -100,7 +100,7 @@ export function TextAreaBlockEdit( {
 		<div { ...blockProps }>
 			{ isRichTextMode && (
 				<BlockControls { ...blockControlsBlockProps }>
-					<AligmentToolbarButton
+					<AlignmentToolbarButton
 						align={ align }
 						setAlignment={ setAlignment }
 					/>
@@ -138,7 +138,7 @@ export function TextAreaBlockEdit( {
 						value={ content || '' }
 						onChange={ setContent }
 						data-empty={ Boolean( content ) }
-						className={ classNames( 'components-summary-control', {
+						className={ clsx( 'components-summary-control', {
 							[ `has-text-align-${ align }` ]: align,
 						} ) }
 						dir={ direction }

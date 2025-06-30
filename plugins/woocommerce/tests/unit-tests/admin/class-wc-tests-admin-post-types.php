@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * WC_Admin_Post_Types tests.
  *
@@ -38,10 +40,10 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 		return array(
 			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			// $edit_type, $change_stock_request_value, $expected_new_stock_status
-			array( 'quick_edit', '', 'outofstock' ),
-			array( 'quick_edit', 'instock', 'instock' ),
-			array( 'bulk_edit', '', 'outofstock' ),
-			array( 'bulk_edit', 'instock', 'instock' ),
+			array( 'quick_edit', '', ProductStockStatus::OUT_OF_STOCK ),
+			array( 'quick_edit', ProductStockStatus::IN_STOCK, ProductStockStatus::IN_STOCK ),
+			array( 'bulk_edit', '', ProductStockStatus::OUT_OF_STOCK ),
+			array( 'bulk_edit', ProductStockStatus::IN_STOCK, ProductStockStatus::IN_STOCK ),
 		);
 	}
 
@@ -60,7 +62,7 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 		foreach ( $product->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
 			$product->set_manage_stock( false );
-			$child->set_stock_status( 'outofstock' );
+			$child->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 			$child->save();
 		}
 

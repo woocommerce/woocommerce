@@ -4,7 +4,7 @@
 import { Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createElement, forwardRef } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -49,7 +49,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 	return (
 		<li
 			{ ...treeItemProps }
-			className={ classNames(
+			className={ clsx(
 				treeItemProps.className,
 				'experimental-woocommerce-tree-item',
 				{
@@ -72,8 +72,6 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
 							onKeyDown={ handleKeyDown }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore __nextHasNoMarginBottom is a valid prop
 							__nextHasNoMarginBottom={ true }
 						/>
 					) : (

@@ -1,20 +1,20 @@
 <?php
-/**
- * Tests for PostsToOrdersMigrationController class.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
-use Automattic\WooCommerce\Testing\Tools\ReplacementObject;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use WC_DateTime;
 
 /**
  * Class PostsToOrdersMigrationControllerTest.
  */
-class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
+class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -135,6 +135,32 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			)
 		);
 		// phpcs:enable
+	}
+
+	/**
+	 * Test that the OrdersTableDataStore cache is properly refreshed after a migration.
+	 */
+	public function test_migration_for_existing_order_properly_clears_cache() {
+		$order = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$this->clear_all_orders();
+
+		// Run the migration once.
+		$this->sut->migrate_order( $order->get_id() );
+
+		// Load the order to confirm it's been properly migrated and prime cache.
+		$cot_order = clone( $order );
+		$this->data_store->read( $cot_order );
+		$this->assertSame( $order->get_id(), $cot_order->get_id() );
+		$this->assertSame( $order->get_shipping_first_name(), $cot_order->get_shipping_first_name() );
+
+		// Change the original post order.
+		$order->set_shipping_first_name( 'John' );
+		$order->save();
+
+		// Run the migration again, assert there are still no duplicates.
+		$this->sut->migrate_order( $order->get_id() );
+		$this->data_store->read( $cot_order );
+		$this->assertSame( $order->get_shipping_first_name(), $cot_order->get_shipping_first_name() );
 	}
 
 	/**
@@ -669,7 +695,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * Configure a dynamic decorator for $wpdb that logs (and optionally errors) any db related transaction query.
 	 *
-	 * @param string|\Exception\bool $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
+	 * @param string|\Exception|bool $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
 	 * @return DynamicDecorator
 	 */
 	private function use_wpdb_mock( $transaction_fails = false ) {

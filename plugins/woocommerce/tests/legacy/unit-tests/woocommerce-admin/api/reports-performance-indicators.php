@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Admin_Tests_API_Reports_Performance_Indicators
  */
@@ -67,7 +69,7 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 25 );
 		$order->save();
 
@@ -90,7 +92,7 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 		$object->set_user_ip_address( '1.2.3.4' );
 		$object->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$time    = time();
 		$request = new WP_REST_Request( 'GET', $this->endpoint );

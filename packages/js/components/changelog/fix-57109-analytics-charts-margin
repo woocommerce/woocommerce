@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Vertically align chart type buttons in <Chart> component

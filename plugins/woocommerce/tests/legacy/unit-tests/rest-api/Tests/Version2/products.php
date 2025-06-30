@@ -6,6 +6,8 @@
  * @since 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
@@ -91,8 +93,8 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 			array(
 				'id'            => $simple->get_id(),
 				'name'          => 'Dummy External Product',
-				'type'          => 'external',
-				'status'        => 'publish',
+				'type'          => ProductType::EXTERNAL,
+				'status'        => ProductStatus::PUBLISH,
 				'sku'           => 'DUMMY EXTERNAL SKU',
 				'regular_price' => '10',
 			),
@@ -325,7 +327,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
-				'type'           => 'simple',
+				'type'           => ProductType::SIMPLE,
 				'name'           => 'Test Simple Product',
 				'sku'            => 'DUMMY SKU SIMPLE API',
 				'regular_price'  => '10',
@@ -340,14 +342,14 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['purchasable'] );
 		$this->assertEquals( 'DUMMY SKU SIMPLE API', $data['sku'] );
 		$this->assertEquals( 'Test Simple Product', $data['name'] );
-		$this->assertEquals( 'simple', $data['type'] );
+		$this->assertEquals( ProductType::SIMPLE, $data['type'] );
 		$this->assertEquals( $shipping_class_id, $data['shipping_class_id'] );
 
 		// Create external.
 		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
-				'type'          => 'external',
+				'type'          => ProductType::EXTERNAL,
 				'name'          => 'Test External Product',
 				'sku'           => 'DUMMY SKU EXTERNAL API',
 				'regular_price' => '10',
@@ -363,7 +365,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertFalse( $data['purchasable'] );
 		$this->assertEquals( 'DUMMY SKU EXTERNAL API', $data['sku'] );
 		$this->assertEquals( 'Test External Product', $data['name'] );
-		$this->assertEquals( 'external', $data['type'] );
+		$this->assertEquals( ProductType::EXTERNAL, $data['type'] );
 		$this->assertEquals( 'Test Button', $data['button_text'] );
 		$this->assertEquals( 'https://wordpress.org', $data['external_url'] );
 
@@ -371,7 +373,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v2/products' );
 		$request->set_body_params(
 			array(
-				'type'       => 'variable',
+				'type'       => ProductType::VARIABLE,
 				'name'       => 'Test Variable Product',
 				'sku'        => 'DUMMY SKU VARIABLE API',
 				'attributes' => array(
@@ -393,7 +395,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'DUMMY SKU VARIABLE API', $data['sku'] );
 		$this->assertEquals( 'Test Variable Product', $data['name'] );
-		$this->assertEquals( 'variable', $data['type'] );
+		$this->assertEquals( ProductType::VARIABLE, $data['type'] );
 		$this->assertEquals( array( 'small', 'medium' ), $data['attributes'][0]['options'] );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
@@ -444,14 +446,14 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 						'sku'           => 'DUMMY SKU BATCH TEST 1',
 						'regular_price' => '10',
 						'name'          => 'Test Batch Create 1',
-						'type'          => 'external',
+						'type'          => ProductType::EXTERNAL,
 						'button_text'   => 'Test Button',
 					),
 					array(
 						'sku'           => 'DUMMY SKU BATCH TEST 2',
 						'regular_price' => '20',
 						'name'          => 'Test Batch Create 2',
-						'type'          => 'simple',
+						'type'          => ProductType::SIMPLE,
 					),
 				),
 			)
@@ -463,8 +465,8 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 1', $data['create'][0]['sku'] );
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 2', $data['create'][1]['sku'] );
 		$this->assertEquals( 'Test Button', $data['create'][0]['button_text'] );
-		$this->assertEquals( 'external', $data['create'][0]['type'] );
-		$this->assertEquals( 'simple', $data['create'][1]['type'] );
+		$this->assertEquals( ProductType::EXTERNAL, $data['create'][0]['type'] );
+		$this->assertEquals( ProductType::SIMPLE, $data['create'][1]['type'] );
 		$this->assertEquals( $product_2->get_id(), $data['delete'][0]['id'] );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v2/products' );
@@ -488,7 +490,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 				wp_update_post(
 					array(
 						'ID'          => $product->get_id(),
-						'post_status' => 'draft',
+						'post_status' => ProductStatus::DRAFT,
 					)
 				);
 			}
@@ -496,24 +498,24 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 
 		// Test filtering with status=publish.
 		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
-		$request->set_param( 'status', 'publish' );
+		$request->set_param( 'status', ProductStatus::PUBLISH );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
 
 		$this->assertEquals( 4, count( $products ) );
 		foreach ( $products as $product ) {
-			$this->assertEquals( 'publish', $product['status'] );
+			$this->assertEquals( ProductStatus::PUBLISH, $product['status'] );
 		}
 
 		// Test filtering with status=draft.
 		$request = new WP_REST_Request( 'GET', '/wc/v2/products' );
-		$request->set_param( 'status', 'draft' );
+		$request->set_param( 'status', ProductStatus::DRAFT );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
 
 		$this->assertEquals( 4, count( $products ) );
 		foreach ( $products as $product ) {
-			$this->assertEquals( 'draft', $product['status'] );
+			$this->assertEquals( ProductStatus::DRAFT, $product['status'] );
 		}
 
 		// Test filtering with no filters - which should return 'any' (all 8).

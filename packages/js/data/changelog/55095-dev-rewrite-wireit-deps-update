@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: refresh wireit dependencyOutputs configuration synchronization when installing dependencies.

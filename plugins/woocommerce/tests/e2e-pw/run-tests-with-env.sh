@@ -26,11 +26,29 @@ SCRIPT_PATH=$(
   pwd -P
 )
 
-echo "Setting up environment: $envName"
+title() {
+    local text=${1:+ }$1${1:+ }
+    local total=$((80 - ${#text}))
+    local left=$((total / 2))
+    local right=$((total - left))
+
+    printf "%s%s%s\n" \
+        "$(printf '=%.0s' $(seq 1 $left))" \
+        "$text" \
+        "$(printf '=%.0s' $(seq 1 $right))"
+}
+
+echo
+title
+title "Preparing to run tests with environment: $envName"
+title
 
 if [ -f "$SCRIPT_PATH/envs/$envName/.env.enc" ]; then
-	echo "Found encrypted .env file for environment '$envName'"
+	echo "Found an encrypted .env file for environment '$envName'"
 	"$SCRIPT_PATH/bin/dotenv.sh" -d "$envName"
+elif [ -f "$SCRIPT_PATH/envs/$envName/.env" ]; then
+	echo "Found a non encrypted .env file for environment '$envName'. Will copy and overwrite the main .env (if it exists)"
+	cp "$SCRIPT_PATH/envs/$envName/.env" "$SCRIPT_PATH/.env"
 else
 	echo "No encrypted .env file found for environment '$envName'."
 	echo "Removing .env file if it exists."
@@ -44,6 +62,16 @@ else
 	"$SCRIPT_PATH/envs/$envName/env-setup.sh"
 fi
 
-echo "Running tests with environment: '$envName'"
+echo
+title
+title "Running tests with environment: '$envName'"
+title
+
+configFile="$SCRIPT_PATH/envs/$envName/playwright.config.js"
+echo "Using config file: $configFile"
 echo "Arguments: $*"
-pnpm playwright test --config="$SCRIPT_PATH"/envs/"$envName"/playwright.config.js "$@"
+title
+
+pnpm playwright test --config="$configFile" "$@"
+
+

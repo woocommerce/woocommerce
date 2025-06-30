@@ -33,32 +33,30 @@ class ResourceStorages {
 	/**
 	 * Check if the resource is supported.
 	 *
-	 * @param string $resource The resource to check.
+	 * @param string $resource_type The resource type to check.
 	 *
 	 * @return bool
 	 */
-	// phpcs:ignore
-	public function is_supported_resource( $resource ) {
-		return isset( $this->storages[ $resource ] );
+	public function is_supported_resource( $resource_type ) {
+		return isset( $this->storages[ $resource_type ] );
 	}
 
 	/**
 	 * Download the resource.
 	 *
 	 * @param string $slug The slug of the resource to download.
-	 * @param string $resource The resource to download.
+	 * @param string $resource_type The resource type to download.
 	 *
 	 * @return false|string
 	 */
-	// phpcs:ignore
-	public function download( $slug, $resource ) {
-		if ( ! isset( $this->storages[ $resource ] ) ) {
+	public function download( $slug, $resource_type ) {
+		if ( ! isset( $this->storages[ $resource_type ] ) ) {
 			return false;
 		}
-		$storages = $this->storages[ $resource ];
+		$storages = $this->storages[ $resource_type ];
 		foreach ( $storages as $storage ) {
-			// phpcs:ignore
-			if ( $found = $storage->download( $slug ) ) {
+			$found = $storage->download( $slug );
+			if ( $found ) {
 				return $found;
 			}
 		}

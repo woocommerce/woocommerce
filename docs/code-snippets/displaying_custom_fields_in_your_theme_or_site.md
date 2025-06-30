@@ -1,17 +1,17 @@
 ---
-post_title: Displaying Custom Fields in Your Theme or Site
-menu_title: Displaying custom fields in theme
-tags: code-snippet
+post_title: Displaying custom fields in your theme or site
+sidebar_label: Displaying custom fields in theme
+
 current wccom url: https://woocommerce.com/document/custom-product-fields/
 ---
 
-## Displaying Custom Fields in Your Theme or Site
+# Displaying custom fields in your theme or site
 
 You can use the metadata from custom fields you add to your products to display the added information within your theme or site.
 
 To display the custom fields for each product, you have to edit your theme’s files. Here’s an example of how you might display a custom field within the single product pages after the short description:
 
-![image](https://github.com/woocommerce/woocommerce-developer-advocacy/assets/15178758/ed417ed8-4462-45b9-96b6-c0141afaeb2b)
+![image](./_media/custom-field-value.png)
 
 ```php
 <?php

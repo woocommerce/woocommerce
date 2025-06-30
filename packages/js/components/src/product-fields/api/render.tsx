@@ -3,10 +3,7 @@
  */
 import { select } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import {
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+import { __experimentalInputControl as InputControl } from '@wordpress/components';
 
 /**
  * Internal dependencies

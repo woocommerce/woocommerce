@@ -1,0 +1,15 @@
+bin/*
+!bin/generate-docs
+!.eslintrc.js
+build
+build-module
+coverage
+languages
+node_modules
+vendor
+legacy
+tests/e2e
+build-types
+
+# These packages have their own eslint config and command
+api

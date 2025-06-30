@@ -69,7 +69,6 @@ export function ImageActionsMenu( {
 	return (
 		<Dropdown
 			{ ...props }
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'bottom-end',
 			} }
@@ -113,7 +112,7 @@ export function ImageActionsMenu( {
 
 					<VariationQuickUpdateMenuItem.Slot
 						group={ 'image-actions-menu' }
-						onChange={ onChange }
+						onChange={ ( value ) => onChange( value ) }
 						onClose={ onClose }
 						selection={ selection }
 						supportsMultipleSelection={ false }

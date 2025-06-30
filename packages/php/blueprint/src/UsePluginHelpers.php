@@ -13,7 +13,7 @@ trait UsePluginHelpers {
 	 *
 	 * @param string $slug The slug of the plugin to activate.
 	 *
-	 * @return bool True if the plugin was activated, false otherwise.
+	 * @return false|null|WP_Error Null on success, WP_Error on invalid file, false if not found.
 	 */
 	public function activate_plugin_by_slug( $slug ) {
 		// Get all installed plugins.
@@ -40,10 +40,10 @@ trait UsePluginHelpers {
 	public function is_plugin_dir( $slug ) {
 		$all_plugins = $this->wp_get_plugins();
 		foreach ( $all_plugins as $plugin_file => $plugin_data ) {
-			// Extract the directory name from the plugin file path
+			// Extract the directory name from the plugin file path.
 			$plugin_dir = explode( '/', $plugin_file )[0];
 
-			// Check for an exact match with the slug
+			// Check for an exact match with the slug.
 			if ( $plugin_dir === $slug ) {
 				return true;
 			}
@@ -59,7 +59,7 @@ trait UsePluginHelpers {
 	 *
 	 * @param string $slug The slug of the plugin to delete.
 	 *
-	 * @return bool True if the plugin was deleted, false otherwise.
+	 * @return bool|WP_Error True if the plugin was deleted, false otherwise.
 	 */
 	public function delete_plugin_by_slug( $slug ) {
 		// Get all installed plugins.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement, cloneElement } from 'react';
+import { createElement, cloneElement } from 'react';
 
 /**
  * Internal dependencies

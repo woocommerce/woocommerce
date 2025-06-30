@@ -1,0 +1,23 @@
+{
+	"name": "woocommerce/filter-wrapper",
+	"title": "Filter Block",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"interactivity": {
+			"clientNavigation": false
+		},
+		"inserter": false
+	},
+	"attributes": {
+		"filterType": {
+			"type": "string"
+		},
+		"heading": {
+			"type": "string"
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

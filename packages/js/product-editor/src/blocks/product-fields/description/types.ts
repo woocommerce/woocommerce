@@ -1,11 +1,4 @@
 /**
- * External dependencies
- */
-import {
-	// @ts-expect-error no exported member.
-	ComponentType,
-} from '@wordpress/element';
-/**
  * Internal dependencies
  */
 import {
@@ -17,4 +10,6 @@ export type DescriptionBlockEditProps =
 	ProductEditorBlockEditProps< ProductEditorBlockAttributes >;
 
 export type DescriptionBlockEditComponent =
-	ComponentType< DescriptionBlockEditProps >;
+	React.ComponentType< DescriptionBlockEditProps > & {
+		attributes: Record< string, unknown >;
+	};

@@ -18,40 +18,7 @@ class ProductTitle extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
-
-	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-			array(
-				'gradients'                       => true,
-				'background'                      => true,
-				'link'                            => false,
-				'text'                            => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'typography'             =>
-			array(
-				'fontSize'                    => true,
-				'lineHeight'                  => true,
-				'__experimentalFontWeight'    => true,
-				'__experimentalTextTransform' => true,
-				'__experimentalFontFamily'    => true,
-			),
-			'spacing'                =>
-			array(
-				'margin'                          => true,
-				'__experimentalSkipSerialization' => true,
-			),
-			'__experimentalSelector' => '.wc-block-components-product-title',
-		);
-	}
+	protected $api_version = '3';
 
 	/**
 	 * Register script and style assets for the block type before it is registered.

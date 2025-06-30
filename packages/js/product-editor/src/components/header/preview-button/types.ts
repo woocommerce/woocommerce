@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
+import { Ref } from 'react';
 
-export type PreviewButtonProps = Omit<
-	Button.AnchorProps,
-	'aria-disabled' | 'variant' | 'href' | 'children'
-> & {
+export type PreviewButtonProps = {
 	productStatus: Product[ 'status' ];
 	productType: string;
 	visibleTab?: string | null;
+	disabled?: boolean;
+	href?: string;
+	ref?: Ref< HTMLElement >;
+	onClick?: ( event: React.MouseEvent< HTMLElement > ) => void;
 };

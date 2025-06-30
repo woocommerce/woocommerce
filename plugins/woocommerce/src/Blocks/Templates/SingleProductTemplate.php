@@ -2,7 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 
 /**
  * SingleProductTemplate class.
@@ -10,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  * @internal
  */
 class SingleProductTemplate extends AbstractTemplate {
+	use BlocksSharedState;
 
 	/**
 	 * The slug of the template.
@@ -51,6 +54,9 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
+			$compatibility_layer = new SingleProductTemplateCompatibility();
+			$compatibility_layer->init();
+
 			$valid_slugs         = array( self::SLUG );
 			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
 			if ( $single_product_slug ) {
@@ -77,6 +83,19 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			}
+
+			$product = wc_get_product( $post->ID );
+			if ( $product ) {
+				wp_interactivity_state(
+					'woocommerce/product-data',
+					array(
+						'templateState' => array(
+							'originalProductData' => ProductDataUtils::get_product_data( $product ),
+							'productData'         => array(),
+						),
+					)
+				);
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
@@ -138,11 +157,25 @@ class SingleProductTemplate extends AbstractTemplate {
 	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks, $is_already_replaced ) {
 		// We want to replace the first single product template block with the password form. We also want to remove all other single product template blocks.
 		// This array doesn't contains all the blocks. For example, it missing the breadcrumbs blocks: it doesn't make sense replace the breadcrumbs with the password form.
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products' );
+		$single_product_template_blocks = array(
+			'woocommerce/product-image-gallery',
+			'woocommerce/product-details',
+			'woocommerce/add-to-cart-form',
+			'woocommerce/product-meta',
+			'woocommerce/product-rating',
+			'woocommerce/product-price',
+			'woocommerce/related-products',
+			'woocommerce/add-to-cart-with-options',
+			'woocommerce/product-gallery',
+			'woocommerce/product-collection',
+			'core/post-title',
+			'core/post-excerpt',
+		);
+
 		return array_reduce(
 			$parsed_blocks,
 			function ( $carry, $block ) use ( $single_product_template_blocks ) {
-				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) ) {
+				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) || ( 'core/pattern' === $block['blockName'] && isset( $block['attrs']['slug'] ) && 'woocommerce-blocks/related-products' === $block['attrs']['slug'] ) ) {
 					if ( $carry['is_already_replaced'] ) {
 						return array(
 							'blocks'              => $carry['blocks'],
@@ -199,6 +232,15 @@ class SingleProductTemplate extends AbstractTemplate {
 
 					$block['innerBlocks']  = $new_inner_blocks;
 					$block['innerContent'] = $new_inner_contents;
+
+					if ( count( $new_inner_blocks ) === 0 ) {
+						return array(
+							'blocks'              => $carry['blocks'],
+							'html_block'          => null,
+							'removed'             => true,
+							'is_already_replaced' => $carry['is_already_replaced'],
+						);
+					}
 
 					return array(
 						'blocks'              => array_merge( $carry['blocks'], array( $block ) ),

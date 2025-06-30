@@ -1,0 +1,211 @@
+.settings-payment-gateways__list {
+	border-top: 1px solid $gray-200;
+	// Without this, the window.innerWidth is not calculated correctly when elements are pushed outside the container.
+	overflow: hidden;
+
+	.woocommerce-list__item {
+		padding: 0 48px;
+		border-bottom: 1px solid $gray-200;
+
+		&.clickable-list-item:hover {
+			background-color: rgba(0, 0, 0, 0.02); /* Light overlay effect */
+			cursor: pointer;
+		}
+
+		&.has-incentive {
+			background-color: $studio-woocommerce-purple-0;
+
+			&:hover {
+				background-color: $studio-woocommerce-purple-0 !important;
+			}
+
+			.woocommerce-list__item-inner {
+				padding: $gap-largest 0;
+			}
+		}
+
+		&:hover {
+			background-color: $white;
+
+			.woocommerce-list__item-title {
+				color: $gray-900;
+			}
+		}
+
+		&-inner {
+			padding: $gap-large 0;
+			align-items: flex-start;
+
+			@media screen and ( max-width: $break-medium ) {
+				display: grid;
+				// Configuring the grid layout to three columns, resulting in the buttons shifting to a new row.
+				grid-template-columns: 30px minmax(200px, 1fr) 40px;
+			}
+		}
+
+		&-inner:focus {
+			box-shadow: none;
+		}
+
+		&-before {
+			margin-right: $gap;
+			align-items: center;
+
+			.drag-handle {
+				min-height: 40px;
+			}
+
+			@media screen and ( max-width: $break-medium ) {
+				margin-right: 0;
+
+				.drag-handle {
+					min-height: 25px;
+					padding-bottom: 15px;
+				}
+			}
+		}
+
+		&-image {
+			width: 40px;
+			max-height: 40px;
+			border-radius: 4px;
+		}
+
+		&-title {
+			font-size: 16px;
+			line-height: 24px;
+			color: $gray-900;
+			font-weight: 600;
+			display: inline-flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			align-items: center;
+
+			@media screen and ( max-width: $break-medium ) {
+				font-size: 15px;
+				font-weight: 500;
+
+				.woocommerce-status-badge {
+					white-space: nowrap;
+				}
+			}
+		}
+
+		&-text {
+			margin-right: $gap;
+
+			@media screen and ( max-width: $break-medium ) {
+				margin-right: 0;
+			}
+		}
+
+		&-content {
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 20px;
+			color: $gray-700;
+
+			.woocommerce-woopayments-payment-methods-logos {
+				flex-wrap: wrap;
+				padding: $gap-small 0 0 0; /* Top, Right, Bottom, Left */
+			}
+
+			@media screen and ( max-width: $break-medium ) {
+				margin-top: $gap-small;
+			}
+		}
+
+		.woocommerce-woopayments-payment-methods-logos {
+			@media screen and ( max-width: $break-medium ) {
+				padding-bottom: 0;
+			}
+		}
+
+		&-buttons {
+			display: inline-flex;
+			margin-left: auto;
+			min-height: 48px;
+
+			@media screen and ( max-width: $break-medium ) {
+				order: 4; /* Position the column in the 4th spot to ensure the buttons appear on a new row */
+				grid-column: 2; /* Start below the 2nd column */
+				grid-row: 2; /* Move to the second row */
+				margin-left: 0;
+				margin-top: $gap;
+				min-height: 0;
+			}
+
+			&__actions {
+				display: flex;
+				gap: $gap;
+				align-self: center;
+
+				@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
+					flex-wrap: nowrap;
+					justify-content: flex-end;
+				}
+
+				.components-button {
+					height: 32px;
+					padding: $grid-unit-05 $grid-unit-10;
+				}
+			}
+		}
+
+		&-after {
+			margin-left: $gap;
+			min-height: 48px;
+
+			@media screen and ( max-width: $break-medium ) {
+				order: 3; /* Position the column in the 3rd spot to ensure the dots appear on the first row */
+				min-height: auto;
+			}
+
+			&.centered {
+				align-self: center;
+			}
+
+			&__actions {
+				display: flex;
+				gap: $gap;
+				align-items: center;
+
+				.woocommerce-ellipsis-menu {
+					width: 32px;
+				}
+
+				&__arrow {
+					padding: $grid-unit-05;
+					line-height: 0;
+				}
+			}
+		}
+
+		&-after.no-buttons {
+			margin-left: auto;
+		}
+	}
+}
+
+@media screen and ( max-width: $break-xlarge ) {
+	.settings-payment-gateways__list {
+		.woocommerce-list__item {
+			padding: 0 $gap-large;
+		}
+	}
+}
+
+@media screen and ( max-width: $break-medium ) {
+	.settings-payment-gateways__list {
+		.woocommerce-list__item {
+			padding: 0 $gap;
+
+			&-before {
+				&-image,
+				img {
+					display: none;
+				}
+			}
+		}
+	}
+}

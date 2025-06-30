@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -65,17 +64,15 @@ if ( hpos_status === true ) {
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
 	admin_update_order_base = 'post.php';
-	admin_new_order_assert = 'Add new order</h1>';
+	admin_new_order_assert = 'Add new order';
 	admin_open_order_assert = 'Edit order</h1>';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'Order updated.';
 }
 
-const date = new Date();
-const order_date = date.toJSON().slice( 0, 10 );
+const global_order_date = new Date().toJSON().slice( 0, 10 );
 
 export function addOrder( includeTests = {} ) {
-	let response;
 	let ajax_nonce_add_meta;
 	let wpnonce;
 	let closed_postboxes_nonce;
@@ -87,7 +84,8 @@ export function addOrder( includeTests = {} ) {
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			create: true,
 			heartbeat: true,
 			open: true,
@@ -106,7 +104,7 @@ export function addOrder( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/wp-admin/${ admin_new_order_base }`,
 			{
 				headers: requestHeaders,
@@ -115,8 +113,8 @@ export function addOrder( includeTests = {} ) {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Add new order' header": ( response ) =>
-				response.body.includes( `${ admin_new_order_assert }` ),
+			"body contains: 'Add new order' header": ( r ) =>
+				r.body.includes( `${ admin_new_order_assert }` ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -190,18 +188,18 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
-			response = http.get(
+			const tasksResponse = http.get(
 				`${ base_url }/wp-json/wc-admin/onboarding/tasks?_locale=user`,
 				{
 					headers: requestHeaders,
 					tags: { name: 'Merchant - wc-admin/onboarding/tasks?' },
 				}
 			);
-			check( response, {
+			check( tasksResponse, {
 				'is status 200': ( r ) => r.status === 200,
 			} );
 
-			response = http.get(
+			const notesResponse = http.get(
 				`${ base_url }/wp-json/wc-analytics/admin/notes?page=1&per_page=25&` +
 					`type=error%2Cupdate&status=unactioned&_locale=user`,
 				{
@@ -209,11 +207,11 @@ export function addOrder( includeTests = {} ) {
 					tags: { name: 'Merchant - wc-analytics/admin/notes?' },
 				}
 			);
-			check( response, {
+			check( notesResponse, {
 				'is status 200': ( r ) => r.status === 200,
 			} );
 
-			response = http.get(
+			const optionsResponse = http.get(
 				`${ base_url }/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user`,
 				{
 					headers: requestHeaders,
@@ -222,7 +220,7 @@ export function addOrder( includeTests = {} ) {
 					},
 				}
 			);
-			check( response, {
+			check( optionsResponse, {
 				'is status 200': ( r ) => r.status === 200,
 			} );
 		} );
@@ -239,7 +237,7 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
-			response = http.post(
+			const response = http.post(
 				`${ base_url }/wp-admin/admin-ajax.php`,
 				`_nonce=${ heartbeat_nonce }&action=heartbeat&has_focus=true&interval=15&screen_id=shop_order`,
 				{
@@ -252,7 +250,9 @@ export function addOrder( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.create ) {
@@ -266,13 +266,18 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
-			const date = new Date();
-			const order_date = date.toJSON().slice( 0, 10 );
+			const order_date = new Date().toJSON().slice( 0, 10 );
 
 			const orderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -281,12 +286,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -294,9 +311,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -337,8 +360,14 @@ export function addOrder( includeTests = {} ) {
 
 			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -347,12 +376,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -360,9 +401,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -397,7 +444,7 @@ export function addOrder( includeTests = {} ) {
 				admin_update_order_params = orderParams.toString();
 			}
 
-			response = http.post(
+			const response = http.post(
 				`${ base_url }/wp-admin/${ admin_update_order }`,
 				admin_update_order_params.toString(),
 				{
@@ -407,14 +454,16 @@ export function addOrder( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Edit order' header": ( response ) =>
-					response.body.includes( `${ admin_open_order_assert }` ),
-				"body contains: 'Order updated' confirmation": ( response ) =>
-					response.body.includes( `${ admin_created_order_assert }` ),
+				"body contains: 'Edit order' header": ( r ) =>
+					r.body.includes( `${ admin_open_order_assert }` ),
+				"body contains: 'Order updated' confirmation": ( r ) =>
+					r.body.includes( `${ admin_created_order_assert }` ),
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.open ) {
@@ -433,7 +482,7 @@ export function addOrder( includeTests = {} ) {
 				admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
 			}
 
-			response = http.get(
+			const response = http.get(
 				`${ base_url }/wp-admin/${ admin_open_order_base }&action=edit`,
 				{
 					headers: requestHeaders,
@@ -442,12 +491,14 @@ export function addOrder( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Edit order' header": ( response ) =>
-					response.body.includes( `${ admin_open_order_assert }` ),
+				"body contains: 'Edit order' header": ( r ) =>
+					r.body.includes( `${ admin_open_order_assert }` ),
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.update ) {
@@ -463,8 +514,14 @@ export function addOrder( includeTests = {} ) {
 
 			const orderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -473,12 +530,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -486,9 +555,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -503,7 +578,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'metakeyinput', '' ],
 				[ 'metakeyselect', '%23NONE%23' ],
 				[ 'metavalue', '' ],
-				[ 'order_date', `${ order_date }` ],
+				[ 'order_date', `${ global_order_date }` ],
 				[ 'order_date_hour', '01' ],
 				[ 'order_date_minute', '01' ],
 				[ 'order_date_second', '01' ],
@@ -528,8 +603,14 @@ export function addOrder( includeTests = {} ) {
 
 			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -538,12 +619,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -551,9 +644,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -564,7 +663,7 @@ export function addOrder( includeTests = {} ) {
 				[ 'excerpt', '' ],
 				[ 'metakeyinput', '' ],
 				[ 'metavalue', '' ],
-				[ 'order_date', `${ order_date }` ],
+				[ 'order_date', `${ global_order_date }` ],
 				[ 'order_date_hour', '01' ],
 				[ 'order_date_minute', '01' ],
 				[ 'order_date_second', '01' ],
@@ -588,7 +687,7 @@ export function addOrder( includeTests = {} ) {
 				admin_update_order_id = `${ admin_open_order_base }`;
 			}
 
-			response = http.post(
+			const response = http.post(
 				`${ base_url }/wp-admin/${ admin_update_order_id }`,
 				admin_update_order_params.toString(),
 				{
@@ -598,8 +697,8 @@ export function addOrder( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Order updated' confirmation": ( response ) =>
-					response.body.includes( `${ admin_update_order_assert }` ),
+				"body contains: 'Order updated' confirmation": ( r ) =>
+					r.body.includes( `${ admin_update_order_assert }` ),
 			} );
 		} );
 	}
@@ -616,8 +715,7 @@ export function addOrder( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
-		const date = new Date();
-		const order_date = date.toJSON().slice( 0, 10 );
+		const order_date = new Date().toJSON().slice( 0, 10 );
 
 		const orderParams = new URLSearchParams( [
 			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
@@ -747,7 +845,7 @@ export function addOrder( includeTests = {} ) {
 			admin_update_order_params = orderParams.toString();
 		}
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/wp-admin/${ admin_update_order }`,
 			admin_update_order_params.toString(),
 			{
@@ -757,10 +855,10 @@ export function addOrder( includeTests = {} ) {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( `${ admin_open_order_assert }` ),
-			"body contains: 'Order updated' confirmation": ( response ) =>
-				response.body.includes( `${ admin_created_order_assert }` ),
+			"body contains: 'Edit order' header": ( r ) =>
+				r.body.includes( `${ admin_open_order_assert }` ),
+			"body contains: 'Order updated' confirmation": ( r ) =>
+				r.body.includes( `${ admin_created_order_assert }` ),
 		} );
 	} );
 
@@ -781,7 +879,7 @@ export function addOrder( includeTests = {} ) {
 			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
 		}
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/wp-admin/${ admin_open_order_base }&action=edit`,
 			{
 				headers: requestHeaders,
@@ -790,8 +888,8 @@ export function addOrder( includeTests = {} ) {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Edit order' header": ( response ) =>
-				response.body.includes( `${ admin_open_order_assert }` ),
+			"body contains: 'Edit order' header": ( r ) =>
+				r.body.includes( `${ admin_open_order_assert }` ),
 		} );
 	} );
 
@@ -849,7 +947,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'metakeyinput', '' ],
 			[ 'metakeyselect', '%23NONE%23' ],
 			[ 'metavalue', '' ],
-			[ 'order_date', `${ order_date }` ],
+			[ 'order_date', `${ global_order_date }` ],
 			[ 'order_date_hour', '01' ],
 			[ 'order_date_minute', '01' ],
 			[ 'order_date_second', '01' ],
@@ -910,7 +1008,7 @@ export function addOrder( includeTests = {} ) {
 			[ 'excerpt', '' ],
 			[ 'metakeyinput', '' ],
 			[ 'metavalue', '' ],
-			[ 'order_date', `${ order_date }` ],
+			[ 'order_date', `${ global_order_date }` ],
 			[ 'order_date_hour', '01' ],
 			[ 'order_date_minute', '01' ],
 			[ 'order_date_second', '01' ],
@@ -934,7 +1032,7 @@ export function addOrder( includeTests = {} ) {
 			admin_update_order_id = `${ admin_open_order_base }`;
 		}
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/wp-admin/${ admin_update_order_id }`,
 			admin_update_order_params.toString(),
 			{
@@ -944,11 +1042,11 @@ export function addOrder( includeTests = {} ) {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Order updated' confirmation": ( response ) =>
-				response.body.includes( `${ admin_update_order_assert }` ),
+			"body contains: 'Order updated' confirmation": ( r ) =>
+				r.body.includes( `${ admin_update_order_assert }` ),
 		} );
 	} );
-};
+}
 
 export default function () {
 	addOrder();

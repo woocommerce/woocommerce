@@ -4,7 +4,7 @@
 import { Modal } from '@wordpress/components';
 
 export type SchedulePublishModalProps = Omit<
-	Modal.Props,
+	React.ComponentProps< typeof Modal >,
 	'children' | 'title' | 'onRequestClose' | 'value'
 > & {
 	postType: string;

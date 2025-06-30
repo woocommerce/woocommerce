@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the deactivatePlugin action to use a plugin file like the WP API expects.

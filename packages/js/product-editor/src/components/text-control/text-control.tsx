@@ -3,11 +3,8 @@
  */
 import { Ref } from 'react';
 import { createElement, forwardRef } from '@wordpress/element';
-import classNames from 'classnames';
-import {
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+import clsx from 'clsx';
+import { __experimentalInputControl as InputControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,13 +30,9 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 		<InputControl
 			{ ...props }
 			ref={ ref }
-			className={ classNames(
-				'woocommerce-product-text-control',
-				className,
-				{
-					'has-error': error,
-				}
-			) }
+			className={ clsx( 'woocommerce-product-text-control', className, {
+				'has-error': error,
+			} ) }
 			label={
 				<Label
 					label={ label }
@@ -49,7 +42,9 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 			}
 			required={ required }
 			help={ error || help }
-			onChange={ onChange }
+			onChange={ ( value: string | undefined ) => {
+				onChange( value ?? '' );
+			} }
 			onBlur={ onBlur }
 		/>
 	);

@@ -215,7 +215,7 @@ $muriel-box-shadow-8dp: 0 5px 5px -3px rgb(0 0 0 / 20%),
 		}
 
 		// At the time of this comment, it was discovered that this component has
-		// the same classnames as the WP Components Checkbox, without it being a code depedency.
+		// the same class names as the WP Components Checkbox, without it being a code dependency.
 		// This caused some visual breakages when changes happened in WP 6.6, and
 		// the rules have been copied over from WP Components styles of 6.5.1.
 		// https://github.com/WordPress/gutenberg/blob/403b4b8d014ef7f6edc15c822e455e109bf49c6d/packages/components/src/checkbox-control/style.scss#L4

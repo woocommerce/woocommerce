@@ -32,7 +32,9 @@ export type SlotContextType = {
 
 const SlotContext = createContext< SlotContextType | undefined >( undefined );
 
-export const SlotContextProvider: React.FC = ( { children } ) => {
+export const SlotContextProvider = ( {
+	children,
+}: React.PropsWithChildren ) => {
 	const [ fills, updateFills ] = useReducer(
 		( data: FillType, updates: FillType ) => ( { ...data, ...updates } ),
 		{}

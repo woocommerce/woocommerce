@@ -29,7 +29,7 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() ); // This is the customer ID from lookup table.
 
@@ -39,7 +39,7 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Customer should have 3 orders.
 		$this->assertSame( 3, DataStore::get_order_count( $customer_id ) );
@@ -75,7 +75,7 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$product2->set_regular_price( 2 );
 		$product2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Create the first order.
 		$order1 = WC_Helper_Order::create_order( $customer->get_id(), $product1 );
@@ -85,7 +85,7 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		$order2 = WC_Helper_Order::create_order( $customer->get_id(), $product2 );
 		$order2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$customer_id = DataStore::get_customer_id_by_user_id( $customer->get_id() ); // This is the customer ID from lookup table.
 

@@ -3,6 +3,9 @@
  * Admin View: Bulk Edit Products
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,6 +70,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 		</div>
 
+		<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+			<div class="inline-edit-group">
+				<label class="alignleft">
+					<span class="title"><?php esc_html_e( 'Cost', 'woocommerce' ); ?></span>
+					<span class="input-text-wrap">
+						<select class="change_cogs_value change_to" name="change_cogs_value">
+							<?php
+							$options = array(
+								''  => __( '— No change —', 'woocommerce' ),
+								'1' => __( 'Change to:', 'woocommerce' ),
+							);
+							foreach ( $options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</span>
+				</label>
+				<label class="change-input">
+					<?php /* phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the esc_attr is somehow not detected */ ?>
+					<?php /* translators: %s = cost value (formatted as currency) */ ?>
+					<input type="text" name="_cogs_value" class="text cogs_value" placeholder="<?php esc_attr( printf( __( 'Enter cost value (%s)', 'woocommerce' ), get_woocommerce_currency_symbol() ) ); ?>" value="" />
+					<?php /* phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped */ ?>
+				</label>
+			<div class="inline-edit-group">
+		<?php endif; ?>
+
 		<?php if ( wc_tax_enabled() ) : ?>
 			<label>
 				<span class="title"><?php _e( 'Tax status', 'woocommerce' ); ?></span>
@@ -74,10 +104,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<select class="tax_status" name="_tax_status">
 						<?php
 						$options = array(
-							''         => __( '— No change —', 'woocommerce' ),
-							'taxable'  => __( 'Taxable', 'woocommerce' ),
-							'shipping' => __( 'Shipping only', 'woocommerce' ),
-							'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
+							''                         => __( '— No change —', 'woocommerce' ),
+							ProductTaxStatus::TAXABLE  => __( 'Taxable', 'woocommerce' ),
+							ProductTaxStatus::SHIPPING => __( 'Shipping only', 'woocommerce' ),
+							ProductTaxStatus::NONE     => _x( 'None', 'Tax status', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
 							echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
@@ -125,10 +155,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 									''  => __( '— No change —', 'woocommerce' ),
 									'1' => __( 'Change to:', 'woocommerce' ),
 								);
-							foreach ( $options as $key => $value ) {
-								echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
-							}
-							?>
+								foreach ( $options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+								}
+								?>
 						</select>
 					</span>
 				</label>
@@ -223,11 +253,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<select class="visibility" name="_visibility">
 					<?php
 					$options = array(
-						''        => __( '— No change —', 'woocommerce' ),
-						'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
-						'catalog' => __( 'Catalog', 'woocommerce' ),
-						'search'  => __( 'Search', 'woocommerce' ),
-						'hidden'  => __( 'Hidden', 'woocommerce' ),
+						''                         => __( '— No change —', 'woocommerce' ),
+						CatalogVisibility::VISIBLE => __( 'Catalog &amp; search', 'woocommerce' ),
+						CatalogVisibility::CATALOG => __( 'Catalog', 'woocommerce' ),
+						CatalogVisibility::SEARCH  => __( 'Search', 'woocommerce' ),
+						CatalogVisibility::HIDDEN  => __( 'Hidden', 'woocommerce' ),
 					);
 					foreach ( $options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';

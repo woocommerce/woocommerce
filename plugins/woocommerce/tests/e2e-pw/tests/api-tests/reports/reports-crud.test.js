@@ -3,7 +3,7 @@ const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 test.describe( 'Reports API tests', () => {
 	test( 'can view all reports', async ( { request } ) => {
 		// call API to retrieve the reports
-		const response = await request.get( '/wp-json/wc/v3/reports' );
+		const response = await request.get( './wp-json/wc/v3/reports' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -117,7 +117,7 @@ test.describe( 'Reports API tests', () => {
 
 	test( 'can view sales reports', async ( { request } ) => {
 		// call API to retrieve the sales reports
-		const response = await request.get( '/wp-json/wc/v3/reports/sales' );
+		const response = await request.get( './wp-json/wc/v3/reports/sales' );
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 		expect( Array.isArray( responseJSON ) ).toBe( true );
@@ -161,7 +161,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view top sellers reports', async ( { request } ) => {
 		// call API to retrieve the top sellers
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/top_sellers'
+			'./wp-json/wc/v3/reports/top_sellers'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -173,7 +173,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view coupons totals', async ( { request } ) => {
 		// call API to retrieve the coupons totals
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/coupons/totals'
+			'./wp-json/wc/v3/reports/coupons/totals'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -211,7 +211,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view customers totals', async ( { request } ) => {
 		// call API to retrieve the customers totals
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/customers/totals'
+			'./wp-json/wc/v3/reports/customers/totals'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -240,7 +240,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view orders totals', async ( { request } ) => {
 		// call API to retrieve the orders totals
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/orders/totals'
+			'./wp-json/wc/v3/reports/orders/totals'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -323,7 +323,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view products totals', async ( { request } ) => {
 		// call API to retrieve the products totals
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/products/totals'
+			'./wp-json/wc/v3/reports/products/totals'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
@@ -370,7 +370,7 @@ test.describe( 'Reports API tests', () => {
 	test( 'can view reviews totals', async ( { request } ) => {
 		// call API to retrieve the reviews totals
 		const response = await request.get(
-			'/wp-json/wc/v3/reports/reviews/totals'
+			'./wp-json/wc/v3/reports/reviews/totals'
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );

@@ -50,60 +50,6 @@ jQuery(function( $ ) {
 		}
 	});
 
-	$( '.wc_sparkline.bars' ).each( function() {
-		var chart_data = $( this ).data( 'sparkline' );
-
-		var options = {
-			grid: {
-				show: false
-			}
-		};
-
-		// main series
-		var series = [{
-			data: chart_data,
-			color: $( this ).data( 'color' ),
-			bars: {
-				fillColor: $( this ).data( 'color' ),
-				fill: true,
-				show: true,
-				lineWidth: 1,
-				barWidth: $( this ).data( 'barwidth' ),
-				align: 'center'
-			},
-			shadowSize: 0
-		}];
-
-		// draw the sparkline
-		$.plot( $( this ), series, options );
-	});
-
-	$( '.wc_sparkline.lines' ).each( function() {
-		var chart_data = $( this ).data( 'sparkline' );
-
-		var options = {
-			grid: {
-				show: false
-			}
-		};
-
-		// main series
-		var series = [{
-			data: chart_data,
-			color: $( this ).data( 'color' ),
-			lines: {
-				fill: false,
-				show: true,
-				lineWidth: 1,
-				align: 'center'
-			},
-			shadowSize: 0
-		}];
-
-		// draw the sparkline
-		$.plot( $( this ), series, options );
-	});
-
 	var dates = $( '.range_datepicker' ).datepicker({
 		changeMonth: true,
 		changeYear: true,

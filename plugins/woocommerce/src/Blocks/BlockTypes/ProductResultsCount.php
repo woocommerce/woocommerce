@@ -54,12 +54,11 @@ class ProductResultsCount extends AbstractBlock {
 				'wc-block-product-results-count',
 				'wp-block-woocommerce-product-results-count',
 			),
-			isset( $attributes['className'] ) ? array( $attributes['className'] ) : array(),
 		);
 		$p->set_attribute( 'class', implode( ' ', $classes ) );
 		$p->set_attribute( 'style', $parsed_style_attributes['styles'] );
 		$p->set_attribute(
-			'data-wc-navigation-id',
+			'data-wp-router-region',
 			'wc-product-results-count-' . ( isset( $block->context['queryId'] ) ? $block->context['queryId'] : 0 )
 		);
 

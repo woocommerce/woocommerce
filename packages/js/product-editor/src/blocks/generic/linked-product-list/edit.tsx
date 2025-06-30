@@ -11,7 +11,7 @@ import {
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { resolveSelect } from '@wordpress/data';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { Product, productsStore } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
@@ -74,7 +74,7 @@ async function getProductsBySearchValue(
 	searchValue = '',
 	excludedIds: number[] = []
 ): Promise< Product[] > {
-	return resolveSelect( PRODUCTS_STORE_NAME ).getProducts< Product[] >( {
+	return resolveSelect( productsStore ).getProducts( {
 		search: searchValue,
 		orderby: 'title',
 		order: 'asc',
@@ -259,7 +259,7 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProducts );
 	}
 
-	function handleAdviceCardDissmiss() {
+	function handleAdviceCardDismiss() {
 		recordEvent( 'linked_products_placeholder_dismiss', {
 			source: TRACKS_SOURCE,
 			field: property,
@@ -297,7 +297,7 @@ export function LinkedProductListBlockEdit( {
 					tip={ emptyState.tip }
 					dismissPreferenceId={ `woocommerce-product-${ property }-advice-card-dismissed` }
 					isDismissible={ emptyState.isDismissible }
-					onDismiss={ handleAdviceCardDissmiss }
+					onDismiss={ handleAdviceCardDismiss }
 				>
 					<EmptyStateImage { ...emptyState } />
 				</AdviceCard>

@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Reports Products REST API Test Class
  *
@@ -63,11 +65,11 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
@@ -105,11 +107,11 @@ class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 		$product_2->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(

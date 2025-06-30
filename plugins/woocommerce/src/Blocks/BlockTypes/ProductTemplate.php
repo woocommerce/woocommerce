@@ -2,13 +2,14 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use WP_Block;
 
 /**
  * ProductTemplate class.
  */
 class ProductTemplate extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -85,26 +86,54 @@ class ProductTemplate extends AbstractBlock {
 
 			// Get an instance of the current Post Template block.
 			$block_instance = $block->parsed_block;
+			$product_id     = get_the_ID();
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
 			$block_instance['blockName'] = 'core/null';
 
+			// Relay the block context to the inner blocks.
+			$available_context = array_merge(
+				(array) $block->context,
+				array(
+					'postType' => get_post_type(),
+					'postId'   => $product_id,
+				)
+			);
+
 			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 			// `render_callback` and ensure that no wrapper markup is included.
 			$block_content = (
-			new WP_Block(
-				$block_instance,
-				array(
-					'postType' => get_post_type(),
-					'postId'   => get_the_ID(),
+				new WP_Block(
+					$block_instance,
+					$available_context
 				)
-			)
 			)->render( array( 'dynamic' => false ) );
+
+			$context = array(
+				'productId' => $product_id,
+			);
+
+			$li_directives = '
+				data-wp-interactive="woocommerce/product-collection"
+				data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wp-key="product-item-' . $product_id . '"
+			';
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.
 			$post_classes = implode( ' ', get_post_class( 'wc-block-product' ) );
-			$content     .= '<li data-wc-key="product-item-' . get_the_ID() . '" class="' . esc_attr( $post_classes ) . '">' . $block_content . '</li>';
+			$content     .= strtr(
+				'<li class="{classes}"
+					{li_directives}
+				>
+					{content}
+				</li>',
+				array(
+					'{classes}'       => esc_attr( $post_classes ),
+					'{li_directives}' => $li_directives,
+					'{content}'       => $block_content,
+				)
+			);
 		}
 
 		/*

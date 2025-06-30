@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { SlotFillProvider } from '@wordpress/components';
 import { createElement } from '@wordpress/element';

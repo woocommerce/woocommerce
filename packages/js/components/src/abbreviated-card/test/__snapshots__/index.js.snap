@@ -3,15 +3,15 @@
 exports[`AbbreviatedCard it renders correctly 1`] = `
 <div>
   <div
-    class="components-surface components-card woocommerce-abbreviated-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+    class="components-surface components-card woocommerce-abbreviated-card css-1lc0qq8-PolymorphicDiv-Surface-getBorders-primary-Card-rounded e19lxcc00"
     data-wp-c16t="true"
     data-wp-component="Card"
   >
     <div
-      class="css-mgwsf4-View-Content em57xhy0"
+      class="css-76dw7d-PolymorphicDiv-Content e19lxcc00"
     >
       <div
-        class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
+        class="components-card__body components-card-body css-dze2sy-PolymorphicDiv-Body-borderRadius e19lxcc00"
         data-wp-c16t="true"
         data-wp-component="CardBody"
       >
@@ -40,13 +40,13 @@ exports[`AbbreviatedCard it renders correctly 1`] = `
     </div>
     <div
       aria-hidden="true"
-      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      class="components-elevation css-1jg41yu-PolymorphicDiv-Elevation-sx-Base-sx-Base-elevationClassName e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Elevation"
     />
     <div
       aria-hidden="true"
-      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      class="components-elevation css-1jg41yu-PolymorphicDiv-Elevation-sx-Base-sx-Base-elevationClassName e19lxcc00"
       data-wp-c16t="true"
       data-wp-component="Elevation"
     />

@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
@@ -48,7 +50,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$coupon->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->apply_coupon( $coupon );
 		$order->set_cart_tax( 5 );
@@ -63,7 +65,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			)
 		);
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -182,15 +184,15 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$order_types = array(
 			array(
-				'status' => 'refunded',
+				'status' => OrderStatus::REFUNDED,
 				'total'  => 50,
 			),
 			array(
-				'status' => 'completed',
+				'status' => OrderStatus::COMPLETED,
 				'total'  => 100,
 			),
 			array(
-				'status' => 'failed',
+				'status' => OrderStatus::FAILED,
 				'total'  => 75,
 			),
 		);
@@ -208,7 +210,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -276,7 +278,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'interval'  => 'hour',
 			'after'     => $start_time,
 			'before'    => $end_time,
-			'status_is' => array( 'failed' ),
+			'status_is' => array( OrderStatus::FAILED ),
 		);
 		$expected_stats = array(
 			'totals'    => array(
@@ -343,15 +345,15 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$order_types = array(
 			array(
-				'status' => 'refunded',
+				'status' => OrderStatus::REFUNDED,
 				'total'  => 50,
 			),
 			array(
-				'status' => 'completed',
+				'status' => OrderStatus::COMPLETED,
 				'total'  => 100,
 			),
 			array(
-				'status' => 'completed',
+				'status' => OrderStatus::COMPLETED,
 				'total'  => 75,
 			),
 		);
@@ -377,7 +379,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			)
 		);
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -649,7 +651,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		foreach ( range( 1, 3 ) as $order_number ) {
 			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 			$order->set_date_created( $order_time++ );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 
 			foreach ( $coupons as $amount => $coupon ) {
 				if ( $amount >= $order_number ) {
@@ -666,7 +668,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -771,8 +773,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$coupon_2->set_amount( $coupon_2_amount );
 		$coupon_2->save();
 
-		$order_status_1 = 'completed';
-		$order_status_2 = 'processing';
+		$order_status_1 = OrderStatus::COMPLETED;
+		$order_status_2 = OrderStatus::PROCESSING;
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 		$customer_2 = WC_Helper_Customer::create_customer( 'cust_2', 'pwd_2', 'user_2@mail.com' );
@@ -917,7 +919,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			}
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -3860,12 +3862,12 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Create order.
 		$order = WC_Helper_Order::create_order();
 		$order->add_product( $product, 1 );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_shipping_total( 10 );
 		$order->apply_coupon( $coupon );
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Check if lookup tables are populated.
 		foreach ( $tables as $table ) {
@@ -3931,9 +3933,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$product_2->set_children( array( $child_1->get_id(), $child_2->get_id() ) );
 
-		$child_1->set_stock_status( 'instock' );
+		$child_1->set_stock_status( ProductStockStatus::IN_STOCK );
 		$child_1->save();
-		$child_2->set_stock_status( 'instock' );
+		$child_2->set_stock_status( ProductStockStatus::IN_STOCK );
 		$child_2->save();
 		WC_Product_Variable::sync( $product_2 );
 
@@ -3944,7 +3946,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product_3->set_regular_price( $product_3_price );
 		$product_3->save();
 
-		$order_status = 'completed';
+		$order_status = OrderStatus::COMPLETED;
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
 
@@ -3996,7 +3998,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2->calculate_totals();
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -4517,7 +4519,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			}
 		}
 
-		$order_status    = 'completed';
+		$order_status    = OrderStatus::COMPLETED;
 		$qty_per_product = 4; // Hardcoded in WC_Helper_Order::create_order.
 
 		$orders = array();
@@ -4544,7 +4546,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -5300,7 +5302,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			}
 		}
 
-		$order_status    = 'completed';
+		$order_status    = OrderStatus::COMPLETED;
 		$qty_per_product = 4; // Hardcoded in WC_Helper_Order::create_order.
 
 		// Create orders for the test cases.
@@ -5328,7 +5330,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		global $wpdb;
 		$res = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}wc_order_stats" );
@@ -6090,11 +6092,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_0 = WC_Helper_Order::create_order( 0, $product );
 		$order_0->set_date_created( $order_0_time );
 		$order_0->set_date_paid( $order_0_time );
-		$order_0->set_status( 'processing' );
+		$order_0->set_status( OrderStatus::PROCESSING );
 		$order_0->set_total( 100 );
 		$order_0->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$start_time  = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
 		$end_time    = gmdate( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
@@ -6110,11 +6112,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_1 = WC_Helper_Order::create_order( 0, $product );
 		$order_1->set_date_created( $order_1_time );
 		$order_1->set_date_paid( $order_1_time );
-		$order_1->set_status( 'processing' );
+		$order_1->set_status( OrderStatus::PROCESSING );
 		$order_1->set_total( 100 );
 		$order_1->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes both orders -> customer is a new customer.
 		$start_time = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
@@ -6149,11 +6151,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2 = WC_Helper_Order::create_order( 0, $product );
 		$order_2->set_date_created( $order_1_time );
 		$order_2->set_date_paid( $order_1_time );
-		$order_2->set_status( 'processing' );
+		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes second and third order -> there is one returning customer.
 		$start_time  = gmdate( 'Y-m-d H:i:s', $order_0_time + 1 );
@@ -6200,11 +6202,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_0 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$order_0->set_date_created( $order_0_time );
 		$order_0->set_date_paid( $order_0_time );
-		$order_0->set_status( 'processing' );
+		$order_0->set_status( OrderStatus::PROCESSING );
 		$order_0->set_total( 100 );
 		$order_0->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$start_time  = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
 		$end_time    = gmdate( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
@@ -6220,11 +6222,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_1 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$order_1->set_date_created( $order_1_time );
 		$order_1->set_date_paid( $order_1_time );
-		$order_1->set_status( 'processing' );
+		$order_1->set_status( OrderStatus::PROCESSING );
 		$order_1->set_total( 100 );
 		$order_1->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes both orders -> customer is a new customer.
 		$start_time = gmdate( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
@@ -6259,11 +6261,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$order_2->set_date_created( $order_1_time );
 		$order_2->set_date_paid( $order_1_time );
-		$order_2->set_status( 'processing' );
+		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Time frame includes second and third order -> there is one returning customer.
 		$start_time  = gmdate( 'Y-m-d H:i:s', $order_0_time + 1 );

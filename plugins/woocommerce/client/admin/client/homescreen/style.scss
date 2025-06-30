@@ -1,0 +1,97 @@
+.woocommerce-admin-page__home #wpcontent,
+.woocommerce-admin-page__home.woocommerce_page_wc-admin #wpbody-content,
+.woocommerce-admin-page__extensions #wpcontent,
+.woocommerce-admin-page__extensions.woocommerce_page_wc-admin #wpbody-content {
+	overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the right-hand column 'stick'
+	position: relative;
+}
+
+.woocommerce-homescreen {
+	display: flex;
+	max-width: 1032px;
+	margin: 0 auto;
+	justify-content: space-between;
+	flex-direction: column;
+
+	.woocommerce-task-dashboard__container {
+		width: 100%;
+		margin-bottom: $gap-large;
+	}
+
+	&.two-columns {
+		flex-direction: row;
+
+		.woocommerce-homescreen-column {
+			width: calc(50% - 12px);
+			margin: 0;
+
+			@include breakpoint( "<782px" ) {
+				width: 100%;
+				position: inherit;
+				top: auto;
+			}
+		}
+
+		.your-store-today {
+			display: block;
+		}
+
+		@include breakpoint( "<782px" ) {
+			flex-direction: column;
+
+			.your-store-today {
+				display: none;
+			}
+		}
+	}
+
+	@include breakpoint( "<782px" ) {
+		margin-left: -16px;
+		margin-right: -16px;
+	}
+}
+
+.woocommerce-homescreen-column {
+	width: 682px;
+	top: 100px;
+	margin: 0 auto;
+	align-self: flex-start;
+
+	> div {
+		margin-bottom: $gap-large;
+	}
+
+	.components-text + .woocommerce-badge {
+		margin-left: 16px;
+	}
+
+	@include breakpoint( "<782px" ) {
+		width: 100%;
+		position: inherit;
+		top: auto;
+	}
+}
+
+.woocommerce-homescreen-card {
+	.components-card__header.is-size-large,
+	.components-card__header.is-size-medium {
+		min-height: 63px;
+		min-height: unset;
+		display: grid;
+		grid-template-columns: auto 24px;
+
+		// IE doesn't support `align-items` on grid container
+
+		& > * {
+			align-self: center;
+		}
+	}
+
+	.components-card__footer.is-size-large {
+		padding: 0 $gap-smaller;
+	}
+}
+
+.woocommerce-layout__inbox-panel-header.your-store-today {
+	display: none;
+}

@@ -1,0 +1,13 @@
+.wc-block-editor-components-upgrade-downgrade-notice {
+	.components-notice__content {
+		display: flex;
+		flex-direction: column;
+		gap: $grid-unit-20;
+	}
+
+	.components-notice__actions {
+		.components-notice__action.components-button {
+			margin-left: 0;
+		}
+	}
+}

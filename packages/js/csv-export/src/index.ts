@@ -21,11 +21,18 @@ function escapeCSVValue( value: string | number ) {
 	// Prevent CSV injection.
 	// See: https://owasp.org/www-community/attacks/CSV_Injection
 	// See: WC_CSV_Exporter::escape_data()
+
+	// Numbers are not escaped, since a pure numeric value cannot form a valid formula to be injected.
+	// This preserves negative numeric values (e.g. `-42`) as numbers in the CSV output.
+	if ( typeof value === 'number' ) {
+		return stringValue;
+	}
+
 	if (
 		[
 			'=',
 			'+',
-			'-',
+			'-', // Only escape '-' if it's not part of a numeric value.
 			'@',
 			String.fromCharCode( 0x09 ), // tab
 			String.fromCharCode( 0x0d ), // carriage return

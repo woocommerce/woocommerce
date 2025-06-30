@@ -1,0 +1,81 @@
+.wc-block-product-filter-chips fieldset {
+	display: contents;
+}
+
+:where(.wc-block-product-filter-chips__items) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $gap-smallest;
+}
+
+.wc-block-product-filter-chips__item {
+	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+	padding: 0.25em 0.75em;
+	appearance: none;
+	background: transparent;
+	border-radius: 2px;
+	font-size: 0.8em;
+	font-family: inherit;
+	cursor: pointer;
+	color: inherit;
+
+	&:focus {
+		outline: 1px solid currentColor;
+		outline-offset: 1px;
+	}
+
+	&:hover {
+		background-color: color-mix(
+			in srgb,
+			var(--wp--preset--color--contrast) 10%,
+			transparent
+		);
+	}
+
+	.has-chip-text-color & {
+		color: var(--wc-product-filter-chips-text);
+	}
+	.has-chip-background-color & {
+		background: var(--wc-product-filter-chips-background);
+	}
+	.has-chip-border-color & {
+		border-color: var(--wc-product-filter-chips-border);
+	}
+}
+
+.wc-block-product-filter-chips__item[aria-checked="true"] {
+
+	.has-selected-chip-text-color & {
+		color: var(--wc-product-filter-chips-selected-text);
+	}
+	.has-selected-chip-background-color & {
+		background: var(--wc-product-filter-chips-selected-background);
+	}
+	.has-selected-chip-border-color & {
+		border-color: var(--wc-product-filter-chips-selected-border);
+	}
+}
+
+:where(.wc-block-product-filter-chips__label) {
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smallest;
+}
+
+.wc-block-product-filter-chips__text {
+	display: contents;
+}
+
+.wc-block-product-filter-chips__count {
+	display: contents;
+	white-space: nowrap;
+}
+
+.wc-block-product-filter-chips__show-more {
+	text-decoration: underline;
+	appearance: none;
+	font-family: inherit;
+	background: transparent;
+	border: none;
+	padding: 0;
+}

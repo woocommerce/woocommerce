@@ -31,6 +31,13 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
+	 * Setting page icon.
+	 *
+	 * @var string
+	 */
+	public $icon = 'shipping';
+
+	/**
 	 * Add this page to settings.
 	 *
 	 * @param array $pages Current pages.
@@ -89,18 +96,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the default section.
-	 *
-	 * The original implementation of 'get_settings' was returning the settings for the "Options" section
-	 * when the supplied value for $current_section was ''.
-	 *
-	 * @return array
-	 */
-	protected function get_settings_for_default_section() {
-		return $this->get_settings_for_options_section();
-	}
-
-	/**
 	 * Get settings for the options section.
 	 *
 	 * @return array
@@ -129,6 +124,15 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'id'            => 'woocommerce_shipping_cost_requires_address',
 					'default'       => 'no',
 					'type'          => 'checkbox',
+					'checkboxgroup' => '',
+				),
+
+				array(
+					'desc'          => __( 'Hide shipping rates when free shipping is available', 'woocommerce' ),
+					'id'            => 'woocommerce_shipping_hide_rates_when_free',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'autoload'      => false,
 					'checkboxgroup' => 'end',
 				),
 

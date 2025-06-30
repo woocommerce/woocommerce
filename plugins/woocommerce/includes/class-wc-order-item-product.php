@@ -7,6 +7,9 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -210,7 +213,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
 			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
@@ -430,7 +433,44 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function get_tax_status() {
 		$product = $this->get_product();
-		return $product ? $product->get_tax_status() : 'taxable';
+		return $product ? $product->get_tax_status() : ProductTaxStatus::TAXABLE;
+	}
+
+	/**
+	 * Get formatted meta data for the item.
+	 *
+	 * This overrides the parent method to conditionally remove backorder
+	 * meta data when the order is marked as completed.
+	 *
+	 * @param string $hideprefix  Meta data prefix, (default: _).
+	 * @param bool   $include_all Include all meta data, this stop skip items with values already in the product name.
+	 * @return array
+	 */
+	public function get_formatted_meta_data( $hideprefix = '_', $include_all = false ) {
+		$formatted_meta = parent::get_formatted_meta_data( $hideprefix, $include_all );
+
+		$order = $this->get_order();
+
+		if ( $order && $order->has_status( OrderStatus::COMPLETED ) ) {
+			/**
+			 * Filter the backorder meta key.
+			 * Make sure to use the same filter as used in set_backorder_meta().
+			 *
+			 * @param string $backorder_meta_key The backorder meta key.
+			 * @param WC_Order_Item_Product $item The order item product.
+			 * @since 9.9.0
+			 * @return string
+			 */
+			$backorder_meta_key = apply_filters( 'woocommerce_backordered_item_meta_name', __( 'Backordered', 'woocommerce' ), $this );
+
+			foreach ( $formatted_meta as $meta_id => $meta ) {
+				if ( isset( $meta->key ) && $meta->key === $backorder_meta_key ) {
+					unset( $formatted_meta[ $meta_id ] );
+				}
+			}
+		}
+
+		return $formatted_meta;
 	}
 
 	/*
@@ -504,5 +544,30 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return true;
 		}
 		return parent::offsetExists( $offset );
+	}
+
+	/**
+	 * Indicates that product line items have an associated Cost of Goods Sold value.
+	 * Note that this is true even if the product has np COGS value (in that case the COGS value for the line item will be zero)-
+	 *
+	 * @return bool Always true.
+	 */
+	public function has_cogs(): bool {
+		return true;
+	}
+
+	/**
+	 * Calculate the Cost of Goods Sold value for this line item.
+	 *
+	 * @return float|null The calculated value, null if the product associated to the line item no longer exists.
+	 */
+	public function calculate_cogs_value_core(): ?float {
+		$product = $this->get_product();
+		if ( ! $product ) {
+			return null;
+		}
+
+		$cogs_per_unit = $product->get_cogs_total_value();
+		return $cogs_per_unit * $this->get_quantity();
 	}
 }

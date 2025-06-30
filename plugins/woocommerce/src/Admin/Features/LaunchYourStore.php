@@ -1,11 +1,11 @@
-<?php
+<?php declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
+
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -23,6 +23,10 @@ class LaunchYourStore {
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_coming_soon_global_tracks' ), 10, 2 );
 		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
+		if ( Features::is_enabled( 'coming-soon-newsletter-template' ) ) {
+			add_action( 'admin_enqueue_scripts', array( $this, 'load_newsletter_scripts' ) );
+			add_action( 'save_post_wp_template', array( $this, 'maybe_track_template_change' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -32,7 +36,9 @@ class LaunchYourStore {
 	 */
 	public function save_site_visibility_options() {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'woocommerce-settings' ) ) {
+		// New Settings API uses wp_rest nonce.
+		$nonce_string = Features::is_enabled( 'settings' ) ? 'wp_rest' : 'woocommerce-settings';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, $nonce_string ) ) {
 			return;
 		}
 
@@ -179,7 +185,7 @@ class LaunchYourStore {
 		}
 
 		$store_pages_only = get_option( 'woocommerce_store_pages_only' ) === 'yes';
-		if ( $store_pages_only && ! WCAdminHelper::is_store_page() ) {
+		if ( $store_pages_only && ! WCAdminHelper::is_current_page_store_page() ) {
 			return false;
 		}
 
@@ -263,5 +269,91 @@ class LaunchYourStore {
 		if ( 'yes' === $existing_meta ) {
 			WCAdminUser::update_user_data_field( $user->ID, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 		}
+	}
+
+	/**
+	 * Check if the Mailpoet is connected.
+	 *
+	 * @return bool true if Mailpoet is fully connected, meaning the API key is valid and approved.
+	 */
+	private function is_mailpoet_connected() {
+		if ( ! class_exists( '\MailPoet\DI\ContainerWrapper' ) || ! class_exists( '\MailPoet\Settings\SettingsController' ) ) {
+			return false;
+		}
+
+		$container = \MailPoet\DI\ContainerWrapper::getInstance( WP_DEBUG );
+
+		// SettingController retrieves data from wp_mailpoet_settings table.
+		$settings = $container->get( \MailPoet\Settings\SettingsController::class );
+
+		if ( false === $settings instanceof \MailPoet\Settings\SettingsController ) {
+			return false;
+		}
+
+		$mta       = $settings->get( 'mta' );
+		$api_state = $mta['mailpoet_api_key_state'] ?? null;
+
+		if ( ! $api_state || ! isset( $api_state['state'], $api_state['code'] ) ) {
+			return false;
+		}
+
+		return 'valid' === $api_state['state'] && 200 === $api_state['code'];
+	}
+
+	/**
+	 * Track when coming soon template is changed.
+	 *
+	 * @param int     $post_id The post ID.
+	 * @param WP_Post $post The post object.
+	 * @param bool    $update Whether the post is being updated.
+	 */
+	public function maybe_track_template_change( $post_id, $post, $update ) {
+		if ( ! $post instanceof \WP_Post || ! isset( $post->post_name, $post->post_title ) ) {
+			return;
+		}
+
+		// Check multiple fields to avoid false matches with non-WooCommerce templates.
+		if ( 'coming-soon' === $post->post_name && 'Page: Coming soon' === $post->post_title ) {
+			$matches = array();
+			$content = $post->post_content;
+			preg_match( '/"comingSoonPatternId":"([^"]+)"/', $content, $matches );
+
+			if ( isset( $matches[1] ) ) {
+				wc_admin_record_tracks_event(
+					'coming_soon_template_saved',
+					array(
+						'pattern_id' => $matches[1],
+						'is_update'  => $update,
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Load slotfill script and JS variables for the newsletter.
+	 * The comingSoonNewsletter is used in client/wp-admin-scripts/coming-soon-newsletter-panel
+	 *
+	 * @return void
+	 */
+	public function load_newsletter_scripts() {
+		$screen = get_current_screen();
+		if ( ! $screen instanceof \WP_Screen ) {
+			return;
+		}
+
+		if ( 'site-editor' !== $screen->id ) {
+			return;
+		}
+
+		$mailpoet = array(
+			'mailpoet_installed' => PluginsHelper::is_plugin_installed( 'mailpoet' ),
+			'mailpoet_connected' => $this->is_mailpoet_connected(),
+		);
+
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion, WordPress.WP.EnqueuedResourceParameters.NotInFooter
+		wp_register_script( 'coming-soon-newsletter-mailpoet', '' );
+		wp_enqueue_script( 'coming-soon-newsletter-mailpoet' );
+		wp_add_inline_script( 'coming-soon-newsletter-mailpoet', 'var comingSoonNewsletter = ' . wp_json_encode( $mailpoet ) . ';' );
 	}
 }

@@ -35,6 +35,14 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 				},
 			},
 			{
+				step: 'setSiteOptions',
+				options: {
+					woocommerce_onboarding_profile: {
+						skipped: true,
+					},
+				},
+			},
+			{
 				step: 'login',
 				username: 'admin',
 				password: 'password',
@@ -72,7 +80,7 @@ async function run( { github, context, core } ) {
 		context.issue.number
 	);
 
-	const url = `https://playground.wordpress.net/#${ JSON.stringify(
+	const url = `https://wordpress-playground.atomicsites.blog/#${ JSON.stringify(
 		defaultSchema
 	) }`;
 

@@ -2,8 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
@@ -103,6 +105,7 @@ class ListTable extends WP_List_Table {
 		add_filter( 'set_screen_option_edit_' . $this->order_type . '_per_page', array( $this, 'set_items_per_page' ), 10, 3 );
 		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'admin_footer', array( $this, 'enqueue_scripts' ) );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'created_via_filter' ) );
 		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'customers_filter' ) );
 
 		$this->items_per_page();
@@ -390,6 +393,7 @@ class ListTable extends WP_List_Table {
 		$this->set_date_args();
 		$this->set_customer_args();
 		$this->set_search_args();
+		$this->set_created_via_args();
 
 		/**
 		 * Provides an opportunity to modify the query arguments used in the (Custom Order Table-powered) order list
@@ -413,10 +417,16 @@ class ListTable extends WP_List_Table {
 		// We must ensure the 'paginate' argument is set.
 		$order_query_args['paginate'] = true;
 
+		// Attempt to use cache if no additional query arguments are used.
+		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+			$this->order_query_args['no_found_rows'] = true;
+			$order_query_args['no_found_rows']       = true;
+		}
+
 		$orders      = wc_get_orders( $order_query_args );
 		$this->items = $orders->orders;
 
-		$max_num_pages = $orders->max_num_pages;
+		$max_num_pages = $this->get_max_num_pages( $orders );
 
 		// Check in case the user has attempted to page beyond the available range of orders.
 		if ( 0 === $max_num_pages && $this->order_query_args['page'] > 1 ) {
@@ -437,6 +447,24 @@ class ListTable extends WP_List_Table {
 
 		// Are we inside the trash?
 		$this->is_trash = 'trash' === $this->request['status'];
+	}
+
+	/**
+	 * Get the max number of pages from orders or from cache.
+	 *
+	 * @param WC_Order[]|stdClass Number of pages and an array of order objects.
+	 * @return int
+	 */
+	private function get_max_num_pages( &$orders ) {
+		if ( ! isset( $this->order_query_args['no_found_rows'] ) || ! $this->order_query_args['no_found_rows'] ) {
+			return $orders->max_num_pages;
+		}
+
+		$count         = $this->count_orders_by_status( $this->order_query_args['status'] );
+		$limit         = $this->get_items_per_page( 'edit_' . $this->order_type . '_per_page' );
+		$orders->total = $count;
+
+		return ceil( $count / $limit );
 	}
 
 	/**
@@ -540,6 +568,49 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Implements filtering of orders by created_via value.
+	 */
+	private function set_created_via_args(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$created_via = sanitize_text_field( wp_unslash( $_GET['_created_via'] ?? '' ) );
+
+		if ( empty( $created_via ) ) {
+			return;
+		}
+
+		$this->order_query_args['created_via'] = array_map( 'trim', explode( ',', $created_via ) );
+
+		$this->has_filter = true;
+	}
+
+	/**
+	 * Render the created_via filter dropdown.
+	 *
+	 * @return void
+	 */
+	public function created_via_filter() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$current_created_via = isset( $_GET['_created_via'] ) ? sanitize_text_field( wp_unslash( $_GET['_created_via'] ) ) : '';
+
+		$created_via_options = array(
+			''                   => __( 'All sales channels', 'woocommerce' ),
+			'admin'              => __( 'Admin', 'woocommerce' ),
+			'checkout,store-api' => __( 'Checkout', 'woocommerce' ),
+			'pos-rest-api'       => __( 'Point of Sale', 'woocommerce' ),
+		);
+		?>
+
+		<select name="_created_via" id="filter-by-created-via">
+			<?php foreach ( $created_via_options as $value => $label ) : ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $current_created_via ); ?>>
+					<?php echo esc_html( $label ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
 	 * Get the list of views for this table (all orders, completed orders, etc, each with a count of the number of
 	 * corresponding orders).
 	 *
@@ -595,28 +666,9 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function count_orders_by_status( $status ): int {
-		global $wpdb;
-
-		// Compute all counts and cache if necessary.
-		if ( is_null( $this->status_count_cache ) ) {
-			$orders_table = OrdersTableDataStore::get_orders_table_name();
-
-			$res = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT status, COUNT(*) AS cnt FROM {$orders_table} WHERE type = %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$this->order_type
-				),
-				ARRAY_A
-			);
-
-			$this->status_count_cache =
-				$res
-				? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
-				: array();
-		}
-
 		$status = (array) $status;
-		$count  = array_sum( array_intersect_key( $this->status_count_cache, array_flip( $status ) ) );
+		$counts = OrderUtil::get_count_for_type( $this->order_type );
+		$count  = array_sum( array_intersect_key( $counts, array_flip( $status ) ) );
 
 		/**
 		 * Allows 3rd parties to modify the count of orders by status.
@@ -756,8 +808,6 @@ class ListTable extends WP_List_Table {
 	private function months_filter() {
 		global $wp_locale;
 
-		// XXX: [review] we may prefer to move this logic outside of the ListTable class.
-
 		/**
 		 * Filters whether to remove the 'Months' drop-down from the order list table.
 		 *
@@ -773,7 +823,7 @@ class ListTable extends WP_List_Table {
 		echo '<select name="m" id="filter-by-date">';
 		echo '<option ' . selected( $m, 0, false ) . ' value="0">' . esc_html__( 'All dates', 'woocommerce' ) . '</option>';
 
-		$order_dates = $this->get_and_maybe_update_months_filter_cache();
+		$order_dates = $this->get_months_filter_options();
 
 		foreach ( $order_dates as $date ) {
 			$month           = zeroise( $date->month, 2 );
@@ -796,61 +846,112 @@ class ListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Get a list of year-month options for filtering the orders list table.
+	 *
+	 * This finds the oldest order and generates a year-month option for every month in the range between then and the
+	 * current month.
+	 *
+	 * @return \stdClass[]
+	 */
+	protected function get_months_filter_options(): array {
+		global $wpdb;
+
+		$orders_table   = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$min_max_months = $wpdb->get_row(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is escaped above.
+			$wpdb->prepare(
+				"
+					SELECT MIN( t.date_created_gmt ) as min_date_gmt,
+					       MAX( t.date_created_gmt ) as max_date_gmt
+					FROM `{$orders_table}` t
+					WHERE type = %s
+					AND status != %s
+				",
+				$this->order_type,
+				OrderStatus::TRASH
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		/**
+		 * Normalize "this month" to be the first day of the month in the current timezone of the site.
+		 */
+		$this_month = new \WC_DateTime(
+			'now',
+			new \DateTimeZone( 'UTC' )
+		);
+		$this_month->setTimezone( wp_timezone() );
+		$this_month->setDate( $this_month->format( 'Y' ), $this_month->format( 'm' ), 1 );
+		$this_month->setTime( 0, 0 );
+
+		$options = array();
+
+		if ( isset( $min_max_months ) && ! is_null( $min_max_months->min_date_gmt ) ) {
+			$start = new \WC_DateTime(
+				$min_max_months->min_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$start->setTimezone( wp_timezone() );
+			$start->setDate( $start->format( 'Y' ), $start->format( 'm' ), 1 );
+			$start->setTime( 0, 0 );
+
+			$end = new \WC_DateTime(
+				$min_max_months->max_date_gmt,
+				new \DateTimeZone( 'UTC' )
+			);
+			$end->setTimezone( wp_timezone() );
+			$end->setDate( $end->format( 'Y' ), $end->format( 'm' ), 1 );
+			$end->setTime( 0, 0 );
+
+			if ( $start > $this_month ) {
+				$start = $this_month;
+			}
+
+			if ( $end < $this_month ) {
+				$end = $this_month;
+			}
+
+			$intervals = new \DatePeriod( $start, new \DateInterval( 'P1M' ), $end );
+
+			foreach ( $intervals as $interval ) {
+				$option        = new \stdClass();
+				$option->year  = $interval->format( 'Y' );
+				$option->month = $interval->format( 'n' );
+				$options[]     = $option;
+			}
+
+			$option        = new \stdClass();
+			$option->year  = $end->format( 'Y' );
+			$option->month = $end->format( 'n' );
+			$options[]     = $option;
+		}
+
+		if ( count( $options ) < 1 ) {
+			$option        = new \stdClass();
+			$option->year  = $this_month->format( 'Y' );
+			$option->month = $this_month->format( 'n' );
+			$options[]     = $option;
+		}
+
+		return array_reverse( $options );
+	}
+
+	/**
 	 * Get order year-months cache. We cache the results in the options table, since these results will change very infrequently.
 	 * We use the heuristic to always return current year-month when getting from cache to prevent an additional query.
+	 *
+	 * @deprecated 9.9.0
 	 *
 	 * @return array List of year-months.
 	 */
 	protected function get_and_maybe_update_months_filter_cache(): array {
-		global $wpdb;
-
-		// We cache in the options table since it's won't be invalidated soon.
-		$cache_option_value_name = 'wc_' . $this->order_type . '_list_table_months_filter_cache_value';
-		$cache_option_date_name  = 'wc_' . $this->order_type . '_list_table_months_filter_cache_date';
-
-		$cached_timestamp = get_option( $cache_option_date_name, 0 );
-
-		// new day, new cache.
-		if ( 0 === $cached_timestamp || gmdate( 'j', time() ) !== gmdate( 'j', $cached_timestamp ) || ( time() - $cached_timestamp ) > 60 * 60 * 24 ) {
-			$cached_value = false;
-		} else {
-			$cached_value = get_option( $cache_option_value_name );
-		}
-
-		if ( false !== $cached_value ) {
-			// Always add current year month for cache stability. This allows us to not hydrate the cache on every order update.
-			$current_year_month        = new \stdClass();
-			$current_year_month->year  = gmdate( 'Y', time() );
-			$current_year_month->month = gmdate( 'n', time() );
-			if ( count( $cached_value ) === 0 || (
-				$cached_value[0]->year !== $current_year_month->year ||
-				$cached_value[0]->month !== $current_year_month->month )
-			) {
-				array_unshift( $cached_value, $current_year_month );
-			}
-			return $cached_value;
-		}
-
-		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
-		$utc_offset   = wc_timezone_offset();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-					SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-									MONTH( t.date_created_local ) AS month
-					FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
-					ORDER BY year DESC, month DESC
-				",
-				$this->order_type
-			)
+		wc_deprecated_function(
+			__METHOD__,
+			'9.9.0',
+			'get_months_filter_options'
 		);
 
-		update_option( $cache_option_date_name, time() );
-		update_option( $cache_option_value_name, $order_dates );
-
-		return $order_dates;
+		return $this->get_months_filter_options();
 	}
 
 	/**
@@ -1715,7 +1816,8 @@ class ListTable extends WP_List_Table {
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
 				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $selected ) ) ); ?>><?php echo esc_html( $label ); ?></option>
-				<?php
-			}
+			<?php } ?>
+		</select>
+		<?php
 	}
 }

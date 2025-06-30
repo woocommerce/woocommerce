@@ -3,10 +3,9 @@
 	"version": "8.2.0",
 	"description": "WooCommerce navigation utilities.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1",
-		"pnpm": "9.1.3"
+		"node": "^20.11.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -35,7 +34,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -54,14 +53,14 @@
 		]
 	},
 	"dependencies": {
-		"@wordpress/api-fetch": "wp-6.0",
-		"@wordpress/components": "wp-6.0",
-		"@wordpress/compose": "wp-6.0",
-		"@wordpress/element": "wp-6.0",
-		"@wordpress/hooks": "wp-6.0",
-		"@wordpress/i18n": "wp-6.0",
-		"@wordpress/notices": "wp-6.0",
-		"@wordpress/url": "wp-6.0",
+		"@wordpress/api-fetch": "wp-6.6",
+		"@wordpress/components": "wp-6.6",
+		"@wordpress/compose": "wp-6.6",
+		"@wordpress/element": "wp-6.6",
+		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/notices": "wp-6.6",
+		"@wordpress/url": "wp-6.6",
 		"history": "^5.3.0",
 		"qs": "^6.11.2",
 		"react-router-dom": "~6.3.0"
@@ -73,20 +72,19 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.23.5",
-		"@babel/runtime": "^7.23.5",
-		"@types/jest": "^27.5.2",
+		"@babel/core": "7.25.7",
+		"@babel/runtime": "7.25.7",
+		"@types/jest": "27.5.x",
 		"@types/qs": "^6.9.10",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
 		"rimraf": "5.0.5",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
-		"wireit": "0.14.3"
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.12"
 	},
 	"config": {
 		"ci": {
@@ -105,7 +103,6 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js",
 					"events": [
 						"pull_request",
 						"push"
@@ -116,7 +113,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -131,7 +128,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -157,13 +154,13 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"package.json",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"package.json"
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
 			]
 		}
 	}

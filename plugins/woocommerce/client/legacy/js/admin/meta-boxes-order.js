@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-len
-/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard */
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
 jQuery( function ( $ ) {
 
 	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
@@ -412,14 +412,10 @@ jQuery( function ( $ ) {
 					$line_subtotal_tax.attr( 'data-subtotal_tax' ),
 					woocommerce_admin.mon_decimal_point
 				) / o_qty;
-				var round_at_subtotal  = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
-				var precision          = woocommerce_admin_meta_boxes[
-					round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
-					];
 
 				if ( 0 < unit_total_tax ) {
 					$line_total_tax.val(
-						parseFloat( accounting.formatNumber( unit_total_tax * qty, precision, '' ) )
+						parseFloat( accounting.formatNumber( unit_total_tax * qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -427,7 +423,11 @@ jQuery( function ( $ ) {
 
 				if ( 0 < unit_subtotal_tax ) {
 					$line_subtotal_tax.val(
-						parseFloat( accounting.formatNumber( unit_subtotal_tax * qty, precision, '' ) )
+						parseFloat( accounting.formatNumber(
+							unit_subtotal_tax * qty,
+							woocommerce_admin_meta_boxes.rounding_precision,
+							''
+						) )
 							.toString()
 							.replace( '.', woocommerce_admin.mon_decimal_point )
 					);
@@ -1111,13 +1111,13 @@ jQuery( function ( $ ) {
 					) / qty;
 
 					if ( 0 < unit_total_tax ) {
-						var round_at_subtotal = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
-						var precision         = woocommerce_admin_meta_boxes[
-							round_at_subtotal ? 'rounding_precision' : 'currency_format_num_decimals'
-							];
 
 						$refund_line_total_tax.val(
-							parseFloat( accounting.formatNumber( unit_total_tax * refund_qty, precision, '' ) )
+							parseFloat( accounting.formatNumber(
+								unit_total_tax * refund_qty,
+								woocommerce_admin_meta_boxes.rounding_precision,
+								''
+							) )
 								.toString()
 								.replace( '.', woocommerce_admin.mon_decimal_point )
 						).trigger( 'change' );
@@ -1568,6 +1568,9 @@ jQuery( function ( $ ) {
 	 */
 	var wc_meta_boxes_order_custom_meta = {
 		init: function() {
+			let select2_args;
+			let metakey_select;
+
 			if ( ! $('#order_custom').length ) {
 				return;
 			}
@@ -1585,11 +1588,114 @@ jQuery( function ( $ ) {
 					$('table#list-table').show();
 				},
 
-				delBefore: function( settings ) {
+				delBefore: function( settings, el ) {
+					if (typeof select2_args.ajax == 'undefined') {
+						// If the list of meta keys have already loaded, prepend the deleted key to the list if it isn't already present.
+						let meta_key = $(el).find('#meta-' + settings.data.id + '-key').val();
+						if (metakey_select.find('option[value=\'' + meta_key + '\']').length === 0) {
+							let newOption = new Option(meta_key, meta_key, false, false);
+							metakey_select.prepend(newOption);
+						}
+					}
 					settings.data.order_id = woocommerce_admin_meta_boxes.post_id;
 					settings.data.action   = 'woocommerce_order_delete_meta';
 					return settings;
+				},
+
+			});
+
+			$( '#order_custom #metakeyselect').filter( function() {
+				metakey_select = $(this);
+				if(metakey_select.hasClass('enhanced)')) {
+					return;
 				}
+
+				select2_args = {
+					allowClear: !!metakey_select.data('allow_clear'),
+					placeholder: metakey_select.data('placeholder'),
+					ajax: {
+						url: wc_enhanced_select_params.ajax_url,
+						dataType: 'json',
+						delay: 500,
+						data: function (params) {
+							return {
+								order_id: metakey_select.data('order_id'),
+								action: 'woocommerce_json_search_order_metakeys',
+								security: wc_enhanced_select_params.search_order_metakeys_nonce
+							};
+						},
+						success: function (data) {
+							let terms = [];
+							if (data) {
+								$.each(data, function (id, term) {
+									terms.push({
+										id: term,
+										text: term,
+									});
+								});
+							}
+							// Reinitialize with the loaded data to avoid continued ajax requests when searching since
+							// we are not using the search term to filter the list on the backend.
+							select2_args.data = terms;
+							delete select2_args.ajax;
+							metakey_select.selectWoo(select2_args).select2('open');
+							return false;
+						},
+						cache: true
+					},
+					language: {
+						errorLoading: function () {
+							// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
+							return wc_enhanced_select_params.i18n_searching;
+						},
+						inputTooLong: function (args) {
+							var overChars = args.input.length - args.maximum;
+
+							if (1 === overChars) {
+								return wc_enhanced_select_params.i18n_input_too_long_1;
+							}
+
+							return wc_enhanced_select_params.i18n_input_too_long_n.replace('%qty%', overChars);
+						},
+						inputTooShort: function (args) {
+							var remainingChars = args.minimum - args.input.length;
+
+							if (1 === remainingChars) {
+								return wc_enhanced_select_params.i18n_input_too_short_1;
+							}
+
+							return wc_enhanced_select_params.i18n_input_too_short_n.replace('%qty%', remainingChars);
+						},
+						loadingMore: function () {
+							return wc_enhanced_select_params.i18n_load_more;
+						},
+						maximumSelected: function (args) {
+							if (args.maximum === 1) {
+								return wc_enhanced_select_params.i18n_selection_too_long_1;
+							}
+
+							return wc_enhanced_select_params.i18n_selection_too_long_n.replace('%qty%', args.maximum);
+						},
+						noResults: function () {
+							return wc_enhanced_select_params.i18n_no_matches;
+						},
+						searching: function () {
+							return wc_enhanced_select_params.i18n_searching;
+						}
+					}
+
+				};
+
+				// Work around to deal with the lack of responsive support from Select2 until a better replacement can be integrated.
+				let resizeTimer;
+				$( window ).on( 'resize', function () {
+					cancelAnimationFrame( resizeTimer );
+					resizeTimer = requestAnimationFrame( function () {
+						metakey_select.selectWoo( select2_args );
+					} );
+				});
+
+				metakey_select.selectWoo(select2_args).addClass('enhanced');
 			});
 		}
 	};
@@ -1599,4 +1705,35 @@ jQuery( function ( $ ) {
 	wc_meta_boxes_order_notes.init();
 	wc_meta_boxes_order_downloads.init();
 	wc_meta_boxes_order_custom_meta.init();
+
+	/**
+	 * Event listeners to allow third-party plugins to reinitialize WooCommerce order meta boxes
+	 * after dynamically modifying their content.
+	 *
+	 * Usage Example:
+	 *
+	 * // Reinitialize the Order Data Panel:
+	 * window.dispatchEvent(new CustomEvent("wc_meta_boxes_order_init"));
+	 *
+	 * // Reinitialize Order Items Panel:
+	 * window.dispatchEvent(new CustomEvent("wc_meta_boxes_order_items_init"));
+	 *
+	 * These events ensure that order meta boxes can be dynamically updated
+	 * and properly reinitialized as needed.
+	 */
+	window.addEventListener('wc_meta_boxes_order_init', (e) => {
+		wc_meta_boxes_order.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_items_init', (e) => {
+		wc_meta_boxes_order_items.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_notes_init', (e) => {
+		wc_meta_boxes_order_notes.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_downloads_init', (e) => {
+		wc_meta_boxes_order_downloads.init()
+	});
+	window.addEventListener('wc_meta_boxes_order_custom_meta_init', (e) => {
+		wc_meta_boxes_order_custom_meta.init()
+	});
 });

@@ -50,6 +50,7 @@ describe( 'plugins reducer', () => {
 		const state = reducer(
 			{
 				profileItems,
+				profileProgress: {},
 				freeExtensions: [],
 				taskLists: {},
 				paymentMethods: [],
@@ -73,6 +74,7 @@ describe( 'plugins reducer', () => {
 		const state = reducer(
 			{
 				profileItems,
+				profileProgress: {},
 				freeExtensions: [],
 				taskLists: {},
 				paymentMethods: [],

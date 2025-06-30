@@ -4,7 +4,7 @@ A plugin that makes it easy to test out pre-releases such as betas release candi
 
 ## Installation
 
-You can either install the latest version from [wp.org](https://wordpress.org/plugins/woocommerce-beta-tester/) or symlink this directory by running `ln -s ./ :path-to-your-wp-plugin-directory/woocommerce-beta-tester`
+You can either install the latest version from [woocommerce.com](https://woocommerce.com/products/woocommerce-beta-tester/) or symlink this directory by running `ln -s ./ :path-to-your-wp-plugin-directory/woocommerce-beta-tester`
 
 ## Development
 

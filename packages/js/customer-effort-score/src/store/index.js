@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { createReduxStore, register } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 
 /**
@@ -15,10 +15,14 @@ import { QUEUE_OPTION_NAME, STORE_KEY } from './constants';
 
 export { QUEUE_OPTION_NAME, STORE_KEY };
 
-export default registerStore( STORE_KEY, {
+const store = createReduxStore( STORE_KEY, {
 	actions,
 	selectors,
 	resolvers,
 	controls,
 	reducer,
 } );
+
+register( store );
+
+export default store;

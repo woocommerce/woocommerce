@@ -60,6 +60,13 @@ class OrdersTableQuery {
 	private $args = array();
 
 	/**
+	 * Original query vars used to build this query.
+	 *
+	 * @var array
+	 */
+	private $query_args = array();
+
+	/**
 	 * Columns to be selected in the SELECT clause.
 	 *
 	 * @var array
@@ -193,7 +200,8 @@ class OrdersTableQuery {
 		$this->suppress_filters = array_key_exists( 'suppress_filters', $args ) ? (bool) $args['suppress_filters'] : false;
 		unset( $args['suppress_filters'] );
 
-		$this->args = $args;
+		$this->args       = $args;
+		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
 
 		// TODO: args to be implemented.
 		unset( $this->args['customer_note'], $this->args['name'] );
@@ -228,7 +236,7 @@ class OrdersTableQuery {
 		 *     @type int   $max_num_pages The number of pages.
 		 * }
 		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
-		 * @param string             $sql The OrdersTableQuery instance.
+		 * @param string             $sql   Fully built SQL query.
 		 */
 		$pre_query = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
 		if ( ! $pre_query || ! isset( $pre_query[0] ) || ! is_array( $pre_query[0] ) ) {
@@ -336,11 +344,11 @@ class OrdersTableQuery {
 	 * Generates a `WP_Date_Query` compatible query from a given date.
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
-	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
 	private function date_to_date_query_arg( $date ): array {
-		$result    = array(
+		$result = array(
 			'year'  => '',
 			'month' => '',
 			'day'   => '',
@@ -373,9 +381,11 @@ class OrdersTableQuery {
 	/**
 	 * Returns UTC-based date query arguments for a combination of local time dates and a date shorthand operator.
 	 *
-	 * @param  array $dates_raw Array of dates (in local time) to use in combination with the operator.
+	 * @param  array  $dates_raw Array of dates (in local time) to use in combination with the operator.
 	 * @param  string $operator One of the operators supported by date queries (<, <=, =, ..., >, >=).
 	 * @return array Partial date query arg with relevant dates now UTC-based.
+	 *
+	 * @throws \Exception If an invalid date shorthand operator is specified.
 	 *
 	 * @since 8.2.0
 	 */
@@ -387,7 +397,7 @@ class OrdersTableQuery {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
 
-		$date1  = end( $dates_raw );
+		$date1 = end( $dates_raw );
 
 		switch ( $operator ) {
 			case '>':
@@ -410,9 +420,9 @@ class OrdersTableQuery {
 						'inclusive' => true,
 					),
 					array(
-						'before'     => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
-						'inclusive'  => false,
-					)
+						'before'    => $this->date_to_date_query_arg( $date1 + DAY_IN_SECONDS ),
+						'inclusive' => false,
+					),
 				);
 				break;
 			case '<=':
@@ -474,7 +484,6 @@ class OrdersTableQuery {
 		foreach ( $date_keys as $date_key ) {
 			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
-
 			$operator   = '=';
 			$dates_raw  = array();
 			$dates      = array();
@@ -646,7 +655,7 @@ class OrdersTableQuery {
 
 		array_walk_recursive(
 			$this->args['date_query'],
-			function( &$value, $key ) use ( $legacy_columns, $table_mapping, $wpdb ) {
+			function ( &$value, $key ) use ( $legacy_columns, $table_mapping, $wpdb ) {
 				if ( 'column' !== $key ) {
 					return;
 				}
@@ -835,7 +844,9 @@ class OrdersTableQuery {
 		// WHERE.
 		$where = '1=1';
 		foreach ( $this->where as $_where ) {
-			$where .= " AND ({$_where})";
+			if ( strlen( $_where ) > 0 ) {
+				$where .= " AND ({$_where})";
+			}
 		}
 
 		// ORDER BY.
@@ -918,8 +929,13 @@ class OrdersTableQuery {
 		if ( ! isset( $this->sql ) || '' === $this->sql ) {
 			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.3.0' );
 		}
-		$orders_table    = $this->tables['orders'];
-		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+		$orders_table = $this->tables['orders'];
+		$count_fields = "COUNT(DISTINCT $fields)";
+		if ( "{$orders_table}.id" === $fields && '' === $join ) {
+			// DISTINCT adds performance overhead, exclude the DISTINCT function when confident it is not needed.
+			$count_fields = 'COUNT(*)';
+		}
+		$this->count_sql = "SELECT $count_fields FROM $orders_table $join WHERE $where";
 
 		if ( ! $this->suppress_filters ) {
 			/**
@@ -1348,7 +1364,7 @@ class OrdersTableQuery {
 		$this->orders = array_map( 'absint', $wpdb->get_col( $this->sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		// Set max_num_pages and found_orders if necessary.
-		if ( ( $this->arg_isset( 'no_found_rows' ) && ! $this->args['no_found_rows'] ) || empty( $this->orders ) ) {
+		if ( ( $this->arg_isset( 'no_found_rows' ) && $this->args['no_found_rows'] ) || empty( $this->orders ) ) {
 			return;
 		}
 
@@ -1478,4 +1494,13 @@ class OrdersTableQuery {
 		return $result;
 	}
 
+	/**
+	 * Return the query args that were used to initialize the query.
+	 *
+	 * @since 9.8.0
+	 * @return array Query args.
+	 */
+	public function get_query_args(): array {
+		return $this->query_args;
+	}
 }

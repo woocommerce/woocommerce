@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent Store API orders being placed with empty state

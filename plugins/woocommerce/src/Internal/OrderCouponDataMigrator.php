@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use \Exception;
 
@@ -17,15 +16,11 @@ use \Exception;
  */
 class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksInterface {
 
-	use AccessiblePrivateMethods;
-
 	/**
 	 * Register hooks for the class.
 	 */
 	public function register() {
-		self::add_filter( 'woocommerce_debug_tools', array( $this, 'handle_woocommerce_debug_tools' ), 999, 1 );
-		self::mark_method_as_accessible( 'enqueue' );
-		self::mark_method_as_accessible( 'dequeue' );
+		add_filter( 'woocommerce_debug_tools', array( $this, 'handle_woocommerce_debug_tools' ), 999, 1 );
 	}
 
 	/**
@@ -163,8 +158,10 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 *
 	 * @param array $tools Old tools array.
 	 * @return array Updated tools array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function handle_woocommerce_debug_tools( array $tools ): array {
+	public function handle_woocommerce_debug_tools( array $tools ): array {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		$pending_count   = $this->get_total_pending_count();
 
@@ -202,8 +199,10 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 * Start the background process for coupon data conversion.
 	 *
 	 * @return string Informative string to show after the tool is triggered in UI.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function enqueue(): string {
+	public function enqueue(): string {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		if ( $batch_processor->is_enqueued( self::class ) ) {
 			return __( 'Background process for coupon meta conversion already started, nothing done.', 'woocommerce' );
@@ -217,8 +216,10 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 * Stop the background process for coupon data conversion.
 	 *
 	 * @return string Informative string to show after the tool is triggered in UI.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function dequeue(): string {
+	public function dequeue(): string {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
 		if ( ! $batch_processor->is_enqueued( self::class ) ) {
 			return __( 'Background process for coupon meta conversion not started, nothing done.', 'woocommerce' );

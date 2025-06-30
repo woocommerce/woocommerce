@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -23,6 +24,7 @@ use WC_Tax;
 use WC_Shipping_Rate;
 use WC_Order_Item_Shipping;
 use WC_Order_Item_Product;
+use WC_Gateway_BACS;
 
 /**
  * Class OrderHelper.
@@ -71,7 +73,7 @@ class OrderHelper {
 		ShippingHelper::create_simple_flat_rate();
 
 		$order_data = array(
-			'status'        => 'pending',
+			'status'        => OrderStatus::PENDING,
 			'customer_id'   => $customer_id,
 			'customer_note' => '',
 			'total'         => '',
@@ -125,7 +127,7 @@ class OrderHelper {
 
 		// Set payment gateway.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$order->set_payment_method( $payment_gateways['bacs'] );
+		$order->set_payment_method( $payment_gateways[ WC_Gateway_BACS::ID ] );
 
 		// Set totals.
 		$order->set_shipping_total( 10 );
@@ -211,7 +213,7 @@ class OrderHelper {
 
 		$order->save();
 
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_currency( 'INR' );
 		$order->set_customer_id( $customer->get_id() );
 		$order->set_billing_email( $customer->get_billing_email() );
@@ -301,7 +303,7 @@ class OrderHelper {
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
-		$order->set_status( 'pending' );
+		$order->set_status( OrderStatus::PENDING );
 		$order->set_created_via( 'unit-tests' );
 		$order->set_currency( 'COP' );
 		$order->set_customer_ip_address( '127.0.0.1' );
@@ -331,7 +333,7 @@ class OrderHelper {
 		$order->set_billing_phone( '555-32123' );
 
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
-		$order->set_payment_method( $payment_gateways['bacs'] );
+		$order->set_payment_method( $payment_gateways[ WC_Gateway_BACS::ID ] );
 
 		$order->set_shipping_total( 5.0 );
 		$order->set_discount_total( 0.0 );

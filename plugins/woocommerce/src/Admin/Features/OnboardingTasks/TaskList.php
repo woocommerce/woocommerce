@@ -168,10 +168,23 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_visible() {
-		if ( ! $this->visible || $this->is_hidden() || ! count( $this->get_viewable_tasks() ) > 0 ) {
+		// If the task list is explicitly set to not be visible, return false.
+		if ( ! $this->visible ) {
 			return false;
 		}
-		return ! $this->is_hidden();
+
+		// If the task list is hidden, return false.
+		if ( $this->is_hidden() ) {
+			return false;
+		}
+
+		// If the task list has no viewable tasks, return false.
+		$no_viewable_tasks = count( $this->get_viewable_tasks() ) === 0;
+		if ( $no_viewable_tasks ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -187,7 +200,7 @@ class TaskList {
 		$viewable_tasks  = $this->get_viewable_tasks();
 		$completed_count = array_reduce(
 			$viewable_tasks,
-			function( $total, $task ) {
+			function ( $total, $task ) {
 				return $task->is_complete() ? $total + 1 : $total;
 			},
 			0
@@ -285,7 +298,7 @@ class TaskList {
 		return current(
 			array_filter(
 				$this->tasks,
-				function( $task ) use ( $task_id ) {
+				function ( $task ) use ( $task_id ) {
 					return $task->get_id() === $task_id;
 				}
 			)
@@ -301,7 +314,7 @@ class TaskList {
 		return array_values(
 			array_filter(
 				$this->tasks,
-				function( $task ) {
+				function ( $task ) {
 					return $task->can_view();
 				}
 			)
@@ -341,7 +354,7 @@ class TaskList {
 
 		$completed_lists   = get_option( self::COMPLETED_OPTION, array() );
 		$completed_lists[] = $this->get_list_id();
-		update_option( self::COMPLETED_OPTION, $completed_lists );
+		update_option( self::COMPLETED_OPTION, $completed_lists, true );
 		$this->maybe_set_default_layout( $completed_lists );
 		$this->record_tracks_event(
 			'tasks_completed',
@@ -362,7 +375,7 @@ class TaskList {
 		if ( 0 !== count( $sort_by ) ) {
 			usort(
 				$this->tasks,
-				function( $a, $b ) use ( $sort_by ) {
+				function ( $a, $b ) use ( $sort_by ) {
 					return Task::sort( $a, $b, $sort_by );
 				}
 			);
@@ -415,10 +428,11 @@ class TaskList {
 		$this->possibly_track_completion();
 		$tasks_json = array();
 
-		// We have no use for hidden lists, it's expensive to compute individual tasks completion.
-		// Exception: Secret tasklist is always hidden.
-		if ( $this->is_visible() || 'secret_tasklist' === $this->id ) {
-			foreach ( $this->tasks as $task ) {
+		foreach ( $this->tasks as $task ) {
+			// We have no use for hidden lists, it's expensive to compute individual tasks completion.
+			// Exception: Secret tasklist is always hidden, or a task is always accessible.
+			$list_is_visible = $this->is_visible() || 'secret_tasklist' === $this->id;
+			if ( $list_is_visible || ( method_exists( $task, 'is_always_accessible' ) && $task->is_always_accessible() ) ) {
 				$json = $task->get_json();
 				if ( $json['canView'] ) {
 					$tasks_json[] = $json;

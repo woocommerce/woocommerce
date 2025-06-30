@@ -6,6 +6,7 @@
  * @version  2.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -250,8 +251,6 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	$item_quantity          = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock  = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 	$restock_refunded_items = wc_stock_amount( $item->get_meta( '_restock_refunded_items', true ) );
-	$order                  = $item->get_order();
-	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
 
 	$diff = $item_quantity - $restock_refunded_items - $already_reduced_stock;
 
@@ -383,7 +382,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			$item->save();
 
-			if ( in_array( $order->get_status(), array( 'processing', 'completed', 'on-hold' ), true ) ) {
+			if ( in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 				if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 					$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';

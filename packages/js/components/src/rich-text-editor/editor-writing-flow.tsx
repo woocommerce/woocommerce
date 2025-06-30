@@ -43,7 +43,7 @@ export const EditorWritingFlow = ( {
 			editorMode: __unstableGetEditorMode(),
 			selectedBlockClientIds: getSelectedBlockClientIds(),
 		};
-	} );
+	}, [] );
 
 	// This is a workaround to prevent focusing the block on initialization.
 	// Changing to a mode other than "edit" ensures that no initial position

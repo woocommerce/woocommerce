@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Variations
  */
@@ -65,11 +67,11 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$variation->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
@@ -98,11 +100,11 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$simple_product = WC_Helper_Product::create_simple_product();
 
 		$order = WC_Helper_Order::create_order( 1, $simple_product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 15 );
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -142,11 +144,11 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$variation_2->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(

@@ -1,0 +1,281 @@
+.woocommerce_page_wc-settings-advanced-blueprint {
+	.blueprint-settings-slotfill {
+		min-height: 650px;
+	}
+
+	.components-snackbar .components-snackbar__content-with-icon {
+		padding-left: 0;
+	}
+
+	.components-snackbar .components-snackbar__icon {
+		display: flex;
+		margin-right: $gap-smaller;
+	}
+
+	.components-snackbar__content {
+		align-items: center;
+	}
+}
+
+.blueprint-settings-slotfill {
+	max-width: 598px;
+	color: #2f2f2f;
+	label {
+		cursor: pointer;
+	}
+
+	h3 {
+		margin: 0 0 8px 0;
+		color: #23282d;
+		font-size: 18px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 133.333% */
+	}
+
+	h4 {
+		margin-bottom: 4px;
+		color: #23282d;
+		font-size: 16px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 150% */
+	}
+
+	p {
+		line-height: 20px;
+		margin: 0;
+	}
+
+	button.is-primary {
+		margin-bottom: 7px;
+	}
+	button.is-link {
+		text-decoration: none;
+		&:active,
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+
+	p.blueprint-settings-intro-text {
+		margin-bottom: 40px;
+	}
+
+	a.woocommerce-admin-inline-documentation-link {
+		text-decoration: none;
+	}
+
+	#download-link-container {
+		margin-bottom: 10px;
+		a {
+			text-decoration: none;
+		}
+	}
+
+	.woo-blueprint-export-step-desc {
+		margin-top: 0.25em;
+		margin-bottom: 1em;
+		color: #828282;
+	}
+
+	.woocommerce-collapsible-content {
+		color: #1e1e1e;
+		flex-grow: 1;
+		button.woocommerce-collapsible-content__toggle {
+			width: 100%;
+			span {
+				font-size: 14px;
+				font-weight: 500;
+				color: #1e1e1e;
+				line-height: 24px;
+			}
+			svg {
+				margin-left: auto;
+				width: 24px;
+				height: 24px;
+				fill: inherit;
+			}
+		}
+
+		span.components-toggle-control__help {
+			margin-inline-start: 49px;
+			line-height: 16px;
+		}
+
+		.components-base-control__field {
+			.components-h-stack {
+				gap: calc(16px);
+			}
+		}
+
+		p.woocommerce-collapsible-content-hint {
+			color: #757575;
+			margin: 6px 0 16px 0;
+		}
+
+		.woocommerce-collapsible-content__content {
+			margin-top: 16px;
+			left: -27px;
+			p {
+				margin: 0 0 12px 0;
+				color: #757575;
+			}
+
+			p.components-base-control__help {
+				margin-top: 4px;
+			}
+
+			.components-base-control {
+				margin-bottom: 16px;
+				&:last-child {
+					margin-bottom: 0;
+					p {
+						margin-bottom: 0;
+					}
+				}
+			}
+		}
+
+
+	}
+
+	.woocommerce-blueprint-import-button {
+		margin-top: 24px;
+	}
+
+	.blueprint-settings-export-group {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 8px;
+		border-bottom: 1px solid #e7e7e9;
+		padding: 16px 0 16px 0;
+		position: relative;
+	}
+
+	.blueprint-settings-export-group-item-count {
+		position: absolute;
+		right: 40px;
+		top: 20px;
+		color: $gray-700;
+		text-align: right;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 400;
+	}
+
+	.blueprint-upload-form {
+		margin: 16px 0 40px 0;
+	}
+
+	.blueprint-settings-export-button {
+		margin-top: 14px;
+	}
+
+	.components-notice {
+		padding: 12px;
+
+		button.components-notice__dismiss {
+			align-self: inherit;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+
+		.components-notice__content,
+		&.is-error .components-notice__content pre {
+			margin: 0;
+			color: $gray-900;
+			line-height: 24px; /* 184.615% */
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			text-wrap: auto;
+		}
+	}
+
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
+	}
+}
+
+// Show the notice at the bottom right of the screen
+.woocommerce-transient-notices:has(div.woocommerce-blueprint-import-notice) {
+	bottom: 14px;
+	right: 18px;
+	left: initial;
+}
+
+.woocommerce-blueprint-overwrite-modal {
+	max-width: 480px;
+
+	.components-modal__header {
+		padding: 32px 32px 16px 32px;
+		height: 80px;
+
+		.components-modal__header-heading {
+			color: $gray-900;
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 28px; /* 140% */
+		}
+	}
+
+	.components-modal__content {
+		padding: 0 32px 32px;
+	}
+
+	.woocommerce-blueprint-overwrite-modal__description {
+		color: $gray-900;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px; /* 153.846% */
+		margin: 0 0 8px;
+	}
+
+	ul {
+		margin: 0;
+		list-style: disc;
+		list-style-position: inside;
+
+		li {
+			color: $gray-900;
+			font-size: 13px;
+			font-weight: 500;
+			line-height: 20px; /* 153.846% */
+			margin-bottom: 0;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: 24px;
+
+		button {
+			padding: 8px 16px;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 20px;
+			height: 40px;
+		}
+
+		&-import.is-importing {
+			padding: 10px 16px;
+			width: 132px;
+			justify-content: center;
+			align-items: center;
+
+			svg {
+				margin: 0;
+			}
+		}
+	}
+}
+
+.blueprint-export-error {
+	margin: 16px 0;
+}

@@ -46,7 +46,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'variations-stats'` Query.
+	 * Get data from `'variations-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -210,16 +210,18 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']['enum']   = array(
-			'date',
-			'net_revenue',
-			'coupons',
-			'refunds',
-			'shipping',
-			'taxes',
-			'net_revenue',
-			'orders_count',
-			'items_sold',
+		$params['orderby']['enum']   = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'net_revenue',
+				'coupons',
+				'refunds',
+				'shipping',
+				'taxes',
+				'net_revenue',
+				'orders_count',
+				'items_sold',
+			)
 		);
 		$params['category_includes'] = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),

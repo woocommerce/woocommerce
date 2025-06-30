@@ -1,0 +1,23 @@
+.woocommerce-layout__footer {
+	background: $studio-white;
+	border-top: 1px solid $gray-200;
+	box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
+	box-sizing: border-box;
+	padding: 0;
+	position: fixed;
+	width: calc(100% - 160px);
+	bottom: -1px; /* to hide the border when no visible children */
+	z-index: 1001; /* on top of #wp-content-editor-tools */
+
+	@include breakpoint("782px-960px") {
+		width: calc(100% - 36px);
+	}
+
+	@include breakpoint("<782px") {
+		flex-flow: row wrap;
+		width: 100%;
+	}
+}
+.folded .woocommerce-layout__footer {
+	width: calc(100% - $admin-menu-width-collapsed);
+}

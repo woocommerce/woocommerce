@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -37,7 +38,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-		$this->tests_dir  = dirname( __FILE__ );
+		$this->tests_dir  = __DIR__;
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
 		$this->register_autoloader_for_testing_tools();
@@ -62,11 +63,23 @@ class WC_Unit_Tests_Bootstrap {
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
+		// Load admin features.
+		tests_add_filter( 'woocommerce_admin_should_load_features', '__return_true' );
+
 		// install WC.
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
+
+		// Speed things up by turning down the password hashing cost.
+		tests_add_filter(
+			'wp_hash_password_options',
+			function ( $options ) {
+				$options['cost'] = 4;
+				return $options;
+			}
+		);
 
 		/*
 		* Load PHPUnit Polyfills for the WP testing suite.
@@ -92,7 +105,8 @@ class WC_Unit_Tests_Bootstrap {
 			$this->initialize_hpos();
 		}
 
-		error_reporting(error_reporting() & ~E_DEPRECATED);
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
+		error_reporting( error_reporting() & ~E_DEPRECATED );
 	}
 
 	/**
@@ -101,7 +115,7 @@ class WC_Unit_Tests_Bootstrap {
 	protected static function register_autoloader_for_testing_tools() {
 		spl_autoload_register(
 			function ( $class ) {
-				$tests_directory   = dirname( __FILE__, 2 );
+				$tests_directory   = dirname( __DIR__, 1 );
 				$helpers_directory = $tests_directory . '/php/helpers';
 
 				// Support loading top-level classes from the `php/helpers` directory.
@@ -172,12 +186,11 @@ class WC_Unit_Tests_Bootstrap {
 	 * Re-initialize the dependency injection engine.
 	 *
 	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
-	 * to replace the registered read-only container with a fully configurable one for testing.
+	 * to replace the registered runtime container with one with extra capabilities for testing.
 	 * To this end we hack a bit and use reflection to grab the underlying container that the read-only one stores
 	 * in a private property.
 	 *
-	 * Additionally, we replace the legacy/function proxies with mockable versions to easily replace anything
-	 * in tests as appropriate.
+	 * Note also that TestingContainer replaces the instance of LegacyProxy with an instance of MockableLegacyProxy.
 	 *
 	 * @throws \Exception The Container class doesn't have a 'container' property.
 	 */
@@ -189,9 +202,11 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		$inner_container_property->setAccessible( true );
-		$inner_container = $inner_container_property->getValue( wc_get_container() );
 
-		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
+		$container       = wc_get_container();
+		$inner_container = $inner_container_property->getValue( $container );
+		$inner_container = new TestingContainer( $inner_container );
+		$inner_container_property->setValue( $container, $inner_container );
 
 		$GLOBALS['wc_container'] = $inner_container;
 	}

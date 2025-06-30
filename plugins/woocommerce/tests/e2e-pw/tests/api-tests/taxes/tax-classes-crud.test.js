@@ -7,7 +7,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( 'can enable tax calculations', async ( { request } ) => {
 			// call API to enable taxes and calculations
 			const response = await request.put(
-				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+				'./wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
 				{
 					data: {
 						value: 'yes',
@@ -27,7 +27,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( 'can create a tax class', async ( { request } ) => {
 			// call API to create a taxclass
 			const response = await request.post(
-				'/wp-json/wc/v3/taxes/classes',
+				'./wp-json/wc/v3/taxes/classes',
 				{
 					data: {
 						name: 'Test Tax Class',
@@ -46,7 +46,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( 'can retrieve a tax class', async ( { request } ) => {
 			// call API to retrieve the previously saved tax class by slug
 			const response = await request.get(
-				`/wp-json/wc/v3/taxes/classes/${ taxClassSlug }`
+				`./wp-json/wc/v3/taxes/classes/${ taxClassSlug }`
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -57,7 +57,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( 'can retrieve all tax classes', async ( { request } ) => {
 			// call API to retrieve all tax classes
 			const response = await request.get(
-				'/wp-json/wc/v3/taxes/classes'
+				'./wp-json/wc/v3/taxes/classes'
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
@@ -70,7 +70,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( `cannot update a tax class`, async ( { request } ) => {
 			// attempt to update tax class should fail
 			const response = await request.put(
-				`/wp-json/wc/v3/taxes/classes/${ taxClassSlug }`,
+				`./wp-json/wc/v3/taxes/classes/${ taxClassSlug }`,
 				{
 					data: {
 						name: 'Not able to update tax class',
@@ -90,7 +90,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 		test( 'can permanently delete a tax class', async ( { request } ) => {
 			// Delete the tax class.
 			const response = await request.delete(
-				`/wp-json/wc/v3/taxes/classes/${ taxClassSlug }`,
+				`./wp-json/wc/v3/taxes/classes/${ taxClassSlug }`,
 				{
 					data: {
 						force: true,
@@ -101,7 +101,7 @@ test.describe( 'Tax Classes API tests: CRUD', () => {
 
 			// Verify that the tax class can no longer be retrieved (empty array returned)
 			const getDeletedTaxClassResponse = await request.get(
-				`/wp-json/wc/v3/taxes/classes/${ taxClassSlug }`
+				`./wp-json/wc/v3/taxes/classes/${ taxClassSlug }`
 			);
 			const getDeletedTaxClassResponseJSON =
 				await getDeletedTaxClassResponse.json();

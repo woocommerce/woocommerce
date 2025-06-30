@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixing type for page property in query parameters.

@@ -71,10 +71,10 @@ function getButton( text: string, url: string ): object {
  * @param {boolean} withAttempt - whether to include the run attempt in the url
  * @return {string} the run url
  */
-function getRunUrl( options: Options, withAttempt: boolean ): string {
+export function getRunUrl( options: Options, withAttempt: boolean ): string {
 	const { serverUrl, runId, repository, runAttempt } = options;
-	return `${ serverUrl }/${ repository }/actions/runs/${ runId }/${
-		withAttempt ? `attempts/${ runAttempt }` : ''
+	return `${ serverUrl }/${ repository }/actions/runs/${ runId }${
+		withAttempt ? `/attempts/${ runAttempt }` : ''
 	}`;
 }
 
@@ -137,7 +137,7 @@ export async function createMessage( options: Options ) {
 		target = `on ${ refType } _*${ refName }*_ (${ eventName })`;
 		const truncatedMessage =
 			commitMessage.length > 50
-				? commitMessage.substring( 0, 48 ) + '...'
+				? commitMessage.substring( 0, 50 ) + '...'
 				: commitMessage;
 
 		contextElements.push(
@@ -194,7 +194,10 @@ export async function createMessage( options: Options ) {
  * @param {number}   chunkSize - the maximum size of each chunk
  * @return {any[]} the array of chunks
  */
-function getBlocksChunksBySize( blocks: any[], chunkSize: number ): any[] {
+export function getBlocksChunksBySize(
+	blocks: any[],
+	chunkSize: number
+): any[] {
 	const chunks = [];
 	for ( let i = 0; i < blocks.length; i += chunkSize ) {
 		const chunk = blocks.slice( i, i + chunkSize );
@@ -212,7 +215,10 @@ function getBlocksChunksBySize( blocks: any[], chunkSize: number ): any[] {
  * @param {string}   type   - the type property to use as delimiter
  * @return {any[]} the array of chunks
  */
-function getBlocksChunksByType( blocks: string | any[], type: string ): any[] {
+export function getBlocksChunksByType(
+	blocks: string | any[],
+	type: string
+): any[] {
 	const chunks = [];
 	let nextIndex = 0;
 

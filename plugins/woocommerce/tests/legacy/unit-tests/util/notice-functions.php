@@ -135,11 +135,11 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		wc_add_notice( 'One True Notice', 'notice' );
 
-		$actual_return = wc_print_notices( true );
-		$normalized_actual_return = preg_replace('/\s+/', '', $actual_return);
-		$normalized_expected_return = preg_replace('/\s+/', '', $expected_return);
+		$actual_return              = wc_print_notices( true );
+		$normalized_actual_return   = preg_replace( '/\s+/', '', $actual_return );
+		$normalized_expected_return = preg_replace( '/\s+/', '', $expected_return );
 
-		$this->assertEquals($normalized_expected_return, $normalized_actual_return);
+		$this->assertEquals( $normalized_expected_return, $normalized_actual_return );
 	}
 
 	/**
@@ -234,5 +234,20 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		$notices = wc_get_notices( 'bogus_type' );
 		$this->assertIsArray( $notices );
 		$this->assertEmpty( $notices );
+	}
+
+	/**
+	 * Test wc_get_notices() with no session.
+	 */
+	public function test_wc_get_notices_no_session() {
+		$original_session = WC()->session;
+
+		WC()->session = null;
+
+		$notices = wc_get_notices();
+		$this->assertIsArray( $notices );
+		$this->assertEmpty( $notices );
+
+		WC()->session = $original_session;
 	}
 }

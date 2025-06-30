@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
@@ -10,7 +10,6 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -90,7 +89,7 @@ export function Edit( {
 				help={
 					salePriceValidationError ? salePriceValidationError : help
 				}
-				className={ classNames( {
+				className={ clsx( {
 					'has-error': salePriceValidationError,
 				} ) }
 			>
@@ -108,7 +107,7 @@ export function Edit( {
 						)
 					}
 					disabled={ disabled }
-					onBlur={ validateSalePrice }
+					onBlur={ () => validateSalePrice() }
 				/>
 			</BaseControl>
 		</div>

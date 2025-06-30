@@ -1,0 +1,150 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__category-selector {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	margin: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.woocommerce-marketplace__category-item {
+	cursor: pointer;
+	white-space: nowrap;
+	margin-bottom: 0;
+
+	.components-dropdown {
+		height: 100%;
+	}
+}
+
+.woocommerce-marketplace__category-item-button {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	border: none;
+	border-radius: 2px;
+	color: $wp-gray-60;
+	background-color: $wp-gray-0;
+	padding: 6px $grid-unit-10;
+	margin-right: $grid-unit-10;
+	line-height: 20px;
+	height: 100%;
+
+	&--selected {
+		color: $white;
+		background-color: $gray-900;
+		fill: $white;
+	}
+
+	&.is-loading {
+		animation: loading-fade 1.6s ease-in-out infinite;
+		background: $skeleton-loader-color;
+		height: 32px;
+		pointer-events: none;
+		width: 6em;
+	}
+}
+
+.woocommerce-marketplace__category-item-content {
+	.components-popover__content {
+		min-width: 200px;
+	}
+}
+
+.woocommerce-marketplace__category-selector--full-width {
+	display: none;
+}
+
+@media screen and (max-width: $break-medium) {
+	.woocommerce-marketplace__category-selector--full-width {
+		display: flex;
+	}
+
+	.woocommerce-marketplace__category-selector {
+		display: none;
+	}
+}
+
+.woocommerce-marketplace__category-dropdown {
+	width: 100%;
+}
+
+.woocommerce-marketplace__category-dropdown-button {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	border: 1px solid $gray-600;
+	border-radius: 2px;
+	background-color: $white;
+	width: 100%;
+	font-size: 13px;
+	line-height: 20px;
+	padding: $grid-unit-15 $grid-unit-10;
+	text-align: left;
+}
+
+.woocommerce-marketplace__category-dropdown-content {
+	background-color: $white;
+	color: $gray-900;
+	font-size: 13px;
+	min-width: 280px;
+	width: calc(100% - 32px);
+
+	.components-popover__content {
+		width: 100%;
+	}
+}
+
+.woocommerce-marketplace__category-dropdown-list {
+	margin: 0;
+	line-height: 20px;
+}
+
+.woocommerce-marketplace__category-dropdown-item {
+	border-radius: 2px;
+
+	&:hover {
+		background-color: $gutenberg-gray-100;
+	}
+}
+
+.woocommerce-marketplace__category-dropdown-item-button {
+	border: none;
+	cursor: pointer;
+	background-color: inherit;
+	color: $gray-900;
+	text-align: left;
+	padding: 6px $grid-unit-10;
+	line-height: 20px;
+	width: 100%;
+
+	&--selected {
+		color: $white;
+		background-color: $gray-900;
+	}
+}
+
+.woocommerce-marketplace__category-navigation-button {
+	border: none;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	height: 100%;
+	width: 100px;
+	cursor: pointer;
+}
+
+.woocommerce-marketplace__category-navigation-button--prev {
+	background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	left: 0;
+	text-align: left;
+}
+
+.woocommerce-marketplace__category-navigation-button--next {
+	background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+	right: 0;
+	text-align: right;
+}

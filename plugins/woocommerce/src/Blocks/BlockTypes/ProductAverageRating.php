@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
@@ -20,38 +22,7 @@ class ProductAverageRating extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
-
-	/**
-	 * Get block supports. Shared with the frontend.
-	 * IMPORTANT: If you change anything here, make sure to update the JS file too.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_supports() {
-		return array(
-			'color'                  =>
-				array(
-					'text'                            => true,
-					'background'                      => true,
-					'__experimentalSkipSerialization' => true,
-				),
-			'spacing'                =>
-				array(
-					'margin'                          => true,
-					'padding'                         => true,
-					'__experimentalSkipSerialization' => true,
-				),
-			'typography'             =>
-				array(
-					'fontSize'                        => true,
-					'__experimentalFontWeight'        => true,
-					'__experimentalSkipSerialization' => true,
-				),
-			'__experimentalSelector' => '.wc-block-components-product-average-rating',
-		);
-	}
-
+	protected $api_version = '3';
 
 	/**
 	 * Overwrite parent method to prevent script registration.
@@ -88,16 +59,29 @@ class ProductAverageRating extends AbstractBlock {
 			return '';
 		}
 
-		$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => implode(
+					' ',
+					array_filter(
+						[
+							'wc-block-components-product-average-rating-counter',
+							esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+							esc_attr( $styles_and_classes['classes'] ),
+						]
+					)
+				),
+				'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
+			)
+		);
+
 		return sprintf(
-			'<div class="wc-block-components-product-average-rating-counter %1$s %2$s" style="%3$s">%4$s</div>',
-			esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-			esc_attr( $styles_and_classes['classes'] ),
-			esc_attr( $styles_and_classes['styles'] ?? '' ),
+			'<div %1$s>%2$s</div>',
+			$wrapper_attributes,
 			$product->get_average_rating()
 		);
 	}
 }
-

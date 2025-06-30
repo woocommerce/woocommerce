@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Debounce the popover show/hide and make better use of Popover component props.
+
+

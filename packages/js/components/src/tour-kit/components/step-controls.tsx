@@ -11,7 +11,7 @@ interface Props {
 	onDismiss: TourStepRendererProps[ 'onDismiss' ];
 }
 
-const StepControls: React.FunctionComponent< Props > = ( { onDismiss } ) => {
+const StepControls = ( { onDismiss }: Props ) => {
 	return (
 		<Flex className="woocommerce-tour-kit-step-controls" justify="flex-end">
 			<Button
@@ -19,7 +19,6 @@ const StepControls: React.FunctionComponent< Props > = ( { onDismiss } ) => {
 				label={ __( 'Close Tour', 'woocommerce' ) }
 				icon={ <Icon icon={ closeSmall } viewBox="6 4 12 14" /> }
 				iconSize={ 16 }
-				size={ 16 }
 				onClick={ onDismiss( 'close-btn' ) }
 			></Button>
 		</Flex>

@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports Import REST API Test Class
@@ -98,12 +99,12 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order_1 = WC_Helper_Order::create_order( $this->customer, $product );
-		$order_1->set_status( 'completed' );
+		$order_1->set_status( OrderStatus::COMPLETED );
 		$order_1->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order_1->save();
 		$order_2 = WC_Helper_Order::create_order( $this->customer, $product );
 		$order_2->set_total( 100 );
-		$order_2->set_status( 'completed' );
+		$order_2->set_status( OrderStatus::COMPLETED );
 		$order_2->save();
 
 		// Delete order stats so we can test import API.
@@ -119,7 +120,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
@@ -139,7 +140,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		// Use the skip existing params to skip processing customers/orders.
 		// Compare against order status to make sure previously imported order was skipped.
-		$order_2->set_status( 'processing' );
+		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->save();
 
 		// Compare against name to make sure previously imported customer was skipped.
@@ -161,7 +162,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
@@ -178,7 +179,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 2, $reports );
-		$this->assertEquals( 'completed', $reports[0]['status'] );
+		$this->assertEquals( OrderStatus::COMPLETED, $reports[0]['status'] );
 	}
 
 	/**
@@ -194,7 +195,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order( 1, $product );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order->save();
 
@@ -242,12 +243,12 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		for ( $i = 0; $i < 25; $i++ ) {
 			$order = WC_Helper_Order::create_order( 1, $product );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
 		// Check that stats exist before deleting.
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 25 ) );
@@ -273,7 +274,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Check that stats have been deleted.
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
@@ -309,19 +310,19 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Create 5 completed orders.
 		for ( $i = 0; $i < 5; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->customer, $product );
-			$order->set_status( 'completed' );
+			$order->set_status( OrderStatus::COMPLETED );
 			$order->set_date_created( time() - ( ( $i + 1 ) * DAY_IN_SECONDS ) );
 			$order->save();
 		}
 
 		// Trash one test order - excludes it from totals.
-		$order->set_status( 'trash' );
+		$order->set_status( OrderStatus::TRASH );
 		$order->save();
 
 		// Create 1 draft order - to be excluded from totals.
 		$order = WC_Helper_Order::create_order( $this->customer, $product );
 		$order->set_date_created( time() - ( 5 * DAY_IN_SECONDS ) );
-		$order->set_status( 'auto-draft' );
+		$order->set_status( OrderStatus::AUTO_DRAFT );
 		$order->save();
 
 		// Test totals and total params.
@@ -375,7 +376,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $report['orders']['imported'] );
 		$this->assertEquals( 4, $report['orders']['total'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Test import status after processing.
 		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/status' );

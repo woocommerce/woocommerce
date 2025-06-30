@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update storybook stories name prefixes for consistency.

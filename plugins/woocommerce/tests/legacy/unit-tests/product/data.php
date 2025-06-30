@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\Product
  */
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
@@ -39,7 +42,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'name'               => 'Test',
 			'slug'               => 'test',
 			'status'             => 'publish',
-			'catalog_visibility' => 'search',
+			'catalog_visibility' => CatalogVisibility::SEARCH,
 			'featured'           => false,
 			'description'        => 'Hello world',
 			'short_description'  => 'hello',
@@ -47,11 +50,11 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'regular_price'      => 15.00,
 			'sale_price'         => 10.00,
 			'total_sales'        => 20,
-			'tax_status'         => 'none',
+			'tax_status'         => ProductTaxStatus::NONE,
 			'tax_class'          => '',
 			'manage_stock'       => true,
 			'stock_quantity'     => 10,
-			'stock_status'       => 'instock',
+			'stock_status'       => ProductStockStatus::IN_STOCK,
 			'backorders'         => 'notify',
 			'sold_individually'  => false,
 			'weight'             => 100,
@@ -114,12 +117,12 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 */
 	public function test_product_backorder_stock_status() {
 		$product = new WC_Product();
-		$product->set_stock_status( 'onbackorder' );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 
 		$product->save();
 		$product = new WC_Product( $product->get_id() );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 	}
 
 	/**
@@ -133,47 +136,47 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		// Product should not have quantity and stock status should not be updated automatically if not managing stock.
 		$product->set_manage_stock( false );
 		$product->set_stock_quantity( 5 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->save();
 		$this->assertEquals( '', $product->get_stock_quantity() );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
-		$product->set_stock_status( 'outofstock' );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product->save();
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 
 		$product->set_manage_stock( true );
 
 		// Product should be out of stock if managing orders, no backorders allowed, and quantity too low.
 		$product->set_stock_quantity( 0 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->set_backorders( 'no' );
 		$product->save();
 		$this->assertEquals( 0, $product->get_stock_quantity() );
-		$this->assertEquals( 'outofstock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 
 		// Product should be on backorder if managing orders, backorders allowed, and quantity too low.
 		$product->set_stock_quantity( 0 );
-		$product->set_stock_status( 'instock' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->set_backorders( 'yes' );
 		$product->save();
 		$this->assertEquals( 0, $product->get_stock_quantity() );
-		$this->assertEquals( 'onbackorder', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
 
 		// Product should go to in stock if backordered and inventory increases.
 		$product->set_stock_quantity( 5 );
-		$product->set_stock_status( 'onbackorder' );
+		$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$product->set_backorders( 'notify' );
 		$product->save();
 		$this->assertEquals( 5, $product->get_stock_quantity() );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 
 		// Product should go to in stock if out of stock and inventory increases.
 		$product->set_stock_quantity( 3 );
-		$product->set_stock_status( 'outofstock' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product->set_backorders( 'no' );
 		$product->save();
 		$this->assertEquals( 3, $product->get_stock_quantity() );
-		$this->assertEquals( 'instock', $product->get_stock_status() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
 	}
 
 	/**

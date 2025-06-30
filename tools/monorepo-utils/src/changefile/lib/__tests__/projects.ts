@@ -1,9 +1,3 @@
-jest.mock( 'uuid', () => {
-	return {
-		v4: jest.fn( () => 1 ),
-	};
-} );
-
 /**
  * External dependencies
  */
@@ -124,23 +118,6 @@ describe( 'Changelog project functions', () => {
 			'beta-tester': 'plugins/beta-tester',
 			'@woocommerce/components': 'packages/js/components',
 			'@woocommerce/data': 'packages/js/data',
-		} );
-	} );
-
-	it( 'getTouchedChangeloggerProjectsPathsMappedToProjects should handle woocommerce-admin projects mapped to woocommerce core', async () => {
-		const touchedFiles = [
-			'plugins/beta-tester/src/index.js',
-			'plugins/woocommerce-admin/src/index.js',
-		];
-		const changeLoggerProjects = [ 'plugins/woocommerce' ];
-		const intersectedProjects =
-			getTouchedChangeloggerProjectsPathsMappedToProjects(
-				touchedFiles,
-				changeLoggerProjects
-			);
-
-		expect( intersectedProjects ).toMatchObject( {
-			woocommerce: 'plugins/woocommerce',
 		} );
 	} );
 } );

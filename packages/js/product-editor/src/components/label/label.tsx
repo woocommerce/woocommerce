@@ -24,14 +24,14 @@ export interface LabelProps {
 	onClick?: ( event: React.MouseEvent ) => void;
 }
 
-export const Label: React.FC< LabelProps > = ( {
+export const Label = ( {
 	label,
 	labelId,
 	required,
 	tooltip,
 	note,
 	onClick,
-} ) => {
+}: LabelProps ) => {
 	let labelElement: JSX.Element | string = label;
 
 	if ( required ) {

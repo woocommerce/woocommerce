@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Strip HTML tags from aria-label in wc_help_tip function

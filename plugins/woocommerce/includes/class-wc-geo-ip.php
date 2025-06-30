@@ -633,7 +633,7 @@ class WC_Geo_IP {
 	);
 
 	/**
-	 * Contry names.
+	 * Country names.
 	 *
 	 * @var array
 	 */
@@ -855,7 +855,7 @@ class WC_Geo_IP {
 		'Tunisia',
 		'Tonga',
 		'Timor-Leste',
-		'Turkey',
+		'Türkiye',
 		'Trinidad and Tobago',
 		'Tuvalu',
 		'Taiwan',

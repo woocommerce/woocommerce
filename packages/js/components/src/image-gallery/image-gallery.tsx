@@ -9,7 +9,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
 /**
@@ -40,7 +40,7 @@ export type ImageGalleryProps = {
 	onDragOver?: DragEventHandler< HTMLLIElement >;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const ImageGallery: React.FC< ImageGalleryProps > = ( {
+export const ImageGallery = ( {
 	children,
 	columns = 4,
 	allowDragging = true,
@@ -71,7 +71,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			{
 				key,
 				isDraggable: allowDragging && ! child.props.isCover,
-				className: classnames( {
+				className: clsx( {
 					'is-toolbar-visible': isToolbarVisible,
 				} ),
 				onClick() {

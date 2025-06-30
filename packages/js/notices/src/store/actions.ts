@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { uniqueId } from 'lodash';
-import { Status, Action as WPNoticeAction } from '@wordpress/notices';
+import type { WPNoticeAction } from '@wordpress/notices/build-types/store/actions';
 
 /**
  * Internal dependencies
@@ -54,7 +54,7 @@ export type Options = {
  * @return {Object} WPNoticeAction object.
  */
 export function createNotice(
-	status: Status = DEFAULT_STATUS,
+	status: string = DEFAULT_STATUS,
 	content: string,
 	options: Partial< Options > = {}
 ) {

@@ -101,13 +101,44 @@ export function* triggerWcaInstall() {
 export function* resetOnboardingWizard() {
 	yield runCommand( 'Reset Onboarding Wizard', function* () {
 		const optionsToDelete = [
-			'woocommerce_task_list_tracked_completed_tasks',
 			'woocommerce_onboarding_profile',
-			'_transient_wc_onboarding_themes',
+			'woocommerce_task_list_tracked_completed_tasks',
+			'woocommerce_private_link',
+			'woocommerce_share_key',
+			'woocommerce_store_pages_only',
 		];
+
+		const defaultOptions = {
+			woocommerce_allow_tracking: 'no',
+			woocommerce_default_country: 'US:CA',
+			woocommerce_currency: 'USD',
+			woocommerce_currency_pos: 'left',
+			woocommerce_price_thousand_sep: ',',
+			woocommerce_price_decimal_sep: '.',
+			woocommerce_price_num_decimals: '2',
+			woocommerce_coming_soon: 'no',
+			woocommerce_weight_unit: 'lbs',
+			woocommerce_dimension_unit: 'in',
+		};
+
+		// Delete existing options
 		yield apiFetch( {
 			method: 'DELETE',
 			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		// Execute batch update of options
+		yield apiFetch( {
+			method: 'POST',
+			path: `${ API_NAMESPACE }/options`,
+			data: {
+				options: Object.entries( defaultOptions ).map(
+					( [ option_name, option_value ] ) => ( {
+						option_name,
+						option_value,
+					} )
+				),
+			},
 		} );
 	} );
 }
@@ -227,11 +258,6 @@ export function* resetCustomizeYourStore() {
 			path: API_NAMESPACE + '/tools/reset-cys',
 			method: 'POST',
 		} );
-
-		yield apiFetch( {
-			path: '/wc-admin/ai/patterns',
-			method: 'DELETE',
-		} );
 	} );
 }
 
@@ -305,5 +331,46 @@ export function* fakeWooPayments( params ) {
 				newStatus === 'yes' ? 'disabled' : 'enabled'
 			}`
 		);
+	} );
+}
+
+export function* updateWccomBaseUrl( { url } ) {
+	yield runCommand( 'Set WooCommerce.com Base URL', function* () {
+		yield apiFetch( {
+			path: '/wc-admin-test-helper/tools/set-wccom-base-url/v1',
+			method: 'POST',
+			data: { url },
+		} );
+	} );
+}
+
+export function* resetLaunchYourStore() {
+	yield runCommand( 'Reset Launch Your Store', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-launch-your-store',
+			method: 'POST',
+		} );
+	} );
+}
+
+export function* loadTemplateVersion( params ) {
+	if ( ! params || ! params.template_name || ! params.version ) {
+		yield updateMessage(
+			'Load Template Version',
+			'Please select a template and version',
+			'error'
+		);
+		return;
+	}
+
+	yield runCommand( 'Load Template Version', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/load-template-version`,
+			method: 'POST',
+			data: {
+				template_name: params.template_name,
+				version: params.version,
+			},
+		} );
 	} );
 }

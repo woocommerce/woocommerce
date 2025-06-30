@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
@@ -61,7 +62,7 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 			array(
 				'post_title'   => 'a product',
 				'post_type'    => 'product',
-				'post_status'  => 'publish',
+				'post_status'  => ProductStatus::PUBLISH,
 				'post_content' => '',
 			)
 		);
@@ -85,7 +86,7 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 			array(
 				'post_title'   => 'a product',
 				'post_type'    => 'product',
-				'post_status'  => 'publish',
+				'post_status'  => ProductStatus::PUBLISH,
 				'post_content' => '',
 			)
 		);

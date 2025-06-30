@@ -2,9 +2,9 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "9.4.0",
+	"version": "10.1.0",
 	"type": "wordpress-plugin",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"repositories": [
@@ -14,7 +14,10 @@
 		},
 		{
 			"type": "path",
-			"url": "../../packages/php/monorepo-plugin"
+			"url": "../../packages/php/monorepo-plugin",
+			"options": {
+				"symlink": false
+			}
 		},
 		{
 			"type": "path",
@@ -22,25 +25,35 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "path",
+			"url": "../../packages/php/email-editor",
+			"options": {
+				"symlink": false
+			}
 		}
 	],
 	"require": {
 		"php": ">=7.4",
-		"automattic/jetpack-a8c-mc-stats": "^2.0.1",
-		"automattic/jetpack-autoloader": "2.11.18",
-		"automattic/jetpack-config": "1.15.2",
-		"automattic/jetpack-connection": "^2.10.1",
-		"automattic/jetpack-constants": "^2.0.3",
+		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
+		"automattic/jetpack-autoloader": "5.0.0",
+		"automattic/jetpack-config": "3.0.0",
+		"automattic/jetpack-connection": "^6.11.1",
+		"automattic/jetpack-constants": "^3.0.1",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
+		"opis/json-schema": "*",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.8.1",
-		"woocommerce/blueprint": "*"
+		"woocommerce/action-scheduler": "3.9.2",
+		"woocommerce/blueprint": "*",
+		"woocommerce/email-editor": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
 		"bamarni/composer-bin-plugin": "^1.4",
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
+		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
@@ -81,7 +94,8 @@
 		"files": [
 			"src/StoreApi/deprecated.php",
 			"src/StoreApi/functions.php",
-			"src/Blocks/Domain/Services/functions.php"
+			"src/Blocks/Domain/Services/functions.php",
+			"src/Deprecated.php"
 		]
 	},
 	"autoload-dev": {
@@ -95,12 +109,10 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"@composer bin all install --ansi",
-			"sh ./bin/package-update.sh"
+			"sh ./bin/post-install.sh"
 		],
 		"post-update-cmd": [
-			"@composer bin all update --ansi",
-			"sh ./bin/package-update.sh"
+			"sh ./bin/post-update.sh"
 		],
 		"test": [
 			"phpunit"
@@ -121,7 +133,7 @@
 			"phpcbf -p"
 		],
 		"makepot-audit": [
-			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,client,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
+			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,assets,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
 		],
 		"makepot": [
 			"@makepot-audit --skip-audit"
@@ -136,7 +148,9 @@
 	"extra": {
 		"installer-paths": {
 			"packages/{$name}": [
-				"woocommerce/action-scheduler"
+				"woocommerce/action-scheduler",
+				"woocommerce/email-editor",
+				"woocommerce/blueprint"
 			]
 		},
 		"scripts-description": {

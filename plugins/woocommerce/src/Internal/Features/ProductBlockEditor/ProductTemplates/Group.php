@@ -28,7 +28,7 @@ class Group extends ProductBlock implements GroupInterface {
 	 * @throws \ValueError If the parent block container does not belong to the same template as the block.
 	 * @throws \InvalidArgumentException If blockName key and value are passed into block configuration.
 	 */
-	public function __construct( array $config, BlockTemplateInterface &$root_template, ContainerInterface &$parent = null ) {
+	public function __construct( array $config, BlockTemplateInterface &$root_template, ?ContainerInterface &$parent = null ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.parentFound
 		if ( ! empty( $config['blockName'] ) ) {
 			throw new \InvalidArgumentException( 'Unexpected key "blockName", this defaults to "woocommerce/product-tab".' );
 		}

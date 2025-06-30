@@ -16,13 +16,6 @@ import { ContributorData, getContributorData } from './github-api';
 
 const OTHER_WATCHED_PACKAGES = [
 	{
-		displayName: 'WooCommerce Blocks',
-		packagist: 'woocommerce/woocommerce-blocks',
-		org: 'woocommerce',
-		repo: 'woocommerce-blocks',
-		versionPrefix: 'v',
-	},
-	{
 		displayName: 'ActionScheduler',
 		packagist: 'woocommerce/action-scheduler',
 		org: 'woocommerce',

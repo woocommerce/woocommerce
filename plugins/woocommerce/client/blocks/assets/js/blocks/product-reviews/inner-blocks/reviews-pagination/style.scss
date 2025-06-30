@@ -1,0 +1,39 @@
+$pagination-margin: 0.5em;
+.wp-block-woocommerce-product-reviews-pagination {
+	// Increased specificity to override blocks default margin.
+	> .wp-block-woocommerce-product-reviews-pagination-next,
+	> .wp-block-woocommerce-product-reviews-pagination-previous,
+	> .wp-block-woocommerce-product-reviews-pagination-numbers {
+		/*rtl:ignore*/
+		margin-right: $pagination-margin;
+		margin-bottom: $pagination-margin;
+
+		font-size: inherit;
+		&:last-child {
+			/*rtl:ignore*/
+			margin-right: 0;
+		}
+	}
+	.wp-block-woocommerce-product-reviews-pagination-previous-arrow {
+		margin-right: 1ch;
+		display: inline-block; // Needed so that the transform works.
+		// chevron(`»`) symbol doesn't need the mirroring by us.
+		&:not(.is-arrow-chevron) {
+			// Flip for RTL.
+			transform: scaleX(1) #{"/*rtl:scaleX(-1);*/"}; // This points the arrow right for LTR and left for RTL.
+		}
+	}
+	.wp-block-woocommerce-product-reviews-pagination-next-arrow {
+		margin-left: 1ch;
+		display: inline-block; // Needed so that the transform works.
+		// chevron(`»`) symbol doesn't need the mirroring by us.
+		&:not(.is-arrow-chevron) {
+			// Flip for RTL.
+			transform: scaleX(1) #{"/*rtl:scaleX(-1);*/"}; // This points the arrow right for LTR and left for RTL.
+		}
+	}
+
+	&.aligncenter {
+		justify-content: center;
+	}
+}

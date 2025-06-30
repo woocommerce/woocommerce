@@ -50,10 +50,7 @@ export function* getProducts( query: Partial< ProductQuery > ) {
 	}
 	try {
 		const { items, totalCount }: { items: Product[]; totalCount: number } =
-			yield request< ProductQuery, Product >(
-				WC_PRODUCT_NAMESPACE,
-				productsQuery
-			);
+			yield request( WC_PRODUCT_NAMESPACE, productsQuery );
 		yield getProductsTotalCountSuccess( query, totalCount );
 		yield getProductsSuccess( query, items, totalCount );
 		return items;

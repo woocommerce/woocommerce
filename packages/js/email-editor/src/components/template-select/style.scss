@@ -1,0 +1,48 @@
+/* Move the less specific selector before the more specific one */
+
+.block-editor-block-patterns-list__item .block-editor-block-preview__container {
+	align-items: flex-start !important;
+}
+
+.block-editor-block-patterns-explorer
+	.block-editor-block-patterns-list
+	.block-editor-block-preview__container {
+	max-height: 300px !important;
+}
+
+.block-editor-block-patterns-list__list-item {
+	overflow: hidden;
+}
+
+.email-editor-recent-templates-info {
+	background-color: #f0f6fc;
+	margin-bottom: 1.5rem;
+	padding: 0.5rem;
+
+	path {
+		fill: #007cba;
+	}
+}
+
+.email-editor-pattern__list-item {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+
+	.block-editor-block-preview__container::after {
+		outline: unset !important;
+		outline-offset: unset !important;
+	}
+
+	.block-editor-block-patterns-list__item-title {
+		font-size: unset !important;
+		padding-left: 1rem;
+	}
+}
+
+.email-editor-modal-footer {
+	background-color: #fff;
+	bottom: 0;
+	padding: 1rem 2rem;
+	position: absolute;
+	right: 0;
+}

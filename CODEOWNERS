@@ -1,1 +1,24 @@
-/.github/ @woocommerce/atlas
+# Monorepo CI and package managers manifests.
+/.github/ @woocommerce/flux
+**/composer.json @woocommerce/flux
+**/package.json @woocommerce/flux
+
+# Monorepo tooling folders.
+/bin/ @woocommerce/flux
+/tools/ @woocommerce/flux
+/packages/js/eslint-plugin/ @woocommerce/flux
+/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
+/packages/js/e2e-utils-playwright/ @woocommerce/flux
+
+# Files in root of repository
+/.* @woocommerce/flux
+/*.* @woocommerce/flux
+/changelog.txt
+/pnpm-lock.yaml
+
+# Docs resources, which gets published to https://developer.woocommerce.com
+/docs/ @woocommerce/developer-advocacy
+
+# Interactivity API - public stores
+/plugins/woocommerce/client/blocks/assets/js/base/stores/ @woocommerce/billow
+/plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php @woocommerce/billow

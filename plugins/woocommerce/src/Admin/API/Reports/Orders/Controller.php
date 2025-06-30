@@ -31,7 +31,7 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/orders';
 
 	/**
-	 * Get data from Query.
+	 * Get data from Orders\Query.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -233,10 +233,12 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                        = parent::get_collection_params();
 		$params['per_page']['minimum'] = 0;
-		$params['orderby']['enum']     = array(
-			'date',
-			'num_items_sold',
-			'net_total',
+		$params['orderby']['enum']     = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'num_items_sold',
+				'net_total',
+			)
 		);
 		$params['product_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
@@ -459,6 +461,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_columns = array(
 			'date_created'    => __( 'Date', 'woocommerce' ),
 			'order_number'    => __( 'Order #', 'woocommerce' ),
+			'total_formatted' => __( 'N. Revenue (formatted)', 'woocommerce' ),
 			'status'          => __( 'Status', 'woocommerce' ),
 			'customer_name'   => __( 'Customer', 'woocommerce' ),
 			'customer_type'   => __( 'Customer type', 'woocommerce' ),
@@ -491,6 +494,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_item = array(
 			'date_created'    => $item['date'],
 			'order_number'    => $item['order_number'],
+			'total_formatted' => $item['total_formatted'],
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],

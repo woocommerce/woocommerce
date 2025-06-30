@@ -5,7 +5,7 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -39,7 +39,7 @@ export function VariationActions( {
 
 	return (
 		<div
-			className={ classNames( {
+			className={ clsx( {
 				'components-dropdown-menu__menu': supportsMultipleSelection,
 			} ) }
 		>
@@ -74,8 +74,6 @@ export function VariationActions( {
 					</>
 				) : (
 					<MenuItem
-						href={ singleSelection?.permalink }
-						target="_blank"
 						rel="noreferrer"
 						onClick={ () => {
 							recordEvent( 'product_variations_preview', {
@@ -142,7 +140,6 @@ export function VariationActions( {
 							? __( 'Delete variation', 'woocommerce' )
 							: undefined
 					}
-					variant="link"
 					onClick={ () => {
 						onDelete( selection );
 						onClose();

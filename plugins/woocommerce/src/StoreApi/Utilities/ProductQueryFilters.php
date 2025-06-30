@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
@@ -56,7 +57,7 @@ class ProductQueryFilters {
 		$stock_status_options  = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 		$hide_outofstock_items = get_option( 'woocommerce_hide_out_of_stock_items' );
 		if ( 'yes' === $hide_outofstock_items ) {
-			unset( $stock_status_options['outofstock'] );
+			unset( $stock_status_options[ ProductStockStatus::OUT_OF_STOCK ] );
 		}
 
 		add_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10, 2 );
@@ -153,8 +154,9 @@ class ProductQueryFilters {
 			},
 			$attributes
 		);
-		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . implode( '","', $attributes_to_count ) . '")';
-		$attribute_count_sql     = "
+		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN (\'' . implode( '\',\'', $attributes_to_count ) . '\')';
+
+		$attribute_count_sql = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
 			FROM {$wpdb->posts} AS posts
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id

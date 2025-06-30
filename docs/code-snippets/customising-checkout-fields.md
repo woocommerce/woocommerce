@@ -1,7 +1,9 @@
 ---
 post_title: Customizing checkout fields using actions and filters
-tags: code-snippet
+
 ---
+
+# Customizing checkout fields using actions and filters
 
 If you are unfamiliar with code and resolving potential conflicts, we have an extension that can help: [WooCommerce Checkout Field Editor](https://woocommerce.com/products/woocommerce-checkout-field-editor/). Installing and activating this extension overrides any code below that you try to implement; and you cannot have custom checkout field code in your functions.php file when the extension is activated.
 
@@ -9,13 +11,13 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/checkout-block/additional-checkout-fields.md).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
 The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
 
-Before returning these fields, WooCommerce puts the fields through a *filter*. This allows them to be edited by third-party plugins, themes and your own custom code.
+Before returning these fields, WooCommerce puts the fields through a _filter_. This allows them to be edited by third-party plugins, themes and your own custom code.
 
 Billing:
 
@@ -74,7 +76,7 @@ That means you have **full control** over checkout fields - you only need to kno
 
 ## Overriding Core Fields
 
-Hooking into the  **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
+Hooking into the **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
 
 ```php
 _x( 'Notes about your order, e.g. special notes for delivery.', 'placeholder', 'woocommerce' );
@@ -303,7 +305,7 @@ function my_custom_checkout_field_display_admin_order_meta($order){
 
 It's alive!
 
-What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, \_shipping_phone). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
+What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, `_shipping_phone`). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
 
 ### Adding a Custom Special Field
 
@@ -339,7 +341,7 @@ This gives us:
 
 ![WooCommerce Codex - Checkout Field Hook](https://developer.woocommerce.com/wp-content/uploads/2023/12/WooCommerce-Codex-Checkout-Field-Hook.png)
 
-Next we need to validate the field when the checkout form is posted. For this example the field is required and not optional:
+Next we need to validate the field when the checkout form is posted. For this example let's check that the field contains only letters:
 
 ```php
 /**
@@ -348,10 +350,10 @@ Next we need to validate the field when the checkout form is posted. For this ex
 add_action( 'woocommerce_checkout_process', 'my_custom_checkout_field_process' );
 
 function my_custom_checkout_field_process() {
-    // Check if set, if its not set add an error.
-    if ( ! $_POST['my_field_name'] ) {
-        wc_add_notice( esc_html__( 'Please enter something into this new shiny field.' ), 'error' );
-    }
+    // Check if this field contains just letters.
+    if ( ! preg_match( '/^[a-zA-Z]+$/', $_POST['my_field_name'] ) ) {
+		wc_add_notice( esc_html__( 'Please enter only letters into this new shiny field.' ), 'error' );
+	}
 }
 ```
 

@@ -1,0 +1,110 @@
+.bank-accounts__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.bank-accounts__add-button {
+	display: flex;
+	justify-content: flex-end;
+	padding: 12px 16px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.bank-accounts__list-header {
+	display: flex;
+	align-items: center;
+	padding: 12px 16px;
+	background-color: #f8f9fa;
+	border-bottom: 1px solid #dcdcde;
+	font-weight: 600;
+	font-size: 11px;
+	color: $gray-900;
+	text-transform: uppercase;
+	border-top: none;
+
+	> .bank-accounts__list-item-inner {
+		display: flex;
+		width: 100%;
+		align-items: center;
+
+		> .bank-accounts__list-item-before {
+			width: 24px;
+			height: 20px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-right: 16px;
+		}
+
+		> .bank-accounts__list-item-text {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			flex-grow: 1;
+			column-gap: 24px;
+		}
+
+		> .bank-accounts__list-item-after {
+			width: 32px;
+			margin-left: 16px;
+		}
+	}
+}
+
+.bank-accounts__list-item {
+	display: flex;
+	align-items: center;
+	padding: 12px 16px;
+	border-top: 1px solid #e0e0e0;
+
+	&.first-item {
+		border-top: none;
+	}
+
+	&:not(.action):hover {
+		background-color: #f8f9fa;
+	}
+
+	&.action {
+		display: flex;
+		justify-content: flex-end;
+		padding: 12px 16px;
+	}
+
+	> .bank-accounts__list-item-inner {
+		display: flex;
+		width: 100%;
+		align-items: center;
+
+		> .bank-accounts__list-item-before {
+			width: 24px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-right: 16px;
+		}
+
+		> .bank-accounts__list-item-text {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			flex-grow: 1;
+			column-gap: 24px;
+
+			div {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+
+		> .bank-accounts__list-item-after {
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			margin-left: 16px;
+		}
+	}
+}

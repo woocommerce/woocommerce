@@ -45,3 +45,7 @@ export function getWccomRequestErrorsMode( state ) {
 export function getIsFakeWooPaymentsEnabled( state ) {
 	return state.params.fakeWooPayments.enabled;
 }
+
+export function getWccomBaseUrl( state ) {
+	return state.params.updateWccomBaseUrl.url;
+}

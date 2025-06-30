@@ -1,0 +1,168 @@
+@import "../../stylesheets/_variables.scss";
+
+.promo-card {
+	background-color: #fff;
+	box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px;
+	border-radius: 1px;
+	padding: 24px;
+
+	&.has-background {
+		align-items: center;
+		background: #fbf9f6 url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzExIiBoZWlnaHQ9IjE2NCIgdmlld0JveD0iMCAwIDMxMSAxNjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTM0Ni4wMjggMTA2LjQ4OEMzNjcuMzA4IDg3LjAwNjEgMzUzLjQwOSA0Mi43MDc5IDMxNC45OTcgNy41NDIxM0MyNzYuNTc2IC0yNy42MzE4IDIyOC4xODggLTQwLjM0ODQgMjA2LjkwOCAtMjAuODc0OUMxOTMuNTIgLTguNjE4NjQgMTk0LjA1OSAxMy40NzcxIDIwNS44NzUgMzYuOTI5MUMxNDYuMTkyIC0xLjIyMDUzIDgzLjE5NTQgLTEwLjcxNDggNTIuMTI4MSAxNy43MTg3QzIxLjA2OTggNDYuMTUyMSAzMS40NDA2IDEwMy44MjUgNzMuMTEyIDE1OC40NzJDNDcuNDg2IDE0Ny42NTQgMjMuMzU5NSAxNDcuMTUzIDkuOTcxODEgMTU5LjQxN0MtMTEuMzA4NCAxNzguODk5IDIuNTkxMDggMjIzLjE5NyA0MS4wMDMyIDI1OC4zNjNDNzkuNDE1MyAyOTMuNTI5IDEyNy44MTIgMzA2LjI1NCAxNDkuMDgzIDI4Ni43NzJDMTYyLjQ3MSAyNzQuNTE2IDE2MS45MzIgMjUyLjQyIDE1MC4xMTYgMjI4Ljk2OEMyMDkuNzk5IDI2Ny4xMTcgMjcyLjc5NiAyNzYuNjEyIDMwMy44NjMgMjQ4LjE3QzMzNC45MjEgMjE5LjczNyAzMjQuNTUxIDE2Mi4wNjQgMjgyLjg3OSAxMDcuNDE3QzMwOC41MDUgMTE4LjIzNCAzMzIuNjMyIDExOC43MjggMzQ2LjAxOSAxMDYuNDcxTDM0Ni4wMjggMTA2LjQ4OFoiIGZpbGw9IiNFNkUyREUiIGZpbGwtb3BhY2l0eT0iMC41Ii8+PC9zdmc+) no-repeat right -50px top -20px;
+		border: none;
+		box-shadow: none;
+		display: flex;
+		flex-direction: row;
+		gap: 12px;
+		justify-content: space-between;
+	}
+
+	&.wide {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		justify-content: space-between;
+
+		.promo-content-image {
+			align-items: center;
+			flex-direction: row-reverse;
+		}
+
+		.promo-links {
+			align-self: flex-end;
+			flex-direction: row-reverse;
+			margin-top: 0;
+		}
+
+		.promo-image {
+			svg {
+				width: 48px;
+			}
+		}
+	}
+}
+
+.promo-content {
+	.promo-text:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.promo-image {
+	display: none;
+
+	svg {
+		width: 72px;
+		height: auto;
+	}
+}
+
+.promo-content-links {
+	display: flex;
+	flex-direction: column;
+}
+
+.promo-content-image {
+	display: flex;
+	gap: 24px;
+	justify-content: space-between;
+}
+
+.promo-links {
+	align-items: center;
+	align-self: stretch;
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	justify-content: flex-start;
+	margin-top: 15px;
+}
+
+.promo-title {
+	font-size: 20px;
+	font-weight: normal;
+	margin-bottom: 8px;
+	margin-top: 0;
+}
+
+.promo-text {
+	font-size: 14px;
+	color: #555;
+}
+
+.promo-cta {
+	background-color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #0073aa));
+	border-radius: 2px;
+	color: var(--wp-components-color-accent-inverted, #fff);
+	display: flex;
+	padding: 10px 15px;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.promo-cta:hover {
+	background-color: var(--wp-components-color-accent-darker-10, var(--wp-admin-theme-color-darker-10, #005a8a));
+	color: #fff;
+}
+
+.promo-cta-link {
+	align-items: center;
+	align-self: stretch;
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #0073aa));
+	display: flex;
+	justify-content: center;
+	padding: var(--grid-unit-10, 8px) var(--grid-unit-20, 16px);
+	white-space: nowrap;
+}
+
+// WooCommerce > Extensions
+.woocommerce-admin-page__extensions {
+	.promo-card {
+		border-radius: 4px;
+		margin-bottom: 40px;
+		width: 100%;
+	}
+}
+
+// Marketing > Coupons
+.woocommerce-marketing-coupons {
+	.promo-card {
+		margin-bottom: 24px;
+	}
+	.promo-title {
+		font-size: 16px;
+	}
+}
+
+@media screen and (min-width: 385px) {
+	.promo-image {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
+
+@media screen and (min-width: $breakpoint-small) {
+	.promo-card {
+		&.has-background {
+			gap: 24px;
+		}
+	}
+
+	.has-background {
+		.promo-image {
+			width: 250px;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.promo-card {
+		&.wide {
+			flex-direction: row;
+
+			.promo-links {
+				align-self: center;
+			}
+		}
+	}
+}

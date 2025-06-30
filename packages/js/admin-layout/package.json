@@ -39,7 +39,7 @@
 		"build:project:bundle": "wireit",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -53,35 +53,33 @@
 	},
 	"dependencies": {
 		"@woocommerce/components": "workspace:*",
-		"@wordpress/components": "wp-6.0",
-		"@wordpress/element": "wp-6.0"
+		"@wordpress/components": "wp-6.6",
+		"@wordpress/element": "wp-6.6"
 	},
 	"devDependencies": {
-		"@types/react": "^17.0.71",
-		"@types/wordpress__components": "^19.10.5",
+		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
-		"concurrently": "^7.6.0",
-		"css-loader": "^3.6.0",
+		"@wordpress/browserslist-config": "next",
+		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
-		"jest": "~27.5.1",
-		"jest-cli": "~27.5.1",
-		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"jest": "27.5.x",
+		"jest-cli": "27.5.x",
+		"postcss-loader": "4.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
-		"sass-loader": "^10.5.0",
-		"ts-jest": "~29.1.1",
-		"typescript": "^5.3.3",
-		"webpack": "^5.89.0",
-		"webpack-cli": "^3.3.12",
-		"wireit": "0.14.3"
+		"sass-loader": "10.5.x",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"webpack": "5.97.x",
+		"webpack-cli": "5.1.x",
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"@types/react": "18.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"config": {
 		"ci": {
@@ -117,7 +115,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -132,7 +130,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -158,16 +156,16 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
-				"node_modules/@woocommerce/internal-style-build/index.js",
-				"node_modules/@woocommerce/internal-style-build/abstracts",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json",
 				"node_modules/@woocommerce/components/build",
 				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
-				"package.json"
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts"
 			]
 		}
 	}

@@ -225,7 +225,7 @@ class Totals extends AbstractOrderConfirmationBlock {
 					'<p class="wc-block-order-confirmation-order-note__label">' .
 						esc_html__( 'Note:', 'woocommerce' ) .
 					'</p>' .
-					'<p>' . wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), [] ) . '</p>' .
+					'<p>' . wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), [ 'br' => [] ] ) . '</p>' .
 				'</div>';
 	}
 }

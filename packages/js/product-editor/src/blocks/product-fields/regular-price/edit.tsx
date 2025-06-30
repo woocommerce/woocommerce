@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
@@ -10,7 +10,6 @@ import { createElement, useEffect } from '@wordpress/element';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -113,7 +112,7 @@ export function Edit( {
 						? regularPriceValidationError
 						: renderHelp()
 				}
-				className={ classNames( {
+				className={ clsx( {
 					'has-error': regularPriceValidationError,
 				} ) }
 			>
@@ -131,7 +130,7 @@ export function Edit( {
 						)
 					}
 					disabled={ disabled }
-					onBlur={ validateRegularPrice }
+					onBlur={ () => validateRegularPrice() }
 				/>
 			</BaseControl>
 		</div>

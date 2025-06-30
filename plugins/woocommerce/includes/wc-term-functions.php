@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Change get terms defaults for attributes to order by the sorting setting, or default to menu_order for sortable taxonomies.
  *
@@ -384,10 +386,32 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * @param array  $terms                       List of terms.
- * @param object $taxonomy                    Taxonomy.
- * @param bool   $callback                    Callback.
- * @param bool   $terms_are_term_taxonomy_ids If terms are from term_taxonomy_id column.
+ * This is used as the update_count_callback for the Product Category and Product Tag
+ * taxonomies. By default, it actually calculates two (possibly different) counts for each
+ * term, which it stores in two different places. The first count is the one done by WordPress
+ * itself, and is based on the status of the objects that are assigned the terms. In this case,
+ * only products with the publish status are counted. This count is stored in the
+ * `wp_term_taxonomy` table in the `count` field.
+ *
+ * The second count is based on WooCommerce-specific characteristics. In addition to the
+ * publish status requirement, products are only counted if they are considered visible in the
+ * catalog. This count is stored in the `wp_termmeta` table. The wc_change_term_counts function
+ * is used to override the first count with the second count in some circumstances.
+ *
+ * Since the first count only needs to be recalculated when a product status is changed in some
+ * way, it can sometimes be skipped (thus avoiding some potentially expensive queries). Setting
+ * the $callback parameter to false skips the first count.
+ *
+ * @param array       $terms                       List of terms. For legacy reasons, this can
+ *                                                 either be a list of taxonomy term IDs or an
+ *                                                 associative array in the format of
+ *                                                 term ID > parent term ID.
+ * @param WP_Taxonomy $taxonomy                    The relevant taxonomy.
+ * @param bool        $callback                    Whether to also recalculate the term counts
+ *                                                 using the WP Core callback. Default true.
+ * @param bool        $terms_are_term_taxonomy_ids Flag to indicate which format the list of
+ *                                                 terms is in. Default true, which indicates
+ *                                                 that it is a list of taxonomy term IDs.
  */
 function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_taxonomy_ids = true ) {
 	global $wpdb;
@@ -405,9 +429,41 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		return;
 	}
 
-	// Standard callback.
+	if ( true === $terms_are_term_taxonomy_ids ) {
+		$taxonomy_term_ids = $terms;
+		$term_ids          = array_map(
+			function ( $term_taxonomy_id ) use ( $taxonomy ) {
+				$term = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, $taxonomy->name );
+				return $term instanceof WP_Term ? $term->term_id : null;
+			},
+			$terms
+		);
+	} else {
+		$taxonomy_term_ids = array(); // Defer querying these until the callback check.
+		$term_ids          = array_keys( $terms );
+	}
+
+	$term_ids          = array_unique( array_filter( $term_ids ) );
+	$taxonomy_term_ids = array_unique( array_filter( $taxonomy_term_ids ) );
+
+	// Exit if we have no terms to count.
+	if ( empty( $term_ids ) ) {
+		return;
+	}
+
+	// Standard WP callback for calculating post term counts.
 	if ( $callback ) {
-		_update_post_term_count( $terms, $taxonomy );
+		if ( count( $taxonomy_term_ids ) < 1 ) {
+			$taxonomy_term_ids = array_map(
+				function ( $term_id ) use ( $taxonomy ) {
+					$term = get_term_by( 'term_id', $term_id, $taxonomy->name );
+					return $term instanceof WP_Term ? $term->term_taxonomy_id : null;
+				},
+				$term_ids
+			);
+		}
+
+		_update_post_term_count( $taxonomy_term_ids, $taxonomy );
 	}
 
 	$exclude_term_ids            = array();
@@ -417,8 +473,11 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$exclude_term_ids[] = $product_visibility_term_ids['exclude-from-catalog'];
 	}
 
-	if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
-		$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
+	if (
+		'yes' === get_option( 'woocommerce_hide_out_of_stock_items' )
+		&& $product_visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ]
+	) {
+		$exclude_term_ids[] = $product_visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ];
 	}
 
 	$query = array(
@@ -430,7 +489,6 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 			WHERE 1=1
 			AND p.post_status = 'publish'
 			AND p.post_type = 'product'
-
 		",
 	);
 
@@ -439,37 +497,17 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$query['where'] .= ' AND exclude_join.object_id IS NULL';
 	}
 
-	// Pre-process term taxonomy ids.
-	if ( ! $terms_are_term_taxonomy_ids ) {
-		// We passed in an array of TERMS in format id=>parent.
-		$terms = array_filter( (array) array_keys( $terms ) );
-	} else {
-		// If we have term taxonomy IDs we need to get the term ID.
-		$term_taxonomy_ids = $terms;
-		$terms             = array();
-		foreach ( $term_taxonomy_ids as $term_taxonomy_id ) {
-			$term    = get_term_by( 'term_taxonomy_id', $term_taxonomy_id, $taxonomy->name );
-			$terms[] = $term->term_id;
-		}
-	}
-
-	// Exit if we have no terms to count.
-	if ( empty( $terms ) ) {
-		return;
-	}
-
 	// Ancestors need counting.
 	if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
-		foreach ( $terms as $term_id ) {
-			$terms = array_merge( $terms, get_ancestors( $term_id, $taxonomy->name ) );
+		foreach ( $term_ids as $term_id ) {
+			$term_ids = array_merge( $term_ids, get_ancestors( $term_id, $taxonomy->name ) );
 		}
+
+		$term_ids = array_unique( $term_ids );
 	}
 
-	// Unique terms only.
-	$terms = array_unique( $terms );
-
 	// Count the terms.
-	foreach ( $terms as $term_id ) {
+	foreach ( $term_ids as $term_id ) {
 		$terms_to_count = array( absint( $term_id ) );
 
 		if ( is_taxonomy_hierarchical( $taxonomy->name ) ) {
@@ -524,7 +562,17 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 		return $terms;
 	}
 
-	if ( ! isset( $taxonomies[0] ) || ! in_array( $taxonomies[0], apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) ), true ) ) {
+	/**
+	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array $valid_taxonomies List of taxonomy slugs.
+	 */
+	$valid_taxonomies   = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) );
+	$current_taxonomies = array_intersect( (array) $taxonomies, $valid_taxonomies );
+
+	if ( empty( $current_taxonomies ) ) {
 		return $terms;
 	}
 
@@ -532,21 +580,21 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	$term_counts   = false === $o_term_counts ? array() : $o_term_counts;
 
 	foreach ( $terms as &$term ) {
-		if ( is_object( $term ) ) {
-			$term_counts[ $term->term_id ] =
-				isset( $term_counts[ $term->term_id ] ) ?
-					$term_counts[ $term->term_id ] :
-					get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
-
-			if ( '' !== $term_counts[ $term->term_id ] ) {
-				$term->count = absint( $term_counts[ $term->term_id ] );
+		if ( $term instanceof WP_Term && in_array( $term->taxonomy, $current_taxonomies, true ) ) {
+			$key = $term->term_id . '_' . $term->taxonomy;
+			if ( ! isset( $term_counts[ $key ] ) ) {
+				$count               = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
+				$count               = '' !== $count ? absint( $count ) : 0;
+				$term_counts[ $key ] = $count;
 			}
+
+			$term->count = $term_counts[ $key ];
 		}
 	}
 
 	// Update transient.
 	if ( $term_counts !== $o_term_counts ) {
-		set_transient( 'wc_term_counts', $term_counts, DAY_IN_SECONDS * 30 );
+		set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
 	}
 
 	return $terms;
@@ -604,7 +652,15 @@ function wc_get_product_visibility_term_ids() {
 		wc_doing_it_wrong( __FUNCTION__, 'wc_get_product_visibility_term_ids should not be called before taxonomies are registered (woocommerce_after_register_post_type action).', '3.1' );
 		return array();
 	}
-	return array_map(
+
+	static $term_ids = array();
+
+	// The static variable doesn't work well with unit tests.
+	if ( count( $term_ids ) > 0 && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
+		return $term_ids;
+	}
+
+	$term_ids = array_map(
 		'absint',
 		wp_parse_args(
 			wp_list_pluck(
@@ -630,31 +686,38 @@ function wc_get_product_visibility_term_ids() {
 			)
 		)
 	);
+
+	return $term_ids;
 }
 
 /**
- * Recounts all terms.
+ * Recounts all terms for product categories and product tags.
  *
  * @since 5.2
+ *
+ * @param bool $include_callback True to update the standard term counts in addition to the product-specific counts,
+ *                               which will cause a lot more queries to run.
+ *
  * @return void
  */
-function wc_recount_all_terms() {
+function wc_recount_all_terms( bool $include_callback = true ) {
 	$product_cats = get_terms(
-		'product_cat',
 		array(
+			'taxonomy'   => 'product_cat',
 			'hide_empty' => false,
 			'fields'     => 'id=>parent',
 		)
 	);
-	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
+	_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), $include_callback, false );
+
 	$product_tags = get_terms(
-		'product_tag',
 		array(
+			'taxonomy'   => 'product_tag',
 			'hide_empty' => false,
 			'fields'     => 'id=>parent',
 		)
 	);
-	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
+	_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), $include_callback, false );
 }
 
 /**

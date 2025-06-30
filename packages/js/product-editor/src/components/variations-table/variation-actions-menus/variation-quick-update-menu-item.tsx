@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Slot, Fill, MenuItem, MenuGroup } from '@wordpress/components';
-import { createElement, Fragment } from '@wordpress/element';
+import { Children, createElement, Fragment } from '@wordpress/element';
 import {
 	createOrderedChildren,
 	sortFillsByOrder,
@@ -33,42 +33,40 @@ export const getGroupName = (
 		: VARIATION_ACTIONS_SLOT_NAME;
 };
 
-export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
-	Slot: React.FC< Slot.Props & VariationQuickUpdateSlotProps >;
-} = ( {
+export const VariationQuickUpdateMenuItem = ( {
 	children,
 	order = DEFAULT_ORDER,
 	group = TOP_LEVEL_MENU,
 	supportsMultipleSelection,
 	onClick = () => {},
 	...props
-} ) => {
-	const handleClick =
-		( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) => () => {
-			const { selection, onChange, onClose } = fillProps;
-			onClick( {
-				selection: Array.isArray( selection )
-					? selection
-					: [ selection ],
-				onChange,
-				onClose,
-			} );
-		};
-
+}: MenuItemProps ) => {
 	const createFill = ( updateType: string ) => (
 		<Fill
 			key={ updateType }
 			name={ getGroupName( group, updateType === MULTIPLE_UPDATE ) }
 		>
-			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
-				createOrderedChildren(
-					<MenuItem { ...props } onClick={ handleClick( fillProps ) }>
+			{ ( fillProps ) => {
+				return createOrderedChildren(
+					<MenuItem
+						{ ...props }
+						onClick={ () => {
+							const { selection, onChange, onClose } = fillProps;
+							onClick( {
+								selection: Array.isArray( selection )
+									? selection
+									: [ selection ],
+								onChange,
+								onClose,
+							} );
+						} }
+					>
 						{ children }
 					</MenuItem>,
 					order,
 					fillProps
-				)
-			}
+				);
+			} }
 		</Fill>
 	);
 
@@ -85,6 +83,8 @@ VariationQuickUpdateMenuItem.Slot = ( {
 	onClose,
 	selection,
 	supportsMultipleSelection,
+}: VariationQuickUpdateSlotProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
 } ) => {
 	return (
 		<Slot
@@ -92,7 +92,10 @@ VariationQuickUpdateMenuItem.Slot = ( {
 			fillProps={ { ...fillProps, onChange, onClose, selection } }
 		>
 			{ ( fills ) => {
-				if ( ! sortFillsByOrder || ! fills?.length ) {
+				if (
+					! sortFillsByOrder ||
+					( fills && Children.count( fills ) === 0 )
+				) {
 					return null;
 				}
 

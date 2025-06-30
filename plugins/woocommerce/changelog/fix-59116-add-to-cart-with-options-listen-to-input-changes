@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update Add to Cart + Options store so it listens to input events

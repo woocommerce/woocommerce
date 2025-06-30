@@ -47,7 +47,7 @@ import {
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
@@ -216,13 +216,24 @@ export function BlockEditor( {
 	);
 
 	// Pull the product templates from the store.
-	const productForms = useSelect( ( sel ) => {
-		return (
-			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-				per_page: -1,
-			} ) || []
-		);
-	}, [] ) as ProductFormPostProps[];
+	const productForms = useSelect(
+		(
+			sel: ( key: string ) => {
+				getEntityRecords: (
+					kind: string,
+					name: string,
+					query: Record< string, unknown >
+				) => ProductFormPostProps[] | undefined;
+			}
+		) => {
+			return (
+				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+					per_page: -1,
+				} ) || []
+			);
+		},
+		[]
+	) as ProductFormPostProps[];
 
 	// Set the default product form template ID.
 	useEffect( () => {
@@ -271,6 +282,7 @@ export function BlockEditor( {
 
 			const blockInstances = synchronizeBlocksWithTemplate(
 				[],
+				// @ts-expect-error Type definitions are missing
 				layoutTemplate.blockTemplates
 			);
 
@@ -282,6 +294,7 @@ export function BlockEditor( {
 
 			onChange( editorTemplate, {} );
 
+			// @ts-expect-error Type definitions are missing
 			dispatch( 'core/editor' ).updateEditorSettings( {
 				...settings,
 				productTemplate,
@@ -303,7 +316,7 @@ export function BlockEditor( {
 
 	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
-	}, [ isEditorLoading ] );
+	}, [ isEditorLoading, setIsEditorLoading ] );
 
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -335,9 +348,16 @@ export function BlockEditor( {
 	}, [] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect( ( selectCore ) => {
-		return selectCore( productEditorUiStore ).isModalEditorOpen();
-	}, [] );
+	const isModalEditorOpen = useSelect(
+		(
+			selectCore: ( key: typeof wooProductEditorUiStore ) => {
+				isModalEditorOpen: () => boolean | undefined;
+			}
+		) => {
+			return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
+		},
+		[]
+	);
 
 	if ( isEditorLoading ) {
 		return (
@@ -352,7 +372,7 @@ export function BlockEditor( {
 			<Suspense fallback={ null }>
 				<ModalEditor
 					onClose={
-						dispatch( productEditorUiStore ).closeModalEditor
+						dispatch( wooProductEditorUiStore ).closeModalEditor
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
 					name={
@@ -386,7 +406,6 @@ export function BlockEditor( {
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
 						<Suspense fallback={ null }>
-							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 							<PluginArea scope="woocommerce-product-block-editor" />
 						</Suspense>
 					</PostTypeContext.Provider>

@@ -1,0 +1,25 @@
+.wc-block-components-totals-footer-item {
+	.wc-block-components-totals-item__value,
+	.wc-block-components-totals-item__label {
+		@include font-size(large);
+	}
+
+	.wc-block-components-totals-item__label {
+		font-weight: 700;
+	}
+
+	.wc-block-components-totals-footer-item-tax {
+		margin-bottom: 0;
+		margin-top: 0;
+		font-weight: 700;
+	}
+
+	.wc-block-components-totals-footer-item-shipping {
+		margin-bottom: 0;
+		margin-top: 0;
+	}
+
+	.wc-block-components-totals-item__value {
+		font-weight: 700;
+	}
+}

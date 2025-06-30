@@ -22,11 +22,11 @@ type AttributesProps = {
  * It is kept here for backward compatibility because is being used in the `AttributesField` component, under
  * `plugins/woocommerce-admin/client/products/fills/attributes-section/attributes-field.tsx`.
  */
-export const Attributes: React.FC< AttributesProps > = ( {
+export const Attributes = ( {
 	value,
 	onChange,
 	attributeList = [],
-} ) => {
+}: AttributesProps ) => {
 	return (
 		<AttributeControl
 			value={ attributeList }

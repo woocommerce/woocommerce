@@ -6,6 +6,8 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -189,7 +191,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		$all_labels = wc_get_attribute_taxonomy_labels();
 		$label      = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
 	} elseif ( $product ) {
-		if ( $product->is_type( 'variation' ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
 		}
 		$attributes = array();

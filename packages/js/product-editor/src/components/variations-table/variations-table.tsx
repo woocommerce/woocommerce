@@ -46,7 +46,7 @@ type VariationsTableProps = {
 			handleDeleteAll: ( values: PartialProductVariation[] ) => void
 		) => void;
 		className?: string;
-		variant?: string;
+		variant?: 'link' | 'primary' | 'secondary';
 	}[];
 	onVariationTableChange?: (
 		type: 'update' | 'delete',
@@ -461,7 +461,6 @@ export const VariationsTable = forwardRef<
 									<CheckboxControl
 										value="all"
 										checked={ areAllSelected }
-										// @ts-expect-error Property 'indeterminate' does not exist
 										indeterminate={
 											! areAllSelected && areSomeSelected
 										}

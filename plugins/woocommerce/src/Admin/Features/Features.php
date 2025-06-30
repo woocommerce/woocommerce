@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Features Class.
@@ -26,8 +27,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'navigation'                 => array( 'default' => 'no' ),
-		'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
 		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
@@ -38,7 +37,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
-		'navigation',
 		'settings',
 	);
 
@@ -56,7 +54,13 @@ class Features {
 	 * Constructor.
 	 */
 	public function __construct() {
+
 		$this->register_internal_class_aliases();
+
+		if ( ! self::should_load_features() ) {
+			return;
+		}
+
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
@@ -113,12 +117,14 @@ class Features {
 		$feature       = str_replace( '-', '', ucwords( strtolower( $feature ), '-' ) );
 		$feature_class = 'Automattic\\WooCommerce\\Admin\\Features\\' . $feature;
 
-		if ( class_exists( $feature_class ) ) {
+		$should_autoload_class = self::should_load_features();
+
+		if ( class_exists( $feature_class, $should_autoload_class ) ) {
 			return $feature_class;
 		}
 
 		// Handle features contained in subdirectory.
-		if ( class_exists( $feature_class . '\\Init' ) ) {
+		if ( class_exists( $feature_class . '\\Init', $should_autoload_class ) ) {
 			return $feature_class . '\\Init';
 		}
 
@@ -129,6 +135,10 @@ class Features {
 	 * Class loader for enabled WooCommerce Admin features/sections.
 	 */
 	public static function load_features() {
+		if ( ! self::should_load_features() ) {
+			return;
+		}
+
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
 			$feature_class = self::get_feature_class( $feature );
@@ -136,6 +146,10 @@ class Features {
 			if ( $feature_class ) {
 				new $feature_class();
 			}
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
+			new \Automattic\WooCommerce\Admin\Features\Blueprint\Init();
 		}
 	}
 
@@ -353,7 +367,6 @@ class Features {
 			'Automattic\WooCommerce\Internal\Admin\Marketing' => 'Automattic\WooCommerce\Admin\Features\Marketing',
 			'Automattic\WooCommerce\Internal\Admin\MobileAppBanner' => 'Automattic\WooCommerce\Admin\Features\MobileAppBanner',
 			'Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications' => 'Automattic\WooCommerce\Admin\Features\RemoteInboxNotifications',
-			'Automattic\WooCommerce\Internal\Admin\SettingsNavigationFeature' => 'Automattic\WooCommerce\Admin\Features\Settings',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBanner',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules',
 			'Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage' => 'Automattic\WooCommerce\Admin\Features\WcPayWelcomePage',
@@ -361,5 +374,30 @@ class Features {
 		foreach ( $aliases as $new_class => $orig_class ) {
 			class_alias( $new_class, $orig_class );
 		}
+	}
+
+	/**
+	 * Check if we're in an admin context where features should be loaded.
+	 *
+	 * @return boolean
+	 */
+	private static function should_load_features() {
+		$should_load = (
+			is_admin() ||
+			wp_doing_ajax() ||
+			wp_doing_cron() ||
+			( defined( 'WP_CLI' ) && WP_CLI ) ||
+			( WC()->is_rest_api_request() && ! WC()->is_store_api_request() ) ||
+			// Allow features to be loaded in frontend for admin users. This is needed for the use case such as the coming soon footer banner.
+			current_user_can( 'manage_woocommerce' )
+		);
+
+		/**
+		 * Filter to determine if admin features should be loaded.
+		 *
+		 * @since 9.6.0
+		 * @param boolean $should_load Whether admin features should be loaded. It defaults to true when the current request is in an admin context.
+		 */
+		return apply_filters( 'woocommerce_admin_should_load_features', $should_load );
 	}
 }

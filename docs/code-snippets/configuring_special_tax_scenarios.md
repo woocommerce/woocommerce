@@ -1,9 +1,11 @@
 ---
 post_title: Code snippets for configuring special tax scenarios
-menu_title: Configuring special tax scenarios
-tags: code-snippet, tax
+sidebar_label: Configuring special tax scenarios
+
 current wccom url: https://woocommerce.com/document/setting-up-taxes-in-woocommerce/configuring-specific-tax-setups-in-woocommerce/#configuring-special-tax-setups
 ---
+
+# Code snippets for configuring special tax scenarios
 
 ## Scenario A: Charge the same price regardless of location and taxes
 
@@ -38,7 +40,7 @@ function big_apple_get_tax_class( $tax_class, $product ) {
 
 Some merchants may require different tax rates to be applied based on a customer role to accommodate for wholesale status or tax exemption.
 
-To enable this functionality, add the following snippet to your child theme's functions.php file or via a code snippet plugin. In this snippet, users with “administrator” capabilities will be assigned the **Zero rate tax class**. Adjust it according to your requirements.
+To enable this functionality, add the following snippet to your child theme's functions.php file or via a code snippet plugin. In this snippet, users with "administrator" capabilities will be assigned the **Zero rate tax class**. Adjust it according to your requirements.
 
 ```php
 <?php

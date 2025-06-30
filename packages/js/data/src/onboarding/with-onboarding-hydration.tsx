@@ -4,11 +4,12 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useRef } from '@wordpress/element';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { ProfileItems } from './types';
 
 export const withOnboardingHydration = ( data: {
@@ -16,14 +17,17 @@ export const withOnboardingHydration = ( data: {
 } ) => {
 	let hydratedProfileItems = false;
 
-	return createHigherOrderComponent< Record< string, unknown > >(
+	return createHigherOrderComponent<
+		ComponentType< Record< string, unknown > >,
+		ComponentType< Record< string, unknown > >
+	>(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
 					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
+						select( store );
 					return {
 						isResolvingGroup: isResolving( 'getProfileItems', [] ),
 						hasFinishedResolutionGroup: hasFinishedResolution(
@@ -31,11 +35,12 @@ export const withOnboardingHydration = ( data: {
 							[]
 						),
 					};
-				}
+				},
+				[]
 			);
 
 			const { startResolution, finishResolution, setProfileItems } =
-				useDispatch( STORE_NAME );
+				useDispatch( store );
 
 			useEffect( () => {
 				if ( ! onboardingRef.current ) {

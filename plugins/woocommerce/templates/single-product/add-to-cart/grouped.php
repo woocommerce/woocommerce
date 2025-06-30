@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.0.1
+ * @version 9.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -64,7 +64,25 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 								woocommerce_template_loop_add_to_cart();
 							} elseif ( $grouped_product_child->is_sold_individually() ) {
 								echo '<input type="checkbox" name="' . esc_attr( 'quantity[' . $grouped_product_child->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity-' . $grouped_product_child->get_id() ) . '" />';
-								echo '<label for="' . esc_attr( 'quantity-' . $grouped_product_child->get_id() ) . '" class="screen-reader-text">' . esc_html__( 'Buy one of this item', 'woocommerce' ) . '</label>';
+								echo '<label for="' . esc_attr( 'quantity-' . $grouped_product_child->get_id() ) . '" class="screen-reader-text">';
+								if ( $grouped_product_child->is_on_sale() ) {
+									printf(
+										/* translators: %1$s: Product name. %2$s: Sale price. %3$s: Regular price */
+										esc_html__( 'Buy one of %1$s on sale for %2$s, original price was %3$s', 'woocommerce' ),
+										esc_html( $grouped_product_child->get_name() ),
+										esc_html( wp_strip_all_tags( wc_price( $grouped_product_child->get_price() ) ) ),
+										esc_html( wp_strip_all_tags( wc_price( $grouped_product_child->get_regular_price() ) ) )
+									);
+								} else {
+									printf(
+										/* translators: %1$s: Product name. %2$s: Product price */
+										esc_html__( 'Buy one of %1$s for %2$s', 'woocommerce' ),
+										esc_html( $grouped_product_child->get_name() ),
+										esc_html( wp_strip_all_tags( wc_price( $grouped_product_child->get_price() ) ) )
+									);
+								}
+								echo '</label>';
+
 							} else {
 								do_action( 'woocommerce_before_add_to_cart_quantity' );
 

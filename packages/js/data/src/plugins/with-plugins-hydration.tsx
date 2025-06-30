@@ -20,7 +20,10 @@ type PluginHydrationData = {
 	jetpackStatus?: { isActive: boolean };
 };
 export const withPluginsHydration = ( data: PluginHydrationData ) =>
-	createHigherOrderComponent< Record< string, unknown > >(
+	createHigherOrderComponent<
+		React.ComponentType< Record< string, unknown > >,
+		React.ComponentType< Record< string, unknown > >
+	>(
 		( OriginalComponent ) => ( props ) => {
 			const shouldHydrate = useSelect(
 				(

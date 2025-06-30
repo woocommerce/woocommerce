@@ -66,7 +66,7 @@ export class LogoPickerPage {
 			},
 		} );
 
-		await apiContext.post( '/wp-json/wp/v2/settings', {
+		await apiContext.post( './wp-json/wp/v2/settings', {
 			data: {
 				site_logo: null,
 			},

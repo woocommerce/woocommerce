@@ -13,27 +13,22 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import { createPullRequest } from '../../../../core/github/repo';
 import { Options } from '../types';
-import {
-	getToday,
-	DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE,
-} from '../../get-version/lib';
+import { getToday } from '../../get-version/lib';
 
 /**
  * Perform changelog adjustments after Jetpack Changelogger has run.
  *
- * @param {string} override    Time override.
- * @param {string} tmpRepoPath Path where the temporary repo is cloned.
+ * @param {string} 	override    Time override.
+ * @param {boolean} appendChangelog Whether to append the changelog or replace it.
+ * @param {string} 	tmpRepoPath Path where the temporary repo is cloned.
  */
 const updateReleaseChangelogs = async (
 	override: string,
+	appendChangelog: boolean,
 	tmpRepoPath: string
 ) => {
 	const today = getToday( override );
-
-	const releaseTime = today.plus( {
-		days: DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE,
-	} );
-	const releaseDate = releaseTime.toISODate();
+	const releaseDate = today.toISODate();
 
 	const readmeFile = path.join(
 		tmpRepoPath,
@@ -62,16 +57,31 @@ const updateReleaseChangelogs = async (
 		'[#$1](https://github.com/woocommerce/woocommerce/pull/$1)'
 	);
 
-	readme = readme.replace(
-		/== Changelog ==\n(.*?)\[See changelog for all versions\]/s,
-		`== Changelog ==\n\n${ nextLog }\n\n[See changelog for all versions]`
-	);
+	if ( appendChangelog ) {
+		// Append: Insert new changelog after "== Changelog ==" but before existing entries
+		const changelogEntries = nextLog
+			.replace(
+				/^= \d+\.\d+\.\d+ \d{4}-\d{2}-\d{2} =\n\n\*\*WooCommerce\*\*\n\n/,
+				''
+			)
+			.trim();
+		readme = readme.replace(
+			/\n+(\[See changelog for all versions\])/,
+			`\n${ changelogEntries }\n\n$1`
+		);
+	} else {
+		// Replace: Replace all existing changelog content with the new changelog
+		readme = readme.replace(
+			/== Changelog ==\n(.*?)\[See changelog for all versions\]/s,
+			`== Changelog ==\n\n${ nextLog }\n\n[See changelog for all versions]`
+		);
+	}
 
 	await writeFile( readmeFile, readme );
 };
 
 /**
- * Perform changelog operations on release branch by submitting a pull request. The release branch is a remote branch.
+ * Perform changelog operations on the release branch by submitting a pull request. The release branch is a remote branch.
  *
  * @param {Object} options       CLI options
  * @param {string} tmpRepoPath   temp repo path
@@ -112,6 +122,7 @@ export const updateReleaseBranchChangelogs = async (
 		}
 
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
+
 		execSync(
 			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n -vvv --use-version ${ version }`,
 			{
@@ -128,7 +139,11 @@ export const updateReleaseBranchChangelogs = async (
 		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
-		await updateReleaseChangelogs( options.override, tmpRepoPath );
+		await updateReleaseChangelogs(
+			options.override,
+			options.appendChangelog,
+			tmpRepoPath
+		);
 
 		Logger.notice(
 			`Committing readme.txt changes in ${ branch } on ${ tmpRepoPath }`
@@ -137,7 +152,11 @@ export const updateReleaseBranchChangelogs = async (
 		await git.commit(
 			`Update the readme files for the ${ version } release`
 		);
-		await git.push( 'origin', commitDirectToBase ? releaseBranch : branch );
+		await git.push(
+			'origin',
+			commitDirectToBase ? releaseBranch : branch,
+			commitDirectToBase ? [] : [ '--force' ]
+		);
 		await git.checkout( '.' );
 
 		if ( commitDirectToBase ) {
@@ -154,7 +173,7 @@ export const updateReleaseBranchChangelogs = async (
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `This pull request was automatically generated during the code freeze to prepare the changelog for ${ version }`,
+			body: `This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
 		} );
@@ -202,14 +221,29 @@ export const updateTrunkChangelog = async (
 			'-b': null,
 			[ branch ]: null,
 		} );
-		await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-		await git.push( 'origin', branch );
+
+		try {
+			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
+		} catch ( e ) {
+			if (
+				e.message.includes( 'nothing to commit, working tree clean' )
+			) {
+				Logger.notice(
+					'Cherry-pick resulted in no changes, continuing without error.'
+				);
+				// No need to skip, just continue
+			} else {
+				throw e; // Re-throw if it's a different error
+			}
+		}
+
+		await git.push( 'origin', branch, [ '--force' ] );
 		Logger.notice( `Creating PR for ${ branch }` );
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
 			title: `Release: Remove ${ version } change files`,
-			body: `This pull request was automatically generated during the code freeze to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
+			body: `This pull request was automatically generated to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
 				prNumber > 0 ? `branch via #${ prNumber }` : ''
 			}`,
 			head: branch,
@@ -217,6 +251,12 @@ export const updateTrunkChangelog = async (
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 	} catch ( e ) {
-		Logger.error( e );
+		if ( e.message.includes( 'No commits between trunk' ) ) {
+			Logger.notice(
+				'No commits between trunk and the branch, skipping the PR.'
+			);
+		} else {
+			Logger.error( e );
+		}
 	}
 };

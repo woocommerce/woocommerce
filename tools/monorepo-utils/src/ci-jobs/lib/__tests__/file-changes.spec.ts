@@ -47,7 +47,8 @@ baz/project-d/baz.js`;
 						},
 					],
 				},
-				'origin/trunk'
+				'origin/trunk',
+				''
 			);
 
 			expect( fileChanges ).toMatchObject( {
@@ -94,7 +95,8 @@ baz/project-d/baz.js`;
 					},
 				],
 			},
-			'origin/trunk'
+			'origin/trunk',
+			''
 		);
 
 		expect( fileChanges ).toStrictEqual( true );

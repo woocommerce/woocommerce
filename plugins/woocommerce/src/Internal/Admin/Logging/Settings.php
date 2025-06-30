@@ -7,7 +7,6 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -19,8 +18,6 @@ use WP_Filesystem_Direct;
  * Settings class.
  */
 class Settings {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Default values for logging settings.
@@ -45,7 +42,7 @@ class Settings {
 	 * Class Settings.
 	 */
 	public function __construct() {
-		self::add_action( 'wc_logs_load_tab', array( $this, 'save_settings' ) );
+		add_action( 'wc_logs_load_tab', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -393,8 +390,10 @@ class Settings {
 	 * @param string $view The current view within the Logs tab.
 	 *
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function save_settings( string $view ): void {
+	public function save_settings( string $view ): void {
 		$is_saving = 'settings' === $view && isset( $_POST['save_settings'] );
 
 		if ( $is_saving ) {

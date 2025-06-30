@@ -8,6 +8,9 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -21,6 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_Orders_V2_Controller
  */
 class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
+	use CogsAwareTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -49,8 +53,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$current_order_coupons      = array_values( $order->get_coupons() );
 		$current_order_coupon_codes = array_map(
-			function( $coupon ) {
-				return $coupon->get_code();
+			function ( $coupon ) {
+				return wc_strtolower( $coupon->get_code() );
 			},
 			$current_order_coupons
 		);
@@ -69,7 +73,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
-			if ( ! in_array( $coupon_code, $current_order_coupon_codes, true ) ) {
+			if ( ! in_array( wc_strtolower( $coupon_code ), $current_order_coupon_codes, true ) ) {
 				$check_result = $discounts->is_coupon_valid( $coupon );
 				if ( is_wp_error( $check_result ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_' . $check_result->get_error_code(), $check_result->get_error_message(), 400 );
@@ -116,6 +120,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'created_via':
+						// Created via is only writable on order creation.
+						if ( ! $creating ) {
+							unset( $request[ $key ] );
+						}
+						break;
 					case 'coupon_lines':
 					case 'status':
 						// Change should be done later so transitions have new data.
@@ -171,6 +181,30 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	}
 
 	/**
+	 * Create or update a line item, overridden to add COGS data as needed.
+	 *
+	 * @param array  $posted Line item data.
+	 * @param string $action 'create' to add line item or 'update' to update it.
+	 * @param object $item Passed when updating an item. Null during creation.
+	 * @return WC_Order_Item_Product
+	 * @throws WC_REST_Exception Invalid data, server error.
+	 */
+	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
+		$prepared = parent::prepare_line_items( $posted, $action, $item );
+
+		if ( ! $prepared->has_cogs() || ! $this->cogs_is_enabled() ) {
+			return $prepared;
+		}
+
+		$cogs_value = $posted['cost_of_goods_sold']['value'] ?? null;
+		if ( ! is_null( $cogs_value ) ) {
+			$prepared->set_cogs_value( (float) $cogs_value );
+		}
+
+		return $prepared;
+	}
+
+	/**
 	 * Wrapper method to remove order items.
 	 * When updating, the item ID provided is checked to ensure it is associated
 	 * with the order.
@@ -220,6 +254,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
+		$object = null;
 		try {
 			$object = $this->prepare_object_for_database( $request, $creating );
 
@@ -231,8 +266,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			WC()->payment_gateways();
 
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
-				// Make sure customer exists.
-				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
+				// The customer must exist, and in a multisite context must be visible to the current user.
+				if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
@@ -243,7 +278,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 
 			if ( $creating ) {
-				$object->set_created_via( 'rest-api' );
+				$object->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->save();
 				$object->calculate_totals();
@@ -274,9 +309,23 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			$data = $e->getErrorData();
+
+			if ( $creating && $object && $object->get_id() ) {
+				try {
+					$object->set_status( 'checkout-draft' );
+					$object->save();
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( Exception $_ ) {
+					// We don't want a failure in changing the order status
+					// to throw on itself, but we don't have anything meaningful
+					// to do with this failure either.
+				}
+
+				$data['new_draft_order_id'] = $object->get_id();
+			}
+
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
 		}
 	}
 
@@ -307,6 +356,19 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
+		// If created_via filter is provided, add it to query args.
+		if ( ! empty( $request['created_via'] ) ) {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['created_via'] = $request['created_via'];
+			} else {
+				$args['meta_query'][] = array(
+					'key'     => '_created_via',
+					'value'   => $request['created_via'],
+					'compare' => 'IN',
+				);
+			}
+		}
+
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
@@ -321,6 +383,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	public function get_item_schema() {
 		$schema = parent::get_item_schema();
 
+		$schema['properties']['created_via']['readonly'] = false;
+
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 
 		$schema['properties']['manual_update'] = array(
@@ -328,6 +392,48 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'description' => __( 'Set the action as manual so that the order note registers as "added by user".', 'woocommerce' ),
 			'type'        => 'boolean',
 			'context'     => array( 'edit' ),
+		);
+
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Add the Cost of Goods Sold related fields to the schema.
+	 *
+	 * @param array $schema The original schema.
+	 * @return array The updated schema.
+	 */
+	private function add_cogs_related_schema( array $schema ): array {
+		$schema['properties']['cost_of_goods_sold'] = array(
+			'description' => __( 'Cost of Goods Sold data.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'total_value' => array(
+					'description' => __( 'Total value of the Cost of Goods Sold for the order.', 'woocommerce' ),
+					'type'        => 'number',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+		);
+
+		$schema['properties']['line_items']['items']['properties']['cost_of_goods_sold'] = array(
+			'description' => __( 'Cost of Goods Sold data. Only present for product line items.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'total_value' => array(
+					'description' => __( 'Value of the Cost of Goods Sold for the order item.', 'woocommerce' ),
+					'type'        => 'number',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
 		);
 
 		return $schema;
@@ -347,11 +453,53 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
-				'enum' => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
+				'enum' => array_merge( array( 'any', OrderStatus::TRASH ), $this->get_order_statuses() ),
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['created_via'] = array(
+			'description'       => __( 'Limit result set to orders created via specific sources (e.g. checkout, admin).', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_list',
+		);
+
 		return $params;
+	}
+
+	/**
+	 * Core method to prepare a single order object for response
+	 * (doesn't fire hooks, execute rest_ensure_response, or add links).
+	 *
+	 * @param  WC_Data         $order  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return array Prepared response data.
+	 * @since  9.5.0
+	 */
+	protected function prepare_object_for_response_core( $order, $request ): array {
+		$cogs_is_enabled = $this->cogs_is_enabled();
+
+		$data = parent::prepare_object_for_response_core( $order, $request );
+
+		if ( isset( $data['line_items'] ) ) {
+			foreach ( $data['line_items'] as &$line_item_data ) {
+				if ( isset( $line_item_data['cogs_value'] ) ) {
+					if ( $cogs_is_enabled ) {
+						$line_item_data['cost_of_goods_sold']['value'] = $line_item_data['cogs_value'];
+					}
+					unset( $line_item_data['cogs_value'] );
+				}
+			}
+		}
+
+		if ( $cogs_is_enabled ) {
+			$data['cost_of_goods_sold']['total_value'] = $order->get_cogs_total_value();
+		}
+
+		return $data;
 	}
 }

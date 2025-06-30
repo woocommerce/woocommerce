@@ -1,6 +1,8 @@
 <?php
 /**
  * Admin View: Email Template Preview
+ *
+ * @deprecated 9.8.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { get } from 'lodash';
 import { createElement } from '@wordpress/element';
 
@@ -12,6 +12,7 @@ import { placeholderWhiteBackground as placeholder } from './placeholder';
 
 type Image = {
 	src?: string;
+	alt?: string;
 };
 
 type ProductImageProps = {
@@ -30,13 +31,15 @@ type ProductImageProps = {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} & Record< string, any >;
 	/** The width of image to display. */
-	width?: number;
+	width?: number | string;
 	/** The height of image to display. */
-	height?: number;
+	height?: number | string;
 	/** Additional CSS classes. */
 	className?: string;
 	/** Text to use as the image alt attribute. */
 	alt?: string;
+	/** Additional style attributes. */
+	style?: React.CSSProperties;
 };
 
 /**
@@ -48,7 +51,7 @@ type ProductImageProps = {
 const ProductImage: React.VFC< ProductImageProps > = ( {
 	product,
 	width = 33,
-	height = 33,
+	height = 'auto',
 	className = '',
 	alt,
 	...props
@@ -59,7 +62,7 @@ const ProductImage: React.VFC< ProductImageProps > = ( {
 	const src = ( productImage && productImage.src ) || false;
 	const altText = alt || ( productImage && productImage.alt ) || '';
 
-	const classes = classnames( 'woocommerce-product-image', className, {
+	const classes = clsx( 'woocommerce-product-image', className, {
 		'is-placeholder': ! src,
 	} );
 
@@ -71,6 +74,10 @@ const ProductImage: React.VFC< ProductImageProps > = ( {
 			height={ height }
 			alt={ altText }
 			{ ...props }
+			style={ {
+				maxHeight: typeof width === 'number' ? width * 3 : undefined,
+				...props.style,
+			} }
 		/>
 	);
 };

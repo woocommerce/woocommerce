@@ -12,7 +12,7 @@ import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sanitize } from 'dompurify';
 
 /**
@@ -59,13 +59,18 @@ type TaskItemProps = {
 	) => void;
 	actionLabel?: string;
 	className?: string;
+	children?: React.ReactNode;
 };
 
-const OptionalTaskTooltip: React.FC< {
+const OptionalTaskTooltip = ( {
+	level,
+	completed,
+	children,
+}: {
 	level: TaskLevel;
 	completed: boolean;
 	children: JSX.Element;
-} > = ( { level, completed, children } ) => {
+} ) => {
 	let tooltip = '';
 	if ( level === 1 && ! completed ) {
 		tooltip = __(
@@ -84,10 +89,15 @@ const OptionalTaskTooltip: React.FC< {
 	return <Tooltip text={ tooltip }>{ children }</Tooltip>;
 };
 
-const OptionalExpansionWrapper: React.FC< {
+const OptionalExpansionWrapper = ( {
+	children,
+	expandable,
+	expanded,
+}: {
 	expandable: boolean;
 	expanded: boolean;
-} > = ( { children, expandable, expanded } ) => {
+	children: JSX.Element;
+} ) => {
 	if ( ! expandable ) {
 		return expanded ? <>{ children }</> : null;
 	}
@@ -105,7 +115,7 @@ const OptionalExpansionWrapper: React.FC< {
 	);
 };
 
-export const TaskItem: React.FC< TaskItemProps > = ( {
+export const TaskItem = ( {
 	completed,
 	title,
 	badge,
@@ -125,13 +135,13 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	action,
 	actionLabel,
 	...listItemProps
-} ) => {
+}: TaskItemProps ) => {
 	const [ isTaskExpanded, setTaskExpanded ] = useState( expanded );
 	useEffect( () => {
 		setTaskExpanded( expanded );
 	}, [ expanded ] );
 
-	const className = classnames( 'woocommerce-task-list__item', {
+	const className = clsx( 'woocommerce-task-list__item', {
 		complete: completed,
 		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,

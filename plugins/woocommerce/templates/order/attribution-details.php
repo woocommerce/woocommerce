@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 9.0.0
+ * @version 9.5.0
  */
 
 declare( strict_types=1 );
@@ -135,4 +135,6 @@ defined( 'ABSPATH' ) || exit;
 			<?php echo esc_html( $meta['session_pages'] ); ?>
 		</span>
 	<?php endif; ?>
+	<!-- A placeholder for the OA install banner React component. -->
+	<div id="order-attribution-install-banner-slotfill"></div>
 </div>

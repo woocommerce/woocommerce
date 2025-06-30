@@ -24,6 +24,7 @@ export type QueryProductAttribute = {
 	order_by: string;
 	has_archives: boolean;
 	generate_slug: boolean;
+	attribute_id: number;
 };
 
 type Query = {
@@ -37,7 +38,7 @@ type MutableProperties = Partial<
 	Omit< QueryProductAttribute, ReadOnlyProperties >
 >;
 
-type ProductAttributeActions = CrudActions<
+export type ProductAttributeActions = CrudActions<
 	'ProductAttribute',
 	ProductAttribute,
 	MutableProperties
@@ -52,16 +53,3 @@ export type ProductAttributeSelectors = CrudSelectors<
 >;
 
 export type ActionDispatchers = DispatchFromMap< ProductAttributeActions >;
-
-/*
- * Add a the second `options` parameter to the `createProductAttribute` action dispatcher
- * todo: do this in a more generic way
- */
-export interface CustomActionDispatchers extends ActionDispatchers {
-	createProductAttribute: (
-		x: Partial< QueryProductAttribute >,
-		options?: {
-			optimisticQueryUpdate: Partial< QueryProductAttribute >;
-		}
-	) => Promise< ProductAttribute >;
-}

@@ -1,4 +1,7 @@
 <?php
+
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * Tests for the Shipping Methods REST API.
  *
@@ -44,25 +47,37 @@ class Shipping_Methods_V2 extends WC_REST_Unit_Test_Case {
 		$methods  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains(
-			array(
-				'id'          => 'free_shipping',
-				'title'       => 'Free shipping',
-				'description' => 'Free shipping is a special method which can be triggered with coupons and minimum spends.',
-				'_links'      => array(
-					'self'       => array(
-						array(
-							'href' => rest_url( '/wc/v2/shipping_methods/free_shipping' ),
+
+		$free_shipping_method = null;
+		foreach ( $methods as $method ) {
+			if ( 'free_shipping' === $method['id'] ) {
+				$free_shipping_method = $method;
+				break;
+			}
+		}
+		$this->assertNotEmpty( $free_shipping_method );
+
+		$this->assertEmpty(
+			ArrayUtil::deep_assoc_array_diff(
+				array(
+					'id'          => 'free_shipping',
+					'title'       => 'Free shipping',
+					'description' => 'Free shipping is a special method which can be triggered with coupons and minimum spends.',
+					'_links'      => array(
+						'self'       => array(
+							array(
+								'href' => rest_url( '/wc/v2/shipping_methods/free_shipping' ),
+							),
 						),
-					),
-					'collection' => array(
-						array(
-							'href' => rest_url( '/wc/v2/shipping_methods' ),
+						'collection' => array(
+							array(
+								'href' => rest_url( '/wc/v2/shipping_methods' ),
+							),
 						),
 					),
 				),
-			),
-			$methods
+				$free_shipping_method
+			)
 		);
 	}
 

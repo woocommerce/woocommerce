@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Refactor block templates fallback methods so they are template-agnostic
-
-

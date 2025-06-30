@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove propTypes and defaultProps from react components in TypeScript.

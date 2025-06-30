@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Improved the WooPaymentsMethodsLogos component to support provided breakpoints and number of methods shown for those.

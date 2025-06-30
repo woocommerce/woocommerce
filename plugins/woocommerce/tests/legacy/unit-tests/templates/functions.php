@@ -6,6 +6,8 @@
  * @since   3.4.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * WC_Tests_Template_Functions class.
  */
@@ -37,7 +39,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'post-' . $product->get_id(),
 			'status-publish',
 			'first',
-			'instock',
+			ProductStockStatus::IN_STOCK,
 			'product_cat-some-category',
 			'sale',
 			'virtual',
@@ -56,7 +58,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'type-product',
 			'post-' . $product->get_id(),
 			'status-publish',
-			'instock',
+			ProductStockStatus::IN_STOCK,
 			'product_cat-some-category',
 			'sale',
 			'virtual',
@@ -157,7 +159,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Include a payment gateway that supports "pay button".
 		add_filter(
 			'woocommerce_payment_gateways',
-			function( $gateways ) {
+			function ( $gateways ) {
 				$gateways[] = 'WC_Mock_Payment_Gateway';
 
 				return $gateways;
@@ -180,18 +182,20 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	public function test_hidden_field() {
-		$actual_html = woocommerce_form_field('test',
-		array(
-			'type' => 'hidden',
-			'id' => 'test_field',
-			'input_class' => array( 'test-field' ),
-			'custom_attributes' => array( 'data-total' => '10' ),
-			'return' => true
-		), 'test value');
+		$actual_html   = woocommerce_form_field(
+			'test',
+			array(
+				'type'              => 'hidden',
+				'id'                => 'test_field',
+				'input_class'       => array( 'test-field' ),
+				'custom_attributes' => array( 'data-total' => '10' ),
+				'return'            => true,
+			),
+			'test value'
+		);
 		$expected_html = '<p class="form-row " id="test_field_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="hidden" class="input-hidden test-field" name="test" id="test_field" value="test value" data-total="10" /></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
-
 	}
 
 	/**
@@ -234,7 +238,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			),
 			'1'
 		);
-		$expected_html = '<p class="form-row validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test" aria-required="true" id="test_radio_1" checked=\'checked\' /><label for="test_radio_1" class="radio ">Option 1</label><input type="radio" class="input-radio " value="2" name="test" aria-required="true" id="test_radio_2" /><label for="test_radio_2" class="radio ">Option 2</label></span></p>';
+		$expected_html = '<p class="form-row validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test" aria-required="true" id="test_radio_1" checked=\'checked\' /><label for="test_radio_1" class="radio required_field">Option 1&nbsp;<span class="required" aria-hidden="true">*</span></label><input type="radio" class="input-radio " value="2" name="test" aria-required="true" id="test_radio_2" /><label for="test_radio_2" class="radio required_field">Option 2&nbsp;<span class="required" aria-hidden="true">*</span></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
 	}
@@ -271,8 +275,68 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			),
 			'1'
 		);
-		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<abbr class="required" title="required">*</abbr></label></span></p>';
+		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<span class="required" aria-hidden="true">*</span></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with basic pagination links
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_basic() {
+		$input_html = '<span class="page-numbers current">1</span> <a class="page-numbers" href="#">2</a>';
+		$args       = array( 'current' => 1 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringContainsString( 'aria-label="Page 1"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with prev/next navigation
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_with_navigation() {
+		$input_html = '<a class="prev page-numbers" href="#">Previous</a> ' .
+					'<span class="page-numbers current">2</span> ' .
+					'<a class="next page-numbers" href="#">Next</a>';
+		$args       = array( 'current' => 2 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringNotContainsString( 'aria-label="Page Previous"', $output );
+		$this->assertStringNotContainsString( 'aria-label="Page Next"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with non-standard elements
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_with_non_standard_elements() {
+		$input_html = '<div class="page-numbers">1</div> ' .
+					'<span class="page-numbers current">2</span> ' .
+					'<p class="page-numbers">3</p>';
+		$args       = array( 'current' => 2 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringNotContainsString( '<div class="page-numbers" aria-label="Page 1">', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+		$this->assertStringNotContainsString( '<p class="page-numbers" aria-label="Page 3">', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with malformed arguments
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_malformed_args() {
+		$input_html     = '<span class="page-numbers current">1</span> <a class="page-numbers" href="#">2</a>';
+		$malformed_args = array( 'current' => 'a' );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $malformed_args );
+
+		// When args['current'] is not a valid number, the function should gracefully handle it
+		// by defaulting to page 0 and still add appropriate aria-labels to maintain accessibility.
+		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 	}
 }

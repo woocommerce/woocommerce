@@ -1,10 +1,19 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 /**
  * class WC_REST_Orders_Controller_Tests.
  * Orders Controller tests for V3 REST API.
  */
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
+	use HPOSToggleTrait;
+	use CogsAwareUnitTestSuiteTrait;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -22,9 +31,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Get all expected fields.
+	 *
+	 * @param bool $with_cogs_enabled True to return the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
-	public function get_expected_response_fields() {
-		return array(
+	public function get_expected_response_fields( bool $with_cogs_enabled ) {
+		$fields = array(
 			'id',
 			'parent_id',
 			'number',
@@ -72,14 +83,29 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'needs_payment',
 			'needs_processing',
 		);
+
+		if ( $with_cogs_enabled ) {
+			$fields[] = 'cost_of_goods_sold';
+		}
+
+		return $fields;
 	}
 
 	/**
+	 * @testWith [true]
+	 *           [false]
+	 *
 	 * Test that all expected response fields are present.
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
+	 *
+	 * @param bool $with_cogs_enabled True to test with the Cost of Goods Sold feature enabled.
 	 */
-	public function test_orders_api_get_all_fields() {
-		$expected_response_fields = $this->get_expected_response_fields();
+	public function test_orders_api_get_all_fields( bool $with_cogs_enabled ) {
+		if ( $with_cogs_enabled ) {
+			$this->enable_cogs_feature();
+		}
+
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 
 		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
@@ -94,10 +120,18 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testWith [true]
+	 *
 	 * Test that all fields are returned when requested one by one.
+	 *
+	 * @param bool $with_cogs_enabled True to test with the Cost of Goods Sold feature enabled.
 	 */
-	public function test_orders_get_each_field_one_by_one() {
-		$expected_response_fields = $this->get_expected_response_fields();
+	public function test_orders_get_each_field_one_by_one( bool $with_cogs_enabled ) {
+		if ( $with_cogs_enabled ) {
+			$this->enable_cogs_feature();
+		}
+
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 		$order                    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
 
 		foreach ( $expected_response_fields as $field ) {
@@ -175,7 +209,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_orders_create(): void {
 		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$order_params             = array(
-			'payment_method'       => 'bacs',
+			'payment_method'       => WC_Gateway_BACS::ID,
 			'payment_method_title' => 'Direct Bank Transfer',
 			'set_paid'             => true,
 			'billing'              => array(
@@ -207,7 +241,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'id', $data );
-		$this->assertEquals( 'processing', $data['status'] );
+		$this->assertEquals( OrderStatus::PROCESSING, $data['status'] );
 
 		wp_cache_flush();
 
@@ -224,11 +258,136 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the created_via parameter is properly stored when creating orders.
+	 */
+	public function test_order_created_via_param(): void {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => 'some_value',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( $order_params['created_via'], $order->get_created_via() );
+	}
+
+	/**
+	 * Tests that the created_via parameter is set to 'rest-api' when empty.
+	 */
+	public function test_order_empty_created_via_param_is_set_to_rest_api() {
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order_params = array(
+			'line_items'  => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+			'created_via' => '',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+
+		wp_cache_flush();
+
+		$order = wc_get_order( $data['id'] );
+		$this->assertNotEmpty( $order );
+		$this->assertEquals( 'rest-api', $order->get_created_via() );
+	}
+
+	/**
+	 * Tests that the created_via parameter cannot be updated.
+	 */
+	public function test_created_via_cannot_be_updated() {
+		$order = new \WC_Order();
+		$order->set_created_via( 'original_value' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'created_via' => 'updated_value' ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 'original_value', $data['created_via'] );
+	}
+
+	/**
+	 * Describes the behavior of order creation (and updates) when the provided customer ID is valid
+	 * as well as when it is invalid (ie, the customer does not belong to the current blog).
+	 *
+	 * @return void
+	 */
+	public function test_valid_and_invalid_customer_ids(): void {
+		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
+		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_a->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$order_id = $response->get_data()['id'];
+		$this->assertEquals( 201, $response->get_status(), 'The order was created.' );
+		$this->assertEquals( $customer_a->get_id(), $response->get_data()['customer_id'], 'The order is associated with the expected customer' );
+
+		// Simulate a multisite network in which $customer_b is not a member of the blog.
+		$legacy_proxy_mock = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy_mock->register_function_mocks(
+			array(
+				'is_multisite'           => function () {
+					return true;
+				},
+				'is_user_member_of_blog' => function () {
+					return false;
+				},
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not created, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
+
+		// Repeat the last test, except by performing an order update (instead of order creation).
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
+	}
+
+	/**
 	 * Tests deleting an order.
 	 */
 	public function test_orders_delete(): void {
 		$order = new \WC_Order();
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$order_id = $order->get_id();
 
@@ -241,13 +400,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'id', $data );
 		$this->assertEquals( $data['id'], $order_id );
-		$this->assertEquals( 'completed', $data['status'] );
+		$this->assertEquals( OrderStatus::COMPLETED, $data['status'] );
 
 		wp_cache_flush();
 
 		// Check the order was actually deleted.
 		$order = wc_get_order( $order_id );
-		$this->assertEquals( 'trash', $order->get_status( 'edit' ) );
+		$this->assertEquals( OrderStatus::TRASH, $order->get_status( 'edit' ) );
 	}
 
 	/**
@@ -255,7 +414,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_collection_param_include_meta() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -274,7 +433,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -288,7 +447,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_collection_param_include_meta_empty() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -306,7 +465,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -321,7 +480,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_collection_param_exclude_meta() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -339,7 +498,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -354,7 +513,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_collection_param_include_meta_override() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -374,7 +533,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -405,23 +564,127 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is enabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
+	}
+
+	/**
+	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
+	 */
+	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$order_admin = WC_Helper_Order::create_order();
+		$order_admin->set_created_via( 'admin' );
+		$order_admin->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+	}
+
+	/**
+	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is disabled.
+	 */
+	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout->set_created_via( 'checkout' );
+		$order_checkout->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'created_via', array( 'invalid_source' ) );
+
+		$response = rest_do_request( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEmpty( $data );
+	}
+
+	/**
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should also be updated.
 	 */
 	public function test_order_update_line_item_quantity_updates_product_stock() {
-		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
 		$product->set_stock_quantity( 10 );
 		$product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => 'on-hold' ) ); // Initial qty of 4.
-		$items = $order->get_items();
-		$item  = reset( $items );
-		wc_maybe_adjust_line_item_product_stock( $item );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'status'     => 'on-hold',
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 6, $product->get_stock_quantity() );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+		$items = $order->get_items();
+		$item  = reset( $items );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
@@ -442,6 +705,49 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
+	 *          only be updated when the order is set to certain statuses.
+	 */
+	public function test_order_update_line_item_quantity_only_updates_product_stock_on_status_change() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'status'     => 'auto-draft',
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 4,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 10, $product->get_stock_quantity() );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'status' => 'processing',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product = wc_get_product( $product );
+		$this->assertEquals( 6, $product->get_stock_quantity() );
+	}
+
+	/**
 	 * @testdox When a line item in an order is removed via REST API, the product's stock should also be updated.
 	 */
 	public function test_order_remove_line_item_updates_product_stock() {
@@ -452,7 +758,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product->set_stock_quantity( 10 );
 		$product->save();
 
-		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => 'on-hold' ) ); // Initial qty of 4.
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::ON_HOLD ) ); // Initial qty of 4.
 		$items = $order->get_items();
 		$item  = reset( $items );
 		wc_maybe_adjust_line_item_product_stock( $item );
@@ -479,5 +785,77 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$product = wc_get_product( $product );
 		$this->assertEquals( 10, $product->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox The retrieved order data doesn't include Cost of Goods Sold information if the feature is disabled.
+	 */
+	public function test_retrieved_order_does_not_include_cogs_info_if_feature_is_disabled() {
+		$this->enable_cogs_feature();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$this->disable_cogs_feature();
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'cost_of_goods_sold', $data );
+
+		foreach ( $data['line_items'] as $item ) {
+			$this->assertArrayNotHasKey( 'cost_of_goods_sold', $item );
+		}
+	}
+
+	/**
+	 * @testdox The retrieved order data includes Cost of Goods Sold information if the feature is enabled.
+	 */
+	public function test_retrieved_order_includes_cogs_info_if_feature_is_enabled() {
+		$this->enable_cogs_feature();
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
+		$this->add_product_with_cogs_to_order( $order, 56.78, 3 );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( 12.34 * 2 + 56.78 * 3, (float) $data['cost_of_goods_sold']['total_value'] );
+
+		$items = $data['line_items'];
+		usort( $items, fn( $a, $b ) => $a['id'] - $b['id'] );
+		$this->assertEquals( 12.34 * 2, (float) $items[0]['cost_of_goods_sold']['value'] );
+		$this->assertEquals( 56.78 * 3, (float) $items[1]['cost_of_goods_sold']['value'] );
+	}
+
+	/**
+	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 *
+	 * @param WC_Order $order The target order.
+	 * @param float    $cogs_value The COGS value of the product.
+	 * @param int      $quantity The quantity of the order item.
+	 */
+	private function add_product_with_cogs_to_order( WC_Order $order, float $cogs_value, int $quantity ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( $cogs_value );
+		$product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_quantity( $quantity );
+		$item->save();
+		$order->add_item( $item );
 	}
 }

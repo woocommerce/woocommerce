@@ -33,7 +33,7 @@ class Init extends RemoteSpecsEngine {
 	 * @param array|null $specs payment suggestion spec array.
 	 * @return array
 	 */
-	public static function get_suggestions( array $specs = null ) {
+	public static function get_suggestions( ?array $specs = null ) {
 		$locale = get_user_locale();
 
 		$specs           = is_array( $specs ) ? $specs : self::get_specs();

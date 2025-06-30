@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Stock_Stats
  */
@@ -53,7 +55,7 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 			$low_stock->set_regular_price( 5 );
 			$low_stock->set_manage_stock( true );
 			$low_stock->set_stock_quantity( 1 );
-			$low_stock->set_stock_status( 'instock' );
+			$low_stock->set_stock_status( ProductStockStatus::IN_STOCK );
 			$low_stock->save();
 		}
 
@@ -62,7 +64,7 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 			$out_of_stock = new WC_Product_Simple();
 			$out_of_stock->set_name( "Test out of stock {$i}" );
 			$out_of_stock->set_regular_price( 5 );
-			$out_of_stock->set_stock_status( 'outofstock' );
+			$out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 			$out_of_stock->save();
 		}
 
@@ -82,16 +84,16 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'totals', $reports );
 		$this->assertEquals( 19, $reports['totals']['products'] );
-		$this->assertEquals( 6, $reports['totals']['outofstock'] );
-		$this->assertEquals( 0, $reports['totals']['onbackorder'] );
-		$this->assertEquals( 3, $reports['totals']['lowstock'] );
-		$this->assertEquals( 13, $reports['totals']['instock'] );
+		$this->assertEquals( 6, $reports['totals'][ ProductStockStatus::OUT_OF_STOCK ] );
+		$this->assertEquals( 0, $reports['totals'][ ProductStockStatus::ON_BACKORDER ] );
+		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
+		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 
 		// Test backorder and cache update.
 		$backorder_stock = new WC_Product_Simple();
 		$backorder_stock->set_name( 'Test backorder' );
 		$backorder_stock->set_regular_price( 5 );
-		$backorder_stock->set_stock_status( 'onbackorder' );
+		$backorder_stock->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		$backorder_stock->save();
 
 		// Clear caches.
@@ -109,10 +111,10 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assertEquals( 20, $reports['totals']['products'] );
-		$this->assertEquals( 6, $reports['totals']['outofstock'] );
-		$this->assertEquals( 1, $reports['totals']['onbackorder'] );
-		$this->assertEquals( 3, $reports['totals']['lowstock'] );
-		$this->assertEquals( 13, $reports['totals']['instock'] );
+		$this->assertEquals( 6, $reports['totals'][ ProductStockStatus::OUT_OF_STOCK ] );
+		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::ON_BACKORDER ] );
+		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
+		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 	}
 
 	/**
@@ -139,9 +141,9 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'totals', $properties );
 		$this->assertCount( 5, $properties['totals']['properties'] );
 		$this->assertArrayHasKey( 'products', $properties['totals']['properties'] );
-		$this->assertArrayHasKey( 'outofstock', $properties['totals']['properties'] );
-		$this->assertArrayHasKey( 'onbackorder', $properties['totals']['properties'] );
-		$this->assertArrayHasKey( 'lowstock', $properties['totals']['properties'] );
-		$this->assertArrayHasKey( 'instock', $properties['totals']['properties'] );
+		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $properties['totals']['properties'] );
+		$this->assertArrayHasKey( ProductStockStatus::ON_BACKORDER, $properties['totals']['properties'] );
+		$this->assertArrayHasKey( ProductStockStatus::LOW_STOCK, $properties['totals']['properties'] );
+		$this->assertArrayHasKey( ProductStockStatus::IN_STOCK, $properties['totals']['properties'] );
 	}
 }

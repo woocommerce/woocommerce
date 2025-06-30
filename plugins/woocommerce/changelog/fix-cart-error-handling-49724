@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix extensionCartUpdates to surface generic error messages, and include documentation for the error handling.

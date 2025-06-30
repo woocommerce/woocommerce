@@ -3,9 +3,9 @@
 	"description": "Remote specs testing suite",
 	"main": "index.js",
 	"scripts": {
-		"changelog": "composer install && composer exec -- changelogger"
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
 	},
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"dependencies": {
 		"js-yaml": "^4.1.0",
 		"json-refs": "^3.0.15",

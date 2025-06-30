@@ -56,7 +56,9 @@ const wooRequestToHandle = ( request ) => {
 };
 
 class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlugin {
-	externalizeWpDeps( _context, request, callback ) {
+	externalizeWpDeps( data, callback ) {
+		const request = data.request;
+
 		let externalRequest;
 
 		// Handle via options.requestToExternal first
@@ -82,7 +84,7 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 		}
 
 		// Fall back to the WP method
-		return super.externalizeWpDeps( _context, request, callback );
+		return super.externalizeWpDeps( data, callback );
 	}
 
 	mapRequestToDependency( request ) {

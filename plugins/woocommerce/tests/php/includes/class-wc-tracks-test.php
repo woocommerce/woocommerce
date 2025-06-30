@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /**
  * Class WC_Tracks_Test.
@@ -59,6 +60,71 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertNotEquals( 'bad', $properties['_ui'] );
 		$this->assertNotEquals( 'bad', $properties['_ut'] );
+	}
+
+
+	/**
+	 * Test role properties for logged out user
+	 */
+	public function test_role_properties_for_logged_out_user() {
+		$properties = \WC_Tracks::get_properties( 'test_event', array() );
+
+		$this->assertContains( 'role', array_keys( $properties ) );
+		$this->assertEquals( '', $properties['role'] );
+		$this->assertEquals( false, $properties['can_install_plugins'] );
+		$this->assertEquals( false, $properties['can_activate_plugins'] );
+		$this->assertEquals( false, $properties['can_manage_woocommerce'] );
+	}
+
+	/**
+	 * Test role properties for administrator
+	 */
+	public function test_role_properties_for_administrator() {
+		$user = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user );
+
+		$properties = \WC_Tracks::get_properties( 'test_event', array() );
+
+		$this->assertEquals( 'administrator', $properties['role'] );
+		$this->assertEquals( true, $properties['can_install_plugins'] );
+		$this->assertEquals( true, $properties['can_activate_plugins'] );
+		$this->assertEquals( true, $properties['can_manage_woocommerce'] );
+	}
+
+	/**
+	 * Test role properties for user with multiple roles
+	 */
+	public function test_role_properties_for_multiple_roles() {
+		$user = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $user );
+		$current_user = wp_get_current_user();
+		$current_user->add_role( 'editor' );
+
+		$properties = \WC_Tracks::get_properties( 'test_event', array() );
+
+		$this->assertEquals( 'shop_manager', $properties['role'] );
+		$this->assertEquals( false, $properties['can_install_plugins'] );
+		$this->assertEquals( false, $properties['can_activate_plugins'] );
+		$this->assertEquals( true, $properties['can_manage_woocommerce'] );
+	}
+
+	/**
+	 * Test role properties for non-sequential roles.
+	 */
+	public function test_role_properties_for_non_sequential_roles() {
+		$user = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $user );
+		$current_user = wp_get_current_user();
+		$current_user->add_role( 'administrator' );
+		// Mock the roles to be an associative array to simulate the scenario where the roles are not sequential.
+		$current_user->roles = array(
+			2 => 'administrator',
+		);
+		$properties          = \WC_Tracks::get_role_details( $current_user );
+		$this->assertEquals( 'administrator', $properties['role'] );
+		$this->assertEquals( true, $properties['can_install_plugins'] );
+		$this->assertEquals( true, $properties['can_activate_plugins'] );
+		$this->assertEquals( true, $properties['can_manage_woocommerce'] );
 	}
 
 	/**
@@ -134,7 +200,7 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	 * Test that the store_id is added to the properties.
 	 */
 	public function test_store_id_is_added_to_properties() {
-		update_option( \WC_Install::STORE_ID_OPTION, '12345' );
+		$store_id   = get_option( \WC_Install::STORE_ID_OPTION, '12345' );
 		$properties = \WC_Tracks::get_properties(
 			'test_event',
 			array(
@@ -142,7 +208,63 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertContains( 'store_id', array_keys( $properties ) );
-		$this->assertEquals( '12345', $properties['store_id'] );
+		$this->assertEquals( $store_id, $properties['store_id'] );
+		delete_option( \WC_Install::STORE_ID_OPTION );
+	}
+
+	/**
+	 * Test that get_blog_details ensures the store ID is set.
+	 */
+	public function test_get_blog_details_ensures_store_id_is_set() {
+		// Delete the store ID option to simulate a fresh installation.
+		delete_option( \WC_Install::STORE_ID_OPTION );
+		delete_transient( 'wc_tracks_blog_details' );
+
+		// Call get_blog_details which should ensure store ID is set.
+		$blog_details = \WC_Tracks::get_blog_details( get_current_user_id() );
+
+		// Verify that store_id exists and is not null.
+		$this->assertArrayHasKey( 'store_id', $blog_details );
+		$this->assertNotNull( $blog_details['store_id'] );
+
+		// Verify that the store ID option was actually set in the database.
+		$store_id = get_option( \WC_Install::STORE_ID_OPTION );
+		$this->assertNotEmpty( $store_id );
+		$this->assertEquals( $store_id, $blog_details['store_id'] );
+	}
+
+	/**
+	 * Test that get_blog_details uses cached data from transients.
+	 */
+	public function test_get_blog_details_uses_cached_data() {
+		// Delete existing transient to start fresh.
+		delete_transient( 'wc_tracks_blog_details' );
+
+		// Set a known store ID.
+		$test_store_id = 'test_store_id_' . uniqid();
+		update_option( \WC_Install::STORE_ID_OPTION, $test_store_id );
+
+		// First call should set the transient.
+		$first_call = \WC_Tracks::get_blog_details( get_current_user_id() );
+		$this->assertEquals( $test_store_id, $first_call['store_id'] );
+
+		// Change the store ID in the database.
+		$new_store_id = 'new_store_id_' . uniqid();
+		update_option( \WC_Install::STORE_ID_OPTION, $new_store_id );
+
+		// Second call should use the cached data and not reflect the new store ID.
+		$second_call = \WC_Tracks::get_blog_details( get_current_user_id() );
+		$this->assertEquals( $test_store_id, $second_call['store_id'] );
+		$this->assertNotEquals( $new_store_id, $second_call['store_id'] );
+
+		// Delete the transient.
+		delete_transient( 'wc_tracks_blog_details' );
+
+		// Third call should get fresh data with the new store ID.
+		$third_call = \WC_Tracks::get_blog_details( get_current_user_id() );
+		$this->assertEquals( $new_store_id, $third_call['store_id'] );
+
+		// Clean up.
 		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 }

@@ -379,19 +379,17 @@ class Register {
 			$where_sql = 'WHERE ' . join( ' AND ', $where );
 		}
 
+		$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-					SELECT   url_id, url, enabled
-					FROM     {$table}
-					{$where_sql}
-					ORDER BY {$order_by} {$order}
-					LIMIT    %d, %d
-				",
-				( $page - 1 ) * $per_page,
-				$per_page
-			)
+			"
+				SELECT   url_id, url, enabled
+				FROM     {$table}
+				{$where_sql}
+				ORDER BY {$order_by} {$order}
+				{$limit_sql}
+			"
 		);
 
 		$total_rows = (int) $wpdb->get_var( "SELECT COUNT( * ) FROM {$table} {$where_sql}" );

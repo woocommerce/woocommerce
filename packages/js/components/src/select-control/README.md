@@ -49,6 +49,9 @@ const options = [
 | `showClearButton`        | boolean      | `false`    | Render a 'Clear' button next to the input box to remove its contents                                                                                            |
 | `hideBeforeSearch`       | boolean      | `false`    | Only show list options after typing a search query                                                                                                              |
 | `staticList`             | boolean      | `false`    | Render results list positioned statically instead of absolutely                                                                                                 |
+| `virtualScroll`          | boolean      | `false`    | Enable virtual scrolling for large lists                                                                                                                        |
+| `virtualItemHeight`      | number       | `35`       | Height in pixels for each virtual item                                                                                                                          |
+| `virtualListHeight`      | number       | `300`      | Maximum height in pixels for the virtualized list                                                                                                               |
 
 ### onChange value
 
@@ -56,3 +59,20 @@ The onChange value defaults to an array of the selected option(s), but will also
 If the `selected` prop has the value set as a `string`, the `onChange` method will also be called with a string value - the `key` of the selected option (if multiple is `false`).
 
 Only string or array are the supported types here.
+
+## Virtualized Lists for Large Datasets
+
+When dealing with a large number of options (thousands), you can enable virtualization for better performance. This feature uses the `react-window` library to render only the items that are visible in the viewport, significantly improving performance.
+
+```jsx
+<SelectControl
+	label="Select from large dataset"
+	onChange={ handleSelect }
+	options={ largeDataset } // Array with thousands of options
+	placeholder="Start typing to search..."
+	isSearchable={ true }
+	virtualScroll={ true } // Enable virtualization
+	virtualItemHeight={ 35 } // Height of each option in pixels
+	virtualListHeight={ 300 } // Maximum height of the dropdown
+/>
+```

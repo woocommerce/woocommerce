@@ -7,7 +7,8 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
+import type { Settings } from './types';
 
 export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 	const { requestedSettings, settingsError, isRequesting, isDirty } =
@@ -18,7 +19,7 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 					getSettingsForGroup,
 					getIsDirty,
 					isUpdateSettingsRequesting,
-				} = select( STORE_NAME );
+				} = select( store );
 				return {
 					requestedSettings: getSettingsForGroup(
 						group,
@@ -37,9 +38,9 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 		persistSettingsForGroup,
 		updateAndPersistSettingsForGroup,
 		updateSettingsForGroup,
-	} = useDispatch( STORE_NAME );
+	} = useDispatch( store );
 	const updateSettings = useCallback(
-		( name, data ) => {
+		( name: string, data: Settings ) => {
 			updateSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]
@@ -50,7 +51,7 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 		persistSettingsForGroup( group );
 	}, [ group ] );
 	const updateAndPersistSettings = useCallback(
-		( name, data ) => {
+		( name: string, data: Settings ) => {
 			updateAndPersistSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]

@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "es2019",
+		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
 		"allowJs": true,
@@ -10,7 +10,7 @@
 		"jsx": "react",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
-		"typeRoots": []
+		"typeRoots": [ "./typings" ]
 	},
 	"exclude": [
 		"node_modules",
@@ -18,10 +18,12 @@
 		"**/build",
 		"**/build-module",
 		"**/build-types",
-		"**/test/*",
+		"**/build-style",
 		"**/jest.config.js",
 		"**/jest-preset.js",
 		"**/webpack.*.js",
 		"**/babel.config.js"
-	]
+	],
+
+	"include": [ "typings/**/*", "src/**/*" ]
 }

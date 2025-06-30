@@ -4,8 +4,8 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCPaymentGateways;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
 
 /**
@@ -25,22 +25,17 @@ class ExportWCPaymentGateways implements StepExporter {
 	 * @return Step
 	 */
 	public function export(): Step {
-		$step = new SetWCPaymentGateways();
+		$options = array();
 		$this->maybe_hide_wcpay_gateways();
 		foreach ( $this->get_wc_payment_gateways() as $id => $payment_gateway ) {
 			if ( in_array( $id, $this->exclude_ids, true ) ) {
 				continue;
 			}
 
-			$step->add_payment_gateway(
-				$id,
-				$payment_gateway->get_title(),
-				$payment_gateway->get_description(),
-				$payment_gateway->is_available() ? 'yes' : 'no'
-			);
+			$options[ 'woocommerce_' . $id . '_settings' ] = $payment_gateway->settings;
 		}
 
-		return $step;
+		return new SetSiteOptions( $options );
 	}
 
 	/**
@@ -58,7 +53,7 @@ class ExportWCPaymentGateways implements StepExporter {
 	 * @return string
 	 */
 	public function get_step_name() {
-		return SetWCPaymentGateways::get_step_name();
+		return 'wcPaymentGateways';
 	}
 
 	/**
@@ -70,5 +65,33 @@ class ExportWCPaymentGateways implements StepExporter {
 		if ( class_exists( 'WC_Payments' ) ) {
 			\WC_Payments::hide_gateways_on_settings_page();
 		}
+	}
+
+	/**
+	 * Return label used in the frontend.
+	 *
+	 * @return string
+	 */
+	public function get_label() {
+		return __( 'Payments', 'woocommerce' );
+	}
+
+	/**
+	 * Return description used in the frontend.
+	 *
+	 * @return string
+	 */
+	public function get_description() {
+		return __( 'Includes all settings in WooCommerce | Settings | Payments.', 'woocommerce' );
+	}
+
+
+	/**
+	 * Check if the current user has the required capabilities for this step.
+	 *
+	 * @return bool True if the user has the required capabilities. False otherwise.
+	 */
+	public function check_step_capabilities(): bool {
+		return current_user_can( 'manage_woocommerce' );
 	}
 }

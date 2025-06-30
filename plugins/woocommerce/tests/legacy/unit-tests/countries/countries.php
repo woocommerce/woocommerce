@@ -219,6 +219,6 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 	 */
 	public function test_get_vat_countries() {
 		$countries = new WC_Countries();
-		$this->assertCount( 80, $countries->get_vat_countries() );
+		$this->assertCount( 79, $countries->get_vat_countries() );
 	}
 }

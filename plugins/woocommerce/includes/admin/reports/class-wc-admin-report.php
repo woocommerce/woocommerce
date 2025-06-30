@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Reports
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -106,7 +107,7 @@ class WC_Admin_Report {
 			'nocache'             => false,
 			'debug'               => false,
 			'order_types'         => wc_get_order_types( 'reports' ),
-			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
+			'order_status'        => array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD ),
 			'parent_order_status' => false,
 		);
 		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
@@ -269,16 +270,16 @@ class WC_Admin_Report {
 
 				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
 
-					if ( is_array( $value['meta_value'] ) ) {
-						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-						$value['meta_value'] = implode( "','", $value['meta_value'] );
+					if ( ! empty( $value['meta_value'] ) && ! is_array( $value['meta_value'] ) ) {
+						$value['meta_value'] = (array) $value['meta_value']; // @phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					}
 
 					if ( ! empty( $value['meta_value'] ) ) {
-						$where_value = "{$value['operator']} ('{$value['meta_value']}')";
+						$formats     = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
+						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
-					$where_value = "{$value['operator']} '{$value['meta_value']}'";
+					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
 				}
 
 				if ( ! empty( $where_value ) ) {
@@ -317,15 +318,15 @@ class WC_Admin_Report {
 
 				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
 
-					if ( is_array( $value['value'] ) ) {
-						$value['value'] = implode( "','", $value['value'] );
+					if ( ! empty( $value['value'] ) && ! is_array( $value['value'] ) ) {
+						$value['value'] = (array) $value['value'];
 					}
-
 					if ( ! empty( $value['value'] ) ) {
-						$where_value = "{$value['operator']} ('{$value['value']}')";
+						$formats     = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
+						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					}
 				} else {
-					$where_value = "{$value['operator']} '{$value['value']}'";
+					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['value'] );
 				}
 
 				if ( ! empty( $where_value ) ) {
@@ -524,14 +525,14 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Prepares a sparkline to show sales in the last X days.
+	 * Prepares the data for a sparkline to show sales in the last X days.
 	 *
 	 * @param  int    $id ID of the product to show. Blank to get all orders.
-	 * @param  int    $days Days of stats to get.
+	 * @param  int    $days Days of stats to get. Default to 7 days.
 	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
-	 * @return string
+	 * @return array
 	 */
-	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
+	public function get_sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
 
 		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
 
@@ -611,6 +612,28 @@ class WC_Admin_Report {
 			$total += $d->sparkline_value;
 		}
 
+		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
+
+		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+		return array(
+			'total' => $total,
+			'data'  => $sparkline_data,
+		);
+	}
+
+	/**
+	 * Prepares the markup for a sparkline to show sales in the last X days.
+	 *
+	 * @param  int    $id ID of the product to show. Blank to get all orders.
+	 * @param  int    $days Days of stats to get. Default to 7 days.
+	 * @param  string $type Type of sparkline to get.
+	 * @return string
+	 */
+	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
+		$sparkline = $this->get_sales_sparkline( $id, $days, $type );
+		$total     = $sparkline['total'];
+
 		if ( 'sales' === $type ) {
 			/* translators: 1: total income 2: days */
 			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), wp_strip_all_tags( wc_price( $total ) ), $days );
@@ -619,11 +642,9 @@ class WC_Admin_Report {
 			$tooltip = sprintf( _n( 'Sold %1$d item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
 		}
 
-		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
+		$sparkline_data = $sparkline['data'];
 
 		return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . wc_esc_json( wp_json_encode( $sparkline_data ) ) . '"></span>';
-
-		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date, WordPress.DateTime.CurrentTimeTimestamp.Requested
 	}
 
 	/**

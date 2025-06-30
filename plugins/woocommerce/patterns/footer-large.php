@@ -23,12 +23,12 @@
 				<p style="margin-bottom:40px"><?php esc_html_e( 'Learn about new products and discounts', 'woocommerce' ); ?></p>
 				<!-- /wp:paragraph -->
 
-				<!-- wp:social-links {"size":"has-small-icon-size","style":{"spacing":{"blockGap":{"left":"16px"}}},"className":"is-style-logos-only"} -->
-				<ul class="wp-block-social-links has-small-icon-size is-style-logos-only">
-					<!-- wp:social-link {"url":"https://www.facebook.com","service":"facebook"} /-->
-					<!-- wp:social-link {"url":"https://www.x.com","service":"x"} /-->
-					<!-- wp:social-link {"url":"https://www.instagram.com","service":"instagram"} /-->
-					<!-- wp:social-link {"url":"https://www.twitch.com","service":"twitch"} /-->
+				<!-- wp:social-links {"size":"has-small-icon-size","style":{"spacing":{"blockGap":{"left":"16px"}}},"className":"has-icon-color is-style-logos-only"} -->
+				<ul class="wp-block-social-links has-small-icon-size has-icon-color is-style-logos-only">
+					<!-- wp:social-link {"url":"https://www.facebook.com","service":"facebook","className":"has-contrast-color"} /-->
+					<!-- wp:social-link {"url":"https://www.x.com","service":"x","className":"has-contrast-color"} /-->
+					<!-- wp:social-link {"url":"https://www.instagram.com","service":"instagram","className":"has-contrast-color"} /-->
+					<!-- wp:social-link {"url":"https://www.twitch.com","service":"twitch","className":"has-contrast-color"} /-->
 				</ul>
 				<!-- /wp:social-links -->
 			</div>

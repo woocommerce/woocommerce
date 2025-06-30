@@ -6,7 +6,10 @@ class SkippedReporter {
 	}
 
 	onTestEnd( testCase, testResult ) {
-		if ( testResult.status === 'skipped' ) {
+		if (
+			testResult.status === 'skipped' &&
+			! testCase.location.file.includes( 'fixtures' )
+		) {
 			this.skippedTests.push(
 				`- ${ testCase.title } in ${ testCase.location.file }:${ testCase.location.line }`
 			);
@@ -18,7 +21,7 @@ class SkippedReporter {
 			const skippedTestsMessage = this.skippedTests.join( '%0A' );
 			// Output a GitHub Actions annotation with line breaks
 			console.log(
-				`::error title=Skipped Tests::${ skippedTestsMessage }`
+				`::warning title=${ this.skippedTests.length } tests were skipped::%0ASkipped tests:%0A${ skippedTestsMessage }`
 			);
 		}
 	}

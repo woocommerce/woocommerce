@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Increase specificity of product data views styles to avoid conflicts.

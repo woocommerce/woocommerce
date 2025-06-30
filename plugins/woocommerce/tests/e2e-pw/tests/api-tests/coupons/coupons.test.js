@@ -13,7 +13,7 @@ test.describe( 'Coupons API tests', () => {
 		};
 
 		//call API to create coupon with testCoupon data
-		const response = await request.post( '/wp-json/wc/v3/coupons', {
+		const response = await request.post( './wp-json/wc/v3/coupons', {
 			data: testCoupon,
 		} );
 
@@ -37,7 +37,7 @@ test.describe( 'Coupons API tests', () => {
 	test( 'can retrieve a coupon', async ( { request } ) => {
 		//call API to get previously created coupon
 		const response = await request.get(
-			`/wp-json/wc/v3/coupons/${ couponId }`
+			`./wp-json/wc/v3/coupons/${ couponId }`
 		);
 
 		//validate response
@@ -56,7 +56,7 @@ test.describe( 'Coupons API tests', () => {
 
 		//call API to update previously created coupon
 		const response = await request.post(
-			`/wp-json/wc/v3/coupons/${ couponId }`,
+			`./wp-json/wc/v3/coupons/${ couponId }`,
 			{
 				data: updatedCouponDetails,
 			}
@@ -72,7 +72,7 @@ test.describe( 'Coupons API tests', () => {
 	test( 'can permanently delete a coupon', async ( { request } ) => {
 		//call API to delete previously created coupon
 		const response = await request.delete(
-			`/wp-json/wc/v3/coupons/${ couponId }`,
+			`./wp-json/wc/v3/coupons/${ couponId }`,
 			{
 				data: { force: true },
 			}
@@ -83,7 +83,7 @@ test.describe( 'Coupons API tests', () => {
 
 		//call API to retrieve previously deleted coupon
 		const getCouponResponse = await request.get(
-			`/wp-json/wc/v3/coupons/${ couponId }`
+			`./wp-json/wc/v3/coupons/${ couponId }`
 		);
 
 		//validate response
@@ -235,7 +235,7 @@ test.describe( 'List coupons', () => {
 
 	test.beforeAll( async ( { request } ) => {
 		// Call the API to Create list of coupons for testing.
-		const response = await request.post( '/wp-json/wc/v3/coupons/batch', {
+		const response = await request.post( './wp-json/wc/v3/coupons/batch', {
 			data: { create: allCoupons },
 		} );
 		const responseJSON = await response.json();
@@ -259,14 +259,14 @@ test.describe( 'List coupons', () => {
 		};
 
 		// call API to batch delete the coupons
-		await request.post( '/wp-json/wc/v3/coupons/batch', {
+		await request.post( './wp-json/wc/v3/coupons/batch', {
 			data: batchDeletePayload,
 		} );
 	} );
 
 	test( 'can list all coupons by default', async ( { request } ) => {
 		// call API to get all coupons
-		const response = await request.get( '/wp-json/wc/v3/coupons' );
+		const response = await request.get( './wp-json/wc/v3/coupons' );
 		const responseJSON = await response.json();
 
 		const listedCoupons = responseJSON;
@@ -286,7 +286,7 @@ test.describe( 'List coupons', () => {
 		};
 
 		// call API to get all coupons with the specified code
-		const response = await request.get( '/wp-json/wc/v3/coupons', {
+		const response = await request.get( './wp-json/wc/v3/coupons', {
 			params: payload,
 		} );
 		const responseJSON = await response.json();
@@ -303,7 +303,7 @@ test.describe( 'List coupons', () => {
 		};
 
 		// call API to get coupons based on the specified page
-		const response = await request.get( '/wp-json/wc/v3/coupons/', {
+		const response = await request.get( './wp-json/wc/v3/coupons/', {
 			params: payload,
 		} );
 		const responseJSON = await response.json();
@@ -320,7 +320,7 @@ test.describe( 'List coupons', () => {
 		};
 
 		//call API to return coupon based on passed in string
-		const response = await request.get( '/wp-json/wc/v3/coupons/', {
+		const response = await request.get( './wp-json/wc/v3/coupons/', {
 			params: payload,
 		} );
 		const responseJSON = await response.json();
@@ -341,7 +341,7 @@ test.describe( 'Add coupon to order', () => {
 	test.beforeAll( async ( { request } ) => {
 		// Create a coupon
 		const createCouponResponse = await request.post(
-			'/wp-json/wc/v3/coupons/',
+			'./wp-json/wc/v3/coupons/',
 			{
 				data: testCoupon,
 			}
@@ -352,10 +352,10 @@ test.describe( 'Add coupon to order', () => {
 
 	// Clean up created coupon and order
 	test.afterAll( async ( { request } ) => {
-		await request.delete( `/wp-json/wc/v3/coupons/${ testCoupon.id }`, {
+		await request.delete( `./wp-json/wc/v3/coupons/${ testCoupon.id }`, {
 			data: { force: true },
 		} );
-		await request.delete( `/wp-json/wc/v3/orders/${ orderId }`, {
+		await request.delete( `./wp-json/wc/v3/orders/${ orderId }`, {
 			data: { force: true },
 		} );
 	} );
@@ -366,7 +366,7 @@ test.describe( 'Add coupon to order', () => {
 			coupon_lines: [ { code: testCoupon.code } ],
 		};
 
-		const response = await request.post( '/wp-json/wc/v3/orders', {
+		const response = await request.post( './wp-json/wc/v3/orders', {
 			data: orderWithCoupon,
 		} );
 		const responseJSON = await response.json();

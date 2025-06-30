@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add parameter to avoid attempting to create the logs directory if it doesn't exist

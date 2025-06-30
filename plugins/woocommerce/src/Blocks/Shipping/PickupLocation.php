@@ -26,6 +26,7 @@ class PickupLocation extends WC_Shipping_Method {
 	 * Constructor.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->id                 = 'pickup_location';
 		$this->method_title       = __( 'Local pickup', 'woocommerce' );
 		$this->method_description = __( 'Allow customers to choose a local pickup location during checkout.', 'woocommerce' );
@@ -37,7 +38,7 @@ class PickupLocation extends WC_Shipping_Method {
 	 */
 	public function init() {
 		$this->enabled          = $this->get_option( 'enabled' );
-		$this->title            = $this->get_option( 'title' );
+		$this->title            = $this->get_option( 'title', __( 'Pickup', 'woocommerce' ) );
 		$this->tax_status       = $this->get_option( 'tax_status' );
 		$this->cost             = $this->get_option( 'cost' );
 		$this->supports         = [ 'settings', 'local-pickup' ];
@@ -144,6 +145,8 @@ class PickupLocation extends WC_Shipping_Method {
 				return __( 'Pickup location', 'woocommerce' );
 			case 'pickup_address':
 				return __( 'Pickup address', 'woocommerce' );
+			case 'pickup_details':
+				return __( 'Pickup details', 'woocommerce' );
 		}
 		return $label;
 	}

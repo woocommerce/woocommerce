@@ -8,6 +8,10 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -49,8 +53,9 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->data['tax_class']         = 'parent';
-		$this->data['attribute_summary'] = '';
+		$this->data['tax_class']              = 'parent';
+		$this->data['attribute_summary']      = '';
+		$this->data['cogs_value_is_additive'] = false;
 		parent::__construct( $product );
 	}
 
@@ -70,7 +75,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_type() {
-		return 'variation';
+		return ProductType::VARIATION;
 	}
 
 	/**
@@ -161,12 +166,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	public function get_permalink( $item_object = null ) {
 		$url = get_permalink( $this->get_parent_id() );
 
-		if ( ! empty( $item_object['variation'] ) ) {
-			$data = $item_object['variation'];
-		} elseif ( ! empty( $item_object['item_meta_array'] ) ) {
+		if ( ! empty( $item_object['item_meta_array'] ) ) {
 			$data_keys   = array_map( 'wc_variation_attribute_name', wp_list_pluck( $item_object['item_meta_array'], 'key' ) );
 			$data_values = wp_list_pluck( $item_object['item_meta_array'], 'value' );
 			$data        = array_intersect_key( array_combine( $data_keys, $data_values ), $this->get_variation_attributes() );
+		} elseif ( ! empty( $item_object['variation'] ) ) {
+			$data = $item_object['variation'];
 		} else {
 			$data = $this->get_variation_attributes();
 		}
@@ -476,7 +481,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 				'shipping_class_id'  => 0,
 				'image_id'           => 0,
 				'purchase_note'      => '',
-				'catalog_visibility' => 'visible',
+				'catalog_visibility' => CatalogVisibility::VISIBLE,
 			)
 		);
 
@@ -547,7 +552,14 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function is_purchasable() {
-		return apply_filters( 'woocommerce_variation_is_purchasable', $this->variation_is_visible() && parent::is_purchasable() && ( 'publish' === $this->parent_data['status'] || current_user_can( 'edit_post', $this->get_parent_id() ) ), $this );
+		/**
+		 * Filter to adjust if a variation is purchasable.
+		 *
+		 * @since 3.0.0
+		 * @param bool $purchasable If the variation is purchasable.
+		 * @param object $variation The variation object.
+		 */
+		return apply_filters( 'woocommerce_variation_is_purchasable', $this->variation_is_visible() && parent::is_purchasable() && ( ProductStatus::PUBLISH === $this->parent_data['status'] || current_user_can( 'edit_post', $this->get_parent_id() ) ), $this );
 	}
 
 	/**
@@ -569,7 +581,16 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public function variation_is_visible() {
-		return apply_filters( 'woocommerce_variation_is_visible', 'publish' === get_post_status( $this->get_id() ) && '' !== $this->get_price(), $this->get_id(), $this->get_parent_id(), $this );
+		/**
+		 * Filter to adjust if a variation is visible.
+		 *
+		 * @since 3.0.0
+		 * @param bool $visible If the variation is visible.
+		 * @param int $variation_id The variation ID.
+		 * @param int $product_id The product ID.
+		 * @param object $variation The variation object.
+		 */
+		return apply_filters( 'woocommerce_variation_is_visible', ProductStatus::PUBLISH === get_post_status( $this->get_id() ) && '' !== $this->get_price(), $this->get_id(), $this->get_parent_id(), $this );
 	}
 
 	/**
@@ -582,5 +603,71 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$valid_classes[] = 'parent';
 
 		return $valid_classes;
+	}
+
+	/**
+	 * Get the value of the "Cost of Goods Sold value is additive" flag for this product.
+	 * See get_cogs_effective_value_core.
+	 *
+	 * @return bool The current value of the flag.
+	 */
+	public function get_cogs_value_is_additive(): bool {
+		return (bool) $this->get_prop( 'cogs_value_is_additive' );
+	}
+
+	/**
+	 * Set the value of the "Cost of Goods Sold value is additive" flag for this product.
+	 * See get_cogs_effective_value_core.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this value will NOT be persisted when the product is saved.
+	 *
+	 * @param bool $value The value to set for the flag.
+	 */
+	public function set_cogs_value_is_additive( bool $value ): void {
+		$this->set_prop( 'cogs_value_is_additive', $value );
+	}
+
+	/**
+	 * Replacement of the parent adjust_cogs_value_before_set method
+	 * to disable the conversion of zero to null.
+	 *
+	 * @param float|null $value Cost value passed to the set_cogs_value method.
+	 * @return float|null The actual value that will be set for the cost property.
+	 */
+	protected function adjust_cogs_value_before_set( ?float $value ): ?float {
+		return $value;
+	}
+
+	/**
+	 * Get the effective total value of the Cost of Goods Sold for this product.
+	 * (the monetary value that will be applied to orders and used for analytics purposes).
+	 *
+	 * If "additive" flag is set, the total value is equal to sum of the effective values of the variation and the parent product.
+	 * Otherwise, if the defined value for this variation is null, the effective value is equal to the effective value of the parent product.
+	 * Otherwise, the effective value is equal to the effective value of the variation.
+	 *
+	 * @return float
+	 */
+	protected function get_cogs_total_value_core(): float {
+		if ( $this->get_cogs_value_is_additive() ) {
+			return $this->get_parent_cogs_effective_value() + $this->get_cogs_effective_value();
+		} else {
+			return is_null( $this->get_cogs_value() ) ? $this->get_parent_cogs_effective_value() : $this->get_cogs_effective_value();
+		}
+	}
+
+	/**
+	 * Get the Cost of Goods Sold effective value of the parent product.
+	 *
+	 * @return float Cost of Goods Sold effective value of the parent product.
+	 */
+	public function get_parent_cogs_effective_value(): float {
+		$parent_cogs = $this->parent_data['cogs_effective_value'] ?? null;
+		if ( is_null( $parent_cogs ) ) {
+			$parent_product                            = wc_get_product( $this->get_parent_id() );
+			$parent_cogs                               = $parent_product ? $parent_product->get_cogs_effective_value() : 0;
+			$this->parent_data['cogs_effective_value'] = $parent_cogs;
+		}
+		return $parent_cogs;
 	}
 }

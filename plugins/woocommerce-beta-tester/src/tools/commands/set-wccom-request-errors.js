@@ -7,7 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const UPDATE_WCCOM_REQUEST_ERRORS_MODE = 'updateWccomRequestErrorsMode';
 
@@ -19,10 +19,10 @@ const OPTIONS = [
 
 export const SetWccomRequestErrros = () => {
 	const errorsMode = useSelect(
-		( select ) => select( STORE_KEY ).getWccomRequestErrorsMode(),
+		( select ) => select( store ).getWccomRequestErrorsMode(),
 		[]
 	);
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onChange( mode ) {
 		updateCommandParams( UPDATE_WCCOM_REQUEST_ERRORS_MODE, {

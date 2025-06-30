@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use WC_Product_Simple;
 use WC_Product_External;
 use WC_Product_Grouped;
@@ -14,6 +15,7 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WC_Product_Attribute;
 use WC_Cache_Helper;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Class ProductHelper.
@@ -58,10 +60,10 @@ class ProductHelper {
 				'price'         => 10,
 				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
-				'tax_status'    => 'taxable',
+				'tax_status'    => ProductTaxStatus::TAXABLE,
 				'downloadable'  => false,
 				'virtual'       => false,
-				'stock_status'  => 'instock',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
 				'weight'        => '1.1',
 			)
 		);
@@ -290,11 +292,12 @@ class ProductHelper {
 	 * Creates a new product review on a specific product.
 	 *
 	 * @since 3.0
-	 * @param int    $product_id integer Product ID that the review is for.
-	 * @param string $review_content string Content to use for the product review.
+	 * @param int        $product_id       Product ID that the review is for.
+	 * @param string     $review_content   Content to use for the product review.
+	 * @param int|string $comment_approved The approval status for the review.
 	 * @return integer Product Review ID.
 	 */
-	public static function create_product_review( $product_id, $review_content = 'Review content here' ) {
+	public static function create_product_review( $product_id, $review_content = 'Review content here', $comment_approved = 1 ) {
 		$data = array(
 			'comment_post_ID'      => $product_id,
 			'comment_author'       => 'admin',
@@ -302,7 +305,7 @@ class ProductHelper {
 			'comment_author_url'   => '',
 			'comment_date'         => '2016-01-01T11:11:11',
 			'comment_content'      => $review_content,
-			'comment_approved'     => 1,
+			'comment_approved'     => $comment_approved,
 			'comment_type'         => 'review',
 		);
 		return \wp_insert_comment( $data );

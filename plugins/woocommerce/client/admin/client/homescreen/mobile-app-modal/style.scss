@@ -1,0 +1,322 @@
+/* stylelint-disable function-url-quotes */
+/* quotes necessary for the data urls in url(), will shift these resources out to their own files when we enable asset modules */
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.woo-icon {
+	height: 48px;
+	width: 48px;
+	background-image: url("data:image/svg+xml,<%3Fxml version='1.0' encoding='UTF-8'%3F><svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='48px' height='48px' viewBox='0 0 48 48' version='1.1'><defs><clipPath id='clip1'><path d='M 10.644531 0.183594 L 37.355469 0.183594 C 43.234375 0.183594 48 4.929688 48 10.785156 L 48 37.378906 C 48 43.234375 43.234375 47.976562 37.355469 47.976562 L 10.644531 47.976562 C 4.765625 47.976562 0 43.234375 0 37.378906 L 0 10.785156 C 0 4.929688 4.765625 0.183594 10.644531 0.183594 Z M 10.644531 0.183594 '/></clipPath><clipPath id='clip2'><path d='M 4.878906 19.167969 L 22.957031 19.167969 L 22.957031 28.996094 L 4.878906 28.996094 Z M 4.878906 19.167969 '/></clipPath><clipPath id='clip3'><path d='M 10.644531 0.183594 L 37.355469 0.183594 C 43.234375 0.183594 48 4.929688 48 10.785156 L 48 37.378906 C 48 43.234375 43.234375 47.976562 37.355469 47.976562 L 10.644531 47.976562 C 4.765625 47.976562 0 43.234375 0 37.378906 L 0 10.785156 C 0 4.929688 4.765625 0.183594 10.644531 0.183594 Z M 10.644531 0.183594 '/></clipPath><clipPath id='clip4'><path d='M 22 19.167969 L 32.347656 19.167969 L 32.347656 28.996094 L 22 28.996094 Z M 22 19.167969 '/></clipPath><clipPath id='clip5'><path d='M 10.644531 0.183594 L 37.355469 0.183594 C 43.234375 0.183594 48 4.929688 48 10.785156 L 48 37.378906 C 48 43.234375 43.234375 47.976562 37.355469 47.976562 L 10.644531 47.976562 C 4.765625 47.976562 0 43.234375 0 37.378906 L 0 10.785156 C 0 4.929688 4.765625 0.183594 10.644531 0.183594 Z M 10.644531 0.183594 '/></clipPath><clipPath id='clip6'><path d='M 33 19.167969 L 42.90625 19.167969 L 42.90625 28.996094 L 33 28.996094 Z M 33 19.167969 '/></clipPath><clipPath id='clip7'><path d='M 10.644531 0.183594 L 37.355469 0.183594 C 43.234375 0.183594 48 4.929688 48 10.785156 L 48 37.378906 C 48 43.234375 43.234375 47.976562 37.355469 47.976562 L 10.644531 47.976562 C 4.765625 47.976562 0 43.234375 0 37.378906 L 0 10.785156 C 0 4.929688 4.765625 0.183594 10.644531 0.183594 Z M 10.644531 0.183594 '/></clipPath></defs><g id='surface1'><g clip-path='url(%23clip1)' clip-rule='nonzero'><path style=' stroke:none;fill-rule:nonzero;fill:rgb(52.941179%,24.313726%,100%);fill-opacity:1;' d='M 10.644531 0.183594 L 37.355469 0.183594 C 43.234375 0.183594 48 4.929688 48 10.785156 L 48 37.378906 C 48 43.234375 43.234375 47.976562 37.355469 47.976562 L 10.644531 47.976562 C 4.765625 47.976562 0 43.234375 0 37.378906 L 0 10.785156 C 0 4.929688 4.765625 0.183594 10.644531 0.183594 Z M 10.644531 0.183594 '/><path style=' stroke:none;fill-rule:nonzero;fill:rgb(52.941179%,24.313726%,100%);fill-opacity:1;' d='M 10.667969 0.183594 L 37.332031 0.183594 C 43.226562 0.183594 48 4.941406 48 10.804688 L 48 37.355469 C 48 43.222656 43.226562 47.976562 37.332031 47.976562 L 10.667969 47.976562 C 4.773438 47.976562 0 43.222656 0 37.355469 L 0 10.804688 C 0 4.941406 4.773438 0.183594 10.667969 0.183594 Z M 10.667969 0.183594 '/></g><g clip-path='url(%23clip2)' clip-rule='nonzero'><g clip-path='url(%23clip3)' clip-rule='nonzero'><path style=' stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;' d='M 9.730469 28.984375 C 10.839844 28.984375 11.730469 28.4375 12.402344 27.179688 L 13.898438 24.394531 L 13.898438 26.757812 C 13.898438 28.148438 14.800781 28.984375 16.199219 28.984375 C 17.296875 28.984375 18.105469 28.503906 18.886719 27.179688 L 22.328125 21.394531 C 23.082031 20.125 22.550781 19.167969 20.890625 19.167969 C 19.996094 19.167969 19.421875 19.457031 18.902344 20.421875 L 16.53125 24.859375 L 16.53125 20.914062 C 16.53125 19.742188 15.96875 19.167969 14.925781 19.167969 C 14.101562 19.167969 13.445312 19.523438 12.9375 20.503906 L 10.703125 24.859375 L 10.703125 20.957031 C 10.703125 19.699219 10.183594 19.167969 8.921875 19.167969 L 6.34375 19.167969 C 5.371094 19.167969 4.878906 19.617188 4.878906 20.453125 C 4.878906 21.285156 5.398438 21.761719 6.34375 21.761719 L 7.398438 21.761719 L 7.398438 26.742188 C 7.398438 28.148438 8.347656 28.984375 9.730469 28.984375 Z M 9.730469 28.984375 '/></g></g><g clip-path='url(%23clip4)' clip-rule='nonzero'><g clip-path='url(%23clip5)' clip-rule='nonzero'><path style=' stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;' d='M 27.359375 19.167969 C 24.550781 19.167969 22.398438 21.257812 22.398438 24.082031 C 22.398438 26.910156 24.5625 28.984375 27.359375 28.984375 C 30.15625 28.984375 32.292969 26.894531 32.308594 24.082031 C 32.308594 21.257812 30.15625 19.167969 27.359375 19.167969 Z M 27.359375 25.964844 C 26.304688 25.964844 25.578125 25.175781 25.578125 24.082031 C 25.578125 22.988281 26.304688 22.183594 27.359375 22.183594 C 28.414062 22.183594 29.140625 22.988281 29.140625 24.082031 C 29.140625 25.175781 28.429688 25.964844 27.359375 25.964844 Z M 27.359375 25.964844 '/></g></g><g clip-path='url(%23clip6)' clip-rule='nonzero'><g clip-path='url(%23clip7)' clip-rule='nonzero'><path style=' stroke:none;fill-rule:nonzero;fill:rgb(100%,100%,100%);fill-opacity:1;' d='M 37.957031 19.167969 C 35.160156 19.167969 33.007812 21.257812 33.007812 24.082031 C 33.007812 26.910156 35.160156 28.984375 37.957031 28.984375 C 40.753906 28.984375 42.90625 26.894531 42.90625 24.082031 C 42.90625 21.269531 40.753906 19.167969 37.957031 19.167969 Z M 37.957031 25.964844 C 36.886719 25.964844 36.1875 25.175781 36.1875 24.082031 C 36.1875 22.988281 36.902344 22.183594 37.957031 22.183594 C 39.011719 22.183594 39.738281 22.988281 39.738281 24.082031 C 39.738281 25.175781 39.011719 25.964844 37.957031 25.964844 Z M 37.957031 25.964844 '/></g></g></g></svg>");
+}
+
+// The welcome modal is presented outside the homescreen class namespace
+.components-guide.woocommerce__mobile-app-welcome-modal {
+	max-width: 964px;
+	min-width: 534px;
+	// Overrides the default modal max-height.
+	max-height: unset;
+
+	@media only screen and (max-width: $break-mobile) {
+		min-width: 100%;
+		max-height: 100%;
+	}
+
+	.components-modal__header {
+		height: 0;
+
+		.components-button {
+			color: $white;
+		}
+	}
+
+	.components-guide__container {
+		margin-top: 0;
+	}
+	.components-guide__page {
+		min-height: 575px;
+
+		.mobile-app-modal-layout {
+			display: grid;
+			grid-template-columns: 3fr 2fr;
+			min-height: 575px;
+
+			@media only screen and (max-width: $break-mobile) {
+				grid-template-columns: 1fr;
+			}
+
+			.mobile-app-modal-illustration {
+				background-color: #5007aa;
+				background-repeat: no-repeat;
+				background-image: url("data:image/svg+xml,<svg width='386' height='721' viewBox='0 0 386 721' fill='none' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' clip-rule='evenodd' d='M47.1418 -34.9676C105.891 -108.179 260.462 -79.6859 383.891 -0.949893C507.319 77.7861 585.37 175 526.621 248.211C486.718 297.936 403.481 313.848 315.51 294.268C324.41 299.276 333.242 304.568 341.983 310.144C502.276 412.396 571.163 571.374 495.847 665.232C472.791 693.963 438.895 713.261 398.358 723.277C490.979 795.502 538.433 879.64 482.31 949.579C416.923 1031.06 258.403 1038.25 134.974 959.51C11.5452 880.774 -63.9168 749.578 1.47026 668.095C13.29 653.366 28.1615 642.059 45.3241 633.883C-97.7369 531.659 -156.084 383.992 -84.6262 294.944C-31.7349 229.033 78.2063 212.764 194.5 244.331C193.584 243.758 192.671 243.18 191.759 242.598C68.3301 163.862 -11.6073 38.2435 47.1418 -34.9676Z' fill='%23873EFF'/></svg>");
+
+				padding-top: 74px;
+				overflow: clip;
+
+				img {
+					margin-right: -24px;
+					width: 100%;
+				}
+
+				@media only screen and (max-width: $break-mobile) {
+					display: none;
+				}
+			}
+
+			.mobile-app-modal-content {
+				display: flex;
+
+				.jetpack-installation-content {
+					animation: fadeIn 0.7s ease-in-out; // the jetpack data takes a moment to load, so we animate it to make it less jarring
+					padding: 48px;
+					display: flex;
+					flex-direction: column;
+
+					.modal-layout-header {
+						.modal-header > h1 {
+							line-height: normal;
+							margin: 24px 0 0;
+						}
+					}
+					.modal-layout-body {
+						flex-grow: 1;
+						margin-bottom: 16px;
+
+						.modal-subheader {
+							margin-top: 16px;
+							margin-bottom: 24px;
+							h3 {
+								font-weight: 400;
+								color: #757575;
+								line-height: 1.6rem;
+								margin: 0;
+							}
+						}
+					}
+
+					.modal-layout-footer {
+						.mobile-footer-icons {
+							display: flex;
+							flex-direction: row;
+							margin-bottom: 16px;
+
+							.apple-icon {
+								width: 24px;
+								height: 24px;
+								margin-inline: 4px;
+								background-repeat: no-repeat;
+								background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 21 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.7928 18.4328C19.4445 19.2374 19.0323 19.978 18.5546 20.659C17.9035 21.5873 17.3704 22.2298 16.9596 22.5866C16.3227 23.1723 15.6404 23.4723 14.9097 23.4893C14.3851 23.4893 13.7525 23.3401 13.0162 23.0373C12.2774 22.7359 11.5984 22.5866 10.9776 22.5866C10.3266 22.5866 9.62829 22.7359 8.8814 23.0373C8.13337 23.3401 7.53077 23.4979 7.07004 23.5135C6.36935 23.5433 5.67093 23.2349 4.97379 22.5866C4.52884 22.1985 3.9723 21.5332 3.30558 20.5907C2.59025 19.5843 2.00215 18.4172 1.54142 17.0866C1.04799 15.6494 0.800637 14.2577 0.800637 12.9103C0.800637 11.3669 1.13414 10.0357 1.80213 8.92023C2.32712 8.02421 3.02553 7.31741 3.89966 6.79854C4.77378 6.27967 5.71827 6.01525 6.7354 5.99834C7.29195 5.99834 8.02178 6.17049 8.92874 6.50882C9.83314 6.84829 10.4139 7.02044 10.6685 7.02044C10.8588 7.02044 11.5039 6.81915 12.5975 6.41784C13.6317 6.04568 14.5046 5.89158 15.2196 5.95228C17.1572 6.10865 18.6129 6.87246 19.581 8.24854C17.8481 9.29851 16.9909 10.7691 17.0079 12.6557C17.0236 14.1252 17.5567 15.348 18.6044 16.3189C19.0792 16.7696 19.6094 17.1178 20.1994 17.3652C20.0714 17.7362 19.9364 18.0916 19.7928 18.4328ZM15.349 0.946082C15.349 2.09785 14.9282 3.17325 14.0895 4.16864C13.0773 5.35195 11.853 6.03572 10.5254 5.92783C10.5085 5.78965 10.4987 5.64422 10.4987 5.49141C10.4987 4.38571 10.9801 3.2024 11.8349 2.23488C12.2616 1.745 12.8044 1.33768 13.4625 1.01275C14.1193 0.692673 14.7405 0.515659 15.3248 0.485352C15.3419 0.639322 15.349 0.793306 15.349 0.946068V0.946082Z' fill='%23BBBBBB'/%3E%3C/svg%3E%0A");
+							}
+							.android-icon {
+								width: 24px;
+								height: 24px;
+								margin-inline: 4px;
+								background-repeat: no-repeat;
+								background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 20 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.83 0.86L13.53 2.16C15.03 3.25 16 5.01 16 7H4C4 5.01 4.97 3.26 6.45 2.17L5.14 0.86C4.94 0.66 4.94 0.35 5.14 0.15C5.34 -0.05 5.65 -0.05 5.85 0.15L7.34 1.63C8.14 1.23 9.04 1 10 1C10.95 1 11.85 1.23 12.64 1.63L14.12 0.15C14.32 -0.05 14.63 -0.05 14.83 0.15C15.03 0.35 15.03 0.66 14.83 0.86ZM0 9.5C0 8.67 0.67 8 1.5 8C2.33 8 3 8.67 3 9.5V16.5C3 17.33 2.33 18 1.5 18C0.67 18 0 17.33 0 16.5V9.5ZM5 19C4.45 19 4 18.55 4 18V8H16V18C16 18.55 15.55 19 15 19H14V22.5C14 23.33 13.33 24 12.5 24C11.67 24 11 23.33 11 22.5V19H9V22.5C9 23.33 8.33 24 7.5 24C6.67 24 6 23.33 6 22.5V19H5ZM18.5 8C17.67 8 17 8.67 17 9.5V16.5C17 17.33 17.67 18 18.5 18C19.33 18 20 17.33 20 16.5V9.5C20 8.67 19.33 8 18.5 8ZM8 5H7V4H8V5ZM12 5H13V4H12V5Z' fill='%23BBBBBB'/%3E%3C/svg%3E%0A");
+							}
+						}
+						.mobile-footer-blurb {
+							font-weight: 400;
+							color: #757575;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.components-guide__footer {
+		display: none; // hide the guide component's 'ok, got it' button
+	}
+
+	.fill-theme-color {
+		fill: var(--wp-admin-theme-color);
+	}
+
+	.components-button.woocommerce__mobile-app-welcome-modal__close-button {
+		width: 24px;
+		height: 24px;
+		min-width: 24px;
+		position: absolute;
+		right: 16px;
+		top: 16px;
+		margin: 0;
+		padding: 0;
+
+		svg {
+			fill: #fff;
+
+			@media only screen and (max-width: $break-mobile) {
+				fill: $gray-900;
+			}
+		}
+	}
+}
+
+.jetpack-stepper-wrapper {
+	button.install-jetpack-button {
+		// the positioning shenanigans in this button is to keep the button size constant after switching the text to spinner
+		background: #069e08;
+		color: #fff;
+		position: relative;
+
+		.install-jetpack-spinner {
+			position: absolute;
+			background-color: transparent; // default background is blue for some reason
+			// below rules are to center the spinner
+			margin-left: auto;
+			margin-right: auto;
+			left: 0;
+			right: 0;
+		}
+
+		.install-jetpack-button-contents {
+			visibility: hidden;
+			.jetpack-icon {
+				display: inline-block;
+				width: 16px;
+				height: 16px;
+				margin-right: 8px;
+				background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 1.33334C4.33333 1.33334 1.33333 4.33334 1.33333 8.00001C1.33333 11.6667 4.33333 14.6667 8 14.6667C11.6667 14.6667 14.6667 11.6667 14.6667 8.00001C14.6667 4.33334 11.6667 1.33334 8 1.33334ZM7.33333 9.33334H4L7.33333 2.66668V9.33334ZM8.66667 13.3333V6.66668H12L8.66667 13.3333Z' fill='white'/%3E%3C/svg%3E%0A");
+			}
+			.install-jetpack-button-text {
+				display: inline-block;
+				vertical-align: top;
+			}
+		}
+	}
+}
+
+.login-stepper-wrapper {
+	button.install-app-button {
+		position: relative;
+		margin-top: 1em;
+	}
+}
+
+.woocommerce-stepper.is-vertical .woocommerce-stepper__step {
+	// default vertical step distance is 36px which is too much and doesn't match the design
+	padding-bottom: 16px;
+}
+
+button.components-button.send-magic-link-button {
+	background: #007cba;
+	color: #fff;
+	position: relative;
+	margin-bottom: 1em;
+	:hover {
+		// the hover state makes the text invisible so we need to override it
+		color: #fff;
+	}
+
+	.send-magic-link-spinner {
+		position: absolute;
+		background-color: transparent;
+		// below rules are to center the spinner
+		margin-left: auto;
+		margin-right: auto;
+		left: 0;
+		right: 0;
+
+		.woocommerce-spinner__circle {
+			stroke: #fff;
+		}
+	}
+
+	.send-magic-link-button-contents {
+		visibility: hidden;
+		.send-magic-link-button-text {
+			display: inline-block;
+			vertical-align: top;
+		}
+	}
+}
+
+.email-sent-modal-body {
+	padding-block: 40px;
+	padding-inline: 56px;
+	margin: auto; // center the content both vertically and horizontally
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 495px;
+	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
+
+	.email-sent-title {
+		h1 {
+			font-weight: 400;
+		}
+	}
+
+	.email-sent-illustration {
+		margin-top: 95px;
+		margin-bottom: 40px;
+		background-image: url("data:image/svg+xml,%3Csvg width='84' height='80' viewBox='0 0 84 80' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.3876 45.6191L0.525879 29.8193L42 0L83.4741 29.8193L69.3907 45.6191H14.3876Z' fill='%23BBBBBB'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='%23757575'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='url(%23paint0_linear_5_40)'/%3E%3Cpath d='M83.4741 80H0.525879V29.8193L42 54.9651L83.4741 29.8193V80Z' fill='%23949494'/%3E%3Cpath d='M0.87554 18.5686L0.545743 18.7302L0.583669 18.6625L0.554725 18.6719L0.595312 18.6417L5.03405 10.716L7.30304 12.6571L9.24955 14.4653L8.69065 14.7392L9.31897 15.8512L0.87554 18.5686Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M5.00295 11.0889L0.793213 18.5413L7.0782 12.8635L5.00295 11.0889Z' fill='%23949494'/%3E%3Cpath d='M8.9094 15.8008L0.80198 18.4878L7.57923 13.4118L8.9094 15.8008Z' fill='%23949494'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M70.5334 0.922852L79.6416 9.52639L68.3945 4.30889L70.5334 0.922852Z' fill='%23949494'/%3E%3Cpath d='M67.0988 9.21499L79.6063 9.45477L67.93 5.29341L67.0988 9.21499Z' fill='%23949494'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_5_40' x1='42' y1='80' x2='42' y2='0' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-opacity='0.12'/%3E%3Cstop offset='0.55135' stop-opacity='0.09'/%3E%3Cstop offset='1' stop-opacity='0.02'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
+		background-repeat: no-repeat;
+		opacity: 0.5;
+		width: 83px;
+		height: 80px;
+	}
+	.email-sent-subheader-spacer {
+		flex-grow: 1;
+		padding-inline: 32px;
+		margin-top: $gap-smallest;
+		.email-sent-subheader {
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5rem;
+			color: #757575;
+			text-align: center;
+		}
+	}
+
+	.email-sent-footer {
+		text-align: center;
+		.email-sent-footer-prompt {
+			font-size: 11px;
+			font-weight: 500;
+			color: #757575;
+		}
+		.email-sent-footer-text {
+			.email-sent-send-another-link {
+				color: #007cba;
+				text-decoration: none;
+				padding: 0;
+				cursor: pointer;
+			}
+		}
+	}
+}
+.wrong-user-connected-modal-body {
+	padding-block: 40px;
+	padding-inline: 56px;
+	margin: auto; // center the content both vertically and horizontally
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 495px;
+	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
+
+	.wrong-user-connected-title {
+		padding-top: 111px;
+	}
+	.wrong-user-connected-subheader-spacer {
+		flex-grow: 1;
+		padding-inline: 32px;
+		margin-top: 16px;
+		.wrong-user-connected-subheader {
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5rem;
+			color: #757575;
+			text-align: center;
+		}
+	}
+}
+

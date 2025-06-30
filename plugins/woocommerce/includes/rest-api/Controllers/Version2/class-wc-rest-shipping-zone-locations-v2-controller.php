@@ -68,7 +68,11 @@ class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zon
 			$data[]   = $location;
 		}
 
-		return rest_ensure_response( $data );
+		$total    = count( $data );
+		$response = rest_ensure_response( $data );
+		$response->header( 'X-WP-Total', $total );
+		$response->header( 'X-WP-TotalPages', $total ? 1 : 0 );
+		return $response;
 	}
 
 	/**

@@ -1,0 +1,60 @@
+.components-guide.woocommerce__email-improvements-modal {
+	max-width: 100%;
+	width: 384px;
+
+	.components-modal__header,
+	.components-guide__footer {
+		display: none;
+	}
+
+	.components-guide__container {
+		margin-top: 0;
+	}
+
+	.email-improvements-modal-layout {
+		position: relative;
+		padding: 32px;
+	}
+
+	.email-improvements-modal-content-image {
+		text-align: center;
+	}
+
+	.email-improvements-modal-content {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+
+		h1 {
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 28px;
+			margin: 0 0 12px;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.email-improvements-modal-footer {
+		display: flex;
+		gap: 16px;
+		justify-content: flex-end;
+	}
+
+	.email-improvements-modal-close-button {
+		height: 24px;
+		margin: 0;
+		min-width: 24px;
+		padding: 4px;
+		position: absolute;
+		right: 16px;
+		top: 16px;
+		width: 24px;
+
+		svg {
+			fill: $gray-900;
+		}
+	}
+}

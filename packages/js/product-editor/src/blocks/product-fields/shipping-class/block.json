@@ -14,7 +14,7 @@
 	"attributes": {
 		"title": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"disabled": {
 			"type": "boolean",

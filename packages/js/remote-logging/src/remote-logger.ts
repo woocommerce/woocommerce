@@ -33,6 +33,44 @@ export const REMOTE_LOGGING_LOG_ENDPOINT_FILTER =
 export const REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER =
 	'woocommerce_remote_logging_js_error_endpoint';
 
+export const REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER =
+	'woocommerce_remote_logging_request_uri_whitelist';
+
+export const REMPOTE_LOGGING_REQUEST_URI_PARAMS_DEFAULT_WHITELIST = [
+	'path',
+	'page',
+	'step',
+	'task',
+	'tab',
+	'section',
+	'status',
+	'post_type',
+	'taxonomy',
+	'action',
+];
+
+export const sanitiseRequestUriParams = ( search: string ) => {
+	const params = new URLSearchParams( search );
+
+	/**
+	 * This filter modifies the list of whitelisted query parameters that won't be masked
+	 * in the logged request URI
+	 *
+	 * @filter woocommerce_remote_logging_request_uri_whitelist
+	 * @param {string[]} whitelist The default whitelist
+	 */
+	const whitelist = applyFilters(
+		REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER,
+		REMPOTE_LOGGING_REQUEST_URI_PARAMS_DEFAULT_WHITELIST
+	) as typeof REMPOTE_LOGGING_REQUEST_URI_PARAMS_DEFAULT_WHITELIST;
+	for ( const [ key ] of params ) {
+		if ( ! whitelist.includes( key ) ) {
+			params.set( key, 'xxxxxx' );
+		}
+	}
+	return params.toString();
+};
+
 const REMOTE_LOGGING_LAST_ERROR_SENT_KEY =
 	'wc_remote_logging_last_error_sent_time';
 
@@ -106,7 +144,8 @@ export class RemoteLogger {
 				properties: {
 					...extraData?.properties,
 					request_uri:
-						window.location.pathname + window.location.search,
+						window.location.pathname +
+						sanitiseRequestUriParams( window.location.search ),
 				},
 			} ),
 			trace: this.getFormattedStackFrame(
@@ -213,7 +252,8 @@ export class RemoteLogger {
 				tags: [ 'js-unhandled-error' ],
 				properties: {
 					request_uri:
-						window.location.pathname + window.location.search,
+						window.location.pathname +
+						sanitiseRequestUriParams( window.location.search ),
 				},
 			} ),
 			trace: this.getFormattedStackFrame( trace ),
@@ -292,7 +332,7 @@ export class RemoteLogger {
 			.map( this.getFormattedFrame )
 			.join( '\n\n' );
 
-		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwith and also our computation.
+		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwidth and also our computation.
 		return trace.length > 8192 ? trace.substring( 0, 8192 ) : trace;
 	}
 

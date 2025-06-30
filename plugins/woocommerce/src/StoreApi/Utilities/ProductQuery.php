@@ -1,6 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use WC_Tax;
 
 /**
@@ -16,7 +21,7 @@ class ProductQuery {
 	 * @return array
 	 */
 	public function prepare_objects_query( $request ) {
-		$args = [
+		$args = array(
 			'offset'              => $request['offset'],
 			'order'               => $request['order'],
 			'orderby'             => $request['orderby'],
@@ -30,30 +35,30 @@ class ProductQuery {
 			'slug'                => $request['slug'],
 			'fields'              => 'ids',
 			'ignore_sticky_posts' => true,
-			'post_status'         => 'publish',
-			'date_query'          => [],
+			'post_status'         => ProductStatus::PUBLISH,
+			'date_query'          => array(),
 			'post_type'           => 'product',
-		];
+		);
 
 		// If searching for a specific SKU or slug, allow any post type.
 		if ( ! empty( $request['sku'] ) || ! empty( $request['slug'] ) ) {
-			$args['post_type'] = [ 'product', 'product_variation' ];
+			$args['post_type'] = array( 'product', 'product_variation' );
 		}
 
 		// Taxonomy query to filter products by type, category, tag, shipping class, and attribute.
-		$tax_query = [];
+		$tax_query = array();
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			if ( 'variation' === $request['type'] ) {
+			if ( ProductType::VARIATION === $request['type'] ) {
 				$args['post_type'] = 'product_variation';
 			} else {
 				$args['post_type'] = 'product';
-				$tax_query[]       = [
+				$tax_query[]       = array(
 					'taxonomy' => 'product_type',
 					'field'    => 'slug',
 					'terms'    => $request['type'],
-				];
+				);
 			}
 		}
 
@@ -77,12 +82,12 @@ class ProductQuery {
 		}
 
 		// Set custom args to handle later during clauses.
-		$custom_keys = [
+		$custom_keys = array(
 			'sku',
 			'min_price',
 			'max_price',
 			'stock_status',
-		];
+		);
 
 		foreach ( $custom_keys as $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
@@ -90,11 +95,11 @@ class ProductQuery {
 			}
 		}
 
-		$operator_mapping = [
+		$operator_mapping = array(
 			'in'     => 'IN',
 			'not_in' => 'NOT IN',
 			'and'    => 'AND',
-		];
+		);
 
 		// Gets all registered product taxonomies and prefixes them with `tax_`.
 		// This is needed to avoid situations where a user registers a new product taxonomy with the same name as default field.
@@ -107,29 +112,31 @@ class ProductQuery {
 		);
 
 		// Map between taxonomy name and arg key.
-		$default_taxonomies = [
-			'product_cat' => 'category',
-			'product_tag' => 'tag',
-		];
+		$default_taxonomies = array(
+			'product_cat'   => 'category',
+			'product_tag'   => 'tag',
+			'product_brand' => 'brand',
+		);
 
 		$taxonomies = array_merge( $all_product_taxonomies, $default_taxonomies );
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
+				$type        = is_numeric( $request[ $key ][0] ) ? 'term_id' : 'slug';
 				$operator    = $request->get_param( $key . '_operator' ) && isset( $operator_mapping[ $request->get_param( $key . '_operator' ) ] ) ? $operator_mapping[ $request->get_param( $key . '_operator' ) ] : 'IN';
-				$tax_query[] = [
+				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
-					'field'    => 'term_id',
+					'field'    => $type,
 					'terms'    => $request[ $key ],
 					'operator' => $operator,
-				];
+				);
 			}
 		}
 
 		// Filter by attributes.
 		if ( ! empty( $request['attributes'] ) ) {
-			$att_queries = [];
+			$att_queries = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
 				if ( empty( $attribute['term_id'] ) && empty( $attribute['slug'] ) ) {
@@ -137,22 +144,22 @@ class ProductQuery {
 				}
 				if ( in_array( $attribute['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 					$operator      = isset( $attribute['operator'], $operator_mapping[ $attribute['operator'] ] ) ? $operator_mapping[ $attribute['operator'] ] : 'IN';
-					$att_queries[] = [
+					$att_queries[] = array(
 						'taxonomy' => $attribute['attribute'],
 						'field'    => ! empty( $attribute['term_id'] ) ? 'term_id' : 'slug',
 						'terms'    => ! empty( $attribute['term_id'] ) ? $attribute['term_id'] : $attribute['slug'],
 						'operator' => $operator,
-					];
+					);
 				}
 			}
 
 			if ( 1 < count( $att_queries ) ) {
 				// Add relation arg when using multiple attributes.
 				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
-				$tax_query[] = [
+				$tax_query[] = array(
 					'relation' => $relation,
 					$att_queries,
-				];
+				);
 			} else {
 				$tax_query = array_merge( $tax_query, $att_queries );
 			}
@@ -176,12 +183,12 @@ class ProductQuery {
 
 		// Filter featured.
 		if ( is_bool( $request['featured'] ) ) {
-			$args['tax_query'][] = [
+			$args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
 				'terms'    => 'featured',
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
-			];
+			);
 		}
 
 		// Filter by on sale products.
@@ -190,7 +197,7 @@ class ProductQuery {
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
-			$on_sale_ids = empty( $on_sale_ids ) ? [ 0 ] : $on_sale_ids;
+			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
 			$args[ $on_sale_key ] += $on_sale_ids;
 		}
@@ -200,28 +207,28 @@ class ProductQuery {
 		$visibility_options = wc_get_product_visibility_options();
 
 		if ( in_array( $catalog_visibility, array_keys( $visibility_options ), true ) ) {
-			$exclude_from_catalog = 'search' === $catalog_visibility ? '' : 'exclude-from-catalog';
-			$exclude_from_search  = 'catalog' === $catalog_visibility ? '' : 'exclude-from-search';
+			$exclude_from_catalog = CatalogVisibility::SEARCH === $catalog_visibility ? '' : 'exclude-from-catalog';
+			$exclude_from_search  = CatalogVisibility::CATALOG === $catalog_visibility ? '' : 'exclude-from-search';
 
-			$args['tax_query'][] = [
+			$args['tax_query'][] = array(
 				'taxonomy'      => 'product_visibility',
 				'field'         => 'name',
-				'terms'         => [ $exclude_from_catalog, $exclude_from_search ],
-				'operator'      => 'hidden' === $catalog_visibility ? 'AND' : 'NOT IN',
+				'terms'         => array( $exclude_from_catalog, $exclude_from_search ),
+				'operator'      => CatalogVisibility::HIDDEN === $catalog_visibility ? 'AND' : 'NOT IN',
 				'rating_filter' => true,
-			];
+			);
 		}
 
 		if ( $rating ) {
-			$rating_terms = [];
+			$rating_terms = array();
 			foreach ( $rating as $value ) {
 				$rating_terms[] = 'rated-' . $value;
 			}
-			$args['tax_query'][] = [
+			$args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
 				'terms'    => $rating_terms,
-			];
+			);
 		}
 
 		$orderby = $request->get_param( 'orderby' );
@@ -283,7 +290,7 @@ class ProductQuery {
 	public function get_results( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
 
-		add_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10, 2 );
 
 		$query       = new \WP_Query();
 		$results     = $query->query( $query_args );
@@ -297,13 +304,13 @@ class ProductQuery {
 			$total_posts = $count_query->found_posts;
 		}
 
-		remove_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10 );
+		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
 
-		return [
+		return array(
 			'results' => $results,
 			'total'   => (int) $total_posts,
 			'pages'   => $query->query_vars['posts_per_page'] > 0 ? (int) ceil( $total_posts / (int) $query->query_vars['posts_per_page'] ) : 1,
-		];
+		);
 	}
 
 	/**
@@ -315,11 +322,11 @@ class ProductQuery {
 	public function get_objects( $request ) {
 		$results = $this->get_results( $request );
 
-		return [
+		return array(
 			'objects' => array_map( 'wc_get_product', $results['results'] ),
 			'total'   => $results['total'],
 			'pages'   => $results['pages'],
-		];
+		);
 	}
 
 	/**
@@ -330,7 +337,9 @@ class ProductQuery {
 	public function get_last_modified() {
 		global $wpdb;
 
-		return strtotime( $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" ) );
+		$last_modified = $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" );
+
+		return $last_modified ? strtotime( $last_modified ) : null;
 	}
 
 	/**
@@ -359,7 +368,7 @@ class ProductQuery {
 				$skus[] = $wp_query->get( 'sku' );
 			}
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= ' AND wc_product_meta_lookup.sku IN ("' . implode( '","', array_map( 'esc_sql', $skus ) ) . '")';
+			$args['where'] .= ' AND wc_product_meta_lookup.sku IN (\'' . implode( '\',\'', array_map( 'esc_sql', $skus ) ) . '\')';
 		}
 
 		if ( $wp_query->get( 'slug' ) ) {
@@ -375,10 +384,10 @@ class ProductQuery {
 
 		if ( $wp_query->get( 'stock_status' ) ) {
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', $wp_query->get( 'stock_status' ) ) ) . '")';
+			$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN (\'' . implode( '\',\'', array_map( 'esc_sql', $wp_query->get( 'stock_status' ) ) ) . '\')';
 		} elseif ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= ' AND wc_product_meta_lookup.stock_status NOT IN ("outofstock")';
+			$args['where'] .= ' AND wc_product_meta_lookup.stock_status NOT IN (\'outofstock\')';
 		}
 
 		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
@@ -442,7 +451,7 @@ class ProductQuery {
 			return '';
 		}
 
-		$or_queries = [];
+		$or_queries = array();
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {

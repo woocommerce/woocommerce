@@ -26,6 +26,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SHOW_CES_MODAL:
 			const cesModalData = {
 				action: action.surveyProps.action,
+				description: action.surveyProps.description,
 				showDescription: action.surveyProps.showDescription,
 				title: action.surveyProps.title,
 				onSubmitLabel: action.onsubmit_label,

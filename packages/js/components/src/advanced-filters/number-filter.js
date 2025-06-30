@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, isArray } from 'lodash';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sprintf, __, _x } from '@wordpress/i18n';
 import { CurrencyFactory } from '@woocommerce/currency';
 
@@ -75,13 +75,7 @@ class NumberFilter extends Component {
 		if ( type === 'currency' ) {
 			return symbolPosition.indexOf( 'right' ) === 0 ? (
 				<TextControlWithAffixes
-					suffix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					suffix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -90,13 +84,7 @@ class NumberFilter extends Component {
 				/>
 			) : (
 				<TextControlWithAffixes
-					prefix={
-						<span
-							dangerouslySetInnerHTML={ {
-								__html: currencySymbol,
-							} }
-						/>
-					}
+					prefix={ <span>{ currencySymbol }</span> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -180,14 +168,14 @@ class NumberFilter extends Component {
 		const rangeStartOnChange = ( newRangeStart ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ newRangeStart, rangeEnd ],
+				value: [ newRangeStart, rangeEnd ],
 			} );
 		};
 
 		const rangeEndOnChange = ( newRangeEnd ) => {
 			onFilterChange( {
 				property: 'value',
-				key: [ rangeStart, newRangeEnd ],
+				value: [ rangeStart, newRangeEnd ],
 			} );
 		};
 
@@ -230,7 +218,7 @@ class NumberFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
-					className={ classnames(
+					className={ clsx(
 						className,
 						'woocommerce-filters-advanced__rule'
 					) }
@@ -244,7 +232,7 @@ class NumberFilter extends Component {
 			),
 			filter: (
 				<div
-					className={ classnames(
+					className={ clsx(
 						className,
 						'woocommerce-filters-advanced__input-range',
 						{
@@ -269,7 +257,7 @@ class NumberFilter extends Component {
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-filters-advanced__fieldset',
 						{
 							'is-english': isEnglish,

@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -12,10 +11,10 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	product_sku,
-	product_id,
 	think_time_min,
 	think_time_max,
+	STORE_NAME,
+	FOOTER_TEXT,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -25,10 +24,9 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { getDefaultProduct } from '../../utils.js';
 
 export function cart() {
-	let response;
-
 	group( 'Product Page Add to cart', function () {
 		const requestheaders = Object.assign(
 			{},
@@ -38,11 +36,12 @@ export function cart() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const product = getDefaultProduct( 'Shopper' );
+
+		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
-				product_sku: `${ product_sku }`,
-				product_id: `${ product_id }`,
+				product_id: `${ product.id }`,
 				quantity: '1',
 			},
 			{
@@ -66,26 +65,19 @@ export function cart() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/cart`, {
+		const response = http.get( `${ base_url }/cart`, {
 			headers: requestheaders,
 			tags: { name: 'Shopper - View Cart' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Cart – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Cart – WooCommerce Core E2E Test Suite',
-			"body does not contain: 'your cart is currently empty'": (
-				response
-			) => ! response.body.includes( 'Your cart is currently empty.' ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+			[ `title is: "Cart – ${ STORE_NAME }"` ]: ( r ) =>
+				r.html().find( 'head title' ).text() ===
+				`Cart – ${ STORE_NAME }`,
+			"body does not contain: 'your cart is currently empty'": ( r ) =>
+				! r.body.includes( 'Your cart is currently empty.' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );
 

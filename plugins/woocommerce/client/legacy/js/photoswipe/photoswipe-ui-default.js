@@ -705,7 +705,7 @@ var PhotoSwipeUI_Default =
 			}, 50);
 		}
 		
-		// toogle pswp--fs class on root element
+		// toggle pswp--fs class on root element
 		framework[ (_fullscrenAPI.isFullscreen() ? 'add' : 'remove') + 'Class' ](pswp.template, 'pswp--fs');
 	};
 

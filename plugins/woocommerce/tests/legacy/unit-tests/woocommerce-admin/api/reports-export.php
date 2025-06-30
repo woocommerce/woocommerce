@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Admin_Tests_API_Reports_Export
  */
@@ -106,7 +108,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Savannah' );
 		$order->set_billing_state( 'GA' );
 		$order->set_billing_postcode( '31401' );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->calculate_totals();
 		$order->save();
 
@@ -115,11 +117,11 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$order->set_billing_city( 'Orlando' );
 		$order->set_billing_state( 'FL' );
 		$order->set_billing_postcode( '32801' );
-		$order->set_status( 'completed' );
+		$order->set_status( OrderStatus::COMPLETED );
 		$order->calculate_totals();
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Initiate an export of the taxes report.
 		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc-analytics/reports/taxes/export' ) );
@@ -143,7 +145,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
 
 		// Run the pending export jobs.
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Check that the status shows 100% and includes a download url.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $status_route ) );

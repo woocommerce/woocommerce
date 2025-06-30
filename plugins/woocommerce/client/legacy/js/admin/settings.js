@@ -51,10 +51,14 @@
 		$( '.colorpick' )
 			.iris( {
 				change: function ( event, ui ) {
-					$( this )
+					const $this = $( this );
+					$this
 						.parent()
 						.find( '.colorpickpreview' )
 						.css( { backgroundColor: ui.color.toString() } );
+					setTimeout( function () {
+						$this.trigger( 'change' );
+					} );
 				},
 				hide: true,
 				border: true,
@@ -85,6 +89,15 @@
 				}
 			} );
 
+		$( '.iris-square-value' ).on( 'click', function ( event ) {
+			event.preventDefault();
+		} );
+
+		$( '.colorpickpreview' ).on( 'click', function ( event ) {
+			event.stopPropagation();
+			$( this ).next( '.colorpick' ).click();
+		} );
+
 		$( 'body' ).on( 'click', function () {
 			$( '.iris-picker' ).hide();
 		} );
@@ -92,15 +105,17 @@
 		// Edit prompt
 		function editPrompt () {
 			var changed = false;
-			let $check_column = $( '.wp-list-table .check-column' );
+			let $prevent_change_elements = $( '.wp-list-table .check-column, .wc-settings-prevent-change-event' );
 
 			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
 				event
 			) {
-				// Toggling WP List Table checkboxes should not trigger navigation warnings.
+				// Prevent change event on specific elements, that don't change the form. E.g.:
+				// - WP List Table checkboxes that only (un)select rows
+				// - Changing email type in email preview
 				if (
-					$check_column.length &&
-					$check_column.has( event.target )
+					$prevent_change_elements.length &&
+					$prevent_change_elements.has( event.target ).length
 				) {
 					return;
 				}
@@ -251,7 +266,7 @@
 					.attr( { tabindex: '-1', 'aria-hidden': 'true' } );
 				if ( ! data.isInitialLoad ) {
 					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
-				}	
+				}
 			} );
 
 		$( '.wc-item-reorder-nav' )
@@ -334,5 +349,74 @@
 			$underObservation.on( 'change', changeAgent );
 			changeAgent();
 		} );
+
+		// Ensures the active tab is visible and centered on small screens if it's out of view in a scrollable tab list.
+		function settings_scroll_to_active_tab() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			// Select the currently active tab
+			const activeTab = document.querySelector( '.nav-tab-active' );
+
+			// Exit if there's no active tab or screen is wider than 500px (desktop)
+			if ( ! activeTab || window.innerWidth >= 500 ) {
+				return;
+			}
+
+			// Get the parent element, assumed to be the scrollable container
+			const parent = activeTab.parentElement;
+
+			// Exit if no parent or if scrolling isn't needed (content fits)
+			if ( ! parent || parent.scrollWidth <= parent.clientWidth ) {
+				return;
+			}
+
+			// Get the position of the active tab relative to its parent
+			const tabLeft = activeTab.offsetLeft;
+			const tabRight = tabLeft + activeTab.offsetWidth;
+			const scrollLeft = parent.scrollLeft;
+			const visibleLeft = scrollLeft;
+			const visibleRight = scrollLeft + parent.clientWidth;
+			const isOutOfView = tabLeft < visibleLeft || tabRight > visibleRight;
+
+			// If it’s out of view, scroll the parent so the tab is centered
+			if ( isOutOfView ) {
+				const offset = tabLeft - parent.clientWidth / 2 + activeTab.offsetWidth / 2;
+					parent.scrollTo( {
+					left: offset,
+					behavior: 'auto' // Instant scroll (no animation)
+				} );
+			}
+		}
+
+		// Some legacy setting pages have tables that span beyond the set width of its parents
+		// causing layout issues.
+		// Fixe the width of the nav tab wrapper to match the window width on mobile.
+		function settings_fix_nav_width() {
+			const body = document.body;
+			if (
+				! body.classList.contains('mobile') ||
+				! body.classList.contains('woocommerce_page_wc-settings')
+			) {
+				return;
+			}
+			const navWrapper = document.getElementsByClassName('nav-tab-wrapper');
+			if ( ! navWrapper.length ) {
+				return;
+			}
+
+			const navWrapperWidth = navWrapper[0].offsetWidth;
+			if ( navWrapperWidth !== window.innerWidth) {
+				navWrapper[0].style.width = window.innerWidth + 'px';
+			}
+		}
+
+		settings_scroll_to_active_tab();
+		settings_fix_nav_width();
+
 	} );
 } )( jQuery, woocommerce_settings_params, wp );

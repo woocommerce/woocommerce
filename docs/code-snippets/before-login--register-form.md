@@ -1,11 +1,11 @@
 ---
 post_title: Add a message above the login / register form
-tags: code-snippet
+
 ---
 
-This code will add a custom message above the login/register form on the user's my-account page.
+# Add a message above the login / register form
 
-Add this code to your child theme's `functions.php` file or via a plugin that allows custom functions to be added, such as the [Code snippets](https://wordpress.org/plugins/code-snippets/) plugin. Avoid adding custom code directly to your parent theme's `functions.php` file, as this will be wiped entirely when you update the theme.
+This code will add a custom message above the login/register form on the user's my-account page.
 
 ```php
 if ( ! function_exists( 'YOUR_PREFIX_login_message' ) ) {

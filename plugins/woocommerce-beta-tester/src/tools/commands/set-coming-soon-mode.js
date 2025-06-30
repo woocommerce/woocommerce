@@ -7,7 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const UPDATE_COMING_SOON_MODE_ACTION_NAME = 'updateComingSoonMode';
 
@@ -19,10 +19,10 @@ const OPTIONS = [
 
 export const SetComingSoonMode = () => {
 	const comingSoonMode = useSelect(
-		( select ) => select( STORE_KEY ).getComingSoonMode(),
+		( select ) => select( store ).getComingSoonMode(),
 		[]
 	);
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onChange( mode ) {
 		updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {

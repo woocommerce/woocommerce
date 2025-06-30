@@ -5,7 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
-use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -15,8 +17,6 @@ defined( 'ABSPATH' ) || exit;
  * Data store class for the product attributes lookup table.
  */
 class LookupDataStore {
-
-	use AccessiblePrivateMethods;
 
 	/**
 	 * Types of updates to perform depending on the current changest
@@ -66,10 +66,10 @@ class LookupDataStore {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		self::add_action( 'woocommerce_run_product_attribute_lookup_update_callback', array( $this, 'run_update_callback' ), 10, 2 );
-		self::add_filter( 'woocommerce_get_sections_products', array( $this, 'add_advanced_section_to_product_settings' ), 100, 1 );
-		self::add_action( 'woocommerce_rest_insert_product', array( $this, 'on_product_created_or_updated_via_rest_api' ), 100, 2 );
-		self::add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_attributes_lookup_table_settings' ), 100, 2 );
+		add_action( 'woocommerce_run_product_attribute_lookup_update_callback', array( $this, 'run_update_callback' ), 10, 2 );
+		add_filter( 'woocommerce_get_sections_products', array( $this, 'add_advanced_section_to_product_settings' ), 100, 1 );
+		add_action( 'woocommerce_rest_insert_product', array( $this, 'on_product_created_or_updated_via_rest_api' ), 100, 2 );
+		add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_attributes_lookup_table_settings' ), 100, 2 );
 	}
 
 	/**
@@ -183,8 +183,10 @@ class LookupDataStore {
 	 *
 	 * @param int $product_id The product id to perform the update for.
 	 * @param int $action The action to perform, one of the ACTION_ constants.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function run_update_callback( int $product_id, int $action ) {
+	public function run_update_callback( int $product_id, int $action ) {
 		if ( ! $this->check_lookup_table_exists() ) {
 			return;
 		}
@@ -235,7 +237,7 @@ class LookupDataStore {
 
 		if ( in_array( 'catalog_visibility', $keys, true ) ) {
 			$new_visibility = $changeset['catalog_visibility'];
-			if ( 'visible' === $new_visibility || 'catalog' === $new_visibility ) {
+			if ( CatalogVisibility::VISIBLE === $new_visibility || CatalogVisibility::CATALOG === $new_visibility ) {
 				return self::ACTION_INSERT;
 			} else {
 				return self::ACTION_DELETE;
@@ -639,8 +641,10 @@ class LookupDataStore {
 	 * @param \WP_Post         $product The post representing the created or updated product.
 	 * @param \WP_REST_Request $request The REST request that caused the hook to be fired.
 	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function on_product_created_or_updated_via_rest_api( \WP_Post $product, \WP_REST_Request $request ): void {
+	public function on_product_created_or_updated_via_rest_api( \WP_Post $product, \WP_REST_Request $request ): void {
 		if ( StringUtil::ends_with( $request->get_route(), '/batch' ) ) {
 			$this->on_product_changed( $product->ID );
 		}
@@ -710,8 +714,10 @@ class LookupDataStore {
 	 *
 	 * @param array $products Original array of settings sections.
 	 * @return array New array of settings sections.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function add_advanced_section_to_product_settings( array $products ): array {
+	public function add_advanced_section_to_product_settings( array $products ): array {
 		if ( $this->check_lookup_table_exists() ) {
 			$products['advanced'] = __( 'Advanced', 'woocommerce' );
 		}
@@ -725,8 +731,10 @@ class LookupDataStore {
 	 * @param array  $settings Original settings configuration array.
 	 * @param string $section_id Settings section identifier.
 	 * @return array New settings configuration array.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	private function add_product_attributes_lookup_table_settings( array $settings, string $section_id ): array {
+	public function add_product_attributes_lookup_table_settings( array $settings, string $section_id ): array {
 		if ( 'advanced' === $section_id && $this->check_lookup_table_exists() ) {
 			$title_item = array(
 				'title' => __( 'Product attributes lookup table', 'woocommerce' ),
@@ -877,7 +885,7 @@ class LookupDataStore {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
 
-		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => 'variation' !== $item['product_type'] );
+		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => ProductType::VARIATION !== $item['product_type'] );
 		$is_variation     = empty( $main_product_row );
 
 		$main_product_id =
@@ -885,13 +893,13 @@ class LookupDataStore {
 			current( $product_ids_with_stock_status )['parent'] :
 			$product_id;
 
-		$is_variable_product = ! $is_variation && ( 'variable' === current( $main_product_row )['product_type'] );
+		$is_variable_product = ! $is_variation && ( ProductType::VARIABLE === current( $main_product_row )['product_type'] );
 
 		$product_ids_with_stock_status = ArrayUtil::group_by_column( $product_ids_with_stock_status, 'id', true );
 		$variation_ids                 = $is_variation ? array( $product_id ) : array_keys( array_diff_key( $product_ids_with_stock_status, array( $product_id => null ) ) );
 		$product_ids_with_stock_status = ArrayUtil::select( $product_ids_with_stock_status, 'stock_status' );
 
-		$product_ids_with_stock_status = array_map( fn( $item ) => 'instock' === $item ? 1 : 0, $product_ids_with_stock_status );
+		$product_ids_with_stock_status = array_map( fn( $item ) => ProductStockStatus::IN_STOCK === $item ? 1 : 0, $product_ids_with_stock_status );
 
 		// * Obtain the list of attributes used for variations and not.
 		// Output: two lists of attribute slugs, all starting with 'pa_'.

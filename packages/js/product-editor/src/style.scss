@@ -53,6 +53,7 @@
 @import "components/number-control/style.scss";
 @import "components/empty-state/style.scss";
 @import "components/combobox-control/style.scss";
+@import "components/more-menu-dropdown/style.scss";
 
 /* Field Blocks */
 
@@ -60,3 +61,5 @@
 
 /* Hooks */
 @import "hooks/use-draggable/styles.scss";
+
+@import "products.scss";

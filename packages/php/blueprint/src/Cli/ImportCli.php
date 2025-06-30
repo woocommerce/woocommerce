@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint\Cli;
 
-use Automattic\WooCommerce\Blueprint\CliResultFormatter;
 use Automattic\WooCommerce\Blueprint\ImportSchema;
+use Automattic\WooCommerce\Blueprint\ResultFormatters\CliResultFormatter;
 
 /**
  * Class ImportCli
@@ -33,8 +33,14 @@ class ImportCli {
 	 * @return void
 	 */
 	public function run( $optional_args ) {
-		$blueprint = ImportSchema::create_from_file( $this->schema_path );
-		$results   = $blueprint->import();
+		try {
+			$blueprint = ImportSchema::create_from_file( $this->schema_path );
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+			return;
+		}
+
+		$results = $blueprint->import();
 
 		$result_formatter = new CliResultFormatter( $results );
 		$is_success       = $result_formatter->is_success();

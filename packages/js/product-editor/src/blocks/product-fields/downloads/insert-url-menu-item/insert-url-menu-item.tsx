@@ -10,7 +10,6 @@ import {
 	Button,
 	Dropdown,
 	MenuItem,
-	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -70,7 +69,6 @@ export function InsertUrlMenuItem( {
 
 	return (
 		<Dropdown
-			// @ts-expect-error missing prop in types.
 			popoverProps={ {
 				placement: 'left',
 			} }

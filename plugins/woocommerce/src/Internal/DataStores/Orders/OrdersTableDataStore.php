@@ -7,10 +7,14 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caching\WPCacheEngine;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Exception;
 use WC_Abstract_Order;
 use WC_Data;
@@ -22,6 +26,8 @@ defined( 'ABSPATH' ) || exit;
  * This class is the standard data store to be used when the custom orders table is in use.
  */
 class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
+
+	use CogsAwareTrait;
 
 	/**
 	 * Order IDs for which we are checking sync on read in the current request. In WooCommerce, using wc_get_order is a very common pattern, to avoid performance issues, we only sync on read once per request per order. This works because we consider out of sync orders to be an anomaly, so we don't recommend running HPOS with incompatible plugins.
@@ -525,6 +531,74 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 
 		return $this->all_order_column_mapping;
 	}
+
+	/**
+	 * The group name to use when caching order object data.
+	 *
+	 * @return string
+	 */
+	private function get_cache_group(): string {
+		return 'orders_data';
+	}
+
+	/**
+	 * Delete cached order data for the given object_ids.
+	 *
+	 * @param array $order_ids The IDs of the orders to remove cache.
+	 *
+	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
+	 *                if the contents were not deleted.
+	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 */
+	public function clear_cached_data( array $order_ids ): array {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return array_fill_keys( $order_ids, true );
+		}
+
+		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
+		$cache_group   = $this->get_cache_group();
+		$return_values = array();
+
+		foreach ( $order_ids as $order_id ) {
+			$return_values[ $order_id ] = $cache_engine->delete_cached_object( $order_id, $cache_group );
+		}
+
+		if ( is_callable( array( $this->data_store_meta, 'clear_cached_data' ) ) ) {
+			$successfully_deleted_cache_order_ids = array_keys( array_filter( $return_values ) );
+			$cache_deletion_results               = $this->data_store_meta->clear_cached_data( $successfully_deleted_cache_order_ids );
+			foreach ( $cache_deletion_results as $order_id => $meta_cache_was_deleted ) {
+				$return_values[ $order_id ] = $return_values[ $order_id ] && $meta_cache_was_deleted;
+			}
+		}
+
+		return $return_values;
+	}
+
+	/**
+	 * Invalidate all the cache used by this data store.
+	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
+	 * @return bool Whether the cache as fully invalidated.
+	 */
+	public function clear_all_cached_data(): bool {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return true;
+		}
+
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$orders_invalidated = $cache_engine->delete_cache_group( $this->get_cache_group() );
+		$meta_invalidated   = true;
+		if ( is_callable( array( $this->data_store_meta, 'clear_cached_data' ) ) ) {
+			$meta_invalidated = $this->data_store_meta->clear_all_cached_data();
+		}
+
+		return $orders_invalidated && $meta_invalidated;
+	}
+
 
 	/**
 	 * Helper function to get alias for order table, this is used in select query.
@@ -1093,7 +1167,7 @@ WHERE
 				{$orders_table}.type IN {$order_types_sql}
 				AND {$orders_table}.status = %s
 				AND {$orders_table}.date_updated_gmt < %s",
-				'wc-pending',
+				OrderInternalStatus::PENDING,
 				gmdate( 'Y-m-d H:i:s', absint( $gmt_timestamp ) )
 			)
 		);
@@ -1143,6 +1217,26 @@ WHERE
 			return array();
 		}
 
+		$order_types = array();
+
+		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			if ( ! is_array( $order_ids ) ) {
+				// self::get_order_data_for_ids() strict types the $order_ids parameter. Temporarily maintain backward compatibility
+				// for potential misuse of self::get_orders_type().
+				$order_ids = array( (int) $order_ids );
+			}
+			// If we're using order data caching, preemptively pull all the data and prime the cache as this method is
+			// almost exclusively used to determine the order class to later hydrate.
+			$orders_data = $this->get_order_data_for_ids( $order_ids );
+			foreach ( $orders_data as $order_id => $order_data ) {
+				if ( ! empty( $order_data->type ) ) {
+					$order_types[ $order_id ] = $order_data->type;
+				}
+			}
+
+			return $order_types;
+		}
+
 		$orders_table          = self::get_orders_table_name();
 		$order_ids_placeholder = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 
@@ -1154,7 +1248,6 @@ WHERE
 			)
 		);
 		// phpcs:enable
-		$order_types = array();
 		foreach ( $results as $row ) {
 			$order_types[ $row->id ] = $row->type;
 		}
@@ -1244,17 +1337,46 @@ WHERE
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
 		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
 
+		$cogs_is_enabled = $this->cogs_is_enabled();
+
 		foreach ( $data as $order_data ) {
 			$order_id = absint( $order_data->id );
 			$order    = $orders[ $order_id ];
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
+			if ( $order->has_cogs() && $cogs_is_enabled ) {
+				$this->read_cogs_data( $order );
+			}
+
 			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
 		}
+	}
+
+	/**
+	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
+	 *
+	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
+	 */
+	private function read_cogs_data( WC_Abstract_Order $order ) {
+		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float $cogs_value The value as read from the database.
+		 * @param WC_Abstract_Order $product The order for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_order_cogs_value', $cogs_value, $order );
+
+		$order->set_cogs_total_value( (float) $cogs_value );
+		$order->apply_changes();
 	}
 
 	/**
@@ -1364,7 +1486,7 @@ WHERE
 	}
 
 	/**
-	 * Helper function to get posts data for an order in bullk. We use to this to compute posts object in bulk so that we can compare it with COT data.
+	 * Helper function to get posts data for an order in bulk. We use to this to compute posts object in bulk so that we can compare it with COT data.
 	 *
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *
@@ -1613,26 +1735,52 @@ WHERE
 	}
 
 	/**
-	 * Return order data for a single order ID.
+	 * Retrieve raw order data for multiple IDs.
 	 *
-	 * @param int $id Order ID.
-	 *
-	 * @return object|\WP_Error DB order object or WP_Error.
-	 */
-	private function get_order_data_for_id( $id ) {
-		$results = $this->get_order_data_for_ids( array( $id ) );
-
-		return is_array( $results ) && count( $results ) > 0 ? $results[ $id ] : $results;
-	}
-
-	/**
-	 * Return order data for multiple IDs.
-	 *
-	 * @param array $ids List of order IDs.
+	 * @param int[] $ids List of order IDs.
 	 *
 	 * @return \stdClass[] DB Order objects or error.
 	 */
-	protected function get_order_data_for_ids( $ids ) {
+	protected function get_order_data_for_ids( array $ids ): array {
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$using_datastore_cache = OrderUtil::custom_orders_table_datastore_cache_enabled();
+		$order_data            = array();
+
+		if ( $using_datastore_cache ) {
+			$order_data = $this->get_order_data_for_ids_from_cache( $ids );
+			$ids        = array_diff( $ids, array_keys( $order_data ) );
+		}
+
+		if ( count( $ids ) > 0 ) {
+			$db_order_data = $this->get_order_data_for_ids_from_db( $ids );
+			$order_data    = $db_order_data + $order_data;
+			if ( count( $db_order_data ) > 0 && $using_datastore_cache ) {
+				$this->set_order_data_in_cache( $db_order_data );
+			}
+		}
+
+		$order_data = array_filter( $order_data );
+
+		$meta_data = $this->data_store_meta->get_meta_data_for_object_ids( array_keys( $order_data ) );
+
+		foreach ( $meta_data as $order_id => $order_meta ) {
+			$order_data[ $order_id ]->meta_data = $order_meta;
+		}
+
+		return $order_data;
+	}
+
+	/**
+	 * Retrieve raw order data from the database for the given a set of IDs.
+	 *
+	 * @param int[] $ids List of order IDs.
+	 *
+	 * @return \stdClass[] Keyed array of objects containing raw order data keyed by the order IDs.
+	 */
+	private function get_order_data_for_ids_from_db( array $ids ): array {
 		global $wpdb;
 
 		if ( ! $ids || empty( $ids ) ) {
@@ -1648,7 +1796,6 @@ WHERE
 		$order_table_alias = $table_aliases['orders'];
 		$order_table_query = $this->get_order_table_select_statement();
 		$id_placeholder    = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
-		$order_meta_table  = self::get_meta_table_name();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_table_query is autogenerated and should already be prepared.
 		$table_data = $wpdb->get_results(
@@ -1660,7 +1807,6 @@ WHERE
 		// phpcs:enable
 
 		$order_data = array();
-
 		foreach ( $table_data as $table_datum ) {
 			$id                = $table_datum->{"{$order_table_alias}_id"};
 			$order_data[ $id ] = new \stdClass();
@@ -1670,11 +1816,11 @@ WHERE
 				foreach ( $column_mappings as $field => $map ) {
 					$field_name = $map['name'] ?? "{$table_name}_$field";
 					if ( property_exists( $table_datum, $field_name ) ) {
-						$field_value = $table_datum->{ $field_name }; // Unique column, field name is different prop name.
+						$field_value = $table_datum->{$field_name}; // Unique column, field name is different prop name.
 					} elseif ( property_exists( $table_datum, "{$table_alias}_$field" ) ) {
 						$field_value = $table_datum->{"{$table_alias}_$field"}; // Non-unique column (billing, shipping etc).
 					} else {
-						$field_value = $table_datum->{ $field }; // Unique column, field name is same as prop name.
+						$field_value = $table_datum->{$field}; // Unique column, field name is same as prop name.
 					}
 					$order_data[ $id ]->{$field_name} = $field_value;
 				}
@@ -1683,29 +1829,32 @@ WHERE
 			$order_data[ $id ]->meta_data = array();
 		}
 
-		if ( count( $order_data ) > 0 ) {
-			$meta_order_ids            = array_keys( $order_data );
-			$meta_order_id_placeholder = implode( ', ', array_fill( 0, count( $meta_order_ids ), '%d' ) );
-			$meta_data_query           = $this->get_order_meta_select_statement();
-			$meta_data                 = $wpdb->get_results(
-				$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $meta_data_query and $order_meta_table is autogenerated and should already be prepared. $id_placeholder is already prepared.
-					"$meta_data_query WHERE $order_meta_table.order_id in ( $meta_order_id_placeholder )",
-					$ids
-				)
-			);
-
-			foreach ( $meta_data as $meta_datum ) {
-				// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Not a meta query.
-				$order_data[ $meta_datum->order_id ]->meta_data[] = (object) array(
-					'meta_id'    => $meta_datum->id,
-					'meta_key'   => $meta_datum->meta_key,
-					'meta_value' => $meta_datum->meta_value,
-				);
-				// phpcs:enable
-			}
-		}
 		return $order_data;
+	}
+
+	/**
+	 * Retrieve raw order data from cache for the given a set of IDs.
+	 *
+	 * @param int[] $ids List of order IDs.
+	 *
+	 * @return \stdClass[] Keyed array of objects containing raw order data keyed by the order IDs.
+	 */
+	private function get_order_data_for_ids_from_cache( array $ids ): array {
+		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+
+		return array_filter( $cache_engine->get_cached_objects( $ids, $this->get_cache_group() ) );
+	}
+
+	/**
+	 * Store the raw data for a set of orders in cache.
+	 *
+	 * @param \stdClass[][] $order_data An array of raw order records to set in cache keyed by the order IDs.
+	 *
+	 * @return void
+	 */
+	private function set_order_data_in_cache( array $order_data ) {
+		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( $order_data, 0, $this->get_cache_group() );
 	}
 
 	/**
@@ -1900,6 +2049,52 @@ FROM $order_meta_table
 		$this->update_address_index_meta( $order, $changes );
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
+
+		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->save_cogs_data( $order );
+		}
+
+		$this->clear_cached_data( array( $order->get_id() ) );
+	}
+
+	/**
+	 * Save the Cost of Goods Sold value of a given order to the database.
+	 *
+	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 */
+	private function save_cogs_data( WC_Abstract_Order $order ) {
+		$cogs_value = $order->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
+		 * or to suppress the saving of the value (so that custom storage can be used).
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
+		if ( is_null( $cogs_value ) ) {
+			return;
+		}
+
+		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+
+		if ( 0.0 === $cogs_value && $existing_meta ) {
+			$existing_meta = current( $existing_meta );
+			$this->data_store_meta->delete_meta( $order, $existing_meta );
+		} elseif ( $existing_meta ) {
+				$existing_meta        = current( $existing_meta );
+				$existing_meta->key   = '_cogs_total_value';
+				$existing_meta->value = $cogs_value;
+				$this->data_store_meta->update_meta( $order, $existing_meta );
+		} else {
+			$meta        = new \WC_Meta_Data();
+			$meta->key   = '_cogs_total_value';
+			$meta->value = $cogs_value;
+			$this->data_store_meta->add_meta( $order, $meta );
+		}
 	}
 
 	/**
@@ -2323,6 +2518,19 @@ FROM $order_meta_table
 		$order_table     = self::get_orders_table_name();
 		$order_parent_id = $order->get_parent_id();
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$child_order_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM $order_table WHERE parent_order_id=%d",
+				$order->get_id()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( empty( $child_order_ids ) ) {
+			return;
+		}
+
 		if ( $this->legacy_proxy->call_function( 'is_post_type_hierarchical', $order->get_type() ) ) {
 			$wpdb->update(
 				$order_table,
@@ -2331,16 +2539,9 @@ FROM $order_meta_table
 				array( '%d' ),
 				array( '%d' )
 			);
-		} else {
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$child_order_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT id FROM $order_table WHERE parent_order_id=%d",
-					$order->get_id()
-				)
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+			$this->clear_cached_data( $child_order_ids );
+		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
 				if ( $child_order ) {
@@ -2396,6 +2597,8 @@ FROM $order_meta_table
 		if ( $data_synchronizer->data_sync_is_enabled() ) {
 			wp_trash_post( $order->get_id() );
 		}
+
+		$this->clear_cached_data( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2424,7 +2627,7 @@ FROM $order_meta_table
 		$previous_status           = $order->get_meta( '_wp_trash_meta_status' );
 		$valid_statuses            = wc_get_order_statuses();
 		$previous_state_is_invalid = ! array_key_exists( $previous_status, $valid_statuses );
-		$pending_is_valid_status   = array_key_exists( 'wc-pending', $valid_statuses );
+		$pending_is_valid_status   = array_key_exists( OrderInternalStatus::PENDING, $valid_statuses );
 
 		if ( $previous_state_is_invalid && $pending_is_valid_status ) {
 			// If the previous status is no longer valid, let's try to restore it to "pending" instead.
@@ -2509,6 +2712,8 @@ FROM $order_meta_table
 			);
 			$order_cache->remove( $order_id );
 		}
+
+		$this->clear_cached_data( array( $order_id ) );
 	}
 
 	/**
@@ -3110,6 +3315,7 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
+			$this->clear_cached_data( array( $order->get_id() ) );
 		}
 
 		return false;
@@ -3132,7 +3338,8 @@ CREATE TABLE $meta_table (
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
 
 		$should_save =
-			$order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
+			$order->get_id() > 0
+			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 
 		/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: consolidate TypeScript config files and JS test directories naming.

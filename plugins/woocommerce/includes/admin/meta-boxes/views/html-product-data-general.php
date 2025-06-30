@@ -5,7 +5,11 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 ?>
 <div id="general_product_data" class="panel woocommerce_options_panel">
@@ -36,42 +40,85 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</div>
 
-	<div class="options_group pricing show_if_simple show_if_external hidden">
+	<?php
+		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
+		$cogs_is_enabled = $cogs_controller->feature_is_enabled();
+	?>
+	<div class="options_group pricing show_if_simple show_if_external hidden<?php echo $cogs_is_enabled ? ' show_if_variable' : ''; ?>">
+		<?php if ( $cogs_is_enabled ) : ?>
+			<span class="show_if_simple show_if_external">
+		<?php endif; ?>
 		<?php
-		woocommerce_wp_text_input(
-			array(
-				'id'        => '_regular_price',
-				'value'     => $product_object->get_regular_price( 'edit' ),
-				'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'data_type' => 'price',
-			)
-		);
+			woocommerce_wp_text_input(
+				array(
+					'id'        => '_regular_price',
+					'value'     => $product_object->get_regular_price( 'edit' ),
+					'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+					'data_type' => 'price',
+				)
+			);
 
-		woocommerce_wp_text_input(
-			array(
-				'id'          => '_sale_price',
-				'value'       => $product_object->get_sale_price( 'edit' ),
-				'data_type'   => 'price',
-				'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
-			)
-		);
+			woocommerce_wp_text_input(
+				array(
+					'id'          => '_sale_price',
+					'value'       => $product_object->get_sale_price( 'edit' ),
+					'data_type'   => 'price',
+					'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+					'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				)
+			);
 
-		$sale_price_dates_from_timestamp = $product_object->get_date_on_sale_from( 'edit' ) ? $product_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() : false;
-		$sale_price_dates_to_timestamp   = $product_object->get_date_on_sale_to( 'edit' ) ? $product_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() : false;
+			$sale_price_dates_from_timestamp = $product_object->get_date_on_sale_from( 'edit' ) ? $product_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() : false;
+			$sale_price_dates_to_timestamp   = $product_object->get_date_on_sale_to( 'edit' ) ? $product_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() : false;
 
-		$sale_price_dates_from = $sale_price_dates_from_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) : '';
-		$sale_price_dates_to   = $sale_price_dates_to_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) : '';
+			$sale_price_dates_from = $sale_price_dates_from_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) : '';
+			$sale_price_dates_to   = $sale_price_dates_to_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) : '';
 
-		echo '<p class="form-field sale_price_dates_fields">
-				<label for="_sale_price_dates_from">' . esc_html__( 'Sale price dates', 'woocommerce' ) . '</label>
-				<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . esc_html( _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
-				<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_html( _x( 'To&hellip;', 'placeholder', 'woocommerce' ) ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
-				<a href="#" class="description cancel_sale_schedule">' . esc_html__( 'Cancel', 'woocommerce' ) . '</a>' . wc_help_tip( __( 'The sale will start at 00:00:00 of "From" date and end at 23:59:59 of "To" date.', 'woocommerce' ) ) . '
-			</p>';
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		do_action( 'woocommerce_product_options_pricing' );
-		?>
+			/**
+			 * Hook to customize the regular expression that validates dates entered in the WooCommerce admin editors.
+			 *
+			 * @param string $pattern Default pattern to use.
+			 */
+			$date_input_html_pattern = apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' );
+
+			echo '<p class="form-field sale_price_dates_fields">
+					<label for="_sale_price_dates_from">' . esc_html__( 'Sale price dates', 'woocommerce' ) . '</label>
+					<input type="text" class="short" name="_sale_price_dates_from" id="_sale_price_dates_from" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . esc_html( _x( 'From&hellip;', 'placeholder', 'woocommerce' ) ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( $date_input_html_pattern ) . '" />
+					<input type="text" class="short" name="_sale_price_dates_to" id="_sale_price_dates_to" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_html( _x( 'To&hellip;', 'placeholder', 'woocommerce' ) ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( $date_input_html_pattern ) . '" />
+					<a href="#" class="description cancel_sale_schedule">' . esc_html__( 'Cancel', 'woocommerce' ) . '</a>' . wc_help_tip( __( 'The sale will start at 00:00:00 of "From" date and end at 23:59:59 of "To" date.', 'woocommerce' ) ) . '
+				</p>';
+
+			/**
+			 * Action that allows to render additional fields for price related settings in the product editor.
+			 */
+			do_action( 'woocommerce_product_options_pricing' );
+
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			?>
+		<?php if ( $cogs_is_enabled ) : ?>
+			</span>
+		<?php endif; ?>
+		<?php if ( $cogs_is_enabled ) : ?>
+			<span class="show_if_simple show_if_variable show_if_external hidden">
+				<?php
+				$is_variable = $product_object instanceof WC_Product_Variable;
+
+				woocommerce_wp_text_input(
+					array(
+						'id'          => '_cogs_value',
+						'value'       => $product_object->get_cogs_value() ?? '',
+						'label'       => __( 'Cost of goods', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+						'data_type'   => 'price',
+						'desc_tip'    => 'true',
+						'placeholder' => '0',
+						'description' => $cogs_controller->get_general_cost_edit_field_tooltip( $is_variable ),
+					)
+				);
+				?>
+			</span>
+		<?php endif; ?>
 	</div>
 
 	<div class="options_group show_if_downloadable hidden">
@@ -178,9 +225,9 @@ defined( 'ABSPATH' ) || exit;
 					'value'       => $product_object->get_tax_status( 'edit' ),
 					'label'       => __( 'Tax status', 'woocommerce' ),
 					'options'     => array(
-						'taxable'  => __( 'Taxable', 'woocommerce' ),
-						'shipping' => __( 'Shipping only', 'woocommerce' ),
-						'none'     => _x( 'None', 'Tax status', 'woocommerce' ),
+						ProductTaxStatus::TAXABLE  => __( 'Taxable', 'woocommerce' ),
+						ProductTaxStatus::SHIPPING => __( 'Shipping only', 'woocommerce' ),
+						ProductTaxStatus::NONE     => _x( 'None', 'Tax status', 'woocommerce' ),
 					),
 					'desc_tip'    => 'true',
 					'description' => __( 'Define whether or not the entire product is taxable, or just the cost of shipping it.', 'woocommerce' ),

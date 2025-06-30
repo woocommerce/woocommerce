@@ -1,0 +1,56 @@
+{
+	"name": "woocommerce/product-image",
+	"title": "Product Image",
+	"description": "Display the main product image.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"showProductLink": { "type": "boolean", "default": true },
+		"showSaleBadge": { "type": "boolean", "default": true },
+		"saleBadgeAlign": { "type": "string", "default": "right" },
+		"imageSizing": { "type": "string", "default": "single" },
+		"productId": { "type": "number", "default": 0 },
+		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"width": { "type": "string" },
+		"height": { "type": "string" },
+		"scale": { "type": "string", "default": "cover" },
+		"aspectRatio": { "type": "string" }
+	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"html": false,
+		"__experimentalBorder": {
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		},
+		"typography": {
+			"fontSize": true,
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"dimensions": {
+			"aspectRatio": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalSelector": ".wc-block-components-product-image"
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"usesContext": [ "imageId", "postId", "query", "queryId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

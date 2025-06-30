@@ -13,13 +13,6 @@ use Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules;
 class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
 
 	/**
-	 * Jetpack version to test the display manager.
-	 *
-	 * @var string
-	 */
-	private $valid_jetpack_version = '4.4';
-
-	/**
 	 * Stores the default WordPress options stored in the database.
 	 *
 	 * @var array
@@ -66,7 +59,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	/**
 	 * Test if the banner is displayed when all conditions are satisfied:
 	 *   - Banner NOT dismissed
-	 *   - Jetpack >= 4.4 installed and active
 	 *   - Jetpack Connected
 	 *   - No incompatible extensions installed:
 	 *       - Shipstation not installed
@@ -76,13 +68,12 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 *   - Order contains physical products which need to be shipped (we should check that the order status is not set to complete)
 	 *   - Store is located in US
 	 *   - Store currency is set to USD
-	 *   - WCS plugin not installed OR WCS is installed *AND* ToS have NOT been accepted *AND* WCS version is 1.22.5 or greater
-	 *     (The 1.22.5 or greater requirement is so we can launch the shipping modal from the banner)
+	 *   - WCS plugin not installed OR WCS is installed
 	 */
 	public function test_display_banner_if_all_conditions_are_met() {
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, null, false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), true );
 			}
@@ -93,7 +84,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 * Test if the banner is hidden when Jetpack is not active.
 	 */
 	public function test_if_banner_hidden_when_jetpack_disconnected() {
-		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( null, null, null, null, null );
+		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( null, null, null );
 
 		$this->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 	}
@@ -103,7 +94,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 */
 	public function test_if_banner_hidden_when_dismiss_option_enabled() {
 		update_option( 'woocommerce_shipping_dismissed_timestamp', -1 );
-		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false );
 
 		$this->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 	}
@@ -115,7 +106,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		$two_hours_from_ago = ( time() - 2 * 60 * 60 ) * 1000;
 		update_option( 'woocommerce_shipping_dismissed_timestamp', $two_hours_from_ago );
 
-		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false );
 
 		$this->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 	}
@@ -128,8 +119,8 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		update_option( 'woocommerce_shipping_dismissed_timestamp', $twenty_four_hours_one_sec_ago );
 
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, null, false, false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), true );
 			}
@@ -140,7 +131,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 * Test if the banner is hidden when no shippable product available.
 	 */
 	public function test_if_banner_hidden_when_no_shippable_product() {
-		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+		$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false );
 
 		$this->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 	}
@@ -151,8 +142,8 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	public function test_if_banner_hidden_when_store_is_not_in_us() {
 		update_option( 'woocommerce_default_country', 'ES' );
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false, false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 			}
@@ -165,8 +156,8 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	public function test_if_banner_hidden_when_currency_is_not_usd() {
 		update_option( 'woocommerce_currency', 'EUR' );
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 			}
@@ -178,34 +169,8 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 */
 	public function test_if_banner_hidden_when_incompatible_plugin_installed() {
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', false, true );
-
-				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
-			}
-		);
-	}
-
-	/**
-	 * Test if the banner is hidden when Jetpack version is not at least 4.4.
-	 */
-	public function test_if_banner_hidden_when_jetpack_version_is_old() {
-		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.3', true, '1.22.5', false, false );
-
-				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
-			}
-		);
-	}
-
-	/**
-	 * Test if the banner is hidden when the WooCommerce Shipping & Tax Terms of Service has been already accepted.
-	 */
-	public function test_if_banner_hidden_when_wcs_tos_accepted() {
-		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.5', true, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false, true );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 			}
@@ -217,8 +182,8 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 */
 	public function test_if_banner_hidden_when_wcs_not_installed() {
 		$this->with_order(
-			function( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( '4.4', true, '1.22.4', false, false );
+			function ( $that ) {
+				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.4', false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 			}
@@ -230,20 +195,10 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 */
 	private function create_order() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_props( array( 'virtual' => true ) );
+		$order   = WC_Helper_Order::create_order( 1, $product );
 
-		$order      = new WC_Order();
-		$order_item = new WC_Order_Item_Product();
-		$order_item->set_props( array( 'product' => $product ) );
-		$order->add_item( $order_item );
-		$order->save();
-
-		global $post;
-
-		// phpcs:disable 	WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post     = new \stdClass();
-		$post->ID = $order->get_id();
-
+		global $theorder;
+		$theorder = $order;
 		return $order;
 	}
 
@@ -274,5 +229,4 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 
 		$this->destroy_order( $order );
 	}
-
 }

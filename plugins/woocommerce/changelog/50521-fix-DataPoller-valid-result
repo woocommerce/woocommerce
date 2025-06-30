@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-In Remote Specs, treat empty arrays as valid cached values so individual engines can return default values.

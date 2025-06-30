@@ -24,6 +24,22 @@ module.exports = {
 };
 ```
 
+**Note:** If you plan to extend the webpack configuration from `@wordpress/scripts` with `WooCommerceDependencyExtractionWebpackPlugin`, be sure to remove the default instance of the plugin:
+
+```js
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const webpackConfig = {
+	...defaultConfig,
+	plugins: [
+		...defaultConfig.plugins.filter(
+			( plugin ) =>
+				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
+		),
+		new WooCommerceDependencyExtractionWebpackPlugin(),
+	],
+};
+```
+
 Additional module requests on top of Wordpress [Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin) are:
 
 | Request                        | Global                   | Script handle          | Notes                                                   |

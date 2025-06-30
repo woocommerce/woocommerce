@@ -8,6 +8,9 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -216,6 +219,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'Note:', 'woocommerce' ),
 					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
 				),
+			),
+			'recreate_order_address_fts_index'     => array(
+				'name'   => __( 'Re-create Order Address FTS index', 'woocommerce' ),
+				'button' => __( 'Recreate index', 'woocommerce' ),
+				'desc'   => __( 'This tool will recreate the full text search index for order addresses. If the index does not exist, it will try to create it.', 'woocommerce' ),
 			),
 		);
 		if ( method_exists( 'WC_Install', 'verify_base_tables' ) ) {
@@ -530,10 +538,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 			case 'clear_sessions':
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
-				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
 				wp_cache_flush();
 				/* translators: %d: amount of sessions */
-				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
+				$message = __( 'Deleted all active sessions', 'woocommerce' );
 				break;
 
 			case 'install_pages':
@@ -542,8 +549,8 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				break;
 
 			case 'delete_taxes':
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
+				$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates;" );
+				$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 
 				if ( method_exists( 'WC_Cache_Helper', 'invalidate_cache_group' ) ) {
 					WC_Cache_Helper::invalidate_cache_group( 'taxes' );
@@ -596,6 +603,13 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message .= implode( ', ', $missing_tables );
 					$ran      = false;
 				}
+				break;
+
+			case 'recreate_order_address_fts_index':
+				$hpos_controller = wc_get_container()->get( CustomOrdersTableController::class );
+				$results         = $hpos_controller->recreate_order_address_fts_index();
+				$ran             = $results['status'];
+				$message         = $results['message'];
 				break;
 
 			default:

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Migrate shipping zones data store to use register(storeDescriptor)

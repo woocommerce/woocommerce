@@ -63,7 +63,7 @@ export function ContentPreview( { content }: ContentPreviewProps ) {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		return select( blockEditorStore ).getSettings();
-	} );
+	}, [] );
 
 	return (
 		<div className="woocommerce-content-preview">

@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * Test WC_Product_Query
  * @package WooCommerce\Tests\Product
@@ -16,7 +18,7 @@ class WC_Tests_WC_Product_Query extends WC_Unit_Test_Case {
 		$this->assertEquals( '', $query->get( 'weight' ) );
 		$types = $query->get( 'type' );
 		sort( $types );
-		$this->assertEquals( array( 'external', 'grouped', 'simple', 'variable' ), $types );
+		$this->assertEquals( array( ProductType::EXTERNAL, ProductType::GROUPED, ProductType::SIMPLE, ProductType::VARIABLE ), $types );
 	}
 
 	/**

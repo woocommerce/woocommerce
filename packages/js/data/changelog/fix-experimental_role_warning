@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove deprecated use of select from @wordpress/data-controls, using controls.resolveSelect instead.

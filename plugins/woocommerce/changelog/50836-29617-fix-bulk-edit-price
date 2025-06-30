@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Product bulk edit: allow to restore original price and avoid fatal errors.

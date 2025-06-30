@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	experimentalProductAttributeTermsStore,
 	Product,
 	type ProductProductAttribute,
 	ProductAttributeTerm,
@@ -76,17 +76,15 @@ export function useProductAttributes( {
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
-			return resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			)
-				.getProductAttributeTerms< ProductAttributeTerm[] >( {
+			return resolveSelect( experimentalProductAttributeTermsStore )
+				.getProductAttributeTerms( {
 					attribute_id: attributeId,
 				} )
 				.then(
 					( attributeTerms ) => {
 						return attributeTerms;
 					},
-					( error ) => {
+					( error: string ) => {
 						return error;
 					}
 				);
@@ -181,6 +179,7 @@ export function useProductAttributes( {
 		).then( ( termData ) => {
 			setAttributes( [
 				...globalAttributes.map( ( attr, index ) =>
+					// @ts-expect-error: termData definition is different from the expected type.
 					enhanceAttribute( attr, termData[ index ] )
 				),
 				...localAttributes,

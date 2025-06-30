@@ -104,14 +104,6 @@ export const versionBumpCommand = new Command( 'version-bump' )
 				Logger.notice( `Checking out ${ base }` );
 				await checkoutRemoteBranch( tmpRepoPath, base );
 			} else {
-				const exists = await git.raw( 'ls-remote', 'origin', branch );
-
-				if ( ! dryRun && exists.trim().length > 0 ) {
-					Logger.error(
-						`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-					);
-				}
-
 				if ( base !== 'trunk' ) {
 					// if the base is not trunk, we need to checkout the base branch first before creating a new branch.
 					Logger.notice( `Checking out ${ base }` );
@@ -150,7 +142,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			);
 
 			Logger.notice( `Pushing ${ workingBranch } branch to Github` );
-			await git.push( 'origin', workingBranch );
+			// if commit is direct to base, we push normally else we push with force
+			if ( commitDirectToBase ) {
+				await git.push( 'origin', workingBranch );
+			} else {
+				await git.push( 'origin', workingBranch, [ '--force' ] );
+			}
 
 			if ( ! commitDirectToBase ) {
 				Logger.startTask( 'Creating a pull request' );

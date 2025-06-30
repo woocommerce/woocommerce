@@ -15,6 +15,8 @@ const DEFAULT_STATE = {
 		runSelectedUpdateCallbacks: {},
 		updateWccomRequestErrorsMode: {},
 		fakeWooPayments: {},
+		updateWccomBaseUrl: { url: '' },
+		loadTemplateVersion: { template_name: '', version: '' },
 	},
 	status: '',
 	dbUpdateVersions: [],

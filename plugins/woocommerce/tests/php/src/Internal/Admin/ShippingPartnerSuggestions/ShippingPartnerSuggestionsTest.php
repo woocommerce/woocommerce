@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\DefaultShippingPartners;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\ShippingPartnerSuggestions;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\ShippingPartnerSuggestionsDataSourcePoller;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use WC_Unit_Test_Case;
 
 /**
@@ -37,7 +38,7 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . ShippingPartnerSuggestionsDataSourcePoller::ID . '_specs',
-			function( $value ) {
+			function ( $value ) {
 				if ( $value ) {
 					return $value;
 				}
@@ -70,6 +71,8 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		// Have a mock logger used by the suggestions rule evaluator.
 		$this->mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
 		add_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**
@@ -91,7 +94,7 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'transient_woocommerce_admin_' . ShippingPartnerSuggestionsDataSourcePoller::ID . '_specs' );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array();
 			}
 		);

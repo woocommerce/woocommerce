@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Default saved payment method is now respected by block checkout.

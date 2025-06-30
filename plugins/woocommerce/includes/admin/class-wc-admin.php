@@ -7,6 +7,11 @@
  * @version  2.6.0
  */
 
+declare(strict_types=1);
+
+use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -21,9 +26,18 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+
+		// Hook in early (priority 1) to make sure the PageController's hooks are added before any WC admin pages or
+		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
+		// While it may not sound like it, the admin_menu action is triggered quite early,
+		// before the admin_init or admin_enqueue_scripts  action.
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
+		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
+
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
+		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -36,7 +50,7 @@ class WC_Admin {
 		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ), 9999 );
 
 		// Add body class for Marketplace and My Subscriptions pages.
-		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
+		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
 	}
@@ -67,6 +81,11 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-exporters.php';
 
 		// Help Tabs.
+		/**
+		 * Filter to enable/disable admin help tab.
+		 *
+		 * @since 3.6.0
+		 */
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
 			include_once __DIR__ . '/class-wc-admin-help.php';
 		}
@@ -77,6 +96,14 @@ class WC_Admin {
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+	}
+
+	/**
+	 * Initialize the admin page controller logic.
+	 */
+	public function init_page_controller() {
+		// We only need to make sure the controller is instantiated since the hooking is done in the constructor.
+		PageController::get_instance();
 	}
 
 	/**
@@ -178,6 +205,11 @@ class WC_Admin {
 			}
 		}
 
+		/**
+		 * Filter to prevent admin access.
+		 *
+		 * @since 3.6.0
+		 */
 		if ( apply_filters( 'woocommerce_prevent_admin_access', $prevent_access ) ) {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit;
@@ -194,22 +226,38 @@ class WC_Admin {
 				die( 'Security check' );
 			}
 
-			// load the mailer class.
-			$mailer = WC()->mailer();
+			$email_preview = wc_get_container()->get( EmailPreview::class );
 
-			// get the preview email subject.
-			$email_heading = __( 'HTML email template', 'woocommerce' );
+			if ( isset( $_GET['type'] ) ) {
+				$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
+				try {
+					$email_preview->set_email_type( $type_param );
+				} catch ( InvalidArgumentException $e ) {
+					wp_die( esc_html__( 'Invalid email type.', 'woocommerce' ), 400 );
+				}
+			}
 
-			// get the preview email content.
-			ob_start();
-			include __DIR__ . '/views/html-email-template-preview.php';
-			$message = ob_get_clean();
-
-			// create a new email.
-			$email = new WC_Email();
-
-			// wrap the content with the email template and then add styles.
-			$message = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$message = $email_preview->render();
+				$message = $email_preview->ensure_links_open_in_new_tab( $message );
+			} else {
+				// Start output buffering to prevent partial renders with PHP notices or warnings.
+				ob_start();
+				try {
+					$message = $email_preview->render();
+					$message = $email_preview->ensure_links_open_in_new_tab( $message );
+				} catch ( Throwable $e ) {
+					ob_end_clean();
+					wp_die(
+						esc_html__(
+							'There was an error rendering the email preview. This doesn\'t affect actual email delivery. Please contact the extension author for assistance.',
+							'woocommerce'
+						),
+						404
+					);
+				}
+				ob_end_clean();
+			}
 
 			// print the preview email.
 			// phpcs:ignore WordPress.Security.EscapeOutput
@@ -217,6 +265,44 @@ class WC_Admin {
 			// phpcs:enable
 			exit;
 		}
+	}
+
+	/**
+	 * Preview email editor placeholder dummy content.
+	 */
+	public function preview_email_editor_dummy_content() {
+		$message = '';
+		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
+			return;
+		}
+
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) {
+			die( 'Security check' );
+		}
+
+		/**
+		 * Email preview instance for rendering dummy content.
+		 *
+		 * @var EmailPreview $email_preview - email preview instance
+		 */
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
+		if ( isset( $_GET['type'] ) ) {
+			$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
+		}
+
+		try {
+			$message = $email_preview->generate_placeholder_content( $type_param );
+		} catch ( \Exception $e ) {
+			// Catch other potential errors during content generation.
+			wp_die( esc_html__( 'There was an error rendering the email preview.', 'woocommerce' ), 404 );
+		}
+
+		// Print the placeholder content.
+		// phpcs:ignore WordPress.Security.EscapeOutput
+		echo $message;
+		exit;
 	}
 
 	/**
@@ -237,6 +323,11 @@ class WC_Admin {
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
 		// Check to make sure we're on a WooCommerce admin page.
+		/**
+		 * Filter to determine if admin footer text should be displayed.
+		 *
+		 * @since 2.3
+		 */
 		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
 			// Change the footer text.
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {

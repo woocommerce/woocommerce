@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Store API: Remove the need for nonces when using cart tokens. Remove deprecated X-WC-Store-API-Nonce header.

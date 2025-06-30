@@ -10,9 +10,11 @@ export type ValidationContextProps< T > = {
 	registerValidator(
 		validatorId: string,
 		validator: Validator< T >
-	): React.Ref< HTMLElement >;
+	): React.Ref< HTMLInputElement >;
 	unRegisterValidator( validatorId: string ): void;
-	getFieldByValidatorId: ( validatorId: string ) => Promise< HTMLElement >;
+	getFieldByValidatorId: (
+		validatorId: string
+	) => Promise< HTMLInputElement >;
 	validateField(
 		name: string,
 		newData?: Record< string, unknown >

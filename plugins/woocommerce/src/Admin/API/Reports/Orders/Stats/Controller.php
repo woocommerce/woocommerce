@@ -31,7 +31,7 @@ class Controller extends GenericStatsController {
 	protected $rest_base = 'reports/orders/stats';
 
 	/**
-	 * Get data from Query.
+	 * Get data from Orders\Stats\Query.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -202,11 +202,13 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_collection_params() {
 		$params                     = parent::get_collection_params();
-		$params['orderby']['enum']  = array(
-			'date',
-			'net_revenue',
-			'orders_count',
-			'avg_order_value',
+		$params['orderby']['enum']  = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'net_revenue',
+				'orders_count',
+				'avg_order_value',
+			)
 		);
 		$params['match']            = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),

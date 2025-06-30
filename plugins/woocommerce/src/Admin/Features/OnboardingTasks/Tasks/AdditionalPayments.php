@@ -1,12 +1,8 @@
 <?php
-
-
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Payments;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 
 /**
  * Payments Task
@@ -77,7 +73,7 @@ class AdditionalPayments extends Payments {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_enabled_additional_gateways();
+			$this->is_complete_result = $this->has_enabled_non_psp_payment_suggestion();
 		}
 
 		return $this->is_complete_result;
@@ -89,28 +85,16 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	public function can_view() {
-		if ( ! Features::is_enabled( 'payment-gateway-suggestions' ) ) {
-			// Hide task if feature not enabled.
-			return false;
-		}
-
 		if ( null !== $this->can_view_result ) {
 			return $this->can_view_result;
 		}
 
-		// Show task if woocommerce-payments is connected or if there are any suggested gateways in other category enabled.
-		$this->can_view_result = (
-			WooCommercePayments::is_connected() ||
-			self::has_enabled_other_category_gateways()
-		);
-
-		// Early return if task is not visible.
-		if ( ! $this->can_view_result ) {
-			return false;
+		// Always show task if there are any gateways enabled (i.e. the Payments task is complete).
+		if ( self::has_gateways() ) {
+			$this->can_view_result = true;
+		} else {
+			$this->can_view_result = false;
 		}
-
-		// Show task if there are any suggested gateways in additional category.
-		$this->can_view_result = ! empty( self::get_suggestion_gateways( 'category_additional' ) );
 
 		return $this->can_view_result;
 	}
@@ -120,84 +104,52 @@ class AdditionalPayments extends Payments {
 	 *
 	 * @return string
 	 */
-	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-admin&task=payments' );
+	public function get_action_url(): string {
+		// We auto-expand the "Other" section to show the additional payment methods.
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&other_pes_section=expanded&from=' . SettingsPaymentsService::FROM_ADDITIONAL_PAYMENTS_TASK );
 	}
 
 	/**
-	 * Check if the store has any enabled gateways in other category.
+	 * Check if there are any enabled non-PSP payment suggestions.
 	 *
-	 * @return bool
+	 * @return bool True if there are enabled non-PSP payment suggestions, false otherwise.
 	 */
-	private static function has_enabled_other_category_gateways() {
-		$other_gateways     = self::get_suggestion_gateways( 'category_other' );
-		$other_gateways_ids = wp_list_pluck( $other_gateways, 'id' );
-
-		return self::has_enabled_gateways(
-			function( $gateway ) use ( $other_gateways_ids ) {
-				return in_array( $gateway->id, $other_gateways_ids, true );
+	private function has_enabled_non_psp_payment_suggestion(): bool {
+		$providers = $this->get_payment_providers();
+		foreach ( $providers as $provider ) {
+			// Check if the provider is enabled and has a suggestion category ID that matches the ones we are interested in.
+			if (
+				! empty( $provider['state']['enabled'] ) &&
+				! empty( $provider['_suggestion_category_id'] ) &&
+				in_array( $provider['_suggestion_category_id'], array( PaymentsProviders::CATEGORY_BNPL, PaymentsProviders::CATEGORY_EXPRESS_CHECKOUT, PaymentsProviders::CATEGORY_CRYPTO ), true )
+			) {
+				return true;
 			}
-		);
+		}
+
+		return false;
 	}
 
 	/**
-	 * Check if the store has any enabled gateways in additional category.
+	 * Get the list of payments providers as it is used on the Payments Settings page.
 	 *
-	 * @return bool
+	 * @return array The list of payment providers.
 	 */
-	private static function has_enabled_additional_gateways() {
-		$additional_gateways     = self::get_suggestion_gateways( 'category_additional' );
-		$additional_gateways_ids = wp_list_pluck( $additional_gateways, 'id' );
+	private function get_payment_providers(): array {
+		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
+			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-		return self::has_enabled_gateways(
-			function( $gateway ) use ( $additional_gateways_ids ) {
-				return 'yes' === $gateway->enabled
-				&& in_array( $gateway->id, $additional_gateways_ids, true );
-			}
-		);
-	}
+			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
+		} catch ( \Throwable $e ) {
+			// In case of any error, return an empty array.
+			$providers = array();
+		}
 
-	/**
-	 * Check if the store has any enabled gateways based on the given criteria.
-	 *
-	 * @param callable|null $filter A callback function to filter the gateways.
-	 * @return bool
-	 */
-	private static function has_enabled_gateways( $filter = null ) {
-		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
-		$enabled_gateways = array_filter(
-			$gateways,
-			function( $gateway ) use ( $filter ) {
-				if ( is_callable( $filter ) ) {
-					return 'yes' === $gateway->enabled && call_user_func( $filter, $gateway );
-				} else {
-					return 'yes' === $gateway->enabled;
-				}
-			}
-		);
-
-		return ! empty( $enabled_gateways );
-	}
-
-	/**
-	 * Get the list of gateways to suggest.
-	 *
-	 * @param string $filter_by Filter by category. "category_additional" or "category_other".
-	 *
-	 * @return array
-	 */
-	private static function get_suggestion_gateways( $filter_by = 'category_additional' ) {
-		$country            = wc_get_base_location()['country'];
-		$plugin_suggestions = Init::get_cached_or_default_suggestions();
-		$plugin_suggestions = array_filter(
-			$plugin_suggestions,
-			function( $plugin ) use ( $country, $filter_by ) {
-				if ( ! isset( $plugin->{$filter_by} ) || ! isset( $plugin->plugins[0] ) ) {
-					return false;
-				}
-				return in_array( $country, $plugin->{$filter_by}, true );
-			}
-		);
-		return $plugin_suggestions;
+		return $providers;
 	}
 }

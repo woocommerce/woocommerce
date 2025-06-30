@@ -20,7 +20,7 @@ class ProductSKU extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $api_version = '2';
+	protected $api_version = '3';
 
 	/**
 	 * Overwrite parent method to prevent script registration.
@@ -69,14 +69,27 @@ class ProductSKU extends AbstractBlock {
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
+		$prefix = isset( $attributes['prefix'] ) ? wp_kses_post( ( $attributes['prefix'] ) ) : __( 'SKU: ', 'woocommerce' );
+		if ( ! empty( $prefix ) ) {
+			$prefix = sprintf( '<span class="wp-block-post-terms__prefix">%s</span>', $prefix );
+		}
+
+		$suffix = isset( $attributes['suffix'] ) ? wp_kses_post( ( $attributes['suffix'] ) ) : '';
+		if ( ! empty( $suffix ) ) {
+			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
+		}
+
 		return sprintf(
-			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta %1$s" style="%2$s">
-				SKU:
-				<strong class="sku">%3$s</strong>
+			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
+				%3$s
+				<span class="sku">%4$s</span>
+				%5$s
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
-			$product_sku
+			$prefix,
+			$product_sku,
+			$suffix
 		);
 	}
 }

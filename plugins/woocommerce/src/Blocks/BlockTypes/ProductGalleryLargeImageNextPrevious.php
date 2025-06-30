@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * ProductGalleryLargeImage class.
  */
@@ -31,34 +32,6 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 	}
 
 	/**
-	 *  Register the context
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'nextPreviousButtonsPosition', 'productGalleryClientId' ];
-	}
-
-	/**
-	 *  Return class suffix
-	 *
-	 * @param array $context Block context.
-	 * @return string
-	 */
-	private function get_class_suffix( $context ) {
-		switch ( $context['nextPreviousButtonsPosition'] ) {
-			case 'insideTheImage':
-				return 'inside-image';
-			case 'outsideTheImage':
-				return 'outside-image';
-			case 'off':
-				return 'off';
-			default:
-				return 'off';
-		}
-	}
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -78,159 +51,72 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery = $product->get_gallery_image_ids();
+		$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
 
-		if ( empty( $product_gallery ) ) {
-			return null;
+		// Don't show the arrows block if there is only one image.
+		if ( $product_gallery_image_count <= 1 ) {
+			return '';
 		}
 
-		$context     = $block->context;
-		$prev_button = $this->get_button( 'previous', $context );
-		$p           = new \WP_HTML_Tag_Processor( $prev_button );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
+		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
-		if ( $p->next_tag() ) {
-			$p->set_attribute(
-				'data-wc-on--click',
-				'actions.selectPreviousImage'
-			);
-			$p->set_attribute(
-				'aria-label',
-				__( 'Previous image', 'woocommerce' )
-			);
-			$prev_button = $p->get_updated_html();
-		}
-
-		$next_button = $this->get_button( 'next', $context );
-		$p           = new \WP_HTML_Tag_Processor( $next_button );
-
-		if ( $p->next_tag() ) {
-			$p->set_attribute(
-				'data-wc-on--click',
-				'actions.selectNextImage'
-			);
-			$p->set_attribute(
-				'aria-label',
-				__( 'Next image', 'woocommerce' )
-			);
-			$next_button = $p->get_updated_html();
-		}
-
-		$alignment_class = isset( $attributes['layout']['verticalAlignment'] ) ? 'is-vertically-aligned-' . $attributes['layout']['verticalAlignment'] : '';
-		$position_class  = 'wc-block-product-gallery-large-image-next-previous--' . $this->get_class_suffix( $context );
-
-		return strtr(
-			'<div
-				class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous {alignment_class}"
-				data-wc-interactive=\'{data_wc_interactive}\'
+		ob_start();
+		?>
+		<div
+			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
+			data-wp-interactive="woocommerce/product-gallery"
+		>
+			<button
+				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
+				data-wp-on--click="actions.selectPreviousImage"
+				data-wp-on--keydown="actions.onArrowsKeyDown"
+				data-wp-bind--aria-disabled="context.disableLeft"
+				aria-label="Previous image"
 			>
-				<div class="wc-block-product-gallery-large-image-next-previous-container {position_class}">
-					{prev_button}
-					{next_button}
-				</div>
-		</div>',
-			array(
-				'{prev_button}'         => $prev_button,
-				'{next_button}'         => $next_button,
-				'{alignment_class}'     => $alignment_class,
-				'{position_class}'      => $position_class,
-				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			)
-		);
-	}
-
-	/**
-	 * Generates the HTML for a next or previous button for the product gallery large image.
-	 *
-	 * @param string $button_type The type of button to generate. Either 'previous' or 'next'.
-	 * @param string $context     The block context.
-	 * @return string The HTML for the generated button.
-	 */
-	protected function get_button( $button_type, $context ) {
-		if ( 'insideTheImage' === $context['nextPreviousButtonsPosition'] ) {
-			return $this->get_inside_button( $button_type, $context );
-		}
-
-		return $this->get_outside_button( $button_type, $context );
-	}
-
-	/**
-	 * Returns an HTML button element with an SVG icon for the previous or next button when the buttons are inside the image.
-	 *
-	 * @param string $button_type The type of button to return. Either "previous" or "next".
-	 * @param string $context The context in which the button is being used.
-	 * @return string The HTML for the button element.
-	 */
-	protected function get_inside_button( $button_type, $context ) {
-		$previous_button_icon_path = 'M28.1 12L30.5 14L21.3 24L30.5 34L28.1 36L17.3 24L28.1 12Z';
-		$next_button_icon_path     = 'M21.7001 12L19.3 14L28.5 24L19.3 34L21.7001 36L32.5 24L21.7001 12Z';
-		$icon_path                 = $previous_button_icon_path;
-		$button_side_class         = 'left';
-
-		if ( 'next' === $button_type ) {
-			$icon_path         = $next_button_icon_path;
-			$button_side_class = 'right';
-		}
-
-		return sprintf(
-			'<button class="wc-block-product-gallery-large-image-next-previous--button wc-block-product-gallery-large-image-next-previous-%1$s--%2$s">
-				<svg  xmlns="http://www.w3.org/2000/svg" width="49" height="48" viewBox="0 0 49 48" fill="none">
-					<g filter="url(#filter0_b_397_11354)">
-						<rect x="0.5" width="48" height="48" rx="5" fill="black" fill-opacity="0.5"/>
-						<path d="%3$s" fill="white"/>
-					</g>
-					<defs>
-						<filter id="filter0_b_397_11354" x="-9.5" y="-10" width="68" height="68" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-							<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-							<feGaussianBlur in="BackgroundImageFix" stdDeviation="5"/>
-							<feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_397_11354"/>
-							<feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_397_11354" result="shape"/>
-						</filter>
-					</defs>
-				</svg>
-			</button>',
-			$button_side_class,
-			$this->get_class_suffix( $context ),
-			$icon_path
-		);
-	}
-
-	/**
-	 * Returns an HTML button element with an SVG icon for the previous or next button when the buttons are outside the image.
-	 *
-	 * @param string $button_type The type of button to return. Either "previous" or "next".
-	 * @param string $context The context in which the button is being used.
-	 * @return string The HTML for the button element.
-	 */
-	protected function get_outside_button( $button_type, $context ) {
-		$next_button_icon_path     = 'M1 1.28516L8 8.28516L1 15.2852';
-		$previous_button_icon_path = 'M9 1.28516L2 8.28516L9 15.2852';
-		$icon_path                 = $previous_button_icon_path;
-		$button_side_class         = 'left';
-
-		if ( 'next' === $button_type ) {
-			$icon_path         = $next_button_icon_path;
-			$button_side_class = 'right';
-		}
-
-		return sprintf(
-			'<button class="wc-block-product-gallery-large-image-next-previous--button wc-block-product-gallery-large-image-next-previous-%1$s--%2$s">
 				<svg
-					width="10"
-					height="16"
-					viewBox="0 0 10 16"
-					fill="none"
+					class="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left"
 					xmlns="http://www.w3.org/2000/svg"
+					width="8"
+					height="12"
+					fill="none"
 				>
 					<path
-						d="%3$s"
-						stroke="black"
-						stroke-width="1.5"
+						fill="currentColor"
+						fillRule="evenodd"
+						d="M6.445 12.005.986 6 6.445-.005l1.11 1.01L3.014 6l4.54 4.995-1.109 1.01Z"
+						clipRule="evenodd"
 					/>
 				</svg>
-			</button>',
-			$button_side_class,
-			$this->get_class_suffix( $context ),
-			$icon_path
-		);
+			</button>
+			<button
+				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
+				data-wp-on--click="actions.selectNextImage"
+				data-wp-on--keydown="actions.onArrowsKeyDown"
+				data-wp-bind--aria-disabled="context.disableRight"
+				aria-label="Next image"
+			>
+				<svg
+					class="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right"
+					xmlns="http://www.w3.org/2000/svg"
+					width="8"
+					height="12"
+					fill="none"
+				>
+					<path
+						fill="currentColor"
+						fillRule="evenodd"
+						d="M1.555-.004 7.014 6l-5.459 6.005-1.11-1.01L4.986 6 .446 1.005l1.109-1.01Z"
+						clipRule="evenodd"
+					/>
+				</svg>
+			</button>
+		</div>
+		<?php
+		$template = ob_get_clean();
+
+		return $template;
 	}
 }

@@ -99,6 +99,10 @@ class Controller extends GenericController {
 				'slug'        => 'customers',
 				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
 			),
+			array(
+				'slug'        => 'customers/stats',
+				'description' => __( 'Stats about groups of customers.', 'woocommerce' ),
+			),
 		);
 
 		/**
@@ -111,6 +115,7 @@ class Controller extends GenericController {
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
 
 		foreach ( $reports as $report ) {
+			// Silently skip non-compliant reports. Like the ones for WC_Admin_Reports::get_reports().
 			if ( empty( $report['slug'] ) ) {
 				continue;
 			}

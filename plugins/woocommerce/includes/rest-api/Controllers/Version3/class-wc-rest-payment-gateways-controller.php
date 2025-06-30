@@ -11,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Paymenga gateways controller class.
+ * Payment gateways controller class.
  *
  * @package WooCommerce\RestApi
  * @extends WC_REST_Payment_Gateways_V2_Controller
@@ -222,5 +222,53 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Validate multiselect based settings (with support for nested options).
+	 *
+	 * @param array|string $values  The submitted values.
+	 * @param array        $setting The field settings.
+	 * @return array|WP_Error
+	 */
+	public function validate_setting_multiselect_field( $values, $setting ) {
+		if ( empty( $values ) ) {
+			return array();
+		}
+
+		if ( ! is_array( $values ) ) {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$valid_keys = $this->flatten_options_keys( $setting['options'] );
+
+		$final_values = array();
+		foreach ( $values as $value ) {
+			if ( in_array( $value, $valid_keys, true ) ) {
+				$final_values[] = $value;
+			}
+		}
+
+		return $final_values;
+	}
+
+	/**
+	 * Helper: Recursively flatten option keys.
+	 *
+	 * @param array $options Nested options array.
+	 * @return array Flat list of valid keys.
+	 */
+	private function flatten_options_keys( array $options ): array {
+		$keys = array();
+
+		foreach ( $options as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$keys = array_merge( $keys, $this->flatten_options_keys( $value ) );
+			} else {
+				$keys[] = $key;
+			}
+		}
+
+		return $keys;
 	}
 }

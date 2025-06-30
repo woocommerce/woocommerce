@@ -1,0 +1,24 @@
+$font-line-height-x-large: 32px;
+
+$grid-unit: 8px;
+$grid-unit-05: 0.5 * $grid-unit; // 4px
+$grid-unit-10: 1 * $grid-unit; // 8px
+$grid-unit-15: 1.5 * $grid-unit; // 12px
+$grid-unit-20: 2 * $grid-unit; // 16px
+$grid-unit-40: 4 * $grid-unit; // 32px
+$grid-unit-60: 6 * $grid-unit; // 48px
+$grid-unit-70: 7 * $grid-unit; // 56px
+$grid-unit-80: 8 * $grid-unit; // 64px
+
+$radius-medium: 4px;
+$radius-large: 8px;
+
+$elevation-x-small: 0 1px 1px rgba($black, 0.03), 0 1px 2px rgba($black, 0.02), 0 3px 3px rgba($black, 0.02), 0 4px 4px rgba($black, 0.01);
+$elevation-large: 0 5px 15px rgba($black, 0.08), 0 15px 27px rgba($black, 0.07), 0 30px 36px rgba($black, 0.04), 0 50px 43px rgba($black, 0.02);
+$nav-sidebar-width: 300px;
+$header-height: 60px;
+$canvas-padding: $grid-unit-20;
+
+$sidebar-width: 280px;
+
+$border-width: 1px;
