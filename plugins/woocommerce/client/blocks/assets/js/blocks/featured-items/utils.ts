@@ -108,11 +108,11 @@ export function dimRatioToClass( ratio: number ) {
 export function getInvalidItemDescription( name: string ):string {
 	return name === BLOCK_NAMES.featuredProduct
 		? __(
-				'Previously selected Product is no longer available',
+				'Previously selected product is no longer available',
 				'woocommerce'
 		  )
 		: __(
-				'Previously selected Category is no longer available',
+				'Previously selected category is no longer available',
 				'woocommerce'
 		  );
 }
