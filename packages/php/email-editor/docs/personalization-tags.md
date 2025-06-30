@@ -2,16 +2,16 @@
 
 ## Table of Contents
 
-- [What are Personalization Tags?](#what-are-personalization-tags)
-- [Personalization Tags and Bits](#personalization-tags-and-bits)
-- [How They Work](#how-they-work)
-- [Key Components Overview](#key-components-overview)
-- [Editor UI](#editor-ui)
-- [Format](#format)
-- [Context](#context)
-- [Core Components](#core-components)
-- [Creating Custom Tags](#creating-custom-tags)
-- [Usage with Renderer](#usage-with-renderer)
+-   [What are Personalization Tags?](#what-are-personalization-tags)
+-   [Personalization Tags and Bits](#personalization-tags-and-bits)
+-   [How They Work](#how-they-work)
+-   [Key Components Overview](#key-components-overview)
+-   [Editor UI](#editor-ui)
+-   [Format](#format)
+-   [Context](#context)
+-   [Core Components](#core-components)
+-   [Creating Custom Tags](#creating-custom-tags)
+-   [Usage with Renderer](#usage-with-renderer)
 
 ## What are Personalization Tags?
 
@@ -19,9 +19,9 @@ Personalization Tags are dynamic placeholders that can be inserted into email co
 
 **Key Features:**
 
-- **Dynamic Content**: Automatically replace tags with relevant data
-- **Context-Aware**: Access to order, customer, store, and site information
-- **Extensible**: Third-party developers can create custom tags
+-   **Dynamic Content**: Automatically replace tags with relevant data
+-   **Context-Aware**: Access to order, customer, store, and site information
+-   **Extensible**: Third-party developers can create custom tags
 
 ## Personalization Tags and Bits
 
@@ -46,26 +46,26 @@ The Personalization Tags system works through a simple architecture:
 
 The central registry that manages all personalization tags. It provides:
 
-- Tag registration and retrieval
-- Duplicate prevention
-- Logging and debugging support
+-   Tag registration and retrieval
+-   Duplicate prevention
+-   Logging and debugging support
 
 ### 2. Personalization_Tag
 
 Individual tag instances that contain:
 
-- Display name and token
-- Category for organization
-- Callback function for value generation
-- Attributes for configuration
+-   Display name and token
+-   Category for organization
+-   Callback function for value generation
+-   Attributes for configuration
 
 ### 3. Personalizer
 
 The main engine that orchestrates the personalization process:
 
-- Manages context data
-- Coordinates tag processing
-- Handles different content types (body, title, links)
+-   Manages context data
+-   Coordinates tag processing
+-   Handles different content types (body, title, links)
 
 ## Editor UI
 
@@ -84,7 +84,15 @@ Personalization Tags use HTML comment syntax with a specific format: `<!--[token
 **Example usage in a paragraph block:**
 
 ```html
-<p>Hello <!--[customer/first-name]-->, your order <!--[order/number]--> was placed on <!--[my-plugin/formatted-date date="order_date" format="F j, Y"]--> and is currently <!--[order/status]-->. Thank you for your purchase!</p>
+<p>
+    Hello
+    <!--[customer/first-name]-->, your order
+    <!--[order/number]-->
+    was placed on
+    <!--[my-plugin/formatted-date date="order_date" format="F j, Y"]-->
+    and is currently
+    <!--[order/status]-->. Thank you for your purchase!
+</p>
 ```
 
 This would render as: "Hello John, your order #12345 was placed on January 15, 2024, and is currently Processing. Thank you for your purchase!"
@@ -113,10 +121,10 @@ The central registry for managing personalization tags.
 
 **Key Methods:**
 
-- `register(Personalization_Tag $tag)`: Register a new tag
-- `get_by_token(string $token)`: Retrieve a tag by its token
-- `get_all()`: Get all registered tags
-- `initialize()`: Initialize the registry and load all providers
+-   `register(Personalization_Tag $tag)`: Register a new tag
+-   `get_by_token(string $token)`: Retrieve a tag by its token
+-   `get_all()`: Get all registered tags
+-   `initialize()`: Initialize the registry and load all providers
 
 **Example Usage:**
 
@@ -162,12 +170,12 @@ new Personalization_Tag(
 
 **Key Methods:**
 
-- `get_name()`: Get the display name
-- `get_token()`: Get the token
-- `get_category()`: Get the category
-- `execute_callback($context, $args)`: Execute the callback function
-- `get_attributes()`: Get default attributes
-- `get_value_to_insert()`: Get the value to insert in UI
+-   `get_name()`: Get the display name
+-   `get_token()`: Get the token
+-   `get_category()`: Get the category
+-   `execute_callback($context, $args)`: Execute the callback function
+-   `get_attributes()`: Get default attributes
+-   `get_value_to_insert()`: Get the value to insert in UI
 
 ### Personalizer
 
@@ -175,9 +183,9 @@ Main engine for replacing tags with values in email content.
 
 **Key Methods:**
 
-- `set_context(array $context)`: Set the personalization context
-- `get_context()`: Get the current context
-- `personalize_content(string $content)`: Process and personalize content
+-   `set_context(array $context)`: Set the personalization context
+-   `get_context()`: Get the current context
+-   `personalize_content(string $content)`: Process and personalize content
 
 **Example Usage:**
 
@@ -256,7 +264,10 @@ $registry->register(
 **Usage in the email content:**
 
 ```html
-<p>Order placed on: <!--[my-plugin/formatted-date date="2024-01-15" format="F j, Y"]--></p>
+<p>
+    Order placed on:
+    <!--[my-plugin/formatted-date date="2024-01-15" format="F j, Y"]-->
+</p>
 ```
 
 ## Usage with Renderer
