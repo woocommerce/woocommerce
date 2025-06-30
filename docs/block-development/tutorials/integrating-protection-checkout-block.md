@@ -103,7 +103,7 @@ The [`rest_authentication_errors`](https://developer.wordpress.org/reference/hoo
 ```php
 add_filter( 'rest_authentication_errors', 'plugin_check_turnstile_token' );
 
-function cfturnstile_store_api_checkout_check( $result ) {
+function plugin_check_turnstile_token( $result ) {
     // Skip if this is not a POST request.
     if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
         // Always return the result or an error, never a boolean. This ensures other checks aren't thrown away like rate limiting or authentication.
@@ -131,18 +131,14 @@ function cfturnstile_store_api_checkout_check( $result ) {
     }
 
     $extensions = $request_body['extensions'];
-    if ( empty( $extensions ) ) {
+    if ( empty( $extensions ) || ! isset( $extensions['plugin-namespace-turnstile'] ) ) {
         return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
     }
-    $value = $extensions['plugin-namespace-turnstile'];
-    if ( empty( $value ) ) {
-        return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
-    }
-    $token = $value['token'];
+    $token = sanitize_text_field( $extensions['plugin-namespace-turnstile']['token'] );
     $check = my_token_check_function( $token );
     $success = $check['success'];
 
-    if( $success != true ) {
+    if( $success !== true ) {
         return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
     }
 
