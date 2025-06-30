@@ -29,7 +29,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 
 // Mock TotalsCoupon component
 jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
-	TotalsCoupon: jest.fn( ( { onSubmit, isLoading, instanceId } ) => (
+	TotalsCoupon: jest.fn( ( { isLoading, instanceId } ) => (
 		<div data-testid="totals-coupon">
 			<span>Coupon Form</span>
 			<span data-testid="instance-id">{ instanceId }</span>
@@ -61,6 +61,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 	} );
 
 	it( 'does not render when coupons are disabled', () => {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 		const getSetting = require( '@woocommerce/settings' ).getSetting;
 		getSetting.mockImplementation( ( setting, defaultValue ) => {
 			if ( setting === 'couponsEnabled' ) {
@@ -97,6 +98,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 
 	it( 'passes correct context to useStoreCartCoupons hook', () => {
 		const useStoreCartCoupons =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 			require( '@woocommerce/base-context/hooks' ).useStoreCartCoupons;
 
 		render( <Block /> );
@@ -115,6 +117,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 
 	it( 'integrates applyCoupon function from hook with TotalsCoupon', () => {
 		const TotalsCoupon =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 			require( '@woocommerce/base-components/cart-checkout' ).TotalsCoupon;
 
 		render( <Block /> );
@@ -132,6 +135,7 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 
 	it( 'passes loading state from hook to TotalsCoupon', () => {
 		const useStoreCartCoupons =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Required for mocking
 			require( '@woocommerce/base-context/hooks' ).useStoreCartCoupons;
 
 		// Mock loading state
