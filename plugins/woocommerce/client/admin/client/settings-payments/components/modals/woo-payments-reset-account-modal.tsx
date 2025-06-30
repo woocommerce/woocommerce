@@ -38,6 +38,11 @@ interface WooPaymentsResetAccountModalProps {
 	 * Indicates if the account is a test-drive/sandbox account.
 	 */
 	isTestMode?: boolean;
+
+	/**
+	 * Indicate if the reset flow is embedded (ie inside NOX).
+	 */
+	isEmbeddedResetFlow?: boolean;
 }
 
 /**
@@ -47,6 +52,7 @@ export const WooPaymentsResetAccountModal = ( {
 	isOpen,
 	onClose,
 	isTestMode,
+	isEmbeddedResetFlow = false,
 }: WooPaymentsResetAccountModalProps ) => {
 	const [ isResettingAccount, setIsResettingAccount ] = useState( false );
 	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
