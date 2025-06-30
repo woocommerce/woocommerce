@@ -57,6 +57,7 @@ const productButtonStore = {
 			const product = wooState.cart?.items.find(
 				( item ) => item.id === state.productId
 			);
+
 			return product?.quantity || 0;
 		},
 		get slideInAnimation() {

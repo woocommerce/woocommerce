@@ -1,12 +1,14 @@
 # WooCommerce Email Editor
 
 This folder contains the code for the WooCommerce Email Editor PHP Package.
-We aim to extract the engine as an independent library, so it can be used in other projects.
-As we are still in an exploration phase, we keep it together with the WooCommerce codebase.
 
-You can locate the JS package here `packages/js/email-editor`
+This package covers functionality for bootstrapping the email editor JS application and code for rendering emails from Gutenberg blocks.
+
+You can locate the JS package in [`packages/js/email-editor`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/email-editor)
 
 ## Workflow Commands
+
+Note: The package is developed in [the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/packages/php/email-editor).
 
 We use `composer` run scripts to run the commands. You can run them using `composer run <command>`.
 If you don't have `composer` installed globally, you need to install it globally. [Please check how to install it](https://getcomposer.org/doc/00-intro.md).
