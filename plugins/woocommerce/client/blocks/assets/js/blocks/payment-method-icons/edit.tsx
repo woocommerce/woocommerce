@@ -55,17 +55,22 @@ const Edit = ( {
 			cardIcons?: Record< string, { icon: string } >;
 		};
 		const cardIcons = wcSettings?.cardIcons || {};
-		const availableCardIcons = Object.keys( cardIcons )
-			.map( ( type ) => {
+		const availableCardIcons = Object.keys( cardIcons ).reduce(
+			( acc, type ) => {
 				if ( ! cardIcons[ type ] || ! cardIcons[ type ].icon ) {
-					return null;
+					return acc;
 				}
-				return {
-					type,
-					icon: cardIcons[ type ].icon,
-				};
-			} )
-			.filter( Boolean );
+
+				return [
+					...acc,
+					{
+						type,
+						icon: cardIcons[ type ].icon,
+					},
+				];
+			},
+			[] as Array< { type: string; icon: string } >
+		);
 		const otherPaymentMethods = Object.keys( wooPaymentMethods )
 			.filter( ( method ) => method !== 'card' )
 			.sort( ( a, b ) => a.localeCompare( b ) );
