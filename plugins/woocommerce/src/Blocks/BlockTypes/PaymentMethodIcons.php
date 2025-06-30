@@ -43,7 +43,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'cardIcons', $this->get_enabled_card_types() );
+		$this->asset_data_registry->add( 'availablePaymentMethods', $this->get_available_payment_methods() );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class PaymentMethodIcons extends AbstractBlock {
 
 		$output  = '<div ' . $wrapper_attributes . '>';
 		$output .= '<div class="wp-block-woocommerce-payment-method-icons">';
-		$output .= $this->render_card_types( $attributes );
+		$output .= $this->render_payment_method_icons( $attributes );
 		$output .= '</div>';
 		$output .= '</div>';
 
@@ -80,21 +80,19 @@ class PaymentMethodIcons extends AbstractBlock {
 	}
 
 	/**
-	 * Render the card types.
+	 * Render payment method icons.
 	 *
 	 * @param array $attributes Block attributes.
 	 * @return string Rendered block type output.
 	 */
-	private function render_card_types( $attributes ) {
+	private function render_payment_method_icons( $attributes ) {
 		$output = '';
 
-		$enabled_card_types         = array_values( $this->get_enabled_card_types() );
-		$other_payment_method_icons = $this->get_other_payment_method_icons();
-		$all_payment_methods        = array_merge( $enabled_card_types, $other_payment_method_icons );
+		$all_payment_methods        = $this->get_available_payment_methods();
 		$number_of_icons            = $attributes['numberOfIcons'] ?? 0;
 		$number_of_icons            = 0 === $number_of_icons ? count( $all_payment_methods ) : max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
 
-		if ( ! empty( $enabled_card_types ) ) {
+		if ( ! empty( $all_payment_methods ) ) {
 			for ( $i = 0; $i < $number_of_icons; $i++ ) {
 				$payment_method = $all_payment_methods[ $i ];
 				$output        .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
@@ -181,7 +179,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return array Other payment method icons.
 	 */
 	private function get_other_payment_method_icons() {
-		$available_gateways    = WC()->payment_gateways->payment_gateways();
+		$available_gateways    = WC()->payment_gateways->get_available_payment_gateways();
 		$other_payment_methods = array();
 
 		if ( empty( $available_gateways ) ) {
@@ -212,5 +210,17 @@ class PaymentMethodIcons extends AbstractBlock {
 		);
 
 		return $other_payment_methods;
+	}
+
+	/**
+	 * Get the available payment methods.
+	 *
+	 * @return array Available payment methods.
+	 */
+	private function get_available_payment_methods() {
+		$enabled_card_types         = array_values( $this->get_enabled_card_types() );
+		$other_payment_method_icons = $this->get_other_payment_method_icons();
+		$all_payment_methods        = array_merge( $enabled_card_types, $other_payment_method_icons );
+		return $all_payment_methods;
 	}
 }
