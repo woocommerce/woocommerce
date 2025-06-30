@@ -101,9 +101,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
+		await page.getByLabel( 'Product quantity' ).fill( '1' );
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '6 in cart' );
+		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
 	test( 'allows adding variable products to cart', async ( {
@@ -179,6 +180,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'Increase quantity of Beanie'
 		);
 		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
 
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
@@ -186,7 +188,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
