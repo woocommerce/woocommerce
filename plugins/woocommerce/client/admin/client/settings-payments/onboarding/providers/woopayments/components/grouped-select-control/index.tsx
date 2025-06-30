@@ -192,7 +192,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 					className="components-grouped-select-control__button-icon"
 				/>
 			</button>
-			<ul { ...menuProps }>
+			<div { ...menuProps }>
 				{ isOpen && (
 					<>
 						{ searchable && (
@@ -206,7 +206,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 								placeholder={ __( 'Search…', 'woocommerce' ) }
 							/>
 						) }
-						<div className="components-grouped-select-control__list-container">
+						<ul className="components-grouped-select-control__list-container">
 							{ itemsToRender.map( ( item, index ) => {
 								const isGroup = !! item.items;
 
@@ -249,10 +249,10 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 									</li>
 								);
 							} ) }
-						</div>
+						</ul>
 					</>
 				) }
-			</ul>
+			</div>
 		</div>
 	);
 };
