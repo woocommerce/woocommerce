@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Release to upload (can be a draft release).'
+        description: 'Release tag to upload (can be a draft release).'
         required: true
         default: ''
 
