@@ -115,7 +115,7 @@ export default defineConfig( {
 			// testIgnore: '**/api-tests/**',
 			testMatch: '**/product/create-product-attributes.spec.js',
 			dependencies: [ 'site setup' ],
-			repeatEach: 100,
+			repeatEach: 300,
 		},
 		{
 			name: 'api',
