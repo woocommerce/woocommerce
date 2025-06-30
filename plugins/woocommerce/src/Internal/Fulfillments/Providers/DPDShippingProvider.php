@@ -15,198 +15,251 @@ class DPDShippingProvider extends AbstractShippingProvider {
 	 * @var array<string, array{patterns: array<int, string>, confidence: int}>
 	 */
 	private const TRACKING_PATTERNS = array(
-		'DE' => array(
+		'DE' => array( // Germany.
 			'patterns'   => array(
-				'/^\d{14}$/',
-				'/^\d{12}$/',
-				'/^\d{10,14}[A-Z]?$/',
-			),
-			'confidence' => 95,
-		),
-		'GB' => array(
-			'patterns'   => array(
-				'/^\d{12}$/',
-				'/^\d{14}$/',
-				'/^[A-Z]{12}$/',
-				'/^[A-Z]{14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
-				'/^\d{13}[A-Z]$/',
-			),
-			'confidence' => 95,
-		),
-		'FR' => array(
-			'patterns'   => array(
-				'/^\d{12,14}$/',
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 95,
+			'confidence' => 75, // Reduced: 12/14 digits are very generic
 		),
-		'NL' => array(
+		'GB' => array( // United Kingdom.
 			'patterns'   => array(
 				'/^\d{14}$/',
-				'/^\d{12}$/',
-				'/^\d{10,14}[A-Z]?$/',
+				'/^[A-Z]{2}\d{9}GB$/',
 			),
-			'confidence' => 95,
+			'confidence' => 85, // Mixed: generic digits + specific GB suffix
 		),
-		'BE' => array(
+		'FR' => array( // France.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
-				'/^\d{10,14}$/',
 			),
-			'confidence' => 90,
+			'confidence' => 75, // Reduced: very generic patterns
 		),
-		'PL' => array(
+		'NL' => array( // Netherlands.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+			),
+			'confidence' => 75, // Reduced: very generic patterns
+		),
+		'BE' => array( // Belgium.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^\d{12}$/',
+			),
+			'confidence' => 75, // Reduced: very generic patterns
+		),
+		'PL' => array( // Poland.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
 			),
 			'confidence' => 90,
 		),
-		'IE' => array(
+		'IE' => array( // Ireland.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
-				'/^\d{13}[A-Z]$/',
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{9}IE$/',
 			),
 			'confidence' => 85,
 		),
-		'AT' => array(
+		'AT' => array( // Austria.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
-				'/^\d{10,14}[A-Z]?$/',
+			),
+			'confidence' => 75, // Reduced: generic patterns
+		),
+		'CH' => array( // Switzerland.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{9}CH$/',
+			),
+			'confidence' => 85,
+		),
+		'ES' => array( // Spain.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 85,
+		),
+		'IT' => array( // Italy.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 85,
+		),
+		'LU' => array( // Luxembourg.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^\d{12}$/',
+			),
+			'confidence' => 75, // Reduced: generic patterns
+		),
+		'CZ' => array( // Czech Republic.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 90,
+		),
+		'SK' => array( // Slovakia.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 90,
+		),
+		'HU' => array( // Hungary.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 90,
+		),
+		'SI' => array( // Slovenia.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
 			),
 			'confidence' => 80,
 		),
-		'CH' => array(
+		'HR' => array( // Croatia.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
-				'/^\d{13}[A-Z]$/',
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 80,
+		),
+		'RO' => array( // Romania.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
 			),
 			'confidence' => 75,
 		),
-		'ES' => array(
+		'BG' => array( // Bulgaria.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
-			),
-			'confidence' => 75,
-		),
-		'IT' => array(
-			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
-			),
-			'confidence' => 75,
-		),
-		'PT' => array(
-			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
 			),
 			'confidence' => 70,
 		),
-		'CZ' => array(
+		'LT' => array( // Lithuania.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 70,
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
 		),
-		'SK' => array(
+		'LV' => array( // Latvia.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 70,
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
 		),
-		'HU' => array(
+		'EE' => array( // Estonia.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 70,
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
 		),
-		'SE' => array(
+		'FI' => array( // Finland.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 65,
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD
 		),
-		'DK' => array(
+		'DK' => array( // Denmark.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 65,
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD
 		),
-		'NO' => array(
+		'SE' => array( // Sweden.
 			'patterns'   => array(
-				'/^\d{12,14}$/',
-				'/^[A-Z]{2}\d{10,12}$/',
+				'/^\d{14}$/',
+				'/^\d{12}$/',
 			),
-			'confidence' => 65,
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD
+		),
+		'NO' => array( // Norway.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^\d{12}$/',
+			),
+			'confidence' => 60, // Reduced: limited DPD presence
+		),
+		'GR' => array( // Greece.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 85,
+		),
+		'PT' => array( // Portugal.
+			'patterns'   => array(
+				'/^\d{14}$/',
+				'/^[A-Z]{2}\d{10}$/',
+			),
+			'confidence' => 85,
 		),
 	);
 
 	/**
-	 * Extended tracking patterns for special cases.
-	 *
-	 * @var array<int, string>
+	 * International shipment pattern (28 digits)
 	 */
-	private const EXTENDED_PATTERNS = array(
-		'/^\d{4}\s\d{3}\s\d{4}\s\d{4}\s\d{4}\s\d{2}\s\d{3}\s\d{3}\s[A-Z]$/', // 28 with spaces + letter
-		'/^\d{28}$/', // 28 digits, no spaces
-	);
+	private const INTERNATIONAL_PATTERN = '/^\d{28}$/';
 
 	/**
-	 * Get the key of the shipping provider.
+	 * Get the unique key for this shipping provider.
 	 *
-	 * @return string The provider key.
+	 * @return string Unique key.
 	 */
 	public function get_key(): string {
 		return 'dpd';
 	}
 
 	/**
-	 * Get the name of the shipping provider.
+	 * Get the name of this shipping provider.
 	 *
-	 * @return string The provider name.
+	 * @return string Name of the shipping provider.
 	 */
 	public function get_name(): string {
 		return 'DPD';
 	}
 
 	/**
-	 * Get the icon URL for the shipping provider.
+	 * Get the icon URL for this shipping provider.
 	 *
-	 * @return string The URL to the provider icon.
+	 * @return string URL of the shipping provider icon.
 	 */
 	public function get_icon(): string {
 		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/dpd.png';
 	}
 
 	/**
-	 * Get the countries from which this provider can ship.
+	 * Get the description of this shipping provider.
 	 *
-	 * @return array<int, string> List of ISO country codes.
+	 * @return array Description of the shipping provider.
 	 */
 	public function get_shipping_from_countries(): array {
 		return array_keys( self::TRACKING_PATTERNS );
 	}
 
 	/**
-	 * Get the countries to which this provider can ship.
+	 * Get the countries this shipping provider can ship to.
 	 *
-	 * @return array<int, string> List of ISO country codes.
+	 * DPD typically ships within Europe, so we return the same countries as shipping from.
+	 *
+	 * @return array List of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
 		return $this->get_shipping_from_countries();
@@ -215,24 +268,25 @@ class DPDShippingProvider extends AbstractShippingProvider {
 	/**
 	 * Get the tracking URL for a given tracking number.
 	 *
-	 * @param string $tracking_number The tracking number.
+	 * @param string $tracking_number The tracking number to generate the URL for.
 	 * @return string The tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://www.dpd.com/tracking/' . $tracking_number;
+		return 'https://www.dpd.com/tracking/' . rawurlencode( $tracking_number );
 	}
 
 	/**
-	 * Validate if a tracking number matches DPD patterns for a specific country.
+	 * Get the tracking URL for a given tracking number and country code.
 	 *
-	 * @param string $tracking_number The normalized tracking number.
-	 * @param string $country_code    The country code to check patterns for.
-	 * @return bool True if the tracking number matches the country's DPD patterns.
+	 * @param string $tracking_number The tracking number to generate the URL for.
+	 * @param string $country_code The country code for the shipment.
+	 * @return string The tracking URL.
 	 */
-	private function validate_tracking_number_for_country( string $tracking_number, string $country_code ): bool {
+	private function validate_country_pattern( string $tracking_number, string $country_code ): bool {
 		if ( ! isset( self::TRACKING_PATTERNS[ $country_code ] ) ) {
 			return false;
 		}
+
 		foreach ( self::TRACKING_PATTERNS[ $country_code ]['patterns'] as $pattern ) {
 			if ( preg_match( $pattern, $tracking_number ) ) {
 				return true;
@@ -242,119 +296,57 @@ class DPDShippingProvider extends AbstractShippingProvider {
 	}
 
 	/**
-	 * Check if tracking number matches extended DPD patterns.
+	 * Try to parse a DPD tracking number.
 	 *
-	 * @param string $tracking_number The tracking number (with or without spaces).
-	 * @return bool True if matches extended patterns.
+	 * @param string $tracking_number The tracking number to parse.
+	 * @param string $shipping_from The country code of the shipping origin.
+	 * @param string $shipping_to The country code of the shipping destination.
+	 * @return array|null An array with 'url' and 'ambiguity_score' if valid, null otherwise.
 	 */
-	private function validate_extended_tracking_number( string $tracking_number ): bool {
-		foreach ( self::EXTENDED_PATTERNS as $pattern ) {
-			if ( preg_match( $pattern, $tracking_number ) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Find all possible countries that match the tracking number pattern.
-	 *
-	 * @param string $normalized_tracking_number The normalized tracking number.
-	 * @return array<int, array{country: string, confidence: int}> Array of matching countries with confidence.
-	 */
-	private function find_matching_countries( string $normalized_tracking_number ): array {
-		$matches = array();
-		foreach ( self::TRACKING_PATTERNS as $country => $config ) {
-			if ( $this->validate_tracking_number_for_country( $normalized_tracking_number, $country ) ) {
-				$matches[] = array(
-					'country'    => $country,
-					'confidence' => $config['confidence'],
-				);
-			}
-		}
-		usort(
-			$matches,
-			function ( $a, $b ) {
-				return $b['confidence'] - $a['confidence'];
-			}
-		);
-		return $matches;
-	}
-
-	/**
-	 * Try to parse the tracking number with additional parameters.
-	 *
-	 * @param string $tracking_number The tracking number.
-	 * @param string $shipping_from   The origin country code.
-	 * @param string $shipping_to     The destination country code.
-	 *
-	 * @return array{url: string, ambiguity_score: int}|null The tracking URL with ambiguity score, or null if parsing fails.
-	 */
-	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
+	public function try_parse_tracking_number(
+		string $tracking_number,
+		string $shipping_from,
+		string $shipping_to
+	): ?array {
 		if ( empty( $tracking_number ) || empty( $shipping_from ) || empty( $shipping_to ) ) {
 			return null;
 		}
 
-		// Normalize tracking number - remove spaces and convert to uppercase.
 		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
 		if ( empty( $normalized ) ) {
 			return null;
 		}
 
-		// Check extended patterns first (highest confidence for these special formats).
-		if ( $this->validate_extended_tracking_number( $tracking_number ) ||
-			$this->validate_extended_tracking_number( $normalized ) ) {
-			return array(
-				'url'             => $this->get_tracking_url( $normalized ),
-				'ambiguity_score' => 95,
-			);
-		}
-
 		$shipping_from = strtoupper( $shipping_from );
 		$shipping_to   = strtoupper( $shipping_to );
 
-		// First, check if the tracking number matches the origin country pattern.
-		if ( $this->validate_tracking_number_for_country( $normalized, $shipping_from ) ) {
-			$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'] ?? 50;
-			// Boost confidence if destination is also a DPD country.
+		// 1. Check international format first.
+		if ( preg_match( self::INTERNATIONAL_PATTERN, $normalized ) ) {
+			if ( in_array( $shipping_from, $this->get_shipping_from_countries(), true ) &&
+				in_array( $shipping_to, $this->get_shipping_to_countries(), true ) ) {
+				return array(
+					'url'             => $this->get_tracking_url( $normalized ),
+					'ambiguity_score' => 95,
+				);
+			}
+			return null;
+		}
+
+		// 2. Check country-specific patterns.
+		if ( $this->validate_country_pattern( $normalized, $shipping_from ) ) {
+			$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'];
+
+			// Boost confidence for intra-DPD shipments.
 			if ( in_array( $shipping_to, $this->get_shipping_to_countries(), true ) ) {
 				$confidence = min( 98, $confidence + 5 );
 			}
+
 			return array(
 				'url'             => $this->get_tracking_url( $normalized ),
 				'ambiguity_score' => $confidence,
 			);
 		}
 
-		// If origin country doesn't match, check all possible countries.
-		$matching_countries = $this->find_matching_countries( $normalized );
-		if ( empty( $matching_countries ) ) {
-			return null; // No valid DPD pattern found.
-		}
-
-		// Calculate ambiguity score based on matches.
-		$base_confidence = $matching_countries[0]['confidence'];
-		$match_count     = count( $matching_countries );
-
-		// Reduce confidence based on ambiguity (more matches = less certain).
-		if ( $match_count > 1 ) {
-			$ambiguity_penalty = min( 30, ( $match_count - 1 ) * 10 );
-			$base_confidence  -= $ambiguity_penalty;
-		}
-
-		// Further reduce if origin country is not in our supported list.
-		if ( ! in_array( $shipping_from, $this->get_shipping_from_countries(), true ) ) {
-			$base_confidence -= 15;
-		}
-
-		// Ensure minimum confidence threshold.
-		if ( $base_confidence < 40 ) {
-			return null;
-		}
-
-		return array(
-			'url'             => $this->get_tracking_url( $normalized ),
-			'ambiguity_score' => max( 40, min( 95, $base_confidence ) ),
-		);
+		return null;
 	}
 }

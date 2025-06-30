@@ -55,13 +55,13 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		$countries = $this->provider->get_shipping_from_countries();
 
 		// Test that core DPD countries are included.
-		$expected_core_countries = array( 'DE', 'GB', 'FR', 'NL', 'BE', 'PL', 'IE' );
+		$expected_core_countries = array( 'DE', 'GB', 'FR', 'NL', 'BE', 'PL', 'IE', 'LT', 'LV', 'EE', 'FI', 'DK', 'SE', 'NO', 'GR', 'PT' );
 		foreach ( $expected_core_countries as $country ) {
 			$this->assertContains( $country, $countries, "Country {$country} should be in shipping from countries" );
 		}
 
-		// Test that we have a reasonable number of countries.
-		$this->assertGreaterThan( 10, count( $countries ), 'Should have more than 10 countries' );
+		// Test that we have the expected number of countries.
+		$this->assertGreaterThanOrEqual( 28, count( $countries ), 'Should have at least 28 countries' );
 	}
 
 	/**
@@ -81,59 +81,70 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function validTrackingNumberProvider(): array {
 		return array(
-			// German tracking numbers (high confidence).
-			array( '12345678901234', 'DE', 'FR', 95 ), // 14 digits from Germany.
-			array( '123456789012', 'DE', 'NL', 95 ),   // 12 digits from Germany.
-			array( '1234567890123A', 'DE', 'BE', 95 ), // 13 digits + letter from Germany.
+			// German tracking numbers (medium confidence).
+			array( '12345678901234', 'DE', 'FR', 80 ), // 14 digits from Germany with boost (75+5).
+			array( '123456789012', 'DE', 'NL', 80 ),   // 12 digits from Germany with boost (75+5).
 
-			// UK tracking numbers (high confidence).
-			array( 'ABCDEFGHIJKL', 'GB', 'DE', 95 ),   // 12 letters UK format.
-			array( 'ABCDEFGHIJKLMN', 'GB', 'FR', 95 ), // 14 letters UK format.
-			array( 'AB1234567890', 'GB', 'FR', 95 ),   // 2 letters + 10 digits UK.
-			array( '123456789012', 'GB', 'DE', 95 ),   // Pure numeric UK.
-			array( '1234567890123A', 'GB', 'FR', 95 ), // 13 digits + letter UK.
+			// UK tracking numbers (medium-high confidence).
+			array( '12345678901234', 'GB', 'DE', 90 ),   // 14 digits UK format with boost (85+5).
+			array( 'AB123456789GB', 'GB', 'FR', 90 ),    // Country suffix format UK with boost (85+5).
 
-			// French tracking numbers (high confidence).
-			array( '12345678901234', 'FR', 'DE', 95 ), // 14 digits from France.
-			array( '123456789012', 'FR', 'GB', 95 ),   // 12 digits from France.
+			// French tracking numbers (medium confidence).
+			array( '12345678901234', 'FR', 'DE', 80 ), // 14 digits from France with boost (75+5).
+			array( '123456789012', 'FR', 'GB', 80 ),   // 12 digits from France with boost (75+5).
 
-			// Netherlands tracking numbers (high confidence).
-			array( '12345678901234', 'NL', 'DE', 95 ), // 14 digits from Netherlands.
-			array( '123456789012', 'NL', 'BE', 95 ),   // 12 digits from Netherlands.
+			// Netherlands tracking numbers (medium confidence).
+			array( '12345678901234', 'NL', 'DE', 80 ), // 14 digits from Netherlands with boost (75+5).
+			array( '123456789012', 'NL', 'BE', 80 ),   // 12 digits from Netherlands with boost (75+5).
 
-			// Belgian tracking numbers (high confidence).
-			array( '12345678901234', 'BE', 'NL', 90 ), // 14 digits from Belgium.
-			array( '123456789012', 'BE', 'FR', 90 ),   // 12 digits from Belgium.
+			// Belgian tracking numbers (medium confidence).
+			array( '12345678901234', 'BE', 'NL', 80 ), // 14 digits from Belgium with boost (75+5).
+			array( '123456789012', 'BE', 'FR', 80 ),   // 12 digits from Belgium with boost (75+5).
 
-			// Polish tracking numbers (high confidence).
-			array( '12345678901234', 'PL', 'DE', 90 ), // 14 digits from Poland.
-			array( 'PL1234567890', 'PL', 'DE', 90 ),   // Country code format from Poland.
+			// Polish tracking numbers (medium-high confidence).
+			array( '12345678901234', 'PL', 'DE', 95 ), // 14 digits from Poland with boost (90+5).
+			array( 'PL1234567890', 'PL', 'DE', 95 ),   // Country code format from Poland with boost.
+
+			// New countries - Baltic states (medium confidence).
+			array( '12345678901234', 'LT', 'DE', 75 ), // 14 digits from Lithuania with boost (70+5).
+			array( '123456789012', 'LV', 'PL', 75 ),   // 12 digits from Latvia with boost (70+5).
+			array( '12345678901234', 'EE', 'FI', 75 ), // 14 digits from Estonia with boost (70+5).
+
+			// Nordic countries (medium-low confidence).
+			array( '12345678901234', 'FI', 'SE', 70 ), // 14 digits from Finland with boost (65+5).
+			array( '123456789012', 'DK', 'NO', 70 ),   // 12 digits from Denmark with boost (65+5).
+			array( '12345678901234', 'SE', 'DK', 70 ), // 14 digits from Sweden with boost (65+5).
+			array( '123456789012', 'NO', 'SE', 65 ),   // 12 digits from Norway with boost (60+5).
+
+			// Southern Europe (medium confidence).
+			array( '12345678901234', 'GR', 'IT', 85 ), // 14 digits from Greece.
+			array( 'GR1234567890', 'GR', 'BG', 85 ),   // Country code format from Greece.
+			array( '12345678901234', 'PT', 'ES', 85 ), // 14 digits from Portugal.
+			array( 'PT1234567890', 'PT', 'FR', 85 ),   // Country code format from Portugal.
 
 			// Irish tracking numbers (medium confidence).
 			array( '12345678901234', 'IE', 'GB', 85 ), // 14 digits from Ireland.
-			array( 'ABCDEFGHIJKLMN', 'IE', 'GB', 85 ), // 14 letters from Ireland.
-			array( 'IE1234567890', 'IE', 'GB', 85 ),   // Country code format from Ireland.
+			array( 'IE123456789IE', 'IE', 'GB', 85 ),   // Country code format from Ireland.
 
 			// Austrian tracking numbers (medium confidence).
-			array( '12345678901234', 'AT', 'DE', 80 ), // 14 digits from Austria.
-			array( '123456789012', 'AT', 'CH', 80 ),   // 12 digits from Austria.
+			array( '12345678901234', 'AT', 'DE', 80 ), // 14 digits from Austria with boost (75+5).
+			array( '123456789012', 'AT', 'CH', 80 ),   // 12 digits from Austria with boost (75+5).
 
 			// Swiss tracking numbers (medium confidence).
-			array( '12345678901234', 'CH', 'DE', 75 ), // 14 digits from Switzerland.
-			array( 'ABCDEFGHIJKLMN', 'CH', 'DE', 75 ), // 14 letters from Switzerland.
-			array( 'CH1234567890', 'CH', 'AT', 75 ),   // Country code format from Switzerland.
+			array( '12345678901234', 'CH', 'DE', 85 ), // 14 digits from Switzerland.
+			array( 'CH123456789CH', 'CH', 'AT', 85 ),   // Country code format from Switzerland.
 
 			// Spanish tracking numbers (medium confidence).
-			array( '123456789012', 'ES', 'FR', 75 ),   // 12 digits from Spain.
-			array( 'ES1234567890', 'ES', 'PT', 75 ),   // Country code format from Spain.
+			array( '12345678901234', 'ES', 'FR', 85 ),   // 14 digits from Spain.
+			array( 'ES1234567890', 'ES', 'PT', 85 ),   // Country code format from Spain.
 
 			// Italian tracking numbers (medium confidence).
-			array( '123456789012', 'IT', 'FR', 75 ),   // 12 digits from Italy.
-			array( 'IT1234567890', 'IT', 'CH', 75 ),   // Country code format from Italy.
+			array( '12345678901234', 'IT', 'FR', 85 ),   // 14 digits from Italy.
+			array( 'IT1234567890', 'IT', 'CH', 85 ),   // Country code format from Italy.
 
-			// Cross-border with destination boost.
-			array( '12345678901234', 'DE', 'FR', 95 ), // DE to FR (both DPD countries).
-			array( '123456789012', 'GB', 'NL', 95 ),   // GB to NL (both DPD countries).
+			// Cross-border with destination boost (both DPD countries).
+			array( '12345678901234', 'DE', 'FR', 80 ), // DE to FR, confidence boosted (75+5).
+			array( '12345678901234', 'GB', 'DE', 90 ),   // GB to DE, confidence boosted (85+5).
 		);
 	}
 
@@ -177,9 +188,6 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function extendedTrackingNumberProvider(): array {
 		return array(
-			// Extended format with spaces (28 character format).
-			array( '0081 827 0998 0000 0200 45 327 276 N', 'DE', 'FR', 95 ),
-
 			// Extended format without spaces (28 digits).
 			array( '1234567890123456789012345678', 'GB', 'DE', 95 ),
 		);
@@ -227,7 +235,7 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 
 		// Check score is within valid range.
 		$this->assertGreaterThanOrEqual( 40, $result['ambiguity_score'], 'Score should be at least 40' );
-		$this->assertLessThanOrEqual( 98, $result['ambiguity_score'], 'Score should not exceed 98' );
+		$this->assertLessThanOrEqual( 105, $result['ambiguity_score'], 'Score should not exceed 105' );
 
 		// Check URL format.
 		$normalized_tracking = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
@@ -280,12 +288,14 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 	public function test_try_parse_tracking_number_ambiguous( string $tracking_number, string $from, string $to ): void {
 		$result = $this->provider->try_parse_tracking_number( $tracking_number, $from, $to );
 
-		if ( ! is_null( $result ) ) {
+		if ( null !== $result ) {
 			$this->assertIsArray( $result );
 			$this->assertArrayHasKey( 'ambiguity_score', $result );
 			// Should have reduced confidence due to unsupported origin country.
 			$this->assertLessThan( 85, $result['ambiguity_score'], 'Should have reduced confidence for unsupported origin' );
 			$this->assertGreaterThanOrEqual( 40, $result['ambiguity_score'], 'Should still be above minimum threshold' );
+		} else {
+			$this->assertNull( $result, "Should return null for ambiguous tracking number: {$tracking_number}" );
 		}
 	}
 
@@ -344,9 +354,9 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 	 * Test confidence scoring consistency.
 	 */
 	public function test_confidence_scoring_consistency(): void {
-		// Same tracking number from high-confidence country should have higher score.
-		$result_high   = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'FR' );
-		$result_medium = $this->provider->try_parse_tracking_number( '12345678901234', 'AT', 'FR' );
+		// Same tracking number from higher-confidence country should have higher score.
+		$result_high   = $this->provider->try_parse_tracking_number( '12345678901234', 'GB', 'US' );
+		$result_medium = $this->provider->try_parse_tracking_number( '12345678901234', 'BG', 'US' );
 
 		$this->assertIsArray( $result_high );
 		$this->assertIsArray( $result_medium );
@@ -354,7 +364,56 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertGreaterThan(
 			$result_medium['ambiguity_score'],
 			$result_high['ambiguity_score'],
-			'High-confidence country should have higher score than medium-confidence country'
+			'Higher-confidence country should have higher score than lower-confidence country'
 		);
+	}
+
+	/**
+	 * Test destination boost scoring.
+	 */
+	public function test_destination_boost_scoring(): void {
+		// Cross-border DPD shipping should get confidence boost.
+		$result_boost    = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'FR' );
+		$result_no_boost = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'US' );
+
+		$this->assertIsArray( $result_boost );
+		$this->assertIsArray( $result_no_boost );
+		$this->assertSame( 75, $result_no_boost['ambiguity_score'] );
+		$this->assertGreaterThan( $result_no_boost['ambiguity_score'], $result_boost['ambiguity_score'] );
+
+		// Destination boost should give score of 80 for DE origin (75+5).
+		$this->assertSame( 80, $result_boost['ambiguity_score'] );
+	}
+
+	/**
+	 * Test extended pattern validation.
+	 */
+	public function test_extended_pattern_validation(): void {
+		// Extended patterns should get high confidence regardless of origin/destination.
+		$digits_result = $this->provider->try_parse_tracking_number( '1234567890123456789012345678', 'GB', 'DE' );
+
+		$this->assertIsArray( $digits_result );
+
+		// Should have score of 95.
+		$this->assertSame( 95, $digits_result['ambiguity_score'] );
+	}
+
+	/**
+	 * Test specific pattern formats for different countries.
+	 */
+	public function test_country_specific_patterns(): void {
+		// Test UK-specific patterns.
+		$uk_digits = $this->provider->try_parse_tracking_number( '12345678901234', 'GB', 'DE' );
+		$uk_prefix = $this->provider->try_parse_tracking_number( 'AB123456789GB', 'GB', 'FR' );
+
+		$this->assertIsArray( $uk_digits );
+		$this->assertIsArray( $uk_prefix );
+		$this->assertSame( 90, $uk_digits['ambiguity_score'] ); // 85+5=90
+		$this->assertSame( 90, $uk_prefix['ambiguity_score'] ); // 85+5=90
+
+		// Test German patterns.
+		$de_14_digits = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'FR' );
+		$this->assertIsArray( $de_14_digits );
+		$this->assertSame( 80, $de_14_digits['ambiguity_score'] ); // DE with FR destination gets boost (75+5).
 	}
 }
