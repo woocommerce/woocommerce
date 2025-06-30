@@ -112,10 +112,8 @@ export default defineConfig( {
 		...setupProjects,
 		{
 			name: 'e2e',
-			// testIgnore: '**/api-tests/**',
-			testMatch: '**/product/create-product-attributes.spec.js',
+			testIgnore: '**/api-tests/**',
 			dependencies: [ 'site setup' ],
-			repeatEach: 300,
 		},
 		{
 			name: 'api',
