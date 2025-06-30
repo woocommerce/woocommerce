@@ -158,7 +158,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		}
 		$row_container_styles = $this->compile_css( $row_container_styles );
 
-		// Generate the icon content
+		// Generate the icon content.
 		$icon_content = sprintf(
 			'<a href="%1$s" %2$s class="wp-block-social-link-anchor">
 				<img height="%3$s" src="%4$s" style="display:block;margin-right:0;" width="%3$s" alt="%5$s">
@@ -173,10 +173,10 @@ class Social_Links extends Abstract_Block_Renderer {
 		$icon_content = Table_Wrapper_Helper::render_table_wrapper( $icon_content, array(), array( 'style' => 'vertical-align:middle;' ) );
 		$icon_content = Table_Wrapper_Helper::render_table_cell( $icon_content, array( 'style' => sprintf( 'vertical-align:middle;font-size:%s;', $text_font_size ) ) );
 
-		// Generate the label content if needed
+		// Generate the label content if needed.
 		$label_content = '';
 		if ( $service_label ) {
-			$label_content = sprintf(
+			$label_content    = sprintf(
 				'<a href="%1$s" %2$s class="wp-block-social-link-anchor">
 					<span style="margin-left:.5em;margin-right:.5em"> %3$s </span>
 				</a>',
@@ -188,22 +188,13 @@ class Social_Links extends Abstract_Block_Renderer {
 				'vertical-align:middle;padding-left:6px;padding-right:6px;font-size:%s;',
 				$text_font_size
 			);
-			$label_content = Table_Wrapper_Helper::render_table_cell( $label_content, array( 'style' => $label_cell_style ) );
+			$label_content    = Table_Wrapper_Helper::render_table_cell( $label_content, array( 'style' => $label_cell_style ) );
 		}
 
-		// Create the inner table for the icon
-		$icon_table_attrs = array();
-		$icon_cell_attrs = array(
-			'style' => 'vertical-align:middle;',
-		);
-
-		$icon_table = Table_Wrapper_Helper::render_table_wrapper( $icon_content, $icon_table_attrs, $icon_cell_attrs );
-
-
-		// Combine icon and label tables
+		// Combine icon and label tables.
 		$social_link_content = $icon_content . $label_content;
 
-		// Create the main social link table
+		// Create the main social link table.
 		$main_table_attrs = array(
 			'align' => 'center',
 			'style' => $main_table_styles,

@@ -108,7 +108,7 @@ class Column extends Abstract_Block_Renderer {
 			$content_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
 		}
 
-		// Create the inner table using the helper
+		// Create the inner table using the helper.
 		$inner_table_attrs = array(
 			'class' => $content_classname,
 			'style' => $content_css,
@@ -122,7 +122,7 @@ class Column extends Abstract_Block_Renderer {
 
 		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
 
-		// Create the outer td element (since this is meant to be used within a columns structure)
+		// Create the outer td element (since this is meant to be used within a columns structure).
 		$wrapper_cell_attrs = array(
 			'class' => $wrapper_classname,
 			'style' => $wrapper_css,

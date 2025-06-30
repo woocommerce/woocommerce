@@ -135,4 +135,4 @@ class Table_Wrapper_Helper {
 		}
 		return implode( ' ', $attr_parts );
 	}
-} 
+}

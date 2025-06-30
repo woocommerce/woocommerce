@@ -185,4 +185,4 @@ class Table_Wrapper_Helper_Test extends \Email_Editor_Unit_Test {
 	</table>';
 		$this->assertSame( $expected, $result );
 	}
-} 
+}
