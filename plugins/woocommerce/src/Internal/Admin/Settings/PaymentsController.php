@@ -9,6 +9,8 @@ use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
+use WC_Payment_Gateway;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -37,6 +39,9 @@ class PaymentsController {
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'add_allowed_promo_notes' ) );
 		add_filter( 'woocommerce_get_sections_checkout', array( $this, 'handle_sections' ), 20 );
 		add_action( 'woocommerce_admin_payments_extension_suggestion_incentive_dismissed', array( $this, 'handle_incentive_dismissed' ) );
+
+		// Legacy logic for backwards compatibility.
+		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( $this, '_legacy_extend_payment_gateway_response' ), 10, 2 );
 	}
 
 	/**
@@ -353,5 +358,69 @@ class PaymentsController {
 		}
 
 		return filter_var( $account_data['data']['details_submitted'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
+	}
+
+	/**
+	 * Add necessary fields to REST API response.
+	 *
+	 * This changes the response data for payment gateways via the REST API.
+	 *
+	 * Note: This method is for ensuring backward compatibility for the former PaymentGatewaysController part of the
+	 * PaymentGatewaySuggestions feature (now removed).
+	 *
+	 * @param WP_REST_Response   $response Response data.
+	 * @param WC_Payment_Gateway $gateway  Payment gateway object.
+	 *
+	 * @return WP_REST_Response The modified response data.
+	 */
+	public function _legacy_extend_payment_gateway_response( $response, $gateway ) {
+		$data = $response->get_data();
+
+		$data['needs_setup']          = $gateway->needs_setup();
+		$data['post_install_scripts'] = $this->_legacy_get_post_install_scripts( $gateway );
+		$data['settings_url']         = method_exists( $gateway, 'get_settings_url' )
+			? $gateway->get_settings_url()
+			: admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
+
+		$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) . '&_wpnonce=' . wp_create_nonce( 'connection-return' ) );
+		$data['connection_url'] = method_exists( $gateway, 'get_connection_url' )
+			? $gateway->get_connection_url( $return_url )
+			: null;
+
+		$data['setup_help_text'] = method_exists( $gateway, 'get_setup_help_text' )
+			? $gateway->get_setup_help_text()
+			: null;
+
+		$data['required_settings_keys'] = method_exists( $gateway, 'get_required_settings_keys' )
+			? $gateway->get_required_settings_keys()
+			: array();
+
+		$response->set_data( $data );
+
+		return $response;
+	}
+
+	/**
+	 * Get payment gateway scripts for post-install.
+	 *
+	 * @param WC_Payment_Gateway $gateway Payment gateway object.
+	 *
+	 * @return array Install scripts.
+	 */
+	public function _legacy_get_post_install_scripts( $gateway ) {
+		$scripts    = array();
+		$wp_scripts = wp_scripts();
+
+		$handles = method_exists( $gateway, 'get_post_install_script_handles' )
+			? $gateway->get_post_install_script_handles()
+			: array();
+
+		foreach ( $handles as $handle ) {
+			if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+				$scripts[] = $wp_scripts->registered[ $handle ];
+			}
+		}
+
+		return $scripts;
 	}
 }

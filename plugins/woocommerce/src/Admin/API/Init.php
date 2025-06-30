@@ -74,7 +74,6 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 				'Automattic\WooCommerce\Admin\API\Options',
 				'Automattic\WooCommerce\Admin\API\Settings',
-				'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
 				'Automattic\WooCommerce\Admin\API\Themes',
 				'Automattic\WooCommerce\Admin\API\Plugins',
 				'Automattic\WooCommerce\Admin\API\OnboardingFreeExtensions',

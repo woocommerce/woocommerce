@@ -55,7 +55,6 @@ declare global {
 			navigation: boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
-			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
 			printful: boolean;
 			'product-pre-publish-modal': boolean;

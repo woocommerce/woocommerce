@@ -27,7 +27,6 @@
 		"product-custom-fields": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
-		"payment-gateway-suggestions": true,
 		"printful": true,
 		"settings": false,
 		"shipping-label-banner": true,

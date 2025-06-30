@@ -244,7 +244,6 @@ class Events {
 
 	/**
 	 *   Refresh transient for the following DataSourcePollers on wc_admin_daily cron job.
-	 *   - PaymentGatewaySuggestionsDataSourcePoller
 	 *   - RemoteFreeExtensionsDataSourcePoller
 	 */
 	protected function possibly_refresh_data_source_pollers() {

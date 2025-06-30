@@ -3077,3 +3077,13 @@ function wc_update_990_remove_reactify_classic_payments_settings_feature_options
 function wc_update_1000_remove_patterns_toolkit_transient() {
 	delete_transient( 'ptk_patterns' );
 }
+
+/**
+ * Remove DB entries used by the Payments Gateway Suggestions feature.
+ *
+ * @return void
+ */
+function wc_update_1010_cleanup_payment_gateway_suggestions_db_entries() {
+	delete_option( 'woocommerce_setting_payments_recommendations_hidden' );
+	delete_transient( 'woocommerce_admin_payment_gateway_suggestions_specs' );
+}
