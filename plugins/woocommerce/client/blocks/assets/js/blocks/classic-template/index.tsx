@@ -50,7 +50,6 @@ type Attributes = {
 };
 
 const blockifiedFallbackConfig = {
-	isConversionPossible: () => false,
 	getBlockifiedTemplate: () => [],
 	getDescription: () => '',
 	onClickCallback: () => void 0,
@@ -220,7 +219,6 @@ const Edit = ( {
 	);
 
 	const {
-		isConversionPossible,
 		getDescription,
 		getSkeleton,
 		blockifyConfig,
@@ -236,7 +234,7 @@ const Edit = ( {
 		/>
 	);
 
-	const canConvert = isConversionPossible();
+	const canConvert = templateDetails?.type ? true : false;
 	const placeholderDescription = getDescription( templateTitle, canConvert );
 
 	return (

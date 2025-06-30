@@ -64,10 +64,6 @@ const getBlockifiedTemplateWithTermDescription = (
 	inheritedAttributes: InheritedAttributes
 ) => getBlockifiedTemplate( inheritedAttributes, true );
 
-const isConversionPossible = () => {
-	return true;
-};
-
 const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 	sprintf(
 		/* translators: %s is the template title */
@@ -161,13 +157,11 @@ const productTaxonomyBlockifyConfig = {
 };
 
 export const blockifiedProductCatalogConfig = {
-	isConversionPossible,
 	getDescription,
 	blockifyConfig: productCatalogBlockifyConfig,
 };
 
 export const blockifiedProductTaxonomyConfig = {
-	isConversionPossible,
 	getDescription,
 	blockifyConfig: productTaxonomyBlockifyConfig,
 };

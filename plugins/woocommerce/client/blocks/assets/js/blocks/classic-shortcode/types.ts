@@ -39,8 +39,6 @@ export type BlockifiedTemplateConfig = {
 	getSkeleton?: ( () => JSX.Element ) | undefined;
 	// Returns the title for the placeholder, or can be left blank to use the default fallback text.
 	getTitle?: ( () => string ) | undefined;
-	// Is conversion possible for the template?
-	isConversionPossible: () => boolean;
 	// If conversion is possible, returns the config for the template to be blockified.
 	blockifyConfig?: ConversionConfig | undefined;
 };

@@ -92,10 +92,6 @@ const getBlockifiedTemplate = () =>
 		),
 	].filter( Boolean ) as BlockInstance[];
 
-const isConversionPossible = () => {
-	return true;
-};
-
 const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 	sprintf(
 		/* translators: %s is the template title */
@@ -154,4 +150,4 @@ const blockifyConfig = {
 	getBlockifiedTemplate,
 };
 
-export { isConversionPossible, getDescription, blockifyConfig };
+export { getDescription, blockifyConfig };

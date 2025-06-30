@@ -45,7 +45,6 @@ type Attributes = {
 };
 
 const blockifiedFallbackConfig = {
-	isConversionPossible: () => false,
 	getBlockifiedTemplate: () => [],
 	getDescription: () => '',
 	onClickCallback: () => void 0,
@@ -183,10 +182,10 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const templatePlaceholder = templateDetails?.placeholder ?? 'cart';
 	const templateType = templateDetails?.type ?? 'fallback';
 
-	const { isConversionPossible, getDescription, getTitle, blockifyConfig } =
+	const { getDescription, getTitle, blockifyConfig } =
 		conversionConfig[ templateType ];
 
-	const canConvert = isConversionPossible();
+	const canConvert = templateDetails?.type ? true : false;
 	const placeholderTitle = getTitle
 		? getTitle()
 		: __( 'Classic Shortcode Placeholder', 'woocommerce' );
