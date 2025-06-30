@@ -30,7 +30,7 @@ export const useFeaturedItemStatus = ( {
 			if ( ! itemId ) {
 				return {
 					status: null,
-					isDeleted: false,
+					isDeleted: true,
 					isLoading: false,
 				};
 			}
@@ -94,7 +94,7 @@ export const useFeaturedItemStatus = ( {
 			// Default fallback (if itemType doesn't match any expected value)
 			return {
 				status: null,
-				isDeleted: null,
+				isDeleted: true,
 				isLoading: false,
 			};
 		},
