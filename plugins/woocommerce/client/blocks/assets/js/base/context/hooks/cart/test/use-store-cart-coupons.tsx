@@ -3,6 +3,10 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import fetchMock from 'jest-fetch-mock';
+
+/**
+ * Internal dependencies
+ */
 import { useStoreCartCoupons } from '../use-store-cart-coupons';
 
 describe( 'useStoreCartCoupons hook API integration', () => {
