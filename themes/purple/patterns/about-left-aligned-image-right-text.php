@@ -17,9 +17,15 @@
 	
 <!-- wp:column {"verticalAlignment":"center"} -->
 
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"aspectRatio":"4/3","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/hero-image.webp" alt="Antique bottles in a dimly lit arched alcove with a textured wall." style="aspect-ratio:4/3;object-fit:cover"/></figure>
-<!-- /wp:image --></div>
+<div class="wp-block-column is-vertically-aligned-center">
+	
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/hero-image.webp","alt":"Antique bottles in a dimly lit arched alcove with a textured wall.","dimRatio":0,"overlayColor":"theme-2","isUserOverlayColor":true,"minHeight":25,"minHeightUnit":"rem"} -->
+<div class="wp-block-cover" style="min-height:25rem"><img class="wp-block-cover__image-background" alt="Antique bottles in a dimly lit arched alcove with a textured wall." src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/hero-image.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+<p class="has-text-align-center has-large-font-size"></p>
+<!-- /wp:paragraph --></div></div>
+<!-- /wp:cover -->
+
+</div>
 <!-- /wp:column -->
  
 <!-- wp:column {"verticalAlignment":"center","layout":{"type":"constrained","justifyContent":"left","contentSize":"460px"}} -->
