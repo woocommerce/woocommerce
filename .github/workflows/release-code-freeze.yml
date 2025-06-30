@@ -55,7 +55,8 @@ jobs:
                 console.log(`Found Feature Freeze event: ${ffEvent.summary}`);
                 core.setOutput('should-run', 'true');
               } else {
-                core.setFailed('No Feature Freeze events found for today. Code freeze will not proceed.');
+                console.log('No Feature Freeze events found for today. Code freeze will not proceed.');
+                core.setOutput('should-run', 'false');
               }
             } catch (error) {
               core.setFailed(`Failed to fetch calendar events: ${error.message}`);
