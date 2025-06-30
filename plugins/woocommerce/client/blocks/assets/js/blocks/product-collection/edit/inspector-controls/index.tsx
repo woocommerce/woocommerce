@@ -46,7 +46,7 @@ import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
 import KeywordControl from './keyword-control';
 import AttributesControl from './attributes-control';
-import TaxonomyControls, { TaxonomyControlsField } from './taxonomy-controls';
+import TaxonomyControls from './taxonomy-controls';
 import HandPickedProductsControl, {
 	HandPickedProductsControlField,
 } from './hand-picked-products-control';
@@ -220,6 +220,7 @@ const ProductCollectionInspectorControls = (
 						<TaxonomyControls
 							{ ...queryControlProps }
 							collection={ collection }
+							renderMode="panel"
 						/>
 					) }
 					{ showFeaturedControl && (
@@ -356,9 +357,10 @@ const CollectionSpecificControls = (
 				 */
 				isByCategoryOrTag && (
 					<PanelBody>
-						<TaxonomyControlsField
+						<TaxonomyControls
 							{ ...queryControlProps }
 							collection={ collection }
+							renderMode="standalone"
 						/>
 					</PanelBody>
 				)

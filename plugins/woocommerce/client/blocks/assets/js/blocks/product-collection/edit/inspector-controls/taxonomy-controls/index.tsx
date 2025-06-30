@@ -55,7 +55,10 @@ function TaxonomyControls( {
 	trackInteraction,
 	query,
 	collection,
-}: QueryControlProps & { collection: string | undefined } ) {
+	renderMode = 'panel',
+}: QueryControlProps & { collection: string | undefined } & {
+	renderMode?: 'panel' | 'standalone';
+} ) {
 	const {
 		filteredTaxonomies,
 		taxQuery,
@@ -66,79 +69,53 @@ function TaxonomyControls( {
 		collection,
 		setQueryAttribute,
 		trackInteraction,
-		isFiltersPanel: true,
+		isFiltersPanel: renderMode === 'panel',
 	} );
 
 	if ( ! shouldShowTaxonomyControl ) {
 		return null;
 	}
 
-	return (
-		<>
-			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
-				const { slug, name } = taxonomy;
-				const termIds = taxQuery?.[ slug ] || [];
-				const handleChange = createHandleChange( slug );
-				const deselectCallback = () => handleChange( [] );
+	const createTaxonomyControl = ( taxonomy: Taxonomy ) => {
+		const { slug } = taxonomy;
+		const termIds = taxQuery?.[ slug ] || [];
+		const handleChange = createHandleChange( slug );
 
-				return (
-					<ToolsPanelItem
-						key={ slug }
-						label={ normalizeName( name ) }
-						hasValue={ () => termIds.length > 0 }
-						onDeselect={ deselectCallback }
-						resetAllFilter={ deselectCallback }
-					>
-						<TaxonomyItem
-							taxonomy={ taxonomy }
-							termIds={ termIds }
-							onChange={ handleChange }
-						/>
-					</ToolsPanelItem>
-				);
-			} ) }
-		</>
-	);
-}
+		return (
+			<TaxonomyItem
+				key={ slug }
+				taxonomy={ taxonomy }
+				termIds={ termIds }
+				onChange={ handleChange }
+			/>
+		);
+	};
 
-export function TaxonomyControlsField( {
-	setQueryAttribute,
-	trackInteraction,
-	query,
-	collection,
-}: QueryControlProps & { collection: string | undefined } ) {
-	const {
-		filteredTaxonomies,
-		taxQuery,
-		createHandleChange,
-		shouldShowTaxonomyControl,
-	} = useTaxonomyControls( {
-		query,
-		collection,
-		setQueryAttribute,
-		trackInteraction,
-		isFiltersPanel: false,
-	} );
+	const createTaxonomyToolsPanelItem = ( taxonomy: Taxonomy ) => {
+		const { slug, name } = taxonomy;
+		const termIds = taxQuery?.[ slug ] || [];
+		const handleChange = createHandleChange( slug );
+		const deselectCallback = () => handleChange( [] );
 
-	if ( ! shouldShowTaxonomyControl ) {
-		return null;
-	}
+		return (
+			<ToolsPanelItem
+				key={ slug }
+				label={ normalizeName( name ) }
+				hasValue={ () => termIds.length > 0 }
+				onDeselect={ deselectCallback }
+				resetAllFilter={ deselectCallback }
+			>
+				{ createTaxonomyControl( taxonomy ) }
+			</ToolsPanelItem>
+		);
+	};
 
 	return (
 		<>
 			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
-				const { slug } = taxonomy;
-				const termIds = taxQuery?.[ slug ] || [];
-				const handleChange = createHandleChange( slug );
-
-				return (
-					<TaxonomyItem
-						key={ slug }
-						taxonomy={ taxonomy }
-						termIds={ termIds }
-						onChange={ handleChange }
-					/>
-				);
+				return renderMode === 'panel'
+					? createTaxonomyToolsPanelItem( taxonomy )
+					: createTaxonomyControl( taxonomy );
 			} ) }
 		</>
 	);
