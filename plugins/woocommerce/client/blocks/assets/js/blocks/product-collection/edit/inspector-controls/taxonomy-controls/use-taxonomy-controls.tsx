@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { useMemo } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import { useTaxonomies } from './index';
 import {
 	QueryControlProps,
