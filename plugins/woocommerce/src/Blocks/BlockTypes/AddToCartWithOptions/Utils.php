@@ -40,57 +40,39 @@ class Utils {
 	 * @return string The Quantity Selector HTML with classes added.
 	 */
 	public static function add_quantity_stepper_classes( $quantity_html ) {
-		$html = new \WP_HTML_Tag_Processor( $quantity_html );
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
 		// Add classes to the form.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
+		while ( $processor->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector' );
 		}
 
-		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector__input' );
+		while ( $processor->next_tag( array( 'class_name' => 'input-text' ) ) ) {
+			$processor->add_class( 'wc-block-components-quantity-selector__input' );
 		}
 
-		return $html->get_updated_html();
+		return $processor->get_updated_html();
 	}
 
 	/**
-	 * Get standardized quantity input arguments for WooCommerce quantity input.
-	 *
-	 * @param \WC_Product $product The product object.
-	 * @return array Arguments for woocommerce_quantity_input().
-	 */
-	public static function get_quantity_input_args( $product ) {
-		return array(
-			/**
-			 * Filter the minimum quantity value allowed for the product.
-			 *
-			 * @since 2.0.0
-			 * @param int        $min_value Minimum quantity value.
-			 * @param WC_Product $product   Product object.
-			 */
-			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-			/**
-			 * Filter the maximum quantity value allowed for the product.
-			 *
-			 * @since 2.0.0
-			 * @param int        $max_value Maximum quantity value.
-			 * @param WC_Product $product   Product object.
-			 */
-			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
-			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		);
-	}
-
-	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
 	 *
 	 * @param string $quantity_html The quantity HTML.
 	 * @param string $wrapper_attributes Optional wrapper attributes.
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		if (
+			$processor->next_tag( 'input' ) &&
+			$processor->get_attribute( 'type' ) === 'number' &&
+			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
+		) {
+			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInputChange' );
+		}
+
+		$quantity_html = $processor->get_updated_html();
+
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
 				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
