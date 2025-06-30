@@ -42,7 +42,7 @@
 				}
 
 				@media screen and (max-width: $break-medium) {
-					padding: $gap-large;
+					padding: $gap;
 				}
 			}
 
@@ -129,7 +129,6 @@
 		height: 100%;
 
 		@media screen and (max-width: $break-medium) {
-			height: calc(100% - 100px); // Account for small screen content being longer on the page.
 			margin-top: -2px; // Compensate for the border on the header.
 		}
 
@@ -173,7 +172,7 @@
 			}
 
 			@media screen and (max-width: $break-medium) {
-				padding: $gap $gap-large;
+				padding: $gap;
 			}
 
 			.woocommerce-settings-payments-header__title {
@@ -222,7 +221,7 @@
 			}
 
 			@media screen and (max-width: $break-medium) {
-				padding: $gap;
+				padding: 18px $gap;
 			}
 		}
 	}
