@@ -408,10 +408,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search_name_sku_or_gtin` param works correctly.
+	 * Test that the `search_name_sku_or_unique_id` param works correctly.
 	 */
-	public function test_products_search_with_search_name_sku_or_gtin_param() {
-		// Create a product with name, SKU, and GTIN.
+	public function test_products_search_with_search_name_sku_or_unique_id_param() {
+		// Create a product with name, SKU, and global_unique_id.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Blue Test Shirt' );
 		$product->set_sku( 'test-blue-123' );
@@ -420,7 +420,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test search by name token.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Blue' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => 'Blue' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
@@ -429,16 +429,16 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test search by SKU token.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'test-blue' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => 'test-blue' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 		$this->assertEquals( 1, count( $response_products ) );
 		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
 
-		// Test search by GTIN.
+		// Test search by global_unique_id.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => '1234567890123' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => '1234567890123' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
@@ -447,7 +447,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test tokenized search.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Blue test' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => 'Blue test' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
@@ -459,9 +459,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search_name_sku_or_gtin` param supersedes other search params.
+	 * Test that the `search_name_sku_or_unique_id` param supersedes other search params.
 	 */
-	public function test_products_search_name_sku_or_gtin_supersedes_other_params() {
+	public function test_products_search_name_sku_or_unique_id_supersedes_other_params() {
 		// Create test products.
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_name( 'Blue Shirt' );
@@ -475,14 +475,14 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product2->set_global_unique_id( '2222222222222' );
 		$product2->save();
 
-		// Test that search_name_sku_or_gtin supersedes search_name_or_sku.
+		// Test that search_name_sku_or_unique_id supersedes search_name_or_sku.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
 			array(
-				'search_name_sku_or_gtin' => 'Blue',
-				'search_name_or_sku'      => 'Red',
-				'search_sku'              => 'red-shirt',
-				'search'                  => 'Red',
+				'search_name_sku_or_unique_id' => 'Blue',
+				'search_name_or_sku'           => 'Red',
+				'search_sku'                   => 'red-shirt',
+				'search'                       => 'Red',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -497,12 +497,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search_name_sku_or_gtin` param works when SKUs are disabled.
+	 * Test that the `search_name_sku_or_unique_id` param works when SKUs are disabled.
 	 */
-	public function test_products_search_name_sku_or_gtin_when_skus_disabled() {
+	public function test_products_search_name_sku_or_unique_id_when_skus_disabled() {
 		add_filter( 'wc_product_sku_enabled', '__return_false' );
 
-		// Create a product with name and GTIN (SKU disabled).
+		// Create a product with name and global_unique_id (SKU disabled).
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Special Test Product' );
 		$product->set_global_unique_id( '9999999999999' );
@@ -510,16 +510,16 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test search by name.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => 'Special' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => 'Special' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 		$this->assertEquals( 1, count( $response_products ) );
 		$this->assertEquals( $product->get_id(), $response_products[0]['id'] );
 
-		// Test search by GTIN.
+		// Test search by global_unique_id.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params( array( 'search_name_sku_or_gtin' => '9999999999999' ) );
+		$request->set_query_params( array( 'search_name_sku_or_unique_id' => '9999999999999' ) );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
