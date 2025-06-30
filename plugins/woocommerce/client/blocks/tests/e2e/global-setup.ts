@@ -38,7 +38,6 @@ export default async function () {
 				outfile: snapshotPath,
 				blueprint,
 				port: 9401,
-				quiet: true,
 			} );
 		} catch ( error ) {
 			// runCLI exits with a error that needs to be fixed in Playground
@@ -46,15 +45,20 @@ export default async function () {
 		}
 
 	// extract the snapshot zip
-	if ( ! existsSync( resolve( snapshotDir, 'wordpressnapshotPaths' ) ) )
+	if ( ! existsSync( resolve( snapshotDir, 'wordpress' ) ) )
 		await createReadStream( snapshotPath )
 			.pipe( unzipper.Extract( { path: snapshotDir } ) )
 			.promise();
 
-	rmSync(
-		resolve( snapshotDir, 'wordpress/wp-content/plugins/woocommerce' ),
-		{ recursive: true, force: true }
-	);
+	if (
+		existsSync(
+			resolve( snapshotDir, 'wordpress/wp-content/plugins/woocommerce' )
+		)
+	)
+		rmSync(
+			resolve( snapshotDir, 'wordpress/wp-content/plugins/woocommerce' ),
+			{ recursive: true, force: true }
+		);
 
 	// // Create the wp-config.php file
 	// copyFileSync(
@@ -62,6 +66,5 @@ export default async function () {
 	// 	wpConfigPath
 	// );
 
-	// remove the zip file
-	unlinkSync( snapshotPath );
+	// if ( existsSync( snapshotPath ) ) unlinkSync( snapshotPath );
 }

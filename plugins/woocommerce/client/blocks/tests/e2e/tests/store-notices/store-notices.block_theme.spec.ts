@@ -37,8 +37,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 			],
 			skipWordPressSetup: true,
 			followSymlinks: true,
+			port: 9401,
 			login: true,
-			quiet: true,
 		} );
 
 		// handler = cliServer.requestHandler;
