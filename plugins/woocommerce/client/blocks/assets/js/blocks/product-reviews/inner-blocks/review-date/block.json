@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-review-date",
 	"title": "Review Date",
 	"category": "woocommerce",
-	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"ancestor": [ "woocommerce/product-reviews" ],
 	"description": "Displays the date on which the review was posted.",
 	"textdomain": "woocommerce",
 	"attributes": {

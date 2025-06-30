@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 10.1.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -124,7 +124,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				?>
 				<tr>
 					<th class="td text-align-left" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td class="td text-align-left"><?php echo wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), array() ); ?></td>
+					<td class="td text-align-left"><?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array() ); ?></td>
 				</tr>
 				<?php
 			}
@@ -133,7 +133,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				<tr class="order-customer-note">
 					<td class="td text-align-left" colspan="3">
 						<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
-						<?php echo wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
+						<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
 					</td>
 				</tr>
 				<?php

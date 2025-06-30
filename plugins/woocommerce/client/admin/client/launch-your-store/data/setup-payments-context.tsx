@@ -93,7 +93,7 @@ export const SetUpPaymentsProvider: React.FC< {
 					closeModal={ closeModal }
 					onboardingSteps={ LYSPaymentsSteps }
 					urlStrategy={ lysUrlStrategy }
-					source="launch-your-store"
+					sessionEntryPoint="lys" // This should match the value of WooPaymentsService::SESSION_ENTRY_LYS.
 					onFinish={ closeModal }
 				>
 					{ children }

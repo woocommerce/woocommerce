@@ -32,7 +32,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 		$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
@@ -187,7 +187,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => ! $product->is_type( 'variable' ),
+					'isFormValid' => function () {
+						$context = wp_interactivity_get_context();
+						$product = wc_get_product( $context['productId'] );
+						if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+							return false;
+						}
+						return true;
+					},
 					'variationId' => null,
 				)
 			);
@@ -207,6 +214,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'variation_id' => $variation['variation_id'],
 							'attributes'   => $variation['attributes'],
 							'price_html'   => $variation['price_html'],
+							'is_in_stock'  => $variation['is_in_stock'],
 						);
 					},
 					$available_variations
@@ -234,14 +242,9 @@ class AddToCartWithOptions extends AbstractBlock {
 				foreach ( $context['groupedProductIds'] as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product ) {
-						/**
-						 * Filter the minimum quantity for a child product in a grouped product.
-						 *
-						 * @since 10.0.0
-						 * @param int $min_quantity The minimum quantity.
-						 * @param WC_Product $child_product The child product object.
-						 */
-						$default_child_quantity                   = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
+
+						$default_child_quantity = isset( $_POST['quantity'][ $child_product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $child_product->get_id() ] ) ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
 						$context['quantity'][ $child_product_id ] = $default_child_quantity;
 
 						// Check for any "sold individually" products and set their default quantity to 0.
@@ -464,7 +467,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-interactive="woocommerce/add-to-cart-with-options"
 						data-wp-bind--value="state.variationId"
 					/>
 				</div>';
