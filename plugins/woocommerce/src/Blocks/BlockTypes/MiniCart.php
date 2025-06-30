@@ -647,8 +647,7 @@ class MiniCart extends AbstractBlock {
 
 		$badge_html = '';
 		if ( 'never' !== $product_count_visibility ) {
-			$badge_html = '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '">' .
-							esc_html( $display_count ) . '</span>';
+			$badge_html = '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '">' . esc_html( $display_count ) . '</span>';
 		}
 
 		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
