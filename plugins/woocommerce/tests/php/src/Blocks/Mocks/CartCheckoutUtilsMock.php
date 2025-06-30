@@ -24,4 +24,52 @@ class CartCheckoutUtilsMock extends CartCheckoutUtils {
 	public static function migrate_checkout_block_field_visibility_attributes_test() {
 		return self::migrate_checkout_block_field_visibility_attributes();
 	}
+
+	/**
+	 * Mock templates for testing.
+	 *
+	 * @var array
+	 */
+	public static $mock_templates = [];
+
+	/**
+	 * Whether to mock block theme.
+	 *
+	 * @var bool
+	 */
+	public static $mock_block_theme = false;
+
+	/**
+	 * Override is_cart_block_default for testing with mocked data.
+	 *
+	 * @return bool
+	 */
+	public static function is_cart_block_default() {
+		if ( self::$mock_block_theme && ! empty( self::$mock_templates ) ) {
+			foreach ( self::$mock_templates as $template ) {
+				if ( 'cart' === $template->slug && false !== strpos( $template->content, 'wp:woocommerce/cart' ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return parent::is_cart_block_default();
+	}
+
+	/**
+	 * Override is_checkout_block_default for testing with mocked data.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_block_default() {
+		if ( self::$mock_block_theme && ! empty( self::$mock_templates ) ) {
+			foreach ( self::$mock_templates as $template ) {
+				if ( 'checkout' === $template->slug && false !== strpos( $template->content, 'wp:woocommerce/checkout' ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return parent::is_checkout_block_default();
+	}
 }
