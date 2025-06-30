@@ -6,6 +6,10 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, RangeControl } from '@wordpress/components';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 
+type BlockAttributes = {
+	numberOfIcons: number;
+};
+
 const CardPreview = ( {
 	type,
 	icon,
@@ -37,10 +41,8 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 }: {
-	attributes: {
-		numberOfIcons: number;
-	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	attributes: BlockAttributes;
+	setAttributes: ( attributes: Partial< BlockAttributes > ) => void;
 } ) => {
 	const blockProps = useBlockProps();
 	const paymentMethodData = getPaymentMethods();
