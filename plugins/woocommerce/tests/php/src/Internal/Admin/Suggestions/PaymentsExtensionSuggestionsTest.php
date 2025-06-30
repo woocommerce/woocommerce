@@ -625,6 +625,23 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting the countries where a payment extension is suggested.
+	 */
+	public function test_get_extension_countries() {
+		// Test for a valid extension ID.
+		$countries = $this->sut->get_extension_countries( PaymentsExtensionSuggestions::WOOPAYMENTS );
+		$this->assertNotEmpty( $countries );
+		$this->assertIsArray( $countries );
+		$this->assertContains( 'US', $countries );
+		$this->assertContains( 'CA', $countries );
+		$this->assertCount( 38, $countries );
+
+		// Test for an invalid extension ID.
+		$countries = $this->sut->get_extension_countries( 'bogus_id' );
+		$this->assertEmpty( $countries );
+	}
+
+	/**
 	 * Test getting payment extension suggestions by ID.
 	 */
 	public function test_get_extension_by_id() {

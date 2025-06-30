@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -449,6 +448,26 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( $categories, $result );
+	}
+
+	/**
+	 * Test getting the countries for a payment extension suggestion.
+	 */
+	public function test_get_payment_extension_suggestion_countries() {
+		// Arrange.
+		$countries = array( 'US', 'CA', 'GB' );
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_extension_countries' )
+			->with( ExtensionSuggestions::WOOPAYMENTS )
+			->willReturn( $countries );
+
+		// Act.
+		$result = $this->sut->get_payment_extension_suggestion_countries( ExtensionSuggestions::WOOPAYMENTS );
+
+		// Assert.
+		$this->assertSame( $countries, $result );
 	}
 
 	/**

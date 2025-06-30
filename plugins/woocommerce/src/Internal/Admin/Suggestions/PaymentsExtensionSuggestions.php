@@ -2019,6 +2019,44 @@ class PaymentsExtensionSuggestions {
 	}
 
 	/**
+	 * Get the countries a certain extension is suggested for.
+	 *
+	 * This is useful for determining if an extension is available in a specific country.
+	 *
+	 * @param string $extension_id The extension ID.
+	 *
+	 * @return array The list of countries where each extension is suggested.
+	 */
+	public function get_extension_countries( string $extension_id ): array {
+		$extension_id = sanitize_title( $extension_id );
+
+		$countries = array();
+		foreach ( $this->country_extensions as $country_code => $extensions ) {
+			// First, check for the short format.
+			if ( in_array( $extension_id, $extensions ) ) {
+				$countries[] = $country_code;
+				continue; // No need to check further in this country.
+			}
+
+			// Then, check for the long format.
+			foreach ( $extensions as $key => $details ) {
+				if ( is_string( $key ) && $key === $extension_id ) {
+					$countries[] = $country_code;
+					break; // No need to check further in this country.
+				}
+			}
+		}
+
+		// Remove duplicates.
+		$countries = array_unique( $countries );
+
+		// Sort the countries alphabetically.
+		sort( $countries );
+
+		return $countries;
+	}
+
+	/**
 	 * Get the base details of a payment extension by its ID.
 	 *
 	 * @param string $extension_id The extension id.

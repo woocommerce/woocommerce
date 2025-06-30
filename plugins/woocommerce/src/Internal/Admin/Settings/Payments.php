@@ -214,6 +214,19 @@ class Payments {
 	}
 
 	/**
+	 * Get the countries where a given payment extension is suggested.
+	 *
+	 * This is useful to determine the list of countries where a payment extension can be used.
+	 *
+	 * @param string $suggestion_id The ID of the payment extension suggestion.
+	 *
+	 * @return string[] The list of ISO 3166-1 alpha-2 country codes where the suggestion is available.
+	 */
+	public function get_payment_extension_suggestion_countries( string $suggestion_id ): array {
+		return $this->extension_suggestions->get_extension_countries( $suggestion_id );
+	}
+
+	/**
 	 * Get the business location country code for the Payments settings.
 	 *
 	 * @return string The ISO 3166-1 alpha-2 country code to use for the overall business location.
