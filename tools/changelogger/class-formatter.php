@@ -83,7 +83,7 @@ class Formatter extends KeepAChangelogParser {
 	 *
 	 * @return string Link to the version's release.
 	 */
-	public function getReleaseLink( $version ) {
+	public function getReleaseLink( string $version ): string {
 		return 'https://github.com/woocommerce/woocommerce/releases/tag/' . $version;
 	}
 

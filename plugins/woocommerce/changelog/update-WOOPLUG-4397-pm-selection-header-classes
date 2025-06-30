@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Use NOX-specific styles in PMs selection step header instead of global WooCommerce classes.
