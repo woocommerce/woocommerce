@@ -3,112 +3,152 @@
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * USPS Shipping Provider class.
+ * USPS Shipping Provider implementation.
+ *
+ * Handles USPS tracking number detection and validation for both domestic and international shipments.
  */
 class USPSShippingProvider extends AbstractShippingProvider {
 	/**
-	 * Get the key of the shipping provider.
+	 * List of countries/territories where USPS offers domestic service.
 	 *
-	 * @return string
+	 * @var array<string>
+	 */
+	private array $domestic_countries = array(
+		'US',
+		'PR',
+		'GU',
+		'AS',
+		'VI',
+		'MP',
+		'FM',
+		'MH',
+		'PW',
+	);
+
+	/**
+	 * Gets the unique provider key.
+	 *
+	 * @return string The provider key 'usps'.
 	 */
 	public function get_key(): string {
 		return 'usps';
 	}
 
 	/**
-	 * Get the name of the shipping provider.
+	 * Gets the display name of the provider.
 	 *
-	 * @return string
+	 * @return string The provider name 'USPS'.
 	 */
 	public function get_name(): string {
 		return 'USPS';
 	}
 
 	/**
-	 * Get the icon of the shipping provider.
+	 * Gets the path to the provider's icon.
 	 *
-	 * @return string
+	 * @return string URL to the USPS logo image.
 	 */
 	public function get_icon(): string {
 		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/usps.png';
 	}
 
 	/**
-	 * Get the tracking URL for a given tracking number.
+	 * Generates the tracking URL for a given tracking number.
 	 *
-	 * @param string $tracking_number The tracking number.
-	 * @return string The tracking URL.
+	 * @param string $tracking_number The tracking number to generate URL for.
+	 * @return string The complete tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=' . rawurlencode( $tracking_number );
+		return 'https://tools.usps.com/go/TrackConfirmAction?tLabels=' . rawurlencode( $tracking_number );
 	}
 
 	/**
-	 * Get the countries from which this provider can ship.
+	 * Gets the list of origin countries supported by USPS.
 	 *
-	 * @return array An array of country codes.
+	 * @return array<string> Array of country codes (only 'US').
 	 */
 	public function get_shipping_from_countries(): array {
-		return array( 'US' );
+		return array( 'US' ); // USPS only ships from the United States.
 	}
 
 	/**
-	 * Get the countries to which this provider can ship.
+	 * Gets the list of destination countries supported by USPS.
 	 *
-	 * @return array An array of country codes.
+	 * @return array<string> Array of country codes including domestic and international.
 	 */
 	public function get_shipping_to_countries(): array {
-		return array( 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AR', 'AS', 'AT', 'AU', 'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BW', 'BY', 'BZ', 'CA', 'CH', 'CL', 'CN', 'CO', 'CR', 'CU', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'ES', 'ET', 'FI', 'FJ', 'FR', 'GA', 'GB', 'GD', 'GE', 'GH', 'GI', 'GR', 'GT', 'GU', 'GY', 'HK', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN', 'IQ', 'IR', 'IS', 'IT', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KR', 'KW', 'KZ', 'LA', 'LB', 'LC', 'LK', 'LR', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MG', 'MK', 'ML', 'MM', 'MN', 'MO', 'MR', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NG', 'NI', 'NL', 'NO', 'NP', 'NZ', 'OM', 'PA', 'PE', 'PG', 'PH', 'PK', 'PL', 'PT', 'PY', 'QA', 'RO', 'RS', 'RU', 'RW', 'SA', 'SD', 'SE', 'SG', 'SI', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'ST', 'SV', 'SY', 'SZ', 'TD', 'TG', 'TH', 'TJ', 'TL', 'TM', 'TN', 'TR', 'TT', 'TV', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VC', 'VE', 'VN', 'VU', 'WS', 'YE', 'ZA', 'ZM', 'ZW' );
+		return array_merge(
+			$this->domestic_countries,
+			explode( ' ', 'AD AE AF AG AI AL AM AO AR AT AU AW AZ BA BB BD BE BF BG BH BI BJ BM BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FR GA GB GD GE GH GI GM GN GQ GR GT GW GY HK HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KP KR KW KZ LA LB LC LK LR LS LT LU LV LY MA MC MD ME MG MK ML MM MN MO MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NZ OM PA PE PG PH PK PL PT PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG UK UY UZ VC VE VN VU WS YE ZA ZM ZW' )
+		);
 	}
 
 	/**
-	 * Get the tracking URL for a given tracking number with additional parameters.
+	 * Attempts to parse and validate a USPS tracking number.
 	 *
-	 * @param string $tracking_number The tracking number.
-	 * @param string $shipping_from The country code from which the shipment is sent.
-	 * @param string $shipping_to The country code to which the shipment is sent.
-	 *
-	 * @return array|null The tracking URL with ambiguity score, or null if parsing fails.
+	 * @param string $tracking_number The tracking number to validate.
+	 * @param string $shipping_from Origin country code.
+	 * @param string $shipping_to Destination country code.
+	 * @return array|null Array with tracking URL and score, or null if invalid.
 	 */
 	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
-		if ( empty( $tracking_number ) || empty( $shipping_from ) || empty( $shipping_to ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
-			return null;
+		if ( empty( $tracking_number ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+			return null; // Invalid input or route.
 		}
 
-		$tracking_number = strtoupper( $tracking_number );
+		$tracking_number = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
+		$is_domestic     = in_array( $shipping_to, $this->domestic_countries, true );
 
-		$is_upu_format    = preg_match( '/^[A-Z]{2}\d{9}US$/', $tracking_number );
-		$is_9x_format     = preg_match( '/^9[0-9]{21,34}$/', $tracking_number );
-		$is_certified     = preg_match( '/^7[0-9]{19}$/', $tracking_number );
-		$is_confirm       = preg_match( '/^23[0-9]{18}$/', $tracking_number );
-		$is_domestic      = 'US' === $shipping_to;
-		$is_international = ! $is_domestic;
+		// Format patterns with their corresponding base scores.
+		$patterns = array(
+			// Certified/Registered Mail (highest confidence).
+			'/^94(07|08)\d{16,20}$/' => 100,     // Certified/Registered.
+			'/^7\d{19}$/'            => 100,     // Certified legacy format.
+			'/^92(08|11)\d{16,20}$/' => 100,     // Registered Mail.
+			'/^[A-Z]{2}\d{9}US$/'    => 100,     // UPU S10 format (highest confidence international).
 
-		$match = false;
-		if ( $is_international && $is_upu_format ) {
-			// For international shipments, we only consider UPU format.
-			$match           = true;
-			$ambiguity_score = 100; // UPU format is unambiguous.
-		} elseif ( $is_domestic ) {
-			// For domestic shipments, we allow multiple formats.
-			if ( $is_upu_format ) {
-				$match           = true;
-				$ambiguity_score = 60; // Domestic UPU format can be shared with some other services.
-			} elseif ( $is_certified ) {
-				$match           = true;
-				$ambiguity_score = 90; // Certified format is specific to USPS.
-			} elseif ( $is_confirm ) {
-				$match           = true;
-				$ambiguity_score = 85; // Confirm format is specific to USPS.
-			} elseif ( $is_9x_format ) {
-				$match           = true;
-				$ambiguity_score = 50; // 9x format is ambiguous but common in USPS.
+			// Priority Mail and standard tracking.
+			'/^92(05|20)\d{16,20}$/' => 95,      // Priority Mail.
+			'/^9400\d{16,20}$/'      => 95,      // Standard USPS Tracking.
+
+			// Express/Global Mail International.
+			'/^E[ACL]\d{9}US$/'      => 90,      // Express Mail International.
+			'/^EC\d{9}US$/'          => 90,      // Global Express Guaranteed.
+
+			// Other international services.
+			'/^[CLR]\d{8,9}US$/'     => 85,      // Registered/Certified International.
+
+			// Other service patterns.
+			'/^91\d{18,20}$/'        => 85,      // GS1-128 format.
+			'/^030[67]\d{16,20}$/'   => 85,      // Delivery Confirmation.
+		);
+
+		foreach ( $patterns as $pattern => $base_score ) {
+			if ( preg_match( $pattern, $tracking_number ) ) {
+				return array(
+					'url'             => $this->get_tracking_url( $tracking_number ),
+					'ambiguity_score' => $base_score,
+				);
 			}
 		}
 
-		return $match ? array(
-			'url'             => $this->get_tracking_url( $tracking_number ),
-			'ambiguity_score' => $ambiguity_score,
-		) : null;
+		// Fallback patterns that consider domestic status.
+		if ( $is_domestic ) {
+			if ( preg_match( '/^\d{20}$/', $tracking_number ) ) {
+				return array(
+					'url'             => $this->get_tracking_url( $tracking_number ),
+					'ambiguity_score' => 70,  // 20-digit domestic.
+				);
+			}
+
+			if ( preg_match( '/^9\d{21,34}$/', $tracking_number ) ) {
+				return array(
+					'url'             => $this->get_tracking_url( $tracking_number ),
+					'ambiguity_score' => 60,  // Fallback 9x domestic.
+				);
+			}
+		}
+
+		return null; // No matching pattern found.
 	}
 }

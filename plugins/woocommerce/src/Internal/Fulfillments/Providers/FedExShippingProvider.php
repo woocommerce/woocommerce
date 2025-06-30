@@ -3,105 +3,138 @@
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * FedEx Shipping Provider class.
+ * FedEx Shipping Provider implementation.
+ *
+ * Handles FedEx tracking number detection and validation for all FedEx services.
  */
 class FedExShippingProvider extends AbstractShippingProvider {
 	/**
-	 * Get the key of the shipping provider.
+	 * List of countries where FedEx has significant operations.
+	 *
+	 * @var array<string>
+	 */
+	private array $supported_countries = array( 'US', 'CA', 'GB', 'DE', 'FR', 'AU', 'JP', 'MX', 'CN', 'IN', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'BR', 'SG' );
+
+	/**
+	 * Gets the unique provider key.
+	 *
+	 * @return string The provider key 'fedex'.
 	 */
 	public function get_key(): string {
 		return 'fedex';
 	}
 
 	/**
-	 * Get the name of the shipping provider.
+	 * Gets the display name of the provider.
+	 *
+	 * @return string The provider name 'FedEx'.
 	 */
 	public function get_name(): string {
 		return 'FedEx';
 	}
 
 	/**
-	 * Get the icon of the shipping provider.
+	 * Gets the path to the provider's icon.
+	 *
+	 * @return string URL to the FedEx logo image.
 	 */
 	public function get_icon(): string {
 		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/fedex.png';
 	}
 
 	/**
-	 * Get the tracking URL for a given tracking number.
+	 * Generates the tracking URL for a given tracking number.
 	 *
-	 * @param string $tracking_number The tracking number.
-	 *
-	 * @return string The tracking URL.
+	 * @param string $tracking_number The tracking number to generate URL for.
+	 * @return string The complete tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
 		return 'https://www.fedex.com/fedextrack/?tracknumbers=' . rawurlencode( $tracking_number );
 	}
 
 	/**
-	 * Get the countries from which this provider can ship.
+	 * Gets the list of origin countries supported by FedEx.
+	 *
+	 * @return array<string> Array of country codes.
 	 */
 	public function get_shipping_from_countries(): array {
-		// FedEx ships globally.
-		return array( 'US', 'CA', 'GB', 'DE', 'FR', 'AU', 'JP', 'MX', 'CN', 'IN' );
+		return $this->supported_countries;
 	}
 
 	/**
-	 * Get the countries to which this provider can ship.
+	 * Gets the list of destination countries supported by FedEx.
+	 *
+	 * @return array<string> Array of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
-		return $this->get_shipping_from_countries();
+		return $this->supported_countries;
 	}
 
 	/**
-	 * Check if this provider can ship from a specific country.
+	 * Checks if FedEx can ship between two countries.
 	 *
-	 * @param string $shipping_from The country code from which the shipment is sent.
-	 * @param string $shipping_to   The country code to which the shipment is sent.
-	 *
-	 * @return bool True if this provider can ship from the country, false otherwise.
+	 * @param string $shipping_from Origin country code.
+	 * @param string $shipping_to Destination country code.
+	 * @return bool True if shipping route is supported.
 	 */
 	public function can_ship_from_to( string $shipping_from, string $shipping_to ): bool {
-		return in_array( $shipping_from, $this->get_shipping_from_countries(), true ) &&
-				in_array( $shipping_to, $this->get_shipping_to_countries(), true );
+		return in_array( $shipping_from, $this->supported_countries, true ) &&
+				in_array( $shipping_to, $this->supported_countries, true );
 	}
 
 	/**
-	 * Try to parse the tracking number with additional parameters.
+	 * Validates and parses a FedEx tracking number.
 	 *
-	 * @param string $tracking_number The tracking number to parse.
-	 * @param string $shipping_from   The country code from which the shipment is sent.
-	 * @param string $shipping_to     The country code to which the shipment is sent.
-	 *
-	 * @return array|null Returns an array with 'url' and 'ambiguity_score' if the tracking number is valid, null otherwise.
+	 * @param string $tracking_number The tracking number to validate.
+	 * @param string $shipping_from Origin country code.
+	 * @param string $shipping_to Destination country code.
+	 * @return array|null Array with tracking URL and score, or null if invalid.
 	 */
 	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
-		if ( empty( $tracking_number ) || empty( $shipping_from ) || empty( $shipping_to ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+		if ( empty( $tracking_number ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
 			return null;
 		}
 
-		$tracking_number = strtoupper( $tracking_number );
+		$tracking_number  = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
+		$is_north_america = in_array( $shipping_from, array( 'US', 'CA' ), true );
 
-		$is_12_digit = preg_match( '/^\d{12}$/', $tracking_number );
-		$is_15_digit = preg_match( '/^\d{15}$/', $tracking_number );
-		$is_20_digit = preg_match( '/^\d{20}$/', $tracking_number );
+		// Service-specific patterns with their base scores.
+		$patterns = array(
+			// FedEx Custom Critical (highest confidence).
+			'/^0[01]\d{13,23}$/' => 98,
 
-		$match = false;
+			// FedEx SmartPost (very specific).
+			'/^023\d{17}$/'      => 96,
+			'/^58\d{17,19}$/'    => 96,
 
-		if ( $is_12_digit ) {
-			$match           = true;
-			$ambiguity_score = 100; // Most common and unique to FedEx.
-		} elseif ( $is_15_digit ) {
-			$match           = true;
-			$ambiguity_score = 85; // Less common but still used.
-		} elseif ( $is_20_digit ) {
-			$match           = true;
-			$ambiguity_score = 60; // Shared by other services.
+			// FedEx Express 3x patterns.
+			'/^3\d{10,14}$/'     => 96,
+
+			// FedEx Freight (must come before generic digit patterns).
+			'/^97\d{13,23}$/'    => 93,
+
+			// FedEx Ground.
+			'/^96\d{18,20}$/'    => $is_north_america ? 95 : 60,
+			'/^7\d{11,20}$/'     => $is_north_america ? 90 : 75,
+
+			// FedEx Express digit patterns (ordered by specificity).
+			'/^\d{12}$/'         => 95,
+			'/^\d{14}$/'         => 95,
+			'/^\d{15}$/'         => 90,
+
+			// Fallback patterns.
+			'/^\d{20}$/'         => 70,
+		);
+
+		foreach ( $patterns as $pattern => $base_score ) {
+			if ( preg_match( $pattern, $tracking_number ) ) {
+				return array(
+					'url'             => $this->get_tracking_url( $tracking_number ),
+					'ambiguity_score' => is_callable( $base_score ) ? $base_score() : $base_score,
+				);
+			}
 		}
 
-		return $match ? array(
-			'url'             => $this->get_tracking_url( $tracking_number ),
-			'ambiguity_score' => $ambiguity_score,
-		) : null;
+		return null;
 	}
 }

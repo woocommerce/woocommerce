@@ -3,96 +3,134 @@
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
 /**
- * DHL Shipping Provider class.
+ * DHL Shipping Provider implementation.
+ *
+ * Handles DHL tracking number detection and validation for all DHL services.
  */
 class DHLShippingProvider extends AbstractShippingProvider {
 	/**
-	 * Get the key of the shipping provider.
+	 * List of countries where DHL has significant operations.
 	 *
-	 * @return string
+	 * @var array<string>
+	 */
+	private array $major_operation_countries = array( 'DE', 'US', 'CA', 'GB', 'SG', 'JP', 'HK', 'NL', 'FR', 'IT', 'AU', 'CN', 'IN', 'ES', 'BE', 'CH', 'AT', 'SE', 'DK', 'NO' );
+
+	/**
+	 * Gets the unique provider key.
+	 *
+	 * @return string The provider key 'dhl'.
 	 */
 	public function get_key(): string {
 		return 'dhl';
 	}
 
 	/**
-	 * Get the name of the shipping provider.
+	 * Gets the display name of the provider.
 	 *
-	 * @return string
+	 * @return string The provider name 'DHL'.
 	 */
 	public function get_name(): string {
 		return 'DHL';
 	}
 
 	/**
-	 * Get the icon of the shipping provider.
+	 * Gets the path to the provider's icon.
 	 *
-	 * @return string
+	 * @return string URL to the DHL logo image.
 	 */
 	public function get_icon(): string {
 		return esc_url( WC()->plugin_url() ) . '/assets/images/shipping_providers/dhl.png';
 	}
 
 	/**
-	 * Get the tracking URL for a given tracking number.
+	 * Generates the appropriate tracking URL based on DHL service type.
 	 *
-	 * @param string $tracking_number The tracking number.
-	 * @return string The tracking URL.
+	 * @param string $tracking_number The tracking number to generate URL for.
+	 * @return string The complete tracking URL.
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
-		return 'https://www.dhl.com/global-en/home/tracking.html?tracking-id=' . rawurlencode( $tracking_number );
+		$tracking_number = strtoupper( $tracking_number );
+
+		// DHL Global Mail services.
+		if ( preg_match( '/^(GM|LX|RX|AU|TH)/', $tracking_number ) ) {
+			return 'https://webtrack.dhlglobalmail.com/?trackingnumber=' . rawurlencode( $tracking_number );
+		}
+
+		// Standard DHL Express tracking.
+		return 'https://www.dhl.com/en/express/tracking.html?AWB=' . rawurlencode( $tracking_number );
 	}
 
 	/**
-	 * Get the countries from which this provider can ship.
+	 * Gets the list of origin countries supported by DHL.
 	 *
-	 * @return array
+	 * @return array<string> Array of country codes.
 	 */
 	public function get_shipping_from_countries(): array {
-		return array( 'DE', 'US', 'GB', 'CA', 'SG', 'JP', 'HK', 'NL', 'FR', 'IT' ); // common DHL hubs.
+		return $this->major_operation_countries;
 	}
 
 	/**
-	 * Get the countries to which this provider can ship.
+	 * Gets the list of destination countries supported by DHL.
 	 *
-	 * @return array
+	 * @return array<string> Array of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
 		return array_keys( wc()->countries->get_countries() );
 	}
 
 	/**
-	 * Try to parse the tracking number.
+	 * Validates and parses a DHL tracking number.
 	 *
-	 * @param string $tracking_number Tracking number to validate.
-	 * @param string $shipping_from Origin country.
-	 * @param string $shipping_to Destination country.
-	 * @return array|null
+	 * @param string $tracking_number The tracking number to validate.
+	 * @param string $shipping_from Origin country code.
+	 * @param string $shipping_to Destination country code.
+	 * @return array|null Array with tracking URL and score, or null if invalid.
 	 */
 	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
-		if ( empty( $tracking_number ) || empty( $shipping_from ) || empty( $shipping_to ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+		if ( empty( $tracking_number ) || ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
 			return null;
 		}
 
-		$tracking_number = strtoupper( $tracking_number );
+		$tracking_number  = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
+		$is_major_country = in_array( $shipping_from, $this->major_operation_countries, true );
 
-		$is_10_digit  = preg_match( '/^\d{10}$/', $tracking_number );
-		$is_jjd14     = preg_match( '/^JJD\d{10}$/', $tracking_number );
-		$is_jjd14_alt = preg_match( '/^JJD\d{12,14}$/', $tracking_number );
+		// Service-specific patterns with their base scores.
+		$patterns = array(
+			// DHL Express (highest confidence).
+			'/^JJD\d{10}$/'         => 98,  // JJD format.
+			'/^JVGL\d{10}$/'        => 98, // JVGL format.
+			'/^\d{11}$/'            => 95,     // Air Waybill.
+			'/^\d{10}$/'            => $is_major_country ? 85 : 70, // 10-digit.
 
-		$match = false;
+			// DHL eCommerce.
+			'/^GM\d{16,20}$/'       => in_array( $shipping_from, array( 'US', 'CA' ), true ) ? 95 : 80,
+			'/^LX\d{9}[A-Z]{2}$/'   => 90,
+			'/^RX\d{9}[A-Z]{2}$/'   => 90,
+			'/^\d{14}$/'            => 'GB' === $shipping_from ? 85 : 0, // UK eCommerce.
 
-		if ( $is_10_digit ) {
-			$match           = true;
-			$ambiguity_score = 80;
-		} elseif ( $is_jjd14 || $is_jjd14_alt ) {
-			$match           = true;
-			$ambiguity_score = 95;
+			// DHL Parcel.
+			'/^3S[A-Z0-9]{8,12}$/'  => in_array( $shipping_from, array( 'DE', 'NL', 'BE', 'FR', 'GB' ), true ) ? 95 : 85,
+
+			// DHL Global Forwarding.
+			'/^\d[A-Z]{2}\d{4,6}$/' => 90,
+			'/^[A-Z]{3,4}\d{4,8}$/' => 90,
+
+			// DHL Piece Numbers.
+			'/^JD\d{11}$/'          => 88,
+		);
+
+		foreach ( $patterns as $pattern => $base_score ) {
+			if ( preg_match( $pattern, $tracking_number ) ) {
+				$score = is_callable( $base_score ) ? $base_score() : $base_score;
+				if ( $score > 0 ) {
+					return array(
+						'url'             => $this->get_tracking_url( $tracking_number ),
+						'ambiguity_score' => $score,
+					);
+				}
+			}
 		}
 
-		return $match ? array(
-			'url'             => $this->get_tracking_url( $tracking_number ),
-			'ambiguity_score' => $ambiguity_score,
-		) : null;
+		return null;
 	}
 }
