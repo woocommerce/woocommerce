@@ -174,10 +174,13 @@ const QuantitySelector = ( {
 				onKeyDown={ quantityInputOnKeyDown }
 				onChange={ ( event ) => {
 					// Inputs values are strings, we parse them here.
-					let value = parseInt( event.target.value, 10 );
-					// parseInt would throw NaN for anything not a number,
-					// so we revert value to the quantity value.
+					let value = Number( event.target.value );
+					// Number() would throw NaN for anything not a number, so we revert value to the quantity value.
 					value = isNaN( value ) ? quantity : value;
+					// Keep integers as integers, but allow floats
+					value = Number.isInteger( step )
+						? Math.round( value )
+						: value;
 
 					if ( value !== quantity ) {
 						// we commit this value immediately.
