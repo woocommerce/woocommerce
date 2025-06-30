@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix layout issue in Safari where payment method toggles and the “Continue” button were cut off in the NOX in-context onboarding modal.
+Improved styling of payment methods selection screen for better cross-browser support.
