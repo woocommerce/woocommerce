@@ -618,7 +618,7 @@ const TestAccountStep = () => {
 		? [
 				{
 					label: __( 'Reset Account', 'woocommerce' ),
-					variant: 'primary' as const,
+					variant: 'secondary' as const,
 					onClick: () => {
 						setIsResetAccountModalOpen( true );
 					},
@@ -705,7 +705,7 @@ const TestAccountStep = () => {
 					setIsResetAccountModalOpen( false );
 					refreshStoreData(); // Force the step to reset.
 				} }
-				isTestMode={ true }
+				isEmbeddedResetFlow
 			/>
 		</div>
 	);
