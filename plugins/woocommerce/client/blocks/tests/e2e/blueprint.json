@@ -1,0 +1,18 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+    "steps": [
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"woocommerce_onboarding_profile": {
+					"complete": true,
+					"skipped": true
+				}
+			}
+		},
+        {
+            "step": "activatePlugin",
+            "pluginPath": "/wordpress/wp-content/plugins/woocommerce/woocommerce.php"
+        }
+    ]
+}
