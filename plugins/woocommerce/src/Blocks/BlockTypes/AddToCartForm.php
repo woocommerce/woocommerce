@@ -75,14 +75,14 @@ class AddToCartForm extends AbstractBlock {
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-		// Replacement string to add button BEFORE the matched <input> element.
+		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $minus_button, $product_html );
-		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
+		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
+		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
 	}
 

@@ -492,6 +492,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		try {
 			$this->woopayments->onboarding_step_save( $step_id, $location, $request->get_params() );
+
+			// If some step data was saved, we also ensure that the step is marked as started, if not already.
+			// This way we maintain onboarding state consistency if the frontend does not call the start endpoint.
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -614,13 +618,6 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-
-		$step_status = $this->woopayments->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $step_status ) {
-			// Mark the step as completed, if not already.
-			// This will ensure proper tracking of the step completion.
-			$this->woopayments->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		}
 
 		return rest_ensure_response(
