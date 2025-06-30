@@ -633,9 +633,27 @@ class MiniCart extends AbstractBlock {
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 
+		$cart_item_count = 0;
+		$cart            = $this->get_cart_instance();
+		if ( $cart ) {
+			$cart_item_count = $cart->get_cart_contents_count();
+		}
+
+		$should_display_count =
+			'always' === $product_count_visibility ||
+			( 'greater_than_zero' === $product_count_visibility && $cart_item_count > 0 );
+
+		$display_count = $should_display_count ? $cart_item_count : '';
+
+		$badge_html = '';
+		if ( 'never' !== $product_count_visibility ) {
+			$badge_html = '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '">' .
+							esc_html( $display_count ) . '</span>';
+		}
+
 		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
-			' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
+			' . $badge_html . '
 		</span>
 		' . $this->get_cart_price_markup( $attributes );
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the mini cart badge only appearing on hover, when cart is empty and item count visibility is set to always.
