@@ -197,6 +197,12 @@
 					display: none;
 				}
 
+				.components-toggle-control {
+					.components-flex {
+						gap: 0;
+					}
+				}
+
 				@media screen and (max-width: $break-medium) {
 					padding: 0;
 				}
@@ -206,7 +212,7 @@
 		.woocommerce-recommended-payment-methods__list_footer {
 			display: flex;
 			justify-content: flex-end;
-			padding: $gap-large;
+			padding: $gap-large calc($gap * 2);
 			background: $white;
 			flex-shrink: 0;
 
