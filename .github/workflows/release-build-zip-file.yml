@@ -7,7 +7,7 @@ on:
         required: false
         default: ''
       skip_verify:
-        description: 'Skip the PR verification step.'
+        description: 'Skip verification steps.'
         type: boolean
         required: true
         default: false
