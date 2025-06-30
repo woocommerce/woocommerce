@@ -59,7 +59,7 @@ class USPSShippingProviderTest extends \WP_UnitTestCase {
 			// Other formats test cases.
 			array( '911234567890123456789', 'US', 'US', true, 85 ),  // GS1-128 format.
 			array( '12345678901234567890', 'US', 'US', true, 70 ),   // 20-digit format.
-			array( '9999111899223859301234', 'US', 'US', true, 60 ), // Fallback 9x format.
+			array( '9999111899223859301234', 'US', 'US', true, 90 ), // Fallback 9x format. Origin or destination is US.
 
 			// Invalid cases test cases.
 			array( 'INVALID123', 'US', 'US', false, null ), // Invalid format.
