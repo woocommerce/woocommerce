@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add `search_name_sku_or_unique_id` parameter to the Products REST API endpoint.
+Add `search_name_sku_or_global_unique_id` parameter to the Products REST API endpoint.
