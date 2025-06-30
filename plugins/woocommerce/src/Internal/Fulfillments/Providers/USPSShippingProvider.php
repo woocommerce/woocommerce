@@ -144,7 +144,7 @@ class USPSShippingProvider extends AbstractShippingProvider {
 			if ( preg_match( '/^9\d{21,34}$/', $tracking_number ) ) {
 				return array(
 					'url'             => $this->get_tracking_url( $tracking_number ),
-					'ambiguity_score' => 60,  // Fallback 9x domestic.
+					'ambiguity_score' => in_array( 'US', array( $shipping_from, $shipping_to ), true ) ? 90 : 60,  // Fallback 9x domestic.
 				);
 			}
 		}
