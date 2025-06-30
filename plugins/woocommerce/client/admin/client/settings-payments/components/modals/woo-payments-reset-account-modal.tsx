@@ -80,6 +80,19 @@ export const WooPaymentsResetAccountModal = ( {
 				invalidatePaymentGateways( 'getPaymentProviders' );
 				// Refresh the WooPayments in-context onboarding store.
 				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+
+				if ( isEmbeddedResetFlow ) {
+					createNotice(
+						'success',
+						__(
+							'Your test account was successfully reset.',
+							'woocommerce'
+						),
+						{
+							isDismissible: true,
+						}
+					);
+				}
 			} )
 			.catch( () => {
 				recordPaymentsEvent( 'provider_reset_onboarding_failed', {
