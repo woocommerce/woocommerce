@@ -17,6 +17,6 @@
 
 <!-- wp:pattern {"slug":"woostarter/centered-text"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/left-aligned-image-text-right"} /-->
+<!-- wp:pattern {"slug":"woostarter/left-aligned-image-right-text"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/about-features-2-columns"} /-->

@@ -80,7 +80,7 @@
 
 <!-- wp:pattern {"slug":"woostarter/related-products-collection"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/left-aligned-image-right-text"} /-->
+<!-- wp:pattern {"slug":"woostarter/left-aligned-product-right-text"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/categories-on-three-columns"} /-->
 
