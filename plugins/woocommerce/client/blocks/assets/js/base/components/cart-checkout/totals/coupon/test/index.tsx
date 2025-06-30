@@ -219,7 +219,6 @@ describe( 'TotalsCoupon', () => {
 		} );
 
 		it( 'handles usage limit exceeded error', async () => {
-			const user = userEvent.setup();
 			const mockOnSubmit = jest.fn().mockResolvedValue( false );
 
 			// Set up validation error for usage limit
@@ -251,7 +250,6 @@ describe( 'TotalsCoupon', () => {
 		} );
 
 		it( 'handles coupons disabled error', async () => {
-			const user = userEvent.setup();
 			const mockOnSubmit = jest.fn().mockResolvedValue( false );
 
 			// Set up validation error for disabled coupons
@@ -283,13 +281,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'Loading States', () => {
 		it( 'shows loading state while coupon is being applied', async () => {
 			const user = userEvent.setup();
-			let resolvePromise: ( value: boolean ) => void;
-			const mockOnSubmit = jest.fn().mockImplementation(
-				() =>
-					new Promise< boolean >( ( resolve ) => {
-						resolvePromise = resolve;
-					} )
-			);
+			const mockOnSubmit = jest.fn().mockResolvedValue( void 0 );
 
 			render(
 				<TotalsCoupon
