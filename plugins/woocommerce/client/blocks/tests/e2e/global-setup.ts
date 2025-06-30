@@ -4,7 +4,14 @@
  * External dependencies
  */
 import { runCLI } from '@wp-playground/cli';
-import { createReadStream, unlinkSync } from 'fs';
+import {
+	createReadStream,
+	unlinkSync,
+	readFileSync,
+	mkdirSync,
+	existsSync,
+	rmSync,
+} from 'fs';
 import { resolve } from 'path';
 import * as unzipper from 'unzipper';
 
@@ -13,28 +20,40 @@ import * as unzipper from 'unzipper';
  */
 
 export default async function () {
-	const snapshotPath = resolve( __dirname, './playground/tmp/wordpress.zip' );
 	const snapshotDir = resolve( __dirname, './playground/tmp/' );
-	try {
-		await runCLI( {
-			command: 'build-snapshot',
-			outfile: snapshotPath,
-			blueprint: resolve( __dirname, './playground/blueprint.json' ),
-			port: 9401,
-			quiet: true,
-		} );
-	} catch ( error ) {
-		// runCLI exits with a error that needs to be fixed in Playground
-		// Error: process.exit unexpectedly called with "0"
-	}
+	const snapshotPath = resolve( __dirname, './playground/tmp/wordpress.zip' );
+	const blueprint = JSON.parse(
+		readFileSync(
+			resolve( __dirname, './playground/blueprint.json' ),
+			'utf8'
+		)
+	);
+
+	if ( ! existsSync( snapshotDir ) ) mkdirSync( snapshotDir );
+
+	if ( ! existsSync( snapshotPath ) )
+		try {
+			await runCLI( {
+				command: 'build-snapshot',
+				outfile: snapshotPath,
+				blueprint,
+				port: 9401,
+				quiet: true,
+			} );
+		} catch ( error ) {
+			// runCLI exits with a error that needs to be fixed in Playground
+			// Error: process.exit unexpectedly called with "0"
+		}
 
 	// extract the snapshot zip
-	await createReadStream( snapshotPath )
-		.pipe( unzipper.Extract( { path: snapshotDir } ) )
-		.promise();
+	if ( ! existsSync( resolve( snapshotDir, 'wordpressnapshotPaths' ) ) )
+		await createReadStream( snapshotPath )
+			.pipe( unzipper.Extract( { path: snapshotDir } ) )
+			.promise();
 
-	unlinkSync(
-		resolve( snapshotDir, 'wordpres/wp-content/plugins/woocommerce' )
+	rmSync(
+		resolve( snapshotDir, 'wordpress/wp-content/plugins/woocommerce' ),
+		{ recursive: true, force: true }
 	);
 
 	// // Create the wp-config.php file
