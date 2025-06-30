@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fixed brands shortcode being empty when `show_empty` was set to `false`.
+Fixed brands shortcodes being empty when `show_empty` and `show_empty_brands` was set to `false`.
