@@ -204,9 +204,12 @@ class PaymentMethodIcons extends AbstractBlock {
 			}
 		}
 
-		usort( $other_payment_methods, function( $a, $b ) {
-			return strcmp( $a['name'], $b['name'] );
-		} );
+		usort(
+			$other_payment_methods,
+			function ( $a, $b ) {
+				return strcmp( $a['name'], $b['name'] );
+			}
+		);
 
 		return $other_payment_methods;
 	}
