@@ -20,35 +20,35 @@ class DPDShippingProvider extends AbstractShippingProvider {
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: 12/14 digits are very generic
+			'confidence' => 75, // Reduced: 12/14 digits are very generic.
 		),
 		'GB' => array( // United Kingdom.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^[A-Z]{2}\d{9}GB$/',
 			),
-			'confidence' => 85, // Mixed: generic digits + specific GB suffix
+			'confidence' => 85, // Mixed: generic digits + specific GB suffix.
 		),
 		'FR' => array( // France.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: very generic patterns
+			'confidence' => 75, // Reduced: very generic patterns.
 		),
 		'NL' => array( // Netherlands.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: very generic patterns
+			'confidence' => 75, // Reduced: very generic patterns.
 		),
 		'BE' => array( // Belgium.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: very generic patterns
+			'confidence' => 75, // Reduced: very generic patterns.
 		),
 		'PL' => array( // Poland.
 			'patterns'   => array(
@@ -69,7 +69,7 @@ class DPDShippingProvider extends AbstractShippingProvider {
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: generic patterns
+			'confidence' => 75, // Reduced: generic patterns.
 		),
 		'CH' => array( // Switzerland.
 			'patterns'   => array(
@@ -97,7 +97,7 @@ class DPDShippingProvider extends AbstractShippingProvider {
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 75, // Reduced: generic patterns
+			'confidence' => 75, // Reduced: generic patterns.
 		),
 		'CZ' => array( // Czech Republic.
 			'patterns'   => array(
@@ -153,49 +153,49 @@ class DPDShippingProvider extends AbstractShippingProvider {
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence.
 		),
 		'LV' => array( // Latvia.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence.
 		),
 		'EE' => array( // Estonia.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 70, // Reduced: generic patterns, limited DPD presence
+			'confidence' => 70, // Reduced: generic patterns, limited DPD presence.
 		),
 		'FI' => array( // Finland.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 65, // Reduced: partnership-based, not direct DPD
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD.
 		),
 		'DK' => array( // Denmark.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 65, // Reduced: partnership-based, not direct DPD
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD.
 		),
 		'SE' => array( // Sweden.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 65, // Reduced: partnership-based, not direct DPD
+			'confidence' => 65, // Reduced: partnership-based, not direct DPD.
 		),
 		'NO' => array( // Norway.
 			'patterns'   => array(
 				'/^\d{14}$/',
 				'/^\d{12}$/',
 			),
-			'confidence' => 60, // Reduced: limited DPD presence
+			'confidence' => 60, // Reduced: limited DPD presence.
 		),
 		'GR' => array( // Greece.
 			'patterns'   => array(
