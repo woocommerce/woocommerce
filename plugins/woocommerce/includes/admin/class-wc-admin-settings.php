@@ -75,6 +75,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$screen = get_current_screen();
 							if ( 'woocommerce_page_wc-settings' === $screen->id ) {
 								$screen->remove_help_tabs();
+								add_filter( 'screen_options_show_screen', '__return_false' );
+
 							}
 						}
 					}
