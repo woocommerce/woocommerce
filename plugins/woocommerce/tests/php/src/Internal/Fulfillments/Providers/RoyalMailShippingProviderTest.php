@@ -89,6 +89,7 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 		return array(
 			// International format: XX#########GB.
 			array( 'AB123456789GB', 'GB', 'US', 85 ),   // International shipment.
+			array( 'AB123456785GB', 'GB', 'US', 90 ),   // International shipment S10 valid.
 			array( 'CD987654321GB', 'GB', 'GB', 92 ),   // Domestic shipment with boost.
 			array( 'EF555666777GB', 'GB', 'FR', 90 ),   // European destination with boost.
 
