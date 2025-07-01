@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import { CartResponseTotalsItem } from '@woocommerce/type-defs/cart-response';
-import '@woocommerce/base-components/loading-mask';
+import type { LoadingMaskProps } from '@woocommerce/base-components/loading-mask';
 /**
  * Internal dependencies
  */
@@ -33,24 +33,28 @@ const mockRemovableChip = jest.fn();
 const mockTotalsItem = jest.fn();
 
 // Mock LoadingMask component
-jest.mock( '@woocommerce/base-components/loading-mask', () => ( props ) => (
-	<div
-		className="wc-block-components-loading-mask"
-		data-testid={ props.isLoading ? 'loading-mask' : 'not-loading' }
-	>
-		{ props.isLoading && (
-			<span className="screen-reader-text">
-				{ props.screenReaderLabel }
-			</span>
-		) }
-		<div
-			className="wc-block-components-loading-mask__children"
-			aria-hidden={ props.isLoading ? 'true' : 'false' }
-		>
-			{ props.children }
-		</div>
-	</div>
-) );
+jest.mock(
+	'@woocommerce/base-components/loading-mask',
+	() => ( props: LoadingMaskProps ) =>
+		(
+			<div
+				className="wc-block-components-loading-mask"
+				data-testid={ props.isLoading ? 'loading-mask' : 'not-loading' }
+			>
+				{ props.isLoading && (
+					<span className="screen-reader-text">
+						{ props.screenReaderLabel }
+					</span>
+				) }
+				<div
+					className="wc-block-components-loading-mask__children"
+					aria-hidden={ props.isLoading ? 'true' : 'false' }
+				>
+					{ props.children }
+				</div>
+			</div>
+		)
+);
 
 jest.mock( '@woocommerce/blocks-components', () => ( {
 	RemovableChip: ( props: RemovableChipProps ) => {
