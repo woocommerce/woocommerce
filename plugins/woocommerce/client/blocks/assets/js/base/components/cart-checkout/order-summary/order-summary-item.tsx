@@ -164,6 +164,8 @@ const OrderSummaryItem = ( {
 				<ProductImage
 					image={ images.length ? images[ 0 ] : {} }
 					fallbackAlt={ name }
+					width={ 48 }
+					height={ 48 }
 				/>
 			</div>
 			<div className="wc-block-components-order-summary-item__description">
