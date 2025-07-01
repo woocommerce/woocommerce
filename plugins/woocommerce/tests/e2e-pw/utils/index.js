@@ -6,6 +6,7 @@ const login = require( './login' );
 const editor = require( './editor' );
 const helpers = require( './helpers' );
 const comingSoon = require( './coming-soon' );
+const cli = require( './cli' );
 
 module.exports = {
 	api,
@@ -16,4 +17,5 @@ module.exports = {
 	editor,
 	helpers,
 	comingSoon,
+	cli,
 };
