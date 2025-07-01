@@ -131,11 +131,11 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string;
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
+			'dependencies' => array( 'wc-blocks' ),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -151,11 +151,11 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
-		];
+			'dependencies' => array(),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -165,7 +165,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**
@@ -175,7 +175,7 @@ class MiniCart extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		if ( is_cart() || is_checkout() ) {
 			return;
 		}
@@ -484,10 +484,10 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
-					'totalItemsInCart'     => $cart_item_count,
-					'badgeIsVisible'       => $badge_is_visible,
-					'formattedSubtotal'    => $formatted_subtotal,
-					'drawerOverlayClass'   => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
+					'totalItemsInCart'   => $cart_item_count,
+					'badgeIsVisible'     => $badge_is_visible,
+					'formattedSubtotal'  => $formatted_subtotal,
+					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 				)
 			);
 
@@ -730,11 +730,11 @@ class MiniCart extends AbstractBlock {
 
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--mini-cart-contents-block' );
-		$shared_chunks = [ 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' ];
+		$shared_chunks = array( 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' );
 
 		foreach ( array_merge( $chunks, $vendor_chunks, $shared_chunks ) as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
-			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
+			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), array(), true );
 			$translations[] = $wp_scripts->print_translations( $handle, false );
 			wp_deregister_script( $handle );
 		}
