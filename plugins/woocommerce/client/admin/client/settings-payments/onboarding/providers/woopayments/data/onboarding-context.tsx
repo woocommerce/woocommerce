@@ -64,6 +64,11 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
 	sessionEntryPoint: '',
+	snackbar: {
+		show: false,
+		message: '',
+	},
+	setSnackbar: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -98,6 +103,15 @@ export const OnboardingProvider: React.FC< {
 	const [ justCompletedStepId, setStepId ] = useState< string | null >(
 		null
 	);
+
+	const [ snackbar, setSnackbar ] = useState< {
+		show: boolean;
+		message: string;
+		className?: string;
+	} >( {
+		show: false,
+		message: '',
+	} );
 
 	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
 		setStepId( stepId );
@@ -238,6 +252,7 @@ export const OnboardingProvider: React.FC< {
 		setIsStateStoreLoading( true );
 		setJustCompletedStepId( null );
 		setAllSteps( [] );
+		setSnackbar( { show: false, message: '' } );
 	};
 
 	const refreshStoreData = () => {
@@ -345,6 +360,8 @@ export const OnboardingProvider: React.FC< {
 				justCompletedStepId,
 				setJustCompletedStepId,
 				sessionEntryPoint,
+				snackbar,
+				setSnackbar,
 			} }
 		>
 			{ children }
