@@ -38,12 +38,20 @@ class JobManager {
 	private $logger;
 
 	/**
+	 * The queue instance.
+	 *
+	 * @var \WC_Queue_Interface
+	 */
+	private $queue;
+
+	/**
 	 * Constructor.
 	 *
 	 * @return void
 	 */
 	public function __construct() {
 		$this->logger = \wc_get_logger();
+		$this->queue  = \WC()->queue();
 	}
 
 	/**
@@ -57,7 +65,7 @@ class JobManager {
 
 		try {
 
-			if ( WC()->queue()->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
+			if ( $this->queue->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
 				return false;
 			}
 
@@ -74,7 +82,7 @@ class JobManager {
 			$delay = (int) apply_filters( 'woocommerce_customer_stock_notifications_first_batch_delay', MINUTE_IN_SECONDS, $product_id );
 			$delay = max( 0, $delay );
 
-			$action_id = WC()->queue()->schedule_single(
+			$action_id = $this->queue->schedule_single(
 				time() + $delay,
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,
@@ -111,7 +119,7 @@ class JobManager {
 
 		$args = array( 'product_id' => $product_id );
 
-		if ( WC()->queue()->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
+		if ( $this->queue->get_next( self::AS_JOB_SEND_STOCK_NOTIFICATIONS, $args, self::AS_JOB_GROUP ) ) {
 			return false;
 		}
 
@@ -127,13 +135,13 @@ class JobManager {
 		$delay = max( 0, $delay );
 
 		if ( 0 === $delay ) {
-			$action_id = WC()->queue()->add(
+			$action_id = $this->queue->add(
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,
 				self::AS_JOB_GROUP
 			);
 		} else {
-			$action_id = WC()->queue()->schedule_single(
+			$action_id = $this->queue->schedule_single(
 				time() + $delay,
 				self::AS_JOB_SEND_STOCK_NOTIFICATIONS,
 				$args,
