@@ -13,3 +13,5 @@
 <!-- wp:pattern {"slug":"woostarter/about-alternating-columns"} /-->
 
 <!-- wp:pattern {"slug":"woostarter/about-category-collection"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/faq-question-list"} /-->
