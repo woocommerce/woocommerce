@@ -49,7 +49,7 @@
 	}
 }
 
-@include breakpoint(">=782px") {
+@include breakpoint(">781px") {
 	.wc-block-cart .wc-block-cart__submit-container--sticky {
 		display: none;
 	}
