@@ -29,6 +29,7 @@ const SnackbarWrapper = () => {
 	return (
 		<WooPaymentsOnboardingModalSnackbar
 			className={ snackbar.className || '' }
+			duration={ snackbar.duration }
 		>
 			{ snackbar.message }
 		</WooPaymentsOnboardingModalSnackbar>
