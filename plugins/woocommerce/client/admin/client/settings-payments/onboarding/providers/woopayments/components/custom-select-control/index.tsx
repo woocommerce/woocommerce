@@ -186,37 +186,42 @@ function CustomSelectControl< ItemType extends Item >( {
 					className="components-custom-select-control__button-icon"
 				/>
 			</Button>
-			{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
-			<ul { ...menuProps } onKeyDown={ onKeyDownHandler }>
-				{ isOpen &&
-					items.map( ( item, index ) => (
-						// eslint-disable-next-line react/jsx-key
-						<li
-							key={ item.key }
-							{ ...getItemProps( {
-								item,
-								index,
-								className: clsx(
-									item.className,
-									'components-custom-select-control__item',
-									{
-										'is-highlighted':
-											index === highlightedIndex,
-									}
-								),
-								style: item.style,
-							} ) }
-						>
-							{ children ? children( item ) : item.name }
-							{ item === selectedItem && (
-								<Icon
-									icon={ check }
-									className="components-custom-select-control__item-icon"
-								/>
-							) }
-						</li>
-					) ) }
-			</ul>
+			<div { ...menuProps }>
+				{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
+				<ul
+					className="components-custom-select-control__menu-container"
+					onKeyDown={ onKeyDownHandler }
+				>
+					{ isOpen &&
+						items.map( ( item, index ) => (
+							// eslint-disable-next-line react/jsx-key
+							<li
+								key={ item.key }
+								{ ...getItemProps( {
+									item,
+									index,
+									className: clsx(
+										item.className,
+										'components-custom-select-control__item',
+										{
+											'is-highlighted':
+												index === highlightedIndex,
+										}
+									),
+									style: item.style,
+								} ) }
+							>
+								{ children ? children( item ) : item.name }
+								{ item === selectedItem && (
+									<Icon
+										icon={ check }
+										className="components-custom-select-control__item-icon"
+									/>
+								) }
+							</li>
+						) ) }
+				</ul>
+			</div>
 		</div>
 	);
 }

@@ -48,7 +48,7 @@
 		}
 	}
 
-	.is-large {
+	@include cart-checkout-large-container {
 		.wc-block-checkout__actions {
 			padding: 0 0 $gap-largest 0;
 		}
