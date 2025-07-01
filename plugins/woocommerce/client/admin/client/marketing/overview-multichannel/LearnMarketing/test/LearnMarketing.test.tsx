@@ -7,10 +7,10 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { useBlogPosts } from './useBlogPosts';
-import { LearnMarketing } from './LearnMarketing';
+import { useBlogPosts } from '../useBlogPosts';
+import { LearnMarketing } from '../LearnMarketing';
 
-jest.mock( './useBlogPosts', () => ( {
+jest.mock( '../useBlogPosts', () => ( {
 	useBlogPosts: jest.fn(),
 } ) );
 
