@@ -26,12 +26,6 @@ interface ErrorData {
 	code: string;
 	message: string;
 }
-
-interface CheckoutData {
-	code?: string;
-	message?: string;
-}
-
 interface ErrorComponentProps {
 	errorData: ErrorData;
 }
@@ -142,7 +136,7 @@ const ErrorButton = ( { errorData }: ErrorComponentProps ) => {
  * checkout block.
  */
 const CheckoutOrderError = () => {
-	const checkoutData: CheckoutData = {
+	const checkoutData: CheckoutResponse = {
 		code: '',
 		message: '',
 		...( preloadedCheckoutData || {} ),
