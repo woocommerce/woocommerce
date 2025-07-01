@@ -6,7 +6,7 @@ sidebar_label: Inner block types
 
 # Inner block types
 
-The following Additional Cart and Checkout inner block types filter is available:
+Adding this sentence as a test. The following Additional Cart and Checkout inner block types filter is available:
 
 -   `additionalCartCheckoutInnerBlockTypes`
 
