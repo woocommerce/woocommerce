@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Removed hardcoded right margin to fix layout inconsistency from Quantity Selector.
+Removed hard-coded right margin from Quantity Selector to resolve layout inconsistency.
