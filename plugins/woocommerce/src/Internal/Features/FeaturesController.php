@@ -572,6 +572,14 @@ class FeaturesController {
 			}
 		}
 
+		// We're deprecating the product block editor feature in favor of a v3 coming out.
+		// We want to hide this setting in the UI for users that don't have it enabled.
+		// If users have it enabled, we won't hide it until they explicitly disable it.
+		if ( isset( $features['product_block_editor'] )
+			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
+			$features['product_block_editor']['disable_ui'] = true;
+		}
+
 		return $features;
 	}
 
@@ -1535,9 +1543,9 @@ class FeaturesController {
 
 		wc_enqueue_js(
 			"
-	    const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
-	    for(const warningRow of warningRows) {
-	    	const pluginName = warningRow.getAttribute('data-plugin');
+		const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
+		for(const warningRow of warningRows) {
+			const pluginName = warningRow.getAttribute('data-plugin');
 			const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
 			if(pluginInfoRow.classList.contains('update')) {
 				warningRow.classList.remove('plugin-update-tr');
@@ -1546,7 +1554,7 @@ class FeaturesController {
 			else {
 				pluginInfoRow.classList.add('update');
 			}
-	    }
+		}
 		"
 		);
 	}
