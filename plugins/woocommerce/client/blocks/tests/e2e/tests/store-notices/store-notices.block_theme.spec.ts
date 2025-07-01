@@ -38,6 +38,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			followSymlinks: true,
 			port: 9401,
 			login: true,
+			experimentalMultiWorker: 16,
 		} );
 
 		// handler = cliServer.requestHandler;
