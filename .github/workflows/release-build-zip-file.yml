@@ -152,7 +152,7 @@ jobs:
             # Stable version in release branch should match wporg.
             svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-          if [[ $branch_stable_version != $svn_stable_version ]] ; then
+            if [[ $branch_stable_version != $svn_stable_version ]] ; then
                 echo "::error::Pre-build verification: stable version in release branch ($branch_stable_version) is not matching the one in SVN trunk ($svn_stable_version)."
                 exit 1
             fi
