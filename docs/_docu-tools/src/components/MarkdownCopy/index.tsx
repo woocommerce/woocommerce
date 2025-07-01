@@ -41,11 +41,9 @@ const MarkdownCopy: React.FC = () => {
         replacement: (content, node) => {
           const pre = node as HTMLElement;
           const code = pre.querySelector('code');
-          const parent = pre.closest('pre');
-          console.log(parent?.className);
           if (!code) return content;
           
-          const language = parent?.className.split(' ').find(className => className.startsWith('language-'))?.replace('language-', '') || '';
+          const language = pre.className.split(' ').find(className => className.startsWith('language-'))?.replace('language-', '') || '';
           return `\n\`\`\`${language}\n${code.textContent || ''}\n\`\`\`\n\n`;
         }
       });
