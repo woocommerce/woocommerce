@@ -633,6 +633,11 @@
 		},
 		{
 			"area": "header",
+			"name": "checkout-header",
+			"title": "Checkout Header"
+		},
+		{
+			"area": "header",
 			"name": "header-alternative",
 			"title": "Header alternative"
 		},

@@ -21,3 +21,12 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
     transition-duration: 0.15s;
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
+/* Styles for WooCommerce blocks that can't be styled via the editor yet. */
+
+.wc-block-components-checkout-step__heading,
+.wc-block-components-checkout-order-summary__title,
+.wc-block-components-totals-coupon,
+.wc-block-components-totals-item {
+    color: var(--wp--preset--color--theme-2);
+}
