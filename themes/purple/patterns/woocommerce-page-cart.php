@@ -9,7 +9,17 @@
 ?>
 <!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
 <!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group"><!-- wp:woocommerce/store-notices /-->
+<main class="wp-block-group">
+
+<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
+<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:heading {"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
+<h2 class="wp-block-heading alignwide" style="margin-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e('Cart', 'woostarter');?></h2>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide"><!-- wp:woocommerce/cart -->
@@ -126,6 +136,12 @@ echo sprintf( esc_html__( 'Have an account? %1$sLog in%2$s to check out faster.
 <!-- /wp:group --></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>
 <!-- /wp:woocommerce/cart --></div>
-<!-- /wp:group --></main>
+<!-- /wp:group -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|70"} -->
+<div style="height:var(--wp--preset--spacing--70)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+</main>
 <!-- /wp:group -->
 <!-- /wp:woocommerce/page-content-wrapper -->
