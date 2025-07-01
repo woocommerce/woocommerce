@@ -20,7 +20,7 @@ describe( 'TotalsCoupon', () => {
 		} );
 	} );
 	afterAll( () => {
-		// Clear validation errors before each test
+		// Clear validation errors after all tests to ensure no data store state is leaked.
 		const { clearValidationErrors } = dispatch( validationStore );
 		act( () => {
 			clearValidationErrors();
@@ -288,7 +288,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'Loading States', () => {
 		it( 'shows loading state while coupon is being applied', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( void 0 );
+			const mockOnSubmit = jest.fn().mockResolvedValue( undefined );
 
 			render(
 				<TotalsCoupon
