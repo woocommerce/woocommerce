@@ -4,8 +4,8 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import clsx from 'clsx';
-import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
-import { DOWN, UP } from '@wordpress/keycodes';
+import { useState, useCallback, useEffect, useRef } from '@wordpress/element';
+import { DOWN, UP, ENTER } from '@wordpress/keycodes';
 import { useDebouncedCallback } from 'use-debounce';
 
 /**
@@ -70,7 +70,10 @@ const QuantitySelector = ( {
 	editable = true,
 }: QuantitySelectorProps ): JSX.Element => {
 	const classes = clsx( 'wc-block-components-quantity-selector', className );
-
+	const [ inputValue, setInputValue ] = useState< string >(
+		quantity.toString()
+	);
+	const [ isFocused, setIsFocused ] = useState< boolean >( false );
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const decreaseButtonRef = useRef< HTMLButtonElement | null >( null );
 	const increaseButtonRef = useRef< HTMLButtonElement | null >( null );
@@ -79,85 +82,111 @@ const QuantitySelector = ( {
 	const canIncrease =
 		! disabled && ( ! hasMaximum || quantity + step <= maximum );
 
-	/**
-	 * The goal of this function is to normalize what was inserted,
-	 * but after the customer has stopped typing.
-	 */
+	// Debounced callback for onChange to prevent excessive server calls
+	const debouncedOnChange = useDebouncedCallback(
+		( newQuantity: number ) => {
+			onChange( newQuantity );
+		},
+		300 // 300ms delay
+	);
+
+	// Sync local state with prop if quantity changes externally (but not when focused)
+	useEffect( () => {
+		if ( ! isFocused ) {
+			setInputValue( quantity.toString() );
+		}
+	}, [ quantity, isFocused ] );
+
 	const normalizeQuantity = useCallback(
-		( initialValue: number ) => {
-			// We copy the starting value.
+		( initialValue: number, snapToStep = true ) => {
 			let value = initialValue;
-
-			// We check if we have a maximum value, and select the lowest between what was inserted and the maximum.
 			if ( hasMaximum ) {
-				value = Math.min(
-					value,
-					// the maximum possible value in step increments.
-					Math.floor( maximum / step ) * step
-				);
+				value = Math.min( value, Math.floor( maximum / step ) * step );
 			}
-
-			// Select the biggest between what's inserted, the minimum value in steps.
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
-			// We round off the value to our steps.
-			value = Math.floor( value / step ) * step;
+			if ( snapToStep ) {
+				// Snap to closest step increment
+				value =
+					Math.round( ( value - minimum ) / step ) * step + minimum;
+			}
 
-			// Only commit if the value has changed
-			if ( value !== initialValue ) {
-				onChange( value );
+			return value;
+		},
+		[ hasMaximum, maximum, minimum, step ]
+	);
+
+	const commitValue = useCallback(
+		( rawValue: string ) => {
+			const value = Number( rawValue );
+			if ( isNaN( value ) ) {
+				setInputValue( quantity.toString() );
+				return;
+			}
+			const normalized = normalizeQuantity( value );
+			setInputValue( normalized.toString() );
+			if ( normalized !== quantity ) {
+				onChange( normalized );
 			}
 		},
-		[ hasMaximum, maximum, minimum, onChange, step ]
+		[ normalizeQuantity, quantity, onChange ]
 	);
 
-	/*
-	 * It's important to wait before normalizing or we end up with
-	 * a frustrating experience, for example, if the minimum is 2 and
-	 * the customer is trying to type "10", premature normalizing would
-	 * always kick in at "1" and turn that into 2.
-	 */
-	const debouncedNormalizeQuantity = useDebouncedCallback(
-		normalizeQuantity,
-		// This value is deliberately smaller than what's in useStoreCartItemQuantity so we don't end up with two requests.
-		300
-	);
-
-	/**
-	 * Normalize qty on mount before render.
-	 */
-	useLayoutEffect( () => {
-		normalizeQuantity( quantity );
-	}, [ quantity, normalizeQuantity ] );
-
-	/**
-	 * Handles keyboard up and down keys to change quantity value.
-	 *
-	 * @param {Object} event event data.
-	 */
-	const quantityInputOnKeyDown = useCallback(
-		( event ) => {
-			const isArrowDown =
-				typeof event.key !== undefined
-					? event.key === 'ArrowDown'
-					: event.keyCode === DOWN;
-			const isArrowUp =
-				typeof event.key !== undefined
-					? event.key === 'ArrowUp'
-					: event.keyCode === UP;
-
-			if ( isArrowDown && canDecrease ) {
-				event.preventDefault();
-				onChange( quantity - step );
+	const handleInputChange = (
+		event: React.ChangeEvent< HTMLInputElement >
+	) => {
+		const raw = event.target.value;
+		setInputValue( raw );
+		const value = Number( raw );
+		if ( ! isNaN( value ) ) {
+			const normalized = normalizeQuantity( value, false );
+			// Check if the value is a valid step increment
+			const remainder = ( ( value - minimum ) / step ) % 1;
+			const isValidStep =
+				Math.abs( remainder ) < 1e-8 ||
+				Math.abs( remainder - 1 ) < 1e-8;
+			// Only push if the value is valid and matches the normalized value
+			if (
+				normalized === value &&
+				normalized !== quantity &&
+				isValidStep
+			) {
+				debouncedOnChange( normalized );
+			} else {
+				// Cancel any pending debounced changes if the value is invalid
+				debouncedOnChange.cancel();
 			}
+		}
+	};
 
-			if ( isArrowUp && canIncrease ) {
-				event.preventDefault();
-				onChange( quantity + step );
+	const handleInputBlur = () => {
+		setIsFocused( false );
+		// Flush any pending debounced changes
+		debouncedOnChange.flush();
+		commitValue( inputValue );
+	};
+
+	const handleInputKeyDown = (
+		event: React.KeyboardEvent< HTMLInputElement >
+	) => {
+		const isArrowDown = event.key === 'ArrowDown' || event.keyCode === DOWN;
+		const isArrowUp = event.key === 'ArrowUp' || event.keyCode === UP;
+		const isEnter = event.key === 'Enter' || event.keyCode === ENTER;
+		if ( isArrowDown && canDecrease ) {
+			event.preventDefault();
+			onChange( quantity - step );
+		}
+		if ( isArrowUp && canIncrease ) {
+			event.preventDefault();
+			onChange( quantity + step );
+		}
+		if ( isEnter ) {
+			commitValue( inputValue );
+			if ( inputRef.current ) {
+				inputRef.current.blur();
 			}
-		},
-		[ quantity, onChange, canIncrease, canDecrease, step ]
-	);
+		}
+	};
 
 	return (
 		<div className={ classes }>
@@ -170,25 +199,11 @@ const QuantitySelector = ( {
 				step={ step }
 				min={ minimum }
 				max={ maximum }
-				value={ quantity }
-				onKeyDown={ quantityInputOnKeyDown }
-				onChange={ ( event ) => {
-					// Inputs values are strings, we parse them here.
-					let value = Number( event.target.value );
-					// Number() would throw NaN for anything not a number, so we revert value to the quantity value.
-					value = isNaN( value ) ? quantity : value;
-					// Keep integers as integers, but allow floats
-					value = Number.isInteger( step )
-						? Math.round( value )
-						: value;
-
-					if ( value !== quantity ) {
-						// we commit this value immediately.
-						onChange( value );
-						// but once the customer has stopped typing, we make sure his value is respecting the bounds (maximum value, minimum value, step value), and commit the normalized value.
-						debouncedNormalizeQuantity( value );
-					}
-				} }
+				value={ inputValue }
+				onChange={ handleInputChange }
+				onFocus={ () => setIsFocused( true ) }
+				onBlur={ handleInputBlur }
+				onKeyDown={ handleInputKeyDown }
 				aria-label={ sprintf(
 					/* translators: %s refers to the item name in the cart. */
 					__( 'Quantity of %s in your cart.', 'woocommerce' ),
@@ -219,7 +234,7 @@ const QuantitySelector = ( {
 									newQuantity
 								)
 							);
-							normalizeQuantity( newQuantity );
+							setInputValue( newQuantity.toString() );
 						} }
 					>
 						&#8722;
@@ -246,7 +261,7 @@ const QuantitySelector = ( {
 									newQuantity
 								)
 							);
-							normalizeQuantity( newQuantity );
+							setInputValue( newQuantity.toString() );
 						} }
 					>
 						&#65291;
