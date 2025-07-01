@@ -203,10 +203,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	private function is_accessing_settings() {
 		if ( is_admin() ) {
-			// phpcs:disable WordPress.Security.NonceVerification
-			if ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) {
+			if ( ! is_wc_admin_settings_page() ) {
 				return false;
 			}
+			// phpcs:disable WordPress.Security.NonceVerification
 			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
 				return false;
 			}
