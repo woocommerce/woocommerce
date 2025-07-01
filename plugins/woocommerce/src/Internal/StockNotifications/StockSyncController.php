@@ -113,7 +113,7 @@ class StockSyncController {
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to process product %d: %s', $product_id, $e->getMessage() ),
-				array( 'source' => 'wc-stock-notifications' )
+				array( 'source' => 'wc-customer-stock-notifications' )
 			);
 		}
 	}

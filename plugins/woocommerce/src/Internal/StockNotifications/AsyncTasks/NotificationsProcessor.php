@@ -212,7 +212,7 @@ class NotificationsProcessor {
 			if ( ! $notification instanceof Notification ) {
 				$this->logger->error(
 					sprintf( 'Failed to get notification ID: %d', $notification_id ),
-					array( 'source' => JobManager::AS_JOB_GROUP )
+					array( 'source' => 'wc-customer-stock-notifications' )
 				);
 				continue;
 			}

@@ -95,7 +95,7 @@ class CycleStateService {
 
 		$this->logger->info(
 			sprintf( 'Completed cycle for product %d. Sent: %d, Skipped: %d, Failed: %d, Duration: %d seconds. Total notifications processed: %d', $product_id, $cycle_state['sent_count'], $cycle_state['skipped_count'], $cycle_state['failed_count'], $cycle_state['duration'], $cycle_state['total_count'] ),
-			array( 'source' => JobManager::AS_JOB_GROUP )
+			array( 'source' => 'wc-customer-stock-notifications' )
 		);
 
 		$this->save_cycle_state( $product_id, array() );
@@ -125,7 +125,7 @@ class CycleStateService {
 		}
 
 		if ( ! $result ) {
-			$this->logger->error( sprintf( 'Failed to save cycle state for product %d. Cycle state: %s', $product_id, wc_print_r( $cycle_state, true ) ), array( 'source' => JobManager::AS_JOB_GROUP ) );
+			$this->logger->error( sprintf( 'Failed to save cycle state for product %d. Cycle state: %s', $product_id, wc_print_r( $cycle_state, true ) ), array( 'source' => 'wc-customer-stock-notifications' ) );
 		}
 
 		return $result;
