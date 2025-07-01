@@ -78,3 +78,15 @@ jobs:
             --base trunk \
             --head "$branch_name" \
             --reviewer "${{ github.actor }}"
+
+  refresh-sites:
+    name: Refresh doc sites after release
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    if: ${{ ! contains( github.event.release.tag_name, 'wc-beta-tester' ) && ! contains( github.event.release.tag_name, '-rc' )  }}
+    steps:
+      - name: Refresh Code reference
+        env:
+          GH_TOKEN: ${{ secrets.CODE_REFERENCE_SITE_TOKEN }}
+        run: |
+          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY_OWNER/code-reference"
