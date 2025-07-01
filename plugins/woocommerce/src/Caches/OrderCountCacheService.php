@@ -52,6 +52,7 @@ class OrderCountCacheService {
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'refresh_cache' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
 		// This is a temporary fix to ensure the background actions are scheduled.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo: Remove this once the Action Scheduler package is updated to >= 3.9.3.
 		add_action( 'admin_init', array( $this, 'schedule_background_actions' ) );
 

@@ -309,6 +309,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo: remove this once we have version 3.9.3 of Action Scheduler.
 		if ( function_exists( 'as_supports' ) && as_supports( 'schedule_recurring_actions_hook' ) ) {
 			add_action( 'action_scheduler_schedule_recurring_actions', array( $this, 'register_recurring_actions' ) );
