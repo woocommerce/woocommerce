@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent wc_get_page_id from returning trashed or deleted page IDs.

@@ -81,16 +81,21 @@ function wc_get_page_id( $page ) {
 		$page = 'myaccount';
 	}
 
-	$page_id = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
+	/**
+	 * Filter the page ID for the specified WooCommerce page.
+	 *
+	 * @since 9.0.0
+	 * @param int $page_id The ID of the page.
+	 * @param string $page The page slug.
+	 */
+	$page_id = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ), $page );
 
 	$post = get_post( $page_id );
-	
 	if ( ! $post || 'publish' !== $post->post_status ) {
 		return -1;
 	}
 
 	return absint( $page_id );
-
 }
 
 /**
