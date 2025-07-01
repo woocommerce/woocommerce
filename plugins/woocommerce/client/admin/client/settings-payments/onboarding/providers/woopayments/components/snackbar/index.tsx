@@ -14,10 +14,12 @@ import './snackbar.scss';
  */
 const WooPaymentsOnboardingModalSnackbar = ( {
 	children,
+	duration = 4000,
 	className,
 }: {
 	children: React.ReactNode;
-	className: string;
+	duration?: number;
+	className?: string;
 } ) => {
 	const [ isVisible, setIsVisible ] = useState( false );
 	const [ isExiting, setIsExiting ] = useState( false );
