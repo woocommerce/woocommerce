@@ -58,7 +58,7 @@ You may have non-PHP systems directly connected to DB that would escape a normal
 2. [ ] Migrate production database to staging site using CLI.
 3. [ ] Monitor migration time for insights into production migration duration.
 4. [ ] Test Phase 1 flows on the staging site with synchronization on.
-5. [ ] Optionally, verify data migration integrity using _wp wc hpo verify_cot_data --verbose._
+5. [ ] Optionally, verify data migration integrity using `wp wc hpos verify_cot_data --verbose`.
 6. [ ] Test Phase 1 flows on the staging site with synchronization off.
 7. [ ] Audit third-party systems to ensure they do not directly access posts tables.
 
@@ -77,7 +77,7 @@ This will make sure that orders will start appearing in the HPOS tables, and tha
 
 Now, start the migration by enabling synchronization by toggling on the "**Enable compatibility mode**" checkbox.
 
-Right after enabling synchronization, you can start migrating past orders from the post tables to the new HPOS tables via CLI using the `wp wc hpo sync` command.
+Right after enabling synchronization, you can start migrating past orders from the post tables to the new HPOS tables via CLI using the `wp wc hpos sync` command.
 
 In case you see any errors, turning off the sync, or interrupting the sync CLI job is considered safe. You can resume once you have resolved the error (or if the error was unrelated to the sync process).
 
