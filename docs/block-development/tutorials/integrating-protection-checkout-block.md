@@ -55,7 +55,7 @@ Once your protection element is rendered, you need to integrate it with the chec
 
 ### Using the Checkout Data Store
 
-The checkout block uses a data store to manage state. You can use the `__internalSetExtensionData` method to pass your protection token to the server.
+The checkout block uses a data store to manage state. You can use the `setExtensionData` method to pass your protection token to the server.
 
 ```js
 /* Woo Checkout Block */
@@ -69,7 +69,7 @@ if ( wp && wp.data ) {
         callback: function( data ) {
           wp.data
             .dispatch("wc/store/checkout")
-            .__internalSetExtensionData("plugin-namespace-turnstile", {
+            .setExtensionData("plugin-namespace-turnstile", {
               token: data,
             });
         },
@@ -85,7 +85,7 @@ if ( wp && wp.data ) {
 
 - We subscribe to the cart data store to detect when the checkout is ready
 - The `turnstile.render()` method initializes your CAPTCHA (replace with your specific implementation)
-- `__internalSetExtensionData()` stores the token in the checkout data store
+- `setExtensionData()` stores the token in the checkout data store
 - The namespace should be unique to your plugin (e.g., `my-plugin-turnstile`)
 
 ### Data Store Integration
@@ -155,10 +155,6 @@ function plugin_check_turnstile_token( $result ) {
 - Consider allowing certain payment methods to bypass protection (e.g., express payments)
 
 ## Important Notes
-
-### Internal Method Usage
-
-The example above uses `__internalSetExtensionData`, which is currently an internal method. While this method is stable, we will notify developers if anything around it changes.
 
 ### Security Considerations
 
