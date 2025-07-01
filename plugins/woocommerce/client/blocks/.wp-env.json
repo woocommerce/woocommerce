@@ -6,8 +6,16 @@
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",
 		"../.."
 	],
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": "wp-content/plugins/woocommerce/debug.log"
+	},
 	"env": {
 		"tests": {
+			"config": {
+				"WP_DEBUG": true,
+				"WP_DEBUG_LOG": "wp-content/plugins/woocommerce/debug.log"
+			},
 			"mappings": {
 				"wp-cli.yml": "./wp-cli.yml",
 				"wp-content/plugins/woocommerce/blocks-bin": "./bin",

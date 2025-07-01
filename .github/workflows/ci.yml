@@ -282,6 +282,10 @@ jobs:
           # Finally, run the tests
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
 
+      - name: 'Print debug log'
+        if: ${{ always() && matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
+        run: pnpm --filter="@woocommerce/block-library" wp-env run tests-cli cat wp-content/plugins/woocommerce/debug.log || true
+
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
         if: ${{ always() && matrix.report.resultsPath != '' }}
