@@ -33,8 +33,9 @@ class StockManagementHelper {
 			return array();
 		}
 
-		if ( isset( $this->managed_variations[ $product->get_id() ] ) ) {
-			return $this->managed_variations[ $product->get_id() ];
+		$product_id = $product->get_id();
+		if ( isset( $this->managed_variations[ $product_id ] ) ) {
+			return $this->managed_variations[ $product_id ];
 		}
 
 		$children = $product->get_children();
@@ -48,8 +49,8 @@ class StockManagementHelper {
 		$query_in         = '(' . implode( ',', $format ) . ')';
 		$managed_children = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
 
-		$this->managed_variations[ $product->get_id() ] = array_map( 'intval', $managed_children );
+		$this->managed_variations[ $product_id ] = array_map( 'intval', $managed_children );
 
-		return $this->managed_variations[ $product->get_id() ];
+		return $this->managed_variations[ $product_id ];
 	}
 }

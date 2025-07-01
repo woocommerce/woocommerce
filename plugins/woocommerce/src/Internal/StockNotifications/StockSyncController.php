@@ -113,7 +113,7 @@ class StockSyncController {
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to process product %d: %s', $product_id, $e->getMessage() ),
-				array( 'source' => 'wc-stock-notifications' )
+				array( 'source' => 'wc-customer-stock-notifications' )
 			);
 		}
 	}
@@ -144,7 +144,7 @@ class StockSyncController {
 		$this->store_admin_notice();
 
 		/**
-		 * Triggers the batch processor to process the product IDs.
+		 * Allows for additional processing of the product IDs after they have been queued.
 		 *
 		 * @since 0.0.0
 		 *

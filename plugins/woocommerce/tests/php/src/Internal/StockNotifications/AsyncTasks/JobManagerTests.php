@@ -53,7 +53,9 @@ class JobManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_schedule_initial_job_for_product_with_existing_job() {
 		$product_id = 123;
-		$this->sut->schedule_initial_job_for_product( $product_id );
+		$result     = $this->sut->schedule_initial_job_for_product( $product_id );
+
+		$this->assertTrue( $result );
 
 		$result = $this->sut->schedule_initial_job_for_product( $product_id );
 

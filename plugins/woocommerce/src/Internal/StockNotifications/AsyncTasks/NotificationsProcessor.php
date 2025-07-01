@@ -25,7 +25,7 @@ class NotificationsProcessor {
 	 *
 	 * @var EmailManager
 	 */
-	private $email_manager;
+	private EmailManager $email_manager;
 
 	/**
 	 * The logger.
@@ -39,21 +39,21 @@ class NotificationsProcessor {
 	 *
 	 * @var EligibilityService
 	 */
-	private $eligibility_service;
+	private EligibilityService $eligibility_service;
 
 	/**
 	 * The job manager.
 	 *
 	 * @var JobManager
 	 */
-	private $job_manager;
+	private JobManager $job_manager;
 
 	/**
 	 * The cycle state service.
 	 *
 	 * @var CycleStateService
 	 */
-	private $cycle_state_service;
+	private CycleStateService $cycle_state_service;
 
 	/**
 	 * The batch size for processing notifications.
@@ -212,7 +212,7 @@ class NotificationsProcessor {
 			if ( ! $notification instanceof Notification ) {
 				$this->logger->error(
 					sprintf( 'Failed to get notification ID: %d', $notification_id ),
-					array( 'source' => JobManager::AS_JOB_GROUP )
+					array( 'source' => 'wc-customer-stock-notifications' )
 				);
 				continue;
 			}
