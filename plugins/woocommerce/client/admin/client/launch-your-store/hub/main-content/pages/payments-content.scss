@@ -11,17 +11,24 @@
 		height: 100%;
 		border-radius: 10px;
 		box-shadow: 0 15px 20px 0 rgba(0, 0, 0, 0.04), 0 13px 15px 0 rgba(0, 0, 0, 0.03), 0 6px 10px 0 rgba(0, 0, 0, 0.02), 0 0 1px 0 rgba(0, 0, 0, 0.25);
-		overflow-y: auto;
+
+		// Prevent the canvas from exceeding the viewport height.
+		&:has(.woocommerce-recommended-payment-methods) {
+			max-height: calc(100vh - 32px);
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
 	}
 
 	.settings-payments-onboarding-modal__content {
 		margin: 0;
+		background: transparent;
 	}
 
 	.woocommerce-recommended-payment-methods {
-		margin-top: 24px;
 		background: transparent;
 		top: $gap-small;
+		max-height: 100%;
 
 		&__header {
 			&--title {
@@ -31,10 +38,18 @@
 				}
 			}
 		}
+
+		&__list {
+			background: $white;
+		}
+
+		&__footer {
+			background-color: transparent;
+		}
 	}
 
 	.settings-payments-onboarding-modal__wrapper {
-		background-color: $white;
+		background-color: transparent;
 	}
 
 	.woocommerce-layout__header {
