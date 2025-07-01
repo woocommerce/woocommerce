@@ -24,11 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	);
 
 	if ( CartCheckoutUtils::is_checkout_block_default() ) {
-		echo wp_kses_post(
+		echo ' ' . wp_kses_post(
 			sprintf(
 			/* translators: %s: URL to local pickup settings */
 				__(
-					" To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+					"To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
 					'woocommerce'
 				),
 				esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
