@@ -9,7 +9,7 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { getTotalBlockingTime, median } from '../utils';
-import { toggleBlockProductEditor } from '../../e2e-pw/utils/simple-products';
+import { wpCLI } from '../../e2e-pw/utils/cli';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
@@ -30,6 +30,12 @@ test.describe( 'Product editor performance', () => {
 		},
 	} );
 
+	test.beforeAll( async () => {
+		await wpCLI(
+			'wp option set woocommerce_feature_product_block_editor_enabled yes'
+		);
+	} );
+
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
 		Object.keys( results ).forEach( ( metric ) => {
@@ -39,10 +45,10 @@ test.describe( 'Product editor performance', () => {
 			body: JSON.stringify( { 'product-editor': medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
-	} );
 
-	test( 'Enable Product Editor', async ( { page } ) => {
-		await toggleBlockProductEditor( 'enable', page );
+		await wpCLI(
+			'wp option set woocommerce_feature_product_block_editor_enabled no'
+		);
 	} );
 
 	test.describe( 'Loading', () => {
@@ -124,6 +130,7 @@ test.describe( 'Product editor performance', () => {
 					.getByLabel( 'Close Tour' )
 					.click( { timeout: 3000 } );
 			} catch ( e ) {
+				// eslint-disable-next-line no-console -- We want to see this in the console.
 				console.log( 'Tour was not visible, skipping.' );
 			}
 

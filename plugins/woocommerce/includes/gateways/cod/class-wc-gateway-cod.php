@@ -367,4 +367,13 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
 		}
 	}
+
+	/**
+	 * Get the settings URL for the gateway.
+	 *
+	 * @return string
+	 */
+	public function get_settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/cod' );
+	}
 }
