@@ -149,6 +149,30 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			}
 
 			expect( fetchMock ).toHaveBeenCalledTimes( 3 );
+			expect( fetchMock ).toHaveBeenNthCalledWith(
+				1,
+				expect.stringContaining( '/wc/store/v1/batch' ),
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.stringContaining( '5fixedcheckout' ),
+				} )
+			);
+			expect( fetchMock ).toHaveBeenNthCalledWith(
+				2,
+				expect.stringContaining( '/wc/store/v1/batch' ),
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.stringContaining( '50percoffcheckout' ),
+				} )
+			);
+			expect( fetchMock ).toHaveBeenNthCalledWith(
+				3,
+				expect.stringContaining( '/wc/store/v1/batch' ),
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.stringContaining( '10fixedproductcheckout' ),
+				} )
+			);
 		} );
 
 		it( 'handles API errors correctly without breaking', async () => {
