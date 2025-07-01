@@ -12,6 +12,7 @@ return array(
 	'belpochta'               => ShippingProviders\BelpochtaShippingProvider::class,
 	'bpost'                   => ShippingProviders\BpostShippingProvider::class,
 	'bulgarian-posts'         => ShippingProviders\BulgarianPostsShippingProvider::class,
+	'canada-post'             => ShippingProviders\CanadaPostShippingProvider::class,
 	'cdek'                    => ShippingProviders\CDEKShippingProvider::class,
 	'ceska-posta'             => ShippingProviders\CeskaPostaShippingProvider::class,
 	'chronopost'              => ShippingProviders\ChronopostShippingProvider::class,
