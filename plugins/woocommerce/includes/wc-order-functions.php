@@ -1079,9 +1079,20 @@ function wc_cancel_unpaid_orders() {
 
 	// Re-schedule the event before cancelling orders
 	// this way in case of a DB timeout or (plugin) crash the event is always scheduled for retry.
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	/**
+	 * Filters the interval at which to cancel unpaid orders in minutes.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param int $cancel_unpaid_interval The interval at which to cancel unpaid orders in minutes.
+	 */
 	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
-	wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
+	// Clear existing scheduled events.
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+
+	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 
 	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
 		return;
