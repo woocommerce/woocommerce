@@ -88,9 +88,9 @@ class PaymentMethodIcons extends AbstractBlock {
 	private function render_payment_method_icons( $attributes ) {
 		$output = '';
 
-		$all_payment_methods        = $this->get_available_payment_methods();
-		$number_of_icons            = $attributes['numberOfIcons'] ?? 0;
-		$number_of_icons            = 0 === $number_of_icons ? count( $all_payment_methods ) : max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
+		$all_payment_methods = $this->get_available_payment_methods();
+		$number_of_icons     = $attributes['numberOfIcons'] ?? 0;
+		$number_of_icons     = 0 === $number_of_icons ? count( $all_payment_methods ) : max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
 
 		if ( ! empty( $all_payment_methods ) ) {
 			for ( $i = 0; $i < $number_of_icons; $i++ ) {
@@ -110,10 +110,6 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return bool WooPayments enabled.
 	 */
 	private function is_woopayments_enabled() {
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			return false;
-		}
-
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		return isset( $payment_gateways['woocommerce_payments'] ) && 'yes' === $payment_gateways['woocommerce_payments']->enabled;
@@ -187,17 +183,25 @@ class PaymentMethodIcons extends AbstractBlock {
 		}
 
 		foreach ( $available_gateways as $gateway ) {
-			if ( 'woocommerce_payments' === $gateway->id ) {
-				continue;
-			}
-
 			if ( 'yes' === $gateway->enabled ) {
-				$icon_url = $gateway->get_icon_url();
-				if ( ! empty( $icon_url ) ) {
-					$other_payment_methods[] = array(
-						'name' => $gateway->get_title(),
-						'icon' => $icon_url,
-					);
+				if ( 'woocommerce_payments' === $gateway->id ) {
+					if ( 'yes' === $gateway->get_option( 'platform_checkout', 'no' ) ) {
+						$other_payment_methods[] = array(
+							'name' => 'WooPay',
+							'icon' => $this->get_card_type_icon_url( 'woopay' ),
+						);
+					}
+				} else {
+					$icon_url = '';
+					if ( method_exists( $gateway, 'get_icon_url' ) ) {
+						$icon_url = $gateway->get_icon_url();
+					}
+					if ( ! empty( $icon_url ) ) {
+						$other_payment_methods[] = array(
+							'name' => $gateway->get_title(),
+							'icon' => $icon_url,
+						);
+					}
 				}
 			}
 		}

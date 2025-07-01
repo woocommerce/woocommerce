@@ -65,13 +65,11 @@ const Edit = ( {
 					return acc;
 				}
 
-				return [
-					...acc,
-					{
-						type,
-						icon: wooPaymentMethods[ type ].icon,
-					},
-				];
+				acc.push( {
+					type,
+					icon: wooPaymentMethods[ type ].icon,
+				} );
+				return acc;
 			},
 			[] as Array< { type: string; icon: string } >
 		);
