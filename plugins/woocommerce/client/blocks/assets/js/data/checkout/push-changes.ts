@@ -31,6 +31,7 @@ const localState = {
 		orderNotes: '',
 		additionalFields: {} as AdditionalValues,
 		activePaymentMethod: '',
+		hasSession: false,
 	},
 };
 
@@ -46,6 +47,7 @@ const initialize = () => {
 		orderNotes: store.getOrderNotes(),
 		additionalFields: store.getAdditionalFields(),
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
+		hasSession: document.cookie.includes( 'woocommerce_cart_hash' ),
 	};
 	localState.isInitialized = true;
 };
@@ -54,6 +56,11 @@ const initialize = () => {
  * Function to dispatch an update to the server.
  */
 const updateCheckoutData = (): void => {
+	// If we don't have any session, exit early.
+	if ( ! localState.checkoutData.hasSession ) {
+		return;
+	}
+
 	if ( localState.doingPush ) {
 		return;
 	}

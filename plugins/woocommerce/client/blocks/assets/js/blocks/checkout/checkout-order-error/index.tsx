@@ -7,6 +7,7 @@ import { removeCart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
+import { CheckoutResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -20,15 +21,33 @@ import {
 	GENERIC_CART_ITEM_ERROR,
 } from './constants';
 
+// Type definitions
+interface ErrorData {
+	code: string;
+	message: string;
+}
+
+interface CheckoutData {
+	code?: string;
+	message?: string;
+}
+
+interface ErrorComponentProps {
+	errorData: ErrorData;
+}
+
 const cartItemErrorCodes = [
 	PRODUCT_OUT_OF_STOCK,
 	PRODUCT_NOT_PURCHASABLE,
 	PRODUCT_NOT_ENOUGH_STOCK,
 	PRODUCT_SOLD_INDIVIDUALLY,
 	GENERIC_CART_ITEM_ERROR,
-];
+] as const;
 
-const preloadedCheckoutData = getSetting( 'checkoutData', {} );
+const preloadedCheckoutData = getSetting(
+	'checkoutData',
+	{}
+) as CheckoutResponse;
 
 /**
  * Get the error message to display.
@@ -36,10 +55,14 @@ const preloadedCheckoutData = getSetting( 'checkoutData', {} );
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorTitle = ( { errorData } ) => {
+const ErrorTitle = ( { errorData }: ErrorComponentProps ) => {
 	let heading = __( 'Checkout error', 'woocommerce' );
 
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+	if (
+		cartItemErrorCodes.includes(
+			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+		)
+	) {
 		heading = __( 'There is a problem with your cart', 'woocommerce' );
 	}
 
@@ -54,10 +77,14 @@ const ErrorTitle = ( { errorData } ) => {
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorMessage = ( { errorData } ) => {
+const ErrorMessage = ( { errorData }: ErrorComponentProps ) => {
 	let message = errorData.message;
 
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+	if (
+		cartItemErrorCodes.includes(
+			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+		)
+	) {
 		message =
 			message +
 			' ' +
@@ -73,20 +100,36 @@ const ErrorMessage = ( { errorData } ) => {
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorButton = ( { errorData } ) => {
+const ErrorButton = ( { errorData }: ErrorComponentProps ) => {
 	let buttonText = __( 'Retry', 'woocommerce' );
-	let buttonUrl = 'javascript:window.location.reload(true)';
 
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
+	if (
+		cartItemErrorCodes.includes(
+			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+		)
+	) {
 		buttonText = __( 'Edit your cart', 'woocommerce' );
-		buttonUrl = CART_URL;
 	}
+
+	const isLink =
+		cartItemErrorCodes.includes(
+			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+		) && CART_URL;
 
 	return (
 		<span className="wp-block-button">
-			<a href={ buttonUrl } className="wp-block-button__link">
-				{ buttonText }
-			</a>
+			{ isLink ? (
+				<a href={ CART_URL } className="wp-block-button__link">
+					{ buttonText }
+				</a>
+			) : (
+				<button
+					className="wp-block-button__link"
+					onClick={ () => window.location.reload() }
+				>
+					{ buttonText }
+				</button>
+			) }
 		</span>
 	);
 };
@@ -99,13 +142,13 @@ const ErrorButton = ( { errorData } ) => {
  * checkout block.
  */
 const CheckoutOrderError = () => {
-	const checkoutData = {
+	const checkoutData: CheckoutData = {
 		code: '',
 		message: '',
 		...( preloadedCheckoutData || {} ),
 	};
 
-	const errorData = {
+	const errorData: ErrorData = {
 		code: checkoutData.code || 'unknown',
 		message:
 			decodeEntities( checkoutData.message ) ||
