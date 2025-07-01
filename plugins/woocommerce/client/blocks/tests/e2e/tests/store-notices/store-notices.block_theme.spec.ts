@@ -54,36 +54,14 @@ test.describe( `${ blockData.slug } Block`, () => {
 	} );
 
 	test( 'should be visible on the Product Catalog template', async ( {
-		page,
 		editor,
 		admin,
 	} ) => {
-		const query = addQueryArgs( '', {
+		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
 			canvas: 'edit',
-		} ).slice( 1 );
-
-		await admin.visitAdminPage( 'site-editor.php', query );
-
-		await page.evaluate( () => {
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuide', false );
-
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuideStyles', false );
-
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuidePage', false );
-
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuideTemplate', false );
 		} );
-
 		const block = await editor.getBlockByName( blockData.slug );
 		await expect( block ).toBeVisible();
 		await expect( block ).toHaveText(
