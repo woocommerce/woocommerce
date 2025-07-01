@@ -7,7 +7,7 @@ import { skipOnboardingWizard } from '../utils/onboarding';
 import { WC_API_PATH } from '../utils/api-client';
 
 setup( 'setup site', async ( { baseURL, restApi } ) => {
-	setup.step( 'configure HPOS', async () => {
+	await setup.step( 'configure HPOS', async () => {
 		const { DISABLE_HPOS } = process.env;
 		console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
@@ -62,15 +62,15 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		);
 	} );
 
-	setup.step( 'disable coming soon', async () => {
+	await setup.step( 'disable coming soon', async () => {
 		await setComingSoon( { baseURL, enabled: 'no' } );
 	} );
 
-	setup.step( 'disable onboarding wizard', async () => {
+	await setup.step( 'disable onboarding wizard', async () => {
 		await skipOnboardingWizard();
 	} );
 
-	setup.step( 'determine if multisite', async () => {
+	await setup.step( 'determine if multisite', async () => {
 		const response = await restApi.get( `${ WC_API_PATH }/system_status` );
 		const { environment } = response.data;
 
@@ -82,7 +82,7 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		}
 	} );
 
-	setup.step( 'general settings', async () => {
+	await setup.step( 'general settings', async () => {
 		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
 			update: [
 				{ id: 'woocommerce_allowed_countries', value: 'all' },
