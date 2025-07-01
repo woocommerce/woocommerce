@@ -181,7 +181,7 @@
 		"@wordpress/rich-text": "wp-6.6",
 		"@wordpress/scripts": "30.13.0",
 		"@wordpress/stylelint-config": "^23.14.0",
-		"@wp-playground/cli": "1.1.1",
+		"@wp-playground/cli": "1.1.4",
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
 		"autoprefixer": "10.4.14",
