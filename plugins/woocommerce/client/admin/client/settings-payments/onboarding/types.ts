@@ -144,4 +144,14 @@ export interface OnboardingContextType {
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
 	sessionEntryPoint: string;
+	snackbar: {
+		show: boolean;
+		message: string;
+		className?: string;
+	};
+	setSnackbar: ( snackbar: {
+		show: boolean;
+		message: string;
+		className?: string;
+	} ) => void;
 }
