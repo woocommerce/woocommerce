@@ -151,6 +151,17 @@ export const __internalSetAvailableExpressPaymentMethods = (
 } );
 
 /**
+ * Set the registered express payment methods.
+ * Registered payment methods are all payment methods from the registry (before filtering).
+ */
+export const __internalSetRegisteredExpressPaymentMethods = (
+	paymentMethods: PlainExpressPaymentMethods
+) => ( {
+	type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+	paymentMethods,
+} );
+
+/**
  * Remove a payment method name from the available payment methods.
  * This is called when a payment method is removed from the registry.
  */
@@ -175,6 +186,32 @@ export const __internalRemoveAvailableExpressPaymentMethod = (
  */
 export function __internalUpdateAvailablePaymentMethods() {
 	return async ( { select, dispatch } ) => {
+		// Import registry functions at runtime to avoid circular dependencies
+		const { getExpressPaymentMethods } = await import(
+			'@woocommerce/blocks-registry'
+		);
+
+		// Convert registered express payment methods from registry to plain format
+		const registeredMethods = getExpressPaymentMethods();
+		const plainRegisteredMethods: PlainExpressPaymentMethods = {};
+
+		Object.keys( registeredMethods ).forEach( ( methodName ) => {
+			const method = registeredMethods[ methodName ];
+			plainRegisteredMethods[ methodName ] = {
+				name: method.name,
+				title: method.title,
+				description: method.description,
+				gatewayId: method.gatewayId,
+				supportsStyle: method.supports?.style || [],
+			};
+		} );
+
+		dispatch(
+			__internalSetRegisteredExpressPaymentMethods(
+				plainRegisteredMethods
+			)
+		);
+
 		const expressRegistered = await checkPaymentMethodsCanPay( true );
 		const registered = await checkPaymentMethodsCanPay( false );
 		const { paymentMethodsInitialized, expressPaymentMethodsInitialized } =
