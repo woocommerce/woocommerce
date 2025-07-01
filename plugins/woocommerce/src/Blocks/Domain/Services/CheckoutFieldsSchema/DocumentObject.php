@@ -141,7 +141,7 @@ class DocumentObject {
 				'items'              => array_merge(
 					...array_map(
 						function ( $item ) {
-							return array_fill( 0, $item['quantity'], $item['id'] );
+							return array_fill( 0, intval( ceil( $item['quantity'] ) ), $item['id'] );
 						},
 						$cart_data['items']
 					)
