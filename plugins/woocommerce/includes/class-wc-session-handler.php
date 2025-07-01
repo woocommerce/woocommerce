@@ -496,24 +496,48 @@ class WC_Session_Handler extends WC_Session {
 	 * For guests, sessions expire in 48 hours.
 	 */
 	public function set_session_expiration() {
-		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
-
 		/**
 		 * Filters the session expiration.
 		 *
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiring = time() + intval( apply_filters( 'wc_session_expiring', $expiring_seconds ) );
+		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', DAY_IN_SECONDS ) );
 
+		if ( $expiring_seconds > MONTH_IN_SECONDS - DAY_IN_SECONDS ) {
+			$expiring_seconds = MONTH_IN_SECONDS - DAY_IN_SECONDS;
+			$transient_key    = 'wc_session_handler_warning';
+			if ( false === get_transient( $transient_key ) ) {
+				wc_get_logger()->warning( 'Keeping sessions for longer than 30 days results in perfomance isues, the default is 2 days for guests and 7 days for logged in users, expiry has been capped to 30 days.', array( 'source' => 'wc_session_handler' ) );
+				set_transient( $transient_key, true, MONTH_IN_SECONDS );
+			}
+		}
 		/**
 		 * Filters the session expiration.
 		 *
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', $expiration_seconds ) );
+		$expiration_seconds = intval( apply_filters( 'wc_session_expiration', is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS ) );
+
+		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
+		if ( $expiration_seconds > MONTH_IN_SECONDS ) {
+			$expiration_seconds = MONTH_IN_SECONDS;
+			$transient_key      = 'wc_session_handler_warning';
+			if ( false === get_transient( $transient_key ) ) {
+				wc_get_logger()->warning( 'Keeping sessions for longer than 30 days results in perfomance isues, the default is 2 days for guests and 7 days for logged in users, expiry has been capped to 30 days.', array( 'source' => 'wc_session_handler' ) );
+				set_transient( $transient_key, true, MONTH_IN_SECONDS );
+			}
+		}
+
+		// If the expiring time is greater than the expiration time, set the expiring time to 90% of the expiration time.
+		if ( $expiring_seconds > $expiration_seconds ) {
+			$expiring_seconds = $expiration_seconds * 0.9;
+		}
+
+		$this->_session_expiring = time() + $expiring_seconds;
+
+		$this->_session_expiration = time() + $expiration_seconds;
 	}
 
 	/**
