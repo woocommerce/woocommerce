@@ -3,7 +3,6 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import fetchMock from 'jest-fetch-mock';
-import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -71,19 +70,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				await result.current.applyCoupon( 'TEST5' );
 			} );
 
-			// Find the batch API call (filter out any initial cart fetches)
-			const batchCalls = fetchMock.mock.calls.filter(
-				( call ) =>
-					typeof call[ 0 ] === 'string' &&
-					call[ 0 ].includes( '/wc/store/v1/batch' )
-			);
-
 			// Verify exactly one batch API call was made
-			expect( batchCalls ).toHaveLength( 1 );
-			expect( batchCalls[ 0 ][ 0 ] ).toEqual(
-				expect.stringContaining( '/wc/store/v1/batch' )
-			);
-			expect( batchCalls[ 0 ][ 1 ] ).toEqual(
+			expect( fetchMock ).toHaveBeenCalledWith(
+				expect.stringContaining( '/wc/store/v1/batch' ),
 				expect.objectContaining( {
 					method: 'POST',
 					headers: expect.objectContaining( {
@@ -93,8 +82,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				} )
 			);
 
-			// Verify the request body contains the coupon code
-			const requestBody = batchCalls[ 0 ][ 1 ].body;
+			// // Verify the request body contains the coupon code
+			const batchPayload = fetchMock.mock.calls[ 0 ][ 1 ] as RequestInit;
+			const requestBody = batchPayload.body as string;
 			const parsedBody = JSON.parse( requestBody );
 			expect( parsedBody.requests ).toHaveLength( 1 );
 			expect( parsedBody.requests[ 0 ].path ).toBe(
@@ -145,7 +135,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 				// Verify the API call for this coupon
 				const callIndex = i;
-				const requestBody = fetchMock.mock.calls[ callIndex ][ 1 ].body;
+				const requestBody = fetchMock.mock.calls?.[ callIndex ]?.[ 1 ]
+					?.body as string;
 				const parsedBody = JSON.parse( requestBody );
 
 				expect( parsedBody.requests[ 0 ].path ).toBe(
@@ -162,16 +153,18 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'handles API errors correctly without breaking', async () => {
 			// Mock an error response
-			fetchMock.mockRejectOnce( {
-				code: 'woocommerce_rest_cart_coupon_error',
-				message: 'Coupon "INVALID" does not exist!',
-				data: {
-					status: 400,
-					details: {
-						cart: 'Coupon "INVALID" does not exist!',
+			fetchMock.mockRejectOnce( ( resolve, reject ) =>
+				reject( {
+					code: 'woocommerce_rest_cart_coupon_error',
+					message: 'Coupon "INVALID" does not exist!',
+					data: {
+						status: 400,
+						details: {
+							cart: 'Coupon "INVALID" does not exist!',
+						},
 					},
-				},
-			} );
+				} )
+			);
 
 			const { result } = renderHook( () =>
 				useStoreCartCoupons( 'wc/checkout' )
@@ -239,7 +232,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			} );
 
 			// Parse and verify the batch request structure
-			const requestBody = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const requestBody = fetchMock.mock?.calls?.[ 0 ]?.[ 1 ]
+				?.body as string;
 			const parsedBody = JSON.parse( requestBody );
 
 			expect( parsedBody ).toEqual( {
@@ -274,7 +268,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			// Verify the API call was made correctly for removal
 			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 
-			const requestBody = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const requestBody = fetchMock.mock.calls?.[ 0 ]?.[ 1 ]
+				?.body as string;
 			const parsedBody = JSON.parse( requestBody );
 
 			expect( parsedBody.requests[ 0 ].path ).toBe(
@@ -305,7 +300,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			// Verify API call is made regardless of context
 			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 
-			const requestBody = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const requestBody = fetchMock.mock?.calls?.[ 0 ]?.[ 1 ]
+				?.body as string;
 			const parsedBody = JSON.parse( requestBody );
 			expect( parsedBody.requests[ 0 ].data.code ).toBe(
 				'CHECKOUT_CONTEXT'
@@ -350,9 +346,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			expect( fetchMock ).toHaveBeenCalledTimes( 2 );
 
 			// Verify both calls have the same API structure
-			const firstCall = JSON.parse( fetchMock.mock.calls[ 0 ][ 1 ].body );
+			const firstCall = JSON.parse(
+				fetchMock.mock?.calls?.[ 0 ]?.[ 1 ]?.body as string
+			);
 			const secondCall = JSON.parse(
-				fetchMock.mock.calls[ 1 ][ 1 ].body
+				fetchMock.mock?.calls?.[ 1 ]?.[ 1 ]?.body as string
 			);
 
 			expect( firstCall.requests[ 0 ].path ).toBe(
@@ -381,7 +379,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				await result.current.applyCoupon( specialCoupon );
 			} );
 
-			const requestBody = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const requestBody = fetchMock.mock?.calls?.[ 0 ]?.[ 1 ]
+				?.body as string;
 			const parsedBody = JSON.parse( requestBody );
 			expect( parsedBody.requests[ 0 ].data.code ).toBe( specialCoupon );
 		} );
@@ -401,7 +400,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				await result.current.applyCoupon( '' );
 			} );
 
-			const requestBody = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const requestBody = fetchMock.mock?.calls?.[ 0 ]?.[ 1 ]
+				?.body as string;
 			const parsedBody = JSON.parse( requestBody );
 			expect( parsedBody.requests[ 0 ].data.code ).toBe( '' );
 		} );
