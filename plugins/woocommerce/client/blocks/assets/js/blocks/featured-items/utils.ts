@@ -105,7 +105,7 @@ export function dimRatioToClass( ratio: number ) {
  * @param {string} name current item name.
  * @return {string} The description message for unavailable item.
  */
-export function getInvalidItemDescription( name: string ):string {
+export function getInvalidItemDescription( name: string ): string {
 	return name === BLOCK_NAMES.featuredProduct
 		? __(
 				'Previously selected product is no longer available',

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-
+import { __ } from '@wordpress/i18n';
+import type { ComponentType } from 'react';
+import { useEffect } from '@wordpress/element';
+import { info } from '@wordpress/icons';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductControl from '@woocommerce/editor-components/product-control';
 import {
 	ProductResponseItem,
 	ProductCategoryResponseItem,
@@ -15,20 +20,15 @@ import {
 	// @ts-expect-error Using experimental features
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
-import ProductControl from '@woocommerce/editor-components/product-control';
-import type { ComponentType } from 'react';
-import { useFeaturedItemStatus } from './use-featured-item-status';
-import { useEffect } from '@wordpress/element';
-import { info } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
+
 import { BLOCK_NAMES } from './constants';
 import { EditorBlock, GenericBlockUIConfig } from './types';
 import { getClassPrefixFromName, getInvalidItemDescription } from './utils';
+import { useFeaturedItemStatus } from './use-featured-item-status';
 
 interface EditModeConfiguration extends GenericBlockUIConfig {
 	description: string;
@@ -104,7 +104,7 @@ export const withEditMode =
 					label={ label }
 					className={ className }
 				>
-					<div>{ __( 'Loading...', 'woocommerce' ) }</div>
+					<div>{ __( 'Loading…', 'woocommerce' ) }</div>
 				</Placeholder>
 			);
 		}
