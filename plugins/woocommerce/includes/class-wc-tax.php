@@ -549,11 +549,20 @@ class WC_Tax {
 	}
 
 	/**
-	 * Gets an array of matching shipping tax rates for a given class.
+	 * Gets shipping tax rates based on tax class and customer location.
 	 *
-	 * @param string $tax_class Tax class to get rates for.
-	 * @param object $customer Override the customer object to get their location.
-	 * @return mixed
+	 * This method determines which tax rates to apply to shipping costs by following this priority:
+	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings if not set to 'inherit'
+	 * 2. If tax_class is provided (per-item shipping), uses that specific class
+	 * 3. If no tax_class provided (per-order shipping), analyzes cart items to determine the appropriate class:
+	 *    - Returns empty array if cart has no taxable items
+	 *    - For multiple tax classes: prioritizes standard rate, then uses first class found in tax class hierarchy
+	 *    - For single tax class: uses that class directly
+	 * 4. Falls back to standard tax rates if no specific rates are found
+	 *
+	 * @param string|null      $tax_class Optional. Specific tax class slug to get rates for. If null, determines from cart contents.
+	 * @param WC_Customer|null $customer Optional. Customer object to get location from. Uses current customer if null.
+	 * @return array Array of tax rate arrays, each containing 'rate', 'label', 'shipping', and 'compound' keys. Empty array if no rates found.
 	 */
 	public static function get_shipping_tax_rates( $tax_class = null, $customer = null ) {
 		// See if we have an explicitly set shipping tax class.
@@ -596,16 +605,22 @@ class WC_Tax {
 	/**
 	 * Get the shipping tax class from the cart items.
 	 *
-	 * @return string|null The shipping tax class, or null if no taxable items are found.
+	 * Determines the appropriate tax class for shipping based on cart contents.
+	 * Standard tax class takes priority, followed by the first non-standard class
+	 * found in the configured tax class hierarchy.
+	 *
+	 * @return string|null The shipping tax class slug, or null if no taxable items are found.
 	 */
 	private static function get_shipping_tax_class_from_cart_items() {
-		$default_tax_class = ''; // Standard.
+		$standard_tax_class = '';
+		$cart               = WC()->cart;
 
-		if ( ! WC()->cart->get_cart() ) {
-			return $default_tax_class;
+		// Check if cart has items before proceeding.
+		if ( ! $cart->get_cart() ) {
+			return $standard_tax_class;
 		}
 
-		$cart_tax_classes = WC()->cart->get_cart_item_tax_classes_for_shipping();
+		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
 
 		// No tax classes = no taxable items.
 		if ( empty( $cart_tax_classes ) ) {
@@ -613,21 +628,29 @@ class WC_Tax {
 		}
 
 		// Standard tax class takes priority over any other tax class.
-		if ( in_array( $default_tax_class, $cart_tax_classes, true ) ) {
-			return $default_tax_class;
+		if ( in_array( $standard_tax_class, $cart_tax_classes, true ) ) {
+			return $standard_tax_class;
 		}
 
-		// If multiple classes are found, use the first one found using the order defined in settings.
-		$tax_classes = self::get_tax_class_slugs();
+		// If only one tax class, use it directly.
+		if ( 1 === count( $cart_tax_classes ) ) {
+			return reset( $cart_tax_classes );
+		}
 
-		foreach ( $tax_classes as $tax_class ) {
-			if ( in_array( $tax_class, $cart_tax_classes, true ) ) {
-				return $tax_class;
+		// For multiple classes, use the first one found using the order defined in settings.
+		static $tax_class_slugs = null;
+		if ( null === $tax_class_slugs ) {
+			$tax_class_slugs = self::get_tax_class_slugs();
+		}
+
+		foreach ( $tax_class_slugs as $tax_class_slug ) {
+			if ( in_array( $tax_class_slug, $cart_tax_classes, true ) ) {
+				return $tax_class_slug;
 			}
 		}
 
-		// Default to standard tax class.
-		return $default_tax_class;
+		// Default to standard tax class if nothing else matches.
+		return $standard_tax_class;
 	}
 
 	/**
