@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -159,7 +160,7 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$featured_image_id          = (int) $product->get_image_id();
-		$gallery_image_ids          = $product->get_gallery_image_ids();
+		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
 		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
 		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
 
@@ -173,10 +174,11 @@ class ProductImage extends AbstractBlock {
 		$title    = get_the_title( $target_image_id );
 
 		$attr = array(
-			'alt'         => empty( $alt_text ) ? $product->get_title() : $alt_text,
-			'data-testid' => 'product-image',
-			'style'       => $image_style,
-			'title'       => $title,
+			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
+			'data-testid'   => 'product-image',
+			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'style'         => $image_style,
+			'title'         => $title,
 		);
 
 		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );

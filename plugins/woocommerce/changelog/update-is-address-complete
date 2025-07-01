@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update address JS utils to use the addressFieldsForShippingRates setting

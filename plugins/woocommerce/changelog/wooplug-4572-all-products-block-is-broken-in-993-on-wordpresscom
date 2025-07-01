@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent All Products block breaking when mini cart is not present in site header

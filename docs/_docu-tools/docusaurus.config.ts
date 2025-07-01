@@ -23,6 +23,8 @@ const config: Config = {
 	onBrokenLinks: 'throw',
 	onBrokenMarkdownLinks: 'warn',
 
+	trailingSlash: true,
+	
 	// Even if you don't use internationalization, you can use this field to set
 	// useful metadata like html lang. For example, if your site is Chinese, you
 	// may want to replace "en" with "zh-Hans".
@@ -30,6 +32,11 @@ const config: Config = {
 		defaultLocale: 'en',
 		locales: ['en'],
 	},
+
+	plugins: [
+		'./llms-txt/index.ts',
+		'./consent-plugin/index.ts'
+	],
 
 	presets: [
 		[
@@ -63,7 +70,7 @@ const config: Config = {
 
 	themeConfig: {
 		// Replace with your project's social card
-		image: 'img/woo-dev-site-logo.svg',
+		image: 'https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2025/03/woo-dev-docs-banner.png',
 		navbar: {
 			logo: {
 				alt: 'WooCommerce developer docs',

@@ -8937,7 +8937,7 @@ body.woocommerce_page_wc-settings {
 
 	.woocommerce-layout__header-heading {
 		padding: 0 0 0 30px;
-		font-weight: 590;
+		font-weight: 600;
 		font-size: 16px;
 		color: #070707;
 	}
@@ -8990,14 +8990,28 @@ body.woocommerce_page_wc-settings {
 		flex-wrap: wrap;
 		list-style: none;
 		padding-left: 30px;
+		padding-right: 24px;
 		gap: 24px;
+
+		/*
+		 * Hides the ::after clearfix from nav-tab-wrapper to avoid the list
+		 * of tasks breaking into two lines in some cases.
+		 * The clearfix is added by WordPress core in
+		 * https://github.com/WordPress/wordpress-develop/blob/512f8052f00932bfab512e40400d80f62c9e6854/src/wp-admin/css/common.css#L2378-L2383
+		 * but it is not needed in our implementation because we use display: flex;
+		 * @see https://github.com/woocommerce/woocommerce/pull/39600
+		 */
+		&:not(.wp-clearfix)::after {
+			display: none;
+		}
+
 		a {
 			float: none;
 			font-family: $font-sf-pro-display;
 			margin-left: 0;
 			border: 0;
 			background: none;
-			font-weight: 510;
+			font-weight: 500;
 			font-size: 14px;
 			line-height: 20px;
 			color: #505050;

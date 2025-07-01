@@ -42,10 +42,10 @@ export const completeSubStep = (
 			status: string;
 		}
 	>
-) => {
+): Promise< void > => {
 	// Store the sub-step completed status on the backend.
 	if ( apiUrl ) {
-		apiFetch( {
+		return apiFetch( {
 			url: apiUrl,
 			method: 'POST',
 			data: {
@@ -58,6 +58,9 @@ export const completeSubStep = (
 			},
 		} );
 	}
+
+	// If no API URL is provided, just return a resolved promise.
+	return Promise.resolve();
 };
 
 /**

@@ -5,17 +5,20 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { CartVariationItem } from '@woocommerce/types';
+import '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
+	price_html: string;
+	is_in_stock: boolean;
 };
 
 export type Context = {
 	productId: number;
 	productType: string;
 	selectedAttributes: CartVariationItem[];
-	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -144,11 +147,21 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { productType } = getContext< Context >();
+				const { availableVariations, selectedAttributes, productType } =
+					getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! addToCartWithOptionsStore.state.variationId;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				// Variable products must be in stock and have a selected variation
+				return Boolean(
+					matchedVariation?.is_in_stock &&
+						matchedVariation?.variation_id
+				);
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -254,7 +267,21 @@ const addToCartWithOptionsStore = store(
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityInputChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, currentValue } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					currentValue,
+					childProductId
+				);
+			},
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
@@ -334,6 +361,31 @@ const addToCartWithOptionsStore = store(
 						quantity: newQuantity,
 						variation: selectedAttributes,
 					} );
+				}
+			},
+		},
+		callbacks: {
+			setProductData: () => {
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const { actions } = store< ProductDataStore >(
+					'woocommerce/product-data',
+					{},
+					{ lock: universalLock }
+				);
+
+				if ( matchedVariation ) {
+					actions.setProductData(
+						'price_html',
+						matchedVariation.price_html
+					);
+				} else {
+					actions.setProductData( 'price_html', null );
 				}
 			},
 		},

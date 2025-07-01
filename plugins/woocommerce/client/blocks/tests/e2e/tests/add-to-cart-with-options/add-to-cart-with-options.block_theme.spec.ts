@@ -101,9 +101,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
+		await page.getByLabel( 'Product quantity' ).fill( '1' );
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '6 in cart' );
+		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
 	test( 'allows adding variable products to cart', async ( {
@@ -125,6 +126,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const productPrice = page
+			.locator( '.wp-block-woocommerce-product-price' )
+			.first();
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
@@ -134,11 +138,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+		await test.step( 'updates product price when attributes are selected', async () => {
+			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+
 			await logoNoOption.click();
 			await colorGreenOption.click();
 			await addToCartButton.click();
 
+			await expect( productPrice ).toHaveText( '$45.00' );
+		} );
+
+		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
@@ -170,6 +180,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'Increase quantity of Beanie'
 		);
 		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
 
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
@@ -177,7 +188,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -220,6 +231,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( attributeOptionsBlock.first() );
 
 		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+
+		// We need to make sure the block updated before saving.
+		// @see https://github.com/woocommerce/woocommerce/issues/57718
+		await expect(
+			editor.canvas.getByLabel( 'Color', { exact: true } )
+		).toBeVisible();
 
 		await editor.saveSiteEditorEntities();
 

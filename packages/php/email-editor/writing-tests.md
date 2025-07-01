@@ -57,7 +57,7 @@ tests/
 composer run test:unit
 
 # Run specific test file
-pnpm --filter='@woocommerce/email-editor-php-config' test:unit -- tests/unit/Engine/Settings_Controller_Test.php
+pnpm --filter='@woocommerce/email-editor-config' test:unit -- tests/unit/Engine/Settings_Controller_Test.php
 
 # Run tests with specific group
 composer run test:unit -- --group=settings
@@ -125,7 +125,7 @@ class Settings_Controller_Test extends \Email_Editor_Unit_Test  {
 composer run test:integration
 
 # Run specific integration test
-pnpm --filter='@woocommerce/email-editor-php-config' test:integration -- tests/integration/Integrations/Core/Renderer/Blocks/Social_Links_Test.php
+pnpm --filter='@woocommerce/email-editor-config' test:integration -- tests/integration/Integrations/Core/Renderer/Blocks/Social_Links_Test.php
 
 # Run tests with specific group
 composer run test:integration -- --group=email-templates

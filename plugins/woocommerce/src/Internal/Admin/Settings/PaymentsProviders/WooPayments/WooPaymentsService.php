@@ -71,6 +71,9 @@ class WooPaymentsService {
 	const NOX_PROFILE_OPTION_KEY    = 'woocommerce_woopayments_nox_profile';
 	const NOX_ONBOARDING_LOCKED_KEY = 'woocommerce_woopayments_nox_onboarding_locked';
 
+	const SESSION_ENTRY_DEFAULT = 'settings_payments';
+	const SESSION_ENTRY_LYS     = 'lys';
+
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
 	const FROM_KYC              = 'KYC';
@@ -125,7 +128,7 @@ class WooPaymentsService {
 	 * Get the onboarding details for the settings page.
 	 *
 	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 *                               This is an ISO 3166-1 alpha-2 country code.
 	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
 	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
@@ -179,7 +182,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return string The status of the onboarding step.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
@@ -216,6 +219,14 @@ class WooPaymentsService {
 				case self::ONBOARDING_STEP_TEST_ACCOUNT:
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
+						// Since it takes a while for the account to be fully working after the test account initialization,
+						// we will force mark the step as completed here, if it is not already.
+						// This is a fail-safe to guard against the case when the frontend doesn't mark the step as completed.
+						// The step has no reason to be blocked or failed.
+						$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 					break;
@@ -268,6 +279,34 @@ class WooPaymentsService {
 			}
 		}
 		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
+			// Special treatment for the test account step:
+			// If the step was marked as started more than 1 minutes ago (plenty of time for the slowest of webhooks to
+			// come through) and it is obviously not completed, and there is no account connected,
+			// we will unmark it as started (aka clean its progress). Something went wrong with the step!
+			// This is an auto-healing measure to prevent the step from being stuck in a started state indefinitely.
+			if ( self::ONBOARDING_STEP_TEST_ACCOUNT === $step_id && ! $this->has_account() ) {
+				$statuses          = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+				$started_timestamp = ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] )
+					? (int) $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ]
+					: 0;
+				if ( $started_timestamp &&
+					( $this->proxy->call_function( 'time' ) - $started_timestamp ) > 60 // 1 minute.
+				) {
+					$this->clean_onboarding_step_progress( $step_id, $location );
+
+					// Record an event for the step being cleaned due to timeout.
+					$this->record_event(
+						self::EVENT_PREFIX . 'onboarding_step_progress_reset_due_to_timeout',
+						$location,
+						array(
+							'step_id' => $step_id,
+						)
+					);
+
+					return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				}
+			}
+
 			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
@@ -285,7 +324,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step has been marked as started.
 	 */
@@ -300,7 +339,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id   The ID of the onboarding step.
 	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 *                          This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool   $overwrite Whether to overwrite the step status if it is already started and update the timestamp.
 	 *
 	 * @return bool Whether the onboarding step was marked as started.
@@ -343,7 +382,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step is completed.
 	 * @throws ApiException On invalid step ID.
@@ -362,7 +401,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step has been marked as completed.
 	 */
@@ -377,7 +416,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id   The ID of the onboarding step.
 	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 *                          This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool   $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
 	 *
 	 * @return bool Whether the onboarding step was marked as completed.
@@ -420,7 +459,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id   The ID of the onboarding step.
 	 * @param string $location  The location for which we are onboarding.
-	 *                          This is a ISO 3166-1 alpha-2 country code.
+	 *                          This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step was cleaned.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
@@ -455,7 +494,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step is failed.
 	 */
@@ -472,7 +511,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $error    Optional. An error to be stored for the step to provide context to API consumers.
 	 *                         The error should be an associative array with the following keys:
 	 *                         - 'code': A string representing the error code.
@@ -519,7 +558,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step was cleared from failed status.
 	 *              Returns false if the step was not failed.
@@ -546,7 +585,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step is blocked.
 	 */
@@ -563,7 +602,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $errors   Optional. A list of errors to be stored for the step to provide context to API consumers.
 	 *
 	 * @return bool Whether the onboarding step was marked as blocked.
@@ -592,7 +631,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step was cleared from blocked status.
 	 *              Returns false if the step was not blocked.
@@ -619,7 +658,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The error for the onboarding step.
 	 */
@@ -689,7 +728,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id      The ID of the onboarding step.
 	 * @param string $location     The location for which we are onboarding.
-	 *                             This is a ISO 3166-1 alpha-2 country code.
+	 *                             This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $request_data The entire data received in the request.
 	 *
 	 * @return bool Whether the onboarding step data was saved.
@@ -792,7 +831,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The check result.
 	 * @throws ApiArgumentException If the given onboarding step ID or step data is invalid.
@@ -811,7 +850,7 @@ class WooPaymentsService {
 	 * Get the recommended payment methods details for onboarding.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The recommended payment methods details.
 	 */
@@ -823,7 +862,7 @@ class WooPaymentsService {
 	 * Initialize the test account for onboarding.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
@@ -866,7 +905,7 @@ class WooPaymentsService {
 		// Clear any previous failed status for the step.
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
-		$selected_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
+		$configured_payment_methods = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_PAYMENT_METHODS, $location, 'payment_methods', array() );
 
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
@@ -887,7 +926,7 @@ class WooPaymentsService {
 				'/wc/v3/payments/onboarding/test_drive_account/init',
 				array(
 					'country'      => $location,
-					'capabilities' => $selected_payment_methods,
+					'capabilities' => $configured_payment_methods,
 					'source'       => $source,
 					'from'         => self::FROM_NOX_IN_CONTEXT,
 				)
@@ -950,12 +989,33 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the test account being initialized.
+		$payment_methods_enabled  = array();
+		$payment_methods_disabled = array();
+		if ( ! empty( $configured_payment_methods ) && is_array( $configured_payment_methods ) ) {
+			foreach ( $configured_payment_methods as $pm_id => $enabled ) {
+				if ( ! is_string( $pm_id ) || ! is_bool( $enabled ) ) {
+					continue; // Skip invalid entries.
+				}
+
+				if ( $enabled ) {
+					$payment_methods_enabled[] = sanitize_key( $pm_id );
+				} else {
+					$payment_methods_disabled[] = sanitize_key( $pm_id );
+				}
+			}
+		}
+		$payment_methods_enabled  = array_unique( $payment_methods_enabled );
+		$payment_methods_disabled = array_unique( $payment_methods_disabled );
+
+		$event_props = array(
+			'payment_methods_enabled'  => implode( ', ', $payment_methods_enabled ),
+			'payment_methods_disabled' => implode( ', ', $payment_methods_disabled ),
+			'source'                   => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_test_account_init',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
@@ -965,7 +1025,7 @@ class WooPaymentsService {
 	 * Get the onboarding KYC account session.
 	 *
 	 * @param string $location        The location for which we are onboarding.
-	 *                                This is a ISO 3166-1 alpha-2 country code.
+	 *                                This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $self_assessment Optional. The self-assessment data.
 	 *                                If not provided, the stored data will be used.
 	 * @param string $source          Optional. The source for the current onboarding flow.
@@ -1085,12 +1145,15 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the KYC session being created.
+		$event_props = array(
+			'new_account_created' => $response['accountCreated'] ?? false,
+			'account_mode'        => ( $response['isLive'] ?? false ) ? 'live' : 'test',
+			'source'              => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_kyc_session_created',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
@@ -1100,7 +1163,7 @@ class WooPaymentsService {
 	 * Finish the onboarding KYC account session.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $source   Optional. The source for the current onboarding flow.
 	 *                         If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
@@ -1191,12 +1254,17 @@ class WooPaymentsService {
 		}
 
 		// Record an event for the KYC session being finished.
+		$event_props = array(
+			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
+			'account_mode'      => ( 'live' === ( $response['mode'] ?? false ) ) ? 'live' : 'test',
+			'details_submitted' => filter_var( $response['details_submitted'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
+			'promotion_id'      => $response['promotion_id'] ?? 'none',
+			'source'            => $source,
+		);
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_kyc_session_finished',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		// Mark the business verification step as completed.
@@ -1265,7 +1333,7 @@ class WooPaymentsService {
 	 * Reset onboarding.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $from     Optional. Where in the UI the request is coming from.
 	 *                         If not provided, it will identify the origin as the WC Admin Payments settings.
 	 * @param string $source   Optional. The source for the current onboarding flow.
@@ -1287,6 +1355,13 @@ class WooPaymentsService {
 		if ( empty( $source ) ) {
 			$source = self::FROM_PAYMENT_SETTINGS;
 		}
+
+		// Before resetting the account, record its details for tracking purposes.
+		$event_props = array(
+			'account_mode' => $this->has_live_account() ? 'live' : 'test',
+			'test_account' => $this->has_test_account(),
+			'source'       => $source,
+		);
 
 		try {
 			// Call the WooPayments API to reset onboarding.
@@ -1339,9 +1414,7 @@ class WooPaymentsService {
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_reset',
 			$location,
-			array(
-				'source' => $source,
-			)
+			$event_props
 		);
 
 		return $response;
@@ -1351,7 +1424,7 @@ class WooPaymentsService {
 	 * Disable test account during the switch-to-live onboarding flow.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $from     Optional. Where in the UI the request is coming from.
 	 *                         If not provided, it will identify the origin as the WC Admin Payments settings.
 	 * @param string $source   Optional. The source for the current onboarding flow.
@@ -1400,6 +1473,17 @@ class WooPaymentsService {
 
 		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
+
+		// Track the failure to disable the test account.
+		if ( is_wp_error( $response ) || ! is_array( $response ) || empty( $response['success'] ) ) {
+			$this->record_event(
+				self::EVENT_PREFIX . 'onboarding_test_account_disable_error',
+				$location,
+				array(
+					'source' => $source,
+				)
+			);
+		}
 
 		if ( is_wp_error( $response ) ) {
 			throw new ApiException(
@@ -1482,7 +1566,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return void
 	 * @throws ApiArgumentException If the onboarding step ID is invalid.
@@ -1556,7 +1640,7 @@ class WooPaymentsService {
 	 * Get the onboarding details for each step.
 	 *
 	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is a ISO 3166-1 alpha-2 country code.
+	 *                               This is an ISO 3166-1 alpha-2 country code.
 	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
 	 * @param string|null $source    Optional. The source for the onboarding flow.
 	 *
@@ -1566,32 +1650,35 @@ class WooPaymentsService {
 	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = null ): array {
 		$steps = array();
 
-		// Add the payment methods onboarding step details.
-		$steps[] = $this->standardize_onboarding_step_details(
-			array(
-				'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
-				'context' => array(
-					'recommended_pms' => $this->get_onboarding_recommended_payment_methods( $location ),
-					'pms_state'       => $this->get_onboarding_payment_methods_state( $location ),
+		// Add the payment methods onboarding step details, but only if we have recommended payment methods.
+		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( ! empty( $recommended_pms ) ) {
+			$steps[] = $this->standardize_onboarding_step_details(
+				array(
+					'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
+					'context' => array(
+						'recommended_pms' => $recommended_pms,
+						'pms_state'       => $this->get_onboarding_payment_methods_state( $location, $recommended_pms ),
+					),
+					'actions' => array(
+						'start'  => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
+						),
+						'save'   => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
+						),
+						'finish' => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
+						),
+					),
 				),
-				'actions' => array(
-					'start'  => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
-					),
-					'save'   => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
-					),
-					'finish' => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
-					),
-				),
-			),
-			$location,
-			$rest_path
-		);
+				$location,
+				$rest_path
+			);
+		}
 
 		// Add the WPCOM connection onboarding step details.
 		$wpcom_step = $this->standardize_onboarding_step_details(
@@ -1609,8 +1696,8 @@ class WooPaymentsService {
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $wpcom_step['status'] ) {
 			// Craft the return URL.
 			switch ( $source ) {
-				case 'launch-your-store':
-					// If the source is 'launch-your-store', we return the user to the Launch Your Store flow.
+				case self::SESSION_ENTRY_LYS:
+					// If the source is LYS, we return the user to the Launch Your Store flow.
 					$return_url = $this->proxy->call_function(
 						'admin_url',
 						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments&wpcom_connection_return=1'
@@ -1748,7 +1835,7 @@ class WooPaymentsService {
 	 *
 	 * @param array  $step_details The onboarding step details to standardize.
 	 * @param string $location     The location for which we are onboarding.
-	 *                             This is a ISO 3166-1 alpha-2 country code.
+	 *                             This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $rest_path    The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding step details.
@@ -1817,7 +1904,7 @@ class WooPaymentsService {
 	 *
 	 * @param array  $steps The onboarding steps list to standardize.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $rest_path The REST API path to use for constructing REST API URLs.
 	 *
 	 * @return array The standardized onboarding steps list.
@@ -1854,7 +1941,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The onboarding step stored data from the NOX profile.
 	 *               If the step data is not found, an empty array is returned.
@@ -1883,7 +1970,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $data     The onboarding step data to save in the profile.
 	 *
 	 * @return bool Whether the onboarding step data was saved.
@@ -1912,7 +1999,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id       The ID of the onboarding step.
 	 * @param string $location      The location for which we are onboarding.
-	 *                              This is a ISO 3166-1 alpha-2 country code.
+	 *                              This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $entry         The entry to get from the step data.
 	 * @param mixed  $default_value The default value to return if the entry is not found.
 	 *
@@ -1933,7 +2020,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $entry    The entry key under which to save in the step data.
 	 * @param array  $data     The data to save in the step data.
 	 *
@@ -1953,7 +2040,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id       The ID of the onboarding step.
 	 * @param string $location      The location for which we are onboarding.
-	 *                              This is a ISO 3166-1 alpha-2 country code.
+	 *                              This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $entry         The entry to get from the step `data`.
 	 * @param mixed  $default_value The default value to return if the entry is not found.
 	 *
@@ -1975,7 +2062,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 * @param string $entry    The entry key under which to save in the step `data`.
 	 * @param mixed  $data     The value to save.
 	 *
@@ -2015,7 +2102,7 @@ class WooPaymentsService {
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return bool Whether the onboarding step requirements are met.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
@@ -2035,16 +2122,23 @@ class WooPaymentsService {
 	/**
 	 * Get the payment methods state for onboarding.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 * @param string     $location        The location for which we are onboarding.
+	 *                                    This is an ISO 3166-1 alpha-2 country code.
+	 * @param array|null $recommended_pms Optional. The recommended payment methods to use.
 	 *
 	 * @return array The onboarding payment methods state.
 	 */
-	private function get_onboarding_payment_methods_state( string $location ): array {
+	private function get_onboarding_payment_methods_state( string $location, ?array $recommended_pms ): array {
 		// First, get the recommended payment methods details from the provider.
 		// We will use their enablement state as the default.
 		// Note: The list is validated and standardized by the provider, so we don't need to do it here.
-		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( null === $recommended_pms ) {
+			$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		}
+		if ( empty( $recommended_pms ) ) {
+			// If there are no recommended payment methods, return an empty array.
+			return array();
+		}
 
 		// Grab the stored payment methods state
 		// (a key-value array of payment method IDs and if they should be automatically enabled or not).
@@ -2082,7 +2176,7 @@ class WooPaymentsService {
 
 			// Check the stored state, if any.
 			if ( isset( $step_pms_data[ $pm_id ] ) ) {
-				$payment_methods_state[ $pm_id ] = filter_var( $step_pms_data[ $pm_id ], FILTER_VALIDATE_BOOLEAN );
+				$payment_methods_state[ $pm_id ] = wc_string_to_bool( $step_pms_data[ $pm_id ] );
 			}
 		}
 
@@ -2232,7 +2326,7 @@ class WooPaymentsService {
 	 * Get the onboarding fields data for the KYC business verification.
 	 *
 	 * @param string $location The location for which we are onboarding.
-	 *                         This is a ISO 3166-1 alpha-2 country code.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The onboarding fields data.
 	 * @throws Exception If the onboarding fields data could not be retrieved or there was an error.
@@ -2313,7 +2407,7 @@ class WooPaymentsService {
 	 * @param string $name              The event name.
 	 *                                  If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
 	 * @param string $business_country  The business registration country code as set in the WooCommerce Payments settings.
-	 *                                  This is a ISO 3166-1 alpha-2 country code.
+	 *                                  This is an ISO 3166-1 alpha-2 country code.
 	 * @param array  $properties        Optional. The event custom properties.
 	 *                                  These properties will be merged with the default properties.
 	 *                                  Default properties values take precedence over the provided ones.

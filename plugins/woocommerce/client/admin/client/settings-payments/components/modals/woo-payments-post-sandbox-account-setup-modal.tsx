@@ -17,6 +17,11 @@ import {
 	recordPaymentsEvent,
 } from '~/settings-payments/utils';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface WooPaymentsReadyToTestModalProps {
 	/**
@@ -54,7 +59,9 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	const handleActivatePayments = () => {
 		// Record the event when the user clicks on the "Activate Payments" button.
 		recordPaymentsEvent( 'switch_to_live_account_click', {
-			provider_id: 'woocommerce_payments',
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
 		setIsActivatingPayments( true );
@@ -69,7 +76,9 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	const handleContinueStoreSetup = () => {
 		// Record the event when the user clicks on the "Continue Store Setup" button.
 		recordPaymentsEvent( 'continue_store_setup_click', {
-			provider_id: 'woocommerce_payments',
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
 		setIsContinuingStoreSetup( true );
