@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -67,9 +67,20 @@ export const withEditMode =
 		} = props;
 
 		const className = getClassPrefixFromName( name );
+		const [ selectedItem, setSelectedItem ] = useState( name === BLOCK_NAMES.featuredProduct ?{
+			productId: 0,
+			mediaId: 0,
+			mediaSrc: '',
+		} : {
+			categoryId: 0,
+			mediaId: 0,
+			mediaSrc: '',
+		});
 
 		const onDone = () => {
-			setAttributes( { editMode: false } );
+			if ( selectedItem.productId || selectedItem.categoryId ) {
+				setAttributes( { editMode: false, ...selectedItem } );
+			}
 			debouncedSpeak( editLabel );
 		};
 
@@ -143,7 +154,7 @@ export const withEditMode =
 									value: ProductCategoryResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedItem( {
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
@@ -165,7 +176,7 @@ export const withEditMode =
 									value: ProductResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedItem( {
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
