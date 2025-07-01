@@ -23,6 +23,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 }
 
 /* Styles for WooCommerce blocks that can't be styled via the editor yet. */
+/* https://github.com/woocommerce/woocommerce/issues/59322 */
 
 .wc-block-components-checkout-step__heading,
 .wc-block-components-checkout-order-summary__title,
