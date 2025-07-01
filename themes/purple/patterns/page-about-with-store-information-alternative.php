@@ -10,5 +10,6 @@
  * Description: An about page pattern.
  */
 ?>
-
 <!-- wp:pattern {"slug":"woostarter/about-alternating-columns"} /-->
+
+<!-- wp:pattern {"slug":"woostarter/about-category-collection"} /-->
