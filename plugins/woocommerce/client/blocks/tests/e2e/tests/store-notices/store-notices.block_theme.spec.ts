@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-utils';
-import { PHPRequestHandler, PHP } from '@php-wasm/universal';
 import { runCLI } from '@wp-playground/cli';
-import { login } from '@wp-playground/blueprints';
 import { resolve } from 'path';
+import { addQueryArgs } from '@wordpress/url';
 
 const blockData = {
 	name: 'Store Notices',
@@ -55,14 +54,36 @@ test.describe( `${ blockData.slug } Block`, () => {
 	} );
 
 	test( 'should be visible on the Product Catalog template', async ( {
+		page,
 		editor,
 		admin,
 	} ) => {
-		await admin.visitSiteEditor( {
+		const query = addQueryArgs( '', {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
 			canvas: 'edit',
+		} ).slice( 1 );
+
+		await admin.visitAdminPage( 'site-editor.php', query );
+
+		await page.evaluate( () => {
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuide', false );
+
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuideStyles', false );
+
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuidePage', false );
+
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuideTemplate', false );
 		} );
+
 		const block = await editor.getBlockByName( blockData.slug );
 		await expect( block ).toBeVisible();
 		await expect( block ).toHaveText(
