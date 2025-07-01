@@ -481,7 +481,7 @@
                          (reverse) ? (slider.last - slider.currentSlide + slider.cloneOffset) * cwidth : (slider.currentSlide + slider.cloneOffset) * cwidth;
                 startX = (vertical) ? localY : localX;
                 startY = (vertical) ? localX : localY;
-                el.addEventListener('touchmove', onTouchMove, false);
+                el.addEventListener('touchmove', onTouchMove, { capture: false, passive: false });
                 el.addEventListener('touchend', onTouchEnd, false);
               }
             };
@@ -497,7 +497,8 @@
               var fxms = 500;
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
-                e.preventDefault();
+				e.preventDefault();
+				e.stopPropagation();
                 if (!fade) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
@@ -509,7 +510,7 @@
 
             onTouchEnd = function(e) {
               // finish the touch by undoing the touch session
-              el.removeEventListener('touchmove', onTouchMove, false);
+              el.removeEventListener('touchmove', onTouchMove, { capture: false, passive: false });
 
               if (slider.animatingTo === slider.currentSlide && !scrolling && !(dx === null)) {
                 var updateDx = (reverse) ? -dx : dx,
