@@ -19,10 +19,15 @@ on:
   workflow_call:
     inputs:
       skip_verify:
-        description: 'Skip the PR verification step (default: false) pass true to skip'
-        required: false
-        default: 'false'
-        type: string
+        description: 'Skip verification steps.'
+        type: boolean
+        required: true
+        default: false
+      create_github_release:
+        description: 'Create a draft GitHub release.'
+        type: boolean
+        required: true
+        default: false
     outputs:
       artifact_url:
         description: 'URL of the built release artifact'
@@ -201,6 +206,12 @@ jobs:
           path: zipfile
           retention-days: 1
 
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
   create-release:
     name: Create GitHub release
     runs-on: ubuntu-latest
@@ -244,9 +255,3 @@ jobs:
             --latest=false \
             --draft \
             $FLAGS
-
-      - name: Output artifact URL
-        id: output-artifact-url
-        run: |
-          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
-          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT

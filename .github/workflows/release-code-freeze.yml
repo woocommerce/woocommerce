@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -169,7 +169,8 @@ jobs:
     uses: ./.github/workflows/release-build-zip-file.yml
     needs: [prepare-for-code-freeze, run-code-freeze]
     with:
-      skip_verify: 'true'
+      skip_verify: true
+      create_github_release: false
 
   notify-slack:
     name: Notify Slack
