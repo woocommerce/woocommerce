@@ -22,6 +22,7 @@ class StockNotifications {
 
 	final public function init() {
 		add_action( 'woocommerce_installed', array( SyncTasks::class, 'schedule_async_tasks' ) );
+		add_action( 'customer_stock_notifications_daily', array( SyncTasks::class, 'do_wc_customer_stock_notifications_daily' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
 
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'on_deactivation' ) );

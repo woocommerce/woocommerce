@@ -449,4 +449,15 @@ class Notification extends \WC_Data {
 
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();
 	}
+
+	public function is_active() {
+		return NotificationStatus::ACTIVE === $this->get_status();
+	}
+
+	public function is_expired() {
+		$created_at     = (int) $this->get_meta( '_verification_created_at' );
+		$time_threshold = Functions::get_verification_expiration_time_threshold();
+
+		return $time_threshold && time() > $created_at + $time_threshold;
+	}
 }
