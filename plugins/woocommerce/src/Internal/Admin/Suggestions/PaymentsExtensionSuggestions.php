@@ -2033,7 +2033,7 @@ class PaymentsExtensionSuggestions {
 		$countries = array();
 		foreach ( $this->country_extensions as $country_code => $extensions ) {
 			// First, check for the short format.
-			if ( in_array( $extension_id, $extensions ) ) {
+			if ( in_array( $extension_id, $extensions, true ) ) {
 				$countries[] = $country_code;
 				continue; // No need to check further in this country.
 			}

@@ -1,7 +1,5 @@
 <?php
-/**
- * Evaluates the spec and returns a status.
- */
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
@@ -119,7 +117,7 @@ class EvaluateSuggestion {
 
 		if ( function_exists( 'hash' ) && in_array( 'xxh3', hash_algos(), true ) ) {
 			// Use xxHash (xxh3) if available.
-			return hash( 'xxh3', $data );
+			return hash( 'xxh3', $data ); // phpcs:ignore PHPCompatibility.ParameterValues.NewHashAlgorithms.xxh3Found
 		}
 		// Fall back to CRC32.
 		return (string) crc32( $data );

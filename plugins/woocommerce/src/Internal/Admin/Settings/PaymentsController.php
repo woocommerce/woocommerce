@@ -41,7 +41,7 @@ class PaymentsController {
 		add_action( 'woocommerce_admin_payments_extension_suggestion_incentive_dismissed', array( $this, 'handle_incentive_dismissed' ) );
 
 		// Legacy logic for backwards compatibility.
-		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( $this, '_legacy_extend_payment_gateway_response' ), 10, 2 );
+		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( $this, 'legacy_extend_payment_gateway_response' ), 10, 2 );
 	}
 
 	/**
@@ -373,11 +373,11 @@ class PaymentsController {
 	 *
 	 * @return WP_REST_Response The modified response data.
 	 */
-	public function _legacy_extend_payment_gateway_response( $response, $gateway ) {
+	public function legacy_extend_payment_gateway_response( $response, $gateway ) {
 		$data = $response->get_data();
 
 		$data['needs_setup']          = $gateway->needs_setup();
-		$data['post_install_scripts'] = $this->_legacy_get_post_install_scripts( $gateway );
+		$data['post_install_scripts'] = $this->legacy_get_post_install_scripts( $gateway );
 		$data['settings_url']         = method_exists( $gateway, 'get_settings_url' )
 			? $gateway->get_settings_url()
 			: admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
@@ -407,7 +407,7 @@ class PaymentsController {
 	 *
 	 * @return array Install scripts.
 	 */
-	public function _legacy_get_post_install_scripts( $gateway ) {
+	private function legacy_get_post_install_scripts( $gateway ) {
 		$scripts    = array();
 		$wp_scripts = wp_scripts();
 
