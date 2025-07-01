@@ -26,16 +26,17 @@ const WooPaymentsOnboardingModalSnackbar = ( {
 		// Trigger entrance animation after mount
 		const showTimer = setTimeout( () => {
 			setIsVisible( true );
-		}, 100 );
 
-		// Start exit animation before unmount
-		const exitTimer = setTimeout( () => {
-			setIsExiting( true );
-		}, 4700 ); // Start exit animation 300ms before the 5s timeout
+			// Start exit animation after the snackbar has been visible
+			const exitTimer = setTimeout( () => {
+				setIsExiting( true );
+			}, duration );
+
+			return () => clearTimeout( exitTimer );
+		}, 100 );
 
 		return () => {
 			clearTimeout( showTimer );
-			clearTimeout( exitTimer );
 		};
 	}, [] );
 
