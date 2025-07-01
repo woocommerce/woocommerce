@@ -33,7 +33,7 @@
 	}
 }
 .wp-block-woocommerce-checkout {
-	margin: 0 auto;
+	margin: 0;
 	padding-top: $gap-large;
 
 	// Don't remove this, it marks the container for container queries used in inner blocks.
@@ -170,4 +170,9 @@
 		@include font-size(large);
 		@include reset-box();
 	}
+}
+
+.theme-twentytwenty .wp-block-woocommerce-checkout, 
+.theme-twentytwentyone .wp-block-woocommerce-checkout {
+	margin: 0 auto;
 }
