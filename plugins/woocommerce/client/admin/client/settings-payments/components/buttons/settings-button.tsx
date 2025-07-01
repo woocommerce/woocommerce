@@ -6,12 +6,17 @@ import { Button } from '@wordpress/components';
 import {
 	OfflinePaymentMethodProvider,
 	PaymentGatewayProvider,
+	PaymentsProviderType,
 } from '@woocommerce/data';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
-import { recordPaymentsProviderEvent } from '~/settings-payments/utils';
+import {
+	recordPaymentsProviderEvent,
+	removeOriginFromURL,
+} from '~/settings-payments/utils';
 
 interface SettingsButtonProps {
 	/**
@@ -43,6 +48,8 @@ export const SettingsButton = ( {
 	isInstallingPlugin,
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
+	const isOffline = gatewayProvider._type === PaymentsProviderType.OfflinePm;
+	const navigate = useNavigate();
 	const recordButtonClickEvent = () => {
 		recordPaymentsProviderEvent( 'provider_manage_click', gatewayProvider );
 	};
@@ -50,9 +57,14 @@ export const SettingsButton = ( {
 	return (
 		<Button
 			variant={ 'secondary' }
-			href={ settingsHref }
+			href={ ! isOffline ? settingsHref : undefined }
 			disabled={ isInstallingPlugin }
-			onClick={ recordButtonClickEvent }
+			onClick={ () => {
+				recordButtonClickEvent();
+				if ( isOffline ) {
+					navigate( removeOriginFromURL( settingsHref ) );
+				}
+			} }
 		>
 			{ buttonText }
 		</Button>

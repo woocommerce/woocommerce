@@ -159,7 +159,7 @@ class Payments {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => admin_url( 'admin.php?page=wc-settings&tab=checkout&section=offline' ),
+							'href' => admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline' ),
 						),
 					),
 				),
