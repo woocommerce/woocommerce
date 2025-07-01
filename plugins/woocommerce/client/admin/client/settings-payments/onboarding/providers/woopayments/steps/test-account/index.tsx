@@ -101,6 +101,7 @@ const TestAccountStep = () => {
 		refreshStoreData,
 		setJustCompletedStepId,
 		sessionEntryPoint,
+		setSnackbar,
 	} = useOnboardingContext();
 
 	// Component State.
@@ -703,7 +704,13 @@ const TestAccountStep = () => {
 				isOpen={ isResetAccountModalOpen }
 				onClose={ () => {
 					setIsResetAccountModalOpen( false );
-					refreshStoreData(); // Force the step to reset.
+					setSnackbar( {
+						show: true,
+						message: __(
+							'Your test account was successfully reset.',
+							'woocommerce'
+						),
+					} );
 				} }
 				isEmbeddedResetFlow
 			/>
