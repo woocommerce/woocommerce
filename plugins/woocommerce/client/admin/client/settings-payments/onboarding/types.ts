@@ -148,10 +148,12 @@ export interface OnboardingContextType {
 		show: boolean;
 		message: string;
 		className?: string;
+		duration?: number;
 	};
 	setSnackbar: ( snackbar: {
 		show: boolean;
 		message: string;
+		duration?: number;
 		className?: string;
 	} ) => void;
 }

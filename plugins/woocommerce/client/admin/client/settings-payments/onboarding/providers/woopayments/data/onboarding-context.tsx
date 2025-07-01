@@ -66,6 +66,7 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	sessionEntryPoint: '',
 	snackbar: {
 		show: false,
+		duration: 4000,
 		message: '',
 	},
 	setSnackbar: () => undefined,
@@ -107,9 +108,11 @@ export const OnboardingProvider: React.FC< {
 	const [ snackbar, setSnackbar ] = useState< {
 		show: boolean;
 		message: string;
+		duration?: number;
 		className?: string;
 	} >( {
 		show: false,
+		duration: 4000,
 		message: '',
 	} );
 
