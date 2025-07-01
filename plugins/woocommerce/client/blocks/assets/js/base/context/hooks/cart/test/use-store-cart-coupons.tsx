@@ -3,11 +3,25 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import fetchMock from 'jest-fetch-mock';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
  */
 import { useStoreCartCoupons } from '../use-store-cart-coupons';
+
+// Mock the resolvers to avoid actual API calls on cart data store setup.
+jest.mock( '../../../../../data/cart/resolvers', () => {
+	return {
+		...jest.requireActual( '../../../../../data/cart/resolvers' ),
+		getCartData: jest
+			.fn()
+			.mockResolvedValue(
+				jest.requireActual( '@woocommerce/resource-previews' )
+					.previewCart
+			),
+	};
+} );
 
 describe( 'useStoreCartCoupons hook API integration', () => {
 	beforeEach( () => {
