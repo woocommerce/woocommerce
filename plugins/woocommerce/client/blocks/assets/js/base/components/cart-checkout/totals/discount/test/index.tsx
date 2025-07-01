@@ -589,7 +589,6 @@ describe( 'TotalsDiscount', () => {
 					total_discount_tax: 'xyz',
 				},
 			};
-			render( <TotalsDiscount { ...props } /> );
 			// parseInt('abc') returns NaN, which is falsy, so component shouldn't render
 			const { container } = render( <TotalsDiscount { ...props } /> );
 			expect( container.firstChild ).toBeNull();
