@@ -219,6 +219,14 @@ class WooPaymentsService {
 				case self::ONBOARDING_STEP_TEST_ACCOUNT:
 					// If the account is a valid, working test account, the step is completed.
 					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
+						// Since it takes a while for the account to be fully working after the test account initialization,
+						// we will force mark the step as completed here, if it is not already.
+						// This is a fail-safe to guard against the case when the frontend doesn't mark the step as completed.
+						// The step has no reason to be blocked or failed.
+						$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+						$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
 						return self::ONBOARDING_STEP_STATUS_COMPLETED;
 					}
 					break;
@@ -271,6 +279,34 @@ class WooPaymentsService {
 			}
 		}
 		if ( $this->was_onboarding_step_marked_started( $step_id, $location ) ) {
+			// Special treatment for the test account step:
+			// If the step was marked as started more than 1 minutes ago (plenty of time for the slowest of webhooks to
+			// come through) and it is obviously not completed, and there is no account connected,
+			// we will unmark it as started (aka clean its progress). Something went wrong with the step!
+			// This is an auto-healing measure to prevent the step from being stuck in a started state indefinitely.
+			if ( self::ONBOARDING_STEP_TEST_ACCOUNT === $step_id && ! $this->has_account() ) {
+				$statuses          = (array) $this->get_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses' );
+				$started_timestamp = ! empty( $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ] )
+					? (int) $statuses[ self::ONBOARDING_STEP_STATUS_STARTED ]
+					: 0;
+				if ( $started_timestamp &&
+					( $this->proxy->call_function( 'time' ) - $started_timestamp ) > 60 // 1 minute.
+				) {
+					$this->clean_onboarding_step_progress( $step_id, $location );
+
+					// Record an event for the step being cleaned due to timeout.
+					$this->record_event(
+						self::EVENT_PREFIX . 'onboarding_step_progress_reset_due_to_timeout',
+						$location,
+						array(
+							'step_id' => $step_id,
+						)
+					);
+
+					return self::ONBOARDING_STEP_STATUS_NOT_STARTED;
+				}
+			}
+
 			return self::ONBOARDING_STEP_STATUS_STARTED;
 		}
 
@@ -1614,32 +1650,35 @@ class WooPaymentsService {
 	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = null ): array {
 		$steps = array();
 
-		// Add the payment methods onboarding step details.
-		$steps[] = $this->standardize_onboarding_step_details(
-			array(
-				'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
-				'context' => array(
-					'recommended_pms' => $this->get_onboarding_recommended_payment_methods( $location ),
-					'pms_state'       => $this->get_onboarding_payment_methods_state( $location ),
+		// Add the payment methods onboarding step details, but only if we have recommended payment methods.
+		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( ! empty( $recommended_pms ) ) {
+			$steps[] = $this->standardize_onboarding_step_details(
+				array(
+					'id'      => self::ONBOARDING_STEP_PAYMENT_METHODS,
+					'context' => array(
+						'recommended_pms' => $recommended_pms,
+						'pms_state'       => $this->get_onboarding_payment_methods_state( $location, $recommended_pms ),
+					),
+					'actions' => array(
+						'start'  => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
+						),
+						'save'   => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
+						),
+						'finish' => array(
+							'type' => self::ACTION_TYPE_REST,
+							'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
+						),
+					),
 				),
-				'actions' => array(
-					'start'  => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/start' ),
-					),
-					'save'   => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/save' ),
-					),
-					'finish' => array(
-						'type' => self::ACTION_TYPE_REST,
-						'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_PAYMENT_METHODS . '/finish' ),
-					),
-				),
-			),
-			$location,
-			$rest_path
-		);
+				$location,
+				$rest_path
+			);
+		}
 
 		// Add the WPCOM connection onboarding step details.
 		$wpcom_step = $this->standardize_onboarding_step_details(
@@ -2083,16 +2122,23 @@ class WooPaymentsService {
 	/**
 	 * Get the payment methods state for onboarding.
 	 *
-	 * @param string $location The location for which we are onboarding.
-	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 * @param string     $location        The location for which we are onboarding.
+	 *                                    This is an ISO 3166-1 alpha-2 country code.
+	 * @param array|null $recommended_pms Optional. The recommended payment methods to use.
 	 *
 	 * @return array The onboarding payment methods state.
 	 */
-	private function get_onboarding_payment_methods_state( string $location ): array {
+	private function get_onboarding_payment_methods_state( string $location, ?array $recommended_pms ): array {
 		// First, get the recommended payment methods details from the provider.
 		// We will use their enablement state as the default.
 		// Note: The list is validated and standardized by the provider, so we don't need to do it here.
-		$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		if ( null === $recommended_pms ) {
+			$recommended_pms = $this->get_onboarding_recommended_payment_methods( $location );
+		}
+		if ( empty( $recommended_pms ) ) {
+			// If there are no recommended payment methods, return an empty array.
+			return array();
+		}
 
 		// Grab the stored payment methods state
 		// (a key-value array of payment method IDs and if they should be automatically enabled or not).
