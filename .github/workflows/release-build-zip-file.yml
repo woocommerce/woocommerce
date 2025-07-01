@@ -10,6 +10,17 @@ on:
         description: 'Skip the PR verification step (default: false) pass true to skip'
         required: false
         default: 'false'
+  workflow_call:
+    inputs:
+      skip_verify:
+        description: 'Skip the PR verification step (default: false) pass true to skip'
+        required: false
+        default: 'false'
+        type: string
+    outputs:
+      artifact_url:
+        description: 'URL of the built release artifact'
+        value: ${{ jobs.build.outputs.artifact-url }}
 
 permissions: {}
 
@@ -29,7 +40,7 @@ jobs:
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify !== 'false') {
+                  if ('${{ inputs.skip_verify }}' !== 'false') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
@@ -148,7 +159,9 @@ jobs:
     name: Build release zip file
     runs-on: ubuntu-latest
     if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
-    needs: [ verify-prs, verify-release-versions ]
+    needs: [ verify-prs ]
+    outputs:
+      artifact-url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     permissions:
       contents: read
     steps:
@@ -167,6 +180,7 @@ jobs:
         run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
 
       - name: Upload the zip file as an artifact
+        id: artifact-upload
         uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -174,3 +188,9 @@ jobs:
           name: woocommerce
           path: zipfile
           retention-days: 7
+
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
