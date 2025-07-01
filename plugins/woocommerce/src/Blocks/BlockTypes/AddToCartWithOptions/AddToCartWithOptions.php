@@ -281,7 +281,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 					/**
@@ -353,7 +353,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
