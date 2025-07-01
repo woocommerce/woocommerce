@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix shipping tax rate lookup when inheriting taxes from items and no matching shipping tax rates are defined.
