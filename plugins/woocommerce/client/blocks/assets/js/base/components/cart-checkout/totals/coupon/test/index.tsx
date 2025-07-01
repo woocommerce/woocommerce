@@ -19,6 +19,13 @@ describe( 'TotalsCoupon', () => {
 			clearValidationErrors();
 		} );
 	} );
+	afterAll( () => {
+		// Clear validation errors before each test
+		const { clearValidationErrors } = dispatch( validationStore );
+		act( () => {
+			clearValidationErrors();
+		} );
+	} );
 
 	it( "Shows a validation error when one is in the wc/store/validation data store and doesn't show one when there isn't", async () => {
 		const user = userEvent.setup();
