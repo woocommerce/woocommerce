@@ -128,6 +128,11 @@ class CheckoutLink {
 				$product_id = $raw_product;
 				$qty        = 1;
 			}
+
+			if ( ! is_numeric( $product_id ) ) {
+				// If the product ID is not numeric, it may be a SKU
+				$product_id = wc_get_product_id_by_sku( wc_clean( $product_id ) );
+			}		
 			
 			$product_id = absint( $product_id );
 			$qty        = absint( $qty );
