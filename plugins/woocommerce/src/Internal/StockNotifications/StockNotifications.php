@@ -21,8 +21,7 @@ class StockNotifications {
 	 */
 
 	final public function init() {
-		add_action( 'woocommerce_installed', array( $this, 'schedule_tasks' ) );
-		add_action( 'upgrader_process_complete', array( $this, 'schedule_tasks' ) );
+		add_action( 'woocommerce_installed', array( SyncTasks::class, 'schedule_async_tasks' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
 
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
@@ -34,7 +33,6 @@ class StockNotifications {
 	 * @internal
 	 */
 	public function init_hooks() {
-
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 
 		$container = wc_get_container();
@@ -64,20 +62,10 @@ class StockNotifications {
 	}
 
 	/**
-	 * This is run on plugin activation, or plugin update to schedule the stock notifications tasks.
-	 *
-	 */
-	public function schedule_tasks() {
-		if ( ! wp_next_scheduled( 'customer_stock_notifications_daily' ) ) {
-			wp_schedule_event( time() + 10, 'daily', 'customer_stock_notifications_daily' );
-		}
-	}
-
-	/**
 	 * Do any cleanup on plugin deactivation.
 	 *
 	 */
 	public function on_deactivation() {
-		wp_clear_scheduled_hook( 'customer_stock_notifications_daily' );
+		SyncTasks::clear_async_tasks();
 	}
 }
