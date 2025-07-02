@@ -1,8 +1,8 @@
 {
     "position": 1,
     "label": "Available filters",
-    "collapsible": false,
-    "collapsed": false,
+    "collapsible": true,
+    "collapsed": true,
     "link": {
       "type": "doc",
       "id": "README"
