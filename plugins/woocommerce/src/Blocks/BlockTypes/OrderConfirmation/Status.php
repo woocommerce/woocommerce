@@ -55,6 +55,43 @@ class Status extends AbstractOrderConfirmationBlock {
 	}
 
 	/**
+	 * Get default status texts for 'order received' scenario.
+	 *
+	 * @param \WC_Order|null $order Order object or null for no permission case.
+	 * @return array Array with 'title' and 'description' keys.
+	 */
+	private function get_default_status_texts( $order ) {
+		return array(
+			/**
+			 * Filter the title shown after a checkout is complete.
+			 *
+			 * @since 9.6.0
+			 *
+			 * @param string         $title The title.
+			 * @param WC_Order|false $order The order created during checkout, or false if order data is not available.
+			 */
+			'title'       => apply_filters(
+				'woocommerce_thankyou_order_received_title',
+				esc_html__( 'Order received', 'woocommerce' ),
+				$order
+			),
+			/**
+			 * Filter the description shown when an order is cancelled.
+			 *
+			 * @since 9.6.0
+			 *
+			 * @param string         $description The description text.
+			 * @param WC_Order|false $order The order, or false if order data is not available.
+			 */
+			'description' => apply_filters(
+				'woocommerce_thankyou_order_received_text',
+				esc_html__( 'Thank you. Your order has been received.', 'woocommerce' ),
+				$order
+			),
+		);
+	}
+
+	/**
 	 * This renders the content of the block within the wrapper.
 	 *
 	 * @param \WC_Order    $order Order object.
@@ -80,79 +117,59 @@ class Status extends AbstractOrderConfirmationBlock {
 		// Override with specific texts for certain order statuses.
 		switch ( $status ) {
 			case 'cancelled':
-				$title_text = wp_kses_post(
-					/**
-					 * Filter the title shown after a checkout is complete.
-					 *
-					 * @since 9.6.0
-					 *
-					 * @param string         $title The title.
-					 * @param WC_Order|false $order The order created during checkout, or false if order data is not available.
-					 */
-					apply_filters(
-						'woocommerce_thankyou_order_received_title',
-						esc_html__( 'Order cancelled', 'woocommerce' ),
-						$order
-					)
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$title_text = apply_filters(
+					'woocommerce_thankyou_order_received_title',
+					esc_html__( 'Order cancelled', 'woocommerce' ),
+					$order
 				);
-				$description_text = wp_kses_post(
 					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					apply_filters(
-						'woocommerce_thankyou_order_received_text',
-						esc_html__( 'Your order has been cancelled.', 'woocommerce' ),
-						$order
-					)
+				$description_text = apply_filters(
+					'woocommerce_thankyou_order_received_text',
+					esc_html__( 'Your order has been cancelled.', 'woocommerce' ),
+					$order
 				);
 				break;
 			case 'refunded':
-				$title_text = wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					apply_filters(
-						'woocommerce_thankyou_order_received_title',
-						esc_html__( 'Order refunded', 'woocommerce' ),
-						$order
-					)
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$title_text       = apply_filters(
+					'woocommerce_thankyou_order_received_title',
+					esc_html__( 'Order refunded', 'woocommerce' ),
+					$order
 				);
-				$description_text = wp_kses_post(
-					sprintf(
+				$description_text = sprintf(
 						// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-						apply_filters(
-							'woocommerce_thankyou_order_received_text',
-							// translators: %s: date and time of the order refund.
+					apply_filters(
+						'woocommerce_thankyou_order_received_text',
+						// translators: %s: date and time of the order refund.
 							esc_html__( 'Your order was refunded %s.', 'woocommerce' ),
-							$order
-						),
-						wc_format_datetime( $order->get_date_modified() )
-					)
+						$order
+					),
+					wc_format_datetime( $order->get_date_modified() )
 				);
 				break;
 			case 'completed':
-				$title_text = wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					apply_filters(
-						'woocommerce_thankyou_order_received_title',
-						esc_html__( 'Order completed', 'woocommerce' ),
-						$order
-					)
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$title_text = apply_filters(
+					'woocommerce_thankyou_order_received_title',
+					esc_html__( 'Order completed', 'woocommerce' ),
+					$order
 				);
-				$description_text = wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					apply_filters(
-						'woocommerce_thankyou_order_received_text',
-						esc_html__( 'Thank you. Your order has been fulfilled.', 'woocommerce' ),
-						$order
-					)
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$description_text = apply_filters(
+					'woocommerce_thankyou_order_received_text',
+					esc_html__( 'Thank you. Your order has been fulfilled.', 'woocommerce' ),
+					$order
 				);
 				break;
 			case 'failed':
-				$title_text = wp_kses_post(
-					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					apply_filters(
-						'woocommerce_thankyou_order_received_title',
-						esc_html__( 'Order failed', 'woocommerce' ),
-						$order
-					)
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$title_text = apply_filters(
+					'woocommerce_thankyou_order_received_title',
+					esc_html__( 'Order failed', 'woocommerce' ),
+					$order
 				);
+
 				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				$order_received_text = apply_filters(
 					'woocommerce_thankyou_order_received_text',
@@ -237,33 +254,6 @@ class Status extends AbstractOrderConfirmationBlock {
 		}
 
 		return $actions;
-	}
-
-	/**
-	 * Get default status texts for 'order received' scenario.
-	 *
-	 * @param \WC_Order|null $order Order object or null for no permission case.
-	 * @return array Array with 'title' and 'description' keys.
-	 */
-	private function get_default_status_texts( $order ) {
-		return array(
-			'title'       => wp_kses_post(
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-				apply_filters(
-					'woocommerce_thankyou_order_received_title',
-					esc_html__( 'Order received', 'woocommerce' ),
-					$order
-				)
-			),
-			'description' => wp_kses_post(
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-				apply_filters(
-					'woocommerce_thankyou_order_received_text',
-					esc_html__( 'Thank you. Your order has been received.', 'woocommerce' ),
-					$order
-				)
-			),
-		);
 	}
 
 	/**
