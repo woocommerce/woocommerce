@@ -243,7 +243,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		$inner_content = Table_Wrapper_Helper::render_outlook_table_wrapper( '{social_links_content}', array( 'align' => 'center' ), array(), array(), false );
 		$main_wrapper  = Table_Wrapper_Helper::render_table_wrapper( $inner_content, $table_attrs, $cell_attrs, $row_attrs );
 
-		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => 'center' ), array(), array(), false );
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => 'center' ) );
 	}
 
 	/**
