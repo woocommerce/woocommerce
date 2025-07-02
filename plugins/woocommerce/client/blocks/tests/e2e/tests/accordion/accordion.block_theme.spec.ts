@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-utils';
+import { runCLI } from '@wp-playground/cli';
+import { resolve } from 'path';
 
 /**
  * Internal dependencies
@@ -28,8 +30,48 @@ const test = base.extend< { pageObject: AccordionPage } >( {
 } );
 
 test.describe( `${ blockData.slug } Block`, () => {
+	let cliServer: any;
+	// let handler: PHPRequestHandler;
+	// let php: PHP;
+	//
+
 	test.beforeEach( async ( { admin } ) => {
+		cliServer = await runCLI( {
+			command: 'server',
+			mountBeforeInstall: [
+				{
+					hostPath: resolve(
+						__dirname,
+						'../../playground/tmp/wordpress/'
+					),
+					vfsPath: '/wordpress/',
+				},
+			],
+			mount: [
+				{
+					hostPath: resolve( __dirname, '../../../../../../' ),
+					vfsPath: '/wordpress/wp-content/plugins/woocommerce',
+				},
+			],
+			skipWordPressSetup: true,
+			followSymlinks: true,
+			port: 9401,
+			login: true,
+		} );
+
 		await admin.createNewPost();
+
+		// handler = cliServer.requestHandler;
+		// php = await handler.getPrimaryPhp();
+		// await login( php, {
+		// 	username: 'admin',
+		// } );
+	} );
+
+	test.afterEach( async () => {
+		if ( cliServer ) {
+			await cliServer.server.close();
+		}
 	} );
 
 	test( 'can be inserted in Post Editor and it is visible on the frontend when feature flag is enabled', async ( {
