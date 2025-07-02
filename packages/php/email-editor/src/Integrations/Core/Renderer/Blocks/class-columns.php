@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -74,11 +75,13 @@ class Columns extends Abstract_Block_Renderer {
 			$columns_styles['background-size'] = 'cover';
 		}
 
-		$rendered_columns = '<table class="' . esc_attr( 'email-block-columns ' . $original_wrapper_classname ) . '" style="width:100%;border-collapse:separate;text-align:left;' . esc_attr( WP_Style_Engine::compile_css( $columns_styles, '' ) ) . '" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
-      <tbody>
-        <tr>{columns_content}</tr>
-      </tbody>
-    </table>';
+		$columns_table_attrs = array(
+			'class' => 'email-block-columns ' . $original_wrapper_classname,
+			'style' => 'width:100%;border-collapse:separate;text-align:left;' . WP_Style_Engine::compile_css( $columns_styles, '' ),
+			'align' => 'center',
+		);
+
+		$columns_content = Table_Wrapper_Helper::render_table_wrapper( '{columns_content}', $columns_table_attrs, array(), array(), false );
 
 		// Margins are not supported well in outlook for tables, so wrap in another table.
 		$margins = $block_attributes['style']['spacing']['margin'] ?? array();
@@ -89,15 +92,18 @@ class Columns extends Abstract_Block_Renderer {
 					'spacing' => array( 'margin' => $margins ),
 				)
 			)['css'];
-			$rendered_columns         = '<table class="email-block-columns-wrapper" style="width:100%;border-collapse:separate;text-align:left;' . esc_attr( $margin_to_padding_styles ) . '" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tbody>
-          <tr>
-            <td>' . $rendered_columns . '</td>
-          </tr>
-        </tbody>
-      </table>';
+
+			$wrapper_table_attrs = array(
+				'class' => 'email-block-columns-wrapper',
+				'style' => 'width:100%;border-collapse:separate;text-align:left;' . $margin_to_padding_styles,
+				'align' => 'center',
+			);
+
+			$wrapper_cell_attrs = array();
+
+			return Table_Wrapper_Helper::render_table_wrapper( $columns_content, $wrapper_table_attrs, $wrapper_cell_attrs );
 		}
 
-		return $rendered_columns;
+		return $columns_content;
 	}
 }
