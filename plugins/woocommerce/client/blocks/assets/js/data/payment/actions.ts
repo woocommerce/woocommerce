@@ -186,32 +186,6 @@ export const __internalRemoveAvailableExpressPaymentMethod = (
  */
 export function __internalUpdateAvailablePaymentMethods() {
 	return async ( { select, dispatch } ) => {
-		// Import registry functions at runtime to avoid circular dependencies
-		const { getExpressPaymentMethods } = await import(
-			'@woocommerce/blocks-registry'
-		);
-
-		// Convert registered express payment methods from registry to plain format
-		const registeredMethods = getExpressPaymentMethods();
-		const plainRegisteredMethods: PlainExpressPaymentMethods = {};
-
-		Object.keys( registeredMethods ).forEach( ( methodName ) => {
-			const method = registeredMethods[ methodName ];
-			plainRegisteredMethods[ methodName ] = {
-				name: method.name,
-				title: method.title,
-				description: method.description,
-				gatewayId: method.gatewayId,
-				supportsStyle: method.supports?.style || [],
-			};
-		} );
-
-		dispatch(
-			__internalSetRegisteredExpressPaymentMethods(
-				plainRegisteredMethods
-			)
-		);
-
 		const expressRegistered = await checkPaymentMethodsCanPay( true );
 		const registered = await checkPaymentMethodsCanPay( false );
 		const { paymentMethodsInitialized, expressPaymentMethodsInitialized } =
