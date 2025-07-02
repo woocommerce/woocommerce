@@ -58,20 +58,24 @@ const NewFulfillmentForm: React.FC = () => {
 					? 'woocommerce-fulfillment-new-fulfillment-form__first'
 					: '',
 			].join( ' ' ) }
-			onClick={ () => setOpenSection( 'order' ) }
-			onKeyUp={ ( event ) => {
-				if ( event.key === 'Enter' ) {
-					setOpenSection( 'order' );
-				}
-			} }
-			role="button"
-			tabIndex={ -1 }
 		>
 			<div
 				className={ [
 					'woocommerce-fulfillment-new-fulfillment-form__header',
 					openSection === 'order' ? 'is-open' : '',
 				].join( ' ' ) }
+				onClick={ () =>
+					setOpenSection( openSection === 'order' ? '' : 'order' )
+				}
+				onKeyDown={ ( event ) => {
+					if ( event.key === 'Enter' || event.key === ' ' ) {
+						setOpenSection(
+							openSection === 'order' ? '' : 'order'
+						);
+					}
+				} }
+				tabIndex={ 0 }
+				role="button"
 			>
 				<h3>
 					{ fulfillments.length === 0

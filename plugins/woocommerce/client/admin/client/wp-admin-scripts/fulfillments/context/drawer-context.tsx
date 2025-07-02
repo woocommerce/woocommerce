@@ -74,6 +74,7 @@ export const FulfillmentDrawerProvider = ( {
 				if ( ! fulfillmentsData || fulfillmentsData.length === 0 ) {
 					setOpenSection( 'order' );
 				}
+				setIsEditing( false );
 			}
 		},
 		[ orderId, fulfillments, order ]

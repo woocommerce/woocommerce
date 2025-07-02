@@ -8,7 +8,7 @@
 	border-bottom: 1px solid #e0e0e0;
 
 	&.woocommerce-fulfillment-new-fulfillment-form__disabled {
-		opacity: 30%;
+		opacity: 0.3;
 		pointer-events: none !important;
 	}
 	&.woocommerce-fulfillment-new-fulfillment-form__first {
@@ -236,7 +236,7 @@
 		border-bottom: 1px solid #e0e0e0;
 
 		&.woocommerce-fulfillment-stored-fulfillment-list-item__disabled {
-			opacity: 30%;
+			opacity: 0.3;
 			pointer-events: none !important;
 		}
 
