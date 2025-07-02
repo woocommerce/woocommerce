@@ -203,7 +203,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "10.0.x"
+			"pinVersion": "9.2.x"
 		},
 		{
 			"dependencies": [
