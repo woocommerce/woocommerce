@@ -60,9 +60,6 @@ class FulfillmentsController {
 		// Create the database tables if they do not exist.
 		$this->maybe_create_db_tables();
 
-		// At this point, the database tables are created, so we can safely add them to the list of tables to install or drop.
-		add_filter( 'woocommerce_install_get_tables', array( $this, 'add_tables_to_install' ) );
-
 		// Register the classes that this controller provides.
 		$container = wc_get_container();
 		foreach ( $this->provides as $class ) {
@@ -127,21 +124,6 @@ class FulfillmentsController {
 
 		// Update the option to indicate that the tables have been created.
 		update_option( 'woocommerce_fulfillments_db_tables_created', true );
-	}
-
-	/**
-	 * Add the fulfillment tables to the list of tables to be installed, or dropped when uninstalling.
-	 *
-	 * @param array $tables The list of tables to install/drop.
-	 * @return array The updated list of tables.
-	 */
-	public function add_tables_to_install( array $tables ): array {
-		global $wpdb;
-
-		$tables[] = "{$wpdb->prefix}wc_order_fulfillments";
-		$tables[] = "{$wpdb->prefix}wc_order_fulfillment_meta";
-
-		return $tables;
 	}
 
 	/**

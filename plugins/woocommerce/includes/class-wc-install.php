@@ -2036,6 +2036,8 @@ $hpos_table_schema;
 			"{$wpdb->prefix}wc_admin_note_actions",
 			"{$wpdb->prefix}wc_customer_lookup",
 			"{$wpdb->prefix}wc_category_lookup",
+			"{$wpdb->prefix}wc_order_fulfillments",
+			"{$wpdb->prefix}wc_order_fulfillment_meta",
 
 			// HPOS.
 			"{$wpdb->prefix}wc_orders",
