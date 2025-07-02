@@ -101,7 +101,10 @@ const QuantitySelector = ( {
 		( initialValue: number, snapToStep = true ) => {
 			let value = initialValue;
 			if ( hasMaximum ) {
-				value = Math.min( value, Math.floor( maximum / step ) * step );
+				value = Math.min(
+					value,
+					Math.floor( maximum / step + 1e-8 ) * step
+				);
 			}
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
@@ -141,10 +144,11 @@ const QuantitySelector = ( {
 		if ( ! isNaN( value ) ) {
 			const normalized = normalizeQuantity( value, false );
 			// Check if the value is a valid step increment
-			const remainder = ( ( value - minimum ) / step ) % 1;
+			// Multiply by inverse of step and check if result is an integer
+			const stepMultiplier = ( value - minimum ) / step;
 			const isValidStep =
-				Math.abs( remainder ) < 1e-8 ||
-				Math.abs( remainder - 1 ) < 1e-8;
+				Math.abs( Math.round( stepMultiplier ) - stepMultiplier ) <
+				1e-8;
 			// Only push if the value is valid and matches the normalized value
 			if (
 				normalized === value &&

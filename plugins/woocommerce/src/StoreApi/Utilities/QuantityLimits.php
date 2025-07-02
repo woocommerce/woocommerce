@@ -85,7 +85,9 @@ final class QuantityLimits {
 			return wc_stock_amount( $quantity );
 		}
 
-		if ( ! is_numeric( $quantity ) || $quantity < 0 ) {
+		$quantity = $this->ensure_numeric( $quantity );
+
+		if ( false === $quantity || 0 > $quantity ) {
 			return wc_stock_amount( 0 );
 		}
 
@@ -113,7 +115,10 @@ final class QuantityLimits {
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
 		// Handle edge cases.
-		if ( ! is_numeric( $number ) || ! is_numeric( $multiple_of ) ) {
+		$number      = $this->ensure_numeric( $number );
+		$multiple_of = $this->ensure_numeric( $multiple_of );
+
+		if ( false === $number || false === $multiple_of ) {
 			return wc_stock_amount( 0 );
 		}
 
@@ -136,7 +141,10 @@ final class QuantityLimits {
 	 */
 	protected function is_multiple_of( $number, $multiple_of ) {
 		// Handle edge cases.
-		if ( ! is_numeric( $number ) || ! is_numeric( $multiple_of ) || 0 >= $multiple_of ) {
+		$number      = $this->ensure_numeric( $number );
+		$multiple_of = $this->ensure_numeric( $multiple_of );
+
+		if ( false === $number || false === $multiple_of || 0 >= $multiple_of ) {
 			return false;
 		}
 
@@ -156,7 +164,24 @@ final class QuantityLimits {
 	 * @return bool
 	 */
 	protected function is_integer_value( $number ) {
-		return is_numeric( $number ) && floor( $number ) === ceil( $number );
+		$number = $this->ensure_numeric( $number );
+		return false !== $number && floor( $number ) === ceil( $number );
+	}
+
+	/**
+	 * Safely convert a value to numeric type to handle cases where extensions pass strings.
+	 *
+	 * @param mixed $value The value to convert.
+	 * @return int|float|false Returns the numeric value or false if conversion fails.
+	 */
+	protected function ensure_numeric( $value ) {
+		if ( is_numeric( $value ) ) {
+			// Convert string to actual numeric type for PHP functions like floor()
+			return is_string( $value ) ? (float) $value : $value;
+		}
+
+		// Handle non-numeric values (including non-numeric strings)
+		return false;
 	}
 
 	/**
@@ -266,9 +291,9 @@ final class QuantityLimits {
 		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
 		 * @return mixed
 		 */
-		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
+		$filtered_value = $this->ensure_numeric( apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item ) );
 
-		return wc_stock_amount( is_numeric( $filtered_value ) ? $filtered_value : $value );
+		return wc_stock_amount( false !== $filtered_value ? $filtered_value : $value );
 	}
 
 	/**
