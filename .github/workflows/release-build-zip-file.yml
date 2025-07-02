@@ -10,24 +10,20 @@ on:
         description: 'Skip verification steps.'
         type: boolean
         required: true
-        default: false
       create_github_release:
         description: 'Create a draft GitHub release.'
         type: boolean
         required: true
-        default: false
   workflow_call:
     inputs:
       skip_verify:
         description: 'Skip verification steps.'
         type: boolean
         required: true
-        default: false
       create_github_release:
         description: 'Create a draft GitHub release.'
         type: boolean
         required: true
-        default: false
     outputs:
       artifact_url:
         description: 'URL of the built release artifact'
