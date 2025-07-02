@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Cart and Session hardening to prevent edge case errors
+
+
