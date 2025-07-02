@@ -21,7 +21,7 @@ test.describe( 'Template customization', () => {
 				? 'template'
 				: 'template part';
 
-		test( `${ testData.templateName } template can be modified and reverted`, async ( {
+		test( `"${ testData.templateName }" template can be modified and reverted`, async ( {
 			admin,
 			frontendUtils,
 			editor,
@@ -77,7 +77,7 @@ test.describe( 'Template customization', () => {
 		} );
 
 		if ( testData.fallbackTemplate ) {
-			test( `${ testData.templateName } template defaults to the ${ testData.fallbackTemplate.templateName } template`, async ( {
+			test( `"${ testData.templateName }" template defaults to the "${ testData.fallbackTemplate.templateName }" template`, async ( {
 				admin,
 				frontendUtils,
 				requestUtils,
@@ -140,7 +140,7 @@ test.describe( 'Template customization', () => {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
-		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
+		test( `user-modified "${ testData.templateName }" template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
 			editor,
