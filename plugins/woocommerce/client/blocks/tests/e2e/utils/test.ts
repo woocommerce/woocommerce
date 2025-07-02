@@ -172,8 +172,12 @@ const test = base.extend<
 	],
 	wpCoreVersion: [
 		async ( {}, use ) => {
-			const output = await wpCLI( 'core version' );
-			const version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+			let version = process.env.WP_CORE_VERSION;
+			if ( ! version ) {
+				const output = await wpCLI( 'core version' );
+				version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+				process.env.WP_CORE_VERSION = version;
+			}
 
 			// We can parse this as a float because WP never updates the minor
 			// version over x.9.x. E.g., after 6.9.x, it will be 7.0.x.
