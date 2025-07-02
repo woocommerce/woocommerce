@@ -3,7 +3,7 @@
  */
 import { debounce } from '@woocommerce/base-utils';
 import { select, dispatch } from '@wordpress/data';
-import type { AdditionalValues } from '@woocommerce/settings';
+import type { OrderFormValues } from '@woocommerce/settings';
 import { ApiErrorResponse } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
@@ -29,10 +29,10 @@ const localState = {
 	// Local cache of the last pushed checkoutData used for comparisons.
 	checkoutData: {
 		orderNotes: '',
-		additionalFields: {} as AdditionalValues,
+		additionalFields: {} as OrderFormValues,
 		activePaymentMethod: '',
-		hasSession: false,
 	},
+	hasSession: false,
 };
 
 const isCheckoutBlock = getSetting< boolean >( 'isCheckoutBlock', false );
@@ -47,8 +47,8 @@ const initialize = () => {
 		orderNotes: store.getOrderNotes(),
 		additionalFields: store.getAdditionalFields(),
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
-		hasSession: document.cookie.includes( 'woocommerce_cart_hash' ),
 	};
+	localState.hasSession = document.cookie.includes( 'woocommerce_cart_hash' );
 	localState.isInitialized = true;
 };
 
@@ -57,7 +57,7 @@ const initialize = () => {
  */
 const updateCheckoutData = (): void => {
 	// If we don't have any session, exit early.
-	if ( ! localState.checkoutData.hasSession ) {
+	if ( ! localState.hasSession ) {
 		return;
 	}
 
@@ -98,29 +98,36 @@ const updateCheckoutData = (): void => {
 	const changedFields = Object.keys( newCheckoutData.additionalFields )
 		.filter( ( key ) => {
 			// Fields with errors should be ignored
-			if ( hasValidationError( key ) ) {
+			if ( hasValidationError( key as keyof OrderFormValues ) ) {
 				return false;
 			}
 
 			// Fields that are not present in the original checkout data and have an empty value should be ignored (happens when a field is hidden on mount).
 			if (
 				! ( key in localState.checkoutData.additionalFields ) &&
-				newCheckoutData.additionalFields[ key ] === ''
+				newCheckoutData.additionalFields[
+					key as keyof OrderFormValues
+				] === ''
 			) {
 				return false;
 			}
 
 			// Fields that have not changed should be ignored
 			if (
-				localState.checkoutData.additionalFields[ key ] ===
-				newCheckoutData.additionalFields[ key ]
+				localState.checkoutData.additionalFields[
+					key as keyof OrderFormValues
+				] ===
+				newCheckoutData.additionalFields[ key as keyof OrderFormValues ]
 			) {
 				return false;
 			}
 			return true;
 		} )
-		.reduce( ( acc: AdditionalValues, key ) => {
-			acc[ key ] = newCheckoutData.additionalFields[ key ];
+		.reduce( ( acc: OrderFormValues, key ) => {
+			acc[ key as keyof OrderFormValues ] =
+				newCheckoutData.additionalFields[
+					key as keyof OrderFormValues
+				];
 			return acc;
 		}, {} );
 
@@ -157,7 +164,7 @@ const updateCheckoutData = (): void => {
 	// Update local cache
 	localState.checkoutData = newCheckoutData;
 
-	dispatch( CHECKOUT_STORE_KEY )
+	( dispatch( CHECKOUT_STORE_KEY ) as any )
 		.updateDraftOrder( requestData )
 		.then( () => {
 			clearFieldErrorNotices( requestData );
