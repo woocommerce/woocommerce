@@ -10,8 +10,7 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-		"lock": false,
-		"interactivity": true
+		"lock": false
 	},
 	"attributes": {
 		"lock": {
