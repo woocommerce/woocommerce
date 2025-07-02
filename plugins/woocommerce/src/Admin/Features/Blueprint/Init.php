@@ -150,7 +150,7 @@ class Init {
 	 * @return array $themes
 	 */
 	public function get_themes_for_export_group() {
-		$themes       = $this->get_installed_wp_org_themes();
+		$themes       = $this->wp_get_themes();
 		$active_theme = $this->wp_get_theme();
 
 		$themes = array_map(
@@ -312,54 +312,5 @@ class Init {
 
 		set_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT, $wp_org_plugins );
 		return $wp_org_plugins;
-	}
-
-
-	/**
-	 * Get all installed WordPress.org themes.
-	 *
-	 * @return array
-	 */
-	private function get_installed_wp_org_themes() {
-		// Get all installed themes.
-		$all_themes    = $this->wp_get_themes();
-		$wp_org_themes = array();
-
-		foreach ( $all_themes as $slug => $theme ) {
-			$api_response = $this->wp_themes_api(
-				'theme_information',
-				array(
-					'slug'   => $slug,
-					'fields' => array(
-						'short_description' => false,
-						'sections'          => false,
-						'description'       => false,
-						'tested'            => false,
-						'requires'          => false,
-						'rating'            => false,
-						'ratings'           => false,
-						'downloaded'        => false,
-						'downloadlink'      => false,
-						'last_updated'      => false,
-						'added'             => false,
-						'tags'              => false,
-						'compatibility'     => false,
-						'homepage'          => false,
-						'versions'          => false,
-						'donate_link'       => false,
-						'reviews'           => false,
-						'banners'           => false,
-						'icons'             => false,
-						'active_installs'   => false,
-					),
-				)
-			);
-
-			if ( ! is_wp_error( $api_response ) ) {
-				$wp_org_themes[ $slug ] = $theme;
-			}
-		}
-
-		return $wp_org_themes;
 	}
 }
