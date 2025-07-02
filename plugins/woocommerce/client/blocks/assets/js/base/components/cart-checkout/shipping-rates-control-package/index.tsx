@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Panel } from '@woocommerce/blocks-components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
@@ -18,6 +19,7 @@ import './style.scss';
 
 export const ShippingRatesControlPackage = ( {
 	packageId,
+	className = '',
 	noResultsMessage,
 	renderOption,
 	packageData,
@@ -93,6 +95,7 @@ export const ShippingRatesControlPackage = ( {
 	);
 
 	const packageRatesProps = {
+		className,
 		noResultsMessage,
 		rates: packageData.shipping_rates,
 		onSelectRate,
@@ -106,7 +109,10 @@ export const ShippingRatesControlPackage = ( {
 	if ( shouldBeCollapsible ) {
 		return (
 			<Panel
-				className="wc-block-components-shipping-rates-control__package"
+				className={ clsx(
+					'wc-block-components-shipping-rates-control__package',
+					className
+				) }
 				// initialOpen remembers only the first value provided to it, so by the
 				// time we know we have several packages, initialOpen would be hardcoded to true.
 				// If we're rendering a panel, we're more likely rendering several
@@ -120,7 +126,12 @@ export const ShippingRatesControlPackage = ( {
 	}
 
 	return (
-		<div className="wc-block-components-shipping-rates-control__package">
+		<div
+			className={ clsx(
+				'wc-block-components-shipping-rates-control__package',
+				className
+			) }
+		>
 			{ header }
 			<PackageRates { ...packageRatesProps } />
 		</div>
