@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Enums\ProductStatus;
  */
 class Config {
 
+	public const DEFAULT_UNVERIFIED_DAYS_THRESHOLD = 30;
+
 	/**
 	 * Runtime cache for supported product types.
 	 *
@@ -119,15 +121,6 @@ class Config {
 	}
 
 	/**
-	 * Returns verification codes expiration time threshold (in seconds).
-	 *
-	 * @return int
-	 */
-	public static function get_verification_expiration_time_threshold() {
-		return (int) apply_filters( 'woocommerce_bis_verification_expiration_time_threshold', HOUR_IN_SECONDS );
-	}
-
-	/**
 	 * Time period required to keep unverified notifications in the system (in seconds). @see WC_BIS_Sync_Tasks::do_wc_bis_daily()
 	 *
 	 * @since 1.2.0
@@ -135,7 +128,13 @@ class Config {
 	 * @return int
 	 */
 	public static function get_delete_unverified_time_threshold() {
-		$delete_after_days = absint( get_option( 'wc_customer_stock_notifications_delete_unverified_days_threshold', 0 ) );
+		$delete_after_days = absint(
+			get_option(
+				'wc_customer_stock_notifications_delete_unverified_days_threshold',
+				self::DEFAULT_UNVERIFIED_DAYS_THRESHOLD
+			)
+		);
+
 		if ( $delete_after_days > 0 ) {
 			$delete_after_days = $delete_after_days * DAY_IN_SECONDS;
 		}

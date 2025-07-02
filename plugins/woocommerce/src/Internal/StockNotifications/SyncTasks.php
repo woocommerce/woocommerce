@@ -29,43 +29,22 @@ class SyncTasks {
 	}
 
 	public static function do_wc_customer_stock_notifications_daily() {
-		// Delete overdue unverified notifications given a specified time threshold.
-		$expiration_time_threshold = Config::get_verification_expiration_time_threshold();
 		$time_threshold            = Config::get_delete_unverified_time_threshold();
 
 		if ( 0 === $time_threshold ) {
 			return;
 		}
+		$overdue_threshold  = time() - $time_threshold;
 
-		$now                = time();
-		$overdue_threshold  = $now - $expiration_time_threshold - $time_threshold;
-		$overdue_query_args = array(
-			'is_active'   => 'off',
-			'is_verified' => 'no',
-			'meta_query'  => array(
-				'relation' => 'AND',
-				array(
-					'key'     => 'awaiting_verification',
-					'value'   => 'yes',
-					'compare' => '=',
-				),
-				array(
-					'key'     => '_verification_created_at',
-					'value'   => $overdue_threshold,
-					'compare' => '<',
-					'type'    => 'UNSIGNED',
-				),
-			),
-			'order_by'    => array( 'id' => 'DESC' ),
+		$overdue_notifications = NotificationQuery::get_notifications(
+			array(
+				'status' => NotificationStatus::PENDING,
+				'end_date' => gmdate( 'Y-m-d H:i:s', $overdue_threshold ),
+			)
 		);
-
-		$overdue_notifications = \WC_Data_Store::load( 'stock_notification' )->query( $overdue_query_args );
 
 		foreach ( $overdue_notifications as $notification_id ) {
 			$notification   = Factory::get_notification( $notification_id );
-			if ( $notification->is_active() || ! $notification->is_expired() || (int) $notification->get_meta( '_verification_created_at' ) > $overdue_threshold ) {
-				continue;
-			}
 			$notification->delete();
 		}
 	}
