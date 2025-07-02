@@ -19,6 +19,13 @@ class FulfillmentsController {
 	private DatabaseUtil $database_util;
 
 	/**
+	 * FeaturesController instance.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
+
+	/**
 	 * Provides the list of classes that this controller provides.
 	 *
 	 * @var string[]
@@ -31,18 +38,22 @@ class FulfillmentsController {
 	);
 
 	/**
+	 * FulfillmentsController constructor.
+	 */
+	public function __construct() {
+		$container                 = wc_get_container();
+		$this->database_util       = $container->get( DatabaseUtil::class );
+		$this->features_controller = $container->get( FeaturesController::class );
+	}
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @return void
 	 */
 	public function register() {
-		/**
-		 * FeaturesController instance.
-		 *
-		 * @var FeaturesController $features_controller
-		 */
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+		// If fulfillments feature is not enabled, do not add the DB tables, and don't register the controller.
+		if ( ! $this->features_controller->feature_is_enabled( 'fulfillments' ) ) {
 			return;
 		}
 
@@ -77,9 +88,24 @@ class FulfillmentsController {
 		 * nothing different in terms of performance with checking the table existence directly,
 		 * and checking an option.
 		 */
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_fulfillments'" ) ) {
+		$existing_tables_count = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM `information_schema`.`tables`
+			WHERE `TABLE_NAME` IN (
+			'{$wpdb->prefix}wc_order_fulfillments',
+			'{$wpdb->prefix}wc_order_fulfillment_meta')"
+		);
+
+		if ( 2 === $existing_tables_count ) {
 			return; // Tables already exist, no need to create them.
 		}
+
+		// Drop the tables if they exist, to ensure a clean slate.
+		// If one table exists and the other does not, it will be an issue.
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_order_fulfillments" );
+		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_order_fulfillment_meta" );
+
+		// Bulk delete order fulfillment status meta from legacy and HPOS order tables.
+		$this->bulk_delete_fulfillment_status_meta();
 
 		$collate          = '';
 		$max_index_length = $this->database_util->get_max_index_length();
@@ -126,5 +152,88 @@ class FulfillmentsController {
 		$tables[] = "{$wpdb->prefix}wc_order_fulfillment_meta";
 
 		return $tables;
+	}
+
+	/**
+	 * Bulk delete fulfillment status meta for specific order IDs, or all orders if no order ID specified.
+	 *
+	 * This method deletes the fulfillment status meta for the specified order IDs from both the legacy postmeta table
+	 * and the HPOS meta table.
+	 *
+	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
+	 */
+	private function bulk_delete_fulfillment_status_meta( $order_ids = array() ): void {
+		$this->delete_legacy_fulfillment_meta( $order_ids );
+		$this->delete_hpos_fulfillment_meta( $order_ids );
+	}
+
+	/**
+	 * Delete fulfillment status meta from legacy postmeta table.
+	 *
+	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
+	 * @return int Number of rows deleted.
+	 */
+	private function delete_legacy_fulfillment_meta( $order_ids = array() ) {
+		global $wpdb;
+
+		if ( ! empty( $order_ids ) ) {
+			$order_params = array_merge( array( '_fulfillment_status' ), $order_ids );
+			return $wpdb->query(
+				$wpdb->prepare(
+					"DELETE pm FROM {$wpdb->postmeta} pm
+					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+					WHERE p.post_type = 'shop_order'
+					AND pm.meta_key = %s
+					AND pm.post_id IN (" . implode( ',', array_fill( 0, count( $order_ids ), '%d' ) ) . ')',
+					...$order_params
+				)
+			);
+		} else {
+			return $wpdb->query(
+				$wpdb->prepare(
+					"DELETE pm FROM {$wpdb->postmeta} pm
+					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+					WHERE p.post_type = 'shop_order'
+					AND pm.meta_key = %s",
+					'_fulfillment_status'
+				)
+			);
+		}
+	}
+
+	/**
+	 * Delete fulfillment status meta from HPOS meta table.
+	 *
+	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
+	 * @return int Number of rows deleted.
+	 */
+	private function delete_hpos_fulfillment_meta( $order_ids = array() ) {
+		global $wpdb;
+
+		// Check if HPOS meta table exists.
+		$table_name = $wpdb->prefix . 'wc_orders_meta';
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+			return 0;
+		}
+
+		if ( ! empty( $order_ids ) ) {
+			$order_params = array_merge( array( '_fulfillment_status' ), $order_ids );
+			return $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}wc_orders_meta
+					WHERE meta_key = %s
+					AND order_id IN (" . implode( ',', array_fill( 0, count( $order_ids ), '%d' ) ) . ')',
+					...$order_params
+				)
+			);
+		} else {
+			return $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}wc_orders_meta
+					WHERE meta_key = %s",
+					'_fulfillment_status'
+				)
+			);
+		}
 	}
 }
