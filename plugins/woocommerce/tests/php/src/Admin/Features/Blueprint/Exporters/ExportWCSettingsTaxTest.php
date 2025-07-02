@@ -119,11 +119,11 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			if ( $step instanceof RunSql ) {
 				$sql_content = $step->prepare_json_array()['sql']['contents'];
 
-				if ( strpos( $sql_content, 'wc_tax_rate_classes' ) !== false && $tax_class_position === -1 ) {
+				if ( false !== strpos( $sql_content, 'wc_tax_rate_classes' ) && -1 === $tax_class_position ) {
 					$tax_class_position = $index;
 				}
 
-				if ( strpos( $sql_content, 'woocommerce_tax_rates' ) !== false && $tax_rate_position === -1 ) {
+				if ( false !== strpos( $sql_content, 'woocommerce_tax_rates' ) && -1 === $tax_rate_position ) {
 					$tax_rate_position = $index;
 				}
 			}
