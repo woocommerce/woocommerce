@@ -15,6 +15,23 @@ use WC_Unit_Test_Case;
 class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Set up the test environment.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Tests if the hooks are added correctly in the constructor.
 	 */
 	public function test_hooks_added() {

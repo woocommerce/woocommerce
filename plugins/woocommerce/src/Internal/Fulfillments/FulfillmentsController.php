@@ -81,22 +81,9 @@ class FulfillmentsController {
 	private function maybe_create_db_tables(): void {
 		global $wpdb;
 
-		/**
-		 * Check if the tables already exist.
-		 *
-		 * Checking if an option is set will also send a query to the database, so there's
-		 * nothing different in terms of performance with checking the table existence directly,
-		 * and checking an option.
-		 */
-		$existing_tables_count = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM `information_schema`.`tables`
-			WHERE `TABLE_NAME` IN (
-			'{$wpdb->prefix}wc_order_fulfillments',
-			'{$wpdb->prefix}wc_order_fulfillment_meta')"
-		);
-
-		if ( 2 === $existing_tables_count ) {
-			return; // Tables already exist, no need to create them.
+		if ( get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
+			// The tables already exist, no need to create them again.
+			return;
 		}
 
 		// Drop the tables if they exist, to ensure a clean slate.
@@ -105,7 +92,7 @@ class FulfillmentsController {
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wc_order_fulfillment_meta" );
 
 		// Bulk delete order fulfillment status meta from legacy and HPOS order tables.
-		$this->bulk_delete_fulfillment_status_meta();
+		$this->bulk_delete_order_fulfillment_status_meta();
 
 		$collate          = '';
 		$max_index_length = $this->database_util->get_max_index_length();
@@ -137,6 +124,9 @@ class FulfillmentsController {
 		) $collate;";
 
 		$this->database_util->dbdelta( $schema );
+
+		// Update the option to indicate that the tables have been created.
+		update_option( 'woocommerce_fulfillments_db_tables_created', true );
 	}
 
 	/**
@@ -162,23 +152,22 @@ class FulfillmentsController {
 	 *
 	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
 	 */
-	private function bulk_delete_fulfillment_status_meta( $order_ids = array() ): void {
-		$this->delete_legacy_fulfillment_meta( $order_ids );
-		$this->delete_hpos_fulfillment_meta( $order_ids );
+	private function bulk_delete_order_fulfillment_status_meta( $order_ids = array() ): void {
+		$this->delete_legacy_order_fulfillment_meta( $order_ids );
+		$this->delete_hpos_order_fulfillment_meta( $order_ids );
 	}
 
 	/**
 	 * Delete fulfillment status meta from legacy postmeta table.
 	 *
 	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
-	 * @return int Number of rows deleted.
 	 */
-	private function delete_legacy_fulfillment_meta( $order_ids = array() ) {
+	private function delete_legacy_order_fulfillment_meta( $order_ids = array() ) {
 		global $wpdb;
 
 		if ( ! empty( $order_ids ) ) {
 			$order_params = array_merge( array( '_fulfillment_status' ), $order_ids );
-			return $wpdb->query(
+			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE pm FROM {$wpdb->postmeta} pm
 					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
@@ -189,7 +178,7 @@ class FulfillmentsController {
 				)
 			);
 		} else {
-			return $wpdb->query(
+			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE pm FROM {$wpdb->postmeta} pm
 					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
@@ -205,20 +194,19 @@ class FulfillmentsController {
 	 * Delete fulfillment status meta from HPOS meta table.
 	 *
 	 * @param array<int> $order_ids Array of order IDs to delete fulfillment status meta for.
-	 * @return int Number of rows deleted.
 	 */
-	private function delete_hpos_fulfillment_meta( $order_ids = array() ) {
+	private function delete_hpos_order_fulfillment_meta( $order_ids = array() ): void {
 		global $wpdb;
 
 		// Check if HPOS meta table exists.
 		$table_name = $wpdb->prefix . 'wc_orders_meta';
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
-			return 0;
+			return;
 		}
 
 		if ( ! empty( $order_ids ) ) {
 			$order_params = array_merge( array( '_fulfillment_status' ), $order_ids );
-			return $wpdb->query(
+			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->prefix}wc_orders_meta
 					WHERE meta_key = %s
@@ -227,7 +215,7 @@ class FulfillmentsController {
 				)
 			);
 		} else {
-			return $wpdb->query(
+			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->prefix}wc_orders_meta
 					WHERE meta_key = %s",
