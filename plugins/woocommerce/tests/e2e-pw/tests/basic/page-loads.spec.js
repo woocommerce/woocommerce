@@ -173,8 +173,7 @@ const wcPages = [
 				name: 'Coupons',
 				heading: 'Coupons',
 				element: '.page-title-action',
-				// WP6.6: "Add coupon", WP6.7: "Add new coupon"
-				text: /Add coupon|Add new coupon/,
+				text: /Add new coupon/,
 			},
 		],
 	},

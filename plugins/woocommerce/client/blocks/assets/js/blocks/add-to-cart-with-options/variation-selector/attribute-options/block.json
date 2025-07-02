@@ -1,11 +1,11 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector-attribute-options",
-	"title": "Variation Selector Attribute Options (Experimental)",
-	"description": "The attribute options of a given variable product attribute.",
+	"title": "Variation Selector: Attribute Options (Beta)",
+	"description": "Display the attribute options associated with a variable product.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [
-		"woocommerce/add-to-cart-with-options-variation-selector-item"
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"attributes": {
 		"style": {

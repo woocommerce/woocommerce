@@ -14,12 +14,14 @@ import {
 	getOnboardingDataError,
 } from './actions';
 
-export function* getOnboardingData() {
+export function* getOnboardingData( sessionEntryPoint?: string | null ) {
 	yield getOnboardingDataRequest();
 
 	try {
 		const response: OnboardingDataResponse = yield apiFetch( {
+			method: 'POST', // Use the not-so-semantic POST to avoid caching of response.
 			path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/onboarding`,
+			data: sessionEntryPoint ? { source: sessionEntryPoint } : {},
 		} );
 
 		yield getOnboardingDataSuccess( response );

@@ -150,14 +150,19 @@ export type EmailStyles = {
 		text: string;
 	};
 	typography?: TypographyProperties;
-	elements?: {
-		heading: {
-			color: {
-				text: string;
-			};
-			typography: TypographyProperties;
-		};
+	elements?: Record< string, ElementStyleProperties >;
+};
+
+interface ElementStyleProperties {
+	typography: TypographyProperties;
+	color?: {
+		background: string;
+		text: string;
 	};
+}
+
+export type EmailBuiltStyles = {
+	css: string;
 };
 
 export type EmailEditorLayout = {
@@ -166,6 +171,7 @@ export type EmailEditorLayout = {
 };
 
 export type EmailEditorUrls = {
+	back: string;
 	send?: string;
 	listings: string;
 };
@@ -179,25 +185,15 @@ export type PersonalizationTag = {
 };
 
 export type State = {
-	inserterSidebar: {
-		isOpened: boolean;
-	};
-	listviewSidebar: {
-		isOpened: boolean;
-	};
-	settingsSidebar: {
-		activeTab: string;
-	};
-	postId: number;
+	postId: number | string; // Template use strings
+	postType: string;
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {
 		globalStylesPostId: number | null;
 	};
-	autosaveInterval: number;
 	urls: EmailEditorUrls;
 	preview: {
-		deviceType: string;
 		toEmail: string;
 		isModalOpened: boolean;
 		isSendingPreviewEmail: boolean;
@@ -265,4 +261,13 @@ export type EmailContentValidationRule = {
 	testContent: ( emailContent: string ) => boolean;
 	message: string;
 	actions: EmailContentValidationAction[];
+};
+
+export type CoreDataError = { message?: string; code?: string };
+
+export type PostWithPermissions = Post & {
+	permissions: {
+		delete: boolean;
+		update: boolean;
+	};
 };

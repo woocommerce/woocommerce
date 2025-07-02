@@ -1,63 +1,92 @@
-// Document actions
-// Component in header for displaying email/campaign title edit popup
-.woocommerce-email-editor-campaign-name {
-	align-items: center;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	min-width: 0;
-
-	.components-dropdown {
-		display: inline-flex;
-	}
-
-	.components-button {
-		min-width: 0;
-		padding: 0;
-	}
-
-	.woocommerce-email-campaign-name-link {
-		display: inline-flex;
-		height: fit-content;
-		margin-right: 10px;
-		margin-top: 10px;
-	}
+// Fix placement of icon for external preview button in preview dropdown
+.components-dropdown-menu__menu .editor-preview-dropdown__button-external {
+	padding-right: 6px;
 }
 
-// Document actions - Popup for editing email/campaign title
-.woocommerce-email-editor-campaign-name-dropdown {
-	.components-popover__content {
-		min-width: 280px;
-		padding: 0;
-	}
-
-	.woocommerce-email-editor-email-title-edit {
-		padding: 16px;
-	}
-}
-
-.woocommerce-email-editor-save-button-dropdown {
-	.components-popover__content {
-		min-width: 280px;
-	}
-}
-
-// We currently don't support command palette so we hide the shortcut
-.editor-document-bar__shortcut {
-	display: none !important;
-}
-
-// Temporarily hide text about amount of changes to save.
-// The wording is not great for email context.
-.entities-saved-states__text-prompt {
-	p {
+// Hide the "Preferences" menu item in the more menu.
+// We don't have any preferences to set in the email editor.
+.more-menu-dropdown__content {
+	.components-menu-group:last-child {
 		display: none;
 	}
 }
 
-// Ensure checkbox controls in save panel dropdown to span the full width
-.woocommerce-email-editor-save-button-dropdown
-	.components-panel__row
-	.components-checkbox-control {
+.woocommerce-email-editor__view-mode-toggle {
+	/* stylelint-disable -- Disable reason: View Transitions not supported properly by stylelint. */
+	view-transition-name: toggle;
+	/* stylelint-enable */
+	top: 0;
+	left: 0;
+	height: 60px;
+	width: 60px;
+	z-index: 100;
+
+	.components-button {
+		color: #fff;
+		height: 100%;
+		width: 100%;
+		border-radius: 0;
+		overflow: hidden;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		&:hover,
+		&:active {
+			color: #fff;
+		}
+
+		&:focus {
+			box-shadow: none;
+		}
+	}
+
+	.woocommerce-email-editor__view-mode-toggle-icon {
+		svg,
+		img {
+			background: $gray-900;
+			display: block;
+		}
+	}
+}
+
+.woocommerce-email-editor-icon {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 60px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	background-color: hsla(0, 0%, 100%, 0.6);
+	-webkit-backdrop-filter: saturate(180%) blur(15px);
+	backdrop-filter: saturate(180%) blur(15px);
+
+	svg {
+		fill: currentColor;
+	}
+}
+
+.woocommerce-email-editor-icon__icon {
+	fill: currentColor;
 	width: 100%;
+	height: 100%;
+	padding: 12px;
+}
+
+.woocommerce-email-editor__view-mode-toggle button:focus {
+	position: relative;
+
+	&::before {
+		content: "";
+		display: block;
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
 }

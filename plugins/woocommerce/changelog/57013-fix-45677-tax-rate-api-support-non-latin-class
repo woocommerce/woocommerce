@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tax rate API support for non-Latin class names.

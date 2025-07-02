@@ -32,6 +32,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
 		// Setup mock logger.
 		$this->mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
@@ -60,7 +61,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	 * Test getting providers when none are registered.
 	 */
 	public function test_get_providers_empty() {
-		$providers = $this->sut->get_registered_providers();
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -105,7 +106,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Test that we have two provider instances registered.
 		$this->assertCount( 2, $registered_providers );
@@ -145,6 +147,9 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				return $providers;
 			}
 		);
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
 		// Check if the provider is available.
 		$this->assertTrue( $this->sut->is_provider_available( 'test-provider' ) );
@@ -201,7 +206,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			20
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Test that we have two provider instances registered.
 		$this->assertCount( 2, $registered_providers );
@@ -246,7 +252,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Only the valid provider should be registered.
 		$this->assertCount( 1, $registered_providers );
@@ -293,7 +300,8 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		$registered_providers = $this->sut->get_registered_providers();
+		$this->sut->init();
+		$registered_providers = $this->sut->get_providers();
 
 		// Only the valid provider should be registered.
 		$this->assertCount( 1, $registered_providers );
@@ -302,28 +310,53 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	}
 
 	/**
-	 * Test that providers are cached and not reinstantiated when the filter returns the same classes.
+	 * Test settings when no providers are registered.
 	 */
-	public function test_provider_caching() {
-		$instantiation_count = 0;
+	public function test_add_address_autocomplete_settings_no_providers() {
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
 
-		// Define a test provider class that tracks instantiation.
+		// Find the autocomplete settings.
+		$autocomplete_enabled_setting  = null;
+		$autocomplete_provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+				$autocomplete_enabled_setting = $setting;
+				break;
+			}
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$autocomplete_provider_setting = $setting;
+				break;
+			}
+		}
+
+		// Preferred provider should not be in the settings if no providers are registered.
+		$this->assertNull( $autocomplete_provider_setting );
+
+		$this->assertNotNull( $autocomplete_enabled_setting );
+		$this->assertEquals( 'checkbox', $autocomplete_enabled_setting['type'] );
+		$this->assertTrue( $autocomplete_enabled_setting['disabled'] );
+		$this->assertStringContainsString( 'WooPayments', $autocomplete_enabled_setting['desc_tip'] );
+	}
+
+	/**
+	 * Test settings when one provider is registered.
+	 */
+	public function test_add_address_autocomplete_settings_single_provider() {
+		// Define test provider class.
 		$provider_class = new class() extends WC_Address_Provider {
 			/**
-			 * @var int Count of instances created.
-			 */
-			public static $instance_count = 0;
-
-			/**
-			 * Constructor for test provider.
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
 			 */
 			public function __construct() {
-				++self::$instance_count;
 				$this->id   = 'test-provider';
 				$this->name = 'Test Provider';
 			}
 		};
 
+		// Get class name for filter.
 		$provider_class_name = get_class( $provider_class );
 
 		add_filter(
@@ -334,28 +367,56 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		);
 
-		// First call should instantiate the provider.
-		$providers1    = $this->sut->get_registered_providers();
-		$initial_count = $provider_class::$instance_count;
+		// Getting sut from container because the settings page uses that, not the instance we make in the test.
+		$this->sut = wc_get_container()->get( AddressProviderController::class )->init();
 
-		// Second call should use cached instance.
-		$providers2 = $this->sut->get_registered_providers();
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
 
-		// Verify the instance count hasn't increased.
-		$this->assertEquals( $initial_count, $provider_class::$instance_count );
+		// Find the autocomplete setting.
+		$autocomplete_enabled_setting  = null;
+		$autocomplete_provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+				$autocomplete_enabled_setting = $setting;
+				break;
+			}
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$autocomplete_provider_setting = $setting;
+				break;
+			}
+		}
 
-		// Verify we got the same instance both times.
-		$this->assertSame( $providers1[0], $providers2[0] );
+		// Preferred provider should not be in the settings if only one provider is registered.
+		$this->assertNull( $autocomplete_provider_setting );
+
+		$this->assertNotNull( $autocomplete_enabled_setting );
+		$this->assertEquals( 'checkbox', $autocomplete_enabled_setting['type'] );
+		$this->assertFalse( $autocomplete_enabled_setting['disabled'] );
+		$this->assertStringNotContainsString( 'WooPayments', $autocomplete_enabled_setting['desc_tip'] );
+
+		// Verify provider select is not added when only one provider exists.
+		$provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$provider_setting = $setting;
+				break;
+			}
+		}
+
+		$this->assertNull( $provider_setting );
 	}
 
 	/**
-	 * Test that providers are reinstantiated when the filter returns different classes.
+	 * Test settings when multiple providers are registered.
 	 */
-	public function test_provider_cache_invalidation() {
-		// Define first test provider class.
+	public function test_add_address_autocomplete_settings_multiple_providers() {
+		// Define test provider classes.
 		$provider1_class = new class() extends WC_Address_Provider {
 			/**
-			 * Constructor for test provider 1.
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
 			 */
 			public function __construct() {
 				$this->id   = 'provider-1';
@@ -363,10 +424,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		};
 
-		// Define second test provider class.
 		$provider2_class = new class() extends WC_Address_Provider {
 			/**
-			 * Constructor for test provider 2.
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
 			 */
 			public function __construct() {
 				$this->id   = 'provider-2';
@@ -374,82 +435,223 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			}
 		};
 
+		// Get class names for filter.
 		$provider1_class_name = get_class( $provider1_class );
 		$provider2_class_name = get_class( $provider2_class );
 
-		// First, register provider1.
 		add_filter(
 			'woocommerce_address_providers',
-			function ( $providers ) use ( $provider1_class_name ) {
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
 				$providers[] = $provider1_class_name;
-				return $providers;
-			}
-		);
-
-		$first_result = $this->sut->get_registered_providers();
-		$this->assertCount( 1, $first_result );
-		$this->assertEquals( 'provider-1', $first_result[0]->id );
-
-		// Now change the filter to return provider2.
-		remove_all_filters( 'woocommerce_address_providers' );
-		add_filter(
-			'woocommerce_address_providers',
-			function ( $providers ) use ( $provider2_class_name ) {
 				$providers[] = $provider2_class_name;
 				return $providers;
 			}
 		);
 
-		$second_result = $this->sut->get_registered_providers();
-		$this->assertCount( 1, $second_result );
-		$this->assertEquals( 'provider-2', $second_result[0]->id );
+		// Getting sut from container because the settings page uses that, not the instance we make in the test.
+		$this->sut = wc_get_container()->get( AddressProviderController::class )->init();
+
+		// Do it this way to simulate the actual settings page with the filter.
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
+
+		// Find the provider select setting.
+		$provider_setting = null;
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_address_autocomplete_provider' === $setting['id'] ) {
+				$provider_setting = $setting;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $provider_setting );
+		$this->assertEquals( 'select', $provider_setting['type'] );
+		$this->assertEquals( 'provider-1', $provider_setting['default'] );
+		$this->assertArrayHasKey( 'provider-1', $provider_setting['options'] );
+		$this->assertArrayHasKey( 'provider-2', $provider_setting['options'] );
+		$this->assertEquals( 'Provider One', $provider_setting['options']['provider-1'] );
+		$this->assertEquals( 'Provider Two', $provider_setting['options']['provider-2'] );
 	}
 
 	/**
-	 * Test that providers are not reinstantiated when the filter returns the same class names in a new array.
+	 * Test that settings are added in the correct position.
 	 */
-	public function test_provider_caching_with_new_array() {
-		// Create a provider class that tracks instantiations.
-		$tracking_provider = new class() extends WC_Address_Provider {
-			/**
-			 * @var int Count of instances created.
-			 */
-			public static $instance_count = 0;
+	public function test_add_address_autocomplete_settings_position() {
+		$settings_class = new \WC_Settings_General();
+		$settings       = $settings_class->get_settings_for_section( '' );
 
+		// Find the position of the default customer address setting and the autocomplete setting.
+		$default_address_pos = -1;
+		$autocomplete_pos    = -1;
+		foreach ( $settings as $index => $setting ) {
+			if ( isset( $setting['id'] ) ) {
+				if ( 'woocommerce_default_customer_address' === $setting['id'] ) {
+					$default_address_pos = $index;
+				} elseif ( 'woocommerce_address_autocomplete_enabled' === $setting['id'] ) {
+					$autocomplete_pos = $index;
+				}
+			}
+		}
+
+		$this->assertGreaterThan( -1, $default_address_pos );
+		$this->assertGreaterThan( -1, $autocomplete_pos );
+		$this->assertGreaterThan( $default_address_pos, $autocomplete_pos );
+		$this->assertEquals( $default_address_pos + 1, $autocomplete_pos );
+	}
+
+	/**
+	 * Test getting preferred provider when set in options.
+	 */
+	public function test_get_preferred_provider_from_options() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
 			/**
-			 * Constructor for test provider.
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
 			 */
 			public function __construct() {
-				++self::$instance_count;
-				$this->id   = 'test-provider';
-				$this->name = 'Test Provider';
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
 			}
 		};
 
-		$provider_class_name = get_class( $tracking_provider );
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
 
-		// Reset the static counter before starting the test.
-		$provider_class_name::$instance_count = 0;
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
 
-		// First filter call.
 		add_filter(
 			'woocommerce_address_providers',
-			function () use ( $provider_class_name ) {
-				// Return a new array each time.
-				return array( $provider_class_name );
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
 			}
 		);
 
-		// First call should instantiate the provider.
-		$providers1 = $this->sut->get_registered_providers();
-		$this->assertEquals( 1, $provider_class_name::$instance_count, 'Provider should be instantiated once' );
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-2' );
 
-		// Second call should use cached instance even though filter returns a new array.
-		$providers2 = $this->sut->get_registered_providers();
-		$this->assertEquals( 1, $provider_class_name::$instance_count, 'Provider should not be instantiated again' );
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
 
-		// Verify we got the same instance both times.
-		$this->assertSame( $providers1[0], $providers2[0] );
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-2', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider when option is not set.
+	 */
+	public function test_get_preferred_provider_fallback() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		delete_option( 'woocommerce_address_autocomplete_provider' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-1', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider when selected provider is no longer available.
+	 */
+	public function test_get_preferred_provider_unavailable() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 * Sets up the provider with an ID and name.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		// Get class names for filter.
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) use ( $provider1_class_name, $provider2_class_name ) {
+				$providers[] = $provider1_class_name;
+				$providers[] = $provider2_class_name;
+				return $providers;
+			}
+		);
+
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-3' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEquals( 'provider-1', $preferred_provider );
+	}
+
+	/**
+	 * Test getting preferred provider with no providers registered.
+	 */
+	public function test_get_preferred_provider_no_providers() {
+		$preferred_provider = $this->sut->get_preferred_provider();
+		$this->assertEmpty( $preferred_provider );
 	}
 
 	/**
@@ -471,7 +673,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -494,7 +699,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -517,7 +725,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -544,7 +755,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -585,7 +799,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				)
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 		$this->assertEmpty( $providers );
 	}
 
@@ -637,7 +854,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 				array( 'context' => 'address_provider_service' )
 			);
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Only the first provider should be registered.
 		$this->assertCount( 1, $providers );
@@ -685,7 +905,10 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->expects( $this->never() )
 			->method( 'error' );
 
-		$providers = $this->sut->get_registered_providers();
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
 
 		// Both providers should be registered.
 		$this->assertCount( 2, $providers );
@@ -693,5 +916,291 @@ class AddressProviderControllerTest extends MockeryTestCase {
 		$this->assertEquals( 'unique-id-2', $providers[1]->id );
 		$this->assertEquals( 'Provider One', $providers[0]->name );
 		$this->assertEquals( 'Provider Two', $providers[1]->name );
+	}
+
+	/**
+	 * Test that providers are returned in registration order when no preferred provider is set.
+	 */
+	public function test_providers_ordered_by_registration() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		$provider3_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-3';
+				$this->name = 'Provider Three';
+			}
+		};
+
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+		$provider3_class_name = get_class( $provider3_class );
+
+		// Register providers in specific order.
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider1_class_name, $provider2_class_name, $provider3_class_name ) {
+				return array( $provider1_class_name, $provider2_class_name, $provider3_class_name );
+			}
+		);
+
+		// Delete any existing preferred provider setting.
+		delete_option( 'woocommerce_address_autocomplete_provider' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
+
+		// Verify providers are in registration order.
+		$this->assertCount( 3, $providers );
+		$this->assertEquals( 'provider-1', $providers[0]->id );
+		$this->assertEquals( 'provider-2', $providers[1]->id );
+		$this->assertEquals( 'provider-3', $providers[2]->id );
+	}
+
+	/**
+	 * Test that the preferred provider is moved to the first position when set.
+	 */
+	public function test_preferred_provider_moved_to_first_position() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		$provider3_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-3';
+				$this->name = 'Provider Three';
+			}
+		};
+
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+		$provider3_class_name = get_class( $provider3_class );
+
+		// Register providers in specific order.
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider1_class_name, $provider2_class_name, $provider3_class_name ) {
+				return array( $provider1_class_name, $provider2_class_name, $provider3_class_name );
+			}
+		);
+
+		// Set provider-2 as the preferred provider.
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-2' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
+
+		// Verify provider-2 is first, and others maintain their relative order.
+		$this->assertCount( 3, $providers );
+		$this->assertEquals( 'provider-2', $providers[0]->id );
+		$this->assertEquals( 'provider-1', $providers[1]->id );
+		$this->assertEquals( 'provider-3', $providers[2]->id );
+	}
+
+	/**
+	 * Test that the preferred provider is moved to the first position when the last provider is preferred.
+	 */
+	public function test_preferred_provider_moved_from_last_position() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		$provider3_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-3';
+				$this->name = 'Provider Three';
+			}
+		};
+
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+		$provider3_class_name = get_class( $provider3_class );
+
+		// Register providers in specific order.
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider1_class_name, $provider2_class_name, $provider3_class_name ) {
+				return array( $provider1_class_name, $provider2_class_name, $provider3_class_name );
+			}
+		);
+
+		// Set provider-3 (the last one) as the preferred provider.
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-3' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
+
+		// Verify provider-3 is first, and others maintain their relative order.
+		$this->assertCount( 3, $providers );
+		$this->assertEquals( 'provider-3', $providers[0]->id );
+		$this->assertEquals( 'provider-1', $providers[1]->id );
+		$this->assertEquals( 'provider-2', $providers[2]->id );
+	}
+
+	/**
+	 * Test that the original order is preserved when the preferred provider is not found.
+	 */
+	public function test_order_preserved_when_preferred_provider_not_found() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		// Register providers in specific order.
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider1_class_name, $provider2_class_name ) {
+				return array( $provider1_class_name, $provider2_class_name );
+			}
+		);
+
+		// Set a non-existent provider as preferred.
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-nonexistent' );
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
+
+		// Verify original order is maintained.
+		$this->assertCount( 2, $providers );
+		$this->assertEquals( 'provider-1', $providers[0]->id );
+		$this->assertEquals( 'provider-2', $providers[1]->id );
+	}
+
+	/**
+	 * Test the original order is preserved when the first provider is already the preferred one.
+	 */
+	public function test_order_preserved_when_first_provider_already_preferred() {
+		// Define test provider classes.
+		$provider1_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-1';
+				$this->name = 'Provider One';
+			}
+		};
+
+		$provider2_class = new class() extends WC_Address_Provider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'provider-2';
+				$this->name = 'Provider Two';
+			}
+		};
+
+		$provider1_class_name = get_class( $provider1_class );
+		$provider2_class_name = get_class( $provider2_class );
+
+		// Register providers in specific order.
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider1_class_name, $provider2_class_name ) {
+				return array( $provider1_class_name, $provider2_class_name );
+			}
+		);
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		// Set the first provider as preferred.
+		update_option( 'woocommerce_address_autocomplete_provider', 'provider-1' );
+
+		$providers = $this->sut->get_providers();
+
+		// Verify original order is maintained.
+		$this->assertCount( 2, $providers );
+		$this->assertEquals( 'provider-1', $providers[0]->id );
+		$this->assertEquals( 'provider-2', $providers[1]->id );
 	}
 }

@@ -60,7 +60,9 @@
 	.wc-block-components-chip:focus,
 	.wc-block-components-chip:hover {
 		background: #fff;
-		button.wc-block-components-chip__remove:not(:hover):not(:active):not(.has-background) {
+		button.wc-block-components-chip__remove:not(:hover):not(:active):not(
+				.has-background
+			) {
 			background: transparent;
 		}
 	}

@@ -174,6 +174,16 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				},
 			};
 			break;
+		case types.UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					updatingAddressFieldsForShippingRates:
+						!! action.isResolving,
+				},
+			};
+			break;
 		case types.UPDATING_SELECTED_SHIPPING_RATE:
 			state = {
 				...state,

@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/add-to-cart-with-options-variation-selector",
-	"title": "Variation Selector (Experimental)",
-	"description": "Display a dropdown to select a variation to add to cart.",
+	"title": "Variation Selector (Beta)",
+	"description": "Display any product variations available to select from and add to cart.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],

@@ -70,12 +70,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 
-		$email_post_id    = $this->factory->post->create(
+		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:paragraph --><p>Hello!</p><!-- /wp:paragraph -->',
 			)
 		);
-		$this->email_post = get_post( $email_post_id );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		$this->email_post = $email_post;
 	}
 
 	/**
@@ -109,6 +112,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_renderer_styles', $styles_callback );
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en' );
 		$style    = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
+		$this->assertIsString( $style );
 		$this->assertStringContainsString( 'color: pink', $style );
 		remove_filter( 'woocommerce_email_renderer_styles', $styles_callback );
 	}
@@ -119,6 +123,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItInlinesBodyStyles(): void {
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en' );
 		$style    = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
+		$this->assertIsString( $style );
 		$this->assertStringContainsString( 'margin: 0; padding: 0;', $style );
 	}
 
@@ -130,6 +135,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		// Verify body element styles.
 		$style = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
+		$this->assertIsString( $style );
 		$this->assertStringContainsString( 'background-color: #123456', $style );
 
 		// Verify layout element styles.
@@ -153,6 +159,56 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders post wrapped withing a template associated with the post via _wp_page_template post meta.
+	 */
+	public function testItRendersPostWithinAssociatedTemplate(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+		update_post_meta( $this->email_post->ID, '_wp_page_template', 'test-email-template' );
+
+		$rendered = $this->renderer->render(
+			$this->email_post,
+			'Subject',
+			'Preheader content',
+			'en'
+		);
+		$this->assertStringContainsString( 'test-template-class', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders post wrapped withing a template passed as parameter.
+	 */
+	public function testItRendersPostWithinTemplatePassedAsParameter(): void {
+		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
+		register_block_template(
+			'renderer-tests//test-email-template-extra',
+			array(
+				'title'       => 'Test Email Template',
+				'description' => 'A test email template.',
+				'content'     => '<!-- wp:group --><div class="wp-block-group test-template-class-extra"><!-- wp:post-content /--></div><!-- /wp:group -->',
+			)
+		);
+		update_post_meta( $this->email_post->ID, '_wp_page_template', 'test-email-template-extra' );
+
+		$rendered = $this->renderer->render(
+			$this->email_post,
+			'Subject',
+			'Preheader content',
+			'en',
+			'',
+			'test-email-template-extra'
+		);
+		$this->assertStringContainsString( 'test-template-class-extra', $rendered['html'] );
+	}
+
+	/**
 	 * Returns the value of the style attribute for the first tag that matches the query.
 	 *
 	 * @param string $html HTML content.
@@ -162,7 +218,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	private function getStylesValueForTag( string $html, array $query ): ?string {
 		$html = new \WP_HTML_Tag_Processor( $html );
 		if ( $html->next_tag( $query ) ) {
-			return $html->get_attribute( 'style' );
+			$result = $html->get_attribute( 'style' );
+			return is_string( $result ) ? $result : null;
 		}
 		return null;
 	}

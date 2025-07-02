@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move marketplace banner to main WC Admin layout component to ensure it always appear at the top of the page.

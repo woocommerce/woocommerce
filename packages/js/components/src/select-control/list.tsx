@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { RefObject } from 'react';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { isEqual, isNumber } from 'lodash';
 import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT, TAB } from '@wordpress/keycodes';
@@ -101,7 +101,7 @@ const VirtualOption = ( {
 			aria-setsize={ options.length }
 			aria-posinset={ index + 1 }
 			disabled={ option.isDisabled }
-			className={ classnames( 'woocommerce-select-control__option', {
+			className={ clsx( 'woocommerce-select-control__option', {
 				'is-selected': index === selectedIndex,
 			} ) }
 			onClick={ () => onSelect( option ) }
@@ -306,13 +306,10 @@ class List extends Component< Props > {
 			virtualListHeight = 300,
 		} = this.props;
 
-		const listboxClasses = classnames(
-			'woocommerce-select-control__listbox',
-			{
-				'is-static': staticList,
-				'is-virtual': virtualScroll,
-			}
-		);
+		const listboxClasses = clsx( 'woocommerce-select-control__listbox', {
+			'is-static': staticList,
+			'is-virtual': virtualScroll,
+		} );
 
 		if ( virtualScroll ) {
 			return (
@@ -361,7 +358,7 @@ class List extends Component< Props > {
 						role="option"
 						aria-selected={ index === selectedIndex }
 						disabled={ option.isDisabled }
-						className={ classnames(
+						className={ clsx(
 							'woocommerce-select-control__option',
 							{
 								'is-selected': index === selectedIndex,

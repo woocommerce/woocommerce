@@ -10,6 +10,7 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 import { ValidationNotices } from './validation-notices';
 import { EditorSnackbars } from './snackbars';
+import { NoticesSlot } from '../../hacks/notices-slot';
 
 // See: https://github.com/WordPress/gutenberg/blob/5be0ec4153c3adf9f0f2513239f4f7a358ba7948/packages/editor/src/components/editor-notices/index.js
 
@@ -33,16 +34,18 @@ export function EditorNotices() {
 
 	return (
 		<>
-			<NoticeList
-				notices={ nonDismissibleNotices }
-				className="components-editor-notices__pinned"
-			/>
-			<NoticeList
-				notices={ dismissibleNotices }
-				className="components-editor-notices__dismissible"
-				onRemove={ ( id ) => removeNotice( id, 'email-editor' ) }
-			/>
-			<ValidationNotices />
+			<NoticesSlot>
+				<NoticeList
+					notices={ nonDismissibleNotices }
+					className="components-editor-notices__pinned"
+				/>
+				<NoticeList
+					notices={ dismissibleNotices }
+					className="components-editor-notices__dismissible"
+					onRemove={ ( id ) => removeNotice( id, 'email-editor' ) }
+				/>
+				<ValidationNotices />
+			</NoticesSlot>
 			<EditorSnackbars context="global" />
 			<EditorSnackbars context="email-editor" />
 		</>

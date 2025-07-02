@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove unusued version field from block.json blocks definition

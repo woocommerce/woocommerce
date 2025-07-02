@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix namespace collision when using interactive blocks inside Product Filters, such as Accordion

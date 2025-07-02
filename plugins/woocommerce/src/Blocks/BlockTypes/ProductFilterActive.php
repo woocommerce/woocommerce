@@ -44,6 +44,7 @@ final class ProductFilterActive extends AbstractBlock {
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
 			'data-wp-bind--hidden' => '!state.hasActiveFilters',
+			'data-wp-class--wc-block-product-filter--hidden' => '!state.hasActiveFilters',
 		);
 
 		wp_interactivity_state(

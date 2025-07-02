@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Added email status toggle in the email editor sidebar. Added the ability to enable/disable transactional emails directly from the email editor

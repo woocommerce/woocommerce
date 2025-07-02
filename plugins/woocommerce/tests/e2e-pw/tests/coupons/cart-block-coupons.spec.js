@@ -128,7 +128,7 @@ test.describe(
 				// apply all coupon types
 				for ( let i = 0; i < coupons.length; i++ ) {
 					await page
-						.getByRole( 'button', { name: 'Add a coupon' } )
+						.getByRole( 'button', { name: 'Add coupons' } )
 						.click();
 					await page
 						.getByLabel( 'Enter code' )
@@ -175,7 +175,7 @@ test.describe(
 				// add all coupons and verify prices
 				for ( let i = 0; i < coupons.length; i++ ) {
 					await page
-						.getByRole( 'button', { name: 'Add a coupon' } )
+						.getByRole( 'button', { name: 'Add coupons' } )
 						.click();
 					await page
 						.getByLabel( 'Enter code' )
@@ -221,7 +221,7 @@ test.describe(
 			async ( { page } ) => {
 				// try to add two same coupons and verify the error message
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
@@ -235,7 +235,7 @@ test.describe(
 						)
 				).toBeVisible();
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
@@ -255,7 +255,7 @@ test.describe(
 			async ( { page } ) => {
 				// add coupon with usage limit
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( couponLimitedCode );
 				await page.getByText( 'Apply', { exact: true } ).click();

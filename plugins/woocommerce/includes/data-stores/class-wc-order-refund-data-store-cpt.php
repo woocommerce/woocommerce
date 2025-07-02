@@ -46,17 +46,24 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * @param array    $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
-		$id               = $order->get_id();
-		$parent_order_id  = $order->get_parent_id();
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
+		$id = $order->get_id();
 
 		if ( ! $id ) {
 			return;
 		}
 
+		$parent_order_id  = $order->get_parent_id();
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
 		$order->set_id( 0 );
+
+		/**
+		 * Fires when a refund is deleted.
+		 *
+		 * @param int $id The refund ID.
+		 * @since 3.0.0
+		 */
 		do_action( 'woocommerce_delete_order_refund', $id );
 	}
 

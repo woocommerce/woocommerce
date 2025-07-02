@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure tax status is copied to shipping line items if shipping method does not support them through options.

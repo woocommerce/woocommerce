@@ -5,6 +5,7 @@ import { objectHasProp } from '@woocommerce/types';
 import deprecated from '@wordpress/deprecated';
 import { getSetting } from '@woocommerce/settings';
 import type { GlobalPaymentMethod } from '@woocommerce/types';
+import { createSelector } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -110,30 +111,41 @@ export const getPaymentMethodData = ( state: PaymentState ) => {
 	return state.paymentMethodData;
 };
 
-export const getIncompatiblePaymentMethods = ( state: PaymentState ) => {
-	const {
-		availablePaymentMethods,
-		availableExpressPaymentMethods,
-		paymentMethodsInitialized,
-		expressPaymentMethodsInitialized,
-	} = state;
+export const getIncompatiblePaymentMethods = createSelector(
+	( state: PaymentState ) => {
+		const {
+			availablePaymentMethods,
+			availableExpressPaymentMethods,
+			paymentMethodsInitialized,
+			expressPaymentMethodsInitialized,
+		} = state;
 
-	if ( ! paymentMethodsInitialized || ! expressPaymentMethodsInitialized ) {
-		return {};
-	}
+		if (
+			! paymentMethodsInitialized ||
+			! expressPaymentMethodsInitialized
+		) {
+			return {};
+		}
 
-	return Object.fromEntries(
-		Object.entries( globalPaymentMethods ).filter( ( [ k ] ) => {
-			return ! (
-				k in
-				{
-					...availablePaymentMethods,
-					...availableExpressPaymentMethods,
-				}
-			);
-		} )
-	);
-};
+		return Object.fromEntries(
+			Object.entries( globalPaymentMethods ).filter( ( [ k ] ) => {
+				return ! (
+					k in
+					{
+						...availablePaymentMethods,
+						...availableExpressPaymentMethods,
+					}
+				);
+			} )
+		);
+	},
+	( state: PaymentState ) => [
+		state.availablePaymentMethods,
+		state.availableExpressPaymentMethods,
+		state.paymentMethodsInitialized,
+		state.expressPaymentMethodsInitialized,
+	]
+);
 
 export const getSavedPaymentMethods = ( state: PaymentState ) => {
 	return state.savedPaymentMethods;

@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
 use WP_REST_Request;
 
@@ -248,6 +247,21 @@ class Utils {
 		}
 
 		return $slug;
+	}
+
+	/**
+	 * Trim the .php file extension from a path.
+	 *
+	 * @param string $path The path to trim.
+	 *
+	 * @return string The trimmed path. If the path does not end with .php, it will be returned as is.
+	 */
+	public static function trim_php_file_extension( string $path ): string {
+		if ( ! empty( $path ) && str_ends_with( $path, '.php' ) ) {
+			$path = substr( $path, 0, - 4 );
+		}
+
+		return $path;
 	}
 
 	/**

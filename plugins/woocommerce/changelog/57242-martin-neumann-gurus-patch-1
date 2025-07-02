@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Allowing password reset in a Multisite Network even if the user is not part of the current blog.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed the broken UI of Single Product block in editor by adding frontend styles and fixing alignment.

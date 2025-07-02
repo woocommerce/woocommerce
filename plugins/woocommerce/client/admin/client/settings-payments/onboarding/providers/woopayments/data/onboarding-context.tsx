@@ -14,7 +14,7 @@ import {
 	WooPaymentsOnboardingStepContent,
 	paymentSettingsStore,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getHistory, getNewPath, getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -23,7 +23,30 @@ import {
 	WooPaymentsProviderOnboardingStep,
 	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
-import { steps as woopaymentsSteps } from '../steps';
+
+/**
+ * URL Strategy interface for handling navigation in different contexts
+ */
+interface URLStrategy {
+	buildStepURL: (
+		stepPath: string,
+		currentParams?: Record< string, string >
+	) => string;
+	preserveParams?: string[]; // params to preserve when navigating.
+}
+
+/**
+ * Default URL strategy for settings-payments (backward compatibility)
+ */
+const defaultURLStrategy: URLStrategy = {
+	buildStepURL: ( stepPath: string ) => {
+		return getNewPath( { path: stepPath }, stepPath, {
+			page: 'wc-settings',
+			tab: 'checkout',
+		} );
+	},
+	preserveParams: [ 'source', 'from' ], // params to preserve when navigating.
+};
 
 /**
  * Context to manage onboarding steps
@@ -38,14 +61,28 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	getStepByKey: () => undefined,
 	refreshStoreData: () => undefined,
 	closeModal: () => undefined,
+	justCompletedStepId: null,
+	setJustCompletedStepId: () => undefined,
+	sessionEntryPoint: '',
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
 
 export const OnboardingProvider: React.FC< {
 	children: React.ReactNode;
+	onboardingSteps: WooPaymentsProviderOnboardingStep[];
 	closeModal: () => void;
-} > = ( { children, closeModal } ) => {
+	onFinish?: () => void;
+	urlStrategy?: URLStrategy;
+	sessionEntryPoint?: string;
+} > = ( {
+	children,
+	onboardingSteps,
+	closeModal,
+	onFinish,
+	urlStrategy,
+	sessionEntryPoint = 'settings_payments', // This should match the value of WooPaymentsService::SESSION_ENTRY_DEFAULT.
+} ) => {
 	const history = getHistory();
 
 	// Use React state to manage steps and loading state
@@ -57,6 +94,15 @@ export const OnboardingProvider: React.FC< {
 		WooPaymentsProviderOnboardingStep[]
 	>( [] );
 
+	// New state for tracking just completed step
+	const [ justCompletedStepId, setStepId ] = useState< string | null >(
+		null
+	);
+
+	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
+		setStepId( stepId );
+	}, [] );
+
 	const {
 		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
 	} = useDispatch( woopaymentsOnboardingStore );
@@ -64,15 +110,17 @@ export const OnboardingProvider: React.FC< {
 	const { invalidateResolutionForStoreSelector: invalidatePaymentProviders } =
 		useDispatch( paymentSettingsStore );
 
-	// Initial data fetch from store
+	// Initial data fetch from store with source parameter
 	const { storeData, isStoreLoading } = useSelect(
 		( select ) => ( {
-			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(),
+			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(
+				sessionEntryPoint
+			),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
 		} ),
-		[]
+		[ sessionEntryPoint ]
 	);
 
 	/**
@@ -109,14 +157,32 @@ export const OnboardingProvider: React.FC< {
 		( stepKey: string ) => {
 			const step = getStepByKey( stepKey );
 			if ( step?.path ) {
-				const newPath = getNewPath( { path: step.path }, step.path, {
-					page: 'wc-settings',
-					tab: 'checkout',
-				} );
+				// Use provided urlStrategy or fall back to default
+				const strategy = urlStrategy || defaultURLStrategy;
+
+				// Get current query params if strategy wants to preserve some
+				const currentParams = strategy.preserveParams
+					? ( getQuery() as Record< string, string > )
+					: {};
+				const preservedParams =
+					strategy.preserveParams?.reduce(
+						( acc: Record< string, string >, param: string ) => {
+							if ( currentParams[ param ] ) {
+								acc[ param ] = currentParams[ param ];
+							}
+							return acc;
+						},
+						{} as Record< string, string >
+					) || {};
+
+				const newPath = strategy.buildStepURL(
+					step.path,
+					preservedParams
+				);
 				history.push( newPath );
 			}
 		},
-		[ getStepByKey, history ]
+		[ getStepByKey, history, urlStrategy ]
 	);
 
 	// Find the first incomplete step with completed dependencies
@@ -143,6 +209,12 @@ export const OnboardingProvider: React.FC< {
 				);
 			}
 
+			// If the current step is the last one, then we should call onFinish if provided.
+			if ( currentStepIndex === allSteps.length - 1 ) {
+				onFinish?.();
+				return;
+			}
+
 			// Find the next step that is not completed and has completed dependencies
 			const nextStep = allSteps.find(
 				( step ) =>
@@ -164,11 +236,12 @@ export const OnboardingProvider: React.FC< {
 	const resetLocalState = () => {
 		setStateStoreSteps( [] );
 		setIsStateStoreLoading( true );
+		setJustCompletedStepId( null );
 		setAllSteps( [] );
 	};
 
 	const refreshStoreData = () => {
-		// Reset the onboarding data both in the store and local state when the onboardingcontext mounts.
+		// Reset the onboarding data both in the store and local state when the onboarding context mounts.
 		// This is important to ensure that the onboarding data is cleared when the modal is closed.
 		// This is to avoid stale data when the modal is opened again.
 		resetLocalState();
@@ -189,7 +262,7 @@ export const OnboardingProvider: React.FC< {
 
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
-		const mapWooPaymentsSteps = woopaymentsSteps
+		const mapWooPaymentsSteps = onboardingSteps
 			// First, filter out steps that are not returned from the API.
 			// This is to avoid showing steps that are not useful to the user.
 			.filter( ( step ) => {
@@ -207,7 +280,7 @@ export const OnboardingProvider: React.FC< {
 				if ( step.type === 'backend' ) {
 					const backendStep = stateStoreSteps.find(
 						( s ) => s.id === step.id
-					);
+					) as WooPaymentsProviderOnboardingStep;
 
 					return Object.assign( {}, step, {
 						status: backendStep?.status || 'not_started',
@@ -215,6 +288,7 @@ export const OnboardingProvider: React.FC< {
 						path: backendStep?.path,
 						context: backendStep?.context,
 						actions: backendStep?.actions,
+						errors: backendStep?.errors,
 					} );
 				}
 
@@ -268,6 +342,9 @@ export const OnboardingProvider: React.FC< {
 					// This is important to ensure that the payment providers buttons are up to date.
 					invalidatePaymentProviders( 'getPaymentProviders' );
 				},
+				justCompletedStepId,
+				setJustCompletedStepId,
+				sessionEntryPoint,
 			} }
 		>
 			{ children }

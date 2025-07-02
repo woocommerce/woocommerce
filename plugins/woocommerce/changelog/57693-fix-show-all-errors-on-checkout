@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Validate all fields and don't bail early on email.

@@ -24,6 +24,8 @@ class Package {
 
 	/**
 	 * Init the package.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		Email_Editor_Container::init();

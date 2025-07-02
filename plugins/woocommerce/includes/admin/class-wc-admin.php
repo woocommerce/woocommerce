@@ -9,8 +9,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
-use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -26,6 +26,14 @@ class WC_Admin {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ) );
+
+		// Hook in early (priority 1) to make sure the PageController's hooks are added before any WC admin pages or
+		// menus logic is run, including the enqueuing of assets via \Automattic\WooCommerce\Internal\Admin\WCAdminAssets.
+		// While it may not sound like it, the admin_menu action is triggered quite early,
+		// before the admin_init or admin_enqueue_scripts  action.
+		// @see https://developer.wordpress.org/apis/hooks/action-reference/#actions-run-during-an-admin-page-request.
+		add_action( 'admin_menu', array( $this, 'init_page_controller' ), 1 );
+
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
@@ -91,6 +99,14 @@ class WC_Admin {
 	}
 
 	/**
+	 * Initialize the admin page controller logic.
+	 */
+	public function init_page_controller() {
+		// We only need to make sure the controller is instantiated since the hooking is done in the constructor.
+		PageController::get_instance();
+	}
+
+	/**
 	 * Include admin files conditionally.
 	 */
 	public function conditional_includes() {
@@ -125,7 +141,9 @@ class WC_Admin {
 	}
 
 	/**
-	 * Handle redirects to setup/welcome page after install and updates.
+	 * Handle redirects:
+	 * 1. To setup/welcome page after install and updates.
+	 * 2. To offline payment gateway(s) new settings page.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
@@ -150,6 +168,37 @@ class WC_Admin {
 
 			wp_safe_redirect( $url );
 			exit;
+		}
+
+		// Check if we have a section parameter for offline payment gateways and redirect to the new path.
+		if ( ! empty( $_GET['section'] ) ) {
+			$section = wc_clean( wp_unslash( $_GET['section'] ) );
+
+			// Handle offline payment gateway(s) redirections.
+			if ( 'offline' === $section || WC_Gateway_BACS::ID === $section || WC_Gateway_COD::ID === $section || WC_Gateway_Cheque::ID === $section ) {
+				// Get current URL and remove source parameter.
+				$current_url = remove_query_arg( 'section' );
+
+				if ( 'offline' === $section ) {
+					$redirect_url = add_query_arg(
+						array(
+							'path' => '/offline',
+						),
+						$current_url,
+					);
+				} else {
+					$redirect_url = add_query_arg(
+						array(
+							'path' => '/offline/' . strtolower( $section ),
+						),
+						$current_url,
+					);
+				}
+
+				// Perform the redirect.
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended

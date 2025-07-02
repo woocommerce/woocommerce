@@ -1,3 +1,9 @@
+@use "sass:color";
+@use "sass:math";
+@use "sass:map";
+@use "sass:meta";
+@use "sass:string";
+
 $fontSizes: (
 	"smaller": 0.75,
 	"small": 0.875,
@@ -15,7 +21,12 @@ $fontSizes: (
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
-			animation-timing-function: cubic-bezier(0.5856, 0.0703, 0.4143, 0.9297);
+			animation-timing-function: cubic-bezier(
+				0.5856,
+				0.0703,
+				0.4143,
+				0.9297
+			);
 			transform: rotate(0deg);
 		}
 		100% {
@@ -66,7 +77,12 @@ $fontSizes: (
 		top: 0;
 		height: 100%;
 		background-repeat: no-repeat;
-		background-image: linear-gradient(90deg, currentColor, #f5f5f54d, currentColor);
+		background-image: linear-gradient(
+			90deg,
+			currentColor,
+			#f5f5f54d,
+			currentColor
+		);
 		transform: translateX(-100%);
 		@include loading-animation();
 		animation: loading__animation 1.5s ease-in-out infinite;
@@ -267,10 +283,49 @@ $fontSizes: (
 
 // Encodes hex colors so they can be used in URL content.
 @function encode-color($color) {
-	@if type-of($color) != "color" or string.index(#{$color}, "#") != 1 {
+	@if meta.type-of($color) != "color" or string.index(#{$color}, "#") != 1 {
 		@return $color;
 	}
 
 	$hex: string.slice(color.ie-hex-str($color), 4);
-	@return "%23" + unquote("#{$hex}");
+	@return "%23" + string.unquote("#{$hex}");
+}
+
+// Container query mixins based on use-container-queries.ts breakpoints
+// we're measuring the width of the container, not the viewport
+// because in the editor, the block can be viewed as on mobile, desktop and tablet in the same viewport
+// .wp-block-woocommerce-checkout and .wp-block-woocommerce-cart are the containers
+// Large: > 700px
+// Medium: > 520px
+// Small: > 400px
+// Mobile: <= 400px
+
+@mixin cart-checkout-large-container {
+	@container (min-width: 700px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-below-large-container {
+	@container (max-width: 699px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-medium-container {
+	@container (min-width: 520px) and (max-width: 699px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-small-container {
+	@container (min-width: 400px) and (max-width: 519px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-mobile-container {
+	@container (max-width: 399px) {
+		@content;
+	}
 }

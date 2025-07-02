@@ -187,14 +187,14 @@ class Controller extends AbstractBlock {
 					array_pop( $enhanced_query_stack );
 
 					if ( empty( $enhanced_query_stack ) ) {
-						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback );
+						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5 );
 						$render_product_collection_callback = null;
 					}
 
 					return $content;
 				};
 
-				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 10, 2 );
+				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5, 2 );
 			}
 		} elseif (
 			! empty( $enhanced_query_stack ) &&

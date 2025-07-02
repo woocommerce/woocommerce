@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.9.0
+ * @version 10.0.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -26,29 +26,24 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 /**
  * Hook for the woocommerce_email_header.
  *
- * @hooked WC_Emails::email_header() Output the email header
- * @since 3.7.0
+ * @hooked WC_Email_Customer_POS_*::email_header() Output the email header
+ * @since 10.0.0
  */
-do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
+do_action( 'woocommerce_pos_email_header', $email_heading, $email ); ?>
 
-<?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
+<div class="email-introduction">
 <p>
 <?php
 if ( ! empty( $order->get_billing_first_name() ) ) {
 	/* translators: %s: Customer first name */
 	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) );
 } else {
-	printf( esc_html__( 'Hi,', 'woocommerce' ) );
+	printf( esc_html__( 'Hi there,', 'woocommerce' ) );
 }
 ?>
 </p>
-<?php if ( $email_improvements_enabled ) : ?>
-	<p><?php esc_html_e( 'We’ve successfully processed your order, and it’s on its way to you.', 'woocommerce' ); ?></p>
-	<p><?php esc_html_e( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?></p>
-<?php else : ?>
-	<p><?php esc_html_e( 'We have finished processing your order.', 'woocommerce' ); ?></p>
-<?php endif; ?>
-<?php echo $email_improvements_enabled ? '</div>' : ''; ?>
+<p><?php esc_html_e( 'Here’s a reminder of what you’ve bought:', 'woocommerce' ); ?></p>
+</div>
 
 <?php
 
@@ -89,8 +84,39 @@ if ( $additional_content ) {
 }
 
 /**
+ * Show store information - store details are set in the Point of Sale settings.
+ */
+if ( ! empty( $pos_store_email ) || ! empty( $pos_store_phone_number ) || ! empty( $pos_store_address ) ) {
+	echo '<div class="pos-store-information">';
+	if ( ! empty( $pos_store_name ) ) {
+		echo '<h2>' . esc_html( $pos_store_name ) . '</h2>';
+	}
+	if ( ! empty( $pos_store_email ) ) {
+		echo '<p>' . esc_html( $pos_store_email ) . '</p>';
+	}
+	if ( ! empty( $pos_store_phone_number ) ) {
+		echo '<p>' . esc_html( $pos_store_phone_number ) . '</p>';
+	}
+	if ( ! empty( $pos_store_address ) ) {
+		echo wp_kses_post( wpautop( wptexturize( $pos_store_address ) ) );
+	}
+	echo '</div>';
+}
+
+/**
+ * Show refund & returns policy - this is set in the Point of Sale settings.
+ */
+if ( ! empty( $pos_refund_returns_policy ) ) {
+	echo '<div class="refund-returns-policy">';
+	echo '<h2>' . esc_html__( 'Refund & Returns Policy', 'woocommerce' ) . '</h2>';
+	echo wp_kses_post( wpautop( wptexturize( $pos_refund_returns_policy ) ) );
+	echo '</div>';
+}
+
+/**
  * Output the email footer
  *
- * @since 4.0.0
+ * @hooked WC_Email_Customer_POS_*::email_footer() Output the email footer
+ * @since 10.0.0
  */
-do_action( 'woocommerce_email_footer', $email );
+do_action( 'woocommerce_pos_email_footer', $email );

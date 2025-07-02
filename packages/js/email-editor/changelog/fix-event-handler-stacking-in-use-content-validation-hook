@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve event handler stacking in `useContentValidation()`.

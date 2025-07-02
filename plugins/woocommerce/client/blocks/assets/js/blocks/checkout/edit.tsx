@@ -64,39 +64,42 @@ export const Edit = ( {
 		hasDarkControls = false,
 	} = attributes;
 
-	const defaultFields = useSelect( ( select ) => {
-		const settings = select(
+	const fieldSettings = useSelect( ( select ) => {
+		return select(
 			coreStore as unknown as string
+			// @ts-expect-error getEditedEntityRecord is not typed in @wordpress/core-data yet.
 		).getEditedEntityRecord( 'root', 'site' ) as Record< string, string >;
+	}, [] );
 
-		const fieldsWithDefaults = {
-			phone: 'optional',
-			company: 'hidden',
-			address_2: 'optional',
-		} as const;
+	const fieldsWithDefaults = {
+		phone: 'optional',
+		company: 'hidden',
+		address_2: 'optional',
+	} as const;
 
-		return {
-			...defaultFieldsSetting,
-			...Object.fromEntries(
-				Object.entries( fieldsWithDefaults ).map(
-					( [ field, defaultValue ] ) => {
-						const value =
-							settings[
-								`woocommerce_checkout_${ field }_field`
-							] || defaultValue;
-						return [
-							field,
-							{
-								...defaultFieldsSetting[ field ],
-								required: value === 'required',
-								hidden: value === 'hidden',
-							},
-						];
-					}
-				)
-			),
-		};
-	} );
+	const defaultFields = {
+		...defaultFieldsSetting,
+		...Object.fromEntries(
+			Object.entries( fieldsWithDefaults ).map(
+				( [ field, defaultValue ] ) => {
+					const value =
+						fieldSettings[
+							`woocommerce_checkout_${ field }_field`
+						] || defaultValue;
+					return [
+						field,
+						{
+							...defaultFieldsSetting[
+								field as keyof typeof defaultFieldsSetting
+							],
+							required: value === 'required',
+							hidden: value === 'hidden',
+						},
+					];
+				}
+			)
+		),
+	};
 
 	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
 	const focus = useRef( getQueryArg( window.location.href, 'focus' ) );

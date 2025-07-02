@@ -34,7 +34,7 @@ export interface Currency {
 }
 
 export interface CurrencyResponse {
-	currency_code: CurrencyCode;
+	currency_code: CurrencyCode | '';
 	currency_symbol: string;
 	currency_minor_unit: number;
 	currency_decimal_separator: string;

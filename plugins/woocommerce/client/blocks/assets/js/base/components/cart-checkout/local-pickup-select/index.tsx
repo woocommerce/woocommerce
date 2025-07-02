@@ -10,27 +10,25 @@ import { useShippingData } from '@woocommerce/base-context';
 
 interface LocalPickupSelectProps {
 	title?: string | undefined;
-	setSelectedOption: ( value: string ) => void;
 	selectedOption: string;
 	pickupLocations: CartShippingPackageShippingRate[];
-	onSelectRate: ( value: string ) => void;
 	renderPickupLocation: (
 		location: CartShippingPackageShippingRate,
 		pickupLocationsCount: number
 	) => RadioControlOptionType;
 	packageCount: number;
+	onChange: ( value: string ) => void;
 }
 /**
  * Local pickup select component, used to render a package title and local pickup options.
  */
 export const LocalPickupSelect = ( {
 	title,
-	setSelectedOption,
 	selectedOption,
 	pickupLocations,
-	onSelectRate,
 	renderPickupLocation,
 	packageCount,
+	onChange,
 }: LocalPickupSelectProps ) => {
 	const { shippingRates } = useShippingData();
 	const internalPackageCount = shippingRates?.length || 1;
@@ -45,10 +43,7 @@ export const LocalPickupSelect = ( {
 		<div className="wc-block-components-local-pickup-select">
 			{ multiplePackages && title ? <div>{ title }</div> : false }
 			<RadioControl
-				onChange={ ( value ) => {
-					setSelectedOption( value );
-					onSelectRate( value );
-				} }
+				onChange={ onChange }
 				highlightChecked={ true }
 				selected={ selectedOption }
 				options={ pickupLocations.map( ( location ) =>

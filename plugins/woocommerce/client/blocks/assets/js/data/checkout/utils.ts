@@ -28,6 +28,7 @@ import type {
 	OrderForm,
 	OrderFormValues,
 } from '@woocommerce/settings';
+import { removeNoticesForField } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -37,6 +38,7 @@ import { store as validationStore } from '../validation';
 import {
 	CheckoutAndPaymentNotices,
 	CheckoutAfterProcessingWithErrorEventData,
+	CheckoutPutData,
 } from './types';
 import {
 	CONTACT_FORM_KEYS,
@@ -282,4 +284,23 @@ export const validateAdditionalFields = (
 	}
 
 	return true;
+};
+
+/**
+ * Clears error notices for fields that have been successfully updated.
+ */
+export const clearFieldErrorNotices = ( data: CheckoutPutData ) => {
+	if ( ! isObject( data ) ) {
+		return;
+	}
+
+	// Check if additional fields were updated successfully
+	if ( data?.additional_fields && isObject( data.additional_fields ) ) {
+		// Get the fields names that we should remove notices for.
+		// If a field is in the success response we can assume it has no errors.
+		const noticeFields = Object.keys( data.additional_fields );
+		noticeFields.forEach( ( field ) => {
+			removeNoticesForField( field );
+		} );
+	}
 };

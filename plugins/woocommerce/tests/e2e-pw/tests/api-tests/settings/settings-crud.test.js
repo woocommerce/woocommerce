@@ -264,7 +264,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_reset_password',
 						label: 'Reset password',
 						description:
-							'Customer "reset password" emails are sent when customers reset their passwords.',
+							'Send an email to customers notifying them that their password has been reset',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
@@ -276,7 +276,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'email_customer_new_account',
 						label: 'New account',
 						description:
-							'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.',
+							'Send an email to customers notifying them that they have created an account',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
@@ -1244,65 +1244,6 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_enable_shipping_calc',
-						label: 'Calculations',
-						description:
-							'Enable the shipping calculator on the cart page',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_cost_requires_address',
-						label: '',
-						description:
-							'Hide shipping costs until an address is entered',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_ship_to_destination',
-						label: 'Shipping destination',
-						description:
-							'This controls which shipping address is used by default.',
-						type: 'radio',
-						default: 'billing',
-						options: {
-							shipping: 'Default to customer shipping address',
-							billing: 'Default to customer billing address',
-							billing_only:
-								'Force shipping to the customer billing address',
-						},
-						tip: 'This controls which shipping address is used by default.',
-						value: 'billing',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_debug_mode',
-						label: 'Debug mode',
-						description: 'Enable debug mode',
-						type: 'checkbox',
-						default: 'no',
-						tip: 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.',
-						value: 'no',
-					} ),
-				] )
-			);
 		} );
 	} );
 
@@ -1465,135 +1406,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all Email settings options', () => {
-		test.beforeAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email settings', async ( { request } ) => {
-			// call API to retrieve all settings options
-			const response = await request.get(
-				'./wp-json/wc/v3/settings/email'
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_from_name',
-						label: '"From" name',
-						description: expect.any( String ),
-						type: 'text',
-						default: expect.any( String ),
-						tip: expect.any( String ),
-						value: expect.any( String ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_from_address',
-						label: '"From" address',
-						description: '',
-						type: 'email',
-						default: expect.any( String ),
-						tip: '',
-						value: expect.any( String ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_header_image',
-						label: 'Header image',
-						description:
-							'Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).',
-						type: 'text',
-						default: '',
-						tip: 'Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_footer_text',
-						label: 'Footer text',
-						description:
-							'The text to appear in the footer of all WooCommerce emails. Available placeholders: {site_title} {site_url}',
-						type: 'textarea',
-						default:
-							'{site_title} &mdash; Built with {WooCommerce}',
-						tip: 'The text to appear in the footer of all WooCommerce emails. Available placeholders: {site_title} {site_url}',
-						value: '{site_title} &mdash; Built with {WooCommerce}',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_base_color',
-						label: 'Base color',
-						description:
-							'The base color for WooCommerce email templates. Default <code>#720eec</code>.',
-						type: 'color',
-						default: '#720eec',
-						tip: 'The base color for WooCommerce email templates. Default <code>#720eec</code>.',
-						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_background_color',
-						label: 'Background color',
-						description:
-							'The background color for WooCommerce email templates. Default <code>#f7f7f7</code>.',
-						type: 'color',
-						default: '#f7f7f7',
-						tip: 'The background color for WooCommerce email templates. Default <code>#f7f7f7</code>.',
-						value: '#ffffff',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_body_background_color',
-						label: 'Body background color',
-						description:
-							'The main body background color. Default <code>#ffffff</code>.',
-						type: 'color',
-						default: '#ffffff',
-						tip: 'The main body background color. Default <code>#ffffff</code>.',
-						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_email_text_color',
-						label: 'Body text color',
-						description:
-							'The main body text color. Default <code>#3c3c3c</code>.',
-						type: 'color',
-						default: '#3c3c3c',
-						tip: 'The main body text color. Default <code>#3c3c3c</code>.',
-						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
-					} ),
-				] )
-			);
-		} );
-	} );
-
-	test.describe( 'List all Email settings options with Email Improvements feature enabled', () => {
-		test.beforeAll( enableEmailImprovementsFeature );
-		test.afterAll( disableEmailImprovementsFeature );
-		test( 'can retrieve all email settings with Email Improvements feature enabled', async ( {
-			request,
-		} ) => {
 			// call API to retrieve all settings options
 			const response = await request.get(
 				'./wp-json/wc/v3/settings/email'
@@ -1662,7 +1475,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						type: 'textarea',
 						default: '{site_title}<br />{store_address}',
 						tip: 'This text will appear in the footer of all of your WooCommerce emails. Available placeholders: {site_title} {site_url} {store_address} {store_email}',
-						value: '{site_title} &mdash; Built with {WooCommerce}',
+						value: '{site_title}<br />{store_address}',
 					} ),
 				] )
 			);
@@ -1672,10 +1485,10 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_base_color',
 						label: 'Accent',
 						description:
-							'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
+							'Customize the color of your buttons and links. Default <code>#720eec</code>.',
 						type: 'color',
-						default: '#9DFF20',
-						tip: 'Customize the color of your buttons and links. Default <code>#9DFF20</code>.',
+						default: '#720eec',
+						tip: 'Customize the color of your buttons and links. Default <code>#720eec</code>.',
 						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
 					} ),
 				] )
@@ -1686,10 +1499,10 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_background_color',
 						label: 'Email background',
 						description:
-							'Select a color for the background of your emails. Default <code>#ffffff</code>.',
+							'Select a color for the background of your emails. Default <code>#f7f7f7</code>.',
 						type: 'color',
-						default: '#ffffff',
-						tip: 'Select a color for the background of your emails. Default <code>#ffffff</code>.',
+						default: '#f7f7f7',
+						tip: 'Select a color for the background of your emails. Default <code>#f7f7f7</code>.',
 						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
 					} ),
 				] )
@@ -1714,10 +1527,10 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_text_color',
 						label: 'Heading & text',
 						description:
-							'Set the color of your headings and text. Default <code>#000000</code>.',
+							'Set the color of your headings and text. Default <code>#3c3c3c</code>.',
 						type: 'color',
-						default: '#000000',
-						tip: 'Set the color of your headings and text. Default <code>#000000</code>.',
+						default: '#3c3c3c',
+						tip: 'Set the color of your headings and text. Default <code>#3c3c3c</code>.',
 						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
 					} ),
 				] )
@@ -1728,10 +1541,10 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_email_footer_text_color',
 						label: 'Secondary text',
 						description:
-							'Choose a color for your secondary text, such as your footer content. Default <code>#787c82</code>.',
+							'Choose a color for your secondary text, such as your footer content. Default <code>#3c3c3c</code>.',
 						type: 'color',
-						default: '#787c82',
-						tip: 'Choose a color for your secondary text, such as your footer content. Default <code>#787c82</code>.',
+						default: '#3c3c3c',
+						tip: 'Choose a color for your secondary text, such as your footer content. Default <code>#3c3c3c</code>.',
 						value: expect.stringMatching( /^#[0-9A-Fa-f]{6}$/ ),
 					} ),
 				] )
@@ -1992,7 +1805,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 								'Display suggestions within WooCommerce',
 							type: 'checkbox',
 							default: 'yes',
-							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
+							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com.',
 							value: expect.any( String ),
 						} ),
 					] )

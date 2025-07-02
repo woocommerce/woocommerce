@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Provide dummy data to the personalizer context for the send preview email

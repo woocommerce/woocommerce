@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Unskip and fix tests skipped in https://github.com/woocommerce/woocommerce/pull/56517

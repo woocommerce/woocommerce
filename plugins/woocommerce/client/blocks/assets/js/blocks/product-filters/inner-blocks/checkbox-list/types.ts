@@ -16,6 +16,8 @@ export type BlockAttributes = {
 	customOptionElementSelected: string;
 	optionElement: string;
 	customOptionElement: string;
+	labelElement: string;
+	customLabelElement: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
@@ -26,4 +28,6 @@ export type EditProps = BlockEditProps< BlockAttributes > & {
 	setOptionElementSelected: ( value: string ) => void;
 	optionElement: Color;
 	setOptionElement: ( value: string ) => void;
+	labelElement: Color;
+	setLabelElement: ( value: string ) => void;
 };

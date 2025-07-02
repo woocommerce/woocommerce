@@ -10,8 +10,9 @@ import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
+			requestUtils,
 			page,
 		} );
 		await use( pageObject );
@@ -22,20 +23,20 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
 
-		test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+		test.beforeEach( async ( { requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-additional-checkout-fields'
 			);
-
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -43,6 +44,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -209,7 +211,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -217,6 +224,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -295,6 +303,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you, from me!',
 						'Is this a personal purchase or a business purchase?':
@@ -367,6 +376,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -374,6 +387,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'This is for you!',
 						'Is this a personal purchase or a business purchase?':
@@ -540,7 +554,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can see server-side validation errors', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -565,6 +584,40 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
+
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.fill( 'test@' );
+
+			// Blur the field to trigger the validation.
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
+
+			await expect(
+				checkoutPageObject.page
+					.locator( '.wc-block-components-notices' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
+			).toBeVisible();
+
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.fill( 'test@test.com' );
+
+			// Blur the field to trigger the validation.
+			await checkoutPageObject.page
+				.getByLabel( 'Alternative Email' )
+				.blur();
+
+			await expect(
+				checkoutPageObject.page
+					.locator( '.wc-block-components-notices' )
+					.getByText(
+						'Please ensure your alternative email matches the correct format.'
+					)
+			).not.toBeVisible();
 
 			await checkoutPageObject.page
 				.getByLabel( 'Test required checkbox' )
@@ -606,6 +659,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Is this a personal purchase or a business purchase?':
 							'business',
 					},
@@ -639,7 +693,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can see and edit submitted fields in my account area. Values are also sanitized and validated in my account area.', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -648,6 +707,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package (optional)':
 							'This is a nice gift',
 						'Is this a personal purchase or a business purchase?':
@@ -904,7 +964,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can refresh the page, and not lose any entered data', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -918,6 +983,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{},
 				{
 					contact: {
+						'Alternative Email': 'test@test.com',
 						'Enter a gift message to include in the package':
 							'Happy Birthday!',
 						'Is this a personal purchase or a business purchase?':

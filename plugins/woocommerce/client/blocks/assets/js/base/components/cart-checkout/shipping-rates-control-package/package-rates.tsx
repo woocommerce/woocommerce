@@ -4,7 +4,6 @@
 import { useState, useEffect } from '@wordpress/element';
 import { RadioControl } from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
-import { usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -34,32 +33,36 @@ const PackageRates = ( {
 	disabled = false,
 	highlightChecked = false,
 }: PackageRates ): JSX.Element => {
-	const selectedRateId = selectedRate?.rate_id || '';
-	const previousSelectedRateId = usePrevious( selectedRateId );
+	const selectedRateId = selectedRate?.rate_id;
 
 	// Store selected rate ID in local state so shipping rates changes are shown in the UI instantly.
-	const [ selectedOption, setSelectedOption ] = useState(
-		selectedRateId ?? ''
-	);
+	const [ selectedOption, setSelectedOption ] = useState<
+		string | undefined
+	>( selectedRateId ?? rates[ 0 ]?.rate_id );
+
+	// Update on mount, we do it every time to:
+	// - sync the initial value with the server
+	// - or reset pending request to change shipping rate that might be coming
+	//   from other components (e.g. local pickup), selectShippingRate thunk in
+	//   the cart store properly handles aborting the previous request if needed
+	useEffect( () => {
+		if ( selectedOption ) {
+			onSelectRate( selectedOption );
+		}
+		// We want this to run on mount only, beware of updating it as it may cause
+		// shipping rate selection to end up in inifite loop
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	// Update the selected option if cart state changes in the data store.
 	useEffect( () => {
-		if (
-			selectedRateId &&
-			selectedRateId !== previousSelectedRateId &&
-			selectedRateId !== selectedOption
-		) {
+		if ( selectedRateId && selectedRateId !== selectedOption ) {
 			setSelectedOption( selectedRateId );
 		}
-	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
-
-	// Update the selected option if there is no rate selected on mount.
-	useEffect( () => {
-		if ( ! selectedOption && rates.length > 0 ) {
-			setSelectedOption( rates[ 0 ].rate_id );
-			onSelectRate( rates[ 0 ].rate_id );
-		}
-	}, [ onSelectRate, rates, selectedOption ] );
+		// We want to explicitly react to changes in the data store only here, local state is managed
+		// through different code path.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ selectedRateId ] );
 
 	if ( rates.length === 0 ) {
 		return noResultsMessage;
@@ -74,7 +77,7 @@ const PackageRates = ( {
 			} }
 			highlightChecked={ highlightChecked }
 			disabled={ disabled }
-			selected={ selectedOption }
+			selected={ selectedOption ?? '' }
 			options={ rates.map( renderOption ) }
 			descriptionStackingDirection="column"
 		/>

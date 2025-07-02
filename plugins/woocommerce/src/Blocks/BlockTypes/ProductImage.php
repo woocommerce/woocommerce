@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -45,13 +46,12 @@ class ProductImage extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'showProductLink'         => true,
-			'showSaleBadge'           => true,
-			'saleBadgeAlign'          => 'right',
-			'imageSizing'             => 'single',
-			'productId'               => 'number',
-			'isDescendentOfQueryLoop' => 'false',
-			'scale'                   => 'cover',
+			'showProductLink'                  => true,
+			'imageSizing'                      => 'single',
+			'productId'                        => 'number',
+			'isDescendentOfQueryLoop'          => 'false',
+			'isDescendentOfSingleProductBlock' => 'false',
+			'scale'                            => 'cover',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -65,26 +65,29 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_on_sale_badge( $product, $attributes ) {
-		if ( ! $product->is_on_sale() || false === $attributes['showSaleBadge'] ) {
+		if (
+			! $product->is_on_sale()
+			|| ! isset( $attributes['showSaleBadge'] )
+			|| ( isset( $attributes['showSaleBadge'] ) && false === $attributes['showSaleBadge'] )
+		) {
 			return '';
 		}
 
-		$font_size = StyleAttributesUtils::get_font_size_class_and_style( $attributes );
+		$align = $attributes['saleBadgeAlign'] ?? 'right';
 
-		$on_sale_badge = sprintf(
-			'
-		<div class="wc-block-components-product-sale-badge wc-block-components-product-sale-badge--align-%s wc-block-grid__product-onsale %s" style="%s">
-			<span aria-hidden="true">%s</span>
-			<span class="screen-reader-text">%s</span>
-		</div>
-	',
-			esc_attr( $attributes['saleBadgeAlign'] ),
-			isset( $font_size['class'] ) ? esc_attr( $font_size['class'] ) : '',
-			isset( $font_size['style'] ) ? esc_attr( $font_size['style'] ) : '',
-			esc_html__( 'Sale', 'woocommerce' ),
-			esc_html__( 'Product on sale', 'woocommerce' )
+		$block = new \WP_Block(
+			array(
+				'blockName' => 'woocommerce/product-sale-badge',
+				'attrs'     => array(
+					'align' => $align,
+				),
+			),
+			array(
+				'postId' => $product->get_id(),
+			)
 		);
-		return $on_sale_badge;
+
+		return $block->render();
 	}
 
 	/**
@@ -94,35 +97,42 @@ class ProductImage extends AbstractBlock {
 	 * @param string      $on_sale_badge Return value from $render_image.
 	 * @param string      $product_image Return value from $render_on_sale_badge.
 	 * @param array       $attributes    Attributes.
+	 * @param string      $inner_blocks_content Rendered HTML of inner blocks.
 	 * @return string
 	 */
-	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
+	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = true === $attributes['showProductLink'];
-		$pointer_events = $is_link ? '' : 'pointer-events: none;';
+		$is_link        = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
+		$href_attribute = $is_link ? sprintf( 'href="%s"', esc_url( $product_permalink ) ) : 'href="#" onclick="return false;"';
+		$wrapper_style  = ! $is_link ? 'pointer-events: none; cursor: default;' : '';
 		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
 
+		$inner_blocks_container = sprintf(
+			'<div class="wc-block-components-product-image__inner-container">%s</div>',
+			$inner_blocks_content
+		);
+
 		return sprintf(
-			'<a href="%1$s" style="%2$s" %3$s>%4$s %5$s</a>',
-			$product_permalink,
-			$pointer_events,
+			'<a %1$s style="%2$s" %3$s>%4$s%5$s%6$s</a>',
+			$href_attribute,
+			esc_attr( $wrapper_style ),
 			$directive,
 			$on_sale_badge,
-			$product_image
+			$product_image,
+			$inner_blocks_container
 		);
 	}
-
-
 
 	/**
 	 * Render Image.
 	 *
 	 * @param \WC_Product $product Product object.
 	 * @param array       $attributes Parsed attributes.
+	 * @param int|null    $image_id Optional image ID from context.
 	 * @return string
 	 */
-	private function render_image( $product, $attributes ) {
+	private function render_image( $product, $attributes, $image_id = null ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
 		$image_style = 'max-width:none;';
@@ -149,23 +159,29 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
 
-		$image_id = $product->get_image_id();
-		$alt_text = '';
-		$title    = '';
-		if ( $image_id ) {
-			$alt_text = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$title    = get_the_title( $image_id );
+		$featured_image_id          = (int) $product->get_image_id();
+		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
+		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
+		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
+
+		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
+
+		if ( ! $target_image_id ) {
+			return wc_placeholder_img( $image_size, array( 'style' => $image_style ) );
 		}
 
-		return $product->get_image(
-			$image_size,
-			array(
-				'alt'         => empty( $alt_text ) ? $product->get_title() : $alt_text,
-				'data-testid' => 'product-image',
-				'style'       => $image_style,
-				'title'       => $title,
-			)
+		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
+		$title    = get_the_title( $target_image_id );
+
+		$attr = array(
+			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
+			'data-testid'   => 'product-image',
+			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'style'         => $image_style,
+			'title'         => $title,
 		);
+
+		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
 	}
 
 	/**
@@ -179,7 +195,6 @@ class ProductImage extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
-
 	/**
 	 * Include and render the block
 	 *
@@ -189,17 +204,11 @@ class ProductImage extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-		$parsed_attributes = $this->parse_attributes( $attributes );
-
+		$parsed_attributes  = $this->parse_attributes( $attributes );
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
+		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
+		$product            = wc_get_product( $post_id );
 
 		$classes = implode(
 			' ',
@@ -219,19 +228,21 @@ class ProductImage extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			return sprintf(
-				'<div %1$s>
-					%2$s
-				</div>',
-				$wrapper_attributes,
-				$this->render_anchor(
-					$product,
-					$this->render_on_sale_badge( $product, $parsed_attributes ),
-					$this->render_image( $product, $parsed_attributes ),
-					$parsed_attributes
-				)
+			$inner_content = $this->render_anchor(
+				$product,
+				$this->render_on_sale_badge( $product, $parsed_attributes ),
+				$this->render_image( $product, $parsed_attributes, $image_id ),
+				$attributes,
+				$content
 			);
 
+			return sprintf(
+				'<div %1$s>%2$s</div>',
+				$wrapper_attributes,
+				$inner_content
+			);
 		}
+
+		return '';
 	}
 }

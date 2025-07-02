@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Logs error if $limit isnt numeric and avoids a fatal error by returning an empty array

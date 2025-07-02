@@ -2,13 +2,13 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.9.0",
+	"version": "10.1.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
-	"license": "GPL-3.0+",
+	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:admin": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/admin-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
@@ -20,6 +20,7 @@
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin",
 		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
 		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
+		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"env:destroy": "pnpm wp-env destroy",
@@ -33,7 +34,7 @@
 		"env:test": "pnpm env:dev",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init",
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "rimraf -g vendor/woocommerce packages/email-editor && XDEBUG_MODE=off composer install --quiet",
+		"postinstall": "rimraf -g vendor/woocommerce packages/email-editor packages/blueprint && XDEBUG_MODE=off composer install --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
@@ -52,6 +53,7 @@
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
 		"test:api:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
+		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
@@ -109,7 +111,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.2 WP: latest",
+					"name": "PHP: 8.4 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -128,18 +130,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.2",
+							"phpVersion": "8.4",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.2-wp-latest"
+						"php-unit-php-8.4-wp-latest"
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1",
+					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -158,17 +160,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-latest-1"
+						"php-unit-php-7.4-wp-latest-1"
 					]
 				},
 				{
-					"name": "PHP WP: prerelease",
+					"name": "PHP: 7.4 WP: prerelease",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -187,13 +190,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-wp-nightly"
+						"php-unit-php-7.4-wp-prerelease"
 					]
 				},
 				{
@@ -339,7 +343,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.1",
+					"name": "Core e2e tests - PHP 8.4",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -358,17 +362,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1"
+							"phpVersion": "8.4"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.1"
+						"core-e2e-php-8.4"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.1",
+						"resultsBlobName": "core-e2e-report-php-8.4",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -506,6 +510,39 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core API tests (with object cache plugin)",
+					"testType": "api",
+					"command": "test:api:object-cache",
+					"optional": false,
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"src/**/*.php",
+						"tests/e2e-pw/bin/**",
+						"tests/e2e-pw/tests/api-tests/**",
+						"tests/e2e-pw/*.js",
+						"tests/e2e-pw/*.sh",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"onlyForDependencies": [],
+					"events": [
+						"push",
+						"core-api-object-cache"
+					],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "core-api-report-object-cache",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -682,8 +719,6 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"on-demand",
-						"release-checks",
 						"core-e2e-pressable"
 					],
 					"report": {
@@ -699,8 +734,6 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"on-demand",
-						"release-checks",
 						"core-e2e-wpcom"
 					],
 					"report": {
@@ -735,7 +768,6 @@
 		"axios": "^0.24.0",
 		"buildkite-test-collector": "^1.7.1",
 		"config": "3.3.7",
-		"cross-env": "6.0.3",
 		"dotenv": "^10.0.0",
 		"eslint": "^8.55.0",
 		"eslint-config-wpcalypso": "5.0.0",
@@ -769,7 +801,8 @@
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build",
-			"../../packages/php/email-editor/src/"
+			"../../packages/php/email-editor/src/",
+			"../../packages/php/blueprint/src/"
 		],
 		"ext": "js,css,php,json",
 		"ignoreRoot": []

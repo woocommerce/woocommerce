@@ -34,6 +34,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
 		WC()->cart->empty_cart();
+
+		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
 	/**
@@ -238,5 +247,25 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
 
 		WC()->customer = $orig_customer;
+	}
+
+	/**
+	 * @testdox Checkout page contains login form for guests.
+	 */
+	public function test_checkout_page_contains_login_form_for_guests() {
+		// Ensure the user is logged out.
+		wp_logout();
+
+		// Add a product to the cart.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		// Simulate visiting the checkout page.
+		ob_start();
+		echo do_shortcode( '[woocommerce_checkout]' );
+		$output = ob_get_clean();
+
+		// Assert that the login form is present.
+		$this->assertStringContainsString( 'woocommerce-form-login', $output );
 	}
 }

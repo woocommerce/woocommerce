@@ -101,7 +101,10 @@ export function usePreviewTemplates(
 ): [ TemplatePreview[], TemplatePreview[], boolean ] {
 	const { templates, patterns, emailPosts, hasEmailPosts } = useSelect(
 		( select ) => {
-			const rawEmailPosts = select( storeName ).getSentEmailEditorPosts();
+			const rawEmailPosts =
+				customEmailContent !== 'swap'
+					? select( storeName ).getSentEmailEditorPosts()
+					: undefined;
 
 			return {
 				templates: select( storeName ).getEmailTemplates(),
@@ -111,7 +114,7 @@ export function usePreviewTemplates(
 				hasEmailPosts: !! ( rawEmailPosts && rawEmailPosts?.length ),
 			};
 		},
-		[]
+		[ customEmailContent ]
 	);
 
 	const allTemplates = useMemo( () => {

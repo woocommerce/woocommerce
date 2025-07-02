@@ -27,87 +27,6 @@
 	}
 }
 
-// Fix editor width.
-// We don't use resizable editor wrapper
-// so we need to set the width manually here
-.editor-visual-editor > div {
-	width: 100%;
-}
-
-#woocommerce-email-editor {
-	.editor-header__toolbar {
-		flex-grow: 1;
-	}
-
-	.editor-header__center {
-		flex-grow: 3;
-	}
-}
-
-.visual-editor__email_content_wrapper {
-	display: flex;
-	height: 100%;
-	width: 100%;
-
-	> div {
-		width: 100%;
-	}
-
-	// Fix for mobile preview height
-	&.is-mobile-preview {
-		> div {
-			display: block !important;
-		}
-
-		.editor-styles-wrapper {
-			height: auto !important;
-		}
-	}
-}
-
-// Specific styles for the component EmailTypeInfo
-// Styles are based on the Block Card component from Gutenberg block editor
-.woocommerce-email-sidebar-email-type-info {
-	.components-panel__row {
-		align-items: flex-start;
-	}
-
-	.woocommerce-email-type-info-icon {
-		flex: 0 0 24px;
-		margin-left: 0;
-		margin-right: 12px;
-	}
-
-	.woocommerce-email-type-info-content {
-		flex-grow: 1;
-		margin-bottom: 4px;
-
-		h2 {
-			font-size: 13px;
-			line-height: 24px;
-			margin: 0 0 4px;
-		}
-
-		span {
-			font-size: 13px;
-		}
-
-		p:last-child {
-			margin-bottom: 0;
-		}
-	}
-
-	.woocommerce-email-type-info-content-heading {
-		display: flex;
-
-		div:last-child {
-			margin-left: auto;
-			margin-right: -8px;
-			margin-top: -6px;
-		}
-	}
-}
-
 .woocommerce-settings-panel-preheader-text {
 	margin-top: 9px;
 }
@@ -171,25 +90,14 @@
 	}
 }
 
-.edit-post-visual-editor {
-	line-height: 1.4; /* Recommended line-height that is also used in the email editor */
-	margin: 0;
-	min-height: 100%;
-	padding: 0;
-	-webkit-text-size-adjust: 100%; /* From MJMJ - Automatic test adjustment on mobile max to 100% */
-	-ms-text-size-adjust: 100%; /* From MJMJ - Automatic test adjustment on mobile max to 100% */
-	word-spacing: normal;
-}
-
-.visual-editor__email_layout_wrapper {
-	height: 100%;
-	margin: 0 auto;
-	padding: 0;
-	width: 100%;
-}
-
 // Hide the advanced settings in the sidebar.
 // This panel is not used in the email editor at this moment.
 .block-editor-block-inspector__advanced {
 	display: none;
+}
+
+// Enforce hidden state.
+// This is used to hide the publish button when there are no email edits.
+.force-hidden {
+	display: none !important;
 }

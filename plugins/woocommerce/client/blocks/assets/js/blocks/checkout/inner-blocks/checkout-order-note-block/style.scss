@@ -30,13 +30,11 @@
 }
 
 .wc-block-components-form
-.wc-block-checkout__order-notes.wc-block-components-checkout-step {
+	.wc-block-checkout__order-notes.wc-block-components-checkout-step {
 	padding-left: 0;
 	margin-bottom: $gap-largest;
 
-	.is-medium &,
-	.is-small &,
-	.is-mobile & {
+	@include cart-checkout-below-large-container {
 		border-bottom: 0;
 		padding-bottom: 0;
 	}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update items store import to use `itemsStore` from `@woocommerce/data`

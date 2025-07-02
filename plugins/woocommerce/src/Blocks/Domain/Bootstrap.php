@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\QueryFilters;
-use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
@@ -22,6 +21,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
@@ -129,9 +129,9 @@ class Bootstrap {
 		// Load and init assets.
 		$this->container->get( PaymentsApi::class )->init();
 		$this->container->get( DraftOrders::class )->init();
-		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
+		$this->container->get( CheckoutLink::class )->init();
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -256,12 +256,6 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			CreateAccount::class,
-			function ( Container $container ) {
-				return new CreateAccount( $container->get( Package::class ) );
-			}
-		);
-		$this->container->register(
 			GoogleAnalytics::class,
 			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
@@ -306,6 +300,12 @@ class Bootstrap {
 				$payment_method_registry = $container->get( PaymentMethodRegistry::class );
 				$asset_data_registry     = $container->get( AssetDataRegistry::class );
 				return new PaymentsApi( $payment_method_registry, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			CheckoutLink::class,
+			function () {
+				return new CheckoutLink();
 			}
 		);
 		$this->container->register(

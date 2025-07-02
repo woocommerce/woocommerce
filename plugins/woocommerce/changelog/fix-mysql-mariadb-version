@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Improve how we detect the database version, for better compatibility with MariaDB.

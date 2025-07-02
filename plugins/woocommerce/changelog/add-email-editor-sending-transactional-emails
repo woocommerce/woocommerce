@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the base functionality for replacing Woo transactional emails with emails created via the block email editor

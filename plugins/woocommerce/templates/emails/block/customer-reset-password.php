@@ -12,52 +12,46 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 9.9.0
+ * @version 10.1.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
 <!-- wp:heading -->
-<h2> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>
-<?php
+<p><?php
 	/* translators: %s: Customer username */
 	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
-<?php
+<p><?php
 	/* translators: %s: Store name */
 	printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
-<?php
+<p><?php
 /* translators: %s: Username */
 echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> 
-<?php
+<p><?php
 	echo esc_html__( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->

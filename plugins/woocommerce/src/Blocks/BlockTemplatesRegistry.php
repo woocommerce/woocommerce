@@ -64,7 +64,7 @@ class BlockTemplatesRegistry {
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
+			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
 				if ( count( $product_types ) > 0 ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );
@@ -94,16 +94,16 @@ class BlockTemplatesRegistry {
 	}
 
 	/**
-	 * Add Add to Cart with Options to the default template part areas.
+	 * Add Add to Cart + Options to the default template part areas.
 	 *
 	 * @param array $default_area_definitions An array of supported area objects.
-	 * @return array The supported template part areas including the Add to Cart with Options one.
+	 * @return array The supported template part areas including the Add to Cart + Options one.
 	 */
 	public function register_add_to_cart_with_options_template_part_area( $default_area_definitions ) {
 		$add_to_cart_with_options_template_part_area = array(
 			'area'        => 'add-to-cart-with-options',
-			'label'       => __( 'Add to Cart with Options', 'woocommerce' ),
-			'description' => __( 'The Add to Cart with Options templates allow defining a different layout for each product type.', 'woocommerce' ),
+			'label'       => __( 'Add to Cart + Options', 'woocommerce' ),
+			'description' => __( 'The Add to Cart + Options templates allow defining a different layout for each product type.', 'woocommerce' ),
 			'icon'        => 'add-to-cart-with-options',
 			'area_tag'    => 'add-to-cart-with-options',
 		);

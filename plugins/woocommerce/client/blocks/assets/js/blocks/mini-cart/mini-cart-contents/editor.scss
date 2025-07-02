@@ -1,5 +1,6 @@
 // Extra classes added for specificity, so we get rid of a top margin added by GB.
-.editor-styles-wrapper .wc-block-editor-mini-cart-contents__wrapper.wc-block-editor-mini-cart-contents__wrapper {
+.editor-styles-wrapper
+	.wc-block-editor-mini-cart-contents__wrapper.wc-block-editor-mini-cart-contents__wrapper {
 	display: flex;
 	justify-content: center;
 	margin: 0;
@@ -13,7 +14,9 @@
 		display: none;
 	}
 
-	.wp-block-woocommerce-filled-mini-cart-contents-block > .block-editor-inner-blocks > .block-editor-block-list__layout {
+	.wp-block-woocommerce-filled-mini-cart-contents-block
+		> .block-editor-inner-blocks
+		> .block-editor-block-list__layout {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
@@ -36,7 +39,6 @@
 		.block-list-appender {
 			position: relative;
 		}
-
 	}
 
 	.wp-block-woocommerce-mini-cart-products-table-block {
@@ -80,7 +82,6 @@
 			margin-top: $gap;
 			position: relative;
 		}
-
 	}
 
 	.wc-block-mini-cart__shopping-button a {

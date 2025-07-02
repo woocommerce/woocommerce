@@ -382,7 +382,7 @@ test(
 						page.locator(
 							`button[aria-label="Remove ${ attribute.options[ 0 ] }"]`
 						)
-					).toBeVisible( { timeout: 2000 } );
+					).toBeVisible();
 				},
 				{
 					message: "wait for the attribute's terms to load",

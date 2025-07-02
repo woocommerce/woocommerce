@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Replaced HPOS Custom Fields select box for existing meta keys to load asynchronously to improve performance.

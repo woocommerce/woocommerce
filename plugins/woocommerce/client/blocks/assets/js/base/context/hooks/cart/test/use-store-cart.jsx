@@ -102,6 +102,9 @@ describe( 'useStoreCart', () => {
 					.fn()
 					.mockReturnValue( ! mockCartIsLoading ),
 				isCustomerDataUpdating: jest.fn().mockReturnValue( false ),
+				isAddressFieldsForShippingRatesUpdating: jest
+					.fn()
+					.mockReturnValue( false ),
 			},
 		};
 		registry.registerStore( storeKey, {

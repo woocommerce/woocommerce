@@ -1,4 +1,3 @@
-
 @mixin thumb {
 	background: $white;
 	background-position: 0 0;
@@ -26,7 +25,6 @@
 	background: $gray-900;
 	border-color: $white;
 }
-
 
 @mixin track {
 	cursor: default;
@@ -108,7 +106,14 @@
 	position: absolute;
 	top: 0;
 	width: 100%;
-	--track-background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+	--track-background: linear-gradient(
+			to right,
+			transparent var(--low),
+			var(--range-color) 0,
+			var(--range-color) var(--high),
+			transparent 0
+		)
+		no-repeat 0 100% / 100% 100%;
 	--range-color: currentColor;
 	/*rtl:ignore*/
 	background: var(--track-background);
@@ -174,7 +179,9 @@
 	gap: $gap;
 	justify-content: flex-end;
 	// The specificity here is needed to overwrite the margin-top that is inherited on WC block template pages such as Shop.
-	button[type="submit"]:not(.wp-block-search__button).wc-block-components-filter-submit-button {
+	button[type="submit"]:not(
+			.wp-block-search__button
+		).wc-block-components-filter-submit-button {
 		margin-top: 0;
 		margin-left: 0;
 		@include font-size(small);
@@ -259,7 +266,14 @@
 
 .rtl {
 	.wc-block-components-price-slider__range-input-progress {
-		--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+		--track-background: linear-gradient(
+				to left,
+				transparent var(--low),
+				var(--range-color) 0,
+				var(--range-color) var(--high),
+				transparent 0
+			)
+			no-repeat 0 100% / 100% 100%;
 		background: var(--track-background);
 	}
 }

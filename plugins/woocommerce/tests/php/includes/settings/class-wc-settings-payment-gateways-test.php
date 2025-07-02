@@ -45,8 +45,7 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 	/**
 	 * get_settings should trigger the appropriate filter depending on the requested section name.
 	 *
-	 * @testWith ["", "woocommerce_payment_gateways_settings"]
-	 *           ["woocommerce_com", "woocommerce_get_settings_checkout"]
+	 * @testWith ["woocommerce_com", "woocommerce_get_settings_checkout"]
 	 *
 	 * @param string $section_name The section name to test getting the settings for.
 	 * @param string $filter_name The name of the filter that is expected to be triggered.
@@ -84,45 +83,10 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 
 		$expected = array(
 			'payment_gateways_options' => 'sectionend',
-			''                         => array( 'title', 'payment_gateways_banner', 'payment_gateways' ),
+			''                         => 'title',
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
-	}
-
-	/**
-	 * @testDox When the current section is the name of an existing gateway, 'output' invokes that gateway's 'admin_options' method.
-	 *
-	 * @testWith ["bacs"]
-	 *           ["wc_gateway_bacs"]
-	 *
-	 * @param string $section_name The name of the current section.
-	 */
-	public function test_output_is_done_via_admin_options_method_of_gateway_specified_as_settings_section( $section_name ) {
-		global $current_section;
-		$current_section = $section_name;
-
-		$admin_options_invoked = false;
-		$actual_gateway        = null;
-
-		$sut = $this->getMockBuilder( WC_Settings_Payment_Gateways::class )
-					->setMethods( array( 'run_gateway_admin_options' ) )
-					->getMock();
-
-		$sut->method( 'run_gateway_admin_options' )
-			->will(
-				$this->returnCallback(
-					function( $gateway ) use ( &$admin_options_invoked, &$actual_gateway ) {
-						$admin_options_invoked = true;
-						$actual_gateway        = $gateway;
-					}
-				)
-			);
-
-		$sut->output();
-
-		$this->assertTrue( $admin_options_invoked );
-		$this->assertInstanceOf( WC_Gateway_BACS::class, $actual_gateway );
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix e2e test `onboarding/add-product-task.spec.js` on WPCOM and Pressable.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix: Ensure `woocommerce_actionable_order_statuses` is always an array to prevent errors in analytics endpoints.
-

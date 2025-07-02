@@ -133,12 +133,13 @@ final class ProductFilterPrice extends AbstractBlock {
 		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
 
 		$filter_context = array(
-			'price' => array(
+			'price'      => array(
 				'minPrice' => $min_price,
 				'maxPrice' => $max_price,
 				'minRange' => $min_range,
 				'maxRange' => $max_range,
 			),
+			'groupLabel' => __( 'Price', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -179,8 +180,10 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
+			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 			return sprintf(
-				'<div %1$s hidden>%2$s</div>',
+				'<div %1$s>%2$s</div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				array_reduce(
 					$block->parsed_block['innerBlocks'],
@@ -213,6 +216,10 @@ final class ProductFilterPrice extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_filtered_price( $block ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		unset( $query_vars['min_price'], $query_vars['max_price'] );
@@ -233,8 +240,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		$price_results = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_filtered_price( $query_vars );
 
 		return array(
-			'min_price' => intval( floor( floatval( $price_results->min_price ?? 0 ) ) ),
-			'max_price' => intval( ceil( floatval( $price_results->max_price ?? 0 ) ) ),
+			'min_price' => intval( floor( floatval( $price_results['min_price'] ?? 0 ) ) ),
+			'max_price' => intval( ceil( floatval( $price_results['max_price'] ?? 0 ) ) ),
 		);
 	}
 }

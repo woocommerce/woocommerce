@@ -45,7 +45,7 @@ export interface ShippingRatesControlProps {
 	// Class name for package rates
 	className?: string | undefined;
 
-	// True when rates are being loaded
+	// True when shipping rates are being loaded
 	isLoadingRates: boolean;
 
 	// Rendered when there are no packages

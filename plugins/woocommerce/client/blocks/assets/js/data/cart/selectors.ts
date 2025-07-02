@@ -10,6 +10,7 @@ import type {
 	ApiErrorResponse,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { createSelector } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -26,17 +27,21 @@ export const getCartData = ( state: CartState ): Cart => {
 	return state.cartData;
 };
 
-export const getCustomerData = (
-	state: CartState
-): {
-	shippingAddress: ShippingAddress;
-	billingAddress: BillingAddress;
-} => {
-	return {
-		shippingAddress: state.cartData.shippingAddress,
-		billingAddress: state.cartData.billingAddress,
-	};
-};
+export const getCustomerData = createSelector(
+	(
+		state: CartState
+	): {
+		shippingAddress: ShippingAddress;
+		billingAddress: BillingAddress;
+	} => {
+		return {
+			shippingAddress: state.cartData
+				.shippingAddress as unknown as ShippingAddress,
+			billingAddress: state.cartData
+				.billingAddress as unknown as BillingAddress,
+		};
+	}
+);
 
 /**
  * Retrieves shipping rates from state.
@@ -189,13 +194,26 @@ export const isItemPendingDelete = (
 	return state.cartItemsPendingDelete.includes( cartItemKey );
 };
 /**
- * Retrieves if the address is being applied for shipping.
+ * Retrieves if the address is being applied for shipping and/or billing.
  *
  * @param {CartState} state The current state.
- * @return {boolean} are shipping rates loading.
+ * @return {boolean} address is being applied for shipping and/or billing.
  */
 export const isCustomerDataUpdating = ( state: CartState ): boolean => {
 	return !! state.metaData.updatingCustomerData;
+};
+
+/**
+ * Retrieves if the address is being applied for shipping only
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} address is being applied for shipping only.
+ */
+//rename const to the new name based on updatingAddressFieldsForShippingRates
+export const isAddressFieldsForShippingRatesUpdating = (
+	state: CartState
+): boolean => {
+	return !! state.metaData.updatingAddressFieldsForShippingRates;
 };
 
 /**

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed issue where the Hand-picked Products inspector control was showing loading chip instead of placeholder text when no products exist.

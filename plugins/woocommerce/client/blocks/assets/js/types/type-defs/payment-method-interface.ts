@@ -173,14 +173,11 @@ export type PaymentMethodInterface = {
 	onSubmit: () => void;
 	// Various payment status helpers.
 	paymentStatus: {
-		isPristine: boolean;
 		isIdle: boolean;
 		isStarted: boolean;
 		isProcessing: boolean;
-		isFinished: boolean;
 		hasError: boolean;
-		hasFailed: boolean;
-		isSuccessful: boolean;
+		isReady: boolean;
 		isDoingExpressPayment: boolean;
 	};
 	// Deprecated. For setting an error (error message string) for express payment methods. Does not change payment status.

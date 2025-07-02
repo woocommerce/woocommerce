@@ -44,7 +44,6 @@ export const ShippingRatesControlPackage = ( {
 				document.querySelectorAll( `.${ packageClass }` ).length
 			);
 		};
-
 		updateCount();
 
 		const observer = new MutationObserver( updateCount );

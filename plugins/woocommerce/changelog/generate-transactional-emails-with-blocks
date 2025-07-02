@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Added block-based email templates for all WooCommerce transactional emails, enabling improved customization through the block email editor

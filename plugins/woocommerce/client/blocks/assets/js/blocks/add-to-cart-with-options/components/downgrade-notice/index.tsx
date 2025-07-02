@@ -43,7 +43,7 @@ export const DowngradeNotice = ( {
 	blockClientId: string;
 } ) => {
 	const notice = __(
-		'Switch back to the classic Add to Cart with Options block.',
+		'Switch back to the classic Add to Cart + Options block.',
 		'woocommerce'
 	);
 

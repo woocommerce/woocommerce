@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Refresh expensive order count queries in the background

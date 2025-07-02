@@ -191,6 +191,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_context = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
+			'groupLabel' => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
@@ -198,9 +199,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
+
 					return array(
 						'label'              => $term['name'],
-						'ariaLabel'          => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'count'              => $term['count'],
@@ -228,6 +229,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( empty( $filter_context['items'] ) ) {
 			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
 		return sprintf(
@@ -252,6 +254,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		if ( 'and' !== strtolower( $query_type ) ) {
@@ -277,7 +283,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		foreach ( $counts as $key => $value ) {
 			$attribute_counts[] = array(
 				'term'  => $key,
-				'count' => $value,
+				'count' => intval( $value ),
 			);
 		}
 

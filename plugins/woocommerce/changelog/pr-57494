@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a search_sku_or_name argument to the REST API products endpoint

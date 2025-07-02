@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -253,6 +254,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
+		$object = null;
 		try {
 			$object = $this->prepare_object_for_database( $request, $creating );
 
@@ -264,8 +266,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			WC()->payment_gateways();
 
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
-				// Make sure customer exists.
-				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
+				// The customer must exist, and in a multisite context must be visible to the current user.
+				if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
@@ -307,9 +309,23 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			$data = $e->getErrorData();
+
+			if ( $creating && $object && $object->get_id() ) {
+				try {
+					$object->set_status( 'checkout-draft' );
+					$object->save();
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( Exception $_ ) {
+					// We don't want a failure in changing the order status
+					// to throw on itself, but we don't have anything meaningful
+					// to do with this failure either.
+				}
+
+				$data['new_draft_order_id'] = $object->get_id();
+			}
+
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
 		}
 	}
 

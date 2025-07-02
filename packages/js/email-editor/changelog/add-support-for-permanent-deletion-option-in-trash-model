@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+The trash model now supports permanent deletion option. Returning `true` for filter `woocommerce_email_editor_trash_modal_should_permanently_delete` will activate the permanent delete option (Skipping trash which is the default)

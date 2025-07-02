@@ -45,7 +45,8 @@
 			}
 		}
 	}
-	.wc-block-components-notices__notice + .wc-block-components-notices__notice {
+	.wc-block-components-notices__notice
+		+ .wc-block-components-notices__notice {
 		margin-top: 1em;
 	}
 }

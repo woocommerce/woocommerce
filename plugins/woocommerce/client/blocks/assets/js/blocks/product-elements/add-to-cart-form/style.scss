@@ -104,7 +104,6 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	}
 
 	.wc-block-components-quantity-selector {
-
 		.input-text {
 			font-size: var(--wp--preset--font-size--small);
 		}
@@ -119,7 +118,7 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 			-moz-appearance: textfield;
 			border: unset;
 			text-align: center;
-			order: 1;
+			order: 2;
 			margin: 0;
 			/**
 			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.

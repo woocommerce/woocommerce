@@ -129,6 +129,15 @@ export function updatingCustomerData( isResolving: boolean ) {
 }
 
 /**
+ * Returns an action object used to track when customer shipping data is being updated.
+ */
+export function updatingAddressFieldsForShippingRates( isResolving: boolean ) {
+	return {
+		type: types.UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES,
+		isResolving,
+	};
+}
+/**
  * Returns an action object used to track whether the shipping rate is being
  * selected or not.
  *

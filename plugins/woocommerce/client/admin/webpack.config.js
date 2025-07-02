@@ -5,7 +5,6 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
@@ -14,7 +13,8 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 /**
  * Internal dependencies
  */
-const UnminifyWebpackPlugin = require( './unminify' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
@@ -59,6 +59,7 @@ const wcAdminPackages = [
 	'product-editor',
 	'settings-editor',
 	'remote-logging',
+	'email-editor',
 ];
 
 const getEntryPoints = () => {
@@ -88,6 +89,13 @@ require( 'fs-extra' ).ensureSymlinkSync(
 
 const webpackConfig = {
 	mode: NODE_ENV,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'node_modules/.cache/webpack'
+		),
+	},
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -148,7 +156,7 @@ const webpackConfig = {
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
-							'../../../../node_modules/.cache/babel-loader'
+							'node_modules/.cache/babel-loader'
 						),
 						cacheCompression: false,
 					},
@@ -221,15 +229,15 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor is integrated as admin dependency, hence this copy step.
+		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
 					from: path.join(
 						__dirname,
-						'../../../../packages/js/email-editor/build'
+						'../../../../packages/js/email-editor/assets'
 					),
-					to: './email-editor',
+					to: './email-editor/assets',
 				},
 			],
 		} ),

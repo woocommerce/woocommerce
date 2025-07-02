@@ -3,7 +3,7 @@
 	"version": "3.0.0",
 	"description": "WooCommerce utility to measure user effort.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"keywords": [
 		"wordpress",
 		"woocommerce"
@@ -61,7 +61,7 @@
 		"@wordpress/element": "wp-6.6",
 		"@wordpress/i18n": "wp-6.6",
 		"@wordpress/notices": "wp-6.6",
-		"classnames": "^2.3.2",
+		"clsx": "2.1.x",
 		"prop-types": "^15.8.1",
 		"react-transition-group": "^4.4.5"
 	},
@@ -75,7 +75,6 @@
 		"@types/jest": "27.5.x",
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/wordpress__data": "6.0.0",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
@@ -83,7 +82,6 @@
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
 		"jest": "27.5.x",
@@ -154,7 +152,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -169,7 +167,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {

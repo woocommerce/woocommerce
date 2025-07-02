@@ -17,7 +17,7 @@
 		width: 100%;
 		display: block;
 		height: $gap-smaller;
-		border-radius: #{$gap-smaller / 2};
+		border-radius: calc($gap-smaller / 2);
 		border: 0;
 		background-color: $universal-border-light;
 		color: $alert-red;
@@ -35,7 +35,7 @@
 			background: none;
 			background-color: currentColor;
 			transition: 0.2s ease;
-			border-radius: #{$gap-smaller / 2};
+			border-radius: calc($gap-smaller / 2);
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
@@ -47,7 +47,7 @@
 			background: none;
 			background-color: currentColor;
 			transition: 0.2s ease;
-			border-radius: #{$gap-smaller / 2};
+			border-radius: calc($gap-smaller / 2);
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
@@ -60,19 +60,23 @@
 		}
 	}
 	.wc-block-components-password-strength__meter[value="1"],
-	.wc-block-components-password-strength__meter[value="1"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="1"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-red;
 	}
 	.wc-block-components-password-strength__meter[value="2"],
-	.wc-block-components-password-strength__meter[value="2"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="2"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-red;
 	}
 	.wc-block-components-password-strength__meter[value="3"],
-	.wc-block-components-password-strength__meter[value="3"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="3"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-yellow;
 	}
 	.wc-block-components-password-strength__meter[value="4"],
-	.wc-block-components-password-strength__meter[value="4"] + .wc-block-components-password-strength__result {
+	.wc-block-components-password-strength__meter[value="4"]
+		+ .wc-block-components-password-strength__result {
 		color: $alert-green;
 	}
 }

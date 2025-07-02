@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Mark failing Cart and Checkout E2E tests as `fixme`.

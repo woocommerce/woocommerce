@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove unsaved changes popup after successful import for blueprint

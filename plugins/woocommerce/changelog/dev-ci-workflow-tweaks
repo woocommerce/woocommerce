@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: skip running core PHP tests for changes in JS dependencies.
