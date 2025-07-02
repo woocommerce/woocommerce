@@ -14,14 +14,6 @@ use WC_Unit_Test_Case;
  * Test ExportWCSettingsTax class.
  */
 class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Setup method.
-	 */
-	public function set_up() {
-		parent::set_up();
-	}
-
 	/**
 	 * Test that custom tax classes are exported in blueprint.
 	 */
