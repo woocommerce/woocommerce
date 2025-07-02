@@ -185,7 +185,7 @@ jobs:
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
             :ice_cube: Code Freeze completed for `${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}` :checking:
-            You can raise a code freeze exception if you need something to be included in this release.
+            If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
             <${{ needs.build-zip.outputs.artifact_url }}|Download zip>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
