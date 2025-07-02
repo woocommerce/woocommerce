@@ -151,11 +151,11 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string;
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
+			'dependencies' => array( 'wc-blocks' ),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -171,11 +171,11 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
-		];
+			'dependencies' => array(),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -185,7 +185,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class MiniCart extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		if ( is_cart() || is_checkout() ) {
 			return;
 		}
@@ -646,23 +646,31 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Process template contents to remove unwanted div wrappers. This is to handle the old
-	 * Mini Cart template which has extra divs nested within the block tags, that are no longer
-	 * needed since we don't render the Mini Cart with React. To maintain compatibility with
-	 * edited templates that have these wrapper divs we must remove them.
+	 * Process template contents to remove unwanted div wrappers.
+	 *
+	 * This is because the old Mini Cart template had extra divs nested within
+	 * the block tags that are no longer necessary since we don't render the
+	 * Mini Cart with React anymore. To maintain compatibility with edited
+	 * templates that have these wrapper divs we must remove them.
 	 *
 	 * @param string $template_contents The template contents to process.
 	 * @return string The processed template contents.
 	 */
 	protected function process_template_contents( $template_contents ) {
-		$parsed_blocks = parse_blocks( $template_contents );
+		$p               = new \WP_HTML_Tag_Processor( $template_contents );
+		$is_old_template = $p->next_tag(
+			array(
+				'tag_name'   => 'div',
+				'class_name' => 'wp-block-woocommerce-mini-cart-contents',
+			)
+		);
 
-		// If the template is not just Gutenberg tags, remove the wrapper divs.
-		if ( strpos( $template_contents, '<div' ) !== false ) {
-			$parsed_blocks = $this->remove_unwanted_blocks( $parsed_blocks );
+		if ( $is_old_template ) {
+			$parsed_blocks = parse_blocks( $template_contents );
+			return serialize_blocks( $this->remove_unwanted_blocks( $parsed_blocks ) );
 		}
 
-		return serialize_blocks( $parsed_blocks );
+		return $template_contents;
 	}
 
 	/**
@@ -829,11 +837,11 @@ class MiniCart extends AbstractBlock {
 
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--mini-cart-contents-block' );
-		$shared_chunks = [ 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' ];
+		$shared_chunks = array( 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' );
 
 		foreach ( array_merge( $chunks, $vendor_chunks, $shared_chunks ) as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
-			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
+			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), array(), true );
 			$translations[] = $wp_scripts->print_translations( $handle, false );
 			wp_deregister_script( $handle );
 		}
