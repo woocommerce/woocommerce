@@ -6,7 +6,11 @@ import { TreeSelectControl } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 
 export const RegionPicker = ( { options, initialValues } ) => {
-	const [ selected, setSelected ] = useState( initialValues.length ? initialValues : [ '__WC_TREE_SELECT_COMPONENT_ROOT__' ] );
+	const [ selected, setSelected ] = useState(
+		initialValues.length
+			? initialValues
+			: [ '__WC_TREE_SELECT_COMPONENT_ROOT__' ]
+	);
 	const onChange = ( value ) => {
 		document.body.dispatchEvent(
 			new CustomEvent( 'wc_region_picker_update', { detail: value } )
