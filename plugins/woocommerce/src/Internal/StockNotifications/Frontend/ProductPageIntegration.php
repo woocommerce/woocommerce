@@ -139,7 +139,7 @@ class ProductPageIntegration {
 				array(
 					'button',
 					\wc_wp_theme_get_element_class_name( 'button' ),
-					'wc_bis_send_form',
+					'woocommerce_bis_form__button',
 				)
 			)
 		);
@@ -147,9 +147,11 @@ class ProductPageIntegration {
 		wc_get_template(
 			'single-product/back-in-stock-form.php',
 			array(
-				'product'      => $product,
-				'button_text'  => $button_text,
-				'button_class' => $button_class,
+				'product'          => $product,
+				'show_checkbox'    => is_user_logged_in() && Config::creates_account_on_signup() && ! Config::requires_account(),
+				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
+				'button_text'      => $button_text,
+				'button_class'     => $button_class,
 			)
 		);
 	}

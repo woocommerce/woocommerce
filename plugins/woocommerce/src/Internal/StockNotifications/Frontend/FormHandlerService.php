@@ -23,14 +23,23 @@ class FormHandlerService {
 	private SignupService $signup_service;
 
 	/**
+	 * The logger.
+	 *
+	 * @var LoggerInterface
+	 */
+	private $logger;
+
+	/**
 	 * Initialize the service.
 	 *
 	 * @internal
 	 *
 	 * @param SignupService $signup_service The signup service.
+	 * @param EligibilityService $eligibility_service The eligibility service.
 	 */
 	final public function init( SignupService $signup_service ) {
-		$this->signup_service = $signup_service;
+		$this->signup_service      = $signup_service;
+		$this->logger              = \wc_get_logger();
 	}
 
 	/**
@@ -44,7 +53,7 @@ class FormHandlerService {
 	 * Handle the form submit event.
 	 */
 	public function handle_signup() {
-		if ( ! isset( $_POST['action'] ) || 'wc_bis_register' !== $_POST['action'] ) { // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_POST['wc_bis_register'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
