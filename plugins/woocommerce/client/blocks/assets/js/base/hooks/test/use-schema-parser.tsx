@@ -11,10 +11,10 @@ import { WPDataRegistry } from '@wordpress/data/build-types/registry';
  * Internal dependencies
  */
 import { useSchemaParser } from '../use-schema-parser';
-import checkoutSchema from '../../../../../../../../../docs/_docu-tools/schemas/v1/checkout-document-schema.json';
 import { CheckoutState } from '../../../data/checkout/default-state';
 import { PaymentState } from '../../../data/payment/default-state';
 import { CartState } from '../../../data/cart/default-state';
+import checkoutSchema from './checkout-document-schema.json';
 
 // Mock the stores
 jest.mock( '@woocommerce/block-data', () => ( {
