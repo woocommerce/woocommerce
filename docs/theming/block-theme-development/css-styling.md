@@ -71,7 +71,7 @@ Developers can now use CSS Container Queries (`@container`) to style child compo
 
 **Note:** Container queries work as long as there isn't another container in between the checkout blocks wrapper and the element being styled. If you define additional CSS containers in your theme or plugins, they may interfere with the container query behavior.
 
-We've introduced new SCSS mixins as convenient helpers for targeting the same width breakpoints previously defined by classes like `.is-large`, `.is-medium`, `.is-small` and `.is-mobile`. These mixins make it easier to style inner content within the Cart and Checkout blocks based on the container width.
+There are SCSS mixins available as convenient helpers for targeting the same width breakpoints previously defined by classes like `.is-large`, `.is-medium`, `.is-small` and `.is-mobile`. These mixins make it easier to style inner content within the Cart and Checkout blocks based on the container width.
 
 ```scss
 // Before, using JS generated CSS class
