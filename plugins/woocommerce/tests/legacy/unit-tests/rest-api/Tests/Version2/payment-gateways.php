@@ -79,7 +79,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 				),
 				'needs_setup'            => false,
 				'post_install_scripts'   => array(),
-				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 				'connection_url'         => '',
 				'setup_help_text'        => '',
 				'required_settings_keys' => array(),

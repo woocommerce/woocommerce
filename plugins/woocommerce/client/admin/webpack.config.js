@@ -93,7 +93,7 @@ const webpackConfig = {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
-			'../../../../node_modules/.cache/webpack-admin'
+			'node_modules/.cache/webpack'
 		),
 	},
 	entry: getEntryPoints(),
@@ -156,7 +156,7 @@ const webpackConfig = {
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
-							'../../../../node_modules/.cache/babel-loader'
+							'node_modules/.cache/babel-loader'
 						),
 						cacheCompression: false,
 					},

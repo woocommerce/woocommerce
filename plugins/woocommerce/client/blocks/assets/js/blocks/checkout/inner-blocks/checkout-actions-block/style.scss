@@ -55,8 +55,16 @@
 	}
 }
 
-.is-mobile {
+@include cart-checkout-small-container {
 	.wc-block-checkout__actions {
+		padding-top: $gap-larger;
+	}
+}
+
+@include cart-checkout-mobile-container {
+	.wc-block-checkout__actions {
+		padding-top: $gap-larger;
+
 		.wc-block-checkout__actions_row {
 			flex-direction: column-reverse;
 		}
