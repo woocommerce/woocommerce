@@ -142,4 +142,16 @@ class Utils {
 		// Render with dynamic set to false to prevent calling render_callback.
 		return $new_block->render( array( 'dynamic' => false ) );
 	}
+
+	/**
+	 * Check if min and max purchase quantity are the same for a product.
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if min and max purchase quantity are the same, false otherwise.
+	 */
+	public static function is_min_max_quantity_same( $product ) {
+		$min_purchase_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		return $min_purchase_quantity === $max_purchase_quantity;
+	}
 }
