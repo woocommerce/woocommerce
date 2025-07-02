@@ -119,20 +119,20 @@ async function addAttribute(
 		).toBeChecked();
 	} );
 
-	await test.step( 'Click "Save attributes".', async () => {
+	await test.step( 'Save attributes', async () => {
+		const waitForSave = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/post.php' ) &&
+				response.status() === 200
+		);
+
 		await page
 			.getByRole( 'button', {
 				name: 'Save attributes',
 			} )
 			.click();
-	} );
 
-	await test.step( "Wait for the tour's dismissal to be saved", async () => {
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( '/post.php' ) &&
-				response.status() === 200
-		);
+		await waitForSave;
 	} );
 
 	await test.step( `Wait for the loading overlay to disappear.`, async () => {
@@ -158,22 +158,10 @@ test( 'can add custom product attributes', async ( { page, product } ) => {
 	}
 
 	await test.step( 'Update product', async () => {
-		// "Update" triggers a lot of requests. Wait for the final one to complete before proceeding.
-		// Otherwise, succeeding steps would be flaky.
-		const finalRequestResolution = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'options' ) &&
-				response
-					.url()
-					.includes( 'woocommerce_task_list_reminder_bar_hidden' )
-		);
-
 		await page
 			.locator( '#publishing-action' )
 			.getByRole( 'button', { name: 'Update' } )
 			.click();
-
-		await finalRequestResolution;
 
 		await expect(
 			page.locator( '.notice-success', { name: 'Product updated' } )

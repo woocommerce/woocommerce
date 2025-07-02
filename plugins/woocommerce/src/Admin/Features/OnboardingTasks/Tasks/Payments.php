@@ -39,7 +39,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid', 'woocommerce' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
@@ -70,7 +70,13 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_gateways();
+			if ( $this->is_woopayments_active() ) {
+				// If WooPayments is active, check if it is fully onboarded with a live account.
+				$this->is_complete_result = $this->is_woopayments_onboarded() && ! $this->has_woopayments_test_account();
+			} else {
+				// If WooPayments is not active, check if there are any enabled gateways.
+				$this->is_complete_result = self::has_gateways();
+			}
 		}
 
 		return $this->is_complete_result;
