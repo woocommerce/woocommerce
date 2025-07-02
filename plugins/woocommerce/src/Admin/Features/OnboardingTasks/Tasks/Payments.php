@@ -39,7 +39,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid', 'woocommerce' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
