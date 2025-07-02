@@ -150,7 +150,7 @@ class Init {
 	 * @return array $themes
 	 */
 	public function get_themes_for_export_group() {
-		$themes       = $this->wp_get_themes();
+		$themes       = $this->get_installed_wp_org_themes();
 		$active_theme = $this->wp_get_theme();
 
 		$themes = array_map(
@@ -312,5 +312,46 @@ class Init {
 
 		set_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT, $wp_org_plugins );
 		return $wp_org_plugins;
+	}
+
+	/**
+	 * Get all installed WordPress.org themes.
+	 *
+	 * @return array
+	 */
+	private function get_installed_wp_org_themes() {
+		// Get all installed themes.
+		$all_themes  = $this->wp_get_themes();
+		$theme_slugs = array();
+
+		// Build an array of installed theme slugs.
+		foreach ( $all_themes as $key => $theme ) {
+			$theme_slugs[] = strtolower( $key );
+		}
+
+		$api_response = $this->wp_themes_api(
+			'theme_information',
+			array(
+				'fields' => array(
+					'downloadlink' => true,
+				),
+				'slugs'  => $theme_slugs,
+			)
+		);
+
+		// If the API fails, return all installed themes.
+		if ( is_wp_error( $api_response ) ) {
+			return $all_themes;
+		}
+
+		$wp_org_themes = array_filter(
+			$all_themes,
+			function ( $theme ) use ( $api_response ) {
+				$slug = $theme->get_stylesheet();
+				return isset( $api_response->{$slug}['download_link'] );
+			}
+		);
+
+		return $wp_org_themes;
 	}
 }
