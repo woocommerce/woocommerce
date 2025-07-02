@@ -30,8 +30,8 @@ class SyncTasks {
 
 	public static function do_wc_customer_stock_notifications_daily() {
 		// Delete overdue unverified notifications given a specified time threshold.
-		$expiration_time_threshold = Functions::get_verification_expiration_time_threshold();
-		$time_threshold            = Functions::get_delete_unverified_time_threshold();
+		$expiration_time_threshold = Config::get_verification_expiration_time_threshold();
+		$time_threshold            = Config::get_delete_unverified_time_threshold();
 
 		if ( 0 === $time_threshold ) {
 			return;
