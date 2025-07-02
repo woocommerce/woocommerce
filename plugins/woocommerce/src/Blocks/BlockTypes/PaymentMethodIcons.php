@@ -160,12 +160,8 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Card type icon URL.
 	 */
 	private function get_card_type_icon_url( $card_type ) {
-		$plugin_path = 'woocommerce-payments/assets/images/payment-method-icons/';
-		if ( ! \is_dir( \WP_PLUGIN_DIR . '/' . \dirname( $plugin_path ) ) ) {
-			return '';
-		}
-
-		$icon_url = \plugins_url( $plugin_path . $card_type . '.svg' );
+		$assets_path = 'assets/images/payment-methods-cards/';
+		$icon_url = \plugins_url( $assets_path . $card_type . '.svg', WC_PLUGIN_FILE );
 		return $icon_url;
 	}
 
@@ -185,23 +181,18 @@ class PaymentMethodIcons extends AbstractBlock {
 		foreach ( $available_gateways as $gateway ) {
 			if ( 'yes' === $gateway->enabled ) {
 				if ( 'woocommerce_payments' === $gateway->id ) {
-					if ( 'yes' === $gateway->get_option( 'platform_checkout', 'no' ) ) {
-						$other_payment_methods[] = array(
-							'name' => 'WooPay',
-							'icon' => $this->get_card_type_icon_url( 'woopay' ),
-						);
-					}
-				} else {
-					$icon_url = '';
-					if ( method_exists( $gateway, 'get_icon_url' ) ) {
-						$icon_url = $gateway->get_icon_url();
-					}
-					if ( ! empty( $icon_url ) ) {
-						$other_payment_methods[] = array(
-							'name' => $gateway->get_title(),
-							'icon' => $icon_url,
-						);
-					}
+					continue;
+				}
+
+				$icon_url = '';
+				if ( method_exists( $gateway, 'get_icon_url' ) ) {
+					$icon_url = $gateway->get_icon_url();
+				}
+				if ( ! empty( $icon_url ) ) {
+					$other_payment_methods[] = array(
+						'name' => $gateway->get_title(),
+						'icon' => $icon_url,
+					);
 				}
 			}
 		}
