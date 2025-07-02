@@ -20,7 +20,7 @@ class StockNotifications {
 	 * Initialize the controller.
 	 */
 
-	public function __construct() { {
+	public function __construct() {
 		add_action( 'woocommerce_installed', array( SyncTasks::class, 'schedule_async_tasks' ) );
 		add_action( 'customer_stock_notifications_daily', array( SyncTasks::class, 'do_wc_customer_stock_notifications_daily' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
