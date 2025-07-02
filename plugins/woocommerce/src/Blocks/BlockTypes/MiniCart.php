@@ -484,9 +484,10 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
-					'totalItemsInCart'  => $cart_item_count,
-					'badgeIsVisible'    => $badge_is_visible,
-					'formattedSubtotal' => $formatted_subtotal,
+					'totalItemsInCart'   => $cart_item_count,
+					'badgeIsVisible'     => $badge_is_visible,
+					'formattedSubtotal'  => $formatted_subtotal,
+					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 				)
 			);
 
@@ -548,7 +549,7 @@ class MiniCart extends AbstractBlock {
 						?>
 					<?php endif; ?>
 				</button>
-				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
+				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass">
 					<div 
 						data-wp-bind--role="state.drawerRole"
 						data-wp-bind--aria-modal="context.isOpen"
