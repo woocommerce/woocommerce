@@ -35,6 +35,13 @@ class AddToCartWithOptionsPage {
 			name: 'Switch product type',
 		} );
 		await productTypeSwitcher.click();
+
+		// Wait for the menu to open.
+		const menu = this.page.getByRole( 'menu', {
+			name: 'Switch product type',
+		} );
+		await menu.waitFor( { state: 'visible' } );
+
 		const customProductTypeButton = this.page.getByRole( 'menuitem', {
 			name: productType,
 		} );
