@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure discount meta slot fill shows when no coupons are applied to the cart.

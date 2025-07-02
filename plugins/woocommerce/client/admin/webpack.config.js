@@ -89,6 +89,13 @@ require( 'fs-extra' ).ensureSymlinkSync(
 
 const webpackConfig = {
 	mode: NODE_ENV,
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'node_modules/.cache/webpack'
+		),
+	},
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -149,7 +156,7 @@ const webpackConfig = {
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
-							'../../../../node_modules/.cache/babel-loader'
+							'node_modules/.cache/babel-loader'
 						),
 						cacheCompression: false,
 					},

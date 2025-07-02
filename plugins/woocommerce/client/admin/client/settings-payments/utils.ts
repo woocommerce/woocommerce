@@ -9,6 +9,7 @@ import {
 import { getAdminLink } from '@woocommerce/settings';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { parseAdminUrl } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -448,4 +449,21 @@ export const recordPaymentsOnboardingEvent = (
 	}
 
 	recordEvent( eventName, data );
+};
+
+/**
+ * Strips the origin from a URL. This is used for front-end navigation using react-router-dom.
+ *
+ * @example
+ * ```
+ * removeOriginFromURL( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline' )
+ * // returns '/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline'
+ * ```
+ *
+ * @param url The URL to strip the origin from.
+ * @return The URL with the origin stripped.
+ */
+export const removeOriginFromURL = ( url: string ) => {
+	const parsedUrl = parseAdminUrl( url );
+	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
 };
