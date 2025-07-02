@@ -282,8 +282,8 @@ final class WC_Cart_Session {
 		$cart_for_session = $this->get_cart_for_session();
 
 		if ( empty( $cart_for_session ) ) {
-			WC()->session->set( 'cart', null );
-			$update_cart_session = true;
+			$wc_session->set( 'cart', null );
+			$wc_session->set( 'cart_totals', null );
 		}
 
 		if ( $update_cart_session ) {
