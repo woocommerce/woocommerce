@@ -51,7 +51,7 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$setting_options_mock->method( 'get_page_options' )->willReturn( [] );
+		$setting_options_mock->method( 'get_page_options' )->willReturn( array() );
 
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
@@ -70,12 +70,12 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		foreach ( $steps as $step ) {
 			if ( $step instanceof RunSql ) {
 				$sql_content = $step->prepare_json_array()['sql']['contents'];
-				
+
 				// Check for tax class export
 				if ( strpos( $sql_content, 'wc_tax_rate_classes' ) !== false && strpos( $sql_content, 'réduit' ) !== false ) {
 					$tax_class_step_found = true;
 				}
-				
+
 				// Check for tax rate export
 				if ( strpos( $sql_content, 'woocommerce_tax_rates' ) !== false && strpos( $sql_content, 'TVA Réduite' ) !== false ) {
 					$tax_rate_step_found = true;
@@ -119,7 +119,7 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$setting_options_mock->method( 'get_page_options' )->willReturn( [] );
+		$setting_options_mock->method( 'get_page_options' )->willReturn( array() );
 
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
@@ -131,11 +131,11 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		foreach ( $steps as $index => $step ) {
 			if ( $step instanceof RunSql ) {
 				$sql_content = $step->prepare_json_array()['sql']['contents'];
-				
+
 				if ( strpos( $sql_content, 'wc_tax_rate_classes' ) !== false && $tax_class_position === -1 ) {
 					$tax_class_position = $index;
 				}
-				
+
 				if ( strpos( $sql_content, 'woocommerce_tax_rates' ) !== false && $tax_rate_position === -1 ) {
 					$tax_rate_position = $index;
 				}
@@ -168,7 +168,7 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$setting_options_mock->method( 'get_page_options' )->willReturn( [] );
+		$setting_options_mock->method( 'get_page_options' )->willReturn( array() );
 
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
@@ -206,14 +206,14 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$setting_options_mock->method( 'get_page_options' )->willReturn( [] );
+		$setting_options_mock->method( 'get_page_options' )->willReturn( array() );
 
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
 
-		$has_settings = false;
-		$has_tax_classes = false;
-		$has_tax_rates = false;
+		$has_settings      = false;
+		$has_tax_classes   = false;
+		$has_tax_rates     = false;
 		$has_tax_locations = false;
 
 		foreach ( $steps as $step ) {
@@ -221,7 +221,7 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 				$has_settings = true;
 			} elseif ( $step instanceof RunSql ) {
 				$sql_content = $step->prepare_json_array()['sql']['contents'];
-				
+
 				if ( strpos( $sql_content, 'wc_tax_rate_classes' ) !== false ) {
 					$has_tax_classes = true;
 				}
@@ -242,4 +242,4 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		// Clean up.
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
-} 
+}
