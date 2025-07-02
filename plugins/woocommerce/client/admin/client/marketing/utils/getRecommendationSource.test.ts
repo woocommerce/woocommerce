@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import { getRecommendationSource } from '../getRecommendationSource';
+import { getRecommendationSource } from './getRecommendationSource';
 
 jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: jest.fn(),
