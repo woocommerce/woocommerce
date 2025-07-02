@@ -32,7 +32,7 @@ abstract class ExportWCSettings implements StepExporter, HasAlias {
 	 *
 	 * @param SettingOptions|null $setting_options The setting options class.
 	 */
-	public function __construct( SettingOptions $setting_options = null ) {
+	public function __construct( ?SettingOptions $setting_options = null ) {
 		$this->setting_options = $setting_options ?? new SettingOptions();
 	}
 

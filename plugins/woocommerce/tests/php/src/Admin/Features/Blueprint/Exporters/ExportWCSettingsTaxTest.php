@@ -26,12 +26,10 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 	 * Test that custom tax classes are exported in blueprint.
 	 */
 	public function test_custom_tax_classes_are_exported() {
-		// Create a custom tax class
 		$custom_tax_class = WC_Tax::create_tax_class( 'réduit' );
 		$this->assertIsArray( $custom_tax_class );
 		$this->assertEquals( 'réduit', $custom_tax_class['name'] );
 
-		// Create a tax rate for the custom class
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'FR',
