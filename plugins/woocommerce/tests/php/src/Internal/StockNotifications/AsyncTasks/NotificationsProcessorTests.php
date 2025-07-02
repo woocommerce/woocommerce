@@ -508,6 +508,15 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test for unknown/deleted product.
+	 */
+	public function test_process_batch_unknown_product() {
+		$product_id = 123;
+		$this->sut->process_batch( $product_id );
+		$this->assertFalse( get_option( CycleStateService::STATE_OPTION_PREFIX . $product_id ) );
+	}
+
+	/**
 	 * Test process_batch method on a product with no notifications.
 	 */
 	public function test_process_batch_no_notifications() {

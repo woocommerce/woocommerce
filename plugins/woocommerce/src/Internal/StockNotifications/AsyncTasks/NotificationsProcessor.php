@@ -162,7 +162,6 @@ class NotificationsProcessor {
 	 * @return void
 	 */
 	public function process_batch( $product_id ) {
-
 		// Sanity checks.
 		try {
 			$product_id  = $this->parse_args( $product_id );
@@ -173,7 +172,7 @@ class NotificationsProcessor {
 			$this->logger->error(
 				sprintf( 'Background process for product %s terminated. Reason: %s', $product_id, $e->getMessage() ),
 				array(
-					'source'     => JobManager::AS_JOB_GROUP,
+					'source'     => 'wc-customer-stock-notifications',
 					'product_id' => $product_id,
 					'exception'  => get_class( $e ),
 				)
