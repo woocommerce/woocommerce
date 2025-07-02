@@ -46,7 +46,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Export tax settings
 		$setting_options_mock = $this->getMockBuilder( \Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions::class )
 			->disableOriginalConstructor()
 			->getMock();
@@ -56,14 +55,11 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
 
-		// Verify we have the expected steps
 		$this->assertIsArray( $steps );
 		$this->assertGreaterThan( 1, count( $steps ) );
 
-		// First step should be basic tax settings
 		$this->assertInstanceOf( SetSiteOptions::class, $steps[0] );
 
-		// Find tax class export step
 		$tax_class_step_found = false;
 		$tax_rate_step_found  = false;
 
@@ -71,12 +67,10 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			if ( $step instanceof RunSql ) {
 				$sql_content = $step->prepare_json_array()['sql']['contents'];
 
-				// Check for tax class export
 				if ( strpos( $sql_content, 'wc_tax_rate_classes' ) !== false && strpos( $sql_content, 'réduit' ) !== false ) {
 					$tax_class_step_found = true;
 				}
 
-				// Check for tax rate export
 				if ( strpos( $sql_content, 'woocommerce_tax_rates' ) !== false && strpos( $sql_content, 'TVA Réduite' ) !== false ) {
 					$tax_rate_step_found = true;
 				}
@@ -86,7 +80,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $tax_class_step_found, 'Custom tax class should be exported' );
 		$this->assertTrue( $tax_rate_step_found, 'Tax rate should be exported' );
 
-		// Clean up
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		WC_Tax::delete_tax_class_by( 'slug', $custom_tax_class['slug'] );
 	}
@@ -95,11 +88,9 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 	 * Test that tax class export comes before tax rate export (proper order).
 	 */
 	public function test_export_order_tax_classes_before_rates() {
-		// Create a custom tax class
 		$custom_tax_class = WC_Tax::create_tax_class( 'test-order' );
 		$this->assertIsArray( $custom_tax_class );
 
-		// Create a tax rate for the custom class
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
@@ -114,7 +105,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Export tax settings
 		$setting_options_mock = $this->getMockBuilder( \Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions::class )
 			->disableOriginalConstructor()
 			->getMock();
@@ -124,7 +114,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
 
-		// Find the positions of tax class and tax rate exports
 		$tax_class_position = -1;
 		$tax_rate_position  = -1;
 
@@ -146,7 +135,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( -1, $tax_rate_position, 'Tax rate export step should exist' );
 		$this->assertLessThan( $tax_rate_position, $tax_class_position, 'Tax classes should be exported before tax rates' );
 
-		// Clean up
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		WC_Tax::delete_tax_class_by( 'slug', $custom_tax_class['slug'] );
 	}
@@ -155,7 +143,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 	 * Test export works when no custom tax classes exist.
 	 */
 	public function test_export_with_no_custom_tax_classes() {
-		// Ensure no custom tax classes exist (only defaults)
 		$tax_classes = WC_Tax::get_tax_classes();
 		foreach ( $tax_classes as $class ) {
 			if ( ! in_array( $class, array( 'Reduced rate', 'Zero rate' ), true ) ) {
@@ -163,7 +150,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 			}
 		}
 
-		// Export tax settings
 		$setting_options_mock = $this->getMockBuilder( \Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions::class )
 			->disableOriginalConstructor()
 			->getMock();
@@ -173,11 +159,9 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$exporter = new ExportWCSettingsTax( $setting_options_mock );
 		$steps    = $exporter->export();
 
-		// Should still work without errors
 		$this->assertIsArray( $steps );
 		$this->assertGreaterThan( 0, count( $steps ) );
 
-		// First step should be basic tax settings
 		$this->assertInstanceOf( SetSiteOptions::class, $steps[0] );
 	}
 
@@ -185,7 +169,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 	 * Test that all expected components are exported.
 	 */
 	public function test_export_includes_all_components() {
-		// Create a dummy tax rate to ensure the table is not empty.
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
@@ -239,7 +222,6 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $has_tax_rates, 'Should export tax rates table' );
 		$this->assertTrue( $has_tax_locations, 'Should export tax rate locations table' );
 
-		// Clean up.
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
 }
