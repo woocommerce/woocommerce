@@ -27,7 +27,7 @@ abstract class WC_Data {
 	/**
 	 * ID for this object.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 * @var int
 	 */
 	protected $id = 0;
