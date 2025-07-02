@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { CollapsibleCard } from './CollapsibleCard';
+import { CollapsibleCard } from '../CollapsibleCard';
 
 const header = 'Card header';
 const body = 'Card body';
