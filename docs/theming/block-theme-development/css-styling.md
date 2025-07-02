@@ -59,7 +59,7 @@ As an example, if we wanted to do the Checkout font size 10% larger when the con
 
 ### CSS Container Queries for Cart and Checkout blocks
 
-WooCommerce now defines the top-level wrappers of both the Cart and Checkout blocks as CSS containers using `container-type: inline-size`:
+WooCommerce defines the top-level wrappers of Cart and Checkout blocks as CSS containers. These containers use `container-type: inline-size`:
 
 ```css
 .wp-block-woocommerce-checkout {
