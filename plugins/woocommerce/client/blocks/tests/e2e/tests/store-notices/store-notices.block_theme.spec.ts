@@ -38,6 +38,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			followSymlinks: true,
 			port: 9401,
 			login: true,
+			php: '8.4',
 		} );
 
 		// handler = cliServer.requestHandler;
