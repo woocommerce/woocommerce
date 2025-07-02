@@ -905,7 +905,7 @@ abstract class WC_Data {
 			} elseif ( is_numeric( $value ) ) {
 				// Timestamps are handled as UTC timestamps in all cases.
 				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
-			} else if( is_string( $value ) ) {
+			} elseif ( is_string( $value ) ) {
 				// Strings are defined in local WP timezone. Convert to UTC.
 				if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $value, $date_bits ) ) {
 					$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
