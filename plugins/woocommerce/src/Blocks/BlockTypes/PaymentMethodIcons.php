@@ -116,7 +116,7 @@ class PaymentMethodIcons extends AbstractBlock {
 	}
 
 	/**
-	 * Get the enabled card types.
+	 * Get the enabled card types for WooPayments.
 	 *
 	 * Note: This uses hardcoded cards based on the default card types provided by WooPayments. This should be updated when these icons can be accessed via an API.
 	 *
