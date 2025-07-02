@@ -20,7 +20,8 @@
 		},
 		"spacing": {
 			"padding": true
-		}
+		},
+		"interactivity": true
 	},
 	"parent": [ "woocommerce/mini-cart-title-block" ],
 	"textdomain": "woocommerce",

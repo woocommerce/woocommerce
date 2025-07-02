@@ -20,6 +20,9 @@
 		},
 		"spacing": {
 			"padding": true
+		},
+		"interactivity": {
+			"clientNavigation": true
 		}
 	},
 	"attributes": {

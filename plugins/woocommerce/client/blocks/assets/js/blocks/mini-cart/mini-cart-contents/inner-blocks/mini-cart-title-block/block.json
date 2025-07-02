@@ -17,6 +17,9 @@
 		},
 		"typography": {
 			"fontSize": true
+		},
+		"interactivity": {
+			"clientNavigation": true
 		}
 	},
 	"attributes": {

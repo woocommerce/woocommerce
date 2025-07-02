@@ -13,6 +13,9 @@
 		"color": {
 			"text": true,
 			"background": true
+		},
+		"interactivity": {
+			"clientNavigation": true
 		}
 	},
 	"attributes": {
