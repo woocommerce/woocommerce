@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import type { OptimisticCartItem, Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	OptimisticCartItem,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -52,7 +55,10 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const getMatchedCartItem = ( cartItem:OptimisticCartItem, selectedItem:CartVariationItem[] ) => {
+const getMatchedCartItem = (
+	cartItem: OptimisticCartItem,
+	selectedItem: CartVariationItem[]
+) => {
 	if (
 		! Array.isArray( cartItem.variation ) ||
 		! Array.isArray( selectedItem )
@@ -91,6 +97,10 @@ const productButtonStore = {
 					return item;
 				}
 			} );
+
+			if ( product[ 0 ]?.type !== 'variable' ) {
+				return product[ 0 ]?.quantity;
+			}
 
 			const selectedProduct = product.find( ( item ) =>
 				getMatchedCartItem( item, selectedAttribute )
