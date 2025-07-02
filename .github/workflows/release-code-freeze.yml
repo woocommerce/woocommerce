@@ -72,7 +72,7 @@ jobs:
       nextTrunkVersion: ${{ steps.calculate-versions.outputs.nextTrunkVersion }}
     steps:
       - name: Verify no PRs open by the github-actions bot are open
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const automatedPRs = await github.rest.search.issuesAndPullRequests({
@@ -85,7 +85,7 @@ jobs:
             }
       - name: Compute next release and dev cycle versions
         id: calculate-versions
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const bumpMinorVersion = (v) => {
