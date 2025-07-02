@@ -596,7 +596,8 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Remove innerHTML from WooCommerce blocks in the parsed blocks array.
+	 * Remove the wrapper divs of the React-based MiniCart WooCommerce blocks in
+	 * the parsed blocks array.
 	 *
 	 * @param array $blocks The parsed blocks array.
 	 * @return array The filtered blocks array.
@@ -622,7 +623,7 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Check if a block is a WooCommerce template block.
+	 * Check if a block is one of the MiniCart inner block.
 	 *
 	 * @param array $block The block to check.
 	 * @return bool True if the block is a WooCommerce template block.
