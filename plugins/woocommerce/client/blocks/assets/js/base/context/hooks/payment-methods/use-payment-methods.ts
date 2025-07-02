@@ -32,7 +32,6 @@ const usePaymentMethodState = (
 		expressPaymentMethodsInitialized,
 		availablePaymentMethods,
 		availableExpressPaymentMethods,
-		registeredExpressPaymentMethods: storeRegisteredExpressPaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
 
@@ -43,8 +42,6 @@ const usePaymentMethodState = (
 			availableExpressPaymentMethods:
 				store.getAvailableExpressPaymentMethods(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
-			registeredExpressPaymentMethods:
-				store.getRegisteredExpressPaymentMethods(),
 		};
 	} );
 
