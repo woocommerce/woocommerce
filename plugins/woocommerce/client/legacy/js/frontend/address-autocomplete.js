@@ -94,15 +94,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 	registerAddressAutocompleteProvider;
 
 ( function () {
-	// Browser detection constants
-	const userAgent = navigator.userAgent.toLowerCase();
-	const isFirefox = userAgent.indexOf( 'firefox' ) > -1;
-	const isSafari =
-		userAgent.indexOf( 'safari' ) > -1 &&
-		userAgent.indexOf( 'chrome' ) === -1 &&
-		userAgent.indexOf( 'chromium' ) === -1;
-	const needsElementCloning = isFirefox || isSafari;
-
 	/**
 	 * Set the active address provider based on which providers' (queried in order) canSearch returns true.
 	 * Triggers when country changes.
