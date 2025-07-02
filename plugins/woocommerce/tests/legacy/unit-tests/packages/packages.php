@@ -15,6 +15,7 @@ class WC_Tests_Packages extends WC_Unit_Test_Case {
 	 */
 	public function test_packages_exist() {
 		$this->assertTrue( \Automattic\WooCommerce\Packages::package_exists( 'woocommerce-admin' ) );
+		$this->assertTrue( \Automattic\WooCommerce\Packages::package_exists( 'woocommerce-payments' ) );
 	}
 
 	/**
@@ -23,5 +24,6 @@ class WC_Tests_Packages extends WC_Unit_Test_Case {
 	public function test_autoload_packages() {
 		$this->assertTrue( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) );
 		$this->assertTrue( class_exists( '\Automattic\WooCommerce\RestApi\Package' ) );
+		$this->assertTrue( class_exists( '\WCPay\Package' ) );
 	}
 }

@@ -31,6 +31,8 @@ class Packages {
 	 */
 	protected static $packages = array(
 		'email-editor' => '\\Automattic\\WooCommerce\\Internal\\EmailEditor\\Package',
+		// 'woocommerce-payments' => '\\WCPay\\Package',
+		'woocommerce-payments' => '\\Automattic\\WooCommerce\\Internal\\Payments\\Package',
 	);
 
 	/**

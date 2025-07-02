@@ -812,7 +812,8 @@
 			"command": "node ./bin/package-update-textdomain.js",
 			"files": [
 				"packages/action-scheduler/action-scheduler.php",
-				"packages/woocommerce-admin/woocommerce-admin.php"
+				"packages/woocommerce-admin/woocommerce-admin.php",
+				"packages/woocommerce-payments/woocommerce-payments.php"
 			],
 			"output": []
 		},
