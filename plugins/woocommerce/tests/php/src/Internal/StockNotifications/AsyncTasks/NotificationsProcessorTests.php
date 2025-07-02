@@ -85,6 +85,11 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$result  = $method->invokeArgs( $this->sut, array( $product->get_id() ) );
 		$this->assertInstanceOf( WC_Product::class, $result );
 
+		$product->set_status( ProductStatus::TRASH );
+		$product->save();
+		$this->expectException( \Exception::class );
+		$method->invokeArgs( $this->sut, array( $product->get_id() ) );
+
 		$product_id = 0;
 		$this->expectException( \Exception::class );
 		$method->invokeArgs( $this->sut, array( $product_id ) );
