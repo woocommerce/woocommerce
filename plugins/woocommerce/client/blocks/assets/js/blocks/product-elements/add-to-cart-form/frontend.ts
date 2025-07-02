@@ -1,8 +1,19 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
+
+export type Context = {
+	productId?: number;
+	productType?: string;
+	quantity: Record< number, number >;
+	childProductId?: number;
+	quantityConstraints?: Record<
+		number,
+		{ min: number; max: number | null; step: number }
+	>;
+};
 
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
@@ -10,8 +21,8 @@ const getInputElementFromEvent = (
 	const target = event.target as HTMLButtonElement;
 
 	const inputElement = target.parentElement?.querySelector(
-		'.input-text.qty.text'
-	) as HTMLInputElement | null | undefined;
+		'.wc-block-components-quantity-selector__input'
+	) as HTMLInputElement | null;
 
 	return inputElement;
 };
@@ -24,21 +35,32 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const parsedMinValue = parseInt( inputElement.min, 10 );
-	const parsedMaxValue = parseInt( inputElement.max, 10 );
-	const parsedStep = parseInt( inputElement.step, 10 );
-
+	const context = getContext< Context >();
+	const productType = context.productType;
+	const childProductIdMatch = inputElement.name.match( /quantity\[(\d+)\]/ );
+	const childProductId = childProductIdMatch
+		? parseInt( childProductIdMatch[ 1 ], 10 )
+		: context.childProductId;
+	const id =
+		productType === 'grouped' && childProductId
+			? childProductId
+			: context.productId;
+	const constraints = context.quantityConstraints?.[ id as number ] || {
+		min: 1,
+		step: 1,
+		max: null,
+	};
+	const minValue = constraints.min;
+	const maxValue = constraints.max;
+	const step = constraints.step;
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
-	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
-	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
-	const step = isNaN( parsedStep ) ? 1 : parsedStep;
-
 	return {
 		currentValue,
 		minValue,
 		maxValue,
 		step,
 		inputElement,
+		childProductId,
 	};
 };
 
@@ -49,17 +71,87 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 };
 
 store( 'woocommerce/add-to-cart-form', {
-	state: {},
+	state: {
+		get allowsDecrease() {
+			const context = getContext< Context >();
+			const {
+				quantity,
+				childProductId,
+				productType,
+				quantityConstraints,
+				productId,
+			} = context;
+			const id =
+				productType === 'grouped' && childProductId
+					? childProductId
+					: productId;
+			const constraints = quantityConstraints?.[ id as number ] || {
+				min: 1,
+				step: 1,
+				max: null,
+			};
+			const minValue = constraints.min;
+			const step = constraints.step;
+			const currentQuantity =
+				productType === 'grouped' && childProductId
+					? quantity?.[ childProductId ] || 0
+					: quantity?.[ productId as number ] || 0;
+			return currentQuantity - step >= minValue;
+		},
+		get allowsIncrease() {
+			const context = getContext< Context >();
+			const {
+				quantity,
+				childProductId,
+				productType,
+				quantityConstraints,
+				productId,
+			} = context;
+			const id =
+				productType === 'grouped' && childProductId
+					? childProductId
+					: productId;
+			const constraints = quantityConstraints?.[ id as number ] || {
+				min: 1,
+				step: 1,
+				max: null,
+			};
+			const maxValue = constraints.max;
+			const step = constraints.step;
+			const currentQuantity =
+				productType === 'grouped' && childProductId
+					? quantity?.[ childProductId ] || 0
+					: quantity?.[ productId as number ] || 0;
+			return maxValue === null || currentQuantity + step <= maxValue;
+		},
+	},
 	actions: {
 		addQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			const inputData = getInputData( event );
 			if ( ! inputData ) {
 				return;
 			}
-			const { currentValue, maxValue, step, inputElement } = inputData;
+			const context = getContext< Context >();
+			const {
+				currentValue,
+				maxValue,
+				step,
+				inputElement,
+				childProductId,
+			} = inputData;
 			const newValue = currentValue + step;
-
-			if ( maxValue === undefined || newValue <= maxValue ) {
+			if ( maxValue === null || newValue <= maxValue ) {
+				if ( childProductId ) {
+					context.quantity = {
+						...context.quantity,
+						[ childProductId ]: newValue,
+					};
+				} else {
+					context.quantity = {
+						...context.quantity,
+						[ context.productId as number ]: newValue,
+					};
+				}
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -69,12 +161,51 @@ store( 'woocommerce/add-to-cart-form', {
 			if ( ! inputData ) {
 				return;
 			}
-			const { currentValue, minValue, step, inputElement } = inputData;
+			const context = getContext< Context >();
+			const {
+				currentValue,
+				minValue,
+				step,
+				inputElement,
+				childProductId,
+			} = inputData;
 			const newValue = currentValue - step;
 
 			if ( newValue >= minValue ) {
+				if ( childProductId ) {
+					context.quantity = {
+						...context.quantity,
+						[ childProductId ]: newValue,
+					};
+				} else {
+					context.quantity = {
+						...context.quantity,
+						[ context.productId as number ]: newValue,
+					};
+				}
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
+			}
+		},
+		handleInputChange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			const inputElement = event.target as HTMLInputElement;
+			const value = parseInt( inputElement.value, 10 );
+			const childProductIdMatch =
+				inputElement.name.match( /quantity\[(\d+)\]/ );
+			const childProductId = childProductIdMatch
+				? parseInt( childProductIdMatch[ 1 ], 10 )
+				: undefined;
+			const context = getContext< Context >();
+			if ( childProductId ) {
+				context.quantity = {
+					...context.quantity,
+					[ childProductId ]: isNaN( value ) ? 0 : value,
+				};
+			} else {
+				context.quantity = {
+					...context.quantity,
+					[ context.productId as number ]: isNaN( value ) ? 0 : value,
+				};
 			}
 		},
 	},
