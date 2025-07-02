@@ -66,7 +66,7 @@ export const SettingsPaymentsOffline = () => {
 	}
 
 	return (
-		<div className="settings-payments-offline__container">
+		<>
 			{ isFetching ? (
 				<ListPlaceholder rows={ 3 } />
 			) : (
@@ -77,7 +77,7 @@ export const SettingsPaymentsOffline = () => {
 					setGateways={ handleOrderingUpdate }
 				/>
 			) }
-		</div>
+		</>
 	);
 };
 

@@ -839,7 +839,7 @@ return array(
 		'DN' => __( 'Dadra and Nagar Haveli', 'woocommerce' ),
 		'DD' => __( 'Daman and Diu', 'woocommerce' ),
 		'DL' => __( 'Delhi', 'woocommerce' ),
-		'LD' => __( 'Lakshadeep', 'woocommerce' ),
+		'LD' => __( 'Lakshadweep', 'woocommerce' ),
 		'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' ),
 	),
 	'IR' => array( // Iranian states.
