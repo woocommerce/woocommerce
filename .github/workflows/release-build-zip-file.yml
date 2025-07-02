@@ -2,14 +2,20 @@ name: 'Release: Build ZIP file'
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name or refs/heads/release/x.x). The resulting file will be available as an artifact on the workflow run.'
+      branch:
+        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
         required: false
         default: ''
       skip_verify:
-        description: 'Skip the PR verification step (default: false) pass true to skip'
-        required: false
-        default: 'false'
+        description: 'Skip verification steps.'
+        type: boolean
+        required: true
+        default: false
+      create_github_release:
+        description: 'Create a draft GitHub release.'
+        type: boolean
+        required: true
+        default: false
 
 permissions: {}
 
@@ -29,7 +35,7 @@ jobs:
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify !== 'false') {
+                  if (event.inputs.skip_verify === 'true') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
@@ -78,7 +84,7 @@ jobs:
                   core.setOutput('runBuildZipJob', runBuildZipJob);
 
         - name: Notify Slack on failure
-          if: ${{ steps.verify-prs.outputs.failureMessage != '' }}
+          if: ${{ steps.verify-prs.outputs.failureMessage != '' && inputs.create_github_release }}
           uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
           with:
               slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -94,65 +100,71 @@ jobs:
   verify-release-versions:
     name: 'Verify release and stable tag versions'
     runs-on: ubuntu-latest
-    if: ${{ inputs.skip_verify == 'false' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+          path: checkout-branch
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+            /plugins/woocommerce/readme.txt
+          sparse-checkout-cone-mode: false
+        if: ${{ inputs.create_github_release && ! inputs.skip_verify }}
 
       - name: 'Pre-build verification'
+        if: ${{ inputs.create_github_release && ! inputs.skip_verify }}
+        env:
+          BRANCH: ${{ inputs.branch || github.ref }}
         run: |
-            branch_name="${GITHUB_REF#refs/heads/}"
+            # Branch name must be 'release/*'.
+            branch_name="${BRANCH#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
-                echo "[ERR] Pre-build verification: the branch name is NOT matching 'release/*' pattern (identified as $branch_name)"
+                echo "::error::Pre-build verification: branch name '$branch_name' is not matching 'release/*' pattern."
                 exit 1
-            else
-                echo "[OK] Pre-build verification: the branch name is matching 'release/*' pattern ($branch_name)"
             fi
+
+            # Version number in branch name and plugin main version must match.
+            branch_plugin_version=$( cat checkout-branch/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
             version_prefix=${branch_name/"release/"/""}
-
-            # Validate release version related attributions
-            branch_plugin_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
-            svn_plugin_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
-                echo "[ERR] Pre-build verification: release version in branch is NOT matching '$version_prefix.*' pattern (identified as $branch_plugin_version)"
+                echo "::error::Pre-build verification: release version in branch ($branch_plugin_version) is not matching '$version_prefix.*' pattern."
                 exit 1
-            else
-                echo "[OK] Pre-build verification: release version in branch is matching '$version_prefix.*' pattern ($branch_plugin_version)"
-            fi
-            if [[ $branch_plugin_version == $svn_plugin_version ]] ; then
-                echo "[ERR] Pre-build verification: release version in branch is matching the one in SVN trunk (identified as $branch_plugin_version)"
-                exit 1
-            else
-                echo "[OK] Pre-build verification: release version in branch is NOT matching the one in SVN trunk ($branch_plugin_version vs $svn_plugin_version)"
             fi
 
-            # Validate stable version attribution
-            branch_stable_version=$( cat plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-            if [[ $branch_stable_version != $svn_stable_version ]] ; then
-                echo "[ERR] Pre-build verification: stable version in branch is NOT matching the one in SVN trunk (identified as $branch_stable_version)"
-                exit 1
-            else
-                echo "[OK] Pre-build verification: stable version in branch is matching the one in SVN trunk ($branch_stable_version vs $svn_stable_version)"
+            # Release should not already exist on wporg.
+            tag_exists=$(curl -s 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request\[slug\]=woocommerce' | jq "(.versions | has(\"$branch_plugin_version\"))")
+            if [ "$tag_exists" == "true" ]; then
+              echo "::error::Tag '$branch_plugin_version' already exists on WordPress.org."
+              exit 1
             fi
-  
-            # Validate changelog for the target release version
-            branch_changelog_version=$( cat changelog.txt | grep -oP '\d+\.\d+\.\d+ '| tail -n +1 | head -n1 )
-            if [[ $branch_plugin_version != *'-'* ]] && [[ $branch_plugin_version != $branch_changelog_version ]]; then
-                echo "[ERR] Pre-build verification: changelog for $branch_plugin_version is missing"
+
+            # Stable version in release branch should match wporg.
+            svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            if [[ $branch_stable_version != $svn_stable_version ]] ; then
+                echo "::error::Pre-build verification: stable version in release branch ($branch_stable_version) is not matching the one in SVN trunk ($svn_stable_version)."
                 exit 1
-            else
-                echo "[OK] Pre-build verification: changelog for $branch_plugin_version is present or not required (the last entry is for $branch_changelog_version)"
             fi
 
   build:
     name: Build release zip file
     runs-on: ubuntu-latest
-    if: ${{ needs.verify-prs.outputs.runBuildZipJob == 'true' }}
     needs: [ verify-prs, verify-release-versions ]
     permissions:
       contents: read
     steps:
+      - name: Verify release branch.
+        env:
+          BRANCH: ${{ inputs.branch || github.ref }}
+        run: |
+          if ! git ls-remote --exit-code --heads  https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
+            echo "::error::Source branch '$BRANCH' does not exist."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
@@ -173,4 +185,48 @@ jobs:
         with:
           name: woocommerce
           path: zipfile
-          retention-days: 7
+          retention-days: 1
+
+  create-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ inputs.create_github_release }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce
+
+      - name: Get version from plugin file
+        id: get_version
+        run: |
+          version=$(cat ./woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Generate release ZIP file
+        run: |
+          zip -q -9 -r ./woocommerce.zip ./woocommerce/
+
+      - name: Create draft release
+        id: create_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          IS_PRERELEASE: ${{ contains(steps.get_version.outputs.version, '-rc') }}
+        run: |
+          FLAGS=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            FLAGS="--prerelease=true"
+          fi
+
+          gh release create ${{ steps.get_version.outputs.version }} \
+            './woocommerce.zip' \
+            --title '${{ steps.get_version.outputs.version }}' \
+            --notes '' \
+            --target '${{ inputs.branch || github.ref }}' \
+            --latest=false \
+            --draft \
+            $FLAGS
