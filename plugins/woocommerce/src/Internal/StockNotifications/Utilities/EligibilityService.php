@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use WC_Product;
 
 /**
@@ -52,6 +53,11 @@ class EligibilityService {
 		}
 
 		if ( ! $product->is_type( Config::get_supported_product_types() ) ) {
+			return false;
+		}
+
+		// Check for invalid product statuses.
+		if ( in_array( $product->get_status(), array( ProductStatus::TRASH, ProductStatus::AUTO_DRAFT, ProductStatus::PENDING, ProductStatus::FUTURE ), true ) ) {
 			return false;
 		}
 

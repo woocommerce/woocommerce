@@ -1,0 +1,20 @@
+diff --git a/lib/cache/PackFileCacheStrategy.js b/lib/cache/PackFileCacheStrategy.js
+index df8958879c07f75aa385f682645cc811b7f364a8..b3540c92b6a8a9b9f4d62b0f4202ec1f39f6ab27 100644
+--- a/lib/cache/PackFileCacheStrategy.js
++++ b/lib/cache/PackFileCacheStrategy.js
+@@ -734,6 +734,15 @@ class PackContentItems {
+ 					rollback(s);
+ 					if (err === NOT_SERIALIZABLE) continue;
+ 					const notSerializableErr = /** @type {Error} */ (err);
++
++					// WooCommerce core customization: build warnings and certain external references not supporting serialization
++					// window ["wp", *] and ["wc", *] references: not affecting the build, but not serialable.
++					if ( notSerializableErr.message.includes( 'No serializer registered for ExternalModule' ) ) continue;
++					// @wordpress/interactivity references to existing fragments: not affecting the build, but not serialable.
++					if ( notSerializableErr.message.includes( 'No serializer registered for ModuleExternalInitFragment' ) ) continue;
++					// build warnings: not affecting the build, but not serialable.
++					if ( notSerializableErr.message.includes( 'No serializer registered for Warning' ) ) continue;
++
+ 					logger.warn(
+ 						`Skipped not serializable cache item '${key}': ${notSerializableErr.message}`
+ 					);

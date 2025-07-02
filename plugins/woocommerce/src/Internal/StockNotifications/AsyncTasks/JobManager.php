@@ -95,14 +95,14 @@ class JobManager {
 
 			$this->logger->info(
 				sprintf( 'Scheduled stock notification for product %d', $product_id ),
-				array( 'source' => self::AS_JOB_GROUP )
+				array( 'source' => 'wc-customer-stock-notifications' )
 			);
 
 			return true;
 		} catch ( Exception $e ) {
 			$this->logger->error(
 				sprintf( 'Failed to schedule stock notification for product %d: %s', $product_id, $e->getMessage() ),
-				array( 'source' => self::AS_JOB_GROUP )
+				array( 'source' => 'wc-customer-stock-notifications' )
 			);
 
 			return false;

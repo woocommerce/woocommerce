@@ -85,6 +85,11 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$result  = $method->invokeArgs( $this->sut, array( $product->get_id() ) );
 		$this->assertInstanceOf( WC_Product::class, $result );
 
+		$product->set_status( ProductStatus::TRASH );
+		$product->save();
+		$this->expectException( \Exception::class );
+		$method->invokeArgs( $this->sut, array( $product->get_id() ) );
+
 		$product_id = 0;
 		$this->expectException( \Exception::class );
 		$method->invokeArgs( $this->sut, array( $product_id ) );
@@ -505,6 +510,15 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 				JobManager::AS_JOB_GROUP
 			)
 		);
+	}
+
+	/**
+	 * Test for unknown/deleted product.
+	 */
+	public function test_process_batch_unknown_product() {
+		$product_id = 123;
+		$this->sut->process_batch( $product_id );
+		$this->assertFalse( get_option( CycleStateService::STATE_OPTION_PREFIX . $product_id ) );
 	}
 
 	/**

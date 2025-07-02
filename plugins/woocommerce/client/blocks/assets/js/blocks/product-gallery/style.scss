@@ -8,12 +8,11 @@ $dialog-padding: 20px;
 	position: relative;
 	flex-grow: 1;
 	aspect-ratio: 1 / 1;
+	overflow: hidden;
 
 	.wc-block-product-gallery-large-image__container {
 		display: flex;
 		overflow: hidden;
-		scroll-snap-type: x mandatory;
-		scroll-behavior: auto;
 		align-items: center;
 		margin: 0;
 		padding: 0;
@@ -23,12 +22,11 @@ $dialog-padding: 20px;
 		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
-		overflow: hidden;
 		width: 100%;
 		display: flex;
+		overflow: hidden;
 		align-items: center;
 		justify-content: center;
-		scroll-snap-align: none center;
 	}
 
 	.wc-block-components-product-image {

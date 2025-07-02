@@ -66,24 +66,30 @@ const BusinessDetails: React.FC = () => {
 
 	const updateBusinessVerificationData = (
 		selfAssessmentData: OnboardingFields
-	) => {
-		const href = currentStep?.actions?.save?.href;
-		// Send POST request to the href with the Business Verification state
-		if ( href ) {
-			apiFetch( {
-				url: href,
+	): Promise< void > => {
+		// Update the local state with the new data.
+		setData( selfAssessmentData );
+
+		const saveUrl = currentStep?.actions?.save?.href;
+		if ( saveUrl ) {
+			// Persist the data on the backend.
+			return apiFetch( {
+				url: saveUrl,
 				method: 'POST',
 				data: {
 					self_assessment: selfAssessmentData,
 				},
 			} );
 		}
+
+		// Return a resolved promise to maintain consistency with the API.
+		return Promise.resolve();
 	};
 
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
+	): Promise< void > => {
 		let newData: OnboardingFields = {
 			[ name ]: selectedItem?.key,
 		};
@@ -92,22 +98,20 @@ const BusinessDetails: React.FC = () => {
 		} else if ( name === 'country' ) {
 			newData = { ...newData, business_type: undefined };
 		}
-		setData( newData );
-		updateBusinessVerificationData( newData );
+
+		return updateBusinessVerificationData( newData );
 	};
 
 	const updateDataOnChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	) => {
-		setData( { [ name ]: selectedItem?.key } );
-
+	): Promise< void > => {
 		const newData: OnboardingFields = {
 			...data,
 			[ name ]: selectedItem?.key,
 		};
 
-		updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData( newData );
 	};
 
 	return (

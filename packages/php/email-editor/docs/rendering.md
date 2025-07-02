@@ -6,13 +6,14 @@ The email rendering system includes **Core Blocks Integration** that provides de
 
 ## Table of Contents
 
-- [Retrieving Services via DI Container](#retrieving-services-via-di-container)
-- [Bootstrapping](#bootstrapping)
-- [Renderer Classes](#renderer-classes)
-    - [Renderer](#renderer)
-    - [Content\_Renderer](#content_renderer)
-- [Core Blocks Integration](#core-blocks-integration)
-- [Integration Example](#integration-example)
+-   [Retrieving Services via DI Container](#retrieving-services-via-di-container)
+-   [Bootstrapping](#bootstrapping)
+-   [Renderer Classes](#renderer-classes)
+    -   [Renderer](#renderer)
+    -   [Content_Renderer](#content_renderer)
+-   [Core Blocks Integration](#core-blocks-integration)
+-   [Table Wrapper Helper](#table-wrapper-helper)
+-   [Integration Example](#integration-example)
 
 ## Retrieving Services via DI Container
 
@@ -76,9 +77,9 @@ The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer` class is respo
 public function render(
     \WP_Post $post,
     string $subject,
-    string $pre_header, 
+    string $pre_header,
     string $language = 'en',
-    string $meta_robots = '', 
+    string $meta_robots = '',
     string $template_slug = ''
 ): array
 ```
@@ -155,6 +156,204 @@ The block renderers for core blocks are linked to the core blocks when they are 
 
 If you use the `Automattic\WooCommerce\EmailEditor\Bootstrap` class, the core integration is set up for you. In case you want to set manually, see the `Automattic\WooCommerce\EmailEditor\Bootstrap` init method.
 
+## Table Wrapper Helper
+
+The `Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper` class provides utility methods for generating email-compatible table structures. Email clients have varying levels of CSS support, so using table-based layouts is often necessary for consistent rendering across different email clients.
+
+### Default Table Attributes
+
+The helper uses the following default table attributes for optimal email client compatibility:
+
+```php
+array(
+    'border'      => '0',
+    'cellpadding' => '0',
+    'cellspacing' => '0',
+    'role'        => 'presentation',
+)
+```
+
+### Available Methods
+
+#### `render_table_wrapper()`
+
+Renders a complete table structure with optional table, cell, and row attributes.
+
+```php
+/**
+ * Render a table wrapper for email blocks.
+ *
+ * @param string $content The content to wrap (e.g., '{block_content}').
+ * @param array  $table_attrs Table attributes to merge with defaults.
+ * @param array  $cell_attrs Cell attributes.
+ * @param array  $row_attrs Row attributes.
+ * @param bool   $render_cell Whether to render the td wrapper (default true).
+ * @return string The generated table wrapper HTML.
+ */
+public static function render_table_wrapper(
+    string $content,
+    array $table_attrs = array(),
+    array $cell_attrs = array(),
+    array $row_attrs = array(),
+    bool $render_cell = true
+): string
+```
+
+**Example Usage:**
+
+```php
+$table_html = Table_Wrapper_Helper::render_table_wrapper(
+    '<p>Email content here</p>',
+    array(
+        'width' => '100%',
+        'style' => 'max-width: 600px;'
+    ),
+    array(
+        'align' => 'center',
+        'style' => 'padding: 20px;'
+    ),
+    array(
+        'style' => 'background-color: #f0f0f0;'
+    )
+);
+```
+
+**Output:**
+
+```html
+<table
+    border="0"
+    cellpadding="0"
+    cellspacing="0"
+    role="presentation"
+    width="100%"
+    style="max-width: 600px;"
+>
+    <tbody>
+        <tr style="background-color: #f0f0f0;">
+            <td align="center" style="padding: 20px;">
+                <p>Email content here</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+```
+
+#### `render_outlook_table_wrapper()`
+
+Renders a complete table structure wrapped in Outlook-specific conditional comments.
+
+```php
+/**
+ * Render an Outlook-specific table wrapper using conditional comments.
+ *
+ * @param string $content The content to wrap (e.g., '{block_content}').
+ * @param array  $table_attrs Table attributes to merge with defaults.
+ * @param array  $cell_attrs Cell attributes.
+ * @param array  $row_attrs Row attributes.
+ * @param bool   $render_cell Whether to render the td wrapper (default true).
+ * @return string The generated table wrapper HTML.
+ */
+public static function render_outlook_table_wrapper(
+    string $content,
+    array $table_attrs = array(),
+    array $cell_attrs = array(),
+    array $row_attrs = array(),
+    bool $render_cell = true
+): string
+```
+
+**Example Usage:**
+
+```php
+$outlook_table = Table_Wrapper_Helper::render_outlook_table_wrapper(
+    '<p>Outlook-specific table content</p>',
+    array('width' => '100%'),
+    array('align' => 'center')
+);
+```
+
+**Output:**
+
+```html
+<!--[if mso | IE]><table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%"><tbody><tr><td align="center"><![endif]-->
+<p>Outlook-specific table content</p>
+<!--[if mso | IE]></td></tr></tbody></table><![endif]-->
+```
+
+#### `render_table_cell()`
+
+Renders a single table cell (`<td>`) element with optional attributes.
+
+```php
+/**
+ * Render a table cell.
+ *
+ * @param string $content The content to wrap.
+ * @param array  $cell_attrs Cell attributes.
+ * @return string The generated table cell HTML.
+ */
+public static function render_table_cell(
+    string $content,
+    array $cell_attrs = array()
+): string
+```
+
+**Example Usage:**
+
+```php
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
+
+$cell_html = Table_Wrapper_Helper::render_table_cell(
+    '<p>Hello World</p>',
+    array(
+        'align' => 'center',
+        'style' => 'padding: 20px;'
+    )
+);
+```
+
+**Output:**
+
+```html
+<td align="center" style="padding: 20px;"><p>Hello World</p></td>
+```
+
+#### `render_outlook_table_cell()`
+
+Renders a table cell wrapped in Outlook-specific conditional comments for better compatibility with Microsoft Outlook.
+
+```php
+/**
+ * Render an Outlook-specific table cell using conditional comments.
+ *
+ * @param string $content The content to wrap.
+ * @param array  $cell_attrs Cell attributes.
+ * @return string The generated table cell HTML with Outlook conditionals.
+ */
+public static function render_outlook_table_cell(
+    string $content,
+    array $cell_attrs = array()
+): string
+```
+
+**Example Usage:**
+
+```php
+$outlook_cell = Table_Wrapper_Helper::render_outlook_table_cell(
+    '<p>Outlook-specific content</p>',
+    array('align' => 'center')
+);
+```
+
+**Output:**
+
+```html
+<!--[if mso | IE]><td align="center"><![endif]-->
+<p>Outlook-specific content</p>
+<!--[if mso | IE]></td><![endif]-->
+```
+
 ## Integration Example
 
 Here's how these classes work together in a typical email rendering workflow:
@@ -187,4 +386,3 @@ $email_data = $renderer->render(
 ```
 
 This allows for flexible email rendering where you can either get the complete email document or just the content blocks, depending on your specific needs.
-

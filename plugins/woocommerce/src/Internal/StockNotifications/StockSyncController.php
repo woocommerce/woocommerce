@@ -110,6 +110,9 @@ class StockSyncController {
 			foreach ( $target_product_ids as $target_product_id ) {
 				$this->queue[ $target_product_id ] = true;
 			}
+
+			$this->store_admin_notice( $product->get_id() );
+
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to process product %d: %s', $product_id, $e->getMessage() ),
@@ -141,8 +144,6 @@ class StockSyncController {
 			$this->job_manager->schedule_initial_job_for_product( $product_id );
 		}
 
-		$this->store_admin_notice();
-
 		/**
 		 * Allows for additional processing of the product IDs after they have been queued.
 		 *
@@ -157,15 +158,16 @@ class StockSyncController {
 	/**
 	 * Store the admin notice.
 	 *
+	 * @param int $product_id The product ID to sync.
 	 * @return void
 	 */
-	private function store_admin_notice(): void {
+	private function store_admin_notice( $product_id ): void {
 		if ( ! is_admin() || ! function_exists( 'wp_admin_notice' ) ) {
 			return;
 		}
 
 		/* translators: 1 = URL of the Back in Stock Notifications page */
-		$notice_message = sprintf( __( 'Back-in-stock notifications for this product are now being processed. Subscribed customers will receive these emails over the next few minutes. You can monitor or manage individual subscriptions on the <a href="%s">Stock Notifications page</a>.', 'woocommerce' ), admin_url( 'admin.php?page=customer-stock-notifications' ) );
+		$notice_message = sprintf( __( 'Back-in-stock notifications for this product are now being processed. Subscribed customers will receive these emails over the next few minutes. You can monitor or manage individual subscriptions on the <a href="%s">Stock Notifications page</a>.', 'woocommerce' ), sprintf( admin_url( 'admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=%d&status=active_customer_stock_notifications&filter_action=Filter' ), $product_id ) );
 
 		update_option( 'wc_customer_stock_notifications_product_sync_notice', $notice_message );
 	}
