@@ -67,7 +67,7 @@ WooCommerce defines the top-level wrappers of Cart and Checkout blocks as CSS co
 }
 ```
 
-Developers can now use CSS Container Queries (`@container`) to style child components based on parent width, eliminating the need for JS-added classes like `.is-large`. Legacy classes remain for compatibility, but we recommend using the new approach for cleaner styling and fewer layout shifts.
+Developers can use CSS Container Queries (`@container`) to style child components based on parent width, eliminating the need for JS-added classes such as `.is-large` which are considered legacy. Legacy classes remain in place for backwards compatibility, but we recommend using the container approach for cleaner styling and fewer layout shifts.
 
 **Note:** Container queries work as long as there isn't another container in between the checkout blocks wrapper and the element being styled. If you define additional CSS containers in your theme or plugins, they may interfere with the container query behavior.
 
