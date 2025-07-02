@@ -13,7 +13,7 @@ type PaymentMethod = {
 	icon: string;
 };
 
-type WooPaymentMethods = Record< string, PaymentMethod >;
+type PaymentMethods = Record< string, PaymentMethod >;
 
 const CardPreview = ( {
 	type,
@@ -50,29 +50,22 @@ const Edit = ( {
 	setAttributes: ( attributes: Partial< BlockAttributes > ) => void;
 } ) => {
 	const blockProps = useBlockProps();
-	const wooPaymentMethods =
-		( window.wcSettings?.availablePaymentMethods as WooPaymentMethods ) ||
-		{};
+	const paymentMethods =
+		( window.wcSettings?.availablePaymentMethods as PaymentMethods ) || {};
 	const { numberOfIcons } = attributes;
 
-	if ( wooPaymentMethods && Object.keys( wooPaymentMethods ).length > 0 ) {
-		const icons = Object.keys( wooPaymentMethods ).reduce(
-			( acc, type ) => {
-				if (
-					! wooPaymentMethods[ type ] ||
-					! wooPaymentMethods[ type ].icon
-				) {
-					return acc;
-				}
-
-				acc.push( {
-					type,
-					icon: wooPaymentMethods[ type ].icon,
-				} );
+	if ( paymentMethods && Object.keys( paymentMethods ).length > 0 ) {
+		const icons = Object.keys( paymentMethods ).reduce( ( acc, type ) => {
+			if ( ! paymentMethods[ type ] || ! paymentMethods[ type ].icon ) {
 				return acc;
-			},
-			[] as Array< { type: string; icon: string } >
-		);
+			}
+
+			acc.push( {
+				type,
+				icon: paymentMethods[ type ].icon,
+			} );
+			return acc;
+		}, [] as Array< { type: string; icon: string } > );
 
 		const iconsToShow =
 			numberOfIcons === 0
@@ -118,10 +111,7 @@ const Edit = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ __(
-				'No active WooPayments payment methods found.',
-				'woocommerce'
-			) }
+			{ __( 'No active payment methods found.', 'woocommerce' ) }
 		</div>
 	);
 };

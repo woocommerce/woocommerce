@@ -2,7 +2,7 @@
 	"name": "woocommerce/payment-method-icons",
 	"version": "1.0.0",
 	"title": "Payment Method Icons",
-	"description": "Display icons for available WooPayments methods.",
+	"description": "Display icons for available payment methods.",
 	"category": "woocommerce",
 	"keywords": [ "woocommerce", "payments", "payment methods" ],
 	"textdomain": "woocommerce",
