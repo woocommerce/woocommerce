@@ -108,6 +108,12 @@ $border-width: 1px;
 			margin-bottom: em($gap);
 		}
 	}
+
+	@include cart-checkout-below-large-container {
+		.wc-block-components-express-payment__content {
+			padding: #{$gap - $universal-border-radius} $gap $gap;
+		}
+	}
 }
 
 .wc-block-components-express-payment--disabled {
@@ -155,6 +161,11 @@ $border-width: 1px;
 		.has-dark-controls & {
 			border-color: $input-border-dark;
 		}
+	}
+}
+@include cart-checkout-below-large-container {
+	.wc-block-components-express-payment-continue-rule {
+		margin: $gap 0;
 	}
 }
 
