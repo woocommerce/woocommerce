@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+
 /**
  * Settings controller for Customer Stock Notifications.
  */
@@ -105,7 +107,7 @@ class SettingsController {
 					'title'   => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
 					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce-back-in-stock-notifications' ),
 					'id'      => 'wc_customer_stock_notifications_delete_unverified_days_threshold',
-					'default' => 0,
+					'default' => Config::DEFAULT_UNVERIFIED_DAYS_THRESHOLD,
 					'type'    => 'number',
 				),
 
