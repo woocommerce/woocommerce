@@ -2041,6 +2041,8 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
 			"{$wpdb->prefix}wc_product_attributes_lookup",
+			"{$wpdb->prefix}wc_stock_notifications",
+			"{$wpdb->prefix}wc_stock_notificationmeta",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",

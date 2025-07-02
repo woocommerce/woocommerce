@@ -24,6 +24,13 @@ final class NotificationCancellationSource {
 	public const USER = 'user';
 
 	/**
+	 * System cancellation source.
+	 *
+	 * @var string
+	 */
+	public const SYSTEM = 'system';
+
+	/**
 	 * Get valid cancellation sources.
 	 *
 	 * @return string[]
@@ -32,6 +39,7 @@ final class NotificationCancellationSource {
 		return array(
 			self::ADMIN,
 			self::USER,
+			self::SYSTEM,
 		);
 	}
 }

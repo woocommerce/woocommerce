@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -413,16 +414,17 @@ CREATE TABLE $meta_table_name (
 		$args = wp_parse_args(
 			$args,
 			array(
-				'status'     => '',
-				'product_id' => array(),
-				'user_id'    => 0,
-				'user_email' => '',
-				'start_date' => 0,
-				'end_date'   => 0,
-				'limit'      => -1,
-				'offset'     => 0,
-				'order_by'   => array( 'id' => 'ASC' ),
-				'return'     => 'ids', // i.e. 'count', 'ids', 'objects'.
+				'status'             => '',
+				'product_id'         => array(),
+				'user_id'            => 0,
+				'user_email'         => '',
+				'last_attempt_limit' => 0,
+				'start_date'         => 0,
+				'end_date'           => 0,
+				'limit'              => -1,
+				'offset'             => 0,
+				'order_by'           => array( 'id' => 'ASC' ),
+				'return'             => 'ids', // i.e. 'count', 'ids', 'objects'.
 			)
 		);
 
@@ -457,6 +459,11 @@ CREATE TABLE $meta_table_name (
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
 			$where_values[] = esc_sql( $args['user_email'] );
+		}
+
+		if ( $args['last_attempt_limit'] > 0 ) {
+			$where[]        = '(date_last_attempt_gmt < %s OR date_last_attempt_gmt IS NULL)';
+			$where_values[] = gmdate( 'Y-m-d H:i:s', $args['last_attempt_limit'] );
 		}
 
 		if ( $args['start_date'] ) {
@@ -519,6 +526,30 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
+	 * Check if the product has active notifications.
+	 *
+	 * @param array<int> $product_ids The product IDs.
+	 * @return bool True if the product has active notifications, false otherwise.
+	 */
+	public function product_has_active_notifications( array $product_ids ): bool {
+		global $wpdb;
+
+		$product_ids = array_filter( array_map( 'absint', $product_ids ) );
+		if ( empty( $product_ids ) ) {
+			return false;
+		}
+
+		$table    = $this->get_table_name();
+		$format   = array_fill( 0, count( $product_ids ), '%d' );
+		$query_in = '(' . implode( ',', $format ) . ')';
+		$sql      = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			"SELECT 1 FROM %i WHERE product_id IN $query_in AND status = %s LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $table, ...$product_ids, NotificationStatus::ACTIVE )
+		);
+		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Get distinct notification creation dates.
 	 *
 	 * @return array
@@ -529,9 +560,9 @@ CREATE TABLE $meta_table_name (
 
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT DISTINCT 
-					YEAR(date_created_gmt) AS year, 
-					MONTH(date_created_gmt) AS month 
+				'SELECT DISTINCT
+					YEAR(date_created_gmt) AS year,
+					MONTH(date_created_gmt) AS month
 				FROM %i
 				ORDER BY year DESC, month DESC',
 				$this->get_table_name()

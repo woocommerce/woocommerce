@@ -11,6 +11,17 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 class NotificationTests extends \WC_Unit_Test_Case {
 
 	/**
+	 * @after
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		// Clean up all notifications.
+		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+	}
+
+	/**
 	 * Test the product getter.
 	 */
 	public function test_product_getter() {

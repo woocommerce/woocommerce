@@ -462,6 +462,45 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test querying notifications with a last attempt limit.
+	 */
+	public function test_query_notifications_with_last_attempt_limit() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'last_attempt_limit' => time(),
+			)
+		);
+		// First notification is returned because it has no last attempt date.
+		$this->assertCount( 1, $notifications );
+
+		$notification->set_date_last_attempt( time() );
+		$notification->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'last_attempt_limit' => time(),
+			)
+		);
+		// Second notification is returned because we need to older than now.
+		$this->assertCount( 0, $notifications );
+
+		$notification->set_date_last_attempt( time() - 1000 );
+		$notification->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'last_attempt_limit' => time(),
+			)
+		);
+		$this->assertCount( 1, $notifications );
+	}
+
+	/**
 	 * Test querying notifications with a limit and offset.
 	 */
 	public function test_query_notifications_with_limit_and_offset() {
