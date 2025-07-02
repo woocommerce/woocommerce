@@ -67,21 +67,22 @@ const getMatchedCartItem = (
 	if ( cartItem.variation.length !== selectedItem.length ) return false;
 
 	return cartItem.variation.every(
-		( { attribute, value }: { attribute: string; value: string } ) =>
+		( {
+			raw_attribute,
+			value,
+		}: {
+			raw_attribute: string;
+			value: string;
+		} ) =>
 			selectedItem.some( ( item ) => {
-				const selectedItemAttr = item.attribute
-					.split( '_' )
-					.reverse()[ 0 ]
-					.toLowerCase();
+				const selectedItemAttr = item.attribute;
 				const selectedItemValue = item.value.toLowerCase();
 
-				if (
-					selectedItemAttr === attribute.toLowerCase() &&
+				return (
+					selectedItemAttr === raw_attribute &&
 					( selectedItemValue === value.toLowerCase() ||
 						( item.value && value === '' ) )
-				) {
-					return true;
-				}
+				);
 			} )
 	);
 };
@@ -98,7 +99,7 @@ const productButtonStore = {
 				}
 			} );
 
-			if ( product[ 0 ]?.type !== 'variable' ) {
+			if ( product[ 0 ]?.type !== 'variation' ) {
 				return product[ 0 ]?.quantity;
 			}
 
