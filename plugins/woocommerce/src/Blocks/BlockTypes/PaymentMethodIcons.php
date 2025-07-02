@@ -185,7 +185,7 @@ class PaymentMethodIcons extends AbstractBlock {
 				}
 
 				$icon_url = '';
-				if ( method_exists( $gateway, 'get_icon_url' ) ) {
+				if ( is_callable( array( $gateway, 'get_icon_url' ) ) ) {
 					$icon_url = $gateway->get_icon_url();
 				}
 				if ( ! empty( $icon_url ) ) {
