@@ -19,12 +19,12 @@ use Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions;
 class ExportWCSettingsTax extends ExportWCSettings {
 	use UseWPFunctions;
 
+	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 	/**
 	 * Constructor.
 	 *
 	 * @param SettingOptions|null $setting_options The setting options class.
 	 */
-	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 	public function __construct( ?SettingOptions $setting_options = null ) {
 		parent::__construct( $setting_options );
 	}
