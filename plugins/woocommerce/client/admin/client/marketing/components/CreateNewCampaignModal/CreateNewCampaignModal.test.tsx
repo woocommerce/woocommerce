@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { useCampaignTypes, useRecommendedChannels } from '~/marketing/hooks';
-import { CreateNewCampaignModal } from '../CreateNewCampaignModal';
+import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 
 jest.mock( '@woocommerce/components', () => {
 	const originalModule = jest.requireActual( '@woocommerce/components' );
