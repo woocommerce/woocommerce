@@ -174,7 +174,7 @@
 		"autoprefixer": "^10.4.16",
 		"await-exec": "^0.1.2",
 		"babel-jest": "27.5.x",
-		"babel-loader": "10.0.x",
+		"babel-loader": "9.2.x",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "^4.1.2",
 		"comment-parser": "^1.4.1",
