@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add to Cart + Options: don't try to remove attributes on load
