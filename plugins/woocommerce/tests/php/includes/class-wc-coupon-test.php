@@ -49,4 +49,21 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 			'Line items associated with deleted products are not included in the discount calculation.'
 		);
 	}
+
+	/**
+	 * @return void
+	 */
+	public function test_coupons_with_an_invalid_date_will_throw_exception(): void {
+		$coupon        = WC_Helper_Coupon::create_coupon(
+			'bad_date',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => 10,
+			)
+		);
+
+		$coupon->set_date_created( new stdClass() );
+
+		$this->expectException( WC_Data_Exception::class );
+	}
 }
