@@ -164,7 +164,7 @@ const updateCheckoutData = (): void => {
 	// Update local cache
 	localState.checkoutData = newCheckoutData;
 
-	( dispatch( CHECKOUT_STORE_KEY ) as any )
+	dispatch( CHECKOUT_STORE_KEY )
 		.updateDraftOrder( requestData )
 		.then( () => {
 			clearFieldErrorNotices( requestData );
