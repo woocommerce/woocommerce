@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: About page with store information 
+ * Title: About page with store information alternative
  * Slug: woostarter/page-about-with-store-information-alternative
  * Categories: woocommerce
  * Keywords: starter
