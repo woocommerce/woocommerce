@@ -7,6 +7,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import '../../../test-helper/global-mock';
 import RemoveButton from '../remove-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
 

@@ -101,7 +101,7 @@ describe( 'FulfillmentLineItem', () => {
 			/>
 		);
 
-		const icon = screen.getByTestId( 'icon-arrow-right-alt2' );
+		const icon = screen.getByTestId( 'icon-arrow-down-alt2' );
 		expect( icon ).toBeInTheDocument();
 
 		fireEvent.click( icon );
