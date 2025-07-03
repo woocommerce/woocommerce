@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-rm -rm $script_dir/tmp/database
+rm -rm $script_dir/tmp
 mkdir $script_dir/tmp/database
 wp-env run tests-cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/setup-sqlite.sh
 
@@ -16,3 +16,5 @@ wp-env run tests-cli -- wp plugin activate woocommerce-test-plugins/test-helper-
 
 echo "Generating test translations"
 node $script_dir/generate-test-translations.js
+
+wp-env run tests-cli -- wp core version | grep -E '^[0-9]+(\.[0-9]+)+$' >$script_dir/tmp/version

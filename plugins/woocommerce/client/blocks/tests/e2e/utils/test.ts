@@ -188,8 +188,24 @@ const test = base.extend<
 	],
 	wpCoreVersion: [
 		async ( {}, use ) => {
-			const output = await wpCLI( 'core version' );
-			const version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+			const versionFilePath = path.resolve(
+				__dirname,
+				'../bin/tmp/version'
+			);
+			let version = '';
+
+			try {
+				version = fs.readFileSync( versionFilePath, 'utf8' ).trim();
+			} catch ( fileError ) {
+				const output = await wpCLI( 'core version' );
+				version = output.stdout.trim().split( '\n' ).at( -1 ) ?? '';
+
+				// Save the version to the file for later use
+				fs.mkdirSync( path.dirname( versionFilePath ), {
+					recursive: true,
+				} );
+				fs.writeFileSync( versionFilePath, version );
+			}
 
 			// We can parse this as a float because WP never updates the minor
 			// version over x.9.x. E.g., after 6.9.x, it will be 7.0.x.
