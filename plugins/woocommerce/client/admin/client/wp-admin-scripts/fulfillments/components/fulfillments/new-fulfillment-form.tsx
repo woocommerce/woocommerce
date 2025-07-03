@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 
@@ -24,6 +24,12 @@ const NewFulfillmentForm: React.FC = () => {
 	const { order, fulfillments, openSection, setOpenSection, isEditing } =
 		useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
+
+	// Reset error when order changes
+	useEffect( () => {
+		setError( null );
+	}, [ order?.id ] );
+
 	const remainingItems = useMemo(
 		() =>
 			getItemsNotInAnyFulfillment(

@@ -39,15 +39,20 @@ export function hasPendingItems(
 	order: Order,
 	fulfillments: Fulfillment[]
 ): boolean {
-	const itemsNotInFulfillments = order.line_items.filter(
-		( item: LineItem ) =>
-			! fulfillments.some( ( fulfillment ) =>
-				getFulfillmentItems( fulfillment ).some(
-					( fulfillmentItem ) => fulfillmentItem.item_id === item.id
-				)
-			)
-	);
-	return itemsNotInFulfillments.length > 0;
+	return order.line_items.some( ( item: LineItem ) => {
+		const totalFulfilledQty = fulfillments.reduce(
+			( total, fulfillment ) => {
+				const fulfillmentItems = getFulfillmentItems( fulfillment );
+				const fulfillmentItemInOrder = fulfillmentItems.find(
+					( fItem: FulfillmentItem ) => fItem.item_id === item.id
+				);
+				return total + ( fulfillmentItemInOrder?.qty || 0 );
+			},
+			0
+		);
+
+		return totalFulfilledQty < item.quantity;
+	} );
 }
 
 export async function refreshOrderFulfillmentStatus( orderId: number ) {

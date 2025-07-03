@@ -80,15 +80,21 @@ export const FulfillmentDrawerProvider = ( {
 	);
 
 	useLayoutEffect( () => {
-		if ( ! fulfillments || fulfillments.length === 0 ) {
+		const hasPendingItemsInOrder =
+			order && fulfillments && hasPendingItems( order, fulfillments );
+
+		if ( hasPendingItemsInOrder ) {
+			// If there are pending items in the order and multiple fulfillments,
+			// open the order section to allow adding a new fulfillment.
 			setOpenSection( 'order' );
-		} else if (
-			order &&
-			fulfillments &&
-			! hasPendingItems( order, fulfillments ) &&
-			fulfillments.length === 1
-		) {
+		} else if ( fulfillments && fulfillments.length === 1 ) {
+			// If all the items are in a single fulfillment,
+			// open that fulfillment section directly.
 			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
+		} else {
+			// If there are no pending items and multiple fulfillments,
+			// collapse all.
+			setOpenSection( '' );
 		}
 	}, [ orderId, fulfillments, order ] );
 

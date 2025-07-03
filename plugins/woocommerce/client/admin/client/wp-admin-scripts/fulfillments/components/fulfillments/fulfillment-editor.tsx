@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -69,6 +69,11 @@ export default function FulfillmentEditor( {
 
 	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
 	const hasPendingItemsInOrder = hasPendingItems( order, fulfillments );
+
+	// Reset error when order changes
+	useEffect( () => {
+		setError( null );
+	}, [ order.id ] );
 
 	const handleChevronClick = () => {
 		if ( isEditing ) return;
