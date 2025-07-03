@@ -319,10 +319,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
-		$search_name_sku_or_global_unique_id_arg = $request['search_name_sku_or_global_unique_id'] ?? '';
+		$search_name_sku_or_global_unique_id_arg = trim( $request['search_name_sku_or_global_unique_id'] ?? '' );
 		$search_name_or_sku_arg                  = $request['search_name_or_sku'] ?? '';
 
-		if ( is_string( $search_name_sku_or_global_unique_id_arg ) && '' !== trim( $search_name_sku_or_global_unique_id_arg ) ) {
+		if ( $search_name_sku_or_global_unique_id_arg ) {
 			// Do a tokenized search for name, SKU, or global_unique_id. Supersedes all other search arguments.
 			$tokens = array_filter( array_map( 'trim', explode( ' ', $search_name_sku_or_global_unique_id_arg ) ) );
 			$this->search_name_sku_or_global_unique_id_tokens = array_map( 'esc_sql', $tokens );
