@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 import { checkCartContent } from '../../utils/cart';
 
 const productPrice = '18.16';

@@ -1,9 +1,18 @@
 /**
+ * External dependencies
+ */
+import { createClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
-import ApiClient, { WC_API_PATH } from '../utils/api-client';
+import { admin } from '../test-data/data';
 
-const api = ApiClient.getInstance();
+const api = createClient(
+	process.env.BASE_URL,
+	admin.username,
+	admin.password
+);
 
 const update = {
 	storeDetails: async ( store ) => {

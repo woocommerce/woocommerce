@@ -1,9 +1,18 @@
 /**
+ * External dependencies
+ */
+import { createClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
-import ApiClient, { WC_API_PATH } from './api-client';
+import { admin } from '../test-data/data';
 
-const apiClient = ApiClient.getInstance();
+const apiClient = createClient(
+	process.env.BASE_URL,
+	admin.username,
+	admin.password
+);
 
 function resolvePath( path ) {
 	return `${ WC_API_PATH }/settings/${ path }`.replace( /\/+/g, '/' );

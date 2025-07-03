@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const hide_task_list = async ( restApi, task_list_name ) => {
 	const {

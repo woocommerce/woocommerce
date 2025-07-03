@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import {
+	addAProductToCart,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { WC_API_PATH } from '../../utils/api-client';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 
 const simpleProductName = 'Cart Coupons Product';
