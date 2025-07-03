@@ -10,7 +10,11 @@ import {
 	Button,
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
-import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
+import {
+	paymentGatewaysStore,
+	optionsStore,
+	paymentSettingsStore,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -43,6 +47,9 @@ export const SettingsPaymentsBacs = () => {
 		} ),
 		[]
 	);
+
+	const { invalidateResolution, invalidateResolutionForStoreSelector } =
+		useDispatch( paymentSettingsStore );
 
 	const { accountsOption, isLoadingAccounts } = useSelect( ( select ) => {
 		const selectors = select( optionsStore );
@@ -137,6 +144,8 @@ export const SettingsPaymentsBacs = () => {
 		} finally {
 			setIsSaving( false );
 			setHasChanges( false );
+			invalidateResolution( 'getPaymentProviders', [] );
+			invalidateResolutionForStoreSelector( 'getOfflinePaymentGateways' );
 		}
 	};
 
