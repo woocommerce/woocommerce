@@ -96,7 +96,7 @@ const Edit = ( {
 						/>
 					</PanelBody>
 				</InspectorControls>
-				<div className="wp-block-woocommerce-payment-method-icons">
+				<div className="wc-block-payment-method-icons">
 					{ icons.slice( 0, iconsToShow ).map( ( icon ) => (
 						<CardPreview
 							key={ icon?.type }

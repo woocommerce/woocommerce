@@ -71,7 +71,7 @@ class PaymentMethodIcons extends AbstractBlock {
 		);
 
 		$output  = '<div ' . $wrapper_attributes . '>';
-		$output .= '<div class="wp-block-woocommerce-payment-method-icons">';
+		$output .= '<div class="wc-block-payment-method-icons">';
 		$output .= $this->render_payment_method_icons( $attributes );
 		$output .= '</div>';
 		$output .= '</div>';
