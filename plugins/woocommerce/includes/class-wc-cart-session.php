@@ -79,7 +79,6 @@ final class WC_Cart_Session {
 
 		// Update session when the cart is updated.
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
@@ -283,12 +282,14 @@ final class WC_Cart_Session {
 		$cart_for_session = $this->get_cart_for_session();
 
 		if ( empty( $cart_for_session ) ) {
-			$wc_session->set( 'cart', null );
-			$wc_session->set( 'cart_totals', null );
-		}
-
-		if ( $update_cart_session ) {
+			// If the cart is empty, clear the cart session directly.
+			$this->destroy_cart_session();
+		} elseif ( $update_cart_session ) {
+			// If the cart is not empty, and the cart session needs to be updated, calculate totals. Session will update after this.
 			$this->cart->calculate_totals();
+		} else {
+			// Otherwise, just set the session. This was previously hooked into `woocommerce_cart_loaded_from_session` but that resulted in multiple session updates.
+			$this->set_session();
 		}
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
