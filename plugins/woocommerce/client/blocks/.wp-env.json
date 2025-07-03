@@ -16,7 +16,8 @@
 				"wp-content/plugins/woocommerce-test-plugins": "../../tests/e2e-pw/bin",
 				"wp-content/themes": "./tests/e2e/themes",
 				"wp-content/themes/storefront": "https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
-				"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"
+				"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip",
+				"wp-content/database": "./tests/e2e/bin/tmp/database"
 			}
 		}
 	}
