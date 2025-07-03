@@ -13,6 +13,8 @@ import {
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
 } from '@woocommerce/e2e-utils';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Internal dependencies
@@ -62,27 +64,27 @@ const prepareAttributes = async () => {
 };
 
 async function globalSetup() {
+	const dbPath = path.resolve( __dirname, 'bin/tmp/database/.ht.sqlite' );
+	const dbBackupPath = path.resolve(
+		__dirname,
+		'bin/tmp/database/.ht.sqlite.backup'
+	);
 	console.log( 'Running global setup:' );
 	console.time( '└ Total time' );
 
 	let databaseImported = false;
 
 	try {
-		await testsCli(
-			`bash wp-content/plugins/woocommerce/blocks-bin/playwright/restore-sqlite.sh`
-		);
-		console.log( '├ Database snapshot imported, running basic setup…' );
-		databaseImported = true;
-	} catch ( error ) {
-		if (
-			error instanceof Error &&
-			! error.message.includes( 'Import file missing' )
-		) {
-			// Throw if the error is not related to the import file missing.
-			throw error;
+		if ( fs.existsSync( dbBackupPath ) ) {
+			fs.copyFileSync( dbBackupPath, dbPath );
+			console.log( '├ Database snapshot imported, running basic setup…' );
+			databaseImported = true;
+		} else {
+			console.log( '├ Database snapshot not found, running full setup…' );
 		}
-
-		console.log( '├ Database snapshot not found, running full setup…' );
+	} catch ( error ) {
+		console.error( 'Error restoring database snapshot:', error );
+		throw error;
 	}
 
 	const requestContext = await request.newContext( {
@@ -109,9 +111,12 @@ async function globalSetup() {
 	}
 
 	console.log( '├ Exporting database snapshot…' );
-	await testsCli(
-		`bash wp-content/plugins/woocommerce/blocks-bin/playwright/backup-sqlite.sh`
-	);
+	try {
+		fs.copyFileSync( dbPath, dbBackupPath );
+	} catch ( error ) {
+		console.error( 'Error backing up database snapshot:', error );
+		throw error;
+	}
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );

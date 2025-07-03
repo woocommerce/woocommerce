@@ -18,6 +18,8 @@ import {
 	RequestUtils,
 	ShippingUtils,
 } from '@woocommerce/e2e-utils';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -102,6 +104,12 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	console[ logFunction ]( text );
 }
 
+const dbPath = path.resolve( __dirname, '../bin/tmp/database/.ht.sqlite' );
+const dbBackupPath = path.resolve(
+	__dirname,
+	'../bin/tmp/database/.ht.sqlite.backup'
+);
+
 const test = base.extend<
 	{
 		admin: Admin;
@@ -139,10 +147,16 @@ const test = base.extend<
 		await page.request.dispose();
 
 		// Reset the database to the initial state via snapshot import.
-		await testsCli(
-			`bash wp-content/plugins/woocommerce/blocks-bin/playwright/restore-sqlite.sh`
-		);
+		try {
+			if ( fs.existsSync( dbBackupPath ) ) {
+				fs.copyFileSync( dbBackupPath, dbPath );
+			}
+		} catch ( error ) {
+			console.error( 'Error restoring database snapshot:', error );
+			throw error;
+		}
 	},
+
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
