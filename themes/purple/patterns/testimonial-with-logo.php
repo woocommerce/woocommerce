@@ -25,6 +25,6 @@
 <!-- /wp:spacer -->
 
 <!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center"} -->
-<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_html_e('Brand logo', 'woostarter');?>" class="" style="width:130px"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'woostarter');?>" class="" style="width:130px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
