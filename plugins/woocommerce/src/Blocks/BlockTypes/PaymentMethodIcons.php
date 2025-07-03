@@ -55,10 +55,9 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$enabled_card_types    = $this->get_enabled_card_types();
-		$other_payment_methods = $this->get_other_payment_method_icons();
+		$payment_methods = $get_available_payment_methods();
 
-		if ( empty( $enabled_card_types ) && empty( $other_payment_methods ) ) {
+		if ( empty( $payment_methods ) ) {
 			return '';
 		}
 
