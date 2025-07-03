@@ -28,7 +28,7 @@ const CardPreview = ( {
 		CardIcon = (
 			<div className="wc-block-payment-method-icons__item">
 				<span
-					className="wp-block-woocommerce-payment-method-icons__icon"
+					className="wc-block-payment-method-icons__icon"
 					style={ {
 						backgroundImage: `url(${ icon })`,
 					} }
