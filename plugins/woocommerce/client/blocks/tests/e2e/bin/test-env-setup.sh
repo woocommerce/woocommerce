@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+rm -rm $script_dir/tmp/database
+mkdir $script_dir/tmp/database
 wp-env run tests-cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/setup-sqlite.sh
 
 # Remove the database snapshot if it exists.
