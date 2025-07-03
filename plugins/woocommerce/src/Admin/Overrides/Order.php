@@ -87,7 +87,7 @@ class Order extends \WC_Order {
 	 *
 	 * @param string $classname Name of the class to be created.
 	 * @param string $order_type Type of order object to be created.
-	 * @param int    $order_id Order id to create.
+	 * @param number $order_id Order id to create.
 	 *
 	 * @return string
 	 */
