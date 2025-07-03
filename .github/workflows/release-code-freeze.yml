@@ -171,14 +171,47 @@ jobs:
     with:
       skip_verify: true
       create_github_release: false
+      branch: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
+
+  modify-zip-version:
+    name: 'Update version to Dev'
+    runs-on: ubuntu-latest
+    needs: [build-zip, prepare-for-code-freeze]
+    env:
+      DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}-dev
+    outputs:
+      artifact_url: ${{ steps.upload-modified-zip.outputs.artifact-url }}
+    steps:
+      - name: Download original zip artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce
+          path: ./download
+
+      - name: Modify version in woocommerce.php
+        run: |
+          sed -i "s/\* Version:.*/\* Version: $DEV_VERSION/" ./download/woocommerce/woocommerce.php
+
+      - name: Create new zip file
+        run: |
+          cd ./download/woocommerce
+          ZIPFILE_NAME="woocommerce-$DEV_VERSION"
+          zip -r "../../$ZIPFILE_NAME.zip" .
+          echo "ZIPFILE_NAME=$ZIPFILE_NAME" >> $GITHUB_ENV
+
+      - name: Upload modified zip as artifact
+        id: upload-modified-zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIPFILE_NAME }}
+          path: ${{ env.ZIPFILE_NAME }}.zip
 
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
-    needs: [build-zip, prepare-for-code-freeze]
+    needs: [modify-zip-version, prepare-for-code-freeze]
     steps:
       - name: Notify Slack on success
-        if: ${{ success() }}
         uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -186,6 +219,6 @@ jobs:
           slack-text: |
             :ice_cube: Code Freeze completed for `${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}` :checking:
             If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
-            <${{ needs.build-zip.outputs.artifact_url }}|Download zip>
+            <${{ needs.modify-zip-version.outputs.artifact_url }}|Download zip>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false

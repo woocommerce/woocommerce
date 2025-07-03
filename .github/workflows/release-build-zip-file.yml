@@ -16,6 +16,11 @@ on:
         required: true
   workflow_call:
     inputs:
+      branch:
+        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        type: string
+        required: false
+        default: ''
       skip_verify:
         description: 'Skip verification steps.'
         type: boolean
