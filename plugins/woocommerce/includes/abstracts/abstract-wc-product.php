@@ -2011,9 +2011,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 * Filters the minimum quantity which can be purchased at once.
 		 *
 		 * @since 10.1.0
-		 *
 		 * @param int|float $quantity The minimum quantity.
-		 * @param WC_Product $this The product object.
+		 * @param \WC_Product $this The product object.
 		 * @return int|float The minimum quantity.
 		 */
 		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_min', 1, $this ) );
@@ -2030,9 +2029,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 * Filters the maximum quantity which can be purchased at once.
 		 *
 		 * @since 10.1.0
-		 *
 		 * @param int|float $quantity The maximum quantity.
-		 * @param WC_Product $this The product object.
+		 * @param \WC_Product $this The product object.
 		 * @return int|float The maximum quantity.
 		 */
 		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_max', $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() ), $this ) );
@@ -2049,9 +2047,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 * Filters the step for the quantity input for this product.
 		 *
 		 * @since 10.1.0
-		 *
 		 * @param int|float $step The step.
-		 * @param WC_Product $this The product object.
+		 * @param \WC_Product $this The product object.
 		 * @return int|float The step.
 		 */
 		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_step', 1, $this ) );

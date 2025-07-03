@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Enums\ProductType;
  * @since  3.0.0 this supports set, increase and decrease.
  *
  * @param  int|WC_Product $product        Product ID or product instance.
- * @param  int|float|null $stock_quantity Stock quantity.
+ * @param  int|null       $stock_quantity Stock quantity.
  * @param  string         $operation      Type of operation, allows 'set', 'increase' and 'decrease'.
  * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
  * @return bool|int|null

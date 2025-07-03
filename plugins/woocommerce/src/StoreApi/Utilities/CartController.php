@@ -671,8 +671,6 @@ class CartController {
 	/**
 	 * Validates an existing cart item and returns any errors.
 	 *
-	 * @throws TooManyInCartException Exception if more than one product that can only be purchased individually is in
-	 * the cart.
 	 * @throws PartialOutOfStockException Exception if an item has a quantity greater than what is available in stock.
 	 * @throws OutOfStockException Exception thrown when an item is entirely out of stock.
 	 * @throws NotPurchasableException Exception thrown when an item is not purchasable.
@@ -685,19 +683,9 @@ class CartController {
 			return;
 		}
 
-		$quantity_limits    = new QuantityLimits();
-		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
-
 		if ( ! $product->is_purchasable() ) {
 			throw new NotPurchasableException(
 				'woocommerce_rest_product_not_purchasable',
-				$product->get_name()
-			);
-		}
-
-		if ( $product->is_sold_individually() && $cart_item['quantity'] > $add_to_cart_limits['maximum'] ) {
-			throw new TooManyInCartException(
-				'woocommerce_rest_product_too_many_in_cart',
 				$product->get_name()
 			);
 		}

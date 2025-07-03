@@ -33,37 +33,46 @@ final class QuantityLimits {
 			];
 		}
 
-		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $cart_item );
-		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $cart_item );
-		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $cart_item );
-		$editable    = $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $cart_item );
-
-		// Ensure values are compatible with each other.
-		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
-		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
-
-		return [
-			'minimum'     => $minimum,
-			'maximum'     => $maximum,
-			'multiple_of' => $multiple_of,
-			'editable'    => $editable,
-		];
+		return array_merge(
+			$this->get_add_to_cart_limits( $product, $cart_item ),
+			[
+				'editable' => $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $product, $cart_item ),
+			]
+		);
 	}
 
 	/**
 	 * Get limits for product add to cart forms.
 	 *
 	 * @param \WC_Product $product Product instance.
+	 * @param array|null  $cart_item Optional cart item associated with the product.
 	 * @return array
 	 */
-	public function get_add_to_cart_limits( \WC_Product $product ) {
-		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $product );
-		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
-		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $product );
+	public function get_add_to_cart_limits( \WC_Product $product, $cart_item = null ) {
+		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $product, $cart_item );
+		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product, $cart_item ), 'maximum', $product, $cart_item );
+		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $product, $cart_item );
 
 		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
 		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
+
+		// Compatibility with the woocommerce_quantity_input_args filter.
+		if ( has_filter( 'woocommerce_quantity_input_args' ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			$filtered_args = apply_filters(
+				'woocommerce_quantity_input_args',
+				[
+					'min_value' => $minimum,
+					'max_value' => $maximum,
+					'step'      => $multiple_of,
+				],
+				$product
+			);
+			$minimum       = $filtered_args['min_value'] ?? $minimum;
+			$maximum       = $filtered_args['max_value'] ?? $maximum;
+			$multiple_of   = $filtered_args['step'] ?? $multiple_of;
+		}
 
 		return [
 			'minimum'     => $minimum,
@@ -120,7 +129,7 @@ final class QuantityLimits {
 		$multiple_of = NumberUtil::normalize( $multiple_of, null );
 
 		if ( is_null( $multiple_of ) || is_null( $number ) ) {
-			return wc_stock_amount( 0 );
+			return 0;
 		}
 
 		if ( 0 >= $multiple_of || $this->is_multiple_of( $number, $multiple_of ) ) {
@@ -130,7 +139,7 @@ final class QuantityLimits {
 		// Ensure valid rounding function.
 		$rounding_function = in_array( $rounding_function, [ 'ceil', 'floor', 'round' ], true ) ? $rounding_function : 'round';
 
-		return wc_stock_amount( $rounding_function( $number / $multiple_of ) * $multiple_of );
+		return NumberUtil::normalize( $rounding_function( $number / $multiple_of ) * $multiple_of );
 	}
 
 	/**
@@ -141,11 +150,7 @@ final class QuantityLimits {
 	 * @return bool
 	 */
 	protected function is_multiple_of( $number, $multiple_of ) {
-		// Handle edge cases.
-		$number      = NumberUtil::normalize( $number, null );
-		$multiple_of = NumberUtil::normalize( $multiple_of, null );
-
-		if ( is_null( $multiple_of ) || is_null( $number ) || 0 >= $multiple_of ) {
+		if ( 0 >= $multiple_of ) {
 			return false;
 		}
 
@@ -184,7 +189,7 @@ final class QuantityLimits {
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The maximum quantity of &quot;%1$s&quot; allowed in the cart is %2$s', 'woocommerce' ), $product->get_name(), $limits['maximum'] ) );
 		}
 
-		if ( ! $this->is_multiple_of( $quantity, $limits['multiple_of'] ) ) {
+		if ( ! $this->is_multiple_of( $quantity, NumberUtil::normalize( $limits['multiple_of'] ) ) ) {
 			/* translators: 1: product name 2: multiple of */
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; must be a multiple of %2$s', 'woocommerce' ), $product->get_name(), $limits['multiple_of'] ) );
 		}
@@ -199,9 +204,10 @@ final class QuantityLimits {
 	 * in the cart at once.
 	 *
 	 * @param \WC_Product $product Product instance.
+	 * @param array|null  $cart_item Optional cart item associated with the product.
 	 * @return int|float
 	 */
-	protected function get_product_quantity_limit( \WC_Product $product ) {
+	protected function get_product_quantity_limit( \WC_Product $product, $cart_item = null ) {
 		$purchase_limit = $product->get_max_purchase_quantity();
 		$limits         = [ $purchase_limit > 0 ? $purchase_limit : 9999 ];
 
@@ -212,7 +218,7 @@ final class QuantityLimits {
 
 		$limit = min( array_filter( $limits ) );
 
-		return $this->filter_numeric_value( $limit, 'limit', $product );
+		return $this->filter_numeric_value( $limit, 'limit', $product, $cart_item );
 	}
 
 	/**
@@ -237,16 +243,13 @@ final class QuantityLimits {
 	/**
 	 * Get a numeric value while running it through a filter hook.
 	 *
-	 * @param int|float         $value Value to filter.
-	 * @param string            $value_type Type of value. Used for filter suffix.
-	 * @param \WC_Product|array $cart_item_or_product Either a cart item or a product instance.
+	 * @param int|float   $value Value to filter.
+	 * @param string      $value_type Type of value. Used for filter suffix.
+	 * @param \WC_Product $product Product instance.
+	 * @param array|null  $cart_item Optional cart item associated with the product.
 	 * @return int|float
 	 */
-	protected function filter_numeric_value( $value, string $value_type, $cart_item_or_product ) {
-		$is_product = $cart_item_or_product instanceof \WC_Product;
-		$product    = $is_product ? $cart_item_or_product : $cart_item_or_product['data'];
-		$cart_item  = $is_product ? null : $cart_item_or_product;
-
+	protected function filter_numeric_value( $value, string $value_type, \WC_Product $product, $cart_item = null ) {
 		/**
 		 * Filters a quantity for a cart item in Store API. This allows extensions to control the qty of items.
 		 *
@@ -268,15 +271,13 @@ final class QuantityLimits {
 	/**
 	 * Get a boolean value while running it through a filter hook.
 	 *
-	 * @param bool              $value Value to filter.
-	 * @param string            $value_type Type of value. Used for filter suffix.
-	 * @param \WC_Product|array $cart_item_or_product Either a cart item or a product instance.
+	 * @param bool        $value Value to filter.
+	 * @param string      $value_type Type of value. Used for filter suffix.
+	 * @param \WC_Product $product Product instance.
+	 * @param array|null  $cart_item Optional cart item associated with the product.
 	 * @return bool
 	 */
-	protected function filter_boolean_value( $value, string $value_type, $cart_item_or_product ) {
-		$is_product = $cart_item_or_product instanceof \WC_Product;
-		$product    = $is_product ? $cart_item_or_product : $cart_item_or_product['data'];
-		$cart_item  = $is_product ? null : $cart_item_or_product;
+	protected function filter_boolean_value( $value, string $value_type, \WC_Product $product, $cart_item = null ) {
 
 		/**
 		 * Filters boolean data for a cart item in Store API.

@@ -18,7 +18,7 @@ final class NumberUtil {
 	 *
 	 * @param mixed $value The value to convert.
 	 * @param mixed $fallback The value to return if the conversion fails.
-	 * @return int|float|mixed Returns the numeric value or the fallback value if conversion fails.
+	 * @return float|mixed Returns the numeric value or the fallback value if conversion fails.
 	 */
 	public static function normalize( $value, $fallback = 0 ) {
 		// Trim string values to handle whitespace consistently across PHP versions.
@@ -27,7 +27,10 @@ final class NumberUtil {
 		}
 
 		if ( is_numeric( $value ) ) {
-			return is_string( $value ) ? floatval( $value ) : $value;
+			$numeric_value = is_string( $value ) ? floatval( $value ) : $value;
+
+			// Round to precision to avoid floating-point precision issues.
+			return round( $numeric_value, WC_ROUNDING_PRECISION );
 		}
 
 		return $fallback;

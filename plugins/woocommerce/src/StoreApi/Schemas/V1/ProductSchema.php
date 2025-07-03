@@ -45,16 +45,6 @@ class ProductSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get the type for the quantity property. This is usually integer, but can be number if the stock amount is
-	 * filtered by third party plugins.
-	 *
-	 * @return string
-	 */
-	public function get_quantity_property_type() {
-		return wc_is_stock_amount_integer() ? 'integer' : 'number';
-	}
-
-	/**
 	 * Product schema properties.
 	 *
 	 * @return array
@@ -463,7 +453,7 @@ class ProductSchema extends AbstractSchema {
 			],
 			'low_stock_remaining' => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woocommerce' ),
-				'type'        => [ $this->get_quantity_property_type(), 'null' ],
+				'type'        => [ 'number', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -499,19 +489,19 @@ class ProductSchema extends AbstractSchema {
 					],
 					'minimum'     => [
 						'description' => __( 'The minimum quantity that can be added to the cart.', 'woocommerce' ),
-						'type'        => $this->get_quantity_property_type(),
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'maximum'     => [
 						'description' => __( 'The maximum quantity that can be added to the cart.', 'woocommerce' ),
-						'type'        => $this->get_quantity_property_type(),
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'multiple_of' => [
 						'description' => __( 'The amount that quantities increment by. Quantity must be an multiple of this value.', 'woocommerce' ),
-						'type'        => $this->get_quantity_property_type(),
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 						'default'     => 1,

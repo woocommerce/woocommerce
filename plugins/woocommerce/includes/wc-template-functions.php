@@ -2062,10 +2062,6 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
 		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
 
-		if ( $product && $product->is_sold_individually() ) {
-			$type = 'hidden';
-		}
-
 		/**
 		 * Controls the quantity input's type attribute.
 		 *
