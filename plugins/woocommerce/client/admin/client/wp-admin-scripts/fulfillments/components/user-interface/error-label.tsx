@@ -8,10 +8,14 @@ export default function ErrorLabel( { error }: { error: string } ) {
 	useLayoutEffect( () => {
 		if ( error ) {
 			// Scroll to the top of the error label when an error occurs.
-			labelRef.current?.scrollTo( {
-				top: 0,
-				behavior: 'smooth',
-			} );
+			labelRef.current
+				?.closest( '.woocommerce-fulfillment-drawer__body' )
+				?.scrollTo( {
+					top: labelRef.current.offsetTop - 90,
+					behavior: 'smooth',
+				} );
+			// Focus the error label for accessibility.
+			labelRef.current?.focus();
 		}
 	}, [ error ] );
 	return (

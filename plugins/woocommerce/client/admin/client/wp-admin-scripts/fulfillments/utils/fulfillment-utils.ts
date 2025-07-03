@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import ShipmentProviders from '../data/shipment-providers';
-import { Fulfillment, FulfillmentItem } from '../data/types';
+import { Fulfillment, FulfillmentItem, LineItem, Order } from '../data/types';
 
 export function getFulfillmentMeta< T >(
 	fulfillment: Fulfillment | null,
@@ -26,6 +26,21 @@ export function getFulfillmentItems(
 		'_items',
 		[]
 	) as Array< FulfillmentItem >;
+}
+
+export function hasPendingItems(
+	order: Order,
+	fulfillments: Fulfillment[]
+): boolean {
+	const itemsNotInFulfillments = order.line_items.filter(
+		( item: LineItem ) =>
+			! fulfillments.some( ( fulfillment ) =>
+				getFulfillmentItems( fulfillment ).some(
+					( fulfillmentItem ) => fulfillmentItem.item_id === item.id
+				)
+			)
+	);
+	return itemsNotInFulfillments.length > 0;
 }
 
 export function getFulfillmentLockState( fulfillment: Fulfillment ): {

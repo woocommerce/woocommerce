@@ -64,14 +64,20 @@ const NewFulfillmentForm: React.FC = () => {
 					'woocommerce-fulfillment-new-fulfillment-form__header',
 					openSection === 'order' ? 'is-open' : '',
 				].join( ' ' ) }
-				onClick={ () =>
-					setOpenSection( openSection === 'order' ? '' : 'order' )
-				}
-				onKeyDown={ ( event ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
+				onClick={ () => {
+					if ( fulfillments.length > 0 ) {
 						setOpenSection(
 							openSection === 'order' ? '' : 'order'
 						);
+					}
+				} }
+				onKeyDown={ ( event ) => {
+					if ( fulfillments.length > 0 ) {
+						if ( event.key === 'Enter' || event.key === ' ' ) {
+							setOpenSection(
+								openSection === 'order' ? '' : 'order'
+							);
+						}
 					}
 				} }
 				tabIndex={ 0 }
@@ -82,16 +88,18 @@ const NewFulfillmentForm: React.FC = () => {
 						? __( 'Order Items', 'woocommerce' )
 						: __( 'Pending Items', 'woocommerce' ) }
 				</h3>
-				<Button __next40pxDefaultSize size="small">
-					<Icon
-						icon={
-							openSection === 'order'
-								? 'arrow-up-alt2'
-								: 'arrow-down-alt2'
-						}
-						size={ 16 }
-					/>
-				</Button>
+				{ fulfillments.length > 0 && (
+					<Button __next40pxDefaultSize size="small">
+						<Icon
+							icon={
+								openSection === 'order'
+									? 'arrow-up-alt2'
+									: 'arrow-down-alt2'
+							}
+							size={ 16 }
+						/>
+					</Button>
+				) }
 			</div>
 			{ ! isEditing && openSection === 'order' && (
 				<div className="woocommerce-fulfillment-new-fulfillment-form__content">

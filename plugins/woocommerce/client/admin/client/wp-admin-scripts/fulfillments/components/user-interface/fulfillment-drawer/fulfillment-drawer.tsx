@@ -12,6 +12,7 @@ import FulfillmentsList from '../../fulfillments/fulfillments-list';
 import FulfillmentsDrawerHeader from './fulfillment-drawer-header';
 import { FulfillmentDrawerProvider } from '../../../context/drawer-context';
 import './fulfillment-drawer.scss';
+import FulfillmentDrawerBody from './fulfillment-drawer-body';
 
 interface Props {
 	isOpen: boolean;
@@ -30,7 +31,7 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 		<>
 			{ hasBackdrop && (
 				<div
-					className="woocommerce-fulfillment-drawer-backdrop"
+					className="woocommerce-fulfillment-drawer__backdrop"
 					onClick={ onClose }
 					role="presentation"
 					style={ { display: isOpen ? 'block' : 'none' } }
@@ -39,15 +40,17 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 			<div className="woocommerce-fulfillment-drawer">
 				<div
 					className={ [
-						'drawer-panel',
+						'woocommerce-fulfillment-drawer__panel',
 						isOpen ? 'is-open' : 'is-closed',
 					].join( ' ' ) }
 				>
 					<ErrorBoundary>
 						<FulfillmentDrawerProvider orderId={ orderId }>
 							<FulfillmentsDrawerHeader onClose={ onClose } />
-							<NewFulfillmentForm />
-							<FulfillmentsList />
+							<FulfillmentDrawerBody>
+								<NewFulfillmentForm />
+								<FulfillmentsList />
+							</FulfillmentDrawerBody>
 						</FulfillmentDrawerProvider>
 					</ErrorBoundary>
 				</div>

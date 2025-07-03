@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext, useState } from 'react';
+import React, { createContext, useLayoutEffect, useState } from 'react';
 import { useSelect } from '@wordpress/data';
 import { isEqual } from 'lodash';
 
@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
  */
 import { Fulfillment, Order } from '../data/types';
 import { store as FulfillmentsStore } from '../data/store';
+import { hasPendingItems } from '../utils/fulfillment-utils';
 
 interface FulfillmentDrawerContextProps {
 	fulfillments: Fulfillment[];
@@ -68,17 +69,28 @@ export const FulfillmentDrawerProvider = ( {
 			const fulfillmentsData = store.readFulfillments( orderId );
 			if ( ! isEqual( orderData, order ) ) {
 				setOrder( orderData );
+				setIsEditing( false );
 			}
 			if ( ! isEqual( fulfillmentsData, fulfillments ) ) {
 				setFulfillments( fulfillmentsData ?? [] );
-				if ( ! fulfillmentsData || fulfillmentsData.length === 0 ) {
-					setOpenSection( 'order' );
-				}
 				setIsEditing( false );
 			}
 		},
 		[ orderId, fulfillments, order ]
 	);
+
+	useLayoutEffect( () => {
+		if ( ! fulfillments || fulfillments.length === 0 ) {
+			setOpenSection( 'order' );
+		} else if (
+			order &&
+			fulfillments &&
+			! hasPendingItems( order, fulfillments ) &&
+			fulfillments.length === 1
+		) {
+			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
+		}
+	}, [ orderId, fulfillments, order ] );
 
 	if ( orderId === null ) {
 		return null;

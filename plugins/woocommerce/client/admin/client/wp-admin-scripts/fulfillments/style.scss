@@ -1,7 +1,3 @@
-/**
- * Fulfillment Drawer styles
- */
-
 .woocommerce-fulfillment-new-fulfillment-form {
 	display: flex;
 	flex-direction: column;
@@ -87,6 +83,7 @@
 		line-height: 16px;
 	}
 }
+
 .woocommerce-fulfillment-item-list {
 	display: flex;
 	flex-direction: column;
@@ -174,6 +171,10 @@
 			border-radius: 2px;
 			font-size: 13px;
 			line-height: 20px;
+		}
+
+		.woocommerce-fulfillment-item-price {
+			min-width: 52px;
 		}
 	}
 	.woocommerce-fulfillment-item-expansion {
@@ -377,9 +378,6 @@
 	}
 }
 
-/**
- * Order list styles
- */
 a.fulfillments-trigger {
 	float: right;
 	height: 16px;
