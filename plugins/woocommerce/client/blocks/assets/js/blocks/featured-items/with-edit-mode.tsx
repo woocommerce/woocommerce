@@ -107,19 +107,7 @@ export const withEditMode =
 					setAttributes( { editMode: currEditModeValue } );
 				}
 			}
-		}, [ status, isDeleted, attributes.editMode, name, setAttributes ] );
-
-		if ( isLoading ) {
-			return (
-				<Placeholder
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ className }
-				>
-					<div>{ __( 'Loading…', 'woocommerce' ) }</div>
-				</Placeholder>
-			);
-		}
+		}, [ status, isDeleted, name, setAttributes ] );
 
 		if ( attributes.editMode ) {
 			return (
