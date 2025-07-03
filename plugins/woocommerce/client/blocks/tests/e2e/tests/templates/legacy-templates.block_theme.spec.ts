@@ -23,7 +23,7 @@ test.describe( 'Legacy templates', () => {
 				canvas: 'edit',
 			} );
 
-			const title = editor.canvas.getByText( 'Title' );
+			const title = editor.canvas.getByText( 'Title' ).first();
 
 			await title.click();
 			await title.press( 'Enter' );

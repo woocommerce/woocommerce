@@ -26,7 +26,6 @@
 
 		display: inline-flex;
 		width: unset;
-		margin-right: 0.5em;
 		margin-bottom: 0;
 
 		.input-text {
@@ -37,7 +36,7 @@
 			-moz-appearance: textfield;
 			border: unset;
 			text-align: center;
-			order: 1;
+			order: 2;
 			font-weight: 600;
 			background-color: transparent;
 			color: currentColor;
@@ -70,4 +69,5 @@
 	.wp-block-woocommerce-product-button
 	.add_to_cart_button {
 	cursor: not-allowed;
+	opacity: 0.5;
 }

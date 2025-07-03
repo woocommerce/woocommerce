@@ -9,11 +9,17 @@ import {
 import { getAdminLink } from '@woocommerce/settings';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { parseAdminUrl } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import {
+	wooPaymentsProviderId,
+	wooPaymentsProviderSuggestionId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 /**
  * Checks whether a payment provider has an incentive.
@@ -96,7 +102,11 @@ export const parseScriptTag = ( elementId: string ) => {
 };
 
 export const isWooPayments = ( id: string ) => {
-	return [ '_wc_pes_woopayments', 'woocommerce_payments' ].includes( id );
+	return [
+		wooPaymentsProviderSuggestionId,
+		wooPaymentsProviderId,
+		wooPaymentsSuggestionId,
+	].includes( id );
 };
 
 /**
@@ -131,7 +141,7 @@ export const resetWooPaymentsAccount = async () => {
 /**
  * Disables the WooPayments test account.
  */
-export const disableWooPaymentsTestMode = async () => {
+export const disableWooPaymentsTestAccount = async () => {
 	try {
 		return await apiFetch( {
 			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
@@ -336,6 +346,69 @@ export const recordPaymentsEvent = (
 };
 
 /**
+ * Records a payments-provider-related event with the WooCommerce Tracks system.
+ *
+ * This function ensures that the event name starts with 'settings_payments_provider_'.
+ *
+ * @param eventName The partial name of the event to record.
+ *                  This should be a string that represents the specific event being tracked,
+ *                  such as 'enabled' or 'incentive_accepted'.
+ *                  Event names should focus on the action or outcome, e.g., 'started' not 'start'.
+ * @param provider  The payments provider for which the event is being recorded.
+ * @param data      An object containing additional data to be sent with the event.
+ */
+export const recordPaymentsProviderEvent = (
+	eventName: string,
+	provider: PaymentsProvider,
+	data: Record< string, string | boolean | number > = {}
+) => {
+	// Ensure the event name starts with 'provider_'.
+	// The rest of the prefixing is handled by `recordPaymentsEvent`.
+	if ( ! eventName.startsWith( 'provider_' ) ) {
+		eventName = `provider_${ eventName }`;
+	}
+
+	const enrichedData: Record< string, string | boolean | number > = {
+		...data,
+		provider_id: provider.id,
+	};
+
+	// Add provider-specific data to the event.
+	// If the provider is a suggestion, use its ID as the suggestion ID.
+	if ( provider._type === 'suggestion' ) {
+		enrichedData.suggestion_id = provider.id;
+	} else {
+		enrichedData.suggestion_id = provider._suggestion_id ?? 'unknown';
+	}
+
+	// The provider state.
+	enrichedData.provider_enabled = provider.state?.enabled ?? false;
+	enrichedData.provider_account_connected =
+		provider.state?.account_connected ?? false;
+	enrichedData.provider_needs_setup = provider.state?.needs_setup ?? false;
+	enrichedData.provider_test_mode = provider.state?.test_mode ?? false;
+	enrichedData.provider_dev_mode = provider.state?.dev_mode ?? false;
+	// The provider onboarding state.
+	enrichedData.provider_onboarding_started =
+		provider.onboarding?.state?.started ?? false;
+	enrichedData.provider_onboarding_completed =
+		provider.onboarding?.state?.completed ?? false;
+	enrichedData.provider_account_test_mode =
+		provider.onboarding?.state?.test_mode ?? false;
+	// The provider extension data.
+	enrichedData.provider_extension_slug = provider.plugin.slug ?? 'unknown';
+	// WooPayments-specific data.
+	if ( isWooPayments( provider.id ) ) {
+		enrichedData.provider_has_test_drive_account =
+			provider.onboarding?.state?.test_drive_account ?? false;
+		enrichedData.provider_has_working_wpcom_connection =
+			provider.onboarding?.state?.wpcom_has_working_connection ?? false;
+	}
+
+	recordPaymentsEvent( eventName, enrichedData );
+};
+
+/**
  * Records a payments onboarding-related event with the WooCommerce Tracks system.
  *
  * This function ensures that the event name starts with 'settings_payments_' and attaches contextual data
@@ -376,4 +449,21 @@ export const recordPaymentsOnboardingEvent = (
 	}
 
 	recordEvent( eventName, data );
+};
+
+/**
+ * Strips the origin from a URL. This is used for front-end navigation using react-router-dom.
+ *
+ * @example
+ * ```
+ * removeOriginFromURL( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline' )
+ * // returns '/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline'
+ * ```
+ *
+ * @param url The URL to strip the origin from.
+ * @return The URL with the origin stripped.
+ */
+export const removeOriginFromURL = ( url: string ) => {
+	const parsedUrl = parseAdminUrl( url );
+	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
 };

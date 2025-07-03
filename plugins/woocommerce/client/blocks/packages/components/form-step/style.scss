@@ -115,6 +115,14 @@
 	margin: 0 0 $gap;
 }
 
+@mixin step-number-mobile-styles {
+	position: static;
+	transform: none;
+	left: auto;
+	top: auto;
+	content: counter(checkout-step) ".\00a0";
+	content: counter(checkout-step) ".\00a0"/ "";
+}
 .wc-block-checkout__form--with-step-numbers {
 	.wc-block-components-checkout-step--with-step-number {
 		padding: 0 0 0 $gap-larger;
@@ -132,14 +140,12 @@
 			transform: translateX(-50%);
 			white-space: nowrap;
 
-			.is-mobile &,
-			.is-small & {
-				position: static;
-				transform: none;
-				left: auto;
-				top: auto;
-				content: counter(checkout-step) ".\00a0";
-				content: counter(checkout-step) ".\00a0"/ "";
+			@include cart-checkout-mobile-container {
+				@include step-number-mobile-styles;
+			}
+
+			@include cart-checkout-small-container {
+				@include step-number-mobile-styles;
 			}
 		}
 

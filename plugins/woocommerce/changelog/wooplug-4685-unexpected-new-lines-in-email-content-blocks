@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+This fix addresses the issue where email content blocks contained unexpected new lines due to unnecessary line breaks in PHP template files. The changes ensure clean email rendering by removing unwanted whitespace.

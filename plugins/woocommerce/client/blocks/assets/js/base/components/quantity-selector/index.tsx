@@ -219,7 +219,7 @@ const QuantitySelector = ( {
 							normalizeQuantity( newQuantity );
 						} }
 					>
-						&#65293;
+						&#8722;
 					</button>
 					<button
 						ref={ increaseButtonRef }

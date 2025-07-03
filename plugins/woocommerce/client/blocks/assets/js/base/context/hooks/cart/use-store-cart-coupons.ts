@@ -114,7 +114,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 									'Coupon code "%s" has been removed from your cart.',
 									'woocommerce'
 								),
-								couponCode
+								decodeEntities( couponCode )
 							),
 							{
 								id: 'coupon-form',
