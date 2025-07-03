@@ -485,7 +485,24 @@ function wc_array_overlay( $a1, $a2 ) {
  * @return int|float
  */
 function wc_stock_amount( $amount ) {
-	return apply_filters( 'woocommerce_stock_amount', $amount );
+	/**
+	 * Filter the stock amount. If an invalid value is returned by hooks, falls back to intval( $amount ).
+	 *
+	 * @since  2.3
+	 * @param int|float $amount Stock amount.
+	 * @return int|float
+	 */
+	return NumberUtil::normalize( apply_filters( 'woocommerce_stock_amount', $amount ), intval( $amount ) );
+}
+
+/**
+ * Check if the stock amount is an integer.
+ *
+ * @since 10.1.0
+ * @return bool
+ */
+function wc_is_stock_amount_integer() {
+	return wc_stock_amount( 1 ) === 1;
 }
 
 /**

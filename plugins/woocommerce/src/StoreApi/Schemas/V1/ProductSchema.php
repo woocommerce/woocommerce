@@ -51,7 +51,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string
 	 */
 	public function get_quantity_property_type() {
-		return has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number';
+		return wc_is_stock_amount_integer() ? 'integer' : 'number';
 	}
 
 	/**

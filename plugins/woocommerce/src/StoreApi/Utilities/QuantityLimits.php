@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
  * QuantityLimits class.
@@ -85,9 +86,9 @@ final class QuantityLimits {
 			return wc_stock_amount( $quantity );
 		}
 
-		$quantity = $this->ensure_numeric( $quantity );
+		$quantity = NumberUtil::normalize( $quantity );
 
-		if ( false === $quantity || 0 > $quantity ) {
+		if ( 0 >= $quantity ) {
 			return wc_stock_amount( 0 );
 		}
 
@@ -115,10 +116,10 @@ final class QuantityLimits {
 	 */
 	public function limit_to_multiple( $number, $multiple_of, string $rounding_function = 'round' ) {
 		// Handle edge cases.
-		$number      = $this->ensure_numeric( $number );
-		$multiple_of = $this->ensure_numeric( $multiple_of );
+		$number      = NumberUtil::normalize( $number, null );
+		$multiple_of = NumberUtil::normalize( $multiple_of, null );
 
-		if ( false === $number || false === $multiple_of ) {
+		if ( is_null( $multiple_of ) || is_null( $number ) ) {
 			return wc_stock_amount( 0 );
 		}
 
@@ -141,47 +142,15 @@ final class QuantityLimits {
 	 */
 	protected function is_multiple_of( $number, $multiple_of ) {
 		// Handle edge cases.
-		$number      = $this->ensure_numeric( $number );
-		$multiple_of = $this->ensure_numeric( $multiple_of );
+		$number      = NumberUtil::normalize( $number, null );
+		$multiple_of = NumberUtil::normalize( $multiple_of, null );
 
-		if ( false === $number || false === $multiple_of || 0 >= $multiple_of ) {
+		if ( is_null( $multiple_of ) || is_null( $number ) || 0 >= $multiple_of ) {
 			return false;
-		}
-
-		// For integer values, use simple modulo.
-		if ( $this->is_integer_value( $number ) && $this->is_integer_value( $multiple_of ) ) {
-			return 0 === ( (int) $number % (int) $multiple_of );
 		}
 
 		$division_result = $number / $multiple_of;
 		return abs( $division_result - round( $division_result ) ) < 0.0001;
-	}
-
-	/**
-	 * Checks if a number is effectively an integer value (handles floats like 5.0).
-	 *
-	 * @param int|float $number The number to check.
-	 * @return bool
-	 */
-	protected function is_integer_value( $number ) {
-		$number = $this->ensure_numeric( $number );
-		return false !== $number && floor( $number ) === ceil( $number );
-	}
-
-	/**
-	 * Safely convert a value to numeric type to handle cases where extensions pass strings.
-	 *
-	 * @param mixed $value The value to convert.
-	 * @return int|float|false Returns the numeric value or false if conversion fails.
-	 */
-	protected function ensure_numeric( $value ) {
-		if ( is_numeric( $value ) ) {
-			// Convert string to actual numeric type for PHP functions like floor()
-			return is_string( $value ) ? (float) $value : $value;
-		}
-
-		// Handle non-numeric values (including non-numeric strings)
-		return false;
 	}
 
 	/**
@@ -291,9 +260,9 @@ final class QuantityLimits {
 		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
 		 * @return mixed
 		 */
-		$filtered_value = $this->ensure_numeric( apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item ) );
+		$filtered_value = apply_filters( 'woocommerce_store_api_product_quantity_' . $value_type, $value, $product, $cart_item );
 
-		return wc_stock_amount( false !== $filtered_value ? $filtered_value : $value );
+		return wc_stock_amount( NumberUtil::normalize( $filtered_value, $value ) );
 	}
 
 	/**

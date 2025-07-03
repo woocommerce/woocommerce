@@ -2012,6 +2012,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			$product = $GLOBALS['product'];
 		}
 
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 		$defaults = array(
 			'input_id'     => uniqid( 'quantity_' ),
 			'input_name'   => 'quantity',
@@ -2020,8 +2021,8 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			'max_value'    => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
 			'min_value'    => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
 			'step'         => apply_filters( 'woocommerce_quantity_input_step', 1, $product ),
-			'pattern'      => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
-			'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
+			'pattern'      => apply_filters( 'woocommerce_quantity_input_pattern', wc_is_stock_amount_integer() ? '[0-9]*' : '' ),
+			'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', wc_is_stock_amount_integer() ? 'numeric' : '' ),
 			'product_name' => $product ? $product->get_title() : '',
 			'placeholder'  => apply_filters( 'woocommerce_quantity_input_placeholder', '', $product ),
 			// When autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
@@ -2031,6 +2032,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		// Apply sanity to min/max args - min cannot be lower than 0.
 		$args['min_value'] = max( $args['min_value'], 0 );
