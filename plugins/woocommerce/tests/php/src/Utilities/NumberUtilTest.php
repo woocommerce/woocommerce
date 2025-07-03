@@ -65,6 +65,15 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `round` should work as the built-in function of the same name when passing a number-like string with spaces.
+	 */
+	public function test_round_when_passing_a_number_like_string_with_spaces() {
+		$actual   = NumberUtil::round( '  1234.5678  ' );
+		$expected = 1235;
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
 	 * Data provider for the `round` tests for non-numeric values.
 	 *
 	 * @return array Values to test.

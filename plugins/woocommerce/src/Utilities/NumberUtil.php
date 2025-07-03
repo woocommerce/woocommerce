@@ -21,9 +21,15 @@ final class NumberUtil {
 	 * @return int|float|mixed Returns the numeric value or the fallback value if conversion fails.
 	 */
 	public static function normalize( $value, $fallback = 0 ) {
+		// Trim string values to handle whitespace consistently across PHP versions.
+		if ( is_string( $value ) ) {
+			$value = trim( $value );
+		}
+
 		if ( is_numeric( $value ) ) {
 			return is_string( $value ) ? floatval( $value ) : $value;
 		}
+
 		return $fallback;
 	}
 
