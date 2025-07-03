@@ -18,8 +18,8 @@
 <div class="wp-block-columns alignwide are-vertically-aligned-center has-theme-5-background-color has-background" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%">
 	
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/beanie-a.webp","alt":"<?php esc_attr_e( 'An illustration of a wool beanie', 'woostarter' ); ?>","dimRatio":40,"isDark":false,"style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'An illustration of a wool beanie', 'woostarter' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/beanie-a.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-view1.webp","alt":"<?php esc_attr_e( 'An illustration of of folded shirts', 'woostarter' ); ?>","dimRatio":40,"isDark":false,"style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'An illustration of folded shirts', 'woostarter' ); ?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-view1.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
 	<p class="has-text-align-center has-large-font-size"></p>
 	<!-- /wp:paragraph --></div></div>
 	<!-- /wp:cover -->
@@ -29,7 +29,7 @@
 
 <!-- wp:column {"verticalAlignment":"center","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"default"}} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:paragraph {"align":"center","style":{"typography":{"lineHeight":"1.2"}},"fontSize":"xx-large"} -->
-<p class="has-text-align-center has-xx-large-font-size" style="line-height:1.2"><?php esc_html_e('Ribbed Wool Beanie', 'woostarter');?></p>
+<p class="has-text-align-center has-xx-large-font-size" style="line-height:1.2"><?php esc_html_e('New Collection', 'woostarter');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
