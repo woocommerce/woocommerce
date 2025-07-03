@@ -26,7 +26,7 @@ const CardPreview = ( {
 
 	if ( type && icon ) {
 		CardIcon = (
-			<div className="wp-block-woocommerce-payment-method-icons__item">
+			<div className="wc-block-payment-method-icons__item">
 				<span
 					className="wp-block-woocommerce-payment-method-icons__icon"
 					style={ {
