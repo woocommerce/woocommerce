@@ -179,8 +179,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			 * Filter the default quantity to add to cart.
 			 *
 			 * @since 10.9.0
-			 * @param int|float $default_quantity The default quantity.
-			 * @param int $product_id The product id.
+			 * @param number $default_quantity The default quantity.
+			 * @param number $product_id The product id.
 			 */
 			$default_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
 
@@ -202,7 +202,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			$context = array(
 				'productId'   => $product->get_id(),
 				'productType' => $product->get_type(),
-				'quantity'    => array( $product->get_id() => $product->get_min_purchase_quantity() ),
+				'quantity'    => array( $product->get_id() => $default_quantity ),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
