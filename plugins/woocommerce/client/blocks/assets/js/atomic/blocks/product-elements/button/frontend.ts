@@ -55,7 +55,7 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const getMatchedCartItem = (
+const isCartItemMatched = (
 	cartItem: OptimisticCartItem,
 	selectedItem: CartVariationItem[]
 ) => {
@@ -75,12 +75,9 @@ const getMatchedCartItem = (
 			value: string;
 		} ) =>
 			selectedItem.some( ( item ) => {
-				const selectedItemAttr = item.attribute;
-				const selectedItemValue = item.value.toLowerCase();
-
 				return (
-					selectedItemAttr === raw_attribute &&
-					( selectedItemValue === value.toLowerCase() ||
+					item.attribute === raw_attribute &&
+					( item.value.toLowerCase() === value.toLowerCase() ||
 						( item.value && value === '' ) )
 				);
 			} )
@@ -90,21 +87,18 @@ const getMatchedCartItem = (
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const selectedAttribute =
-				addToCartWithOptionsState?.selectedAttributes;
+			const products = wooState.cart?.items.filter(
+				( item ) => item.id === state.productId
+			);
 
-			const product = wooState.cart?.items.filter( ( item ) => {
-				if ( item.id === state.productId ) {
-					return item;
-				}
-			} );
-
-			if ( product[ 0 ]?.type !== 'variation' ) {
-				return product[ 0 ]?.quantity;
+			if ( products[ 0 ]?.type !== 'variation' ) {
+				return products[ 0 ]?.quantity;
 			}
 
-			const selectedProduct = product.find( ( item ) =>
-				getMatchedCartItem( item, selectedAttribute )
+			const selectedAttribute =
+				addToCartWithOptionsState?.selectedAttributes;
+			const selectedProduct = products.find( ( item ) =>
+				isCartItemMatched( item, selectedAttribute )
 			);
 
 			return selectedProduct?.quantity || 0;
