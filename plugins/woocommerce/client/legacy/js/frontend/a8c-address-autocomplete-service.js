@@ -8,60 +8,7 @@
 	const MAX_SERVICE_ERROR_RETRIES = 3;
 
 	/**
-	 * Copied from Lodash.
-	 *
-	 * Creates a debounced function that delays invoking `func` until after `wait`
-	 * milliseconds have elapsed since the last time the debounced function was
-	 * invoked. The debounced function comes with a `cancel` method to cancel
-	 * delayed `func` invocations and a `flush` method to immediately invoke them.
-	 * Provide `options` to indicate whether `func` should be invoked on the
-	 * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
-	 * with the last arguments provided to the debounced function. Subsequent
-	 * calls to the debounced function return the result of the last `func`
-	 * invocation.
-	 *
-	 * **Note:** If `leading` and `trailing` options are `true`, `func` is
-	 * invoked on the trailing edge of the timeout only if the debounced function
-	 * is invoked more than once during the `wait` timeout.
-	 *
-	 * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
-	 * until to the next tick, similar to `setTimeout` with a timeout of `0`.
-	 *
-	 * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
-	 * for details over the differences between `_.debounce` and `_.throttle`.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @since 0.1.0
-	 * @category Function
-	 * @param {Function} func The function to debounce.
-	 * @param {number} [wait=0] The number of milliseconds to delay.
-	 * @param {Object} [options={}] The options object.
-	 * @param {boolean} [options.leading=false]
-	 *  Specify invoking on the leading edge of the timeout.
-	 * @param {number} [options.maxWait]
-	 *  The maximum time `func` is allowed to be delayed before it's invoked.
-	 * @param {boolean} [options.trailing=true]
-	 *  Specify invoking on the trailing edge of the timeout.
-	 * @returns {Function} Returns the new debounced function.
-	 * @example
-	 *
-	 * // Avoid costly calculations while the window size is in flux.
-	 * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
-	 *
-	 * // Invoke `sendMail` when clicked, debouncing subsequent calls.
-	 * jQuery(element).on('click', _.debounce(sendMail, 300, {
-	 *   'leading': true,
-	 *   'trailing': false
-	 * }));
-	 *
-	 * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
-	 * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
-	 * var source = new EventSource('/stream');
-	 * jQuery(source).on('message', debounced);
-	 *
-	 * // Cancel the trailing debounced invocation.
-	 * jQuery(window).on('popstate', debounced.cancel);
+	 * Debounce function from lodash, modified to return a promise.
 	 */
 	function debounce( func, wait, options ) {
 		var lastArgs,
@@ -88,11 +35,18 @@
 
 		function invokeFunc( time ) {
 			var args = lastArgs,
-				thisArg = lastThis;
+				thisArg = lastThis,
+				resolve = args._resolve;
 
 			lastArgs = lastThis = undefined;
 			lastInvokeTime = time;
 			result = func.apply( thisArg, args );
+
+			// If there's a resolve function, call it with the result
+			if ( resolve ) {
+				resolve( result );
+			}
+
 			return result;
 		}
 
@@ -102,7 +56,12 @@
 			// Start the timer for the trailing edge.
 			timerId = setTimeout( timerExpired, wait );
 			// Invoke the leading edge.
-			return leading ? invokeFunc( time ) : result;
+			return leading
+				? invokeFunc( time )
+				: new Promise( ( resolve ) => {
+						// Store the resolve function to be called when the function executes
+						lastArgs._resolve = resolve;
+				  } );
 		}
 
 		function remainingWait( time ) {
@@ -155,6 +114,10 @@
 			if ( timerId !== undefined ) {
 				clearTimeout( timerId );
 			}
+			// Reject any pending promise
+			if ( lastArgs && lastArgs._resolve ) {
+				lastArgs._resolve( [] ); // Resolve with empty array for cancelled requests
+			}
 			lastInvokeTime = 0;
 			lastArgs = lastCallTime = lastThis = timerId = undefined;
 		}
@@ -185,7 +148,11 @@
 			if ( timerId === undefined ) {
 				timerId = setTimeout( timerExpired, wait );
 			}
-			return result;
+			// Return a promise that will resolve when the function is eventually called
+			return new Promise( ( resolve ) => {
+				// Store the resolve function to be called when the function executes
+				lastArgs._resolve = resolve;
+			} );
 		}
 		debounced.cancel = cancel;
 		debounced.flush = flush;
@@ -194,15 +161,36 @@
 
 	Object.entries( a8cAddressAutocompleteServiceKeys ).forEach(
 		( [ key, value ] ) => {
-			let resultCache = {};
-			let lastResult = [];
 			let sessionId =
 				crypto && crypto.randomUUID
 					? crypto.randomUUID()
 					: Math.random().toString( 36 ).substring( 2 );
 			let requestDurations = [];
 			let serviceErrorRetries = 0;
-			let controller = new AbortController();
+			// Cache for search results - key: `${inputValue}:${country}`, value: data
+			const searchCache = new Map();
+
+			// Helper function to check cache
+			const getCachedResult = ( inputValue, country ) => {
+				const cacheKey = `${ inputValue }:${ country }`;
+				return searchCache.get( cacheKey ) || null;
+			};
+
+			// Helper function to store result in cache
+			const cacheResult = ( inputValue, country, data ) => {
+				const cacheKey = `${ inputValue }:${ country }`;
+				searchCache.set( cacheKey, data );
+
+				// Clean up cache if it gets too large (more than 100 entries)
+				if ( searchCache.size > 100 ) {
+					// Remove oldest entries (first 20 entries)
+					const entries = Array.from( searchCache.entries() );
+					entries.slice( 0, 20 ).forEach( ( [ key ] ) => {
+						searchCache.delete( key );
+					} );
+				}
+			};
+
 			const debouncedSearch = debounce(
 				async ( inputValue, country ) => {
 					const params = new URLSearchParams( {
@@ -220,7 +208,7 @@
 						);
 						const endTime = Date.now();
 						requestDurations.push( endTime - startTime );
-						const data = await response.json();
+						let data = await response.json();
 
 						if ( data.code ) {
 							switch ( data.code ) {
@@ -251,6 +239,8 @@
 									return [];
 								case 'missing_query':
 								case 'no_suggestions':
+									// Cache empty results to avoid repeated API calls
+									cacheResult( inputValue, country, [] );
 									return [];
 								case 'missing_session_id':
 									sessionId =
@@ -278,27 +268,29 @@
 							}
 						}
 						if ( Array.isArray( data ) ) {
-							lastResult = data.map( ( item ) => ( {
+							data = data.map( ( item ) => ( {
 								id: item.id,
 								label: item.label,
 								matchedSubstrings: item.matched_substrings,
 							} ) );
-							return lastResult;
+							// Cache the successful result
+							cacheResult( inputValue, country, data );
+							return data;
 						}
 					} catch ( e ) {
 						if ( e.name === 'AbortError' ) {
 							// Ignore abort errors from cancelled requests
-							return lastResult;
+							return [];
 						}
 						console.error(
 							'Error fetching address suggestions:',
 							e
 						);
-						return lastResult;
+						return [];
 					}
 				},
-				150,
-				{ leading: true, maxWait: 1000 }
+				300,
+				{ leading: false, trailing: true }
 			);
 			window.wc.addressAutocomplete.registerAddressAutocompleteProvider( {
 				id: key,
@@ -339,16 +331,16 @@
 					if ( permanentlyDisabledServices.includes( key ) ) {
 						return [];
 					}
+
 					inputValue = inputValue.trim();
-					const cacheKey = `${ inputValue }-${ country }`;
-					if ( resultCache[ cacheKey ] ) {
-						return resultCache[ cacheKey ];
+
+					// Check cache first - bypass debounce for cached results
+					const cachedResult = getCachedResult( inputValue, country );
+					if ( cachedResult !== null ) {
+						return cachedResult;
 					}
-					const result = await debouncedSearch( inputValue, country );
-					if ( Array.isArray( result ) && result.length > 0 ) {
-						resultCache[ cacheKey ] = result;
-					}
-					return result;
+
+					return await debouncedSearch( inputValue, country );
 				},
 				async select( addressId ) {
 					const params = new URLSearchParams( {
@@ -362,7 +354,7 @@
 						`${ selectUrl }?${ params.toString() }`
 					);
 
-					const data = await response.json();
+					let data = await response.json();
 					// Reset session ID after successful select
 					sessionId = crypto.randomUUID();
 					try {
@@ -380,7 +372,6 @@
 						console.error( e );
 					}
 					requestDurations = [];
-					lastResult = [];
 					if ( data.error ) {
 						switch ( data.error ) {
 							case 'expired_jwt_token':
@@ -448,9 +439,47 @@
 	);
 } )();
 
+function createBeacon( section, { name, value, type } ) {
+	const event = name.replace( '-', '_' );
+
+	// A counting event defaults to incrementing by one.
+	if ( type === 'counting' ) {
+		value = value === undefined ? 1 : value;
+	}
+	value = Array.isArray( value ) ? value : [ value ];
+	return value.map(
+		( v ) =>
+			`a8c.${ section }.${ event }:${ v }|${
+				type === 'timing' ? 'ms' : 'c'
+			}`
+	);
+}
+
+function createStatsdURL( sectionName, events ) {
+	if ( ! Array.isArray( events ) ) {
+		events = [ events ]; // Only a single event was passed to process.
+	}
+
+	const sanitizedSection = sectionName.replace( /[.:-]/g, '_' );
+	const json = JSON.stringify( {
+		beacons: events
+			.map( ( event ) => createBeacon( sanitizedSection, event ) )
+			.flat(),
+	} );
+
+	const encodedJson = encodeURIComponent( json );
+
+	return `https://pixel.wp.com/boom.gif?json=${ encodedJson }`;
+}
+
 window.addEventListener(
 	'wc-address-autocomplete-service-request-durations',
 	( e ) => {
-		console.log( e.detail.requestDurations );
+		// Send request durations to statsd, to keep track of the average request duration.
+		new Image().src = createStatsdURL( 'a8c-ac-service', {
+			name: 'request-durations',
+			value: e.detail.requestDurations,
+			type: 'timing',
+		} );
 	}
 );

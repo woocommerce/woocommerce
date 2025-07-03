@@ -54,7 +54,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		$transient_key = $this->id . 'address_autocomplete_jwt';
 		$cached_jwt    = get_transient( $transient_key );
 		// If we have a cached, valid token, we load it to class and return early.
-		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) ) {
+		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) && 'local' !== wp_get_environment_type() ) {
 			$this->jwt = $cached_jwt;
 			return $this->jwt;
 		}
