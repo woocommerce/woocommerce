@@ -1369,6 +1369,14 @@ class CartController {
 		$variation_id     = $data_store->find_matching_product_variation( $product, $match_attributes );
 
 		if ( empty( $variation_id ) ) {
+			// Check if no attributes were selected at all.
+			if ( empty( array_filter( $match_attributes ) ) ) {
+				throw new RouteException(
+					'woocommerce_rest_missing_attributes',
+					__( 'Missing attributes for variable product.', 'woocommerce' ),
+					400
+				);
+			}
 			throw new RouteException(
 				'woocommerce_rest_variation_id_from_variation_data',
 				__( 'No matching variation found.', 'woocommerce' ),
