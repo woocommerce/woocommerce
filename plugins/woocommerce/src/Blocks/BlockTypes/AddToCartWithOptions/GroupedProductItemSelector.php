@@ -38,7 +38,6 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'input_name'  => 'quantity[' . $product->get_id() . ']',
 				'input_id'    => 'quantity_' . $product->get_id(),
 				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				'min_value'   => AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ? 0 :
 				/**
 				 * Filter the minimum quantity value allowed for the product.
 				 *
@@ -46,7 +45,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				 * @param int        $min_value Minimum quantity value.
 				 * @param WC_Product $product   Product object.
 				 */
-				apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
+				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
 				/**
 				 * Filter the maximum quantity value allowed for the product.
 				 *
