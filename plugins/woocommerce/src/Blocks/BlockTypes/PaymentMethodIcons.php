@@ -95,8 +95,8 @@ class PaymentMethodIcons extends AbstractBlock {
 		if ( ! empty( $all_payment_methods ) ) {
 			for ( $i = 0; $i < $number_of_icons; $i++ ) {
 				$payment_method = $all_payment_methods[ $i ];
-				$output        .= '<div class="wp-block-woocommerce-payment-method-icons__item">';
-				$output        .= '<span class="wp-block-woocommerce-payment-method-icons__icon" style="background-image: url(\'' . \esc_url( $payment_method['icon'] ) . '\');" role="img" aria-label="' . \esc_attr( $payment_method['name'] ) . '"></span>';
+				$output        .= '<div class="wc-block-payment-method-icons__item">';
+				$output        .= '<span class="wc-block-payment-method-icons__icon" style="background-image: url(\'' . \esc_url( $payment_method['icon'] ) . '\');" role="img" aria-label="' . \esc_attr( $payment_method['name'] ) . '"></span>';
 				$output        .= '</div>';
 			}
 		}
