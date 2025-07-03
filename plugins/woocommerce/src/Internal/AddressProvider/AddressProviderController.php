@@ -181,7 +181,7 @@ class AddressProviderController {
 			return $this->preferred_provider_option;
 		}
 
-		// Get the first provider's ID by instantiating it.
+		// Get the first provider's ID.
 		return $this->providers[0]->id ?? '';
 	}
 }

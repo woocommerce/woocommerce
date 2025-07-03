@@ -6,8 +6,8 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useRecommendedPluginsWithoutChannels } from '../useRecommendedPluginsWithoutChannels';
-import { DiscoverTools } from '../DiscoverTools';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
+import { DiscoverTools } from './DiscoverTools';
 
 jest.mock( '@woocommerce/components', () => {
 	const originalModule = jest.requireActual( '@woocommerce/components' );
@@ -19,7 +19,7 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-jest.mock( '../useRecommendedPluginsWithoutChannels', () => ( {
+jest.mock( './useRecommendedPluginsWithoutChannels', () => ( {
 	useRecommendedPluginsWithoutChannels: jest.fn(),
 } ) );
 
