@@ -67,20 +67,22 @@ export const withEditMode =
 		} = props;
 
 		const className = getClassPrefixFromName( name );
-		const [ selectedItem, setSelectedItem ] = useState( name === BLOCK_NAMES.featuredProduct ?{
-			productId: 0,
-			mediaId: 0,
-			mediaSrc: '',
-		} : {
-			categoryId: 0,
-			mediaId: 0,
-			mediaSrc: '',
-		});
+		const [ selectedItem, setSelectedItem ] = useState(
+			name === BLOCK_NAMES.featuredProduct
+				? {
+						productId: 0,
+						mediaId: 0,
+						mediaSrc: '',
+				  }
+				: {
+						categoryId: 0,
+						mediaId: 0,
+						mediaSrc: '',
+				  }
+		);
 
 		const onDone = () => {
-			if ( selectedItem.productId || selectedItem.categoryId ) {
-				setAttributes( { editMode: false, ...selectedItem } );
-			}
+			setAttributes( { editMode: false } );
 			debouncedSpeak( editLabel );
 		};
 
@@ -95,16 +97,15 @@ export const withEditMode =
 		} );
 
 		useEffect( () => {
-			const currEditModeValue =
-				( name === BLOCK_NAMES.featuredProduct &&
-					status !== 'publish' ) ||
-				isDeleted;
+			if ( ! isLoading ) {
+				const currEditModeValue =
+					( name === BLOCK_NAMES.featuredProduct &&
+						status !== 'publish' ) ||
+					isDeleted;
 
-			if (
-				currEditModeValue !== attributes.editMode &&
-				typeof currEditModeValue === 'boolean'
-			) {
-				setAttributes( { editMode: currEditModeValue } );
+				if ( currEditModeValue ) {
+					setAttributes( { editMode: currEditModeValue } );
+				}
 			}
 		}, [ status, isDeleted, attributes.editMode, name, setAttributes ] );
 
@@ -154,7 +155,7 @@ export const withEditMode =
 									value: ProductCategoryResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedItem( {
+									setAttributes( {
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
@@ -176,7 +177,7 @@ export const withEditMode =
 									value: ProductResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedItem( {
+									setAttributes( {
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
