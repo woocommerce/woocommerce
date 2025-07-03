@@ -35,7 +35,7 @@ final class QuantityLimits {
 
 		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $cart_item );
 		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $cart_item );
-		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $cart_item );
+		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $cart_item );
 		$editable    = $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $cart_item );
 
 		// Ensure values are compatible with each other.
@@ -59,7 +59,7 @@ final class QuantityLimits {
 	public function get_add_to_cart_limits( \WC_Product $product ) {
 		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $product );
 		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
-		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $product );
+		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $product );
 
 		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );

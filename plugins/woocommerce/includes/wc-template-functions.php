@@ -2016,20 +2016,27 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		$defaults = array(
 			'input_id'     => uniqid( 'quantity_' ),
 			'input_name'   => 'quantity',
-			'input_value'  => '1',
 			'classes'      => apply_filters( 'woocommerce_quantity_input_classes', array( 'input-text', 'qty', 'text' ), $product ),
-			'max_value'    => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
-			'min_value'    => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
-			'step'         => apply_filters( 'woocommerce_quantity_input_step', 1, $product ),
 			'pattern'      => apply_filters( 'woocommerce_quantity_input_pattern', wc_is_stock_amount_integer() ? '[0-9]*' : '' ),
-			'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', wc_is_stock_amount_integer() ? 'numeric' : '' ),
-			'product_name' => $product ? $product->get_title() : '',
+			'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', wc_is_stock_amount_integer() ? 'numeric' : 'decimal' ),
 			'placeholder'  => apply_filters( 'woocommerce_quantity_input_placeholder', '', $product ),
 			// When autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
 			// See @link https://github.com/woocommerce/woocommerce/issues/30733.
 			'autocomplete' => apply_filters( 'woocommerce_quantity_input_autocomplete', 'off', $product ),
 			'readonly'     => false,
 		);
+
+		if ( $product ) {
+			$defaults['min_value'] = $product->get_min_purchase_quantity();
+			$defaults['max_value'] = $product->get_max_purchase_quantity();
+			$defaults['step'] = $product->get_purchase_quantity_step();
+			$defaults['product_name'] = $product->get_title();
+		} else {
+			$defaults['min_value'] = apply_filters( 'woocommerce_quantity_input_min', 1, $product );
+			$defaults['max_value'] = apply_filters( 'woocommerce_quantity_input_max', -1, $product );
+			$defaults['step'] = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
+			$defaults['product_name'] = '';
+		}
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
@@ -2043,6 +2050,9 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			$args['max_value'] = $args['min_value'];
 		}
 
+		// Default value should be the min value unless defined.
+		$args['input_value'] = isset( $args['input_value'] ) ? $args['input_value'] : $defaults['min_value'];
+
 		/**
 		 * The input type attribute will generally be 'number' unless the quantity cannot be changed, in which case
 		 * it will be set to 'hidden'. An exception is made for non-hidden readonly inputs: in this case we set the
@@ -2051,6 +2061,10 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		 */
 		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
 		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
+
+		if ( $product && $product->is_sold_individually() ) {
+			$type = 'hidden';
+		}
 
 		/**
 		 * Controls the quantity input's type attribute.

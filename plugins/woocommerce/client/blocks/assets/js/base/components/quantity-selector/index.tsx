@@ -77,6 +77,7 @@ const QuantitySelector = ( {
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const decreaseButtonRef = useRef< HTMLButtonElement | null >( null );
 	const increaseButtonRef = useRef< HTMLButtonElement | null >( null );
+	const expectedQuantityRef = useRef< number >( quantity );
 	const hasMaximum = typeof maximum !== 'undefined';
 	const canDecrease = ! disabled && quantity - step >= minimum;
 	const canIncrease =
@@ -91,9 +92,11 @@ const QuantitySelector = ( {
 	);
 
 	// Sync local state with prop if quantity changes externally (but not when focused)
+	// Only sync if the quantity change wasn't expected from a button click
 	useEffect( () => {
-		if ( ! isFocused ) {
+		if ( ! isFocused && quantity !== expectedQuantityRef.current ) {
 			setInputValue( quantity.toString() );
+			expectedQuantityRef.current = quantity;
 		}
 	}, [ quantity, isFocused ] );
 
@@ -129,6 +132,8 @@ const QuantitySelector = ( {
 			const normalized = normalizeQuantity( value );
 			setInputValue( normalized.toString() );
 			if ( normalized !== quantity ) {
+				// Update expected quantity to prevent useEffect from overriding local state
+				expectedQuantityRef.current = normalized;
 				onChange( normalized );
 			}
 		},
@@ -178,11 +183,23 @@ const QuantitySelector = ( {
 		const isEnter = event.key === 'Enter' || event.keyCode === ENTER;
 		if ( isArrowDown && canDecrease ) {
 			event.preventDefault();
-			onChange( quantity - step );
+			// Cancel any pending debounced changes to prevent race conditions
+			debouncedOnChange.cancel();
+			const newQuantity = quantity - step;
+			// Update expected quantity to prevent useEffect from overriding local state
+			expectedQuantityRef.current = newQuantity;
+			onChange( newQuantity );
+			setInputValue( newQuantity.toString() );
 		}
 		if ( isArrowUp && canIncrease ) {
 			event.preventDefault();
-			onChange( quantity + step );
+			// Cancel any pending debounced changes to prevent race conditions
+			debouncedOnChange.cancel();
+			const newQuantity = quantity + step;
+			// Update expected quantity to prevent useEffect from overriding local state
+			expectedQuantityRef.current = newQuantity;
+			onChange( newQuantity );
+			setInputValue( newQuantity.toString() );
 		}
 		if ( isEnter ) {
 			commitValue( inputValue );
@@ -227,6 +244,10 @@ const QuantitySelector = ( {
 						disabled={ ! canDecrease }
 						onClick={ () => {
 							const newQuantity = quantity - step;
+							// Cancel any pending debounced changes to prevent race conditions
+							debouncedOnChange.cancel();
+							// Update expected quantity to prevent useEffect from overriding local state
+							expectedQuantityRef.current = newQuantity;
 							onChange( newQuantity );
 							speak(
 								sprintf(
@@ -254,6 +275,10 @@ const QuantitySelector = ( {
 						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
 						onClick={ () => {
 							const newQuantity = quantity + step;
+							// Cancel any pending debounced changes to prevent race conditions
+							debouncedOnChange.cancel();
+							// Update expected quantity to prevent useEffect from overriding local state
+							expectedQuantityRef.current = newQuantity;
 							onChange( newQuantity );
 							speak(
 								sprintf(
