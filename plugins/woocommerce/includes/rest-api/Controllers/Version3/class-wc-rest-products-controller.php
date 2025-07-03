@@ -505,20 +505,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Determine if we need to join based on search criteria.
-		$needs_join = false;
-
-		if ( $this->search_name_sku_or_global_unique_id_tokens ) {
-			// For global_unique_id search, we always need the meta lookup table.
-			$needs_join = true;
-		} elseif ( $this->search_name_or_sku_tokens ) {
-			if ( wc_product_sku_enabled() ) {
-				// For name or SKU search with SKU enabled, we need the meta lookup table.
-				$needs_join = true;
-			}
-		} elseif ( ! empty( $this->search_sku_arg_value ) ) {
-			// For SKU search, we need the meta lookup table.
-			$needs_join = true;
-		}
+		$needs_join =
+			$this->search_name_sku_or_global_unique_id_tokens
+			|| ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() )
+			|| ( ! empty( $this->search_sku_arg_value ) );
 
 		if ( ! $needs_join ) {
 			return $join;
