@@ -21,15 +21,11 @@ class StockNotifications {
 	 */
 
 	public function __construct() {
-		add_action( 'woocommerce_installed', array( SyncTasks::class, 'schedule_async_tasks' ) );
-		add_action( 'customer_stock_notifications_daily', array( SyncTasks::class, 'do_wc_customer_stock_notifications_daily' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
-
-		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 	}
 
 	/**
-	 * Regiter hooks and services.
+	 * Register hooks and services.
 	 *
 	 * @internal
 	 */
@@ -41,6 +37,7 @@ class StockNotifications {
 		$container->get( StockSyncController::class );
 		$container->get( NotificationsProcessor::class );
 		$container->get( PrivacyEraser::class );
+		$container->get( DataRetentionController::class );
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );
@@ -60,13 +57,5 @@ class StockNotifications {
 
 		$data_stores['stock_notification'] = wc_get_container()->get( StockNotificationsDataStore::class );
 		return $data_stores;
-	}
-
-	/**
-	 * Do any cleanup on plugin deactivation.
-	 *
-	 */
-	public function on_deactivation() {
-		SyncTasks::clear_async_tasks();
 	}
 }
