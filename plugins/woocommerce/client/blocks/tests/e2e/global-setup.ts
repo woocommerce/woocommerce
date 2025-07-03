@@ -8,6 +8,7 @@ import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
 	wpCLI,
+	testsCli,
 	customerFile,
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
@@ -67,7 +68,9 @@ async function globalSetup() {
 	let databaseImported = false;
 
 	try {
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await testsCli(
+			`bash wp-content/plugins/woocommerce/blocks-bin/playwright/restore-sqlite.sh`
+		);
 		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {
@@ -106,7 +109,9 @@ async function globalSetup() {
 	}
 
 	console.log( '├ Exporting database snapshot…' );
-	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
+	await testsCli(
+		`bash wp-content/plugins/woocommerce/blocks-bin/playwright/backup-sqlite.sh`
+	);
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );

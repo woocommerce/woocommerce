@@ -7,6 +7,7 @@ import {
 	STORAGE_STATE_PATH,
 	DB_EXPORT_FILE,
 	wpCLI,
+	testsCli,
 	Admin,
 	Editor,
 	FrontendUtils,
@@ -137,9 +138,10 @@ const test = base.extend<
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
-		await wpCLI( `db reset --yes` );
 		// Reset the database to the initial state via snapshot import.
-		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		await testsCli(
+			`bash wp-content/plugins/woocommerce/blocks-bin/playwright/restore-sqlite.sh`
+		);
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
