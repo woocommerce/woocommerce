@@ -183,6 +183,9 @@ jobs:
           WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce/client/blocks' || matrix.projectPath  }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
+      - name: 'Create tmp dir for blocks e2e test'
+        run: mkdir -p ${{ github.workspace }}/plugins/woocommerce/client/blocks/tests/e2e/bin/tmp/database/
+
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
