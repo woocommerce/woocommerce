@@ -29,7 +29,9 @@ $dialog-padding: 20px;
 		justify-content: center;
 	}
 
-	:where(.wc-block-components-product-image) {
+	// These rules are overriding styles from WooCommerce core, that's why we
+	// can't use `:where()` and they need a higher specificity.
+	.wc-block-components-product-image.wc-block-components-product-image {
 		margin: 0;
 		height: 100%;
 
@@ -37,7 +39,7 @@ $dialog-padding: 20px;
 			height: 100%;
 		}
 
-		:where(img) {
+		img {
 			height: 100%;
 			// There's inline style object-fit: cover; that we need to override.
 			object-fit: contain !important;
@@ -360,7 +362,9 @@ $dialog-padding: 20px;
 		@include horizontal-thumbnails;
 		flex-direction: column;
 
-		:where(.wc-block-product-gallery-large-image-next-previous) {
+		// This rule is overriding a `display: flex` from WordPress core, that's
+		// why it needs a higher specificity.
+		.wc-block-product-gallery-large-image-next-previous.wc-block-product-gallery-large-image-next-previous {
 			display: none;
 		}
 
