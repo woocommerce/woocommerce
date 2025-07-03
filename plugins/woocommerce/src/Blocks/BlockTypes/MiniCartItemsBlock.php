@@ -169,7 +169,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 											</span>											
 										</span>
 										<div 
-												data-wp-bind--hidden="!state.cartItemHasDiscount" 
+												data-wp-bind--hidden="!state.isLineItemTotalDiscountVisible" 
 												class="wc-block-components-product-badge wc-block-components-sale-badge"
 												hidden
 											>

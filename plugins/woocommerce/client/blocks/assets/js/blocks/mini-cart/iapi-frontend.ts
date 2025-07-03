@@ -371,6 +371,13 @@ const { state: cartItemState } = store(
 
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
 			},
+
+			get isLineItemTotalDiscountVisible(): boolean {
+				return (
+					cartItemState.cartItemHasDiscount &&
+					cartItemState.cartItem.quantity > 1
+				);
+			},
 		},
 
 		actions: {
