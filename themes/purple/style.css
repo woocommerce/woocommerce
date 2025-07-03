@@ -31,3 +31,9 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 .wc-block-components-totals-item {
     color: var(--wp--preset--color--theme-2);
 }
+
+/* https://github.com/woocommerce/woocommerce/issues/59391 */
+.woocommerce-account .entry-content > .woocommerce{
+    padding-top: var(--wp--preset--spacing--60);
+    padding-bottom: var(--wp--preset--spacing--70);
+}
