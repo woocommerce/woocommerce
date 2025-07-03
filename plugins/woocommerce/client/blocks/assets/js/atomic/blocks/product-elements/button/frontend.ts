@@ -91,17 +91,18 @@ const productButtonStore = {
 				( item ) => item.id === state.productId
 			);
 
+			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
 				return products[ 0 ]?.quantity;
 			}
 
-			const selectedAttribute =
+			const selectedAttributes =
 				addToCartWithOptionsState?.selectedAttributes;
-			const selectedProduct = products.find( ( item ) =>
-				isCartItemMatched( item, selectedAttribute )
+			const selectedVariableProduct = products.find( ( item ) =>
+				isCartItemMatched( item, selectedAttributes )
 			);
 
-			return selectedProduct?.quantity || 0;
+			return selectedVariableProduct?.quantity || 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
