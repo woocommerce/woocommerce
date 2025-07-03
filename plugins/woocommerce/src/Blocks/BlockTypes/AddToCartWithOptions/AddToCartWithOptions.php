@@ -233,7 +233,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						$args                           = Utils::get_quantity_input_args( $child_product );
 						$step                           = isset( $args['step'] ) ? (int) $args['step'] : 1;
 						$context['quantityConstraints'][ $child_product_id ] = array(
-							'min'  => isset( $args['min_value'] ) ? (int) $args['min_value'] : 1,
+							'min'  => 0,
 							'max'  => ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
 							? (int) $args['max_value']
 							: null,

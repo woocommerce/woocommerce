@@ -302,7 +302,7 @@ class AddToCartForm extends AbstractBlock {
 							$max = $min;
 						}
 						$context['quantityConstraints'][ $child_product_id ] = array(
-							'min'  => (int) $min,
+							'min'  => 0,
 							'max'  => ( '' !== $max && -1 !== $max ) ? (int) $max : null,
 							'step' => (int) $step,
 						);

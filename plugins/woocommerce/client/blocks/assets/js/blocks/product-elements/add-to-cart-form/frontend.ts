@@ -9,7 +9,7 @@ export type Context = {
 	productType?: string;
 	quantity: Record< number, number >;
 	childProductId?: number;
-	quantityConstraints?: Record<
+	quantityConstraints: Record<
 		number,
 		{ min: number; max: number | null; step: number }
 	>;
@@ -46,9 +46,8 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			? childProductId
 			: context.productId;
 	const constraints = context.quantityConstraints?.[ id as number ] || {
-		min: 1,
+		min: productType === 'grouped' && childProductId ? 0 : 1,
 		step: 1,
-		max: null,
 	};
 	const minValue = constraints.min;
 	const maxValue = constraints.max;
@@ -86,9 +85,8 @@ store( 'woocommerce/add-to-cart-form', {
 					? childProductId
 					: productId;
 			const constraints = quantityConstraints?.[ id as number ] || {
-				min: 1,
+				min: productType === 'grouped' && childProductId ? 0 : 1,
 				step: 1,
-				max: null,
 			};
 			const minValue = constraints.min;
 			const step = constraints.step;
@@ -112,9 +110,8 @@ store( 'woocommerce/add-to-cart-form', {
 					? childProductId
 					: productId;
 			const constraints = quantityConstraints?.[ id as number ] || {
-				min: 1,
+				min: productType === 'grouped' && childProductId ? 0 : 1,
 				step: 1,
-				max: null,
 			};
 			const maxValue = constraints.max;
 			const step = constraints.step;
