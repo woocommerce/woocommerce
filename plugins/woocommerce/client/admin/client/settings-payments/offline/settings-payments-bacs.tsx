@@ -134,6 +134,7 @@ export const SettingsPaymentsBacs = () => {
 					settings,
 				} ),
 			] );
+			setHasChanges( false );
 			createSuccessNotice(
 				__( 'Settings updated successfully', 'woocommerce' )
 			);
@@ -143,7 +144,6 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
-			setHasChanges( false );
 			invalidateResolution( 'getPaymentProviders', [] );
 			invalidateResolutionForStoreSelector( 'getOfflinePaymentGateways' );
 		}

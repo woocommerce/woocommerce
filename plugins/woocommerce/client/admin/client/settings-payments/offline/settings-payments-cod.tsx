@@ -95,6 +95,7 @@ export const SettingsPaymentsCod = () => {
 			settings,
 		} )
 			.then( () => {
+				setHasChanges( false );
 				invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 				createSuccessNotice(
 					__( 'Settings updated successfully', 'woocommerce' )
@@ -107,7 +108,6 @@ export const SettingsPaymentsCod = () => {
 			} )
 			.finally( () => {
 				setIsSaving( false );
-				setHasChanges( false );
 				invalidateResolution( 'getPaymentProviders', [] );
 				invalidateResolutionForPaymentSettings(
 					'getOfflinePaymentGateways'
