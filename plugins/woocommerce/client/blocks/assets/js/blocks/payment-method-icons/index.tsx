@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { Icon } from '@wordpress/components';
 
 /**
