@@ -150,8 +150,8 @@ class ProductButton extends AbstractBlock {
 			 * Filters the change the quantity to add to cart.
 			 *
 			 * @since 10.9.0
-			 * @param number $default_quantity The default quantity.
-			 * @param number $product_id The product id.
+			 * @param int|float $default_quantity The default quantity.
+			 * @param int $product_id The product id.
 			 */
 			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 		}
@@ -304,8 +304,8 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Get the number of items in the cart for a given product id.
 	 *
-	 * @param number $product_id The product id.
-	 * @return number The number of items in the cart.
+	 * @param int $product_id The product id.
+	 * @return int|float The number of items in the cart.
 	 */
 	private function get_cart_item_quantities_by_product_id( $product_id ) {
 		if ( ! isset( WC()->cart ) ) {

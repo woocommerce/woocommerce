@@ -156,7 +156,7 @@ class RelatedProducts extends AbstractBlock {
 	 * Get related products ids.
 	 * The logic is copied from the core function woocommerce_related_products. https://github.com/woocommerce/woocommerce/blob/ca49caabcba84ce9f60a03c6d3534ec14b350b80/plugins/woocommerce/includes/wc-template-functions.php/#L2039-L2074
 	 *
-	 * @param number $product_per_page Products per page.
+	 * @param int $product_per_page Products per page.
 	 * @return array Products ids.
 	 */
 	private function get_related_products_ids( $product_per_page = 5 ) {
