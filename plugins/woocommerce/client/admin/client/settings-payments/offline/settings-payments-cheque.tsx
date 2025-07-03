@@ -9,7 +9,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { paymentGatewaysStore } from '@woocommerce/data';
+import { paymentGatewaysStore, paymentSettingsStore } from '@woocommerce/data';
 import { useState, useEffect } from '@wordpress/element';
 
 /**
@@ -41,6 +41,12 @@ export const SettingsPaymentsCheque = () => {
 
 	const { updatePaymentGateway, invalidateResolutionForStoreSelector } =
 		useDispatch( paymentGatewaysStore );
+
+	const {
+		invalidateResolution,
+		invalidateResolutionForStoreSelector:
+			invalidateResolutionForPaymentSettings,
+	} = useDispatch( paymentSettingsStore );
 
 	const [ formValues, setFormValues ] = useState<
 		Record< string, string | boolean | string[] >
@@ -81,14 +87,19 @@ export const SettingsPaymentsCheque = () => {
 				createSuccessNotice(
 					__( 'Settings updated successfully', 'woocommerce' )
 				);
-				setIsSaving( false );
-				setHasChanges( false );
 			} )
 			.catch( () => {
 				createErrorNotice(
 					__( 'Failed to update settings', 'woocommerce' )
 				);
+			} )
+			.finally( () => {
 				setIsSaving( false );
+				setHasChanges( false );
+				invalidateResolution( 'getPaymentProviders', [] );
+				invalidateResolutionForPaymentSettings(
+					'getOfflinePaymentGateways'
+				);
 			} );
 	};
 
