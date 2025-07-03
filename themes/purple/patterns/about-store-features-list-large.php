@@ -17,11 +17,11 @@
 <!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
 <div class="wp-block-group alignwide"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_html_e('Check icon.', 'woostarter');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Premium quality: our product selection is carefully curated by our team</p>
+<p class="has-large-font-size"><?php esc_html_e('Premium quality: our product selection is carefully curated by our team', 'woostarter');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -31,11 +31,11 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_html_e('Check icon.', 'woostarter');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Ethically produced: our product selection is carefully curated by our team</p>
+<p class="has-large-font-size"><?php esc_html_e('Ethically produced: our product selection is carefully curated by our team', 'woostarter');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -45,11 +45,11 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_html_e('Check icon.', 'woostarter');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Timeless design: our product selection is carefully curated by our team</p>
+<p class="has-large-font-size"><?php esc_html_e('Timeless design: our product selection is carefully curated by our team', 'woostarter');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -59,11 +59,11 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"id":475,"width":"30px","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="Check icon." class="wp-image-475" style="width:30px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_html_e('Check icon.', 'woostarter');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size">Built to last: our product selection is carefully curated by our team</p>
+<p class="has-large-font-size"><?php esc_html_e('Built to last: our product selection is carefully curated by our team', 'woostarter');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
