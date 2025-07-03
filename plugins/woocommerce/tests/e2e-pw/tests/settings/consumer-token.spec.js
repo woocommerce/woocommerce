@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { HTTPClientFactory } from '@woocommerce/api';
+import { createClient } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
@@ -43,10 +43,12 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 		).toBeVisible();
 	} );
 
-	const apiClient = HTTPClientFactory.build( playwrightConfig.use.baseURL )
-		.withOAuth( key, secret )
-		.withIndexPermalinks()
-		.create();
+	// const apiClient = HTTPClientFactory.build( playwrightConfig.use.baseURL )
+	// 	.withOAuth( key, secret )
+	// 	.withIndexPermalinks()
+	// 	.create();
+
+	const apiClient = createClient( playwrightConfig.use.baseURL, key, secret );
 
 	await test.step( 'can use the consumer key', async () => {
 		const createResponse = await apiClient.post(
