@@ -28,6 +28,7 @@ class Init {
 	use UseWPFunctions;
 
 	const INSTALLED_WP_ORG_PLUGINS_TRANSIENT = 'woocommerce_blueprint_installed_wp_org_plugins';
+	const INSTALLED_WP_ORG_THEMES_TRANSIENT  = 'woocommerce_blueprint_installed_wp_org_themes';
 	/**
 	 * Array of initialized exporters.
 	 *
@@ -53,6 +54,10 @@ class Init {
 
 		add_action( 'upgrader_process_complete', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
 		add_action( 'deleted_plugin', array( $this, 'clear_installed_wp_org_plugins_transient' ), 10, 2 );
+
+		add_action( 'upgrader_process_complete', array( $this, 'clear_installed_wp_org_themes_transient' ), 10, 2 );
+		add_action( 'switch_theme', array( $this, 'clear_installed_wp_org_themes_transient' ) );
+		add_action( 'deleted_theme', array( $this, 'clear_installed_wp_org_themes_transient' ) );
 	}
 
 	/**
@@ -142,6 +147,13 @@ class Init {
 	 */
 	public function clear_installed_wp_org_plugins_transient() {
 		delete_transient( self::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
+	}
+
+	/**
+	 * Clear the installed WordPress.org themes transient.
+	 */
+	public function clear_installed_wp_org_themes_transient() {
+		delete_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT );
 	}
 
 	/**
@@ -320,6 +332,12 @@ class Init {
 	 * @return array
 	 */
 	private function get_installed_wp_org_themes() {
+		// Try to get cached theme list.
+		$wp_org_themes = get_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT );
+		if ( is_array( $wp_org_themes ) ) {
+			return $wp_org_themes;
+		}
+
 		// Get all installed themes.
 		$all_themes  = $this->wp_get_themes();
 		$theme_slugs = array();
@@ -352,6 +370,7 @@ class Init {
 			}
 		);
 
+		set_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT, $wp_org_themes );
 		return $wp_org_themes;
 	}
 }
