@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\Block_Delimiter;
 
 /**
  * Mini-Cart class.
@@ -596,63 +597,12 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Remove the wrapper divs of the React-based MiniCart WooCommerce blocks in
-	 * the parsed blocks array.
-	 *
-	 * @param array $blocks The parsed blocks array.
-	 * @return array The filtered blocks array.
-	 */
-	protected function remove_unwanted_blocks( $blocks ) {
-		$filtered_blocks = array();
-
-		foreach ( $blocks as $block ) {
-			// Only remove outer wrapper from WooCommerce blocks.
-			if ( $this->is_woocommerce_template_block( $block ) ) {
-				$block['innerContent'] = $this->remove_outer_wrapper( $block['innerContent'] );
-			}
-
-			// Recursively process inner blocks.
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$block['innerBlocks'] = $this->remove_unwanted_blocks( $block['innerBlocks'] );
-			}
-
-			$filtered_blocks[] = $block;
-		}
-
-		return $filtered_blocks;
-	}
-
-	/**
-	 * Check if a block is one of the MiniCart inner block.
-	 *
-	 * @param array $block The block to check.
-	 * @return bool True if the block is a WooCommerce template block.
-	 */
-	protected function is_woocommerce_template_block( $block ) {
-		return isset( $block['blockName'] ) && in_array( $block['blockName'], self::MINI_CART_TEMPLATE_BLOCKS, true );
-	}
-
-	/**
-	 * Remove the outer wrapper from the inner content array.
-	 *
-	 * @param array $inner_content_arr The inner content array.
-	 * @return array The filtered inner content array.
-	 */
-	protected function remove_outer_wrapper( $inner_content_arr ) {
-		if ( ! empty( $inner_content_arr ) ) {
-			$inner_content_arr[0]                                 = '';
-			$inner_content_arr[ count( $inner_content_arr ) - 1 ] = '';
-		}
-		return $inner_content_arr;
-	}
-
-	/**
 	 * Process template contents to remove unwanted div wrappers.
 	 *
-	 * This is because the old Mini Cart template had extra divs nested within
-	 * the block tags that are no longer necessary since we don't render the
-	 * Mini Cart with React anymore. To maintain compatibility with edited
-	 * templates that have these wrapper divs we must remove them.
+	 * The old Mini Cart template had extra divs nested within the block tags
+	 * that are no longer necessary since we don't render the Mini Cart with
+	 * React anymore. To maintain compatibility with user saved templates that
+	 * have these wrapper divs, we must remove them.
 	 *
 	 * @param string $template_contents The template contents to process.
 	 * @return string The processed template contents.
@@ -666,12 +616,43 @@ class MiniCart extends AbstractBlock {
 			)
 		);
 
-		if ( $is_old_template ) {
-			$parsed_blocks = parse_blocks( $template_contents );
-			return serialize_blocks( $this->remove_unwanted_blocks( $parsed_blocks ) );
+		if ( ! $is_old_template ) {
+			return $template_contents;
 		}
 
-		return $template_contents;
+		$output                   = '';
+		$was_at                   = 0;
+		$is_mini_cart_block_stack = array( false );
+
+		foreach ( Block_Delimiter::scan_delimiters( $template_contents ) as $where => $delimiter ) {
+			list( $at, $length ) = $where;
+			$block_type          = $delimiter->allocate_and_return_block_type();
+			$delimiter_type      = $delimiter->get_delimiter_type();
+
+			if ( ! $is_mini_cart_block_stack[ array_key_last( $is_mini_cart_block_stack ) ] ) {
+				// Copy content up to and including this block delimiter.
+				$output .= substr( $template_contents, $was_at, $at + $length - $was_at );
+			} else {
+				// Just copy the block delimiter, skipping the wrapper div that existed before.
+				$output .= substr( $template_contents, $at, $length );
+			}
+
+			// Update the position to the end of the block delimiter.
+			$was_at = $at + $length;
+
+			if ( Block_Delimiter::OPENER === $delimiter_type ) {
+				// Add the Mini Cart block info to a stack.
+				$is_mini_cart_block_stack[] = in_array( $block_type, self::MINI_CART_TEMPLATE_BLOCKS, true );
+			} elseif ( Block_Delimiter::CLOSER === $delimiter_type ) {
+				// Pop the last Mini Cart block info from the stack.
+				array_pop( $is_mini_cart_block_stack );
+			}
+		}
+
+		// Add any remaining content.
+		$output .= substr( $template_contents, $was_at );
+
+		return $output;
 	}
 
 	/**
@@ -767,8 +748,8 @@ class MiniCart extends AbstractBlock {
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
-						. wp_kses_post( $template_part_contents ) .
-						'</div>
+					. wp_kses_post( $template_part_contents ) .
+					'</div>
 					</div>
 				</div>
 			</div>
