@@ -2027,14 +2027,14 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 		);
 
 		if ( $product ) {
-			$defaults['min_value'] = $product->get_min_purchase_quantity();
-			$defaults['max_value'] = $product->get_max_purchase_quantity();
-			$defaults['step'] = $product->get_purchase_quantity_step();
+			$defaults['min_value']    = $product->get_min_purchase_quantity();
+			$defaults['max_value']    = $product->get_max_purchase_quantity();
+			$defaults['step']         = $product->get_purchase_quantity_step();
 			$defaults['product_name'] = $product->get_title();
 		} else {
-			$defaults['min_value'] = apply_filters( 'woocommerce_quantity_input_min', 1, $product );
-			$defaults['max_value'] = apply_filters( 'woocommerce_quantity_input_max', -1, $product );
-			$defaults['step'] = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
+			$defaults['min_value']    = apply_filters( 'woocommerce_quantity_input_min', 1, $product );
+			$defaults['max_value']    = apply_filters( 'woocommerce_quantity_input_max', -1, $product );
+			$defaults['step']         = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
 			$defaults['product_name'] = '';
 		}
 

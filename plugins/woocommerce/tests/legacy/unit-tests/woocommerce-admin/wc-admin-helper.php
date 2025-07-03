@@ -176,7 +176,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 * @dataProvider range_provider
 	 * Test wc_admin_active_in_date_range with data provided from range_provider.
 	 *
-	 * @param int     $store_age age in seconds of store.
+	 * @param number  $store_age age in seconds of store.
 	 * @param string  $range expected store range.
 	 * @param boolean $expected expected boolean value.
 	 */
