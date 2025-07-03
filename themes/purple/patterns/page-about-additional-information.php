@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: About page with store information alternative
- * Slug: woostarter/page-about-with-store-information-alternative
+ * Title: About page with additional information
+ * Slug: woostarter/page-about-additional-information
  * Categories: woocommerce
  * Keywords: starter
  * Block Types: core/post-content
