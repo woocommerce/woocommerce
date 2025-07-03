@@ -189,7 +189,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const placeholderTitle = getTitle
 		? getTitle()
 		: __( 'Classic Shortcode Placeholder', 'woocommerce' );
-	const placeholderDescription = getDescription( templateTitle, canConvert );
+	const placeholderDescription = getDescription( templateTitle );
 
 	const learnMoreContent = createInterpolateElement(
 		__(
