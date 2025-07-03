@@ -372,7 +372,7 @@ const { state: cartItemState } = store(
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
 			},
 
-			get isAvailableInBackorder(): boolean {
+			get isAvailableOnBackorder(): boolean {
 				return cartItemState.cartItem.show_backorder_badge;
 			},
 		},
