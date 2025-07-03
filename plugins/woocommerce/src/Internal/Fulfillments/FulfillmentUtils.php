@@ -342,23 +342,23 @@ class FulfillmentUtils {
 		return array(
 			'fulfilled'           => array(
 				'label'            => __( 'Fulfilled', 'woocommerce' ),
-				'background_color' => '#d4edda',
-				'text_color'       => '#155724',
+				'background_color' => '#C6E1C6',
+				'text_color'       => '#13550F',
 			),
 			'partially_fulfilled' => array(
 				'label'            => __( 'Partially fulfilled', 'woocommerce' ),
-				'background_color' => '#fff3cd',
-				'text_color'       => '#856404',
+				'background_color' => '#C8D7E1',
+				'text_color'       => '#003D66',
 			),
 			'unfulfilled'         => array(
 				'label'            => __( 'Unfulfilled', 'woocommerce' ),
-				'background_color' => '#f8d7da',
-				'text_color'       => '#721c24',
+				'background_color' => '#FBE5E5',
+				'text_color'       => '#CC1818',
 			),
 			'no_fulfillments'     => array(
 				'label'            => __( 'No fulfillments', 'woocommerce' ),
-				'background_color' => '#f8f9fa',
-				'text_color'       => '#6c757d',
+				'background_color' => '#F0F0F0',
+				'text_color'       => '#2F2F2F',
 			),
 		);
 	}
@@ -377,14 +377,14 @@ class FulfillmentUtils {
 			'fulfilled'   => array(
 				'label'            => __( 'Fulfilled', 'woocommerce' ),
 				'is_fulfilled'     => true,
-				'background_color' => '#d4edda',
-				'text_color'       => '#155724',
+				'background_color' => '#C6E1C6',
+				'text_color'       => '#13550F',
 			),
 			'unfulfilled' => array(
 				'label'            => __( 'Unfulfilled', 'woocommerce' ),
 				'is_fulfilled'     => false,
-				'background_color' => '#f8d7da',
-				'text_color'       => '#721c24',
+				'background_color' => '#FBE5E5',
+				'text_color'       => '#CC1818',
 			),
 		);
 	}

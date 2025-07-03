@@ -8,7 +8,7 @@ export default function FulfillmentStatusBadge( {
 }: {
 	fulfillment: Fulfillment;
 } ) {
-	const statuses = window.wcFulfillmentSettings.statuses;
+	const statuses = window.wcFulfillmentSettings.fulfillment_statuses;
 	const fulfillmentStatus = statuses[ fulfillment.status ] || {
 		label: fulfillment.status,
 		is_fulfilled: false,
