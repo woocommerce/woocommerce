@@ -64,7 +64,11 @@ const isCartItemMatched = (
 		! Array.isArray( selectedItem )
 	)
 		return false;
-	if ( cartItem.variation.length !== selectedItem.length ) return false;
+
+	// Incase the attributes list length is different in both the objects
+	if ( cartItem.variation.length !== selectedItem.length ) {
+		return false;
+	}
 
 	return cartItem.variation.every(
 		( {
@@ -78,7 +82,7 @@ const isCartItemMatched = (
 				return (
 					item.attribute === raw_attribute &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) )
+						( item.value && value === '' ) ) // Handle "any" attribute type
 				);
 			} )
 	);
