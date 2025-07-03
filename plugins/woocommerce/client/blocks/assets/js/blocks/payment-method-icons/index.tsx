@@ -12,8 +12,7 @@ import { paymentMethodsIcon } from './icon';
 import edit from './edit';
 import './style.scss';
 
-registerBlockType( metadata.name, {
-	...( metadata as BlockConfiguration ),
+registerBlockType( metadata, {
 	icon: {
 		src: <Icon icon={ paymentMethodsIcon } />,
 	},
