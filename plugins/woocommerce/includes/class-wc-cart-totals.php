@@ -137,12 +137,8 @@ final class WC_Cart_Totals {
 			throw new Exception( 'A valid WC_Cart object is required' );
 		}
 
-		// Check if customer is VAT exempt, if customer is defined.
-		$customer               = $cart->get_customer();
-		$is_customer_vat_exempt = $customer && $customer->get_is_vat_exempt();
-
 		$this->cart          = $cart;
-		$this->calculate_tax = wc_tax_enabled() && ! $is_customer_vat_exempt;
+		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
 		$this->calculate();
 	}
 
@@ -726,8 +722,7 @@ final class WC_Cart_Totals {
 		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
 
 		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-		$customer                        = $this->cart->get_customer();
-		$is_customer_vat_exempt          = $customer && $customer->get_is_vat_exempt();
+		$is_customer_vat_exempt          = $this->cart->get_customer()->get_is_vat_exempt();
 
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
