@@ -51,7 +51,10 @@ function setAttribute( name: string, value: string | null ) {
 
 function setDefaultSelectedAttribute() {
 	const context = getContext< Context >();
-	setAttribute( context.name, context.selectedValue );
+
+	if ( context.selectedValue ) {
+		setAttribute( context.name, context.selectedValue );
+	}
 }
 
 /**

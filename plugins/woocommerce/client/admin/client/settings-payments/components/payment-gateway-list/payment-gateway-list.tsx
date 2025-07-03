@@ -10,6 +10,7 @@ import {
 	PaymentsExtensionSuggestionProvider,
 } from '@woocommerce/data';
 import { Gridicon } from '@automattic/components';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -22,6 +23,7 @@ import {
 import { PaymentExtensionSuggestionListItem } from '~/settings-payments/components/payment-extension-suggestion-list-item';
 import { PaymentGatewayListItem } from '~/settings-payments/components/payment-gateway-list-item';
 import './payment-gateway-list.scss';
+import { removeOriginFromURL } from '~/settings-payments/utils';
 
 interface PaymentGatewayListProps {
 	/**
@@ -86,6 +88,8 @@ export const PaymentGatewayList = ( {
 	updateOrdering,
 	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
+	const navigate = useNavigate();
+
 	return (
 		<SortableContainer< PaymentsProvider >
 			items={ providers }
@@ -146,8 +150,12 @@ export const PaymentGatewayList = ( {
 									id={ offlinePmsGroup.id }
 									className="transitions-disabled woocommerce-list__item clickable-list-item enter-done"
 									onClick={ () => {
-										window.location.href =
-											offlinePmsGroup.management._links.settings.href;
+										navigate(
+											removeOriginFromURL(
+												offlinePmsGroup.management
+													._links.settings.href
+											)
+										);
 									} }
 								>
 									<div className="woocommerce-list__item-inner">
