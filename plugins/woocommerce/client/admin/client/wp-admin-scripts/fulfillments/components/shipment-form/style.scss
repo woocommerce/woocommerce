@@ -108,7 +108,8 @@
 					li {
 						padding: 0 16px;
 						background-color: var(--wc-content-bg, #fff);
-						&:hover, &.is-selected {
+						&:hover,
+						&.is-selected {
 							background-color: var(
 								--wp-components-color-accent,
 								var(--wp-admin-theme-color, #3858e9)
