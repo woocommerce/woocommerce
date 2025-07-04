@@ -34,9 +34,6 @@ const attributes = {
 		columns: 5,
 		shrinkColumns: true,
 	},
-	query: {
-		orderBy: 'post__in',
-	},
 	hideControls: [ CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE ],
 };
 
