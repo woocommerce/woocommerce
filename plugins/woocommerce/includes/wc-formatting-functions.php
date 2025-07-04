@@ -286,7 +286,11 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
-	$number = $number ? $number : '0';
+	$number = $number ?? '0';
+
+	if ( '' === $number ) {
+		return '';
+	}
 
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
