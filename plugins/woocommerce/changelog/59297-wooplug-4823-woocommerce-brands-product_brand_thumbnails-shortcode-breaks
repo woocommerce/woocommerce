@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed brands shortcode being empty when `show_empty` was set to `false`.

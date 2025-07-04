@@ -87,7 +87,7 @@ jobs:
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
 
       - name: Setup - spawn linting and testing jobs
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         id: 'project-jobs'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -438,7 +438,7 @@ jobs:
 
       - name: 'Add a link to test report in summary'
         if: ${{ strategy.job-index == 0 }} # only add the link once
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const BASE_REPORT_URL = 'https://woocommerce.github.io/woocommerce-test-reports/#/';

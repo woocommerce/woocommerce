@@ -52,6 +52,9 @@
 	.wc-block-components-sidebar {
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,
+		// Increase specificity to overwrite the rule from the TotalsWrapper component
+		// https://github.com/woocommerce/woocommerce/blob/74e823c0324289cff7361629ff8cc677c45dce0f/plugins/woocommerce/client/blocks/packages/components/totals-wrapper/style.scss#L24
+		.slot-wrapper .wc-block-components-panel,
 		.wc-block-components-totals-coupon {
 			padding-left: $gap;
 			padding-right: $gap;
