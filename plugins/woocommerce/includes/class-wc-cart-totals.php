@@ -37,14 +37,6 @@ final class WC_Cart_Totals {
 	protected $cart;
 
 	/**
-	 * Reference to customer object.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-	protected $customer;
-
-	/**
 	 * Line items to calculate.
 	 *
 	 * @since 3.2.0
