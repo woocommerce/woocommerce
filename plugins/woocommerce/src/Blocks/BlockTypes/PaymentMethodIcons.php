@@ -212,9 +212,8 @@ class PaymentMethodIcons extends AbstractBlock {
 	 * @return array Available payment methods.
 	 */
 	private function get_available_payment_methods() {
-		$enabled_card_types         = array_values( $this->get_enabled_card_types() );
-		$other_payment_method_icons = $this->get_other_payment_method_icons();
-		$all_payment_methods        = array_merge( $enabled_card_types, $other_payment_method_icons );
-		return $all_payment_methods;
+		$enabled_cards   = array_values( $this->get_enabled_card_types() );
+		$payment_methods = array_merge( $enabled_cards, $this->get_other_payment_method_icons() );
+		return $payment_methods;
 	}
 }
