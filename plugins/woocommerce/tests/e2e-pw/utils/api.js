@@ -8,11 +8,11 @@ import { createClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { admin } from '../test-data/data';
 
-const api = createClient(
-	process.env.BASE_URL,
-	admin.username,
-	admin.password
-);
+const api = createClient( process.env.BASE_URL, {
+	type: 'basic',
+	username: admin.username,
+	password: admin.password,
+} );
 
 const update = {
 	storeDetails: async ( store ) => {

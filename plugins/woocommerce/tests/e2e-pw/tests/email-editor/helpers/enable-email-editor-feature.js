@@ -54,7 +54,11 @@ export const disableEmailEditor = async ( baseURL ) =>
 export const deleteEmailPost = async ( baseURL, pageId ) => {
 	console.log( 'Deleting email post', { pageId } );
 
-	const apiClient = createClient( baseURL, admin.username, admin.password );
+	const apiClient = createClient( baseURL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
 	await apiClient.delete(
 		`${ WP_API_PATH }/woo_email/${ pageId }?force=true`
 	);

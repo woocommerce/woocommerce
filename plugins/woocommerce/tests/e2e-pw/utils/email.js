@@ -75,11 +75,11 @@ export async function expectEmailContent(
 }
 
 export async function getWooEmails( params ) {
-	const apiClient = createClient(
-		process.env.BASE_URL,
-		admin.username,
-		admin.password
-	);
+	const apiClient = createClient( process.env.BASE_URL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
 	const emails = await apiClient.get( `${ WP_API_PATH }/woo_email`, {
 		...params,
 	} );

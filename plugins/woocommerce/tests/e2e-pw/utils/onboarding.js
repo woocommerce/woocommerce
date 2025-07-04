@@ -19,11 +19,11 @@ import { admin } from '../test-data/data';
  */
 
 export async function updateOnboardingProfile( data ) {
-	const apiClient = createClient(
-		process.env.BASE_URL,
-		admin.username,
-		admin.password
-	);
+	const apiClient = createClient( process.env.BASE_URL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
 	const path = `${ WC_ADMIN_API_PATH }/onboarding/profile`;
 
 	const updateResponse = await apiClient.put( path, data );

@@ -37,11 +37,11 @@ export const CLASSIC_CART_PAGE = {
 };
 
 export async function pageExists( slug ) {
-	const apiClient = createClient(
-		process.env.BASE_URL,
-		admin.username,
-		admin.password
-	);
+	const apiClient = createClient( process.env.BASE_URL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
 	const pages = await apiClient.get(
 		`${ WP_API_PATH }/pages?slug=${ slug }`,
 		{
@@ -56,11 +56,11 @@ export async function pageExists( slug ) {
 async function createShortcodePage( slug, title, shortcode ) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( `Creating ${ title } page` );
-		const apiClient = createClient(
-			process.env.BASE_URL,
-			admin.username,
-			admin.password
-		);
+		const apiClient = createClient( process.env.BASE_URL, {
+			type: 'basic',
+			username: admin.username,
+			password: admin.password,
+		} );
 		const page = await apiClient
 			.post( `${ WP_API_PATH }/pages`, {
 				title,

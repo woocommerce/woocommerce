@@ -16,7 +16,13 @@ import { admin } from '../test-data/data';
 
 export const test = baseTest.extend( {
 	restApi: async ( { baseURL }, use ) => {
-		await use( createClient( baseURL, admin.username, admin.password ) );
+		await use(
+			createClient( baseURL, {
+				type: 'basic',
+				username: admin.username,
+				password: admin.password,
+			} )
+		);
 	},
 
 	testPageTitlePrefix: [ '', { option: true } ],
