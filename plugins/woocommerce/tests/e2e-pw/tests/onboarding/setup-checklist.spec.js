@@ -96,7 +96,7 @@ test(
 		);
 		await nonSupportedWooPaymentsCountryPage
 			.locator( '.woocommerce-task-list__item' )
-			.filter( { hasText: 'Get paid' } )
+			.filter( { hasText: 'Set up payments' } )
 			.click();
 
 		await expect(

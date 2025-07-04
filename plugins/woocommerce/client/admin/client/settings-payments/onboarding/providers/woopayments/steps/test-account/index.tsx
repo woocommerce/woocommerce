@@ -20,7 +20,13 @@ import {
 	disableWooPaymentsTestAccount,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
+import { WooPaymentsResetAccountModal } from '~/settings-payments/components/modals/woo-payments-reset-account-modal';
 import './style.scss';
+
+const TEST_ACCOUNT_ERROR_CODES = {
+	ACCOUNT_ALREADY_EXISTS:
+		'woocommerce_woopayments_test_account_already_exists',
+};
 
 interface StepCheckResponse {
 	status: string;
@@ -95,6 +101,7 @@ const TestAccountStep = () => {
 		refreshStoreData,
 		setJustCompletedStepId,
 		sessionEntryPoint,
+		setSnackbar,
 	} = useOnboardingContext();
 
 	// Component State.
@@ -106,6 +113,10 @@ const TestAccountStep = () => {
 	const [ loaderTitle, setLoaderTitle ] = useState< string | undefined >(
 		PHASE_MESSAGES[ 0 ]
 	);
+
+	const [ isResetAccountModalOpen, setIsResetAccountModalOpen ] =
+		useState( false );
+	const [ errorCode, setErrorCode ] = useState< string | undefined >();
 
 	// Refs for timers and phase tracking.
 	const pollingTimeoutRef = useRef< number | null >( null );
@@ -254,6 +265,7 @@ const TestAccountStep = () => {
 						return apiFetch< {
 							success: boolean;
 							message?: string;
+							code?: string;
 						} >( {
 							url: currentStep?.actions?.init?.href,
 							method: 'POST',
@@ -264,6 +276,7 @@ const TestAccountStep = () => {
 							// Start polling immediately after successful init.
 							setStatus( 'polling' );
 						} else {
+							setErrorCode( response?.code || '' );
 							setErrorMessage(
 								response?.message ||
 									__(
@@ -275,6 +288,7 @@ const TestAccountStep = () => {
 						}
 					} )
 					.catch( ( error ) => {
+						setErrorCode( error?.code || '' );
 						setErrorMessage( error.message );
 						setStatus( 'error' );
 					} );
@@ -598,6 +612,59 @@ const TestAccountStep = () => {
 		);
 	}
 
+	const isAccountAlreadyExistsError =
+		errorCode === TEST_ACCOUNT_ERROR_CODES.ACCOUNT_ALREADY_EXISTS;
+
+	const actions = isAccountAlreadyExistsError
+		? [
+				{
+					label: __( 'Reset Account', 'woocommerce' ),
+					variant: 'secondary' as const,
+					onClick: () => {
+						setIsResetAccountModalOpen( true );
+					},
+				},
+		  ]
+		: [
+				{
+					label: __( 'Try Again', 'woocommerce' ),
+					variant: 'primary' as const,
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'try_again_on_error',
+								retries: retryCounter + 1,
+								source: sessionEntryPoint,
+							}
+						);
+
+						resetState();
+						setRetryCounter( ( c ) => c + 1 );
+					},
+				},
+				{
+					label: __( 'Cancel', 'woocommerce' ),
+					variant: 'secondary' as const,
+					className:
+						'woocommerce-payments-test-account-step__error-cancel-button',
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'cancel_on_error',
+								retries: retryCounter,
+								source: sessionEntryPoint,
+							}
+						);
+
+						closeModal();
+					},
+				},
+		  ];
+
 	// Render loading/error state.
 	return (
 		<div className="woocommerce-payments-test-account-step">
@@ -610,51 +677,7 @@ const TestAccountStep = () => {
 					isDismissible={ false }
 					actions={
 						// Only show actions if the step is not blocked.
-						status !== 'blocked'
-							? [
-									{
-										label: __( 'Try Again', 'woocommerce' ),
-										variant: 'primary',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'try_again_on_error',
-													retries: retryCounter + 1,
-													source: sessionEntryPoint,
-												}
-											);
-
-											resetState();
-											setRetryCounter( ( c ) => c + 1 );
-										},
-									},
-									{
-										label: __( 'Cancel', 'woocommerce' ),
-										variant: 'secondary',
-										className:
-											'woocommerce-payments-test-account-step__error-cancel-button',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'cancel_on_error',
-													retries: retryCounter,
-													source: sessionEntryPoint,
-												}
-											);
-
-											closeModal();
-										},
-									},
-							  ]
-							: []
+						status !== 'blocked' ? actions : []
 					}
 					className="woocommerce-payments-test-account-step__error"
 				>
@@ -676,6 +699,21 @@ const TestAccountStep = () => {
 					message={ getPhaseMessage( pollingPhase ) }
 				/>
 			) }
+
+			<WooPaymentsResetAccountModal
+				isOpen={ isResetAccountModalOpen }
+				onClose={ () => {
+					setIsResetAccountModalOpen( false );
+					setSnackbar( {
+						show: true,
+						message: __(
+							'Your test account was successfully reset.',
+							'woocommerce'
+						),
+					} );
+				} }
+				isEmbeddedResetFlow
+			/>
 		</div>
 	);
 };
