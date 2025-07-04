@@ -30,7 +30,8 @@ type NotifyQuantityChangesArgs = {
 const isWithinQuantityLimits = ( cartItem: CartItem ) => {
 	return (
 		cartItem.quantity >= cartItem.quantity_limits.minimum &&
-		cartItem.quantity <= cartItem.quantity_limits.maximum
+		cartItem.quantity <= cartItem.quantity_limits.maximum &&
+		cartItem.quantity % cartItem.quantity_limits.multiple_of === 0
 	);
 };
 
