@@ -118,9 +118,9 @@ class FedExShippingProvider extends AbstractShippingProvider {
 			'/^7\d{11,20}$/'     => $is_north_america ? 90 : 75,
 
 			// FedEx Express digit patterns (ordered by specificity).
-			'/^\d{12}$/'         => 95,
-			'/^\d{14}$/'         => 95,
-			'/^\d{15}$/'         => 90,
+			'/^\d{12}$/'         => $is_north_america ? 95 : 80,  // Reduced for EU.
+			'/^\d{14}$/'         => $is_north_america ? 95 : 80,  // Reduced for EU.
+			'/^\d{15}$/'         => $is_north_america ? 90 : 75,  // Reduced for EU.
 
 			// Fallback patterns.
 			'/^\d{20}$/'         => 70,
