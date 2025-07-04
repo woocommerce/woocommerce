@@ -5,14 +5,21 @@ import { render, screen } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 
 /**
+ * External dependencies
+ */
+import { useEditorContext } from '@woocommerce/base-context';
+
+/**
  * Internal dependencies
  */
 import CheckoutExpressPayment from '../checkout-express-payment';
 
 // Mock the settings
-jest.mock( '@woocommerce/settings', () => ( {
+const mockSettings = {
 	CURRENT_USER_IS_ADMIN: false,
-} ) );
+};
+
+jest.mock( '@woocommerce/settings', () => mockSettings );
 
 // Mock the block data stores
 jest.mock( '@woocommerce/block-data', () => ( {
@@ -22,7 +29,7 @@ jest.mock( '@woocommerce/block-data', () => ( {
 
 // Mock the base context
 jest.mock( '@woocommerce/base-context', () => ( {
-	useEditorContext: jest.fn().mockReturnValue( { isEditor: false } ),
+	useEditorContext: jest.fn(),
 	noticeContexts: {
 		EXPRESS_PAYMENTS: 'wc/express-payment',
 	},
@@ -78,11 +85,9 @@ describe( 'CheckoutExpressPayment', () => {
 	describe( 'No registered express payment methods', () => {
 		beforeEach( () => {
 			// Reset mocks to ensure clean state
-			const mockEditorContext = require( '@woocommerce/base-context' );
-			mockEditorContext.useEditorContext.mockReturnValue( {
+			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			const mockSettings = require( '@woocommerce/settings' );
 			mockSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
@@ -108,8 +113,7 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render StoreNoticesContainer when in editor', () => {
-			const mockEditorContext = require( '@woocommerce/base-context' );
-			mockEditorContext.useEditorContext.mockReturnValue( {
+			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: true,
 			} );
 
@@ -123,7 +127,6 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render StoreNoticesContainer when user is admin', () => {
-			const mockSettings = require( '@woocommerce/settings' );
 			mockSettings.CURRENT_USER_IS_ADMIN = true;
 
 			render( <CheckoutExpressPayment /> );
@@ -135,11 +138,9 @@ describe( 'CheckoutExpressPayment', () => {
 	describe( 'Registered but no valid express payment methods', () => {
 		beforeEach( () => {
 			// Reset mocks to ensure clean state
-			const mockEditorContext = require( '@woocommerce/base-context' );
-			mockEditorContext.useEditorContext.mockReturnValue( {
+			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			const mockSettings = require( '@woocommerce/settings' );
 			mockSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
@@ -168,8 +169,7 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render StoreNoticesContainer when in editor', () => {
-			const mockEditorContext = require( '@woocommerce/base-context' );
-			mockEditorContext.useEditorContext.mockReturnValue( {
+			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: true,
 			} );
 
@@ -183,7 +183,6 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render StoreNoticesContainer when user is admin', () => {
-			const mockSettings = require( '@woocommerce/settings' );
 			mockSettings.CURRENT_USER_IS_ADMIN = true;
 
 			render( <CheckoutExpressPayment /> );

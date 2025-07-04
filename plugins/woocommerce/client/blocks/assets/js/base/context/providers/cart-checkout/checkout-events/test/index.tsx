@@ -54,7 +54,7 @@ describe( 'CheckoutEventsContext', () => {
 	it( '__internalSetRegisteredExpressPaymentMethods is called when component renders', () => {
 		render(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 
@@ -83,7 +83,7 @@ describe( 'CheckoutEventsContext', () => {
 		checkoutEvents.onCheckoutValidation( callback2 );
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		await act( () =>
@@ -91,7 +91,7 @@ describe( 'CheckoutEventsContext', () => {
 		);
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		expect( callback ).toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe( 'CheckoutEventsContext', () => {
 		checkoutEvents.onCheckoutFail( failCallback );
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		await act( () =>
@@ -114,7 +114,7 @@ describe( 'CheckoutEventsContext', () => {
 		);
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		expect( successCallback ).toHaveBeenCalled();
@@ -130,7 +130,7 @@ describe( 'CheckoutEventsContext', () => {
 		checkoutEvents.onCheckoutFail( failCallback );
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		await act( () => {
@@ -139,7 +139,7 @@ describe( 'CheckoutEventsContext', () => {
 		} );
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
-				{ null as any }
+				{ ( <div /> ) as unknown as React.ReactChildren }
 			</CheckoutEventsProvider>
 		);
 		expect( successCallback ).not.toHaveBeenCalled();
