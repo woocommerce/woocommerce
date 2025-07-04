@@ -55,14 +55,14 @@ class AdminManager {
 		if (
 			! in_array(
 				$screen_id,
-				array( 'woocommerce_page_wc-customer-stock-notifications', 'woocommerce_page_wc-settings', ),
+				array( 'woocommerce_page_wc-customer-stock-notifications', 'woocommerce_page_wc-settings' ),
 				true
 			)
 		) {
 			return;
 		}
 
-		if ( 'woocommerce_page_wc-settings' === $screen_id && 'customer_stock_notifications' !== $_GET['section']  ) {
+		if ( 'woocommerce_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'customer_stock_notifications' !== $_GET['section'] ) {
 			return;
 		}
 
