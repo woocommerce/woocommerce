@@ -171,6 +171,51 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
+	 * Get quantity constraints for a product.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @param bool       $is_grouped_child Whether this is a grouped child product.
+	 * @return array
+	 */
+	private function get_quantity_constraints( $product, $is_grouped_child = false ) {
+		/**
+		 * Filter the minimum quantity value allowed for the product.
+		 *
+		 * @since 10.1.0
+		 * @param int        $min_value Minimum quantity value.
+		 * @param WC_Product $product   Product object.
+		 */
+		$min = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+		/**
+		 * Filter the maximum quantity value allowed for the product.
+		 *
+		 * @since 10.1.0
+		 * @param int        $max_value Maximum quantity value.
+		 * @param WC_Product $product   Product object.
+		 */
+		$max = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		/**
+		 * Filter the step quantity value allowed for the product.
+		 *
+		 * @since 10.1.0
+		 * @param int        $step_value Step quantity value.
+		 * @param WC_Product $product    Product object.
+		 */
+		$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
+
+		$min = max( $min, 0 );
+		$max = 0 < $max ? $max : '';
+		if ( '' !== $max && $max < $min ) {
+			$max = $min;
+		}
+		return array(
+			'min'  => $is_grouped_child ? 0 : (int) $min,
+			'max'  => ( '' !== $max && -1 !== $max ) ? (int) $max : null,
+			'step' => (int) $step,
+		);
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -292,37 +337,13 @@ class AddToCartForm extends AbstractBlock {
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $child_product->is_purchasable() && $child_product->is_in_stock() && ! $child_product->has_options() ) {
-						$context['groupedProductIds'][] = $child_product_id;
-						$min                            = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
-						$max                            = apply_filters( 'woocommerce_quantity_input_max', $child_product->get_max_purchase_quantity(), $child_product );
-						$step                           = apply_filters( 'woocommerce_quantity_input_step', 1, $child_product );
-						$min                            = max( $min, 0 );
-						$max                            = 0 < $max ? $max : '';
-						if ( '' !== $max && $max < $min ) {
-							$max = $min;
-						}
-						$context['quantityConstraints'][ $child_product_id ] = array(
-							'min'  => 0,
-							'max'  => ( '' !== $max && -1 !== $max ) ? (int) $max : null,
-							'step' => (int) $step,
-						);
+						$context['groupedProductIds'][]                      = $child_product_id;
+						$context['quantityConstraints'][ $child_product_id ] = $this->get_quantity_constraints( $child_product, true );
 					}
 				}
 			} else {
-				$min  = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
-				$max  = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
-				$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
-				$min  = max( $min, 0 );
-				$max  = 0 < $max ? $max : '';
-				if ( '' !== $max && $max < $min ) {
-					$max = $min;
-				}
 				$context['quantityConstraints'] = array(
-					$product->get_id() => array(
-						'min'  => (int) $min,
-						'max'  => ( '' !== $max && -1 !== $max ) ? (int) $max : null,
-						'step' => (int) $step,
-					),
+					$product->get_id() => $this->get_quantity_constraints( $product ),
 				);
 				$context['productId']           = $product->get_id();
 				$context['productType']         = $product->get_type();
