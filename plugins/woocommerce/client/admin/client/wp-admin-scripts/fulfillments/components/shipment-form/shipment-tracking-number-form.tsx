@@ -6,6 +6,7 @@ import { Button, ExternalLink, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -15,6 +16,15 @@ import ErrorLabel from '../user-interface/error-label';
 import { EditIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
 import ShipmentProviders from '../../data/shipment-providers';
+import { useFulfillmentDrawerContext } from '../../context/drawer-context';
+
+interface TrackingNumberParsingResponse {
+	tracking_number_details: {
+		tracking_number: string;
+		tracking_url: string;
+		shipping_provider: string;
+	};
+}
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
 	const provider = ShipmentProviders.find( ( p ) => p.value === providerKey );
@@ -34,6 +44,8 @@ export default function ShipmentTrackingNumberForm() {
 	const [ trackingNumberTemp, setTrackingNumberTemp ] = useState( '' );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
+	const [ isLoading, setIsLoading ] = useState( false );
+	const { order } = useFulfillmentDrawerContext();
 	const {
 		trackingNumber,
 		setTrackingNumber,
@@ -44,24 +56,35 @@ export default function ShipmentTrackingNumberForm() {
 		setShipmentProvider,
 	} = useShipmentFormContext();
 
-	const handleTrackingNumberLookup = () => {
+	const handleTrackingNumberLookup = async () => {
 		setError( null );
-		// TODO: For testing purposes, remove this before production.
-		if ( trackingNumberTemp === '12345678' ) {
-			setTrackingNumber( trackingNumberTemp );
-			setShipmentProvider( 'ups' );
+		try {
+			setIsLoading( true );
+			const { tracking_number_details } =
+				await apiFetch< TrackingNumberParsingResponse >( {
+					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
+					method: 'GET',
+				} );
+			if ( ! tracking_number_details.tracking_number ) {
+				setError(
+					__(
+						'No information found for this tracking number. Check the number or enter the details manually.',
+						'woocommerce'
+					)
+				);
+				return;
+			}
+			setTrackingNumber( tracking_number_details.tracking_number );
+			setTrackingUrl( tracking_number_details.tracking_url );
+			setShipmentProvider( tracking_number_details.shipping_provider );
 			setProviderName( '' );
-			setTrackingUrl(
-				'https://www.ups.com/track?tracknum=12345678&some-other-long-query-string-for-testing-ellipsis'
-			);
 			setEditMode( false );
-		} else {
+		} catch ( err ) {
 			setError(
-				__(
-					'No information found for this tracking number. Check the number or enter the details manually.',
-					'woocommerce'
-				)
+				__( 'Failed to fetch shipment information.', 'woocommerce' )
 			);
+		} finally {
+			setIsLoading( false );
 		}
 	};
 
@@ -75,7 +98,7 @@ export default function ShipmentTrackingNumberForm() {
 		<>
 			<p className="woocommerce-fulfillment-description">
 				{ __(
-					'Provide the shipment tracking number to find the shipment provider and tracking URL. Enter "12345678" to test the tracking number lookup.',
+					'Provide the shipment tracking number to find the shipment provider and tracking URL.',
 					'woocommerce'
 				) }
 			</p>
@@ -99,6 +122,11 @@ export default function ShipmentTrackingNumberForm() {
 						<Button
 							variant="secondary"
 							text="Find info"
+							disabled={
+								isLoading ||
+								isEmpty( trackingNumberTemp.trim() )
+							}
+							isBusy={ isLoading }
 							onClick={ handleTrackingNumberLookup }
 							__next40pxDefaultSize
 						/>

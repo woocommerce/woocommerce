@@ -415,7 +415,7 @@ class FulfillmentsRenderer {
 			 *
 			 * @since 9.9.0
 			 */
-			'providers'        => apply_filters( 'wc_fulfillment_shipping_providers', array() ),
+			'providers'        => FulfillmentUtils::get_shipping_providers_object(),
 			'statuses'         => FulfillmentUtils::get_fulfillment_statuses(),
 			'currency_symbols' => get_woocommerce_currency_symbols(),
 		);
