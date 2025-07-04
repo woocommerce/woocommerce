@@ -11,7 +11,7 @@ class DataRetentionController {
 
 	public function __construct() {
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
-		add_action( 'update_option_wc_customer_stock_notifications_delete_unverified_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		add_action( 'update_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		add_action( 'add_option_wc_customer_stock_notifications_delete_unverified_time_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_async_tasks' ) );
 	}
@@ -30,8 +30,8 @@ class DataRetentionController {
 			return;
 		}
 
-		if ( ! wp_next_scheduled( 'customer_stock_notifications_daily' ) ) {
-			wp_schedule_event( time(), 'daily', self::DAILY_TASK_HOOK );
+		if ( ! wp_next_scheduled( self::DAILY_TASK_HOOK ) ) {
+			wp_schedule_event( time() + 1, 'daily', self::DAILY_TASK_HOOK );
 		}
 	}
 
@@ -50,7 +50,7 @@ class DataRetentionController {
 	 * @return void
 	 */
 	public function do_wc_customer_stock_notifications_daily() {
-		$time_threshold            = Config::get_delete_unverified_time_threshold();
+		$time_threshold            = Config::get_delete_after_days();
 
 		if ( 0 === $time_threshold ) {
 			return;

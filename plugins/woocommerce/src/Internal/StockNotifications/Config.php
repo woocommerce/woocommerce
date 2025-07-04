@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
  */
 class Config {
 
-	public const DEFAULT_UNVERIFIED_DAYS_THRESHOLD = 30;
+	public const DEFAULT_DELETE_AFTER_DAYS = 30;
 
 	/**
 	 * Runtime cache for supported product types.
@@ -121,23 +121,17 @@ class Config {
 	}
 
 	/**
-	 * Time period required to keep unverified notifications in the system (in seconds). @see WC_BIS_Sync_Tasks::do_wc_bis_daily()
-	 *
-	 * @since 1.2.0
+	 * How long to keep unverified notifications in the system (in days).
 	 *
 	 * @return int
 	 */
-	public static function get_delete_unverified_time_threshold() {
+	public static function get_delete_after_days(): int {
 		$delete_after_days = absint(
 			get_option(
-				'wc_customer_stock_notifications_delete_unverified_days_threshold',
-				self::DEFAULT_UNVERIFIED_DAYS_THRESHOLD
+				'wc_customer_stock_notifications_delete_after_days',
+				self::DEFAULT_DELETE_AFTER_DAYS
 			)
 		);
-
-		if ( $delete_after_days > 0 ) {
-			$delete_after_days = $delete_after_days * DAY_IN_SECONDS;
-		}
 
 		return $delete_after_days;
 	}
