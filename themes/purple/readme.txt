@@ -41,7 +41,12 @@ Source: https://fonts.google.com/specimen/Inter
 
 == Images ==
 
-All images bundled are original by Automattic
-Author: Automattic (https://automattic.com)
+Theme screenshot, Icon and logo images 
+Author: Beatriz Fialho
+License: CC0 1.0 Universal
+License URI: https://creativecommons.org/publicdomain/zero/1.0/
+
+Pattern placeholder, product images
+Author: Marek Rybicki
 License: CC0 1.0 Universal
 License URI: https://creativecommons.org/publicdomain/zero/1.0/
