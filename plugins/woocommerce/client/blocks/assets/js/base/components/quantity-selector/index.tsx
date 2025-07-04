@@ -66,7 +66,14 @@ const QuantitySelector = ( {
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
 			// We round off the value to our steps.
-			value = Math.floor( value / step ) * step;
+			value = Math.round( value / step ) * step;
+
+			// Round to avoid floating-point precision errors (e.g., 1.4000000000000001 -> 1.4).
+			const stepDecimalPlaces =
+				step.toString().split( '.' )[ 1 ]?.length || 0;
+			value =
+				Math.round( value * Math.pow( 10, stepDecimalPlaces ) ) /
+				Math.pow( 10, stepDecimalPlaces );
 
 			return value;
 		},
