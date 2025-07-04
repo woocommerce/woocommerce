@@ -33,6 +33,7 @@ class QuantityLimitsTests extends TestCase {
 		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
 		remove_all_filters( 'woocommerce_store_api_product_quantity_maximum' );
 		remove_all_filters( 'woocommerce_store_api_product_quantity_minimum' );
+		remove_all_filters( 'woocommerce_quantity_input_args' );
 		parent::tearDown();
 	}
 
@@ -54,6 +55,68 @@ class QuantityLimitsTests extends TestCase {
 		remove_all_filters( 'woocommerce_stock_amount' );
 		// Add only intval.
 		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * Test quantity limits with float support enabled.
+	 */
+	public function test_quantity_limits_with_classic_filters() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		add_filter(
+			'woocommerce_quantity_input_args',
+			function ( $args, $the_product ) use ( $product ) {
+				if ( $the_product->get_id() === $product->get_id() ) {
+					$args['min_value'] = 2;
+					$args['max_value'] = 8;
+					$args['step']      = 2;
+				}
+				return $args;
+			},
+			10,
+			2
+		);
+
+		$quantity_limits = new QuantityLimits();
+		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
+
+		$this->assertEquals( 2, $limits['minimum'], 'Minimum quantity should be 2' );
+		$this->assertEquals( 8, $limits['maximum'], 'Maximum quantity should be 8' );
+		$this->assertEquals( 2, $limits['multiple_of'], 'Multiple of should be 2' );
+		remove_all_filters( 'woocommerce_quantity_input_args' );
+
+		// Adjust max value in filter greater than stock quantity.
+		add_filter(
+			'woocommerce_quantity_input_args',
+			function ( $args, $the_product ) use ( $product ) {
+				if ( $the_product->get_id() === $product->get_id() ) {
+					$args['min_value'] = 2;
+					$args['max_value'] = 12;
+					$args['step']      = 2;
+				}
+				return $args;
+			},
+			10,
+			2
+		);
+
+		$quantity_limits = new QuantityLimits();
+		$limits          = $quantity_limits->get_add_to_cart_limits( $product );
+
+		$this->assertEquals( 2, $limits['minimum'], 'Minimum quantity should be 2' );
+		$this->assertEquals( 10, $limits['maximum'], 'Maximum quantity should be 10 to match stock quantity' );
+		$this->assertEquals( 2, $limits['multiple_of'], 'Multiple of should be 2' );
+		remove_all_filters( 'woocommerce_quantity_input_args' );
 	}
 
 	/**

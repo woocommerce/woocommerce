@@ -49,30 +49,20 @@ final class QuantityLimits {
 	 * @return array
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product, $cart_item = null ) {
-		$minimum     = $this->filter_numeric_value( $product->get_min_purchase_quantity(), 'minimum', $product, $cart_item );
-		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product, $cart_item ), 'maximum', $product, $cart_item );
-		$multiple_of = $this->filter_numeric_value( $product->get_purchase_quantity_step(), 'multiple_of', $product, $cart_item );
+		// Compatibility with the woocommerce_quantity_input_args filter. Gets initial values to match classic quantity input.
+		$args        = wc_get_quantity_input_args( [], $product );
+		$minimum     = $this->filter_numeric_value( $args['min_value'], 'minimum', $product, $cart_item );
+		$maximum     = $this->filter_numeric_value(
+			$this->adjust_product_quantity_limit( $args['max_value'], $product, $cart_item ),
+			'maximum',
+			$product,
+			$cart_item
+		);
+		$multiple_of = $this->filter_numeric_value( $args['step'], 'multiple_of', $product, $cart_item );
 
 		// Ensure values are compatible with each other.
 		$minimum = max( $multiple_of, $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ) );
 		$maximum = max( $minimum, $this->limit_to_multiple( $maximum, $multiple_of, 'floor' ) );
-
-		// Compatibility with the woocommerce_quantity_input_args filter.
-		if ( has_filter( 'woocommerce_quantity_input_args' ) ) {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$filtered_args = apply_filters(
-				'woocommerce_quantity_input_args',
-				[
-					'min_value' => $minimum,
-					'max_value' => $maximum,
-					'step'      => $multiple_of,
-				],
-				$product
-			);
-			$minimum       = $filtered_args['min_value'] ?? $minimum;
-			$maximum       = $filtered_args['max_value'] ?? $maximum;
-			$multiple_of   = $filtered_args['step'] ?? $multiple_of;
-		}
 
 		return [
 			'minimum'     => $minimum,
@@ -205,22 +195,20 @@ final class QuantityLimits {
 	 * This is based on product properties, including remaining stock, and defaults to a maximum of 9999 of any product
 	 * in the cart at once.
 	 *
+	 * @param int|float   $purchase_limit The purchase limit from the product. Usually maps to `get_max_purchase_quantity`.
 	 * @param \WC_Product $product Product instance.
 	 * @param array|null  $cart_item Optional cart item associated with the product.
 	 * @return int|float
 	 */
-	protected function get_product_quantity_limit( \WC_Product $product, $cart_item = null ) {
-		$purchase_limit = $product->get_max_purchase_quantity();
-		$limits         = [ $purchase_limit > 0 ? $purchase_limit : 9999 ];
+	protected function adjust_product_quantity_limit( $purchase_limit, \WC_Product $product, $cart_item = null ) {
+		$limits = [ $purchase_limit > 0 ? $purchase_limit : 9999 ];
 
 		// If managing stock and backorders are not allowed, get the remaining stock considering active carts.
 		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
-		$limit = min( array_filter( $limits ) );
-
-		return $this->filter_numeric_value( $limit, 'limit', $product, $cart_item );
+		return $this->filter_numeric_value( min( array_filter( $limits ) ), 'limit', $product, $cart_item );
 	}
 
 	/**
