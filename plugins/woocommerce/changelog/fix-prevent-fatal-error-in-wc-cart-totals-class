@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check to see if customer object is defined before calling `get_is_vat_exempt`
