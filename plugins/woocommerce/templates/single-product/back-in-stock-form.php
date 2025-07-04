@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="wc_bis_form">
+<div class="wc_bis_form<?php echo $is_visible ? '' : ' hidden'; ?>" data-bis-product-id="<?php echo $product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ); ?>">
 
 	<h3>
 		<?php echo wp_kses_post( __( 'Want to be notified when this product is back in stock?', 'woocommerce' ) ); ?>
@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				name="wc_bis_register"
 				class="<?php echo esc_attr( $button_class ); ?>"
 			>
-				<?php echo esc_html( $button_text ); ?>
+				<?php echo esc_html( __( 'Notify me', 'woocommerce' ) ); ?>
 			</button>
 		</div>
 
@@ -67,6 +67,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</label>
 
 		<?php endif; ?>
+
+		<?php wp_nonce_field( 'wc_bis_signup', 'wc_bis_nonce' ); ?>
 
 		<input type="hidden" name="wc_bis_product_id" value="<?php echo $product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ); ?>" />
 	</form>

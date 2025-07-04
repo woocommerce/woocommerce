@@ -1212,6 +1212,10 @@ p.demo_store,
 		margin: 2em 0;
 		padding: 0;
 
+		&.hidden {
+			display: none;
+		}
+
 		&__form-row {
 			display: flex;
 			flex-wrap: wrap;

@@ -4,10 +4,19 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+
 /**
  * Settings controller for Customer Stock Notifications.
  */
 class SettingsController {
+
+	/**
+	 * Meta key for the enable signups option per product.
+	 *
+	 * @var string
+	 */
+	public const PRODUCT_META_KEY = 'customer_stock_notifications_enable_signups';
 
 	/**
 	 * Constructor.
@@ -22,6 +31,10 @@ class SettingsController {
 
 		// Display admin notices about incompatible settings combinations.
 		add_action( 'admin_notices', array( $this, 'output_admin_notices' ) );
+
+		// Display and save product-level stock notifications option.
+		add_action( 'woocommerce_product_options_stock_status', array( $this, 'add_disable_stock_notifications_checkbox' ), 20 );
+		add_action( 'woocommerce_admin_process_product_object', array( $this, 'process_product_object' ) );
 	}
 
 	/**
@@ -175,5 +188,69 @@ class SettingsController {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Setting to allow admins disabling bis on product level.
+	 *
+	 * @return void
+	 */
+	public function add_disable_stock_notifications_checkbox() {
+
+		if ( ! Config::allows_signups() ) {
+			return;
+		}
+
+		global $product_object;
+		if ( ! is_a( $product_object, 'WC_Product' ) ) {
+			return;
+		}
+
+		$enable_signups = 'no' !== $product_object->get_meta( self::PRODUCT_META_KEY ) ? 'yes' : 'no';
+
+		wp_nonce_field( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
+		woocommerce_wp_checkbox(
+			array(
+				'id'            => self::PRODUCT_META_KEY,
+				'label'         => __( 'Stock notifications', 'woocommerce' ),
+				'value'         => $enable_signups,
+				'wrapper_class' => implode(
+					' ',
+					array_map(
+						function ( $type ) {
+							return 'show_if_' . $type;
+						},
+						Config::get_supported_product_types()
+					)
+				),
+				'description'   => __( 'Let customers sign up to be notified when this product is restocked', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
+	 * Save product settings meta.
+	 *
+	 * @param  WC_Product $product The product object.
+	 * @return void
+	 */
+	public static function process_product_object( $product ) {
+
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return;
+		}
+
+		if ( ! $product->is_type( Config::get_supported_product_types() ) ) {
+			return;
+		}
+
+		check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
+
+		/**
+		 * Hint: If the meta exists and the posted value is false, delete the meta.
+		 * Otherwise, add the meta.
+		 */
+		$posted_is_enabled = isset( $_POST[ self::PRODUCT_META_KEY ] );
+		$product->update_meta_data( self::PRODUCT_META_KEY, $posted_is_enabled ? 'yes' : 'no' );
 	}
 }

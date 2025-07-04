@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 
 /**
  * A class for handling the business logic of the signup process.
@@ -35,6 +36,24 @@ class SignupService {
 	// phpcs:enable
 
 	/**
+	 * Eligibility service.
+	 *
+	 * @var EligibilityService
+	 */
+	private EligibilityService $eligibility_service;
+
+	/**
+	 * Init the service.
+	 *
+	 * @internal
+	 *
+	 * @param EligibilityService $eligibility_service The eligibility service.
+	 */
+	final public function init( EligibilityService $eligibility_service ) {
+		$this->eligibility_service = $eligibility_service;
+	}
+
+	/**
 	 * Signup.
 	 *
 	 * @param int    $product_id The product ID.
@@ -45,12 +64,29 @@ class SignupService {
 	 */
 	public function signup( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
 
-		$type = \WC_Product_Factory::get_product_type( $product_id );
-		if ( ! in_array( $type, Config::get_supported_product_types(), true ) ) {
+		// Sanity checks.
+		if ( ! Config::allows_signups() ) {
+			return new \WP_Error( self::ERROR_FAILED );
+		}
+
+		$product = wc_get_product( $product_id );
+		if ( ! $product ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		$notification = $this->get_existing_subscription( $product_id, $user_id, $user_email, $posted_attributes );
+		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
+			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
+		}
+
+		if ( ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
+			return new \WP_Error( self::ERROR_INVALID_REQUEST );
+		}
+
+		if ( ! $this->eligibility_service->product_allows_signups( $product ) ) {
+			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
+		}
+
+		$notification = $this->is_already_signed_up( $product_id, $user_id, $user_email, $posted_attributes );
 		if ( $notification instanceof Notification ) {
 			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
 				return new SignupResult( self::SIGNUP_ALREADY_JOINED, $notification );
@@ -66,10 +102,6 @@ class SignupService {
 				$notification->save();
 				return new SignupResult( self::SIGNUP_SUCCESS, $notification );
 			}
-		}
-
-		if ( $this->is_rate_limited() ) {
-			return new \WP_Error( self::ERROR_RATE_LIMITED );
 		}
 
 		$account_created = $this->maybe_create_customer( $user_id, $user_email );
@@ -119,17 +151,17 @@ class SignupService {
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
-	 * @param string $email The user email.
-	 * @param array  $posted_attributes The posted attributes.
+	 * @param string $user_email The user email.
+	 * @param array  $posted_attributes The posted attributes (Optional).
 	 * @return Notification|null The notification, or null if it doesn't exist.
 	 */
-	private function get_existing_subscription( int $product_id, int $user_id, string $email, array $posted_attributes ) {
+	public function is_already_signed_up( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ) {
 
 		if ( empty( $product_id ) ) {
 			return null;
 		}
 
-		if ( empty( $user_id ) && empty( $email ) ) {
+		if ( empty( $user_id ) && empty( $user_email ) ) {
 			return null;
 		}
 
@@ -137,7 +169,7 @@ class SignupService {
 		if ( ! empty( $user_id ) ) {
 			$found = NotificationQuery::notification_exists_by_user_id( $product_id, $user_id );
 		} else {
-			$found = NotificationQuery::notification_exists_by_email( $product_id, $email );
+			$found = NotificationQuery::notification_exists_by_email( $product_id, $user_email );
 		}
 
 		if ( ! $found ) {
@@ -148,7 +180,7 @@ class SignupService {
 		if ( ! empty( $user_id ) ) {
 			$query_args['user_id'] = $user_id;
 		} else {
-			$query_args['user_email'] = $email;
+			$query_args['user_email'] = $user_email;
 		}
 
 		$query_args['return'] = 'ids';
@@ -339,15 +371,15 @@ class SignupService {
 		}
 
 		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
+		if ( ! $product instanceof \WC_Product ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		if ( ! in_array( $product->get_type(), Config::get_supported_product_types(), true ) ) {
+		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		if ( $this->is_product_disabled( $product ) ) {
+		if ( ! $this->eligibility_service->product_allows_signups( $product ) ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
@@ -391,8 +423,8 @@ class SignupService {
 	 *
 	 * @see \WC_Cart::add_to_cart() for similar attribute parsing logic.
 	 *
-	 * @param array $source The source data.
-	 * @param \WC_Product_Variable $product The product.
+	 * @param array                 $source The source data.
+	 * @param \WC_Product_Variable  $product The product.
 	 * @param \WC_Product_Variation $variation The variation.
 	 * @return array The posted attributes.
 	 */
@@ -428,54 +460,6 @@ class SignupService {
 	}
 
 	/**
-	 * Check if the product is disabled.
-	 *
-	 * @param WC_Product $product The product.
-	 * @return bool True if the product is disabled, false otherwise.
-	 */
-	private function is_product_disabled( \WC_Product $product ): bool {
-		return false;
-	}
-
-	/**
-	 * Check if the request is rate limited.
-	 *
-	 * @return bool True if the request is rate limited, false otherwise.
-	 */
-	public function is_rate_limited(): bool {
-
-		/**
-		 * Filter to disable rate limiting.
-		 *
-		 * @since 0.0.0
-		 *
-		 * @param bool $disable_rate_limiting Whether to disable rate limiting.
-		 * @return bool
-		 */
-		if ( (bool) apply_filters( 'woocommerce_customer_stock_notifications_disable_rate_limiting', false ) ) {
-			return false;
-		}
-
-		$user_id   = get_current_user_id();
-		$action_id = sprintf( 'bis_signup_%s', 0 === $user_id ? \WC_Geolocation::get_ip_address() : $user_id );
-		if ( \WC_Rate_Limiter::retried_too_soon( $action_id ) ) {
-			return true;
-		}
-
-		/**
-		 * Filter the rate limit delay.
-		 *
-		 * @since 0.0.0
-		 *
-		 * @param int $delay The delay in seconds.
-		 */
-		$delay = (int) apply_filters( 'woocommerce_customer_stock_notifications_rate_limit_delay', 30 );
-		\WC_Rate_Limiter::set_rate_limit( $action_id, $delay );
-
-		return false;
-	}
-
-	/**
 	 * Get the error message for the error code.
 	 *
 	 * @param string $error_code The error code.
@@ -506,7 +490,7 @@ class SignupService {
 	 * @return string The signup user message.
 	 */
 	public function get_signup_user_message( string $signup_code, Notification $notification ): string {
-		$message = '';
+		$message           = '';
 		$has_action_button = false;
 		switch ( $signup_code ) {
 
