@@ -146,7 +146,7 @@ class ProductPageIntegration {
 		 * @return string|null The message.
 		 */
 		$pre = apply_filters( 'woocommerce_customer_stock_notifications_account_required_message_html', null, $product );
-		if ( ! empty( $pre ) ) {
+		if ( ! is_null( $pre ) ) {
 			echo wp_kses_post( $pre );
 			return;
 		}
@@ -176,7 +176,7 @@ class ProductPageIntegration {
 		 * @return string|null The message.
 		 */
 		$pre = apply_filters( 'woocommerce_customer_stock_notifications_already_signed_up_message_html', null, $product, $notification );
-		if ( ! empty( $pre ) ) {
+		if ( ! is_null( $pre ) ) {
 			echo wp_kses_post( $pre );
 			return;
 		}
@@ -227,7 +227,7 @@ class ProductPageIntegration {
 	 *
 	 * @return bool True if personalization is enabled, false otherwise.
 	 */
-	private function is_personalization_enabled(): bool {
+	public static function is_personalization_enabled(): bool {
 
 		/**
 		 * Filter whether personalization is enabled while rendering the form.
@@ -237,6 +237,6 @@ class ProductPageIntegration {
 		 * @param bool $enabled Whether personalization is enabled.
 		 * @return bool
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', true );
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', false );
 	}
 }

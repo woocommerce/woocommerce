@@ -43,14 +43,23 @@ class SignupService {
 	private EligibilityService $eligibility_service;
 
 	/**
+	 * Notification management service.
+	 *
+	 * @var NotificationManagementService
+	 */
+	private NotificationManagementService $notification_management_service;
+
+	/**
 	 * Init the service.
 	 *
 	 * @internal
 	 *
-	 * @param EligibilityService $eligibility_service The eligibility service.
+	 * @param EligibilityService            $eligibility_service The eligibility service.
+	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 */
-	final public function init( EligibilityService $eligibility_service ) {
-		$this->eligibility_service = $eligibility_service;
+	final public function init( EligibilityService $eligibility_service, NotificationManagementService $notification_management_service ) {
+		$this->eligibility_service             = $eligibility_service;
+		$this->notification_management_service = $notification_management_service;
 	}
 
 	/**
@@ -69,6 +78,10 @@ class SignupService {
 			return new \WP_Error( self::ERROR_FAILED );
 		}
 
+		if ( empty( $user_email ) && empty( $user_id ) ) {
+			return new \WP_Error( self::ERROR_INVALID_REQUEST );
+		}
+
 		$product = wc_get_product( $product_id );
 		if ( ! $product ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
@@ -78,7 +91,7 @@ class SignupService {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		if ( ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
+		if ( $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
 			return new \WP_Error( self::ERROR_INVALID_REQUEST );
 		}
 
@@ -100,12 +113,25 @@ class SignupService {
 				// If the notification is pending and double opt-in is not required, skip and activate the notification.
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$notification->save();
+
+				/**
+				 * Action: woocommerce_customer_stock_notifications_signup
+				 *
+				 * @since 0.0.0
+				 *
+				 * @param Notification $notification The notification.
+				 */
+				do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
 				return new SignupResult( self::SIGNUP_SUCCESS, $notification );
 			}
 		}
 
-		$account_created = $this->maybe_create_customer( $user_id, $user_email );
-		$user_id         = $account_created ? $account_created : $user_id;
+		$account_created = null;
+		if ( empty( $user_id ) && Config::creates_account_on_signup() ) {
+			$account_created = $this->create_customer( $user_email );
+			$user_id         = $account_created ? $account_created : $user_id;
+		}
+
 		$notification    = new Notification();
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_product_id( $product_id );
@@ -190,7 +216,7 @@ class SignupService {
 			$query_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				array(
 					'key'     => 'posted_attributes',
-					'value'   => $posted_attributes,
+					'value'   => maybe_serialize( $posted_attributes ),
 					'compare' => '=',
 				),
 			);
@@ -210,36 +236,16 @@ class SignupService {
 	}
 
 	/**
-	 * Maybe create the customer.
-	 *
-	 * @param int    $user_id The user ID.
-	 * @param string $user_email The user email.
-	 * @return int|null The user ID if the customer was created, null otherwise.
-	 */
-	private function maybe_create_customer( int $user_id, string $user_email ) {
-
-		if ( ! Config::creates_account_on_signup() ) {
-			return null;
-		}
-
-		if ( ! empty( $user_id ) ) {
-			return null;
-		}
-
-		if ( ! isset( $data['email'] ) || ! is_email( $data['email'] ) ) {
-			return null;
-		}
-
-		return $this->create_customer( $user_email );
-	}
-
-	/**
 	 * Create a new customer.
 	 *
 	 * @param string $user_email The user email.
 	 * @return int|null The user ID if the customer was created, null otherwise.
 	 */
 	private function create_customer( string $user_email ) {
+
+		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
+			return null;
+		}
 
 		try {
 			$username = wc_create_new_customer_username( $user_email );
@@ -263,7 +269,7 @@ class SignupService {
 	/**
 	 * Parse the request data from a given source.
 	 *
-	 * @param array $source The data source, e.g. $_POST or $_REQUEST.
+	 * @param array $source The source data, e.g. $_POST or $_REQUEST.
 	 * @return array|\WP_Error {
 	 *  The parsed request data, or a WP_Error if the request data is invalid.
 	 *
@@ -286,17 +292,9 @@ class SignupService {
 		}
 
 		$parsed_data['product_id'] = $product->get_id();
+		if ( $product instanceof \WC_Product_Variation ) {
+			$posted_attributes = $this->parse_posted_attributes( $source, $product );
 
-		if ( $product instanceof \WC_Product_Variable && isset( $source['wc_bis_variation_id'] ) ) {
-			$variation = $this->parse_variation( $source );
-			if ( \is_wp_error( $variation ) ) {
-				return $variation;
-			}
-
-			// Set the target product ID to the variation ID.
-			$parsed_data['product_id'] = $variation->get_id();
-
-			$posted_attributes = $this->parse_posted_attributes( $source, $product, $variation );
 			if ( ! empty( $posted_attributes ) ) {
 				$parsed_data['posted_attributes'] = $posted_attributes;
 			}
@@ -306,9 +304,9 @@ class SignupService {
 	}
 
 	/**
-	 * Parse the user data from the source data, e.g. $_POST or $_REQUEST.
+	 * Parse the user data from the source data.
 	 *
-	 * @param array $source The source data.
+	 * @param array $source The source data, e.g. $_POST or $_REQUEST.
 	 * @return array|\WP_Error The parsed user data, or a WP_Error if the user data is invalid.
 	 */
 	private function parse_user_data( array $source ) {
@@ -359,9 +357,9 @@ class SignupService {
 	}
 
 	/**
-	 * Parse the product from the source data, e.g. $_POST or $_REQUEST.
+	 * Parse the product from the source data.
 	 *
-	 * @param array $source The source data.
+	 * @param array $source The source data, e.g. $_POST or $_REQUEST.
 	 * @return \WC_Product|\WP_Error The product, or a WP_Error if the product is invalid.
 	 */
 	private function parse_product( array $source ) {
@@ -387,32 +385,7 @@ class SignupService {
 	}
 
 	/**
-	 * Parse the variation from the source data, e.g. $_POST or $_REQUEST.
-	 *
-	 * @param array $source The source data.
-	 * @return \WC_Product_Variation|\WP_Error The variation, or a WP_Error if the variation is invalid.
-	 */
-	private function parse_variation( array $source ) {
-
-		$variation_id = isset( $source['wc_bis_variation_id'] ) ? absint( wp_unslash( $source['wc_bis_variation_id'] ) ) : false;
-		if ( ! $variation_id ) {
-			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
-		}
-
-		$variation = wc_get_product( $variation_id );
-		if ( ! $variation ) {
-			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
-		}
-
-		if ( ! $variation instanceof \WC_Product_Variation ) {
-			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
-		}
-
-		return $variation;
-	}
-
-	/**
-	 * Parse variation attributes from source data like $_POST or $_REQUEST.
+	 * Parse variation attributes from source data.
 	 *
 	 * This method extracts attributes that are defined as 'any' in the variation and need to be
 	 * explicitly specified during signup. These attributes cannot be retrieved directly from the variation
@@ -423,12 +396,20 @@ class SignupService {
 	 *
 	 * @see \WC_Cart::add_to_cart() for similar attribute parsing logic.
 	 *
-	 * @param array                 $source The source data.
-	 * @param \WC_Product_Variable  $product The product.
-	 * @param \WC_Product_Variation $variation The variation.
+	 * @param array       $source The source data, e.g. $_POST or $_REQUEST.
+	 * @param \WC_Product $variation The variation.
 	 * @return array The posted attributes.
 	 */
-	private function parse_posted_attributes( array $source, \WC_Product_Variable $product, \WC_Product_Variation $variation ): array {
+	private function parse_posted_attributes( array $source, \WC_Product $variation ): array {
+
+		if ( ! $variation instanceof \WC_Product_Variation ) {
+			return array();
+		}
+
+		$product = wc_get_product( $variation->get_parent_id() );
+		if ( ! $product ) {
+			return array();
+		}
 
 		$posted_attributes = array();
 		foreach ( $product->get_attributes() as $attribute ) {
@@ -437,7 +418,6 @@ class SignupService {
 			}
 
 			$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-
 			if ( isset( $source[ $attribute_key ] ) ) {
 				if ( $attribute['is_taxonomy'] ) {
 					$value = sanitize_title( wp_unslash( $source[ $attribute_key ] ) );
@@ -453,6 +433,8 @@ class SignupService {
 		}
 
 		$variation_attributes = $variation->get_variation_attributes();
+		// Filter out 'any' variations, which are empty.
+		$variation_attributes = array_filter( $variation_attributes );
 		$diff                 = array_diff( $posted_attributes, $variation_attributes );
 
 		// Return the posted attributes only if a variation with `any` attribute is detected.
@@ -518,7 +500,7 @@ class SignupService {
 
 			case self::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN:
 				$notice_text     = esc_html__( 'You have already joined this waitlist. Please complete the sign-up process by following the verification link sent to your e-mail.', 'woocommerce' );
-				$url             = $this->get_resend_verification_email_url( $notification );
+				$url             = $this->notification_management_service->get_resend_verification_email_url( $notification );
 				$button_class    = wc_wp_theme_get_element_class_name( 'button' );
 				$wp_button_class = $button_class ? ' ' . $button_class : '';
 				$message         = sprintf(
@@ -543,26 +525,5 @@ class SignupService {
 		}
 
 		return $message;
-	}
-
-	/**
-	 * Get resend verification email URL.
-	 *
-	 * @param Notification $notification The notification.
-	 * @return string The resend verification email URL.
-	 */
-	public function get_resend_verification_email_url( Notification $notification ): string {
-		// @todo: Move this to the NotificationManagementService.
-		$url = add_query_arg(
-			array(
-				'wc_bis_resend_notification' => $notification->get_id(),
-			),
-			$notification->get_product_permalink()
-		);
-
-		return wp_nonce_url(
-			$url,
-			'wc_bis_resend_verification_email_nonce'
-		);
 	}
 }

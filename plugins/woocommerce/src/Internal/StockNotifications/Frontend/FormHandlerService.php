@@ -59,24 +59,18 @@ class FormHandlerService {
 		}
 
 		try {
-			$data = $this->signup_service->parse( $_POST );
-			if ( \is_wp_error( $data ) ) {
-				wc_add_notice( $this->signup_service->get_error_message( $data->get_error_code() ), 'error' );
-				return;
-			}
 
-			/**
-			 * Filter to disable nonce check.
-			 *
-			 * @since 0.0.0
-			 *
-			 * @param bool $disable_nonce_check Whether to disable nonce check.
-			 */
-			if ( (bool) apply_filters( 'woocommerce_customer_stock_notifications_disable_nonce_check', Config::requires_account() ) ) {
+			if ( self::requires_nonce_check() ) {
 				if ( ! isset( $_POST['wc_bis_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['wc_bis_nonce'] ), 'wc_bis_signup' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					wc_add_notice( $this->signup_service->get_error_message( SignupService::ERROR_INVALID_REQUEST ), 'error' );
 					return;
 				}
+			}
+
+			$data = $this->signup_service->parse( $_POST );
+			if ( \is_wp_error( $data ) ) {
+				wc_add_notice( $this->signup_service->get_error_message( $data->get_error_code() ), 'error' );
+				return;
 			}
 
 			$result = $this->signup_service->signup(
@@ -97,5 +91,27 @@ class FormHandlerService {
 			$this->logger->error( $e->getMessage(), array( 'source' => 'stock-notifications-signup-errors' ) );
 			return;
 		}
+	}
+
+	/**
+	 * Whether the form requires a nonce check.
+	 *
+	 * Note: Nonce checks may be disabled for guest signups to support HTML caching.
+	 *
+	 * @return bool True if the form requires a nonce check, false otherwise.
+	 */
+	public static function requires_nonce_check(): bool {
+
+		$requires_account = ProductPageIntegration::is_personalization_enabled() && ( Config::requires_account() || \is_user_logged_in() );
+
+		/**
+		 * Filter to require nonce check.
+		 *
+		 * @since 0.0.0
+		 *
+		 * @param bool $requires_nonce_check Whether to require nonce check.
+		 * @return bool
+		 */
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_requires_nonce_check', $requires_account );
 	}
 }
