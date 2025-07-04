@@ -87,6 +87,7 @@ const getInputData = (
 	const constraints = context.quantityConstraints?.[ id ] || {
 		min: productType === 'grouped' && childProductId ? 0 : 1,
 		step: 1,
+		max: null,
 	};
 	const minValue = constraints.min;
 	const maxValue = constraints.max;
@@ -207,6 +208,7 @@ const addToCartWithOptionsStore = store(
 				const constraints = quantityConstraints?.[ id ] || {
 					min: productType === 'grouped' && childProductId ? 0 : 1,
 					step: 1,
+					max: null,
 				};
 				const minValue = constraints.min;
 				const step = constraints.step;
@@ -232,6 +234,7 @@ const addToCartWithOptionsStore = store(
 				const constraints = quantityConstraints?.[ id ] || {
 					min: productType === 'grouped' && childProductId ? 0 : 1,
 					step: 1,
+					max: null,
 				};
 				const maxValue = constraints.max;
 				const step = constraints.step;
