@@ -289,6 +289,7 @@ const addToCartWithOptionsStore = store(
 				const {
 					currentValue,
 					maxValue,
+					minValue,
 					step,
 					childProductId,
 					inputElement,
@@ -296,11 +297,12 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue + step;
 
 				if ( maxValue === null || newValue <= maxValue ) {
+					const updatedValue = Math.max( minValue, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
+						updatedValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
+					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -313,6 +315,7 @@ const addToCartWithOptionsStore = store(
 				}
 				const {
 					currentValue,
+					maxValue,
 					minValue,
 					step,
 					childProductId,
@@ -321,15 +324,19 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue - step;
 
 				if ( newValue >= minValue ) {
+					const updatedValue = Math.min(
+						maxValue ?? Infinity,
+						newValue
+					);
 					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
+						updatedValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
+					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleQuantityInputChange: (
+			handleQuantityInput: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
@@ -342,6 +349,28 @@ const addToCartWithOptionsStore = store(
 					currentValue,
 					childProductId
 				);
+			},
+			handleQuantityChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, maxValue, minValue, currentValue } =
+					inputData;
+
+				const newValue = Math.min(
+					maxValue ?? Infinity,
+					Math.max( minValue, currentValue )
+				);
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					newValue,
+					childProductId
+				);
+				event.target.value = newValue.toString();
+				dispatchChangeEvent( event.target );
 			},
 			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >

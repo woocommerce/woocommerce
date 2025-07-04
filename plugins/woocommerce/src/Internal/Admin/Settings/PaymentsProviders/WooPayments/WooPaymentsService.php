@@ -877,7 +877,7 @@ class WooPaymentsService {
 		// Nothing to do if we already have a connected test account.
 		if ( $this->has_test_account() ) {
 			throw new ApiException(
-				'woocommerce_woopayments_onboarding_action_error',
+				'woocommerce_woopayments_test_account_already_exists',
 				esc_html__( 'A test account is already set up.', 'woocommerce' ),
 				(int) WP_Http::FORBIDDEN
 			);

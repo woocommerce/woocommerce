@@ -176,7 +176,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			/**
-			 * Filters the change the quantity to add to cart.
+			 * Filter the default quantity to add to cart.
 			 *
 			 * @since 10.9.0
 			 * @param number $default_quantity The default quantity.
@@ -291,11 +291,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( ! $is_disabled_compatibility_layer && ! Utils::is_not_purchasable_product( $product ) ) {
 				ob_start();
+				/**
+				 * Hook: woocommerce_before_add_to_cart_form.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_before_add_to_cart_form' );
+
 				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 					/**
@@ -367,7 +374,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
@@ -427,6 +434,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}
+
+				/**
+				 * Hook: woocommerce_after_add_to_cart_form.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_after_add_to_cart_form' );
+
 				$hooks_after = ob_get_clean();
 			}
 
