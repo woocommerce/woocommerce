@@ -356,7 +356,9 @@
 
 					let data = await response.json();
 					// Reset session ID after successful select
-					sessionId = crypto.randomUUID();
+                    sessionId = crypto && crypto.randomUUID
+                        ? crypto.randomUUID()
+                        : Math.random().toString( 36 ).substring( 2 );
 					try {
 						dispatchEvent(
 							new CustomEvent(
