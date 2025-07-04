@@ -59,14 +59,7 @@ class ImportSetSiteOptions implements StepProcessor {
 			$current_value = $this->wp_get_option( $key );
 
 			if ( $current_value !== $value ) {
-				$result->add_info(
-					sprintf(
-						'%s was intended to be set to %s, but the stored value is %s. It may have been overridden by a hook.',
-						$key,
-						$value,
-						$current_value
-					)
-				);
+				$result->add_warn( "{$key} was intended to be set, but the stored value may have been overridden by a hook." );
 				continue;
 			}
 
