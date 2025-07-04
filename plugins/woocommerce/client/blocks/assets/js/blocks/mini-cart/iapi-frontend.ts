@@ -371,6 +371,15 @@ const { state: cartItemState } = store(
 
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
 			},
+
+			get isProductHiddenFromCatalog(): boolean {
+				const { catalog_visibility: catalogVisibility } =
+					cartItemState.cartItem;
+				return (
+					catalogVisibility === 'hidden' ||
+					catalogVisibility === 'search'
+				);
+			},
 		},
 
 		actions: {
