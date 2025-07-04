@@ -105,7 +105,7 @@ class SettingsController {
 
 				array(
 					'title'   => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
-					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce-back-in-stock-notifications' ),
+					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce' ),
 					'id'      => 'wc_customer_stock_notifications_delete_after_days',
 					'default' => Config::get_delete_after_days(),
 					'type'    => 'number',

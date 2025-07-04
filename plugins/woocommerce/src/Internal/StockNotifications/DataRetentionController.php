@@ -6,9 +6,18 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
+/**
+ * Controller for managing data retention of customer stock notifications.
+ *
+ * This controller handles the scheduling and execution of tasks related to
+ * deleting overdue notifications based on a configured time threshold.
+ */
 class DataRetentionController {
 	public const DAILY_TASK_HOOK = 'customer_stock_notifications_daily';
 
+	/**
+	 * Constructor to set up hooks for managing data retention tasks.
+	 */
 	public function __construct() {
 		add_action( 'woocommerce_installed', array( $this, 'on_woo_install_or_update' ) );
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
@@ -46,7 +55,7 @@ class DataRetentionController {
 		}
 	}
 
-	/*
+	/**
 	 * Unschedule the daily task when the plugin is deactivated, or the option is set to zero.
 	 */
 	public function clear_daily_task() {
@@ -61,22 +70,22 @@ class DataRetentionController {
 	 * @return void
 	 */
 	public function do_wc_customer_stock_notifications_daily() {
-		$time_threshold            = Config::get_delete_after_days();
+		$time_threshold = Config::get_delete_after_days();
 
 		if ( 0 === $time_threshold ) {
 			return;
 		}
-		$overdue_threshold  = time() - $time_threshold;
+		$overdue_threshold = time() - $time_threshold;
 
 		$overdue_notifications = NotificationQuery::get_notifications(
 			array(
-				'status' => NotificationStatus::PENDING,
+				'status'   => NotificationStatus::PENDING,
 				'end_date' => gmdate( 'Y-m-d H:i:s', $overdue_threshold ),
 			)
 		);
 
 		foreach ( $overdue_notifications as $notification_id ) {
-			$notification   = Factory::get_notification( $notification_id );
+			$notification = Factory::get_notification( $notification_id );
 			$notification->delete();
 		}
 	}

@@ -19,7 +19,6 @@ class StockNotifications {
 	/**
 	 * Initialize the controller.
 	 */
-
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
 		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
