@@ -8,6 +8,7 @@ import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { expect } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
+import playwrightConfig from '../playwright.config';
 
 /**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
@@ -75,7 +76,7 @@ export async function expectEmailContent(
 }
 
 export async function getWooEmails( params ) {
-	const apiClient = createClient( process.env.BASE_URL, {
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,

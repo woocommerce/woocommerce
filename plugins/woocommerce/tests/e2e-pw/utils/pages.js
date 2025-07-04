@@ -37,7 +37,7 @@ export const CLASSIC_CART_PAGE = {
 };
 
 export async function pageExists( slug ) {
-	const apiClient = createClient( process.env.BASE_URL, {
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,

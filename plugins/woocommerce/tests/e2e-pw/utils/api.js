@@ -7,8 +7,9 @@ import { createClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { admin } from '../test-data/data';
+import playwrightConfig from '../playwright.config';
 
-const api = createClient( process.env.BASE_URL, {
+const api = createClient( playwrightConfig.use.baseURL, {
 	type: 'basic',
 	username: admin.username,
 	password: admin.password,

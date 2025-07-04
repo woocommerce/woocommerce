@@ -10,6 +10,7 @@ import {
  * Internal dependencies
  */
 import { admin } from '../test-data/data';
+import playwrightConfig from '../playwright.config';
 
 /**
  * Update the onboarding profile using a call to the wc-admin API.
@@ -19,7 +20,7 @@ import { admin } from '../test-data/data';
  */
 
 export async function updateOnboardingProfile( data ) {
-	const apiClient = createClient( process.env.BASE_URL, {
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
