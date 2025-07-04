@@ -62,10 +62,11 @@ const isCartItemMatched = (
 	if (
 		! Array.isArray( cartItem.variation ) ||
 		! Array.isArray( selectedItem )
-	)
+	) {
 		return false;
+	}
 
-	// Incase the attributes list length is different in both the objects
+	// In case the attributes list length is different in both the objects.
 	if ( cartItem.variation.length !== selectedItem.length ) {
 		return false;
 	}
@@ -97,7 +98,7 @@ const productButtonStore = {
 
 			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
-				return products[ 0 ]?.quantity;
+				return products[ 0 ]?.quantity || 0;
 			}
 
 			const selectedAttributes =
