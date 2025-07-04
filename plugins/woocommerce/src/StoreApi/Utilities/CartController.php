@@ -1369,8 +1369,21 @@ class CartController {
 		$variation_id     = $data_store->find_matching_product_variation( $product, $match_attributes );
 
 		if ( empty( $variation_id ) ) {
-			// Check if no attributes were selected at all.
-			if ( empty( array_filter( $match_attributes ) ) ) {
+			$required_attributes = array_filter(
+				$product->get_attributes(),
+				function ( $attribute ) {
+					return $attribute->get_variation();
+				}
+			);
+
+			$selected_attributes = array_filter(
+				$match_attributes,
+				function ( $value ) {
+					return '' !== $value && null !== $value;
+				}
+			);
+
+			if ( count( $selected_attributes ) < count( $required_attributes ) ) {
 				throw new RouteException(
 					'woocommerce_rest_missing_attributes',
 					__( 'Missing attributes for variable product.', 'woocommerce' ),
