@@ -12,6 +12,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\BillingAddressSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ShippingAddressSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
  * DocumentObject class.
@@ -141,7 +142,7 @@ class DocumentObject {
 				'items'              => array_merge(
 					...array_map(
 						function ( $item ) {
-							return array_fill( 0, $item['quantity'], $item['id'] );
+							return array_fill( 0, (int) NumberUtil::ceil( $item['quantity'] ), $item['id'] );
 						},
 						$cart_data['items']
 					)
