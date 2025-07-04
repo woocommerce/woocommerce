@@ -27,6 +27,31 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
+const getQuantityStateInfo = () => {
+	const context = getContext< Context >();
+	const {
+		quantity,
+		childProductId,
+		productType,
+		quantityConstraints,
+		productId,
+	} = context;
+	const id =
+		productType === 'grouped' && childProductId
+			? childProductId
+			: productId;
+	const constraints = quantityConstraints?.[ id ] || {
+		min: productType === 'grouped' && childProductId ? 0 : 1,
+		step: 1,
+		max: null,
+	};
+	const currentQuantity =
+		productType === 'grouped' && childProductId
+			? quantity?.[ childProductId ] || 0
+			: quantity?.[ productId ] || 0;
+	return { constraints, currentQuantity };
+};
+
 const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	const inputElement = getInputElementFromEvent( event );
 
@@ -73,55 +98,13 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 store( 'woocommerce/add-to-cart-form', {
 	state: {
 		get allowsDecrease() {
-			const context = getContext< Context >();
-			const {
-				quantity,
-				childProductId,
-				productType,
-				quantityConstraints,
-				productId,
-			} = context;
-			const id =
-				productType === 'grouped' && childProductId
-					? childProductId
-					: productId;
-			const constraints = quantityConstraints?.[ id ] || {
-				min: productType === 'grouped' && childProductId ? 0 : 1,
-				step: 1,
-				max: null,
-			};
-			const minValue = constraints.min;
-			const step = constraints.step;
-			const currentQuantity =
-				productType === 'grouped' && childProductId
-					? quantity?.[ childProductId ] || 0
-					: quantity?.[ productId ] || 0;
+			const { constraints, currentQuantity } = getQuantityStateInfo();
+			const { min: minValue, step } = constraints;
 			return currentQuantity - step >= minValue;
 		},
 		get allowsIncrease() {
-			const context = getContext< Context >();
-			const {
-				quantity,
-				childProductId,
-				productType,
-				quantityConstraints,
-				productId,
-			} = context;
-			const id =
-				productType === 'grouped' && childProductId
-					? childProductId
-					: productId;
-			const constraints = quantityConstraints?.[ id ] || {
-				min: productType === 'grouped' && childProductId ? 0 : 1,
-				step: 1,
-				max: null,
-			};
-			const maxValue = constraints.max;
-			const step = constraints.step;
-			const currentQuantity =
-				productType === 'grouped' && childProductId
-					? quantity?.[ childProductId ] || 0
-					: quantity?.[ productId ] || 0;
+			const { constraints, currentQuantity } = getQuantityStateInfo();
+			const { max: maxValue, step } = constraints;
 			return maxValue === null || currentQuantity + step <= maxValue;
 		},
 	},
