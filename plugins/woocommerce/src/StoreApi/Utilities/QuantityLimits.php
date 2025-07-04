@@ -155,6 +155,8 @@ final class QuantityLimits {
 		}
 
 		$division_result = $number / $multiple_of;
+		// Use tolerance for floating-point comparison to handle precision errors.
+		// Example: 0.3 / 0.1 = 2.9999999999999996 instead of exactly 3.0 due to floating-point precision.
 		return abs( $division_result - round( $division_result ) ) < 0.0001;
 	}
 
