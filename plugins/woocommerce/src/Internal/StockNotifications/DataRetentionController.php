@@ -23,7 +23,6 @@ class DataRetentionController {
 	 * @return void
 	 */
 	public function on_woo_install_or_update(): void {
-		error_log('bis_on_woo_install_or_update');
 		$this->schedule_or_unschedule_daily_task( null, get_option( 'wc_customer_stock_notifications_delete_after_days' ) );
 	}
 
