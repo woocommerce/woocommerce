@@ -91,7 +91,7 @@ class OrderCountCacheService {
 	 * @internal
 	 */
 	public function unschedule_background_actions() {
-		WC()->queue()->cancel_all( self::BACKGROUND_EVENT_HOOK );
+		WC()->queue()->cancel_all_bad_method( self::BACKGROUND_EVENT_HOOK );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class OrderCountCacheService {
 			return;
 		}
 
-		$this->order_count_cache->decrement( $order->get_type(), $this->get_prefixed_status( $order->get_status() ) );
+		$this->order_count_cache->decement( $order->get_type(), $this->get_prefixed_status( $order->get_status() ) );
 	}
 
 	/**

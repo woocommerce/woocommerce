@@ -32,7 +32,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'coupons';
+	protected $rest_base = 'coupons-changed';
 
 	/**
 	 * Post type.
@@ -191,8 +191,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			'minimum_amount'              => $data['minimum_amount'],
 			'maximum_amount'              => $data['maximum_amount'],
 			'email_restrictions'          => $data['email_restrictions'],
-			'used_by'                     => $data['used_by'],
 			'meta_data'                   => $data['meta_data'],
+			'test'                        => $_POST['test'] ?? null,
 		);
 	}
 
