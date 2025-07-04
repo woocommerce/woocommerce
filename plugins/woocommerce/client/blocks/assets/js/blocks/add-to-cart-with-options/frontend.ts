@@ -46,6 +46,15 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
+const getDefaultConstraints = (
+	productType: string,
+	childProductId?: number
+) => ( {
+	min: productType === 'grouped' && childProductId ? 0 : 1,
+	step: 1,
+	max: null,
+} );
+
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
 ) => {
@@ -84,11 +93,9 @@ const getInputData = (
 		productType === 'grouped' && childProductId
 			? childProductId
 			: context.productId;
-	const constraints = context.quantityConstraints?.[ id ] || {
-		min: productType === 'grouped' && childProductId ? 0 : 1,
-		step: 1,
-		max: null,
-	};
+	const constraints =
+		context.quantityConstraints?.[ id ] ||
+		getDefaultConstraints( productType, childProductId );
 	const minValue = constraints.min;
 	const maxValue = constraints.max;
 	const step = constraints.step;
@@ -205,11 +212,9 @@ const addToCartWithOptionsStore = store(
 					productType === 'grouped' && childProductId
 						? childProductId
 						: productId;
-				const constraints = quantityConstraints?.[ id ] || {
-					min: productType === 'grouped' && childProductId ? 0 : 1,
-					step: 1,
-					max: null,
-				};
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
 				const minValue = constraints.min;
 				const step = constraints.step;
 				return currentQuantity - step >= minValue;
@@ -231,11 +236,9 @@ const addToCartWithOptionsStore = store(
 					productType === 'grouped' && childProductId
 						? childProductId
 						: productId;
-				const constraints = quantityConstraints?.[ id ] || {
-					min: productType === 'grouped' && childProductId ? 0 : 1,
-					step: 1,
-					max: null,
-				};
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
 				const maxValue = constraints.max;
 				const step = constraints.step;
 				return maxValue === null || currentQuantity + step <= maxValue;
