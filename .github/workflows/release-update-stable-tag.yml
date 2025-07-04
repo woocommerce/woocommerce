@@ -27,6 +27,7 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
+      target-branches: ${{ steps.get-branches.outputs.branches }}
     steps:
       - name: Check confirmation
         run: |
@@ -50,11 +51,14 @@ jobs:
             if (versionMatch) {
               const major = versionMatch[1];
               const minor = versionMatch[2];
-              const branch = `release/${major}.${minor}`;
+              const majorMinor = `${major}.${minor}`;
+              const branch = `release/${majorMinor}`;
 
               console.log(`Input version: ${versionInput}`);
+              console.log(`Major.minor version: ${majorMinor}`);
               console.log(`Release branch: ${branch}`);
               core.setOutput('version', versionInput);
+              core.setOutput('major-minor', majorMinor);
               core.setOutput('branch', branch);
             } else {
               core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z)`);
@@ -65,6 +69,35 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Get target branches for stable tag update
+        id: get-branches
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          MAJOR_MINOR="${{ steps.extract-version.outputs.major-minor }}"
+
+          # Get all remote branches that match the pattern "release/x.y"
+          all_branches=$(git ls-remote --heads origin | grep -E "refs/heads/release/[0-9]+\.[0-9]+$" | cut -f2 | sed "s|refs/heads/||")
+
+          matching_branches=("trunk" "release/$MAJOR_MINOR")
+
+          for branch_name in $all_branches; do
+              version=$(echo "$branch_name" | sed "s|release/||")
+
+              if [[ $(php -r "echo version_compare('$version', '$MAJOR_MINOR');") == 1 ]]; then
+                  matching_branches+=("$branch_name")
+              fi
+          done
+
+          branches_json="["
+          sep=""
+          for branch in "${matching_branches[@]}"; do
+            branches_json="$branches_json$sep\"$branch\""
+            sep=","
+          done
+          branches_json="$branches_json]"
+          echo "Target branches: ${matching_branches[@]}"
+          echo "branches=$branches_json" >> $GITHUB_OUTPUT
 
       - name: Verify release branch exists
         run: |
@@ -174,9 +207,7 @@ jobs:
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
       matrix:
-        branch:
-          - trunk
-          - ${{ needs.validate-release.outputs.branch }}
+        branch: ${{ fromJSON(needs.validate-release.outputs.target-branches) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
