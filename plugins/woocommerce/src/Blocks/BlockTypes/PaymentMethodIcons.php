@@ -89,7 +89,12 @@ class PaymentMethodIcons extends AbstractBlock {
 
 		$all_payment_methods = $this->get_available_payment_methods();
 		$number_of_icons     = $attributes['numberOfIcons'] ?? 0;
-		$number_of_icons     = 0 === $number_of_icons ? count( $all_payment_methods ) : max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
+
+		if ( 0 === $number_of_icons ) {
+			$number_of_icons = count( $all_payment_methods );
+		} else {
+			$number_of_icons = max( 0, min( intval( $number_of_icons ), count( $all_payment_methods ) ) );
+		}
 
 		if ( ! empty( $all_payment_methods ) ) {
 			for ( $i = 0; $i < $number_of_icons; $i++ ) {
@@ -160,8 +165,11 @@ class PaymentMethodIcons extends AbstractBlock {
 	 */
 	private function get_card_type_icon_url( $card_type ) {
 		$assets_path = 'assets/images/payment-methods-cards/';
+		$icon_path   = WC_ABSPATH . $assets_path . $card_type . '.svg';
 		$icon_url    = \plugins_url( $assets_path . $card_type . '.svg', WC_PLUGIN_FILE );
-		return $icon_url;
+
+		return file_exists( $icon_path ) ? $icon_url : '';
+
 	}
 
 	/**
