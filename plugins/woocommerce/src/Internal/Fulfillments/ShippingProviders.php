@@ -7,6 +7,7 @@ return array(
 	'amazon-logistics'        => ShippingProviders\AmazonLogisticsShippingProvider::class,
 	'an-post'                 => ShippingProviders\AnPostShippingProvider::class,
 	'aras-kargo'              => ShippingProviders\ArasKargoShippingProvider::class,
+	'australia-post'          => ShippingProviders\AustraliaPostShippingProvider::class,
 	'azerpost'                => ShippingProviders\AzerpostShippingProvider::class,
 	'bartolini-brt'           => ShippingProviders\BartoliniBRTShippingProvider::class,
 	'belpochta'               => ShippingProviders\BelpochtaShippingProvider::class,
