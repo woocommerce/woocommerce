@@ -22,10 +22,16 @@ class StockNotifications {
 
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
-		add_action('woocommerce_installed', array( $this, 'on_install' ) );
+		add_action('woocommerce_installed', array( $this, 'on_install_or_update' ) );
 	}
 
-	public function on_install() {
+	/**
+	 * Handle the WooCommerce installation event.
+	 *
+	 * This method is called when WooCommerce is installed or updated.
+	 * It initializes the data retention controller to set up necessary tasks.
+	 */
+	public function on_install_or_update() {
 		wc_get_container()->get( DataRetentionController::class )->on_woo_install_or_update();
 	}
 
