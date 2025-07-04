@@ -250,7 +250,7 @@
 													.toString( 36 )
 													.substring( 2 );
 									return [];
-								case 'woo_addression_suggestion_internal_error':
+								case 'woo_address_suggestion_internal_error':
 								case 'woo_address_suggestion_service_error':
 									serviceErrorRetries++;
 									if (
@@ -327,7 +327,7 @@
 					}
 				},
 				search: async ( inputValue, country, type ) => {
-					// We need to return early here beacuse canSearch is not always called from search.
+					// We need to return early here because canSearch is not always called from search.
 					if ( permanentlyDisabledServices.includes( key ) ) {
 						return [];
 					}
@@ -413,8 +413,8 @@
 												.toString( 36 )
 												.substring( 2 );
 								return [];
-							case 'woo_addression_suggestion_internal_error':
-							case 'woo_addression_suggestion_server_error':
+							case 'woo_address_suggestion_internal_error':
+							case 'woo_address_suggestion_server_error':
 								serviceErrorRetries++;
 								if (
 									serviceErrorRetries >=

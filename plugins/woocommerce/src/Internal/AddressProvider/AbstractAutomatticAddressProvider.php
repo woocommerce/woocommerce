@@ -63,8 +63,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		try {
 			$fresh_jwt = $this->get_address_service_jwt();
 			if ( $fresh_jwt && JsonWebToken::shallow_validate( $fresh_jwt ) ) {
-				$this->jwt = $fresh_jwt;
-				set_transient( $transient_key, $fresh_jwt, DAY_IN_SECONDS );
+				$this->set_jwt( $fresh_jwt );
 				return $this->jwt;
 			}
 		} catch ( \Exception $e ) {
