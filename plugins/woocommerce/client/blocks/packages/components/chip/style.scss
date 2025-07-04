@@ -28,6 +28,9 @@
 	&.wc-block-components-chip--radius-large {
 		border-radius: 2em;
 		padding-left: 0.75em;
+		padding-right: 0.75em;
+	}
+	&.is-removable.wc-block-components-chip--radius-large {
 		padding-right: 0.25em;
 	}
 	.wc-block-components-chip__text {

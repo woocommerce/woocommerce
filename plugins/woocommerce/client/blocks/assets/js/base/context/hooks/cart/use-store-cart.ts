@@ -179,6 +179,7 @@ export const useStoreCart = (
 						( coupon: CartResponseCouponItem ) => ( {
 							...coupon,
 							label: decodeEntities( coupon.code ),
+							isRemovable: true,
 						} )
 				  )
 				: EMPTY_CART_COUPONS,

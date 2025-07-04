@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
+import { Chip, RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -21,7 +21,7 @@ import './style.scss';
 export interface TotalsDiscountProps {
 	cartCoupons: LooselyMustHave<
 		CartResponseCouponItemWithLabel,
-		'code' | 'label' | 'totals'
+		'code' | 'label' | 'totals' | 'isRemovable'
 	>[];
 	currency: Currency;
 	isRemovingCoupon: boolean;
@@ -86,29 +86,45 @@ const TotalsDiscount = ( {
 						<ul className="wc-block-components-totals-discount__coupon-list">
 							{ filteredCartCoupons.map( ( cartCoupon ) => {
 								return (
-									<RemovableChip
-										key={ 'coupon-' + cartCoupon.code }
-										className="wc-block-components-totals-discount__coupon-list-item"
-										text={ cartCoupon.label }
-										screenReaderText={ sprintf(
-											/* translators: %s Coupon code. */
-											__( 'Coupon: %s', 'woocommerce' ),
-											cartCoupon.label
-										) }
-										disabled={ isRemovingCoupon }
-										onRemove={ () => {
-											removeCoupon( cartCoupon.code );
-										} }
-										radius="large"
-										ariaLabel={ sprintf(
-											/* translators: %s is a coupon code. */
-											__(
-												'Remove coupon "%s"',
-												'woocommerce'
-											),
-											cartCoupon.label
-										) }
-									/>
+									cartCoupon.isRemovable 
+									? (
+										<RemovableChip
+											key={ 'coupon-' + cartCoupon.code }
+											className="wc-block-components-totals-discount__coupon-list-item"
+											text={ cartCoupon.label }
+											screenReaderText={ sprintf(
+												/* translators: %s Coupon code. */
+												__( 'Coupon: %s', 'woocommerce' ),
+												cartCoupon.label
+											) }
+											disabled={ isRemovingCoupon }
+											onRemove={ () => {
+												removeCoupon( cartCoupon.code );
+											} }
+											radius="large"
+											ariaLabel={ sprintf(
+												/* translators: %s is a coupon code. */
+												__(
+													'Remove coupon "%s"',
+													'woocommerce'
+												),
+												cartCoupon.label
+											) }
+										/>
+									) : (
+										<Chip
+											key={ 'coupon-' + cartCoupon.code }
+											className="wc-block-components-totals-discount__coupon-list-item"
+											text={ cartCoupon.label }
+											screenReaderText={ sprintf(
+												/* translators: %s Coupon code. */
+												__( 'Coupon: %s', 'woocommerce' ),
+												cartCoupon.label
+											) }
+											radius="large"
+											element="li"
+										/>
+									)
 								);
 							} ) }
 						</ul>

@@ -14,6 +14,7 @@ export interface CartResponseCouponItem {
 	code: string;
 	discount_type: string;
 	totals: CartResponseTotalsItem;
+	isRemovable: boolean;
 }
 
 export interface CartResponseCouponItemWithLabel
