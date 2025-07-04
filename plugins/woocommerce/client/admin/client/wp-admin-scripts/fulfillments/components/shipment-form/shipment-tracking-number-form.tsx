@@ -116,6 +116,15 @@ export default function ShipmentTrackingNumberForm() {
 							onChange={ ( value ) => {
 								setTrackingNumberTemp( value );
 							} }
+							onKeyDown={ ( event ) => {
+								if (
+									event.key === 'Enter' &&
+									! isLoading &&
+									! isEmpty( trackingNumberTemp.trim() )
+								) {
+									handleTrackingNumberLookup();
+								}
+							} }
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
 						/>
@@ -137,11 +146,20 @@ export default function ShipmentTrackingNumberForm() {
 					<div className="woocommerce-fulfillment-input-container">
 						<h4>{ __( 'Tracking Number', 'woocommerce' ) }</h4>
 						<div className="woocommerce-fulfillment-input-group space-between">
-							<span>{ trackingNumber }</span>
+							<span 
+								onClick={ () => {
+									setEditMode( true );
+									setTrackingNumberTemp( trackingNumber );
+								} }
+								style={ { cursor: 'pointer' } }
+							>
+								{ trackingNumber }
+							</span>
 							<Button
 								size="small"
 								onClick={ () => {
 									setEditMode( true );
+									setTrackingNumberTemp( trackingNumber );
 								} }
 							>
 								<EditIcon />
