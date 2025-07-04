@@ -61,7 +61,7 @@ const test = baseTest.extend( {
 				);
 			} catch ( error ) {
 				// Ignore 410 error - which is expected if the review was already trashed
-				if ( error.data?.data?.status !== 410 ) {
+				if ( error.status !== 410 ) {
 					throw error;
 				}
 			}

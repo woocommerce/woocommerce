@@ -33,7 +33,7 @@ const test = baseTest.extend( {
 		} catch ( error ) {
 			// Only throw if the error is not a 404 (product not found).
 			// This is expected if the product was already deleted by the test.
-			if ( error.data?.data?.status !== 404 ) {
+			if ( error.status !== 404 ) {
 				throw error;
 			}
 		}

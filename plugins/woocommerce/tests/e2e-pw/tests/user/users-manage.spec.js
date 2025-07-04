@@ -23,13 +23,17 @@ const test = baseTest.extend( {
 		await use( user );
 
 		try {
-			await restApi.delete( `${ WP_API_PATH }/users/${ user.id }`, {
-				force: true,
-				reassign: 1,
-			} );
+			await restApi.delete(
+				`${ WP_API_PATH }/users/${ user.id }`,
+				{
+					force: true,
+					reassign: 1,
+				},
+				true
+			);
 		} catch ( error ) {
 			// Accept 404 error as the user might have been deleted already in the test
-			if ( error.data?.data?.status !== 404 ) {
+			if ( error.status !== 404 ) {
 				throw error;
 			}
 		}
