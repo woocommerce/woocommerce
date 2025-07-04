@@ -169,7 +169,6 @@ class PaymentMethodIcons extends AbstractBlock {
 		$icon_url    = \plugins_url( $assets_path . $card_type . '.svg', WC_PLUGIN_FILE );
 
 		return file_exists( $icon_path ) ? $icon_url : '';
-
 	}
 
 	/**
