@@ -91,8 +91,8 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 			array( '123456789012', 'US', 'ZZ', false, 0 ), // Invalid destination.
 
 			// International validations.
-			array( '123456789012', 'DE', 'FR', true, 95 ),
-			array( '123456789012', 'JP', 'AU', true, 95 ),
+			array( '123456789012', 'DE', 'FR', true, 80 ), // Not North America, generic 12-digit.
+			array( '123456789012', 'JP', 'AU', true, 80 ), // Not North America, generic 12-digit.
 		);
 	}
 
