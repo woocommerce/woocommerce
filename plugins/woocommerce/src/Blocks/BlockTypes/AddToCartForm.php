@@ -324,6 +324,8 @@ class AddToCartForm extends AbstractBlock {
 						'step' => (int) $step,
 					),
 				);
+				$context['productId']           = $product->get_id();
+				$context['productType']         = $product->get_type();
 			}
 		}
 

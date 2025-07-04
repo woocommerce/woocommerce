@@ -5,10 +5,10 @@ import { store, getContext } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
 export type Context = {
-	productId?: number;
-	productType?: string;
+	productId: number;
+	productType: string;
 	quantity: Record< number, number >;
-	childProductId?: number;
+	childProductId: number;
 	quantityConstraints: Record<
 		number,
 		{ min: number; max: number | null; step: number }
@@ -45,7 +45,7 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 		productType === 'grouped' && childProductId
 			? childProductId
 			: context.productId;
-	const constraints = context.quantityConstraints?.[ id as number ] || {
+	const constraints = context.quantityConstraints?.[ id ] || {
 		min: productType === 'grouped' && childProductId ? 0 : 1,
 		step: 1,
 	};
@@ -84,7 +84,7 @@ store( 'woocommerce/add-to-cart-form', {
 				productType === 'grouped' && childProductId
 					? childProductId
 					: productId;
-			const constraints = quantityConstraints?.[ id as number ] || {
+			const constraints = quantityConstraints?.[ id ] || {
 				min: productType === 'grouped' && childProductId ? 0 : 1,
 				step: 1,
 			};
@@ -93,7 +93,7 @@ store( 'woocommerce/add-to-cart-form', {
 			const currentQuantity =
 				productType === 'grouped' && childProductId
 					? quantity?.[ childProductId ] || 0
-					: quantity?.[ productId as number ] || 0;
+					: quantity?.[ productId ] || 0;
 			return currentQuantity - step >= minValue;
 		},
 		get allowsIncrease() {
@@ -109,7 +109,7 @@ store( 'woocommerce/add-to-cart-form', {
 				productType === 'grouped' && childProductId
 					? childProductId
 					: productId;
-			const constraints = quantityConstraints?.[ id as number ] || {
+			const constraints = quantityConstraints?.[ id ] || {
 				min: productType === 'grouped' && childProductId ? 0 : 1,
 				step: 1,
 			};
@@ -118,7 +118,7 @@ store( 'woocommerce/add-to-cart-form', {
 			const currentQuantity =
 				productType === 'grouped' && childProductId
 					? quantity?.[ childProductId ] || 0
-					: quantity?.[ productId as number ] || 0;
+					: quantity?.[ productId ] || 0;
 			return maxValue === null || currentQuantity + step <= maxValue;
 		},
 	},
@@ -146,7 +146,7 @@ store( 'woocommerce/add-to-cart-form', {
 				} else {
 					context.quantity = {
 						...context.quantity,
-						[ context.productId as number ]: newValue,
+						[ context.productId ]: newValue,
 					};
 				}
 				inputElement.value = newValue.toString();
@@ -177,7 +177,7 @@ store( 'woocommerce/add-to-cart-form', {
 				} else {
 					context.quantity = {
 						...context.quantity,
-						[ context.productId as number ]: newValue,
+						[ context.productId ]: newValue,
 					};
 				}
 				inputElement.value = newValue.toString();
@@ -201,7 +201,7 @@ store( 'woocommerce/add-to-cart-form', {
 			} else {
 				context.quantity = {
 					...context.quantity,
-					[ context.productId as number ]: isNaN( value ) ? 0 : value,
+					[ context.productId ]: isNaN( value ) ? 0 : value,
 				};
 			}
 		},
