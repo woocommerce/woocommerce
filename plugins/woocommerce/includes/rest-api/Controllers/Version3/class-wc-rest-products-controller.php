@@ -573,25 +573,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return '';
 		}
 
+		$column_map = array(
+			'name'             => "{$wpdb->posts}.post_title",
+			'sku'              => 'wc_product_meta_lookup.sku',
+			'global_unique_id' => 'wc_product_meta_lookup.global_unique_id',
+		);
+
 		$field_clauses = array();
 
 		foreach ( $fields as $field ) {
+			if ( ! isset( $column_map[ $field ] ) ) {
+				continue;
+			}
+
+			$db_column           = $column_map[ $field ];
 			$field_token_clauses = array();
 
 			foreach ( $tokens as $token ) {
 				$like_search = '%' . $wpdb->esc_like( $token ) . '%';
-
-				switch ( $field ) {
-					case 'name':
-						$field_token_clauses[] = $wpdb->prepare( "($wpdb->posts.post_title LIKE %s)", $like_search );
-						break;
-					case 'sku':
-						$field_token_clauses[] = $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
-						break;
-					case 'global_unique_id':
-						$field_token_clauses[] = $wpdb->prepare( '(wc_product_meta_lookup.global_unique_id LIKE %s)', $like_search );
-						break;
-				}
+				$field_token_clauses[] = '(' . $db_column . ' LIKE ' . $wpdb->prepare( '%s', $like_search ) . ')';
 			}
 
 			if ( $field_token_clauses ) {
