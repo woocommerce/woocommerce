@@ -553,7 +553,7 @@ class MiniCart extends AbstractBlock {
 						data-wp-bind--role="state.drawerRole"
 						data-wp-bind--aria-modal="context.isOpen"
 						data-wp-bind--aria-hidden="!context.isOpen"
-						data-wp-bind--tab-index="state.drawerTabIndex"
+						data-wp-bind--tabindex="state.drawerTabIndex"
 						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
 					>
 						<div class="wc-block-components-drawer__content">
