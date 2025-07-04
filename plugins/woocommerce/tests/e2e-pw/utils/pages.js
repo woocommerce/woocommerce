@@ -56,7 +56,7 @@ export async function pageExists( slug ) {
 async function createShortcodePage( slug, title, shortcode ) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( `Creating ${ title } page` );
-		const apiClient = createClient( process.env.BASE_URL, {
+		const apiClient = createClient( playwrightConfig.use.baseURL, {
 			type: 'basic',
 			username: admin.username,
 			password: admin.password,
