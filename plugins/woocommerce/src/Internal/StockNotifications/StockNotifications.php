@@ -22,6 +22,11 @@ class StockNotifications {
 
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
+		add_action('woocommerce_installed', array( $this, 'on_install' ) );
+	}
+
+	public function on_install() {
+		wc_get_container()->get( DataRetentionController::class )->on_woo_install_or_update();
 	}
 
 	/**

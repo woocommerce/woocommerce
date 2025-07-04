@@ -10,11 +10,23 @@ class DataRetentionController {
 	public const DAILY_TASK_HOOK = 'customer_stock_notifications_daily';
 
 	public function __construct() {
+		add_action( 'woocommerce_installed', array( $this, 'on_woo_install_or_update' ) );
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
 		add_action( 'update_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		add_action( 'add_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_daily_task' ) );
 	}
+
+	/**
+	 * Tasks to run when WooCommerce is installed or updated.
+	 *
+	 * @return void
+	 */
+	public function on_woo_install_or_update(): void {
+		error_log('bis_on_woo_install_or_update');
+		$this->schedule_or_unschedule_daily_task( null, get_option( 'wc_customer_stock_notifications_delete_after_days' ) );
+	}
+
 	/**
 	 * Responds to changes in the option for deleting unverified notifications.
 	 * If the new value is numeric and greater than zero, it schedules a daily task.
