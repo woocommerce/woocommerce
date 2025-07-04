@@ -70,6 +70,7 @@ jobs:
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
+      nextPrepReleaseBranch: ${{ steps.calculate-versions.outputs.nextPrepReleaseBranch }}
       nextTrunkVersion: ${{ steps.calculate-versions.outputs.nextTrunkVersion }}
     steps:
       - name: Verify no PRs open by the github-actions bot are open
@@ -102,10 +103,12 @@ jobs:
             const currentVersion = currentRelease.data.tag_name.replace(/[^0-9.]+/, '');
             const nextReleaseVersion = bumpMinorVersion(currentVersion);
             const nextReleaseBranch = `release/${nextReleaseVersion.slice(0, -2)}`;
+            const nextPrepReleaseBranch = `prep/${nextReleaseBranch}-for-next-dev-cycle-${nextReleaseVersion.slice(0, -2)}`;
             const nextTrunkVersion = bumpMinorVersion(nextReleaseVersion);
 
             core.setOutput('nextReleaseVersion', nextReleaseVersion);
             core.setOutput('nextReleaseBranch', nextReleaseBranch);
+            core.setOutput('nextPrepReleaseBranch', nextPrepReleaseBranch);
             core.setOutput('nextTrunkVersion', nextTrunkVersion);
 
   run-code-freeze:
@@ -171,14 +174,14 @@ jobs:
     with:
       skip_verify: true
       create_github_release: false
-      branch: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
+      branch: ${{ needs.prepare-for-code-freeze.outputs.nextPrepReleaseBranch }}
 
   modify-zip-version:
     name: 'Update version to Dev'
     runs-on: ubuntu-latest
     needs: [build-zip, prepare-for-code-freeze]
     env:
-      DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}-dev
+      DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev
     outputs:
       artifact_url: ${{ steps.upload-modified-zip.outputs.artifact-url }}
     steps:
