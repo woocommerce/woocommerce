@@ -79,7 +79,6 @@ final class WC_Cart_Session {
 
 		// Update session when the cart is updated.
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
@@ -101,14 +100,15 @@ final class WC_Cart_Session {
 		 */
 		do_action( 'woocommerce_load_cart_from_session' );
 
-		$cart        = (array) array_filter( WC()->session->get( 'cart', array() ) );
-		$cart_totals = WC()->session->get( 'cart_totals', null );
+		$wc_session  = WC()->session;
+		$cart        = (array) array_filter( $wc_session->get( 'cart', array() ) );
+		$cart_totals = $wc_session->get( 'cart_totals', null );
 
 		$this->cart->set_totals( $cart_totals );
-		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
-		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
-		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
-		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
+		$this->cart->set_applied_coupons( $wc_session->get( 'applied_coupons', array() ) );
+		$this->cart->set_coupon_discount_totals( $wc_session->get( 'coupon_discount_totals', array() ) );
+		$this->cart->set_coupon_discount_tax_totals( $wc_session->get( 'coupon_discount_tax_totals', array() ) );
+		$this->cart->set_removed_cart_contents( $wc_session->get( 'removed_cart_contents', array() ) );
 
 		// Flag to indicate the stored cart should be updated. If cart totals are null, this will be true to calculate totals.
 		$update_cart_session = is_null( $cart_totals );
@@ -117,8 +117,8 @@ final class WC_Cart_Session {
 		$order_again = false;
 
 		// Populate cart from order.
-		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart );
 			$order_again         = true;
 			$update_cart_session = true;
 		}
@@ -282,12 +282,14 @@ final class WC_Cart_Session {
 		$cart_for_session = $this->get_cart_for_session();
 
 		if ( empty( $cart_for_session ) ) {
-			WC()->session->set( 'cart', null );
-			$update_cart_session = true;
-		}
-
-		if ( $update_cart_session ) {
+			// If the cart is empty, clear the cart session directly.
+			$this->destroy_cart_session();
+		} elseif ( $update_cart_session ) {
+			// If the cart is not empty, and the cart session needs to be updated, calculate totals. Session will update after this.
 			$this->cart->calculate_totals();
+		} else {
+			// Otherwise, just set the session. This was previously hooked into `woocommerce_cart_loaded_from_session` but that resulted in multiple session updates.
+			$this->set_session();
 		}
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
@@ -303,13 +305,15 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function destroy_cart_session() {
-		WC()->session->set( 'cart', null );
-		WC()->session->set( 'cart_totals', null );
-		WC()->session->set( 'applied_coupons', null );
-		WC()->session->set( 'coupon_discount_totals', null );
-		WC()->session->set( 'coupon_discount_tax_totals', null );
-		WC()->session->set( 'removed_cart_contents', null );
-		WC()->session->set( 'order_awaiting_payment', null );
+		$wc_session = WC()->session;
+
+		$wc_session->set( 'cart', null );
+		$wc_session->set( 'cart_totals', null );
+		$wc_session->set( 'applied_coupons', null );
+		$wc_session->set( 'coupon_discount_totals', null );
+		$wc_session->set( 'coupon_discount_tax_totals', null );
+		$wc_session->set( 'removed_cart_contents', null );
+		$wc_session->set( 'order_awaiting_payment', null );
 	}
 
 	/**

@@ -252,17 +252,8 @@ class ProductButton extends AbstractBlock {
 			$args['attributes']['value'] = $product->get_id();
 		}
 
-		/**
-		 * Filters the add to cart button class.
-		 *
-		 * @since 8.7.0
-		 *
-		 * @param string $class The class.
-		 */
-		$html = apply_filters(
-			'woocommerce_loop_add_to_cart_link',
-			strtr(
-				'<div {wrapper_attributes}
+		$html = strtr(
+			'<div {wrapper_attributes}
 					{div_directives}
 				>
 					<{html_element}
@@ -275,22 +266,35 @@ class ProductButton extends AbstractBlock {
 					</{html_element}>
 					{view_cart_html}
 				</div>',
-				array(
-					'{wrapper_attributes}'     => $wrapper_attributes,
-					'{html_element}'           => $html_element,
-					'{button_classes}'         => $button_classes,
-					'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
-					'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-					'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
-					'{div_directives}'         => $is_ajax_button ? $div_directives : '',
-					'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
-					'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
-					'{view_cart_html}'         => $is_ajax_button && CartCheckoutUtils::has_cart_page() ? $this->get_view_cart_html() : '',
-				)
-			),
-			$product,
-			$args
+			array(
+				'{wrapper_attributes}'     => $wrapper_attributes,
+				'{html_element}'           => $html_element,
+				'{button_classes}'         => $button_classes,
+				'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
+				'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
+				'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
+				'{div_directives}'         => $is_ajax_button ? $div_directives : '',
+				'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
+				'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
+				'{view_cart_html}'         => $is_ajax_button && CartCheckoutUtils::has_cart_page() ? $this->get_view_cart_html() : '',
+			)
 		);
+
+		if ( ! $is_descendant_of_add_to_cart_form ) {
+			/**
+			 * Filters the add to cart button class.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param string $class The class.
+			 */
+			$html = apply_filters(
+				'woocommerce_loop_add_to_cart_link',
+				$html,
+				$product,
+				$args
+			);
+		}
 
 		$product = $previous_product;
 
