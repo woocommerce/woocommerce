@@ -169,6 +169,9 @@ const QuantitySelector = ( {
 
 			const normalized = normalizeQuantity( value );
 
+			// Update expected quantity to prevent useEffect from overriding local state
+			expectedQuantityRef.current = normalized;
+
 			// Only push if the value is valid and matches the normalized value
 			if ( normalized === value && normalized !== quantity ) {
 				debouncedOnChange( normalized );
