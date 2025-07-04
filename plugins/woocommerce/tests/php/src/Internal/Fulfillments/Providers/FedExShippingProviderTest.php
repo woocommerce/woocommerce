@@ -71,7 +71,7 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 
 			// FedEx Express - 14 digit (95 score).
 			array( '12345678901234', 'US', 'FR', true, 95 ),
-			array( '98765432109876', 'GB', 'DE', true, 95 ),
+			array( '98765432109876', 'GB', 'DE', true, 80 ), // Reduced for EU.
 
 			// FedEx Express - 15 digit (90 score).
 			array( '123456789012345', 'CA', 'US', true, 90 ),
