@@ -132,7 +132,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 													data-wp-on--input="actions.overrideInvalidQuantity"
 													data-wp-on--change="actions.changeQuantity" 
 													data-wp-bind--aria-label="state.quantityDescriptionLabel" 
-													data-wp-bind--min="state.cartItem.quantity_limits.editable" 
+													data-wp-bind--min="state.cartItem.quantity_limits.minimum" 
 													data-wp-bind--max="state.cartItem.quantity_limits.maximum"
 													data-wp-bind--value="state.cartItem.quantity"
 													data-wp-bind--readonly="!state.cartItem.quantity_limits.editable"
