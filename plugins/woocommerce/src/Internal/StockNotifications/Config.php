@@ -13,6 +13,9 @@ use Automattic\WooCommerce\Enums\ProductStatus;
  */
 class Config {
 
+	/**
+	 * How long to keep pending notifications before deleting them (in days).
+	 */
 	public const DEFAULT_DELETE_AFTER_DAYS = 30;
 
 	/**
@@ -121,18 +124,16 @@ class Config {
 	}
 
 	/**
-	 * How long to keep unverified notifications in the system (in days).
+	 * How long to keep pending notifications before deleting them (in days).
 	 *
 	 * @return int
 	 */
 	public static function get_delete_after_days(): int {
-		$delete_after_days = absint(
+		return absint(
 			get_option(
 				'wc_customer_stock_notifications_delete_after_days',
 				self::DEFAULT_DELETE_AFTER_DAYS
 			)
 		);
-
-		return $delete_after_days;
 	}
 }

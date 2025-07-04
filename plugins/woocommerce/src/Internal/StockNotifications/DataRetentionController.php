@@ -12,8 +12,8 @@ class DataRetentionController {
 	public function __construct() {
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
 		add_action( 'update_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
-		add_action( 'add_option_wc_customer_stock_notifications_delete_unverified_time_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
-		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_async_tasks' ) );
+		add_action( 'add_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_daily_task' ) );
 	}
 	/**
 	 * Responds to changes in the option for deleting unverified notifications.
@@ -26,7 +26,7 @@ class DataRetentionController {
 	 */
 	public function schedule_or_unschedule_daily_task( $unused, $new_option_value ): void {
 		if ( ! is_numeric( $new_option_value ) || empty( $new_option_value ) ) {
-			$this->clear_async_tasks();
+			$this->clear_daily_task();
 			return;
 		}
 
@@ -36,9 +36,9 @@ class DataRetentionController {
 	}
 
 	/*
-	 * Clear the scheduled tasks for stock notifications.
+	 * Unschedule the daily task when the plugin is deactivated, or the option is set to zero.
 	 */
-	public function clear_async_tasks() {
+	public function clear_daily_task() {
 		wp_clear_scheduled_hook( self::DAILY_TASK_HOOK );
 	}
 
