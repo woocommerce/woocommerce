@@ -23,7 +23,7 @@
 			trailing = true;
 
 		if ( typeof func != 'function' ) {
-			throw new TypeError( FUNC_ERROR_TEXT );
+			throw new TypeError( 'Expected a function' );
 		}
 
 		if ( typeof options === 'object' ) {
@@ -191,6 +191,81 @@
 				}
 			};
 
+			// Shared error handling function
+			const handleApiError = ( data, response ) => {
+				if ( ! data.code && ! data.error ) {
+					return null; // No error to handle
+				}
+
+				const errorCode = data.code || data.error;
+
+				switch ( errorCode ) {
+					case 'expired_jwt_token':
+					case 'malformed_jwt_token':
+					case 'invalid_jwt_token':
+					case 'invalid_issuer':
+					case 'invalid_service':
+					case 'missing_jwt_token':
+						permanentlyDisabledServices.push( key );
+						console.error(
+							'Automattic Address Suggestion has been disabled due to invalid JWT token'
+						);
+						return null;
+					case 'rate_limit_exceeded':
+						permanentlyDisabledServices.push( key );
+						setTimeout( () => {
+							permanentlyDisabledServices.splice(
+								permanentlyDisabledServices.indexOf( key ),
+								1
+							);
+						}, response.headers.get( 'RateLimit-Retry-After' ) * 1000 );
+						console.error(
+							'Automattic Address Suggestion has been disabled due to rate limit exceeded'
+						);
+						return null;
+					case 'missing_query':
+						return null;
+					case 'no_suggestions':
+						return [];
+					case 'missing_address_id':
+						console.error(
+							'Automattic Address Suggestion: Missing address ID'
+						);
+						return null;
+					case 'no_place':
+						console.error(
+							'Automattic Address Suggestion: No place found'
+						);
+						return null;
+					case 'missing_session_id':
+						sessionId =
+							crypto && crypto.randomUUID
+								? crypto.randomUUID()
+								: Math.random().toString( 36 ).substring( 2 );
+						return null;
+					case 'woo_address_suggestion_internal_error':
+					case 'woo_address_suggestion_service_error':
+					case 'woo_address_suggestion_server_error':
+						serviceErrorRetries++;
+						if (
+							serviceErrorRetries >= MAX_SERVICE_ERROR_RETRIES
+						) {
+							permanentlyDisabledServices.push( key );
+							console.error(
+								'Automattic Address Suggestion has been disabled due to internal service error'
+							);
+						}
+						return null;
+					default:
+						if ( ! isSearchError ) {
+							console.error(
+								'Automattic Address Suggestion: Unknown error'
+							);
+						}
+						return null;
+				}
+			};
+
 			const debouncedSearch = debounce(
 				async ( inputValue, country ) => {
 					const params = new URLSearchParams( {
@@ -210,70 +285,20 @@
 						requestDurations.push( endTime - startTime );
 						let data = await response.json();
 
-						if ( data.code ) {
-							switch ( data.code ) {
-								case 'expired_jwt_token':
-								case 'malformed_jwt_token':
-								case 'invalid_jwt_token':
-								case 'invalid_issuer':
-								case 'invalid_service':
-								case 'missing_jwt_token':
-									permanentlyDisabledServices.push( key );
-									console.error(
-										'Automattic Address Suggestion has been disabled due to invalid JWT token'
-									);
-									return [];
-								case 'rate_limit_exceeded':
-									permanentlyDisabledServices.push( key );
-									setTimeout( () => {
-										permanentlyDisabledServices.splice(
-											permanentlyDisabledServices.indexOf(
-												key
-											),
-											1
-										);
-									}, response.headers.get( 'RateLimit-Retry-After' ) * 1000 );
-									console.error(
-										'Automattic Address Suggestion has been disabled due to rate limit exceeded'
-									);
-									return [];
-								case 'missing_query':
-								case 'no_suggestions':
-									// Cache empty results to avoid repeated API calls
-									cacheResult( inputValue, country, [] );
-									return [];
-								case 'missing_session_id':
-									sessionId =
-										crypto && crypto.randomUUID
-											? crypto.randomUUID()
-											: Math.random()
-													.toString( 36 )
-													.substring( 2 );
-									return [];
-								case 'woo_address_suggestion_internal_error':
-								case 'woo_address_suggestion_service_error':
-									serviceErrorRetries++;
-									if (
-										serviceErrorRetries >=
-										MAX_SERVICE_ERROR_RETRIES
-									) {
-										permanentlyDisabledServices.push( key );
-										console.error(
-											'Automattic Address Suggestion has been disabled due to internal service error'
-										);
-									}
-									return [];
-								default:
-									return [];
-							}
+						// Handle errors using shared function
+						const errorResult = handleApiError( data, response );
+						if ( errorResult !== null ) {
+							return errorResult;
 						}
+
 						if ( Array.isArray( data ) ) {
 							data = data.map( ( item ) => ( {
 								id: item.id,
 								label: item.label,
 								matchedSubstrings: item.matched_substrings,
 							} ) );
-							// Cache the successful result
+							// Cache the successful result.
+							// An empty result is still a valid result and is cached.
 							cacheResult( inputValue, country, data );
 							return data;
 						}
@@ -356,9 +381,10 @@
 
 					let data = await response.json();
 					// Reset session ID after successful select
-                    sessionId = crypto && crypto.randomUUID
-                        ? crypto.randomUUID()
-                        : Math.random().toString( 36 ).substring( 2 );
+					sessionId =
+						crypto && crypto.randomUUID
+							? crypto.randomUUID()
+							: Math.random().toString( 36 ).substring( 2 );
 					try {
 						dispatchEvent(
 							new CustomEvent(
@@ -374,64 +400,11 @@
 						console.error( e );
 					}
 					requestDurations = [];
-					if ( data.error ) {
-						switch ( data.error ) {
-							case 'expired_jwt_token':
-							case 'malformed_jwt_token':
-							case 'invalid_jwt_token':
-							case 'invalid_issuer':
-							case 'invalid_service':
-							case 'missing_jwt_token':
-								permanentlyDisabledServices.push( key );
-								return null;
-							case 'rate_limit_exceeded':
-								permanentlyDisabledServices.push( key );
-								setTimeout( () => {
-									permanentlyDisabledServices.splice(
-										permanentlyDisabledServices.indexOf(
-											key
-										),
-										1
-									);
-								}, response.headers.get( 'RateLimit-Retry-After' ) * 1000 );
-								return null;
-							case 'missing_address_id':
-								console.error(
-									'Automattic Address Suggestion: Missing address ID'
-								);
-								return null;
-							case 'no_place':
-								console.error(
-									'Automattic Address Suggestion: No place found'
-								);
-								return null;
-							case 'missing_session_id':
-								sessionId =
-									crypto && crypto.randomUUID
-										? crypto.randomUUID()
-										: Math.random()
-												.toString( 36 )
-												.substring( 2 );
-								return [];
-							case 'woo_address_suggestion_internal_error':
-							case 'woo_address_suggestion_server_error':
-								serviceErrorRetries++;
-								if (
-									serviceErrorRetries >=
-									MAX_SERVICE_ERROR_RETRIES
-								) {
-									permanentlyDisabledServices.push( key );
-									console.error(
-										'Automattic Address Suggestion has been disabled due to internal service error'
-									);
-								}
-								return null;
-							default:
-								console.error(
-									'Automattic Address Suggestion: Unknown error'
-								);
-								return null;
-						}
+
+					// Handle errors using shared function
+					const errorResult = handleApiError( data, response );
+					if ( errorResult !== null ) {
+						return errorResult;
 					}
 
 					return data;

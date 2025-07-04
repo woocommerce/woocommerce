@@ -94,10 +94,27 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	public function set_jwt( $jwt ) {
 		$this->jwt = $jwt;
 		if ( null !== $jwt ) {
-			set_transient( $this->id . 'address_autocomplete_jwt', $jwt, DAY_IN_SECONDS );
+			set_transient( $this->id . 'address_autocomplete_jwt', $jwt, $this->get_jwt_cache_duration( $jwt ) );
 		} else {
 			delete_transient( $this->id . 'address_autocomplete_jwt' );
 		}
+	}
+
+	/**
+	 * Gets the cache duration for the JWT.
+	 *
+	 * @param string $jwt The JWT for the address service.
+	 * @return int The cache duration for the JWT.
+	 */
+	public function get_jwt_cache_duration( $jwt ) {
+		if ( JsonWebToken::shallow_validate( $jwt ) ) {
+			$parts = JsonWebToken::get_parts( $jwt );
+			if ( property_exists( $parts->payload, 'exp' ) ) {
+				return $parts->payload->exp - time();
+			}
+		}
+
+		return DAY_IN_SECONDS;
 	}
 
 	/**
