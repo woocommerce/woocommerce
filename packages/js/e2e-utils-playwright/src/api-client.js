@@ -12,7 +12,6 @@ import axios from 'axios';
  * @return {Object} API client instance with HTTP methods
  */
 export function createClient( baseURL, username, password ) {
-	console.log( 'createClient', { baseURL } );
 	// Ensure baseURL ends with '/'
 	if ( ! baseURL.endsWith( '/' ) ) {
 		baseURL += '/';
@@ -43,9 +42,11 @@ export function createClient( baseURL, username, password ) {
 		 * @param {Object} params Query parameters
 		 * @return {Promise} Promise that resolves to response object
 		 */
-		async get( path, params = {} ) {
-			// console.log( 'get', { path, params } );
+		async get( path, params = {}, debug = false ) {
 			const response = await axiosInstance.get( path, { params } );
+			if ( debug ) {
+				console.log( 'get', { path, params, response } );
+			}
 			return response;
 		},
 
@@ -56,9 +57,11 @@ export function createClient( baseURL, username, password ) {
 		 * @param {Object} data Request body data
 		 * @return {Promise} Promise that resolves to response object
 		 */
-		async post( path, data = {} ) {
-			// console.log( 'post', { path, data } );
+		async post( path, data = {}, debug = false ) {
 			const response = await axiosInstance.post( path, data );
+			if ( debug ) {
+				console.log( 'post', { path, data, response } );
+			}
 			return response;
 		},
 
@@ -69,9 +72,11 @@ export function createClient( baseURL, username, password ) {
 		 * @param {Object} data Request body data
 		 * @return {Promise} Promise that resolves to response object
 		 */
-		async put( path, data = {} ) {
-			// console.log( 'put', { path, data } );
+		async put( path, data = {}, debug = false ) {
 			const response = await axiosInstance.put( path, data );
+			if ( debug ) {
+				console.log( 'put', { path, data, response } );
+			}
 			return response;
 		},
 
@@ -82,11 +87,13 @@ export function createClient( baseURL, username, password ) {
 		 * @param {Object} params Query parameters or request body
 		 * @return {Promise} Promise that resolves to response object
 		 */
-		async delete( path, params = {} ) {
-			// console.log( 'delete', { path, params } );
+		async delete( path, params = {}, debug = false ) {
 			const response = await axiosInstance.delete( path, {
 				data: params,
 			} );
+			if ( debug ) {
+				console.log( 'delete', { path, params, response } );
+			}
 			return response;
 		},
 	};
