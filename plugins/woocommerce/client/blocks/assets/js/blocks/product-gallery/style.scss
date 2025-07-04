@@ -151,13 +151,13 @@ $dialog-padding: 20px;
 	padding: 0;
 	background: #fff;
 	outline-offset: -2px;
+}
 
-	:where([aria-disabled="true"]) {
-		:where(.wc-block-product-gallery-large-image-next-previous__icon) {
-			opacity: 30%;
-		}
-		cursor: not-allowed;
+:where(.wc-block-product-gallery-large-image-next-previous__button[aria-disabled="true"]) {
+	:where(.wc-block-product-gallery-large-image-next-previous__icon) {
+		opacity: 30%;
 	}
+	cursor: not-allowed;
 }
 
 @mixin vertical-thumbnails {
