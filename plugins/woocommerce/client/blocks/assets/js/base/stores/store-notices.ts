@@ -18,6 +18,7 @@ type NoticeWithId = Notice & {
 };
 
 const getStoreNoticeContext = getContextFn< {
+	notices: NoticeWithId[];
 	notice: NoticeWithId;
 } >;
 
@@ -66,7 +67,7 @@ const generateNoticeId = () => {
 };
 
 // Todo: export this store once the store is public.
-store< Store >(
+const { state } = store< Store >(
 	'woocommerce/store-notices',
 	{
 		state: {
@@ -99,13 +100,24 @@ store< Store >(
 				return notice.type === 'notice';
 			},
 			get notices() {
-				const { notices } = getProductCollectionContext();
-				return notices;
+				const productCollectionContext = getProductCollectionContext();
+				if ( productCollectionContext ) {
+					return productCollectionContext?.notices;
+				}
+
+				const context = getStoreNoticeContext();
+
+				if ( context && context.notices ) {
+					return context.notices;
+				}
+
+				return [];
 			},
 		},
 		actions: {
 			addNotice: ( notice: Notice ) => {
-				const { notices } = getProductCollectionContext();
+				const { notices } = state;
+
 				const noticeId = generateNoticeId();
 				const noticeWithId = {
 					...notice,
@@ -117,7 +129,8 @@ store< Store >(
 			},
 
 			removeNotice: ( noticeId: string | PointerEvent ) => {
-				const { notices } = getProductCollectionContext();
+				const { notices } = state;
+
 				noticeId =
 					typeof noticeId === 'string'
 						? noticeId

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
 export interface EditorColors {
 	editorBackgroundColor: string;
@@ -18,6 +18,8 @@ export const useThemeColors = (
 	styleId: string,
 	getStyleContent: ( colors: EditorColors ) => string
 ): void => {
+	const styleElementRef = useRef< HTMLStyleElement | null >( null );
+
 	useEffect( () => {
 		// Find the editor styles wrapper in the main document.
 		let editorStylesWrapper = document.querySelector(
@@ -61,31 +63,68 @@ export const useThemeColors = (
 
 		const styleElementId = `${ styleId }-editor-theme-colors`;
 
-		const alreadyInjected = editorStylesWrapper.querySelector(
+		// Check if we already have a style element.
+		let styleElement = editorStylesWrapper.querySelector(
 			`#${ styleElementId }`
-		);
+		) as HTMLStyleElement | null;
 
-		// Check if we've already injected a style with this id.
-		if ( alreadyInjected ) {
-			return;
+		// If no style element exists, create one.
+		if ( ! styleElement ) {
+			styleElement = document.createElement( 'style' );
+			styleElement.id = styleElementId;
+			editorStylesWrapper.appendChild( styleElement );
 		}
 
-		// Generate the content for this style.
+		// Store reference to the style element.
+		styleElementRef.current = styleElement;
+
+		// Generate and update the style content.
 		const styleContent = getStyleContent( {
 			editorBackgroundColor,
 			editorColor,
 		} );
 
-		// Create and inject the style element with the specific ID.
-		const styleElement = document.createElement( 'style' );
-		styleElement.id = styleElementId;
-		styleElement.appendChild( document.createTextNode( styleContent ) );
-		editorStylesWrapper.appendChild( styleElement );
+		// Update the style content.
+		styleElement.textContent = styleContent;
 
-		/**
-		 * We are intentionally not cleaning up the style element here, because
-		 * blocks might be remounted many times, so this way we avoid removing
-		 * and appending the style element many times.
-		 */
+		// Set up a MutationObserver to watch for style changes.
+		const observer = new MutationObserver( () => {
+			const newComputedStyles =
+				window.getComputedStyle( editorStylesWrapper );
+			const newBackgroundColor = newComputedStyles?.backgroundColor;
+			const newColor = newComputedStyles?.color;
+
+			if (
+				newBackgroundColor !== editorBackgroundColor ||
+				newColor !== editorColor
+			) {
+				// Update the style content with new colors.
+				const newStyleContent = getStyleContent( {
+					editorBackgroundColor: newBackgroundColor,
+					editorColor: newColor,
+				} );
+				if ( styleElementRef.current ) {
+					styleElementRef.current.textContent = newStyleContent;
+				}
+			}
+		} );
+
+		// Start observing the editor styles wrapper for style changes.
+		observer.observe( editorStylesWrapper, {
+			attributes: true,
+			attributeFilter: [ 'class' ],
+		} );
+
+		return () => {
+			observer.disconnect();
+			if (
+				styleElementRef.current &&
+				styleElementRef.current.parentNode
+			) {
+				styleElementRef.current.parentNode.removeChild(
+					styleElementRef.current
+				);
+			}
+		};
 	}, [ getStyleContent, styleId ] );
 };

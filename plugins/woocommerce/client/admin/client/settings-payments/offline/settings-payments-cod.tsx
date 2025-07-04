@@ -18,8 +18,8 @@ import { useState, useEffect } from '@wordpress/element';
  */
 import '../settings-payments-body.scss';
 import { mapShippingMethodsOptions } from '~/settings-payments/offline/utils';
-import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { Settings } from '~/settings-payments/components/settings';
+import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 
 /**
  * This page is used to manage the settings for the Cash on delivery payment gateway.

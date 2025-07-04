@@ -39,30 +39,25 @@ class TemplateApiController {
 	 *
 	 * @param array              $data - WP_Block_Template data.
 	 * @param \WP_Block_Template $template_post - WP_Block_Template object.
-	 * @throws \InvalidArgumentException If the email address is invalid.
+	 * @return \WP_Error|null Returns WP_Error if email validation fails, null otherwise.
 	 */
-	public function save_template_data( array $data, \WP_Block_Template $template_post ): void {
+	public function save_template_data( array $data, \WP_Block_Template $template_post ): ?\WP_Error {
 		if ( WooEmailTemplate::TEMPLATE_SLUG === $template_post->slug && isset( $data['sender_settings'] ) ) {
-			$new_from_name     = $data['sender_settings']['from_name'] ?? null;
-			$current_from_name = get_option( 'woocommerce_email_from_name' );
+			$new_from_name = $data['sender_settings']['from_name'] ?? null;
 
-			if ( null !== $new_from_name && $new_from_name !== $current_from_name ) {
+			if ( null !== $new_from_name ) {
 				update_option( 'woocommerce_email_from_name', $new_from_name );
 			}
 
 			$new_from_address = $data['sender_settings']['from_address'] ?? null;
-			// This validation matches HTML input type email validation.
-			// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#validation.
-			$email_validation_pattern = '/^[a-zA-Z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/';
-			if ( null === $new_from_address || ! preg_match( $email_validation_pattern, $new_from_address ) ) {
-				throw new \InvalidArgumentException( esc_html( __( 'Invalid email address provided for sender settings', 'woocommerce' ) ) );
+			if ( null === $new_from_address || ! filter_var( $new_from_address, FILTER_VALIDATE_EMAIL ) ) {
+				return new \WP_Error( 'invalid_email_address', __( 'Invalid email address provided for sender settings', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$current_from_address = get_option( 'woocommerce_email_from_address' );
-			if ( $new_from_address !== $current_from_address ) {
-				update_option( 'woocommerce_email_from_address', $new_from_address );
-			}
+			update_option( 'woocommerce_email_from_address', $new_from_address );
 		}
+
+		return null;
 	}
 
 	/**

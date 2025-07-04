@@ -38,15 +38,18 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		setOptionElementSelected,
 		optionElement,
 		setOptionElement,
+		labelElement,
+		setLabelElement,
 	} = props;
 
 	const {
 		customOptionElementBorder,
 		customOptionElementSelected,
 		customOptionElement,
+		customLabelElement,
 	} = attributes;
 	const { filterData } = context;
-	const { isLoading, items } = filterData;
+	const { isLoading, items, showCounts } = filterData;
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -82,14 +85,14 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<Disabled>
-					<ul className="wc-block-product-filter-checkbox-list__list">
+					<div className="wc-block-product-filter-checkbox-list__items">
 						{ isLoading && loadingState }
 						{ ! isLoading &&
 							( isLongList
 								? items.slice( 0, threshold )
 								: items
 							).map( ( item, index ) => (
-								<li
+								<div
 									key={ index }
 									className="wc-block-product-filter-checkbox-list__item"
 								>
@@ -111,13 +114,20 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 												icon={ checkMark }
 											/>
 										</span>
-										<span className="wc-block-product-filter-checkbox-list__text">
-											{ item.label }
+										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
+											<span className="wc-block-product-filter-checkbox-list__text">
+												{ item.label }
+											</span>
+											{ showCounts && (
+												<span className="wc-block-product-filter-checkbox-list__count">
+													{ ` (${ item.count })` }
+												</span>
+											) }
 										</span>
 									</label>
-								</li>
+								</div>
 							) ) }
-					</ul>
+					</div>
 					{ ! isLoading && isLongList && (
 						<button className="wc-block-product-filter-checkbox-list__show-more">
 							{ __( 'Show more…', 'woocommerce' ) }
@@ -130,6 +140,25 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
+							{
+								label: __( 'Label', 'woocommerce' ),
+								colorValue:
+									labelElement.color || customLabelElement,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setLabelElement( colorValue );
+									setAttributes( {
+										customLabelElement: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setLabelElement( '' );
+									setAttributes( {
+										customLabelElement: '',
+									} );
+								},
+							},
 							{
 								label: __(
 									'Option Element Border',
@@ -209,4 +238,5 @@ export default withColors( {
 	optionElementBorder: 'option-element-border',
 	optionElementSelected: 'option-element-border',
 	optionElement: 'option-element',
+	labelElement: 'label-element',
 } )( CheckboxListEdit );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { get } from 'lodash';
 import { createElement } from '@wordpress/element';
 
@@ -62,7 +62,7 @@ const ProductImage: React.VFC< ProductImageProps > = ( {
 	const src = ( productImage && productImage.src ) || false;
 	const altText = alt || ( productImage && productImage.alt ) || '';
 
-	const classes = classnames( 'woocommerce-product-image', className, {
+	const classes = clsx( 'woocommerce-product-image', className, {
 		'is-placeholder': ! src,
 	} );
 

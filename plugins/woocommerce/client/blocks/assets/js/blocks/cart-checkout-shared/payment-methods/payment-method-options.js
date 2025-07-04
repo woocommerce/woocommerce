@@ -88,7 +88,7 @@ const PaymentMethodOptions = () => {
 
 	const isSinglePaymentMethod =
 		Object.keys( savedPaymentMethods ).length === 0 &&
-		Object.keys( paymentMethods ).length === 1;
+		Object.keys( availablePaymentMethods ).length === 1;
 
 	const singleOptionClass = clsx( {
 		'disable-radio-control': isSinglePaymentMethod,

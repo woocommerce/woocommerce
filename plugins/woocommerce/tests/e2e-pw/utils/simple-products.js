@@ -1,63 +1,5 @@
 const { expect } = require( '@playwright/test' );
 
-const SETTINGS_URL =
-	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
-
-/**
- * This function checks whether the block product editor is enabled on a page.
- *
- * Navigates to the block product editor and verifies it's enabled.
- *
- * @param {import('@playwright/test').Page} page
- *
- * @return {Promise<boolean>} Boolean value based on the visibility of the element.
- */
-async function isBlockProductEditorEnabled( page ) {
-	await page.goto( SETTINGS_URL );
-	return await page
-		.locator( '#woocommerce_feature_product_block_editor_enabled' )
-		.isChecked();
-}
-
-/**
- * This function is typically used for enabling/disabling the block product editor in settings page.
- *
- * @param {string}                          action The action that will be performed.
- * @param {import('@playwright/test').Page} page
- */
-async function toggleBlockProductEditor( action = 'enable', page ) {
-	await page.goto( SETTINGS_URL );
-
-	const enableProductEditor = page.locator(
-		'#woocommerce_feature_product_block_editor_enabled'
-	);
-	const isEnabled = await enableProductEditor.isChecked();
-
-	if (
-		( action === 'enable' && isEnabled ) ||
-		( action === 'disable' && ! isEnabled )
-	) {
-		// No need to toggle the setting.
-		return;
-	}
-
-	if ( action === 'enable' ) {
-		await enableProductEditor.check();
-	} else if ( action === 'disable' ) {
-		await enableProductEditor.uncheck();
-	}
-
-	await page
-		.getByRole( 'button', {
-			name: 'Save changes',
-		} )
-		.click();
-
-	await expect(
-		page.locator( '#message' ).getByText( 'Your settings have been saved' )
-	).toBeVisible();
-}
-
 /**
  * This function simulates the clicking of the "Add New" link under the "product" section in the menu.
  *
@@ -110,6 +52,4 @@ module.exports = {
 	expectOldProductEditor,
 	clickAddNewMenuItem,
 	clickOnTab,
-	isBlockProductEditorEnabled,
-	toggleBlockProductEditor,
 };

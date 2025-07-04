@@ -44,7 +44,6 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the closest gallery container
 	const galleryContainer = element.closest(
 		'.wp-block-woocommerce-product-gallery'
 	);
@@ -53,15 +52,34 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const imageElement = galleryContainer.querySelector(
-		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
+	// Find the scrollable container for the large image gallery
+	const scrollableContainer = galleryContainer.querySelector(
+		'.wc-block-product-gallery-large-image__container'
+	);
+
+	if ( ! scrollableContainer ) {
+		return;
+	}
+
+	const imageElement = scrollableContainer.querySelector(
+		`img[data-image-id="${ imageId }"]`
 	);
 
 	if ( imageElement ) {
-		imageElement.scrollIntoView( {
+		// Calculate the scroll position to center the image horizontally
+		const containerRect = scrollableContainer.getBoundingClientRect();
+		const imageRect = imageElement.getBoundingClientRect();
+
+		const scrollLeft =
+			scrollableContainer.scrollLeft +
+			( imageRect.left - containerRect.left ) -
+			( containerRect.width - imageRect.width ) / 2;
+
+		// Use scrollTo as scrollIntoView with inline: 'center'
+		// is not supported in iOS (Safari and Chrome).
+		scrollableContainer.scrollTo( {
+			left: scrollLeft,
 			behavior: 'smooth',
-			block: 'nearest',
-			inline: 'center',
 		} );
 	}
 };
@@ -233,21 +251,52 @@ const productGallery = {
 				actions.selectPreviousImage();
 			}
 		},
-		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
-					event.preventDefault();
-				}
-				actions.selectCurrentImage();
-			}
-		},
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.code === 'Escape' ) {
 				actions.closeDialog();
+			}
+
+			if ( event.code === 'Tab' ) {
+				const focusableElementsSelectors =
+					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+				const dialogPopUp = getElement()?.ref as HTMLElement;
+				const focusableElements = dialogPopUp.querySelectorAll(
+					focusableElementsSelectors
+				);
+
+				if ( ! focusableElements.length ) {
+					return;
+				}
+
+				const firstFocusableElement =
+					focusableElements[ 0 ] as HTMLElement;
+				const lastFocusableElement = focusableElements[
+					focusableElements.length - 1
+				] as HTMLElement;
+
+				if (
+					! event.shiftKey &&
+					event.target === lastFocusableElement
+				) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+					return;
+				}
+
+				if (
+					event.shiftKey &&
+					event.target === firstFocusableElement
+				) {
+					event.preventDefault();
+					lastFocusableElement.focus();
+					return;
+				}
+
+				if ( event.target === dialogPopUp ) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+				}
 			}
 		},
 		openDialog: () => {
@@ -278,7 +327,12 @@ const productGallery = {
 			}
 			const { clientX } = event.touches[ 0 ];
 			context.touchCurrentX = clientX;
-			event.preventDefault();
+
+			// Only prevent default if there's significant horizontal movement
+			const delta = clientX - context.touchStartX;
+			if ( Math.abs( delta ) > 10 ) {
+				event.preventDefault();
+			}
 		},
 		onTouchEnd: () => {
 			const context = getContext();
@@ -314,6 +368,38 @@ const productGallery = {
 			const overflowState = checkOverflow( scrollableElement );
 
 			context.thumbnailsOverflow = overflowState;
+		},
+		onArrowsKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				actions.selectNextImage();
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				actions.selectPreviousImage();
+			}
+		},
+		onThumbnailsArrowsKeyDown: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+
+			// Find and focus the newly selected image
+			const element = getElement()?.ref as HTMLElement;
+			const { selectedImageId } = getContext();
+
+			if ( element ) {
+				const galleryContainer = element.closest(
+					'.wp-block-woocommerce-product-gallery'
+				);
+				if ( galleryContainer ) {
+					const selectedImage = galleryContainer.querySelector(
+						`img[data-image-id="${ selectedImageId }"]`
+					) as HTMLElement;
+					if ( selectedImage ) {
+						selectedImage.focus( { preventScroll: true } );
+					}
+				}
+			}
 		},
 	},
 	callbacks: {
@@ -392,11 +478,10 @@ const productGallery = {
 						behavior: 'auto',
 						block: 'center',
 					} );
-					selectedImage.focus();
 				}
 			}
 		},
-		toggleActiveImageAttributes: () => {
+		toggleActiveThumbnailAttributes: () => {
 			const element = getElement()?.ref as HTMLElement;
 			if ( ! element ) return false;
 
@@ -407,12 +492,38 @@ const productGallery = {
 			const imageId = Number( imageIdValue );
 
 			if ( selectedImageId === imageId ) {
-				element.classList.add( 'is-active' );
+				element.classList.add(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '0' );
 			} else {
-				element.classList.remove( 'is-active' );
+				element.classList.remove(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '-1' );
 			}
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext();
+			const resizeObserver = new ResizeObserver( () => {
+				const overflowState = checkOverflow( scrollableElement );
+				context.thumbnailsOverflow = overflowState;
+			} );
+
+			// Observe both the scrollable element and its parent for size changes
+			resizeObserver.observe( scrollableElement );
+			if ( scrollableElement.parentElement ) {
+				resizeObserver.observe( scrollableElement.parentElement );
+			}
+
+			return () => {
+				resizeObserver.disconnect();
+			};
 		},
 	},
 };

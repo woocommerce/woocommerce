@@ -34,6 +34,9 @@ jest.mock( '@woocommerce/admin-layout', () => {
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
@@ -112,12 +115,10 @@ describe( 'ShippingRecommendations', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should trigger event settings_shipping_recommendation_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	it( 'should trigger event settings_shipping_recommendation_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		render( <ShippingRecommendations /> );
 
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_shipping_recommendation_visit_marketplace_click',
@@ -125,7 +126,10 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
-	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+
 		const mockLocation = {
 			href: 'test',
 		} as Location;
@@ -137,9 +141,7 @@ describe( 'ShippingRecommendations', () => {
 
 		render( <ShippingRecommendations /> );
 
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
