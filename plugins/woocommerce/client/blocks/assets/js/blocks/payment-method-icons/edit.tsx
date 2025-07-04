@@ -59,7 +59,6 @@ const Edit = ( {
 			if ( ! paymentMethods[ type ] || ! paymentMethods[ type ].icon ) {
 				return acc;
 			}
-
 			acc.push( {
 				type,
 				icon: paymentMethods[ type ].icon,
