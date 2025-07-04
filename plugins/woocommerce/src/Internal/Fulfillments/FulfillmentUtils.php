@@ -466,7 +466,7 @@ class FulfillmentUtils {
 			// The tracking number is in the UPU S10 format.
 			$tracking_number = substr( $tracking_number, 2, -2 );
 		} elseif ( ! preg_match( '/^\d{9}$/', $tracking_number ) ) {
-			// Ensure the tracking number is exactly 8 digits.
+			// Ensure the tracking number is exactly 9 digits.
 			return false;
 		}
 
