@@ -405,7 +405,9 @@ class QuantityLimitsTests extends TestCase {
 		// Test normalization with float quantities.
 		$normalized = $quantity_limits->normalize_cart_item_quantity( 5.7, $cart_item );
 		$this->assertIsFloat( $normalized, 'Normalized quantity should be a float when float support is enabled' );
-		$this->assertTrue( $normalized <= 10.5, 'Normalized quantity should not exceed stock limit' );
+
+		$normalized = $quantity_limits->normalize_cart_item_quantity( 11.4, $cart_item );
+		$this->assertEquals( 10, $normalized, 'Normalized quantity should not exceed stock limit (so should not be 11, it should round down to 10)' );
 
 		// Test invalid input handling.
 		$this->assertEquals( 0, $quantity_limits->normalize_cart_item_quantity( -1.5, $cart_item ), 'Negative quantities should be normalized to 0' );
