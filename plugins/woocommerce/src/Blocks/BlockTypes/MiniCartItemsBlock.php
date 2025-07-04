@@ -132,9 +132,10 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 													data-wp-on--input="actions.overrideInvalidQuantity"
 													data-wp-on--change="actions.changeQuantity" 
 													data-wp-bind--aria-label="state.quantityDescriptionLabel" 
-													data-wp-bind--min="state.cartItem.quantity_limits.minimum" 
+													data-wp-bind--min="state.cartItem.quantity_limits.editable" 
 													data-wp-bind--max="state.cartItem.quantity_limits.maximum"
-													data-wp-bind--value="state.cartItem.quantity" 
+													data-wp-bind--value="state.cartItem.quantity"
+													data-wp-bind--readonly="!state.cartItem.quantity_limits.editable"
 													class="wc-block-components-quantity-selector__input" 
 													type="number" 
 													step="1"
@@ -142,7 +143,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 												<button 
 													data-wp-bind--disabled="state.minimumReached" 
 													data-wp-on--click="actions.decrementQuantity" 
-													data-wp-bind--aria-label="state.reduceQuantityLabel" 
+													data-wp-bind--aria-label="state.reduceQuantityLabel"
+													data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
 													class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
 												>
 													−
@@ -150,7 +152,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 												<button 
 													data-wp-bind--disabled="state.maximumReached" 
 													data-wp-on--click="actions.incrementQuantity" 
-													data-wp-bind--aria-label="state.increaseQuantityLabel" 
+													data-wp-bind--aria-label="state.increaseQuantityLabel"
+													data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
 													class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
 												>
 													＋
