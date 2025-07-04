@@ -2,7 +2,7 @@
  * External dependencies
  */
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
-const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const WebpackRTLPlugin = require( '@automattic/webpack-rtl-plugin' );
 const path = require( 'path' );
 
 /**
