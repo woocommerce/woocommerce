@@ -351,7 +351,20 @@ class Init {
 			'theme_information',
 			array(
 				'fields' => array(
-					'downloadlink' => true,
+					'downloadlink'    => true,
+					'sections'        => false,
+					'description'     => false,
+					'rating'          => false,
+					'ratings'         => false,
+					'downloaded'      => false,
+					'last_updated'    => false,
+					'tags'            => false,
+					'homepage'        => false,
+					'screenshots'     => false,
+					'screenshot_url'  => false,
+					'parent'          => false,
+					'versions'        => false,
+					'extended_author' => false,
 				),
 				'slugs'  => $theme_slugs,
 			)
