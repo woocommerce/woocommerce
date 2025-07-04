@@ -1618,7 +1618,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'readonly'    => true,
 							),
 							'global_unique_id' => array(
-								'description' => __( 'Product global unique id.', 'woocommerce' ),
+								'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
