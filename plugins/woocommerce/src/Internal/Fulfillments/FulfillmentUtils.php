@@ -453,4 +453,41 @@ class FulfillmentUtils {
 			),
 		);
 	}
+
+	/**
+	 * Calculate the S10 check digit for UPU tracking numbers.
+	 *
+	 * @param string $tracking_number The tracking number without the check digit.
+	 *
+	 * @return int The calculated check digit.
+	 */
+	public static function check_s10_upu_format( string $tracking_number ): bool {
+		if ( preg_match( '/^[A-Z]{2}\d{9}[A-Z]{2}$/', $tracking_number ) ) {
+			// The tracking number is in the UPU S10 format.
+			$tracking_number = substr( $tracking_number, 2, -2 );
+		} elseif ( ! preg_match( '/^\d{9}$/', $tracking_number ) ) {
+			// Ensure the tracking number is exactly 9 digits.
+			return false;
+		}
+
+		// Define the weights for the S10 check digit calculation.
+		$weights = array( 8, 6, 4, 2, 3, 5, 9, 7 );
+		$sum     = 0;
+
+		// Calculate the weighted sum of the digits.
+		for ( $i = 0; $i < 8; $i++ ) {
+			$sum += $weights[ $i ] * (int) $tracking_number[ $i ];
+		}
+
+		// Calculate the check digit.
+		$check_digit = 11 - ( $sum % 11 );
+		if ( 10 === $check_digit ) {
+			$check_digit = 0;
+		} elseif ( 11 === $check_digit ) {
+			$check_digit = 5;
+		}
+
+		// Validate the check digit against the last digit of the tracking number.
+		return (int) $tracking_number[8] === $check_digit;
+	}
 }
