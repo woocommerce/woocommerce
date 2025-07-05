@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 
 /**
  * FulfillmentsManager class.
@@ -24,6 +25,7 @@ class FulfillmentsManager {
 	public function __construct() {
 		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'wc_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
 
 		$this->init_fulfillment_status_hooks();
 	}
@@ -87,6 +89,8 @@ class FulfillmentsManager {
 			include __DIR__ . '/ShippingProviders.php'
 		);
 
+		ksort( $shipping_providers );
+
 		return $shipping_providers;
 	}
 
@@ -124,5 +128,112 @@ class FulfillmentsManager {
 		}
 
 		$order->save();
+	}
+
+	/**
+	 * Try to parse the tracking number with additional parameters.
+	 *
+	 * @param string $tracking_number The tracking number.
+	 * @param string $shipping_from The country code from which the shipment is sent.
+	 * @param string $shipping_to The country code to which the shipment is sent.
+	 *
+	 * @return array An array containing the provider as key, and the parsing results.
+	 */
+	public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): array {
+		// Validate the tracking number format and length.
+		if ( ! is_string( $tracking_number ) || empty( $tracking_number ) || strlen( $tracking_number ) > 50 ) {
+			$tracking_number = is_string( $tracking_number ) && ! empty( $tracking_number ) ? substr( $tracking_number, 0, 50 ) : '';
+			return array(
+				'tracking_number'   => $tracking_number,
+				'shipping_provider' => '',
+				'tracking_url'      => '',
+			);
+		}
+
+		// Normalize the tracking number to uppercase.
+		$tracking_number = strtoupper( $tracking_number );
+		$tracking_number = preg_replace( '/[^A-Z0-9]/', '', $tracking_number ); // Remove non-alphanumeric characters.
+
+		$shipping_providers = FulfillmentUtils::get_shipping_providers();
+		$results            = array();
+		foreach ( $shipping_providers as $provider ) {
+			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
+				try {
+					/**
+					 * Instantiate the shipping provider class.
+					 *
+					 * @var AbstractShippingProvider $provider_instance
+					 */
+					$provider_instance = wc_get_container()->get( $provider );
+				} catch ( \Throwable $e ) {
+					$logger = wc_get_logger();
+					$logger->error(
+						sprintf(
+							'Error instantiating shipping provider class %s: %s',
+							$provider,
+							$e->getMessage()
+						),
+						array( 'source' => 'woocommerce-fulfillments' )
+					);
+					continue; // Skip if the provider class cannot be instantiated.
+				}
+			} else {
+				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
+			}
+
+			$parsing_result = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			if ( ! is_null( $parsing_result ) ) {
+				$results[ $provider_instance->get_key() ] = $parsing_result;
+			}
+		}
+
+		if ( 1 === count( $results ) ) {
+			$result  = reset( $results );
+			$key     = key( $results );
+			$results = array(
+				'tracking_number'   => $tracking_number,
+				'shipping_provider' => $key,
+				'tracking_url'      => $result['url'] ?? '',
+			);
+		} elseif ( 1 < count( $results ) ) {
+			// If multiple providers could parse the tracking number, find the one with the highest ambiguity score.
+			$possibilities            = $results;
+			$results                  = $this->get_best_parsing_result( $results, $tracking_number );
+			$results['possibilities'] = $possibilities; // Include all possibilities for reference.
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Get the best parsing result from multiple results.
+	 *
+	 * This method finds the provider with the highest ambiguity score from the results.
+	 *
+	 * @param array  $results The results from multiple providers.
+	 * @param string $tracking_number The tracking number being parsed.
+	 *
+	 * @return array The best parsing result.
+	 */
+	private function get_best_parsing_result( array $results, string $tracking_number ): array {
+		$best_result   = null;
+		$best_provider = '';
+		$best_score    = 0;
+		foreach ( $results as $provider_key => $result ) {
+			if ( ! isset( $result['ambiguity_score'] ) || ! is_numeric( $result['ambiguity_score'] ) ) {
+				continue; // Skip if ambiguity score is not set or not numeric.
+			}
+
+			if ( is_null( $best_result ) || $result['ambiguity_score'] > $best_score ) {
+				$best_result   = $result;
+				$best_provider = $provider_key;
+				$best_score    = $result['ambiguity_score'];
+			}
+		}
+		return is_null( $best_result ) ? array() : array(
+			'tracking_number'   => $tracking_number,
+			'shipping_provider' => $best_provider,
+			'tracking_url'      => $best_result['url'],
+		);
 	}
 }
