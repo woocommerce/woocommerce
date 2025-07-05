@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 
 /**
  * Loader Class.
@@ -69,6 +70,7 @@ class Loader {
 		Settings::get_instance();
 		SiteHealth::get_instance();
 		SystemStatusReport::get_instance();
+		HposOrderExportHandler::get_instance();
 
 		wc_get_container()->get( TaxSettingsRecommendations::class );
 		wc_get_container()->get( Reviews::class );
