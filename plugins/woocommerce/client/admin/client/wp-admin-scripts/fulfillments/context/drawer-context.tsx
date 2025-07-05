@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext, useState } from 'react';
+import React, { createContext, useLayoutEffect, useState } from 'react';
 import { useSelect } from '@wordpress/data';
 import { isEqual } from 'lodash';
 
@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
  */
 import { Fulfillment, Order } from '../data/types';
 import { store as FulfillmentsStore } from '../data/store';
+import { hasPendingItems } from '../utils/fulfillment-utils';
 
 interface FulfillmentDrawerContextProps {
 	fulfillments: Fulfillment[];
@@ -68,16 +69,34 @@ export const FulfillmentDrawerProvider = ( {
 			const fulfillmentsData = store.readFulfillments( orderId );
 			if ( ! isEqual( orderData, order ) ) {
 				setOrder( orderData );
+				setIsEditing( false );
 			}
 			if ( ! isEqual( fulfillmentsData, fulfillments ) ) {
 				setFulfillments( fulfillmentsData ?? [] );
-				if ( ! fulfillmentsData || fulfillmentsData.length === 0 ) {
-					setOpenSection( 'order' );
-				}
+				setIsEditing( false );
 			}
 		},
 		[ orderId, fulfillments, order ]
 	);
+
+	useLayoutEffect( () => {
+		const hasPendingItemsInOrder =
+			order && fulfillments && hasPendingItems( order, fulfillments );
+
+		if ( hasPendingItemsInOrder ) {
+			// If there are pending items in the order and multiple fulfillments,
+			// open the order section to allow adding a new fulfillment.
+			setOpenSection( 'order' );
+		} else if ( fulfillments && fulfillments.length === 1 ) {
+			// If all the items are in a single fulfillment,
+			// open that fulfillment section directly.
+			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
+		} else {
+			// If there are no pending items and multiple fulfillments,
+			// collapse all.
+			setOpenSection( '' );
+		}
+	}, [ orderId, fulfillments, order ] );
 
 	if ( orderId === null ) {
 		return null;

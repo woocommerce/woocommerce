@@ -7,7 +7,7 @@ declare global {
 		value: string;
 	}
 
-	interface FulfillmentStatus {
+	interface FulfillmentStatusProps {
 		label: string;
 		is_fulfilled: boolean;
 		background_color: string;
@@ -18,7 +18,8 @@ declare global {
 		wcFulfillmentSettings: {
 			providers: Record< string, ShipmentProvider >;
 			currency_symbols: Record< string, string >;
-			statuses: Record< string, FulfillmentStatus >;
+			fulfillment_statuses: Record< string, FulfillmentStatusProps >;
+			order_fulfillment_statuses: Record< string, FulfillmentStatusProps >;
 		};
 	}
 }

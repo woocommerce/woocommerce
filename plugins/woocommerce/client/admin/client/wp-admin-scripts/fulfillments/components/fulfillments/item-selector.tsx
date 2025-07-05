@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { CheckboxControl } from '@wordpress/components';
-import { __, _n, sprintf } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
+import { _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -145,48 +144,18 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 							__nextHasNoMarginBottom
 						/>
 					) }
-					{ selectedItemsCount > 0 && (
-						<div className="woocommerce-fulfillment-item-bulk-select__label">
-							{ sprintf(
-								/* translators: %s: number of selected items */
-								_n(
-									'%s selected',
-									'%s selected',
-									selectedItemsCount,
-									'woocommerce'
-								),
-								selectedItemsCount
-							) }
-						</div>
-					) }
-					{ editMode && itemsCount > selectedItemsCount && (
-						<Link
-							href="#"
-							className="woocommerce-fulfillment-item-bulk-select__link"
-							onClick={ ( event ) => {
-								event.preventDefault();
-								selectAllItems();
-							} }
-						>
-							{ sprintf(
-								/* translators: %s: number of items in the order */
-								__( 'Select all (%s)', 'woocommerce' ),
-								itemsCount
-							) }
-						</Link>
-					) }
-					{ editMode && selectedItemsCount > 0 && (
-						<Link
-							href="#"
-							className="woocommerce-fulfillment-item-bulk-select__link"
-							onClick={ ( event ) => {
-								event.preventDefault();
-								clearSelectedItems();
-							} }
-						>
-							{ __( 'Clear selection', 'woocommerce' ) }
-						</Link>
-					) }
+					<div className="woocommerce-fulfillment-item-bulk-select__label">
+						{ sprintf(
+							/* translators: %s: number of selected items */
+							_n(
+								'%s selected',
+								'%s selected',
+								selectedItemsCount,
+								'woocommerce'
+							),
+							selectedItemsCount
+						) }
+					</div>
 				</div>
 			</li>
 			{ selectedItems.map( ( item: ItemSelection ) => (

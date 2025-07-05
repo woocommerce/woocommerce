@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 
@@ -24,6 +24,12 @@ const NewFulfillmentForm: React.FC = () => {
 	const { order, fulfillments, openSection, setOpenSection, isEditing } =
 		useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
+
+	// Reset error when order changes
+	useEffect( () => {
+		setError( null );
+	}, [ order?.id ] );
+
 	const remainingItems = useMemo(
 		() =>
 			getItemsNotInAnyFulfillment(
@@ -58,36 +64,48 @@ const NewFulfillmentForm: React.FC = () => {
 					? 'woocommerce-fulfillment-new-fulfillment-form__first'
 					: '',
 			].join( ' ' ) }
-			onClick={ () => setOpenSection( 'order' ) }
-			onKeyUp={ ( event ) => {
-				if ( event.key === 'Enter' ) {
-					setOpenSection( 'order' );
-				}
-			} }
-			role="button"
-			tabIndex={ -1 }
 		>
 			<div
 				className={ [
 					'woocommerce-fulfillment-new-fulfillment-form__header',
 					openSection === 'order' ? 'is-open' : '',
 				].join( ' ' ) }
+				onClick={ () => {
+					if ( fulfillments.length > 0 ) {
+						setOpenSection(
+							openSection === 'order' ? '' : 'order'
+						);
+					}
+				} }
+				onKeyDown={ ( event ) => {
+					if ( fulfillments.length > 0 ) {
+						if ( event.key === 'Enter' || event.key === ' ' ) {
+							setOpenSection(
+								openSection === 'order' ? '' : 'order'
+							);
+						}
+					}
+				} }
+				tabIndex={ 0 }
+				role="button"
 			>
 				<h3>
 					{ fulfillments.length === 0
 						? __( 'Order Items', 'woocommerce' )
 						: __( 'Pending Items', 'woocommerce' ) }
 				</h3>
-				<Button __next40pxDefaultSize size="small">
-					<Icon
-						icon={
-							openSection === 'order'
-								? 'arrow-up-alt2'
-								: 'arrow-down-alt2'
-						}
-						size={ 16 }
-					/>
-				</Button>
+				{ fulfillments.length > 0 && (
+					<Button __next40pxDefaultSize size="small">
+						<Icon
+							icon={
+								openSection === 'order'
+									? 'arrow-up-alt2'
+									: 'arrow-down-alt2'
+							}
+							size={ 16 }
+						/>
+					</Button>
+				) }
 			</div>
 			{ ! isEditing && openSection === 'order' && (
 				<div className="woocommerce-fulfillment-new-fulfillment-form__content">

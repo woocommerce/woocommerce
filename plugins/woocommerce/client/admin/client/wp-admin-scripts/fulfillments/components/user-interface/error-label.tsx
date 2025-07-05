@@ -1,6 +1,22 @@
+/**
+ * External dependencies
+ */
+import { useLayoutEffect, useRef } from 'react';
+
 export default function ErrorLabel( { error }: { error: string } ) {
+	const labelRef = useRef< HTMLDivElement >( null );
+	useLayoutEffect( () => {
+		if ( error ) {
+			// Scroll to the top of the error label when an error occurs.
+			labelRef.current?.scrollIntoView( {
+				behavior: 'smooth',
+				block: 'start',
+				inline: 'nearest',
+			} );
+		}
+	}, [ error ] );
 	return (
-		<div className="woocommerce-fulfillment-error-label">
+		<div className="woocommerce-fulfillment-error-label" ref={ labelRef }>
 			<span className="woocommerce-fulfillment-error-label__icon">
 				<svg
 					width="16"

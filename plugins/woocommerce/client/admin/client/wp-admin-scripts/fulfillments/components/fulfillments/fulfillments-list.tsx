@@ -25,7 +25,7 @@ export default function FulfillmentsList() {
 						onExpand={ () =>
 							setOpenSection( 'fulfillment-' + fulfillment.id )
 						}
-						onCollapse={ () => setOpenSection( 'order' ) }
+						onCollapse={ () => setOpenSection( '' ) }
 						key={ fulfillment.id }
 						order={ order }
 						fulfillment={ fulfillment }

@@ -415,9 +415,10 @@ class FulfillmentsRenderer {
 			 *
 			 * @since 9.9.0
 			 */
-			'providers'        => FulfillmentUtils::get_shipping_providers_object(),
-			'statuses'         => FulfillmentUtils::get_fulfillment_statuses(),
-			'currency_symbols' => get_woocommerce_currency_symbols(),
+			'providers'                  => FulfillmentUtils::get_shipping_providers_object(),
+			'currency_symbols'           => get_woocommerce_currency_symbols(),
+			'fulfillment_statuses'       => FulfillmentUtils::get_fulfillment_statuses(),
+			'order_fulfillment_statuses' => FulfillmentUtils::get_order_fulfillment_statuses(),
 		);
 
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );

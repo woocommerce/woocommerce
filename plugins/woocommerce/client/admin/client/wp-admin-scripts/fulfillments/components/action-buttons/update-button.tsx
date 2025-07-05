@@ -11,7 +11,10 @@ import { useState } from 'react';
  */
 import { useFulfillmentContext } from '../../context/fulfillment-context';
 import { store as FulfillmentStore } from '../../data/store';
-import { getFulfillmentItems } from '../../utils/fulfillment-utils';
+import {
+	getFulfillmentItems,
+	refreshOrderFulfillmentStatus,
+} from '../../utils/fulfillment-utils';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 
 export default function UpdateButton( {
@@ -46,6 +49,7 @@ export default function UpdateButton( {
 		if ( error ) {
 			setError( error );
 		} else {
+			refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
 		setIsExecuting( false );

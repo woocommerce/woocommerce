@@ -10,8 +10,9 @@
 	max-width: 501px;
 	pointer-events: none;
 	overflow: hidden;
+	overscroll-behavior-y: none;
 
-	.drawer-panel {
+	&__panel {
 		position: absolute;
 		right: 0;
 		top: 0;
@@ -33,65 +34,68 @@
 			transition: transform 0.3s ease-in-out;
 			transform: translateX(0%);
 		}
+	}
 
-		.drawer-header {
-			padding: 16px 20px;
+	&__header {
+		padding: 16px 20px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 4px;
+		inset: 0;
+		bottom: auto;
+		background-color: #fff;
+		border-bottom: 1px solid #ddd;
+		z-index: 1;
+
+		&__title {
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
+			align-items: center;
 			justify-content: space-between;
-			gap: 4px;
-			position: sticky;
-			top: 0;
-			background-color: #fff;
-			border-bottom: 1px solid #ddd;
-			z-index: 1;
+			flex-grow: 1;
 
-			&.drawer-header__disabled {
-				opacity: 0.3;
-				pointer-events: none !important;
-			}
-
-			.drawer-header__title {
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				justify-content: space-between;
-				flex-grow: 1;
-
-				h2 {
-					letter-spacing: 0%;
-					font-size: 15px;
-					line-height: 20px;
-					font-weight: 500;
-					color: #070707;
-					margin: 0;
-				}
-
-				.drawer-header__close-button {
-					background: transparent;
-					border: 0 solid transparent;
-					cursor: pointer;
-					font-size: 20px;
-					line-height: 16px;
-					width: 16px;
-					height: 16px;
-					padding: 0;
-					font-weight: 200;
-				}
-			}
-
-			p {
-				font-size: 11px;
-				line-height: 16px;
-				font-weight: 400;
-				color: var(--wc-admin-subtext, #767676);
+			h2 {
+				letter-spacing: 0%;
+				font-size: 15px;
+				line-height: 20px;
+				font-weight: 500;
+				color: #070707;
 				margin: 0;
 			}
 		}
+
+		&__close-button {
+			background: transparent;
+			border: 0 solid transparent;
+			cursor: pointer;
+			font-size: 20px;
+			line-height: 16px;
+			width: 16px;
+			height: 16px;
+			padding: 0;
+			font-weight: 200;
+		}
+
+		p {
+			font-size: 11px;
+			line-height: 16px;
+			font-weight: 400;
+			color: var(--wc-admin-subtext, #767676);
+			margin: 0;
+		}
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		height: fit-content;
+		overflow-y: auto;
+		overscroll-behavior: none;
 	}
 }
 
-.woocommerce-fulfillment-drawer-backdrop {
+.woocommerce-fulfillment-drawer__backdrop {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -108,10 +112,18 @@
 		width: 100%;
 		min-width: 100%;
 		max-width: 100%;
-		.drawer-panel {
+		&__panel {
 			width: 100%;
 			min-width: 100%;
 			max-width: 100%;
 		}
+		&__body {
+			height: calc(100% - 73px);
+		}
+	}
+
+	// Prevent scrolling of the body when the drawer is open.
+	body:has(.woocommerce-fulfillment-drawer__body) {
+		overflow: hidden;
 	}
 }
