@@ -52,6 +52,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public static function setupBeforeClass(): void {
 		parent::setupBeforeClass();
 
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
 
 		for ( $order_number = 1; $order_number <= 10; $order_number++ ) {
@@ -82,6 +85,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Delete the created user.
 		wp_delete_user( self::$created_user_id );
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
 
 		parent::tearDownAfterClass();
 	}

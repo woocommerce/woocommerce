@@ -15,6 +15,23 @@ use WC_Order;
 class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Set up the test environment.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Test hooks.
 	 */
 	public function test_hooks() {
@@ -85,6 +102,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the initial shipping providers are loaded correctly.
 	 */
 	public function test_get_initial_shipping_providers() {
+		// Ensure the FulfillmentsManager is instantiated to load shipping providers filter.
+		new FulfillmentsManager();
+
 		/**
 		 * Filter to get initial shipping providers
 		 *

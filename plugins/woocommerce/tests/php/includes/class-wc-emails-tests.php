@@ -67,6 +67,10 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	 * Test that fulfillment meta function outputs linked meta.
 	 */
 	public function test_fulfillment_meta() {
+		// Ensure the FulfillmentsController is registered, which is necessary for the translation of meta keys.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+
 		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
 			array(

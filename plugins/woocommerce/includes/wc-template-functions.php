@@ -2915,11 +2915,18 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
-		$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+		$template = 'order/order-details.php';
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+			if ( ! empty( $fulfillments ) ) {
+				$template = 'order/order-details-fulfillments.php';
+			}
+		}
 
 		wc_get_template(
-			empty( $fulfillments ) ? 'order/order-details.php' : 'order/order-details-fulfillments.php',
+			$template,
 			array(
 				'order_id'       => $order_id,
 				/**
