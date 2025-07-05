@@ -3,6 +3,12 @@
  */
 import '../global.d.ts';
 
+// Mock scrollIntoView method for testing
+Object.defineProperty( HTMLElement.prototype, 'scrollIntoView', {
+	value: jest.fn(),
+	writable: true,
+} );
+
 // This needs to be defined before importing the component
 global.window.wcFulfillmentSettings = {
 	providers: {
