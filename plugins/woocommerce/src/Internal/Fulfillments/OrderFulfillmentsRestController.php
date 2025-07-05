@@ -137,7 +137,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Register the route for tracking number lookup.
 		register_rest_route(
 			$this->route_namespace,
-			'/fulfillments/lookup',
+			$this->rest_base . '/lookup',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
@@ -566,19 +566,47 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The tracking number details, or an error if the request fails.
 	 */
 	public function get_tracking_number_details( WP_REST_Request $request ) {
-		$tracking_number = $request->get_param( 'tracking_number' );
+		$order_id        = (int) $request->get_param( 'order_id' );
+		$tracking_number = sanitize_text_field( $request->get_param( 'tracking_number' ) );
 
-		// Prepare a stubbed response for the tracking number details for now.
-		return new WP_REST_Response(
-			array(
-				'tracking_number_details' => array(
-					'tracking_number'   => $tracking_number,
-					'shipping_provider' => 'UPS',
-					'tracking_url'      => "https://www.ups.com/track?tracknum={$tracking_number}",
-				),
-			),
-			WP_Http::OK
+		if ( empty( $tracking_number ) ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_tracking_number_missing',
+				__( 'Tracking number is required.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		if ( ! $order_id ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_order_id_missing',
+				__( 'Order ID is required.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_order_invalid_id',
+				__( 'Invalid order ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::NOT_FOUND )
+			);
+		}
+
+		/**
+		 * Parse the tracking number with additional parameters.
+		 *
+		 * @since 9.9.0
+		 */
+		$tracking_number_parse_result = apply_filters(
+			'wc_fulfillment_parse_tracking_number',
+			$tracking_number,
+			WC()->countries->get_base_country(),
+			$order->get_shipping_country(),
 		);
+
+		return new WP_REST_Response( array( 'tracking_number_details' => $tracking_number_parse_result ), WP_Http::OK );
 	}
 
 	/**
@@ -923,6 +951,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 */
 	private function get_args_for_get_tracking_number_details(): array {
 		return array(
+			'order_id'        => array(
+				'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
+				'type'        => 'integer',
+				'required'    => true,
+				'context'     => array( 'view', 'edit' ),
+			),
 			'tracking_number' => array(
 				'description' => __( 'The tracking number to look up.', 'woocommerce' ),
 				'type'        => 'string',

@@ -5,12 +5,31 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
+use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\ShippingProviderMock;
 use WC_Order;
 
 /**
  * Tests for Fulfillment object.
  */
 class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Set up the test environment.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		parent::tearDownAfterClass();
+	}
 
 	/**
 	 * Test hooks.
@@ -83,6 +102,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the initial shipping providers are loaded correctly.
 	 */
 	public function test_get_initial_shipping_providers() {
+		// Ensure the FulfillmentsManager is instantiated to load shipping providers filter.
+		new FulfillmentsManager();
+
 		/**
 		 * Filter to get initial shipping providers
 		 *
@@ -176,5 +198,99 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( did_action( 'wc_fulfillment_after_delete' ) > 0 );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
+	}
+
+	/**
+	 * Test that the tracking number can be parsed correctly.
+	 */
+	public function test_try_parse_tracking_number_nominal() {
+		$manager         = new FulfillmentsManager();
+		$tracking_number = '1234567890';
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container     = wc_get_container();
+		$mock_provider = $this->getMockBuilder( ShippingProviderMock::class )->onlyMethods( array( 'try_parse_tracking_number' ) )->getMock();
+		$container->replace( ShippingProviderMock::class, $mock_provider );
+		add_filter(
+			'wc_fulfillment_shipping_providers',
+			function ( $providers ) {
+				$providers = array(
+					'custom_provider' => ShippingProviderMock::class,
+				);
+				return $providers;
+			}
+		);
+
+		$mock_provider->expects( $this->once() )
+			->method( 'try_parse_tracking_number' )
+			->willReturn(
+				array(
+					'url' => 'https://example.com/track?number=' . $tracking_number,
+				)
+			);
+
+		// Test with a valid tracking number.
+		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$this->assertEquals( $tracking_number, $parsed_number['tracking_number'] );
+		$this->assertEquals( 'mock_shipping_provider', $parsed_number['shipping_provider'] );
+		$this->assertEquals( 'https://example.com/track?number=' . $tracking_number, $parsed_number['tracking_url'] );
+	}
+
+	/**
+	 * Test tracking number parsing without any matches.
+	 */
+	public function test_try_parse_tracking_number_no_match() {
+		$manager         = new FulfillmentsManager();
+		$tracking_number = '1234567890';
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container     = wc_get_container();
+		$mock_provider = $this->getMockBuilder( ShippingProviderMock::class )->onlyMethods( array( 'try_parse_tracking_number' ) )->getMock();
+		$container->replace( ShippingProviderMock::class, $mock_provider );
+		add_filter(
+			'wc_fulfillment_shipping_providers',
+			function ( $providers ) {
+				$providers = array(
+					'custom_provider' => ShippingProviderMock::class,
+				);
+				return $providers;
+			}
+		);
+
+		$mock_provider->expects( $this->once() )
+			->method( 'try_parse_tracking_number' )
+			->willReturn( null );
+
+		// Test with a valid tracking number.
+		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * Test tracking number parsing without any shipping providers.
+	 */
+	public function test_try_parse_tracking_number_no_providers() {
+		$manager         = new FulfillmentsManager();
+		$tracking_number = '1234567890';
+
+		add_filter(
+			'wc_fulfillment_shipping_providers',
+			function ( $providers ) {
+				$providers = array();
+				return $providers;
+			}
+		);
+
+		// Test with a valid tracking number.
+		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$this->assertEquals( array(), $parsed_number );
 	}
 }

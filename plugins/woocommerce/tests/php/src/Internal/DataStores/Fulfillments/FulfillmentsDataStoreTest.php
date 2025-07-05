@@ -26,8 +26,17 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
 		self::$order_fulfillment_data_store = new FulfillmentsDataStore();
+	}
+
+	/**
+	 * Runs after all the tests of the class.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		parent::tearDownAfterClass();
 	}
 
 	/**

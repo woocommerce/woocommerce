@@ -27,6 +27,23 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	private WC_Order $order;
 
 	/**
+	 * Runs before all the tests of the class.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+	}
+
+	/**
+	 * Runs after all the tests of the class.
+	 */
+	public static function tearDownAfterClass(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Setup test case.
 	 */
 	public function setUp(): void {

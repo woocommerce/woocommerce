@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 use WC_Order;
 
 /**
@@ -330,6 +331,70 @@ class FulfillmentUtils {
 	}
 
 	/**
+	 * Get the shipping providers.
+	 *
+	 * This method retrieves the shipping providers registered in the WooCommerce Fulfillments system.
+	 * It can be filtered using the `wc_fulfillment_shipping_providers` filter.
+	 *
+	 * @return array An associative array of shipping providers with their details.
+	 */
+	public static function get_shipping_providers(): array {
+		/**
+		 * This filter allows plugins to modify the list of shipping providers.
+		 * It can be used to add, remove, or change the shipping providers available in the
+		 * WooCommerce Fulfillments system.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param array $shipping_providers The default list of shipping providers.
+		 */
+		return apply_filters(
+			'wc_fulfillment_shipping_providers',
+			array()
+		);
+	}
+
+	/**
+	 * Get the shipping providers as an array of JS objects, for use in the fulfillment UI.
+	 *
+	 * @return array An associative array of shipping providers with their details.
+	 */
+	public static function get_shipping_providers_object(): array {
+		$shipping_providers = self::get_shipping_providers();
+		if ( ! is_array( $shipping_providers ) ) {
+			return array();
+		}
+		$shipping_providers_object = array();
+		foreach ( $shipping_providers as $shipping_provider ) {
+			if ( is_string( $shipping_provider )
+			&& class_exists( $shipping_provider )
+			&& is_subclass_of( $shipping_provider, AbstractShippingProvider::class )
+			) {
+				try {
+					// Instantiate the shipping provider class.
+					$shipping_provider_instance = wc_get_container()->get( $shipping_provider );
+				} catch ( \Throwable $e ) {
+					continue; // Skip if instantiation fails.
+				}
+				$shipping_providers_object[ $shipping_provider_instance->get_key() ] = array(
+					'label' => $shipping_provider_instance->get_name(),
+					'icon'  => $shipping_provider_instance->get_icon(),
+					'value' => $shipping_provider_instance->get_key(),
+				);
+			}
+			if ( is_object( $shipping_provider ) && $shipping_provider instanceof AbstractShippingProvider ) {
+				$shipping_providers_object[ $shipping_provider->get_key() ] = array(
+					'label' => $shipping_provider->get_name(),
+					'icon'  => $shipping_provider->get_icon(),
+					'value' => $shipping_provider->get_key(),
+				);
+			}
+		}
+
+		return $shipping_providers_object;
+	}
+
+	/**
 	 * Get the default order fulfillment statuses.
 	 *
 	 * This method provides the default order fulfillment statuses that can be used
@@ -387,5 +452,42 @@ class FulfillmentUtils {
 				'text_color'       => '#CC1818',
 			),
 		);
+	}
+
+	/**
+	 * Calculate the S10 check digit for UPU tracking numbers.
+	 *
+	 * @param string $tracking_number The tracking number without the check digit.
+	 *
+	 * @return int The calculated check digit.
+	 */
+	public static function check_s10_upu_format( string $tracking_number ): bool {
+		if ( preg_match( '/^[A-Z]{2}\d{9}[A-Z]{2}$/', $tracking_number ) ) {
+			// The tracking number is in the UPU S10 format.
+			$tracking_number = substr( $tracking_number, 2, -2 );
+		} elseif ( ! preg_match( '/^\d{9}$/', $tracking_number ) ) {
+			// Ensure the tracking number is exactly 9 digits.
+			return false;
+		}
+
+		// Define the weights for the S10 check digit calculation.
+		$weights = array( 8, 6, 4, 2, 3, 5, 9, 7 );
+		$sum     = 0;
+
+		// Calculate the weighted sum of the digits.
+		for ( $i = 0; $i < 8; $i++ ) {
+			$sum += $weights[ $i ] * (int) $tracking_number[ $i ];
+		}
+
+		// Calculate the check digit.
+		$check_digit = 11 - ( $sum % 11 );
+		if ( 10 === $check_digit ) {
+			$check_digit = 0;
+		} elseif ( 11 === $check_digit ) {
+			$check_digit = 5;
+		}
+
+		// Validate the check digit against the last digit of the tracking number.
+		return (int) $tracking_number[8] === $check_digit;
 	}
 }

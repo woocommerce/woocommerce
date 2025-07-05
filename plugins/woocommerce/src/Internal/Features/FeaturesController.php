@@ -461,6 +461,16 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => true,
 			),
+			'fulfillments'           => array(
+				'name'               => __( 'Order Fulfillments', 'woocommerce' ),
+				'description'        => __(
+					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
+					'woocommerce'
+				),
+				'enabled_by_default' => false,
+				'disable_ui'         => true,
+				'is_experimental'    => false,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
