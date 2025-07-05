@@ -169,8 +169,8 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	it( 'switches to edit mode when tracking number is clicked', () => {
 		mockContext.trackingNumber = '1Z12345E0291980793';
 		render( <ShipmentTrackingNumberForm /> );
-		const trackingNumberSpan = screen.getByText( '1Z12345E0291980793' );
-		fireEvent.click( trackingNumberSpan );
+		const trackingNumberButton = screen.getByRole( 'button', { name: '1Z12345E0291980793' } );
+		fireEvent.click( trackingNumberButton );
 
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
