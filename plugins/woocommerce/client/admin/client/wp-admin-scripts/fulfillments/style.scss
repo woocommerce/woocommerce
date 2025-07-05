@@ -1,14 +1,10 @@
-/**
- * Fulfillment Drawer styles
- */
-
 .woocommerce-fulfillment-new-fulfillment-form {
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid #e0e0e0;
 
 	&.woocommerce-fulfillment-new-fulfillment-form__disabled {
-		opacity: 30%;
+		opacity: 0.3;
 		pointer-events: none !important;
 	}
 	&.woocommerce-fulfillment-new-fulfillment-form__first {
@@ -87,6 +83,7 @@
 		line-height: 16px;
 	}
 }
+
 .woocommerce-fulfillment-item-list {
 	display: flex;
 	flex-direction: column;
@@ -175,6 +172,11 @@
 			font-size: 13px;
 			line-height: 20px;
 		}
+
+		.woocommerce-fulfillment-item-price {
+			min-width: 52px;
+			text-align: right;
+		}
 	}
 	.woocommerce-fulfillment-item-expansion {
 		flex-direction: column;
@@ -236,7 +238,7 @@
 		border-bottom: 1px solid #e0e0e0;
 
 		&.woocommerce-fulfillment-stored-fulfillment-list-item__disabled {
-			opacity: 30%;
+			opacity: 0.3;
 			pointer-events: none !important;
 		}
 
@@ -320,6 +322,7 @@
 	flex-direction: row;
 	align-items: flex-start;
 	gap: 4px;
+	scroll-margin-top: 16px;
 	& &__icon {
 		width: 16px;
 		height: 16px;
@@ -377,9 +380,6 @@
 	}
 }
 
-/**
- * Order list styles
- */
 a.fulfillments-trigger {
 	float: right;
 	height: 16px;

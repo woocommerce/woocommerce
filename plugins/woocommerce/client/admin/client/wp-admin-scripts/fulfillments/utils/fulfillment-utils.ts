@@ -1,8 +1,15 @@
 /**
+ * External dependencies
+ */
+import { dispatch, resolveSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import ShipmentProviders from '../data/shipment-providers';
-import { Fulfillment, FulfillmentItem } from '../data/types';
+import { Fulfillment, FulfillmentItem, LineItem, Order } from '../data/types';
+import { store as FulfillmentStore } from '../data/store';
 
 export function getFulfillmentMeta< T >(
 	fulfillment: Fulfillment | null,
@@ -26,6 +33,67 @@ export function getFulfillmentItems(
 		'_items',
 		[]
 	) as Array< FulfillmentItem >;
+}
+
+export function hasPendingItems(
+	order: Order,
+	fulfillments: Fulfillment[]
+): boolean {
+	return order.line_items.some( ( item: LineItem ) => {
+		const totalFulfilledQty = fulfillments.reduce(
+			( total, fulfillment ) => {
+				const fulfillmentItems = getFulfillmentItems( fulfillment );
+				const fulfillmentItemInOrder = fulfillmentItems.find(
+					( fItem: FulfillmentItem ) => fItem.item_id === item.id
+				);
+				return total + ( fulfillmentItemInOrder?.qty || 0 );
+			},
+			0
+		);
+
+		return totalFulfilledQty < item.quantity;
+	} );
+}
+
+export async function refreshOrderFulfillmentStatus( orderId: number ) {
+	dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
+		orderId,
+	] );
+	const order: Order | null = await resolveSelect(
+		FulfillmentStore
+	).getOrder( orderId );
+	if ( order ) {
+		const order_status =
+			( order.meta_data.find(
+				( meta ) => meta.key === '_fulfillment_status'
+			)?.value as string ) ?? 'no_fulfillments';
+		const marker = document.querySelector(
+			`.order-${ orderId } td.fulfillment_status mark`
+		);
+		if ( marker ) {
+			const status = window.wcFulfillmentSettings
+				.order_fulfillment_statuses[ order_status ] || {
+				label: __( 'Unknown', 'woocommerce' ),
+				background_color: '#f8f9fa',
+				text_color: '#6c757d',
+			};
+			// Set content of the marker to the label of the status.
+			const textContainer = marker.querySelector( 'span' );
+			if ( textContainer ) {
+				textContainer.textContent = status.label;
+			} else {
+				// If the span is not found, create it and append it to the marker.
+				const span = document.createElement( 'span' );
+				span.textContent = status.label;
+				marker.replaceChildren( span );
+			}
+			// Set the style attribute of the marker.
+			marker.setAttribute(
+				'style',
+				`background-color: ${ status.background_color }; color: ${ status.text_color };`
+			);
+		}
+	}
 }
 
 export function getFulfillmentLockState( fulfillment: Fulfillment ): {

@@ -21,8 +21,8 @@ export default function FulfillmentsDrawerHeader( {
 
 	return (
 		order && (
-			<div className={ 'drawer-header' }>
-				<div className="drawer-header__title">
+			<div className={ 'woocommerce-fulfillment-drawer__header' }>
+				<div className="woocommerce-fulfillment-drawer__header__title">
 					<h2>
 						#{ order.id }{ ' ' }
 						{ order.billing.first_name +
@@ -30,7 +30,7 @@ export default function FulfillmentsDrawerHeader( {
 							order.billing.last_name }
 					</h2>
 					<button
-						className="drawer-header__close-button"
+						className="woocommerce-fulfillment-drawer__header__close-button"
 						onClick={ () => {
 							setIsEditing( false );
 							setOpenSection( 'order' );

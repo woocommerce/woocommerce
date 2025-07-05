@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { createRoot } from '@wordpress/element';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -15,20 +15,23 @@ function FulfillmentsController() {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ orderId, setOrderId ] = useState< number | null >( null );
 
-	const deselectOrderRow = () => {
+	const deselectOrderRow = useCallback( () => {
 		document.querySelectorAll( '.type-shop_order' ).forEach( ( row ) => {
 			row.classList.remove( 'is-selected' );
 		} );
-	};
+	}, [] );
 
-	const selectOrderRow = ( button: HTMLButtonElement ) => {
-		const targetRow = button.closest( 'tr' );
-		deselectOrderRow();
-		targetRow?.classList.add( 'is-selected' );
-	};
+	const selectOrderRow = useCallback(
+		( button: HTMLButtonElement ) => {
+			const targetRow = button.closest( 'tr' );
+			deselectOrderRow();
+			targetRow?.classList.add( 'is-selected' );
+		},
+		[ deselectOrderRow ]
+	);
 
 	useLayoutEffect( () => {
-		document.body.addEventListener( 'click', ( e ) => {
+		const handleClick = ( e: Event ) => {
 			const target = e.target as HTMLElement;
 			if ( target.closest( '.fulfillments-trigger' ) ) {
 				const button = target.closest(
@@ -43,8 +46,14 @@ function FulfillmentsController() {
 					setIsOpen( true );
 				}
 			}
-		} );
-	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps
+		};
+
+		document.body.addEventListener( 'click', handleClick );
+
+		return () => {
+			document.body.removeEventListener( 'click', handleClick );
+		};
+	}, [ selectOrderRow ] );
 
 	const query = getQuery();
 	const isOrderDetailsPage = query.hasOwnProperty( 'id' );

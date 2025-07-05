@@ -13,6 +13,7 @@ import { useFulfillmentContext } from '../../context/fulfillment-context';
 import { store as FulfillmentStore } from '../../data/store';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import CustomerNotificationBox from '../customer-notification-form';
+import { refreshOrderFulfillmentStatus } from '../../utils/fulfillment-utils';
 
 export default function RemoveButton( {
 	setError,
@@ -39,6 +40,7 @@ export default function RemoveButton( {
 		if ( error ) {
 			setError( error );
 		} else {
+			refreshOrderFulfillmentStatus( order.id );
 			setOpenSection( 'order' );
 			setIsEditing( false );
 		}

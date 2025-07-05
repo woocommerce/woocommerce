@@ -16,7 +16,7 @@ import ErrorLabel from '../user-interface/error-label';
 import { EditIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
 import ShipmentProviders from '../../data/shipment-providers';
-import { useFulfillmentDrawerContext } from '../../context/drawer-context';
+import { useFulfillmentContext } from '../../context/fulfillment-context';
 
 interface TrackingNumberParsingResponse {
 	tracking_number_details: {
@@ -45,7 +45,7 @@ export default function ShipmentTrackingNumberForm() {
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
-	const { order } = useFulfillmentDrawerContext();
+	const { order } = useFulfillmentContext();
 	const {
 		trackingNumber,
 		setTrackingNumber,
@@ -55,6 +55,11 @@ export default function ShipmentTrackingNumberForm() {
 		shipmentProvider,
 		setShipmentProvider,
 	} = useShipmentFormContext();
+
+	// Reset error when order changes
+	useEffect( () => {
+		setError( null );
+	}, [ order?.id ] );
 
 	const handleTrackingNumberLookup = async () => {
 		setError( null );

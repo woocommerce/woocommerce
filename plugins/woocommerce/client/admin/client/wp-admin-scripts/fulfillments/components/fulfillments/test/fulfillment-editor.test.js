@@ -62,7 +62,7 @@ describe( 'FulfillmentEditor', () => {
 		onCollapse: jest.fn(),
 		fulfillment: {
 			id: 1,
-			status: 'pending',
+			status: 'unfulfilled',
 			is_fulfilled: false,
 			meta_data: [
 				{
@@ -85,6 +85,27 @@ describe( 'FulfillmentEditor', () => {
 			{
 				id: 1,
 				status: 'pending',
+				is_fulfilled: false,
+				meta_data: [
+					{
+						id: 1,
+						key: '_items',
+						value: [
+							{
+								item_id: 1,
+								qty: 2,
+							},
+							{
+								item_id: 2,
+								qty: 1,
+							},
+						],
+					},
+				],
+			},
+			{
+				id: 2,
+				status: 'unfulfilled',
 				is_fulfilled: false,
 				meta_data: [
 					{

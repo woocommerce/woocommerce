@@ -96,7 +96,7 @@ export default function FulfillmentLineItem( {
 				{ editMode && quantity > 1 && (
 					<Icon
 						icon={
-							itemExpanded ? 'arrow-up-alt2' : 'arrow-right-alt2'
+							itemExpanded ? 'arrow-up-alt2' : 'arrow-down-alt2'
 						}
 						onClick={ () => {
 							setItemExpanded( ! itemExpanded );
