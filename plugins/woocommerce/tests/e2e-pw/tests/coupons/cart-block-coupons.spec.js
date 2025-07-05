@@ -207,6 +207,15 @@ test.describe(
 						.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
 						.click();
 					await expect(
+						page
+							.locator(
+								'.wc-block-components-notice-banner__content'
+							)
+							.getByText(
+								`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
+							)
+					).toBeVisible();
+					await expect(
 						page.locator(
 							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 						)

@@ -183,7 +183,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 				},
 			},
 		},
@@ -195,7 +195,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 				},
 			},
 		},
@@ -226,7 +226,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 				},
 			},
 		},
@@ -238,7 +238,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 				},
 			},
 		},
@@ -269,7 +269,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 				},
 			},
 		},
@@ -281,7 +281,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 				},
 			},
 		},

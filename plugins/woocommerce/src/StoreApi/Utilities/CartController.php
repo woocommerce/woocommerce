@@ -50,7 +50,12 @@ class CartController {
 			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
 
 			if ( $normalized_qty !== $cart_item['quantity'] ) {
-				$this->set_cart_item_quantity( $cart_item['key'], $normalized_qty );
+				try {
+					$this->set_cart_item_quantity( $cart_item['key'], $normalized_qty );
+				} catch ( RouteException $e ) {
+					// Ignore errors and continue.
+					continue;
+				}
 			}
 		}
 	}
@@ -121,10 +126,12 @@ class CartController {
 
 		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
+		$request_quantity = wc_stock_amount( $request['quantity'] );
 
 		if ( $existing_cart_id ) {
 			$cart_item           = $cart->cart_contents[ $existing_cart_id ];
-			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $request['quantity'] + $cart_item['quantity'], $cart_item );
+			$updated_quantity    = $request_quantity + $cart_item['quantity'];
+			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $updated_quantity, $cart_item );
 
 			if ( is_wp_error( $quantity_validation ) ) {
 				throw new RouteException(
@@ -134,14 +141,13 @@ class CartController {
 				);
 			}
 
-			$cart->set_quantity( $existing_cart_id, $request['quantity'] + $cart->cart_contents[ $existing_cart_id ]['quantity'], true );
+			$cart->set_quantity( $existing_cart_id, $updated_quantity, true );
 
 			return $existing_cart_id;
 		}
 
 		// Normalize quantity.
 		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
-		$request_quantity   = (int) $request['quantity'];
 
 		if ( $add_to_cart_limits['maximum'] ) {
 			$request_quantity = min( $request_quantity, $add_to_cart_limits['maximum'] );
@@ -226,8 +232,8 @@ class CartController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
-	 * @param string  $item_id Cart item id.
-	 * @param integer $quantity Cart quantity.
+	 * @param string    $item_id Cart item id.
+	 * @param int|float $quantity Cart quantity.
 	 */
 	public function set_cart_item_quantity( $item_id, $quantity = 1 ) {
 		$cart_item = $this->get_cart_item( $item_id );
@@ -290,10 +296,11 @@ class CartController {
 		}
 
 		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+			$request_quantity = wc_stock_amount( $request['quantity'] );
+			$qty_remaining    = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart      = $this->get_product_quantity_in_cart( $product );
 
-			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
+			if ( $qty_remaining < $qty_in_cart + $request_quantity ) {
 				throw new RouteException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					sprintf(
