@@ -34,7 +34,7 @@ class HposOrderExportHandler {
 	 */
 	public function __construct() {
 		add_action( 'export_wp', array( $this, 'maybe_buffer_hpos_orders' ), 10, 1 );
-		add_action( 'rss2_item', array( $this, 'output_buffered_orders_after_posts' ), 999 );
+		add_action( 'rss2_head', array( $this, 'output_buffered_orders_after_posts' ), 999 );
 	}
 
 	/**
