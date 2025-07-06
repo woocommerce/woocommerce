@@ -1,5 +1,5 @@
 <?php
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
@@ -23,18 +23,26 @@ class HposOrderExportHandler {
 	protected static $instance = null;
 
 	/**
-	 * Constructor. Registers the export hook.
+	 * Buffered XML output for HPOS orders.
+	 *
+	 * @var string
+	 */
+	protected $buffered_items = '';
+
+	/**
+	 * Constructor. Registers the export hooks.
 	 */
 	public function __construct() {
-		add_action( 'export_wp', array( $this, 'maybe_output_hpos_orders' ), 10, 1 );
+		add_action( 'export_wp', array( $this, 'maybe_buffer_hpos_orders' ), 10, 1 );
+		add_action( 'rss2_head', array( $this, 'output_buffered_orders_after_posts' ), 999 );
 	}
 
 	/**
 	 * Get class instance.
 	 *
-	 * @return object Instance.
+	 * @return HposOrderExportHandler
 	 */
-	public static function get_instance() {
+	public static function get_instance(): HposOrderExportHandler {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
@@ -42,11 +50,26 @@ class HposOrderExportHandler {
 	}
 
 	/**
-	 * Hook into the WordPress export system and output HPOS orders if applicable.
+	 * Wraps given string in XML CDATA tag.
+	 *
+	 * @param string $str String to wrap in XML CDATA tag.
+	 * @return string
+	 */
+	protected function wxr_cdata( string $str ): string {
+		if ( ! seems_utf8( $str ) ) {
+			$str = mb_convert_encoding( $str, 'UTF-8', 'auto' );
+		}
+
+		return '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
+	}
+
+
+	/**
+	 * Capture HPOS orders as XML output to be injected later.
 	 *
 	 * @param array $args Export arguments.
 	 */
-	public function maybe_output_hpos_orders( $args ) {
+	public function maybe_buffer_hpos_orders( array $args ): void {
 		if ( ! isset( $args['content'] ) || 'shop_order' !== $args['content'] ) {
 			return;
 		}
@@ -58,15 +81,16 @@ class HposOrderExportHandler {
 			return;
 		}
 
+		ob_start();
+
 		$orders = wc_get_orders(
 			array(
-				'limit'        => -1,
-				'return'       => 'ids',
-				'orderby'      => 'date_created',
-				'order'        => 'ASC',
-				'type'         => 'shop_order',
-				'paginate'     => false,
-				'date_created' => '>' . gmdate( 'Y-m-d H:i:s', 0 ),
+				'limit'    => -1,
+				'return'   => 'ids',
+				'orderby'  => 'date_created',
+				'order'    => 'ASC',
+				'type'     => 'shop_order',
+				'paginate' => false,
 			)
 		);
 
@@ -76,13 +100,25 @@ class HposOrderExportHandler {
 				$this->export_order_to_xml( $order );
 			}
 		}
+
+		$this->buffered_items = ob_get_clean();
 	}
 
 	/**
-	 * Outputs orders in XML format.
+	 * Outputs buffered XML after WordPress native posts export.
+	 */
+	public function output_buffered_orders_after_posts(): void {
+		if ( ! empty( $this->buffered_items ) ) {
+			echo wp_kses_post( $this->buffered_items );
+			$this->buffered_items = '';
+		}
+	}
+
+	/**
+	 * Outputs a single order in WXR-compatible XML format.
 	 *
 	 * @param \WC_Order $order The WooCommerce order object.
 	 */
-	protected function export_order_to_xml( $order ) {
+	protected function export_order_to_xml( $order ): void {
 	}
 }
