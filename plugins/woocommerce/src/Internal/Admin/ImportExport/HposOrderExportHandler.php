@@ -34,7 +34,7 @@ class HposOrderExportHandler {
 	 */
 	public function __construct() {
 		add_action( 'export_wp', array( $this, 'maybe_buffer_hpos_orders' ), 10, 1 );
-		add_action( 'rss2_head', array( $this, 'output_buffered_orders_after_posts' ), 999 );
+		add_action( 'rss2_item', array( $this, 'output_buffered_orders_after_posts' ), 999 );
 	}
 
 	/**
@@ -109,7 +109,8 @@ class HposOrderExportHandler {
 	 */
 	public function output_buffered_orders_after_posts(): void {
 		if ( ! empty( $this->buffered_items ) ) {
-			echo wp_kses_post( $this->buffered_items );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $this->buffered_items;
 			$this->buffered_items = '';
 		}
 	}
@@ -119,6 +120,17 @@ class HposOrderExportHandler {
 	 *
 	 * @param \WC_Order $order The WooCommerce order object.
 	 */
-	protected function export_order_to_xml( $order ): void {
+	protected function export_order_to_xml( $order ) {
+		$order_id       = $order->get_id();
+		$date_created   = $order->get_date_created();
+		$date_modified  = $order->get_date_modified();
+		$post_author_id = $order->get_customer_id();
+		?>
+
+		<item>
+			
+		</item>
+
+		<?php
 	}
 }
