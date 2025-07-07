@@ -32,7 +32,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 		$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
@@ -176,7 +176,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			/**
-			 * Filters the change the quantity to add to cart.
+			 * Filter the default quantity to add to cart.
 			 *
 			 * @since 10.9.0
 			 * @param number $default_quantity The default quantity.
@@ -214,6 +214,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'variation_id' => $variation['variation_id'],
 							'attributes'   => $variation['attributes'],
 							'price_html'   => $variation['price_html'],
+							'is_in_stock'  => $variation['is_in_stock'],
 						);
 					},
 					$available_variations
@@ -269,11 +270,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( ! $is_disabled_compatibility_layer && ! Utils::is_not_purchasable_product( $product ) ) {
 				ob_start();
+				/**
+				 * Hook: woocommerce_before_add_to_cart_form.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_before_add_to_cart_form' );
+
 				if ( ProductType::SIMPLE === $product_type ) {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 					/**
@@ -345,7 +353,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					/**
 					 * Hook: woocommerce_before_add_to_cart_quantity.
 					 *
-					 * @since 2.7.0
+					 * @since 10.0.0
 					 */
 					do_action( 'woocommerce_before_add_to_cart_quantity' );
 				}
@@ -405,6 +413,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					 */
 					do_action( 'woocommerce_after_variations_form' );
 				}
+
+				/**
+				 * Hook: woocommerce_after_add_to_cart_form.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_after_add_to_cart_form' );
+
 				$hooks_after = ob_get_clean();
 			}
 
