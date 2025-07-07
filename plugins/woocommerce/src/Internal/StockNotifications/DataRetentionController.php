@@ -19,10 +19,9 @@ class DataRetentionController {
 	 * Constructor to set up hooks for managing data retention tasks.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_installed', array( $this, 'on_woo_install_or_update' ) );
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
-		add_action( 'update_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
-		add_action( 'add_option_wc_customer_stock_notifications_delete_after_days', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		add_action( 'update_option_wc_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		add_action( 'add_option_wc_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_daily_task' ) );
 	}
 
@@ -32,7 +31,7 @@ class DataRetentionController {
 	 * @return void
 	 */
 	public function on_woo_install_or_update(): void {
-		$this->schedule_or_unschedule_daily_task( null, get_option( 'wc_customer_stock_notifications_delete_after_days' ) );
+		$this->schedule_or_unschedule_daily_task( null, Config::get_unverified_deletion_days_threshold() );
 	}
 
 	/**
@@ -51,7 +50,7 @@ class DataRetentionController {
 		}
 
 		if ( ! wp_next_scheduled( self::DAILY_TASK_HOOK ) ) {
-			wp_schedule_event( time() + 1, 'daily', self::DAILY_TASK_HOOK );
+			wp_schedule_event( time() + 10, 'daily', self::DAILY_TASK_HOOK );
 		}
 	}
 
@@ -70,7 +69,7 @@ class DataRetentionController {
 	 * @return void
 	 */
 	public function do_wc_customer_stock_notifications_daily() {
-		$time_threshold = Config::get_delete_after_days();
+		$time_threshold = Config::get_unverified_deletion_days_threshold();
 
 		if ( 0 === $time_threshold ) {
 			return;
