@@ -279,8 +279,10 @@ class FilterData {
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
 		 */
-		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
 
 		$this->set_cache( $transient_key, $results );
 
@@ -297,6 +299,8 @@ class FilterData {
 	public function get_taxonomy_counts( array $query_vars, string $taxonomy_to_count ) {
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
 		 */
 		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'taxonomy', $query_vars, array( 'taxonomy' => $taxonomy_to_count ) );
 
@@ -340,6 +344,8 @@ class FilterData {
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'taxonomy', $query_vars, array( 'taxonomy' => $taxonomy_to_count ) );
 
