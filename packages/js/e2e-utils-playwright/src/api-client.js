@@ -4,7 +4,7 @@
  */
 import axios from 'axios';
 import OAuth from 'oauth-1.0a';
-import crypto from 'crypto';
+import { createHmac } from 'crypto';
 
 /**
  * Create an API client instance with the given configuration
@@ -60,11 +60,10 @@ export function createClient( baseURL, auth ) {
 				key: auth.consumerKey,
 				secret: auth.consumerSecret,
 			},
-			signature_method: 'HMAC-SHA1',
-			hash_function( base_string, key ) {
-				return crypto
-					.createHmac( 'sha1', key )
-					.update( base_string )
+			signature_method: 'HMAC-SHA256',
+			hash_function: ( base, key ) => {
+				return createHmac( 'sha256', key )
+					.update( base )
 					.digest( 'base64' );
 			},
 		} );
@@ -72,20 +71,55 @@ export function createClient( baseURL, auth ) {
 
 	const axiosInstance = axios.create( axiosConfig );
 
-	function getSignedUrl( path, params = {} ) {
-		const url = baseURL + path.replace( /^\//, '' );
-		const oauthParams = oauth.authorize( {
-			url,
-			method: 'GET',
-			data: params,
-		} );
-		const urlObj = new URL( url );
-		Object.entries( { ...params, ...oauthParams } ).forEach(
-			( [ key, value ] ) => {
-				urlObj.searchParams.append( key, value );
-			}
-		);
-		return urlObj.toString();
+	function oauthRequest(
+		method,
+		path,
+		{ params = {}, data = {}, debug = false } = {}
+	) {
+		let url = baseURL + path.replace( /^\//, '' );
+		let requestConfig = { method };
+		let oauthParams, headers;
+
+		if ( method === 'GET' ) {
+			oauthParams = oauth.authorize( {
+				url,
+				method,
+				data: params,
+			} );
+			const urlObj = new URL( url );
+			Object.entries( { ...params, ...oauthParams } ).forEach(
+				( [ key, value ] ) => {
+					urlObj.searchParams.append( key, value );
+				}
+			);
+			url = urlObj.toString();
+			requestConfig = { ...requestConfig, url };
+		} else {
+			const isJson = (
+				axiosConfig.headers[ 'Content-Type' ] || ''
+			).includes( 'application/json' );
+			oauthParams = oauth.authorize( {
+				url,
+				method,
+				data: isJson ? {} : data,
+			} );
+			headers = {
+				...axiosConfig.headers,
+				...oauth.toHeader( oauthParams ),
+			};
+			requestConfig = { ...requestConfig, url, headers, data };
+		}
+
+		if ( debug ) {
+			console.log( 'oauthRequest', {
+				method,
+				url,
+				params,
+				data,
+				headers,
+			} );
+		}
+		return axios( requestConfig );
 	}
 
 	return {
@@ -98,12 +132,7 @@ export function createClient( baseURL, auth ) {
 		 */
 		async get( path, params = {}, debug = false ) {
 			if ( auth.type === 'oauth1' ) {
-				const url = getSignedUrl( path, params );
-				const response = await axios.get( url );
-				if ( debug ) {
-					console.log( 'get', { path, params, response } );
-				}
-				return response;
+				return oauthRequest( 'GET', path, { params, debug } );
 			}
 			const response = await axiosInstance.get( path, { params } );
 			if ( debug ) {
@@ -121,24 +150,7 @@ export function createClient( baseURL, auth ) {
 		 */
 		async post( path, data = {}, debug = false ) {
 			if ( auth.type === 'oauth1' ) {
-				const url = baseURL + path.replace( /^\//, '' );
-				const oauthParams = oauth.authorize( {
-					url,
-					method: 'POST',
-					data,
-				} );
-				const headers = {
-					...axiosConfig.headers,
-					...oauth.toHeader( oauthParams ),
-				};
-
-				console.log( 'post', { url, data, headers } );
-
-				const response = await axios.post( url, data, { headers } );
-				if ( debug ) {
-					console.log( 'post', { path, data, response } );
-				}
-				return response;
+				return oauthRequest( 'POST', path, { data, debug } );
 			}
 			const response = await axiosInstance.post( path, data );
 			if ( debug ) {
@@ -156,21 +168,7 @@ export function createClient( baseURL, auth ) {
 		 */
 		async put( path, data = {}, debug = false ) {
 			if ( auth.type === 'oauth1' ) {
-				const url = baseURL + path.replace( /^\//, '' );
-				const oauthParams = oauth.authorize( {
-					url,
-					method: 'PUT',
-					data,
-				} );
-				const headers = {
-					...axiosConfig.headers,
-					...oauth.toHeader( oauthParams ),
-				};
-				const response = await axios.put( url, data, { headers } );
-				if ( debug ) {
-					console.log( 'put', { path, data, response } );
-				}
-				return response;
+				return oauthRequest( 'PUT', path, { data, debug } );
 			}
 			const response = await axiosInstance.put( path, data );
 			if ( debug ) {
@@ -188,24 +186,7 @@ export function createClient( baseURL, auth ) {
 		 */
 		async delete( path, params = {}, debug = false ) {
 			if ( auth.type === 'oauth1' ) {
-				const url = baseURL + path.replace( /^\//, '' );
-				const oauthParams = oauth.authorize( {
-					url,
-					method: 'DELETE',
-					data: params,
-				} );
-				const headers = {
-					...axiosConfig.headers,
-					...oauth.toHeader( oauthParams ),
-				};
-				const response = await axios.delete( url, {
-					headers,
-					data: params,
-				} );
-				if ( debug ) {
-					console.log( 'delete', { path, params, response } );
-				}
-				return response;
+				return oauthRequest( 'DELETE', path, { data: params, debug } );
 			}
 			const response = await axiosInstance.delete( path, {
 				data: params,
