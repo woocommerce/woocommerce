@@ -107,7 +107,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 											class="wc-block-components-product-badge wc-block-components-product-low-stock-badge"
 											data-wp-bind--hidden="!state.isLowInStockVisible"
 											data-wp-text="state.lowInStockLabel"
-											hidden
 										>
 										</div>
 										<div class="wc-block-cart-item__prices">
