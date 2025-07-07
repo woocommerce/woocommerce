@@ -75,7 +75,7 @@ class DataRetentionController {
 		if ( 0 === $time_threshold ) {
 			return;
 		}
-		$overdue_threshold = time() - $time_threshold;
+		$overdue_threshold = time() - $time_threshold * DAY_IN_SECONDS;
 
 		$overdue_notifications = NotificationQuery::get_notifications(
 			array(

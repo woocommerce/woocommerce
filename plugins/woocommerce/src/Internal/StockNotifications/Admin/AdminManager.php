@@ -61,7 +61,7 @@ class AdminManager {
 		) {
 			return;
 		}
-
+		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( 'woocommerce_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'customer_stock_notifications' !== $_GET['section'] ) {
 			return;
 		}
