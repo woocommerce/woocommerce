@@ -165,6 +165,11 @@ class Renderer {
 	private function render_text_version( $template ) {
 		$template = ( mb_detect_encoding( $template, 'UTF-8', true ) ) ? $template : mb_convert_encoding( $template, 'UTF-8', mb_list_encodings() );
 
+		// Ensure template is a string before processing.
+		if ( ! is_string( $template ) ) {
+			return '';
+		}
+
 		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
 

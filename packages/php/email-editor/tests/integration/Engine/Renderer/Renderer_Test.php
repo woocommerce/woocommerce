@@ -241,7 +241,12 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--></p><!-- /wp:paragraph -->';
-		wp_update_post( $this->email_post );
+		wp_update_post(
+			array(
+				'ID'           => $this->email_post->ID,
+				'post_content' => $this->email_post->post_content,
+			)
+		);
 		$rendered = $this->renderer->render(
 			$this->email_post,
 			'Subject',
