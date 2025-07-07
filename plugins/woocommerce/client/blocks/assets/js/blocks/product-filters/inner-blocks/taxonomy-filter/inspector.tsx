@@ -2,9 +2,16 @@
  * External dependencies
  */
 import { InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import {
+	SelectControl,
+	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -34,78 +41,134 @@ export const TaxonomyFilterInspectorControls = ( {
 
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Taxonomy', 'woocommerce' ) }>
-				<SelectControl
-					help={ __(
-						'Select a taxonomy to filter by.',
-						'woocommerce'
-					) }
-					value={ taxonomy }
-					options={ [
-						{
-							label: __( 'Select a taxonomy', 'woocommerce' ),
-							value: '',
-						},
-						...taxonomyOptions,
-					] }
-					onChange={ ( value: string ) => {
-						setAttributes( { taxonomy: value } );
-						updateFilterHeading(
-							clientId,
-							getTaxonomyLabel( value )
-						);
-					} }
-				/>
-			</PanelBody>
-			<PanelBody title={ __( 'Display', 'woocommerce' ) }>
-				<SelectControl
+			<ToolsPanel
+				label={ __( 'Taxonomy Filter Settings', 'woocommerce' ) }
+				resetAll={ () => {
+					setAttributes( {
+						taxonomy: '',
+						sortOrder: 'count-desc',
+						displayStyle: 'list',
+						showCounts: false,
+						hideEmpty: true,
+					} );
+				} }
+			>
+				<ToolsPanelItem
+					label={ __( 'Taxonomy', 'woocommerce' ) }
+					hasValue={ () => !! taxonomy }
+					onDeselect={ () => setAttributes( { taxonomy: '' } ) }
+					isShownByDefault={ true }
+				>
+					<SelectControl
+						label={ __( 'Taxonomy', 'woocommerce' ) }
+						help={ __(
+							'Select a taxonomy to filter by.',
+							'woocommerce'
+						) }
+						value={ taxonomy }
+						options={ [
+							{
+								label: __( 'Select a taxonomy', 'woocommerce' ),
+								value: '',
+							},
+							...taxonomyOptions,
+						] }
+						onChange={ ( value: string ) => {
+							setAttributes( { taxonomy: value } );
+							updateFilterHeading(
+								clientId,
+								getTaxonomyLabel( value )
+							);
+						} }
+					/>
+				</ToolsPanelItem>
+				<ToolsPanelItem
 					label={ __( 'Sort Order', 'woocommerce' ) }
-					value={ sortOrder }
-					options={ [
-						{
-							label: __( 'Count (High to Low)', 'woocommerce' ),
-							value: 'count-desc',
-						},
-						{
-							label: __( 'Count (Low to High)', 'woocommerce' ),
-							value: 'count-asc',
-						},
-						{
-							label: __( 'Name (A to Z)', 'woocommerce' ),
-							value: 'name-asc',
-						},
-						{
-							label: __( 'Name (Z to A)', 'woocommerce' ),
-							value: 'name-desc',
-						},
-					] }
-					onChange={ ( value: string ) =>
-						setAttributes( { sortOrder: value } )
+					hasValue={ () => sortOrder !== 'count-desc' }
+					onDeselect={ () =>
+						setAttributes( { sortOrder: 'count-desc' } )
 					}
-				/>
-				<DisplayStyleSwitcher
-					clientId={ clientId }
-					currentStyle={ displayStyle }
-					onChange={ ( value: string ) =>
-						setAttributes( { displayStyle: value } )
+				>
+					<SelectControl
+						label={ __( 'Sort Order', 'woocommerce' ) }
+						value={ sortOrder }
+						options={ [
+							{
+								label: __(
+									'Count (High to Low)',
+									'woocommerce'
+								),
+								value: 'count-desc',
+							},
+							{
+								label: __(
+									'Count (Low to High)',
+									'woocommerce'
+								),
+								value: 'count-asc',
+							},
+							{
+								label: __( 'Name (A to Z)', 'woocommerce' ),
+								value: 'name-asc',
+							},
+							{
+								label: __( 'Name (Z to A)', 'woocommerce' ),
+								value: 'name-desc',
+							},
+						] }
+						onChange={ ( value: string ) =>
+							setAttributes( { sortOrder: value } )
+						}
+					/>
+				</ToolsPanelItem>
+				<ToolsPanelItem
+					label={ __( 'Display Style', 'woocommerce' ) }
+					hasValue={ () => displayStyle !== 'list' }
+					isShownByDefault={ true }
+					onDeselect={ () =>
+						setAttributes( { displayStyle: 'list' } )
 					}
-					parentBlockName={ metadata.name }
-				/>
-				<ToggleControl
+				>
+					<DisplayStyleSwitcher
+						clientId={ clientId }
+						currentStyle={ displayStyle }
+						onChange={ ( value: string | number | undefined ) =>
+							setAttributes( { displayStyle: value as string } )
+						}
+						parentBlockName={ metadata.name }
+					/>
+				</ToolsPanelItem>
+				<ToolsPanelItem
 					label={ __( 'Product counts', 'woocommerce' ) }
-					checked={ showCounts }
-					onChange={ ( value: boolean ) =>
-						setAttributes( { showCounts: value } )
-					}
-				/>
-				<ToggleControl
+					hasValue={ () => showCounts }
+					onDeselect={ () => setAttributes( { showCounts: false } ) }
+					isShownByDefault={ true }
+				>
+					<ToggleControl
+						label={ __( 'Product counts', 'woocommerce' ) }
+						checked={ showCounts }
+						onChange={ ( value: boolean ) =>
+							setAttributes( { showCounts: value } )
+						}
+					/>
+				</ToolsPanelItem>
+				<ToolsPanelItem
 					label={ __( 'Hide items with no products', 'woocommerce' ) }
-					checked={ hideEmpty }
-					onChange={ ( value: boolean ) =>
-						setAttributes( { hideEmpty: value } )
-					}
-				/>
-			</PanelBody>
+					hasValue={ () => ! hideEmpty }
+					onDeselect={ () => setAttributes( { hideEmpty: false } ) }
+				>
+					<ToggleControl
+						label={ __(
+							'Hide items with no products',
+							'woocommerce'
+						) }
+						checked={ hideEmpty }
+						onChange={ ( value: boolean ) =>
+							setAttributes( { hideEmpty: value } )
+						}
+					/>
+				</ToolsPanelItem>
+			</ToolsPanel>
 		</InspectorControls>
 	);
 };
