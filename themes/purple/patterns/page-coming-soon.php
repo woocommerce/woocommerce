@@ -12,8 +12,8 @@
 <!-- wp:columns {"lock":{"move":false,"remove":false},"metadata":{"name":"Coming Soon: Split layout with image","categories":["Coming","Soon","Pages"],"patternName":"purple/coming-soon"},"align":"full","className":"is-style-default","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"margin":{"top":"0","bottom":"0"}}}} -->
 <div class="wp-block-columns alignfull is-style-default" style="margin-top:0;margin-bottom:0"><!-- wp:column {"verticalAlignment":"center","className":"is-style-default","style":{"spacing":{"padding":{"right":"var:preset|spacing|50","left":"var:preset|spacing|50","top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-column is-vertically-aligned-center is-style-default" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"level":1,"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"xx-large"} -->
-<h1 class="wp-block-heading has-theme-2-color has-text-color has-link-color has-xx-large-font-size"><?php esc_html_e('Coming soon', 'purple');?></h1>
+<div class="wp-block-group"><!-- wp:heading {"level":1} -->
+<h1><?php esc_html_e('Coming soon', 'purple');?></h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.3"},"spacing":{"margin":{"right":"var:preset|spacing|80"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4"} -->

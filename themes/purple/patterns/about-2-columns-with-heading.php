@@ -20,14 +20,14 @@
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color has-link-color"><?php esc_html_e('We create bold, high-quality pieces designed to bring joy to everyday life, blending playful design with honest craftsmanship.', 'purple');?></p>
+<div class="wp-block-column"><!-- wp:paragraph -->
+<p><?php esc_html_e('We create bold, high-quality pieces designed to bring joy to everyday life, blending playful design with honest craftsmanship.', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color has-link-color"><?php esc_html_e('We believe that clothing should feel good, look good, and do good—both for the people who wear it and the planet we share.', 'purple');?>	</p>
+<div class="wp-block-column"><!-- wp:paragraph -->
+<p><?php esc_html_e('We believe that clothing should feel good, look good, and do good—both for the people who wear it and the planet we share.', 'purple');?>	</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
