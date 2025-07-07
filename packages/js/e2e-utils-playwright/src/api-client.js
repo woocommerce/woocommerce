@@ -14,6 +14,23 @@ import crypto from 'crypto';
  * @return {Object} API client instance with HTTP methods
  */
 export function createClient( baseURL, auth ) {
+	if ( ! auth || typeof auth !== 'object' ) {
+		throw new Error( 'auth parameter is required and must be an object' );
+	}
+	if ( auth.type === 'basic' ) {
+		if ( ! auth.username || ! auth.password ) {
+			throw new Error( 'Basic auth requires username and password' );
+		}
+	} else if ( auth.type === 'oauth1' ) {
+		if ( ! auth.consumerKey || ! auth.consumerSecret ) {
+			throw new Error(
+				'OAuth1 auth requires consumerKey and consumerSecret'
+			);
+		}
+	} else {
+		throw new Error( 'auth.type must be either "basic" or "oauth1"' );
+	}
+
 	// Ensure baseURL ends with '/'
 	if ( ! baseURL.endsWith( '/' ) ) {
 		baseURL += '/';
@@ -114,6 +131,9 @@ export function createClient( baseURL, auth ) {
 					...axiosConfig.headers,
 					...oauth.toHeader( oauthParams ),
 				};
+
+				console.log( 'post', { url, data, headers } );
+
 				const response = await axios.post( url, data, { headers } );
 				if ( debug ) {
 					console.log( 'post', { path, data, response } );
