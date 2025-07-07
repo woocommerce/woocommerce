@@ -157,7 +157,7 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 
 		foreach ( $test_cases as $test_case ) {
 			list( $tracking_number, $from, $to ) = $test_case;
-			$result = $this->provider->try_parse_tracking_number( $tracking_number, $from, $to );
+			$result                              = $this->provider->try_parse_tracking_number( $tracking_number, $from, $to );
 
 			$this->assertNotNull( $result, "Should parse tracking number with normalization: {$tracking_number}" );
 			$this->assertArrayHasKey( 'url', $result );

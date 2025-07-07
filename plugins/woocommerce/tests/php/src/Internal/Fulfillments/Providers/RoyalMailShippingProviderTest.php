@@ -171,7 +171,7 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 
 		foreach ( $test_cases as $test_case ) {
 			list( $tracking_number, $from, $to ) = $test_case;
-			$result = $this->provider->try_parse_tracking_number( $tracking_number, $from, $to );
+			$result                              = $this->provider->try_parse_tracking_number( $tracking_number, $from, $to );
 
 			$this->assertNotNull( $result, "Should parse tracking number with normalization: {$tracking_number}" );
 			$this->assertArrayHasKey( 'url', $result );
@@ -246,11 +246,11 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function test_service_specific_scoring(): void {
 		// Test different service types.
-		$standard  = $this->provider->try_parse_tracking_number( 'AB123456789GB', 'GB', 'FR' );
-		$signed    = $this->provider->try_parse_tracking_number( 'SD12345678', 'GB', 'FR' );
-		$special   = $this->provider->try_parse_tracking_number( 'SF123456789012', 'GB', 'FR' );
-		$rm_std    = $this->provider->try_parse_tracking_number( 'RM1234567890', 'GB', 'FR' );
-		$pf_exp    = $this->provider->try_parse_tracking_number( 'PF123456789012', 'GB', 'FR' );
+		$standard = $this->provider->try_parse_tracking_number( 'AB123456789GB', 'GB', 'FR' );
+		$signed   = $this->provider->try_parse_tracking_number( 'SD12345678', 'GB', 'FR' );
+		$special  = $this->provider->try_parse_tracking_number( 'SF123456789012', 'GB', 'FR' );
+		$rm_std   = $this->provider->try_parse_tracking_number( 'RM1234567890', 'GB', 'FR' );
+		$pf_exp   = $this->provider->try_parse_tracking_number( 'PF123456789012', 'GB', 'FR' );
 
 		$this->assertNotNull( $standard );
 		$this->assertNotNull( $signed );

@@ -71,8 +71,8 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 			array( '712345678901234567890', 'DE', 'FR', true, 75 ),
 
 			// FedEx Express - 15 digit (80 US/CA, 65 others).
-			array( '123456789012345', 'US', 'CA', true, 80 ), // Invalid check digit
-			array( '123456789012345', 'DE', 'FR', true, 65 ), // Invalid check digit
+			array( '123456789012345', 'US', 'CA', true, 80 ), // Invalid check digit.
+			array( '123456789012345', 'DE', 'FR', true, 65 ), // Invalid check digit.
 
 			// FedEx Express - 12 digit with invalid check digit (85 US/CA, 70 others).
 			array( '123456789013', 'US', 'CA', true, 85 ), // Invalid check digit.
@@ -159,21 +159,21 @@ class FedExShippingProviderTest extends \WP_UnitTestCase {
 	 * Tests the scoring hierarchy between different formats.
 	 */
 	public function test_format_confidence_hierarchy(): void {
-		$custom_critical = $this->provider->try_parse_tracking_number( '001234567890123456789012', 'US', 'CA' );
-		$express_12_valid = $this->provider->try_parse_tracking_number( '123456789013', 'US', 'CA' ); // Valid check digit.
+		$custom_critical    = $this->provider->try_parse_tracking_number( '001234567890123456789012', 'US', 'CA' );
+		$express_12_valid   = $this->provider->try_parse_tracking_number( '123456789013', 'US', 'CA' ); // Valid check digit.
 		$express_12_invalid = $this->provider->try_parse_tracking_number( '123456789012', 'US', 'CA' ); // Invalid check digit.
-		$express_15      = $this->provider->try_parse_tracking_number( '123456789012345', 'US', 'CA' );
-		$generic_20      = $this->provider->try_parse_tracking_number( '12345678901234567890', 'US', 'CA' );
+		$express_15         = $this->provider->try_parse_tracking_number( '123456789012345', 'US', 'CA' );
+		$generic_20         = $this->provider->try_parse_tracking_number( '12345678901234567890', 'US', 'CA' );
 
 		// Custom Critical should have highest score.
 		$this->assertGreaterThan( $express_12_valid['ambiguity_score'], $custom_critical['ambiguity_score'] );
-		
+
 		// Both 12-digit numbers get same score if both have invalid check digits.
 		$this->assertEquals( $express_12_invalid['ambiguity_score'], $express_12_valid['ambiguity_score'] );
-		
+
 		// Express 15 should beat Express 12 invalid.
 		$this->assertGreaterThan( $express_15['ambiguity_score'], $express_12_invalid['ambiguity_score'] );
-		
+
 		// Express 15 should beat generic 20.
 		$this->assertGreaterThan( $generic_20['ambiguity_score'], $express_15['ambiguity_score'] );
 	}

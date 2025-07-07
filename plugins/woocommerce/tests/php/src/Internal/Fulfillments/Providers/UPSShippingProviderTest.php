@@ -30,7 +30,7 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 			array( '1Z12345E0205271688', 'CA', 'US', true, 100 ),
 			array( '1Z12345E0205271688', 'GB', 'FR', true, 100 ),
 			array( '1z12345e0205271688', 'DE', 'IT', true, 100 ),
-			
+
 			// 1Z format with invalid check digit (95).
 			array( '1Z12345E0205271687', 'US', 'DE', true, 95 ),
 

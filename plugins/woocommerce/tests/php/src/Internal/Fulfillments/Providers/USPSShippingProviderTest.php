@@ -144,8 +144,8 @@ class USPSShippingProviderTest extends \WP_UnitTestCase {
 	 * Tests international shipment scoring.
 	 */
 	public function test_international_scoring(): void {
-		$upu_valid = $this->provider->try_parse_tracking_number( 'LZ123456787US', 'US', 'DE' ); // Invalid UPU check digit = 90.
-		$upu_invalid = $this->provider->try_parse_tracking_number( 'LZ123456789US', 'US', 'DE' ); // Invalid UPU check digit = 90.
+		$upu_valid    = $this->provider->try_parse_tracking_number( 'LZ123456787US', 'US', 'DE' ); // Invalid UPU check digit = 90.
+		$upu_invalid  = $this->provider->try_parse_tracking_number( 'LZ123456789US', 'US', 'DE' ); // Invalid UPU check digit = 90.
 		$global_valid = $this->provider->try_parse_tracking_number( 'EC123456787US', 'US', 'CA' ); // Invalid UPU check digit = 90.
 
 		$this->assertEquals( 90, $upu_valid['ambiguity_score'] );

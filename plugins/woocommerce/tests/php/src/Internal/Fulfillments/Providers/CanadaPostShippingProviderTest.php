@@ -255,7 +255,7 @@ class CanadaPostShippingProviderTest extends \WP_UnitTestCase {
 
 		// Domestic should have higher score (95 vs 94).
 		$this->assertSame( 95, $result_domestic['ambiguity_score'] );
-		$this->assertSame( 94, $result_international['ambiguity_score'] ); // US gets +2 boost
+		$this->assertSame( 94, $result_international['ambiguity_score'] ); // US gets +2 boost.
 		$this->assertGreaterThan( $result_international['ambiguity_score'], $result_domestic['ambiguity_score'] );
 	}
 
