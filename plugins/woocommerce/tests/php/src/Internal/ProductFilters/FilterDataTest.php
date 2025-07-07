@@ -270,8 +270,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * @testdox Test taxonomy count without filter.
 	 */
 	public function test_get_taxonomy_counts_with_default_query() {
-		$wp_query                = new \WP_Query( array( 'post_type' => 'product' ) );
-		$query_vars              = array_filter( $wp_query->query_vars );
+		$wp_query                 = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars               = array_filter( $wp_query->query_vars );
 		$actual_taxonomy_counts   = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
 		$expected_taxonomy_counts = $this->get_expected_category_counts();
 
@@ -285,7 +285,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'max_price', 35 );
 
-		$query_vars              = array_filter( $wp_query->query_vars );
+		$query_vars               = array_filter( $wp_query->query_vars );
 		$actual_taxonomy_counts   = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
 		$expected_taxonomy_counts = $this->get_expected_category_counts(
 			function ( $product_data ) {
