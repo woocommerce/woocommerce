@@ -391,7 +391,7 @@ const { state: cartItemState } = store(
 
 			get isLowInStockVisible(): boolean {
 				return (
-					! cartItemState.isAvailableOnBackorder &&
+					! cartItemState.cartItem.show_backorder_badge &&
 					!! cartItemState.cartItem.low_stock_remaining
 				);
 			},
