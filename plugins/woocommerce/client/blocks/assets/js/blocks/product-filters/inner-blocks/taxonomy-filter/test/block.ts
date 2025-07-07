@@ -50,9 +50,11 @@ describe( 'Taxonomy Filter block', () => {
 	describe( 'Initial display', () => {
 		test( 'should show notice when no taxonomy is selected', async () => {
 			await setup( { taxonomy: '' } );
-			await selectBlock( /Block: Taxonomy/i );
+			await selectBlock( /Block: Taxonomy Filter/i );
 
-			const block = within( screen.getByLabelText( /Block: Taxonomy/i ) );
+			const block = within(
+				screen.getByLabelText( /Block: Taxonomy Filter/i )
+			);
 
 			expect(
 				block.getByText(
