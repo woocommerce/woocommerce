@@ -36,12 +36,11 @@ const cartItemErrorCodes = [
 	PRODUCT_NOT_ENOUGH_STOCK,
 	PRODUCT_SOLD_INDIVIDUALLY,
 	GENERIC_CART_ITEM_ERROR,
-] as const;
+];
 
-const preloadedCheckoutData = getSetting(
-	'checkoutData',
-	{}
-) as CheckoutResponse;
+const preloadedCheckoutData = getSetting<
+	CheckoutResponse | Record< string, unknown >
+>( 'checkoutData', {} );
 
 /**
  * Get the error message to display.
@@ -52,11 +51,7 @@ const preloadedCheckoutData = getSetting(
 const ErrorTitle = ( { errorData }: ErrorComponentProps ) => {
 	let heading = __( 'Checkout error', 'woocommerce' );
 
-	if (
-		cartItemErrorCodes.includes(
-			errorData.code as ( typeof cartItemErrorCodes )[ number ]
-		)
-	) {
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
 		heading = __( 'There is a problem with your cart', 'woocommerce' );
 	}
 
