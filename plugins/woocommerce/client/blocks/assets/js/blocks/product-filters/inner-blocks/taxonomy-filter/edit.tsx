@@ -80,8 +80,6 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const isLoading = isOptionsLoading;
-
 	if ( ! taxonomy )
 		return (
 			<div { ...innerBlocksProps }>
@@ -108,7 +106,7 @@ const Edit = ( props: EditProps ) => {
 								termOptions.length === 0 && isPreview
 									? termOptionsPreview
 									: termOptions,
-							isLoading,
+							isLoading: isOptionsLoading,
 							showCounts,
 						},
 					} }
