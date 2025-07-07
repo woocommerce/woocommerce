@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Three-column blog section
- * Slug: woostarter/blog-3-column-section
+ * Slug: purple/blog-3-column-section
  * Categories: posts, featured
  * Keywords: posts, query, blog, featured
  * Description: A blog section with three posts.

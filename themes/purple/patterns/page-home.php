@@ -1,17 +1,17 @@
 <?php
 /**
  * Title: home
- * Slug: woostarter/home
+ * Slug: purple/home
  * Inserter: no
  * Template Types: front-page, index, home
  */
 ?>
-<!-- wp:pattern {"slug":"woostarter/hero-with-text-and-two-buttons"} /-->
-<!-- wp:pattern {"slug":"woostarter/woocommerce-new-arrivals"} /-->
-<!-- wp:pattern {"slug":"woostarter/two-columns-full-width-categories"} /-->
-<!-- wp:pattern {"slug":"woostarter/woocommerce-best-sellers"} /-->
-<!-- wp:pattern {"slug":"woostarter/cta-with-images"} /-->
-<!-- wp:pattern {"slug":"woostarter/posts-three-columns"} /-->
-<!-- wp:pattern {"slug":"woostarter/testimonial-with-logo"} /-->
-<!-- wp:pattern {"slug":"woostarter/social-media-call-to-action-with-hero-image"} /-->
-<!-- wp:pattern {"slug":"woostarter/store-features-four-columns"} /-->
+<!-- wp:pattern {"slug":"purple/hero-with-text-and-two-buttons"} /-->
+<!-- wp:pattern {"slug":"purple/woocommerce-new-arrivals"} /-->
+<!-- wp:pattern {"slug":"purple/two-columns-full-width-categories"} /-->
+<!-- wp:pattern {"slug":"purple/woocommerce-best-sellers"} /-->
+<!-- wp:pattern {"slug":"purple/cta-with-images"} /-->
+<!-- wp:pattern {"slug":"purple/posts-three-columns"} /-->
+<!-- wp:pattern {"slug":"purple/testimonial-with-logo"} /-->
+<!-- wp:pattern {"slug":"purple/social-media-call-to-action-with-hero-image"} /-->
+<!-- wp:pattern {"slug":"purple/store-features-four-columns"} /-->

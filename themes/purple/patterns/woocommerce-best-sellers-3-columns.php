@@ -1,22 +1,22 @@
 <?php
 /**
  * Title: Best Sellers Collection
- * Slug: woostarter/woocommerce-best-sellers-3-columns
+ * Slug: purple/woocommerce-best-sellers-3-columns
  * Categories: woo-commerce, featured-selling
  * Block Types: woocommerce/product-collection
  * Description: A section with a heading and a 3 column product grid.
  */
-?><!-- wp:group {"metadata":{"categories":["text","featured"],"patternName":"woostarter/woocommerce-best-sellers-3-columns","name":"Best Sellers Collection"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|40","right":"var:preset|spacing|40"}}},"layout":{"type":"constrained"}} -->
+?><!-- wp:group {"metadata":{"categories":["text","featured"],"patternName":"purple/woocommerce-best-sellers-3-columns","name":"Best Sellers Collection"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|40","right":"var:preset|spacing|40"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--40)"><!-- wp:columns {"verticalAlignment":"center","align":"wide"} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%"><!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide"><!-- wp:heading {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|30"}}}} -->
-<h2 class="wp-block-heading" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Our Bestsellers', 'woostarter');?></h2>
+<h2 class="wp-block-heading" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Our Bestsellers', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop now', 'woostarter');?></a></div>
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop now', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div>

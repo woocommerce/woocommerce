@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Centered text
- * Slug: woostarter/centered-text
+ * Slug: purple/centered-text
  * Categories: text, about
  * Keywords: about, text
  * Description: A description section aligned center.
@@ -13,7 +13,7 @@
 <!-- /wp:spacer -->
 
 <!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size"><?php esc_html_e('Our products are crafted with meticulous attention to quality, using only the finest materials and ingredients. Designed to deliver exceptional performance, each item undergoes rigorous testing to ensure it meets the highest standards.', 'woostarter');?></p>
+<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size"><?php esc_html_e('Our products are crafted with meticulous attention to quality, using only the finest materials and ingredients. Designed to deliver exceptional performance, each item undergoes rigorous testing to ensure it meets the highest standards.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|80"} -->

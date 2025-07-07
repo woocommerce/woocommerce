@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: WooCommerce Single Product
- * Slug: woostarter/woocommerce-single-product
+ * Slug: purple/woocommerce-single-product
  * Categories: page
  * Post Types: page, wp_template
  * Viewport width: 1400
@@ -64,7 +64,7 @@
 
 			<!-- wp:woocommerce/add-to-cart-with-options /-->
 
-			<!-- wp:pattern {"slug":"woostarter/hidden-woocommerce-product-details"} /-->
+			<!-- wp:pattern {"slug":"purple/hidden-woocommerce-product-details"} /-->
 
 		</div>
 		<!-- /wp:column -->
@@ -77,11 +77,11 @@
 </div>
 <!-- /wp:group -->
 
-<!-- wp:pattern {"slug":"woostarter/related-products-collection"} /-->
+<!-- wp:pattern {"slug":"purple/related-products-collection"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/left-aligned-product-right-text"} /-->
+<!-- wp:pattern {"slug":"purple/left-aligned-product-right-text"} /-->
 
-<!-- wp:pattern {"slug":"woostarter/categories-on-three-columns"} /-->
+<!-- wp:pattern {"slug":"purple/categories-on-three-columns"} /-->
 
 <!-- wp:group {"metadata":{"name":"Product reviews"},"align":"wide","layout":{"type":"constrained","contentSize":"","wideSize":"49rem"}} -->
 <div class="wp-block-group alignwide">

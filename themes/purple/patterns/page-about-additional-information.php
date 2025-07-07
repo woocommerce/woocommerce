@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: About page with additional information
- * Slug: woostarter/page-about-additional-information
+ * Slug: purple/page-about-additional-information
  * Categories: woo-commerce, about, text, media, columns
  * Keywords: starter
  * Block Types: core/post-content
@@ -10,6 +10,6 @@
  * Description: An about page pattern.
  */
 ?>
-<!-- wp:pattern {"slug":"woostarter/about-alternating-columns"} /-->
-<!-- wp:pattern {"slug":"woostarter/about-category-collection"} /-->
-<!-- wp:pattern {"slug":"woostarter/faq-question-list"} /-->
+<!-- wp:pattern {"slug":"purple/about-alternating-columns"} /-->
+<!-- wp:pattern {"slug":"purple/about-category-collection"} /-->
+<!-- wp:pattern {"slug":"purple/faq-question-list"} /-->

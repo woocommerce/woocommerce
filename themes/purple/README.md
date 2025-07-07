@@ -1,10 +1,10 @@
-# WooStarter Theme
+# Purple Theme
 
 A lightweight, customizable starter block theme for WooCommerce stores that prioritizes performance, accessibility, and modern development practices.
 
 ## Overview
 
-WooStarter is a foundation theme designed specifically for WooCommerce development. It focuses on providing essential functionality without unnecessary features, allowing developers to build custom e-commerce sites more efficiently. The theme emphasizes clean code structure and follows WordPress best practices to serve as a solid starting point for custom projects.
+Purple is a foundation theme designed specifically for WooCommerce development. It focuses on providing essential functionality without unnecessary features, allowing developers to build custom e-commerce sites more efficiently. The theme emphasizes clean code structure and follows WordPress best practices to serve as a solid starting point for custom projects.
 
 ## ⚠️ Work in Progress
 
@@ -27,7 +27,7 @@ Breaking changes may occur without notice as we continue to improve the foundati
 
 ## Getting Started
 
-1. Install woostarter like any WordPress theme
+1. Install purple like any WordPress theme
 2. Activate WooCommerce plugin
 3. Configure theme settings via the WordPress Customizer
 4. Start building your custom WooCommerce store
@@ -48,4 +48,4 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## License
 
-WooStarter is licensed under the GPL v2 or later.
+Purple is licensed under the GPL v2 or later.

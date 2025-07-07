@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Shop homepage alternative 2
- * Slug: woostarter/page-home-alternative-2
+ * Slug: purple/page-home-alternative-2
  * Categories: woo-commerce, about, text, media, columns
  * Keywords: starter
  * Block Types: core/post-content
@@ -10,8 +10,8 @@
  * Description: A shop homepage pattern.
  */
 ?>
-<!-- wp:pattern {"slug":"woostarter/two-columns-full-width-categories"} /-->
-<!-- wp:pattern {"slug":"woostarter/new-arrival-product"} /-->
-<!-- wp:pattern {"slug":"woostarter/woocommerce-featured-products"} /-->
-<!-- wp:pattern {"slug":"woostarter/left-aligned-image-description-button"} /-->
-<!-- wp:pattern {"slug":"woostarter/store-features-four-columns-alternative"} /-->
+<!-- wp:pattern {"slug":"purple/two-columns-full-width-categories"} /-->
+<!-- wp:pattern {"slug":"purple/new-arrival-product"} /-->
+<!-- wp:pattern {"slug":"purple/woocommerce-featured-products"} /-->
+<!-- wp:pattern {"slug":"purple/left-aligned-image-description-button"} /-->
+<!-- wp:pattern {"slug":"purple/store-features-four-columns-alternative"} /-->

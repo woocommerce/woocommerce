@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: WooCommerce Page Cart
- * Slug: woostarter/woocommerce-page-cart
+ * Slug: purple/woocommerce-page-cart
  * Categories: page
  * Post Types: page, wp_template
  * Viewport width: 1400
@@ -17,7 +17,7 @@
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"align":"wide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
-<h2 class="wp-block-heading alignwide" style="margin-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e('Cart', 'woostarter');?></h2>
+<h2 class="wp-block-heading alignwide" style="margin-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e('Cart', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/store-notices /-->
@@ -79,7 +79,7 @@
 
 <!-- wp:woocommerce/cart-cross-sells-block -->
 <div class="wp-block-woocommerce-cart-cross-sells-block"><!-- wp:heading {"fontSize":"large"} -->
-<h2 class="wp-block-heading has-large-font-size"><?php esc_html_e('Browse products', 'woostarter');?></h2>
+<h2 class="wp-block-heading has-large-font-size"><?php esc_html_e('Browse products', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:woocommerce/cart-cross-sells-products-block -->
@@ -95,12 +95,12 @@
 <!-- /wp:spacer -->
 
 <!-- wp:heading {"textAlign":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
-<h2 class="wp-block-heading has-text-align-center" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Your shopping bag is empty', 'woostarter');?></h2>
+<h2 class="wp-block-heading has-text-align-center" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Your shopping bag is empty', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/shop"><?php esc_html_e('Return to shop', 'woostarter');?></a></div>
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/shop"><?php esc_html_e('Return to shop', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 
@@ -110,13 +110,13 @@
 
 <!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
 <p class="has-text-align-center has-theme-4-color has-text-color has-link-color has-small-font-size"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
-echo sprintf( esc_html__( 'Have an account? %1$sLog in%2$s to check out faster.', 'woostarter' ), '<a href="' . esc_url( '/my-account' ) . '">', '</a>' ); ?></p>
+echo sprintf( esc_html__( 'Have an account? %1$sLog in%2$s to check out faster.', 'purple' ), '<a href="' . esc_url( '/my-account' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"metadata":{"name":"Product Collection 5 Columns","categories":["woo-commerce","featured-selling"],"patternName":"woocommerce-blocks/product-collection-5-columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:heading {"textAlign":"center","level":3,"align":"wide"} -->
-<h3 class="wp-block-heading alignwide has-text-align-center"><?php esc_html_e('You might like', 'woostarter');?></h3>
+<h3 class="wp-block-heading alignwide has-text-align-center"><?php esc_html_e('You might like', 'purple');?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|50"} -->

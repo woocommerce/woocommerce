@@ -1,19 +1,19 @@
 <?php
 /**
  * Title: Product grids with filters
- * Slug: woostarter/product-grid-with-filters
+ * Slug: purple/product-grid-with-filters
  * Categories: woo-commerce
  * Keywords: woo-commerce, product, grid, filters
  * Description: A product grid with filters.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Product grids with filters","patternName":"woostarter/product-grid-with-filters"},"align":"wide","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Product grids with filters","patternName":"purple/product-grid-with-filters"},"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide">
 
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"22%"} -->
 <div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
-<h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:0;font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e('Filter by:', 'woostarter');?></h3>
+<h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:0;font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e('Filter by:', 'purple');?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:column -->
 
@@ -23,7 +23,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php esc_html_e('Sort by:', 'woostarter');?></p>
+<p><?php esc_html_e('Sort by:', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/catalog-sorting {"fontSize":"medium","style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>
@@ -38,7 +38,7 @@
 <div class="wp-block-woocommerce-product-filters wc-block-product-filters" style="--wc-product-filters-text-color:#111;--wc-product-filters-background-color:#fff;--wc-product-filter-block-spacing:0"><!-- wp:woocommerce/accordion-group {"style":{"spacing":{"blockGap":"0"}}} -->
 <div class="wp-block-woocommerce-accordion-group"><!-- wp:woocommerce/accordion-item -->
 <div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header {"level":4,"icon":"chevron"} -->
-<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Price', 'woostarter');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
+<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Price', 'purple');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
 <!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"right":"var:preset|spacing|20","left":"var:preset|spacing|20","top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"},"margin":{"bottom":"var:preset|spacing|30"}}}} -->
@@ -52,7 +52,7 @@
 
 <!-- wp:woocommerce/accordion-item -->
 <div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header {"level":4,"icon":"chevron"} -->
-<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Rating', 'woostarter');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
+<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Rating', 'purple');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
 <!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
@@ -66,7 +66,7 @@
 
 <!-- wp:woocommerce/accordion-item -->
 <div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header {"level":4,"icon":"chevron"} -->
-<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Color', 'woostarter');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
+<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Color', 'purple');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
 <!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
@@ -80,7 +80,7 @@
 
 <!-- wp:woocommerce/accordion-item -->
 <div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header {"level":4,"icon":"chevron"} -->
-<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Status', 'woostarter');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
+<h4 class="wp-block-woocommerce-accordion-header accordion-item__heading"><button class="accordion-item__toggle"><span><?php esc_html_e('Status', 'purple');?></span><span class="accordion-item__toggle-icon has-icon-chevron" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.0041 10.5547L11.9996 16.0134L5.99512 10.5547L7.00413 9.44482L11.9996 13.9862L16.9951 9.44483L18.0041 10.5547Z" fill="currentColor"></path></svg></span></button></h4>
 <!-- /wp:woocommerce/accordion-header -->
 
 <!-- wp:woocommerce/accordion-panel {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
@@ -101,7 +101,7 @@
 <!-- wp:woocommerce/product-filter-clear-button -->
 <!-- wp:buttons {"layout":{"type":"flex","verticalAlignment":"stretched"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"textAlign":"center","textColor":"theme-4","className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
-<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-theme-4-color has-text-color has-background has-link-color has-medium-font-size has-text-align-center has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e('Clear filters', 'woostarter');?></a></div>
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-theme-4-color has-text-color has-background has-link-color has-medium-font-size has-text-align-center has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e('Clear filters', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 <!-- /wp:woocommerce/product-filter-clear-button --></div>
@@ -131,11 +131,11 @@
 <!-- /wp:spacer -->
 
 <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-<!-- wp:query-pagination-previous {"label":"<?php esc_html_e('Previous', 'woostarter');?>"} /-->
+<!-- wp:query-pagination-previous {"label":"<?php esc_html_e('Previous', 'purple');?>"} /-->
 
 <!-- wp:query-pagination-numbers /-->
 
-<!-- wp:query-pagination-next {"label":"<?php esc_html_e('Next', 'woostarter');?>"} /-->
+<!-- wp:query-pagination-next {"label":"<?php esc_html_e('Next', 'purple');?>"} /-->
 <!-- /wp:query-pagination -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|30"} -->
@@ -146,7 +146,7 @@
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","flexWrap":"wrap"}} -->
 <div class="wp-block-group"><!-- wp:paragraph {"fontSize":"medium"} -->
 <p class="has-medium-font-size"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */ 
-echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'woostarter' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
+echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 <!-- /wp:woocommerce/product-collection-no-results --></div>

@@ -1,4 +1,4 @@
-=== woostarter ===
+=== Purple ===
 Contributors: Automattic
 Requires at least: 6.8
 Tested up to: 6.8
@@ -17,8 +17,8 @@ Purple is the new WooCommerce starter theme, fully built with blocks and ready f
 
 == Copyright ==
 
-woostarter WordPress Theme, (C) 2025 Automattic
-woostarter is distributed under the terms of the GNU GPL.
+Purple WordPress Theme, (C) 2025 Automattic
+Purple is distributed under the terms of the GNU GPL.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

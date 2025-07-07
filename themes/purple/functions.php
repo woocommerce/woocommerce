@@ -1,20 +1,20 @@
 <?php
 /**
- * woostarter functions and definitions
+ * purple functions and definitions
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
  *
- * @package woostarter
- * @since woostarter 1.0
+ * @package purple
+ * @since purple 1.0
  */
 
 declare( strict_types = 1 );
 
-if ( ! function_exists( 'woostarter_unregister_patterns' ) ) :
+if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 	/**
 	 * Unregister Jetpack patterns and core patterns bundled in WordPress.
 	 */
-	function woostarter_unregister_patterns() {
+	function purple_unregister_patterns() {
 		$pattern_names = array(
 			// Jetpack form patterns.
 			'contact-form',
@@ -44,24 +44,24 @@ if ( ! function_exists( 'woostarter_unregister_patterns' ) ) :
 
 endif;
 
-if ( ! function_exists( 'woostarter_setup' ) ) :
+if ( ! function_exists( 'purple_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
 	 *
-	 * @since woostarter 1.0
+	 * @since purple 1.0
 	 *
 	 * @return void
 	 */
-	function woostarter_setup() {
+	function purple_setup() {
 
 		// Enqueue editor styles.
 		add_editor_style( 'style.css' );
 		// Unregister Jetpack form patterns and core patterns bundled in WordPress.
 		// Simple sites
-		woostarter_unregister_patterns();
+		purple_unregister_patterns();
 		add_filter( 'wp_loaded', function () {
 			// Atomic sites
-			woostarter_unregister_patterns();
+			purple_unregister_patterns();
 		} );
 		// Remove theme support for the core and featured patterns coming from the Dotorg pattern directory.
 		remove_theme_support( 'core-block-patterns' );
@@ -69,31 +69,31 @@ if ( ! function_exists( 'woostarter_setup' ) ) :
 
 endif;
 
-add_action( 'after_setup_theme', 'woostarter_setup' );
+add_action( 'after_setup_theme', 'purple_setup' );
 
-if ( ! function_exists( 'woostarter_styles' ) ) :
+if ( ! function_exists( 'purple_styles' ) ) :
 	/**
 	 * Enqueue styles.
 	 *
-	 * @since woostarter 1.0
+	 * @since purple 1.0
 	 *
 	 * @return void
 	 */
-	function woostarter_styles() {
+	function purple_styles() {
 
 		// Register theme stylesheet.
 		wp_register_style(
-			'woostarter-style',
+			'purple-style',
 			get_stylesheet_directory_uri() . '/style.css',
 			array(),
 			wp_get_theme()->get( 'Version' )
 		);
 
 		// Enqueue theme stylesheet.
-		wp_enqueue_style( 'woostarter-style' );
+		wp_enqueue_style( 'purple-style' );
 
 	}
 
 endif;
 
-add_action( 'wp_enqueue_scripts', 'woostarter_styles' );
+add_action( 'wp_enqueue_scripts', 'purple_styles' );
