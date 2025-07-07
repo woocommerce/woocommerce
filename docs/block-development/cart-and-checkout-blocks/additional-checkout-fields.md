@@ -721,7 +721,7 @@ It's full schema is this one:
 				},
 				"items": {
 					"type": "array",
-					"description": "List of product IDs in the cart, IDs will be dubplicated depending on the quantity of the product in the cart, so if you have 2 of product ID 1, the array will have 2 entries of product ID 1",
+					"description": "List of product IDs in the cart, IDs will be duplicated depending on the quantity of the product in the cart, so if you have 2 of product ID 1, the array will have 2 entries of product ID 1. This only supports integer quantities, not floats (which round up to the nearest integer).",
 					"items": {
 						"type": "integer"
 					}
