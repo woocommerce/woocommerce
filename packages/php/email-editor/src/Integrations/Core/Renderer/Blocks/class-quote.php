@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -141,20 +142,18 @@ class Quote extends Abstract_Block_Renderer {
 			)
 		)['declarations'];
 
-		return sprintf(
-			'<table class="email-block-quote %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-				<tbody>
-					<tr>
-						<td class="email-block-quote-content" style="%2$s" width="100%%">
-							{quote_content}
-							{citation_content}
-						</td>
-					</tr>
-				</tbody>
-			</table>',
-			esc_attr( WP_Style_Engine::compile_css( $table_styles, '' ) ),
-			esc_attr( WP_Style_Engine::compile_css( $cell_styles, '' ) ),
-			esc_attr( $original_classname ),
+		$table_attrs = array(
+			'class' => 'email-block-quote ' . $original_classname,
+			'style' => WP_Style_Engine::compile_css( $table_styles, '' ),
+			'width' => '100%',
 		);
+
+		$cell_attrs = array(
+			'class' => 'email-block-quote-content',
+			'style' => WP_Style_Engine::compile_css( $cell_styles, '' ),
+			'width' => '100%',
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( '{quote_content}{citation_content}', $table_attrs, $cell_attrs );
 	}
 }

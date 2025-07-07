@@ -19,43 +19,41 @@
 	padding: 0.25em 0.75em;
 	user-select: none;
 
-	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled) {
+	&:where(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)) {
 		color: color-mix(in srgb, var(--pill-color) 40%, transparent);
 		cursor: not-allowed;
 		text-decoration: line-through;
 	}
 
-	&:hover {
-		&:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)) {
-			background-color: color-mix(
-				in srgb,
-				var(--pill-color) 10%,
-				transparent
-			);
-		}
-	
-		&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked) {
-			background-color: color-mix(
-				in srgb,
-				var(--pill-background-color) 85%,
-				transparent
-			);
-		}
+	&:where(:hover:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled))) {
+		background-color: color-mix(
+			in srgb,
+			var(--pill-color) 10%,
+			transparent
+		);
 	}
 
-	&:focus-within {
+	&:where(:hover:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
+		background-color: color-mix(
+			in srgb,
+			var(--pill-background-color) 85%,
+			transparent
+		);
+	}
+
+	&:where(:focus-within) {
 		outline: 1px solid var(--pill-color);
 		outline-offset: 1px;
+	}
 
-		&:has(
-			.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked
-		) {
-			outline-color: var(--pill-background-color);
-		}
+	&:where(:focus-within:has(
+		.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked
+	)) {
+		outline-color: var(--pill-background-color);
 	}
 
 	// We can't make it display: none, otherwise it's not focusable.
-	.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input {
+	:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input) {
 		height: 0;
 		width: 0;
 		opacity: 0;
