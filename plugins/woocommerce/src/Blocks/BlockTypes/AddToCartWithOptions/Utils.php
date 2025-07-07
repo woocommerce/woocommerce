@@ -19,10 +19,6 @@ class Utils {
 	 * @return string Quantity input HTML with increment and decrement buttons.
 	 */
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
-		$pattern_class     = '/(<input[^>]*id="quantity_[^\"]*"[^>]*class=")([^"]*)"/';
-		$replacement_class = '$1$2 wc-block-components-quantity-selector__input"';
-		$quantity_html     = preg_replace( $pattern_class, $replacement_class, $quantity_html );
-
 		$pattern_input     = '/(<input[^>]*id="quantity_[^\"]*"[^>]*)\/>/';
 		$replacement_input = '$1 data-wp-on--change="actions.handleQuantityInputChange" />';
 		$quantity_html     = preg_replace( $pattern_input, $replacement_input, $quantity_html );
@@ -31,7 +27,7 @@ class Utils {
 		$pattern_stepper = '/(<input[^>]*id="quantity_[^\"]*"[^>]*data-wp-on--change="actions.handleQuantityInputChange"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
@@ -73,7 +69,7 @@ class Utils {
 			/**
 			 * Filter the minimum quantity value allowed for the product.
 			 *
-			 * @since 2.0.0
+			 * @since 10.1.0
 			 * @param int        $min_value Minimum quantity value.
 			 * @param WC_Product $product   Product object.
 			 */
@@ -81,7 +77,7 @@ class Utils {
 			/**
 			 * Filter the maximum quantity value allowed for the product.
 			 *
-			 * @since 2.0.0
+			 * @since 10.1.0
 			 * @param int        $max_value Maximum quantity value.
 			 * @param WC_Product $product   Product object.
 			 */
@@ -116,18 +112,18 @@ class Utils {
 		if ( $child_product_id ) {
 			$context['childProductId'] = $child_product_id;
 		}
-		$context_json = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
+		$context_attribute = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
 
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
 				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
 				$wrapper_attributes,
-				$context_json,
+				$context_attribute,
 				$quantity_html
 			);
 		}
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_json . '>' . $quantity_html . '</div>';
+		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_attribute . '>' . $quantity_html . '</div>';
 	}
 
 	/**
