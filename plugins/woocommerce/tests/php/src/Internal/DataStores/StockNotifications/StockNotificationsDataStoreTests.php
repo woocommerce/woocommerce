@@ -67,6 +67,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->set_date_last_attempt( '2024-06-01 00:00:00' );
 		$notification->set_date_cancelled( '2024-07-01 00:00:00' );
 		$notification->set_cancellation_source( NotificationCancellationSource::USER );
+		$notification->set_email_link_action_key( '123' );
 
 		$notification->save();
 
@@ -83,6 +84,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-06-01 00:00:00', $notification->get_date_last_attempt()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '2024-07-01 00:00:00', $notification->get_date_cancelled()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( NotificationCancellationSource::USER, $notification->get_cancellation_source() );
+		$this->assertEquals( '123', $notification->get_email_link_action_key() );
 	}
 
 	/**
@@ -121,6 +123,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( null, $notification->get_date_last_attempt() );
 		$this->assertEquals( null, $notification->get_date_cancelled() );
 		$this->assertEquals( null, $notification->get_cancellation_source() );
+		$this->assertEquals( null, $notification->get_email_link_action_key() );
 		$notification->set_product_id( 1 );
 		$notification->set_user_id( 1 );
 		$notification->save();
@@ -137,6 +140,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( null, $notification->get_date_last_attempt() );
 		$this->assertEquals( null, $notification->get_date_cancelled() );
 		$this->assertEquals( null, $notification->get_cancellation_source() );
+		$this->assertEquals( null, $notification->get_email_link_action_key() );
 	}
 
 	/**
@@ -166,6 +170,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->set_date_last_attempt( '2024-01-04 00:00:00' );
 		$notification->set_date_cancelled( '2024-01-05 00:00:00' );
 		$notification->set_cancellation_source( NotificationCancellationSource::ADMIN );
+		$notification->set_email_link_action_key( '123' );
 		$notification->save();
 
 		// Verify all properties were updated correctly.
@@ -178,6 +183,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-01-04 00:00:00', $notification->get_date_last_attempt()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '2024-01-05 00:00:00', $notification->get_date_cancelled()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( NotificationCancellationSource::ADMIN, $notification->get_cancellation_source() );
+		$this->assertEquals( '123', $notification->get_email_link_action_key() );
 
 		// Verify modified date is updated.
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_created()->format( 'Y-m-d H:i:s' ) );

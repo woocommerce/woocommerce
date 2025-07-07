@@ -37,17 +37,18 @@ class Notification extends \WC_Data {
 	 * @var array
 	 */
 	protected $data = array(
-		'status'              => NotificationStatus::PENDING,
-		'product_id'          => 0,
-		'user_id'             => 0,
-		'user_email'          => '',
-		'date_created'        => null,
-		'date_confirmed'      => null,
-		'date_modified'       => null,
-		'date_notified'       => null,
-		'date_last_attempt'   => null,
-		'date_cancelled'      => null,
-		'cancellation_source' => null,
+		'status'               => NotificationStatus::PENDING,
+		'product_id'           => 0,
+		'user_id'              => 0,
+		'user_email'           => '',
+		'date_created'         => null,
+		'date_confirmed'       => null,
+		'date_modified'        => null,
+		'date_notified'        => null,
+		'date_last_attempt'    => null,
+		'date_cancelled'       => null,
+		'cancellation_source'  => null,
+		'email_link_action_key' => '',
 	);
 
 	/**
@@ -184,6 +185,10 @@ class Notification extends \WC_Data {
 	 */
 	public function get_cancellation_source( $context = 'view' ) {
 		return $this->get_prop( 'cancellation_source', $context );
+	}
+
+	public function get_email_link_action_key( $context = 'view' ) {
+		return $this->get_prop( 'email_link_action_key', $context );
 	}
 
 	/**
@@ -324,6 +329,10 @@ class Notification extends \WC_Data {
 		}
 
 		$this->set_prop( 'cancellation_source', $cancellation_source );
+	}
+
+	public function set_email_link_action_key( $hashed_key ) {
+		$this->set_prop( 'email_link_action_key', $hashed_key );
 	}
 
 	/*
