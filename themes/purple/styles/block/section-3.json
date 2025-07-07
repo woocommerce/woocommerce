@@ -18,6 +18,11 @@
                 "color": {
                     "text": "color-mix(in srgb, currentColor 25%, transparent)"
                 }
+            },
+            "core/site-tagline": {
+                "color": {
+                    "text": "var(--wp--preset--color--theme-1)"
+                }
             }
         },
         "elements": {

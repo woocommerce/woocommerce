@@ -357,6 +357,11 @@
 					"text": "var(--wp--preset--color--theme-6)"
 				}
 			},
+			"core/site-tagline": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
 			"core/site-title": {
 				"elements": {
 					"link": {
