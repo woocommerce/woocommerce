@@ -192,21 +192,19 @@ class Renderer {
 
 		foreach ( $all_tags as $tag ) {
 			$token = $tag->get_token();
-			// Create a unique placeholder for each personalization tag.
-			$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter . '_' . md5( $token );
+			// Create a unique placeholder for each personalization tag (counter is sufficient).
+			$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
 			// Store the full HTML comment format.
 			$this->personalization_tag_placeholders[ $placeholder ] = '<!--' . $token . '-->';
 			++$counter;
 		}
 
-		// Replace all personalization tags with placeholders.
-		foreach ( $this->personalization_tag_placeholders as $placeholder => $html_comment ) {
-			// Escape the HTML comment for safe regex usage.
-			$escaped_html_comment = preg_quote( $html_comment, '/' );
-			// Match the exact HTML comment format.
-			$pattern  = '/' . $escaped_html_comment . '/';
-			$template = preg_replace( $pattern, $placeholder, $template );
-		}
+		// Replace all personalization tags with placeholders (exact string replacement).
+		$template = str_replace(
+			array_values( $this->personalization_tag_placeholders ),
+			array_keys( $this->personalization_tag_placeholders ),
+			$template
+		);
 
 		return $template;
 	}
