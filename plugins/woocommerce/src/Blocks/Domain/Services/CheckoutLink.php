@@ -99,48 +99,49 @@ class CheckoutLink {
 
 			if ( strpos( $raw_product, ':' ) !== false ) {
 
-				list( $product_id, $product_data ) = explode( ':', $raw_product );
-				
-				if ( is_numeric( $product_data ) ) {
-					$qty = $product_data;
-				} else {
+				list( $product_id, $qty, $product_data ) = array_pad( explode( ':', $raw_product, 3 ), 3, false );
+
+				// If the quantity is not-numeric, it may be key=value pairs.
+				if ( ! is_numeric( $qty ) ) {
+					$product_data = $qty;
+					$qty          = 1;
+				}
+
+				if ( $product_data ) {
+
 					// Parse key=value pairs separated by semicolons
 					$pairs = explode( ';', $product_data );
 
-					$cart_item_data  = [];
+					$cart_item_data = [];
 
 					foreach ( $pairs as $pair ) {
 						if ( strpos( $pair, '=' ) === false ) {
 							continue;
 						}
 						list( $key, $value ) = explode( '=', $pair, 2 );
-						$key   = trim( $key );
-						$value = trim( $value );
+						$key                 = trim( $key );
+						$value               = trim( $value );
 
 						$cart_item_data[ $key ] = wc_clean( $value );
 					}
-
-					$qty = $cart_item_data['qty'] ?? 1;
-
 				}
-
 			} else {
 				$product_id = $raw_product;
 				$qty        = 1;
 			}
 
 			if ( ! is_numeric( $product_id ) ) {
-				// If the product ID is not numeric, it may be a SKU
+				// If the product ID is not numeric, it may be a SKU.
 				$product_id = wc_get_product_id_by_sku( wc_clean( $product_id ) );
-			}		
-			
+			}
+
 			$product_id = absint( $product_id );
 			$qty        = absint( $qty );
 
 			if ( ! $product_id || ! $qty ) {
 				continue;
 			}
-			
+
 			$variation = array_map(
 				function ( $key, $value ) {
 					return [
@@ -152,13 +153,11 @@ class CheckoutLink {
 				$cart_item_data
 			);
 
-			$products[ $product_id ] = array_merge(
-				[
-					'quantity'  => $qty,
-					'variation' => $variation,
-				],
-				$cart_item_data,
-			);
+			$products[ $product_id ] = [
+				'quantity'       => $qty,
+				'variation'      => $variation,
+				'cart_item_data' => $cart_item_data,
+			];
 		}
 
 		return $products;
@@ -189,7 +188,7 @@ class CheckoutLink {
 		foreach ( $products as $product_id => $product_data ) {
 			try {
 				$controller->add_to_cart(
-					array_merge( 
+					array_merge(
 						[ 'id' => $product_id ],
 						$product_data
 					)
