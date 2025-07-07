@@ -96,7 +96,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 									<div class="wc-block-cart-item__wrap">					
 										<span data-wp-bind--hidden="!state.isProductHiddenFromCatalog" data-wp-text="state.cartItemName" class="wc-block-components-product-name"></span>
 										<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-text="state.cartItemName" data-wp-bind--href="state.cartItem.permalink" class="wc-block-components-product-name"></a>
-										<div data-wp-bind--hidden="!state.cartItem.show_backorder_badge" class="wc-block-components-product-badge wc-block-components-product-backorder-badge" hidden>
+										<div data-wp-bind--hidden="!state.cartItem.show_backorder_badge" class="wc-block-components-product-badge wc-block-components-product-backorder-badge">
 											<?php echo esc_html( $available_on_backorder_label ); ?>
 										</div>
 										<div class="wc-block-cart-item__prices">
