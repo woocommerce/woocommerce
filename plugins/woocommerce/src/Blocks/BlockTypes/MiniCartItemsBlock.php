@@ -59,6 +59,9 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 
 		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
 
+		/* translators: %d stock amount (number of items in stock for product) */
+		$low_in_stock_label = __( '%d left in stock', 'woocommerce' );
+
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			array(
@@ -66,6 +69,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 				'increaseQuantityLabel'    => $increase_quantity_label,
 				'quantityDescriptionLabel' => $quantity_description_label,
 				'removeFromCartLabel'      => $remove_from_cart_label,
+				'lowInStockLabel'          => $low_in_stock_label,
 			)
 		);
 
@@ -98,6 +102,12 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 										<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-text="state.cartItemName" data-wp-bind--href="state.cartItem.permalink" class="wc-block-components-product-name"></a>
 										<div data-wp-bind--hidden="!state.cartItem.show_backorder_badge" class="wc-block-components-product-badge wc-block-components-product-backorder-badge">
 											<?php echo esc_html( $available_on_backorder_label ); ?>
+										</div>
+										<div 
+											class="wc-block-components-product-badge wc-block-components-product-low-stock-badge"
+											data-wp-bind--hidden="!state.isLowInStockVisible"
+											data-wp-text="state.lowInStockLabel"
+										>
 										</div>
 										<div class="wc-block-cart-item__prices">
 											<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
