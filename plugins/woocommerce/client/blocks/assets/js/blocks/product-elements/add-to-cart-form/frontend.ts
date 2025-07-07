@@ -45,10 +45,7 @@ const getQuantityStateInfo = () => {
 		step: 1,
 		max: null,
 	};
-	const currentQuantity =
-		productType === 'grouped' && childProductId
-			? quantity?.[ childProductId ] || 0
-			: quantity?.[ productId ] || 0;
+	const currentQuantity = quantity?.[ id ] || 0;
 	return { constraints, currentQuantity };
 };
 
@@ -124,17 +121,11 @@ store( 'woocommerce/add-to-cart-form', {
 			} = inputData;
 			const newValue = currentValue + step;
 			if ( maxValue === null || newValue <= maxValue ) {
-				if ( childProductId ) {
-					context.quantity = {
-						...context.quantity,
-						[ childProductId ]: newValue,
-					};
-				} else {
-					context.quantity = {
-						...context.quantity,
-						[ context.productId ]: newValue,
-					};
-				}
+				const id = childProductId || context.productId;
+				context.quantity = {
+					...context.quantity,
+					[ id ]: newValue,
+				};
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -155,17 +146,11 @@ store( 'woocommerce/add-to-cart-form', {
 			const newValue = currentValue - step;
 
 			if ( newValue >= minValue ) {
-				if ( childProductId ) {
-					context.quantity = {
-						...context.quantity,
-						[ childProductId ]: newValue,
-					};
-				} else {
-					context.quantity = {
-						...context.quantity,
-						[ context.productId ]: newValue,
-					};
-				}
+				const id = childProductId || context.productId;
+				context.quantity = {
+					...context.quantity,
+					[ id ]: newValue,
+				};
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -179,17 +164,11 @@ store( 'woocommerce/add-to-cart-form', {
 				? parseInt( childProductIdMatch[ 1 ], 10 )
 				: undefined;
 			const context = getContext< Context >();
-			if ( childProductId ) {
-				context.quantity = {
-					...context.quantity,
-					[ childProductId ]: isNaN( value ) ? 0 : value,
-				};
-			} else {
-				context.quantity = {
-					...context.quantity,
-					[ context.productId ]: isNaN( value ) ? 0 : value,
-				};
-			}
+			const id = childProductId || context.productId;
+			context.quantity = {
+				...context.quantity,
+				[ id ]: isNaN( value ) ? 0 : value,
+			};
 		},
 	},
 } );
