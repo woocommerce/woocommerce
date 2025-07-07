@@ -14,6 +14,8 @@ use WP_REST_Response;
 
 /**
  * Controller for the WooPayments-specific REST endpoints to service the Payments settings page.
+ *
+ * @internal
  */
 class WooPaymentsRestController extends RestApiControllerBase {
 

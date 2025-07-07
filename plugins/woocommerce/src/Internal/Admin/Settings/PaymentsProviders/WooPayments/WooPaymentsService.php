@@ -17,6 +17,8 @@ use WP_Http;
 defined( 'ABSPATH' ) || exit;
 /**
  * WooPayments-specific Payments settings page service class.
+ *
+ * @internal
  */
 class WooPaymentsService {
 
