@@ -57,7 +57,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		// translators: Save as in "Save $x".
 		$save_label = __( 'Save', 'woocommerce' );
 
-		$available_on_backorder_label  = __( 'Available on backorder', 'woocommerce' );
+		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
