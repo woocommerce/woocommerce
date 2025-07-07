@@ -242,7 +242,7 @@ jobs:
               action: 'feature-freeze',
               version: '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}',
               build_zip: '${{ needs.modify-zip-version.outputs.artifact_url }}',
-              post_status: 'publish'
+              post_status: 'draft'
             };
 
             const requestBody = JSON.stringify({
