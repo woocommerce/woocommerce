@@ -380,5 +380,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Resolved SCSS load order warnings between Payments Settings and Launch Your Store chunks. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
 * Enhancement - Enhanced styling of NOX In-context sidebar stepper for visual consistency and improved contrast. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
 * Enhancement - Use NOX-specific styles in PMs selection step header instead of global WooCommerce classes. [#59059](https://github.com/woocommerce/woocommerce/pull/59059)
+* Fix - Check to see if customer object is defined before calling `get_is_vat_exempt` [#59397](https://github.com/woocommerce/woocommerce/pull/59397)
+* Fix - Fixed brands shortcode being empty when `show_empty` was set to `false`. [#59395](https://github.com/woocommerce/woocommerce/pull/59395)
+* Fix - Improved styling of payment methods selection screen for better cross-browser support. [#59291](https://github.com/woocommerce/woocommerce/pull/59291)
+* Fix - Product Gallery: fix incorrectly handled swiping on mobile devices [#59350](https://github.com/woocommerce/woocommerce/pull/59350)
+* Add - Make it possible to reset an account directly from the NOX step [#59366](https://github.com/woocommerce/woocommerce/pull/59366)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
