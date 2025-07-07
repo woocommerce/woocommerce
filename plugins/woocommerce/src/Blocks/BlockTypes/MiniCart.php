@@ -433,7 +433,7 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		/**
-		 * In the cart and checkout pages, the block is either render hidden or remove.
+		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
 		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
