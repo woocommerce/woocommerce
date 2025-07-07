@@ -334,10 +334,13 @@ class AddToCartForm extends AbstractBlock {
 		);
 
 		if ( $is_stepper_style ) {
-			$context = array();
+			$context    = array();
+			$product_id = $product->get_id();
+
 			if ( $product->is_type( 'grouped' ) ) {
 				$context['groupedProductIds']   = array();
 				$context['quantityConstraints'] = array();
+
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $child_product->is_purchasable() && $child_product->is_in_stock() && ! $child_product->has_options() ) {
@@ -347,9 +350,9 @@ class AddToCartForm extends AbstractBlock {
 				}
 			} else {
 				$context['quantityConstraints'] = array(
-					$product->get_id() => $this->get_quantity_constraints( $product ),
+					$product_id => $this->get_quantity_constraints( $product ),
 				);
-				$context['productId']           = $product->get_id();
+				$context['productId']           = $product_id;
 				$context['productType']         = $product->get_type();
 			}
 		}
