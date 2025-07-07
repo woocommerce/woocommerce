@@ -378,6 +378,15 @@ const { state: cartItemState } = store(
 					cartItemState.cartItem.quantity > 1
 				);
 			},
+
+			get isProductHiddenFromCatalog(): boolean {
+				const { catalog_visibility: catalogVisibility } =
+					cartItemState.cartItem;
+				return (
+					catalogVisibility === 'hidden' ||
+					catalogVisibility === 'search'
+				);
+			},
 		},
 
 		actions: {

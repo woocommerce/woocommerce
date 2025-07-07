@@ -62,24 +62,27 @@ class FilterData {
 			return $cached_data;
 		}
 
-		global $wpdb;
-
+		$results     = array();
 		$product_ids = $this->get_cached_product_ids( $query_vars );
 
-		$price_filter_sql = "
-		SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
-		FROM {$wpdb->wc_product_meta_lookup}
-		WHERE product_id IN ( {$product_ids} )
-		";
+		if ( $product_ids ) {
+			global $wpdb;
 
-		/**
-		 * We can't use $wpdb->prepare() here because using %s with
-		 * $wpdb->prepare() for a subquery won't work as it will escape the SQL
-		 * query.
-		 * We're using the query as is, same as Core does.
-		 */
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$results = (array) $wpdb->get_row( $price_filter_sql );
+			$price_filter_sql = "
+			SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
+			FROM {$wpdb->wc_product_meta_lookup}
+			WHERE product_id IN ( {$product_ids} )
+			";
+
+			/**
+			* We can't use $wpdb->prepare() here because using %s with
+			* $wpdb->prepare() for a subquery won't work as it will escape the SQL
+			* query.
+			* We're using the query as is, same as Core does.
+			*/
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$results = (array) $wpdb->get_row( $price_filter_sql );
+		}
 
 		/**
 		 * Filters the product filter data before it is returned.
@@ -124,40 +127,42 @@ class FilterData {
 			return $cached_data;
 		}
 
+		$results     = array();
 		$product_ids = $this->get_cached_product_ids( $query_vars );
 
-		global $wpdb;
-		$stock_status_counts = array();
+		if ( $product_ids ) {
+			global $wpdb;
 
-		foreach ( $statuses as $status ) {
-			$stock_status_count_sql = "
-				SELECT COUNT( DISTINCT posts.ID ) as status_count
-				FROM {$wpdb->posts} as posts
-				INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-				AND postmeta.meta_key = '_stock_status'
-				AND postmeta.meta_value = '" . esc_sql( $status ) . "'
-				WHERE posts.ID IN ( {$product_ids} )
-			";
+			foreach ( $statuses as $status ) {
+				$stock_status_count_sql = "
+					SELECT COUNT( DISTINCT posts.ID ) as status_count
+					FROM {$wpdb->posts} as posts
+					INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+					AND postmeta.meta_key = '_stock_status'
+					AND postmeta.meta_value = '" . esc_sql( $status ) . "'
+					WHERE posts.ID IN ( {$product_ids} )
+				";
 
-			/**
-			 * We can't use $wpdb->prepare() here because using %s with
-			 * $wpdb->prepare() for a subquery won't work as it will escape the
-			 * SQL query.
-			 * We're using the query as is, same as Core does.
-			 */
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$result                         = $wpdb->get_row( $stock_status_count_sql );
-			$stock_status_counts[ $status ] = $result->status_count;
+				/**
+				* We can't use $wpdb->prepare() here because using %s with
+				* $wpdb->prepare() for a subquery won't work as it will escape the
+				* SQL query.
+				* We're using the query as is, same as Core does.
+				*/
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$result             = $wpdb->get_row( $stock_status_count_sql );
+				$results[ $status ] = $result->status_count;
+			}
 		}
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
 		 */
-		$stock_status_counts = apply_filters( 'woocommerce_product_filter_data', $stock_status_counts, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$this->set_cache( $transient_key, $stock_status_counts );
+		$this->set_cache( $transient_key, $results );
 
-		return $stock_status_counts;
+		return $results;
 	}
 
 	/**
@@ -183,28 +188,31 @@ class FilterData {
 			return $cached_data;
 		}
 
-		global $wpdb;
-
+		$results     = array();
 		$product_ids = $this->get_cached_product_ids( $query_vars );
 
-		$rating_count_sql = "
-			SELECT COUNT( DISTINCT product_id ) as product_count, ROUND( average_rating, 0 ) as rounded_average_rating
-			FROM {$wpdb->wc_product_meta_lookup}
-			WHERE product_id IN ( {$product_ids} )
-			AND average_rating > 0
-			GROUP BY rounded_average_rating
-			ORDER BY rounded_average_rating DESC
-		";
+		if ( $product_ids ) {
+			global $wpdb;
 
-		/**
-		 * We can't use $wpdb->prepare() here because using %s with
-		 * $wpdb->prepare() for a subquery won't work as it will escape the
-		 * SQL query.
-		 * We're using the query as is, same as Core does.
-		 */
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$results = $wpdb->get_results( $rating_count_sql );
-		$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
+			$rating_count_sql = "
+				SELECT COUNT( DISTINCT product_id ) as product_count, ROUND( average_rating, 0 ) as rounded_average_rating
+				FROM {$wpdb->wc_product_meta_lookup}
+				WHERE product_id IN ( {$product_ids} )
+				AND average_rating > 0
+				GROUP BY rounded_average_rating
+				ORDER BY rounded_average_rating DESC
+			";
+
+			/**
+			* We can't use $wpdb->prepare() here because using %s with
+			* $wpdb->prepare() for a subquery won't work as it will escape the
+			* SQL query.
+			* We're using the query as is, same as Core does.
+			*/
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$results = $wpdb->get_results( $rating_count_sql );
+			$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
+		}
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
@@ -240,12 +248,14 @@ class FilterData {
 			return $cached_data;
 		}
 
-		global $wpdb;
-
+		$results     = array();
 		$product_ids = $this->get_cached_product_ids( $query_vars );
 
-		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
-		$attribute_count_sql     = "
+		if ( $product_ids ) {
+			global $wpdb;
+
+			$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
+			$attribute_count_sql     = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
 			FROM {$wpdb->posts} AS posts
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
@@ -256,15 +266,16 @@ class FilterData {
 			GROUP BY terms.term_id
 		";
 
-		/**
-		 * We can't use $wpdb->prepare() here because using %s with
-		 * $wpdb->prepare() for a subquery won't work as it will escape the
-		 * SQL query.
-		 * We're using the query as is, same as Core does.
-		 */
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$results = $wpdb->get_results( $attribute_count_sql );
-		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+			/**
+			 * We can't use $wpdb->prepare() here because using %s with
+			 * $wpdb->prepare() for a subquery won't work as it will escape the
+			 * SQL query.
+			 * We're using the query as is, same as Core does.
+			 */
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$results = $wpdb->get_results( $attribute_count_sql );
+			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+		}
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.

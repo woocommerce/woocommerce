@@ -3,14 +3,14 @@ $thumbnails-gradient-size: 20%;
 $thumbnails-gap: 2%;
 $dialog-padding: 20px;
 
-.wc-block-product-gallery-large-image {
+:where(.wc-block-product-gallery-large-image) {
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
 	aspect-ratio: 1 / 1;
 	overflow: hidden;
 
-	.wc-block-product-gallery-large-image__container {
+	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
 		overflow: hidden;
 		align-items: center;
@@ -18,7 +18,7 @@ $dialog-padding: 20px;
 		padding: 0;
 	}
 
-	.wc-block-product-gallery-large-image__wrapper {
+	:where(.wc-block-product-gallery-large-image__wrapper) {
 		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
@@ -29,11 +29,13 @@ $dialog-padding: 20px;
 		justify-content: center;
 	}
 
-	.wc-block-components-product-image {
+	// These rules are overriding styles from WooCommerce core, that's why we
+	// can't use `:where()` and they need a higher specificity.
+	.wc-block-components-product-image.wc-block-components-product-image {
 		margin: 0;
 		height: 100%;
 
-		a {
+		:where(a) {
 			height: 100%;
 		}
 
@@ -44,42 +46,40 @@ $dialog-padding: 20px;
 		}
 	}
 
-	.wc-block-woocommerce-product-gallery-large-image__image {
+	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
 		display: block;
 		position: relative;
 		transition: all 0.1s linear;
 		z-index: 1;
 
 		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
-		&.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click {
+		&:where(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click) {
 			cursor: pointer;
 		}
 
-		&.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom {
+		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
 			cursor: zoom-in;
 		}
-
-		/**
-		* ============================================================
-		* START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		* ============================================================
-		*/
-
-		&--legacy {
-			margin: 0 auto;
-			aspect-ratio: 1 / 1;
-			object-fit: contain;
-			width: 100%;
-		}
-
-		/**
-		* ==========================================================
-		* END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		* ==========================================================
-		*/
 	}
 
-	.wc-block-product-gallery-large-image__inner-blocks {
+	/**
+	* ============================================================
+	* START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
+	* ============================================================
+	*/
+	:where(.wc-block-woocommerce-product-gallery-large-image__image--legacy) {
+		margin: 0 auto;
+		aspect-ratio: 1 / 1;
+		object-fit: contain;
+		width: 100%;
+	}
+	/**
+	* ==========================================================
+	* END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
+	* ==========================================================
+	*/
+
+	:where(.wc-block-product-gallery-large-image__inner-blocks) {
 		display: flex;
 		flex-direction: column;
 		position: absolute;
@@ -95,77 +95,78 @@ $dialog-padding: 20px;
 	}
 }
 
-.wc-block-product-gallery-large-image-next-previous {
+:where(.wc-block-product-gallery-large-image-next-previous) {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	width: 100%;
 	height: 100%;
 
-	&__icon {
-		color: inherit;
-	}
-
-	// Icons are centred but they are perceived off hence adjusting with padding.
-	&__icon--left {
-		padding: 2px 2px 0 0;
-	}
-
-	&__icon--right {
-		padding: 2px 0 0 2px;
-	}
-
-	&__button {
-		cursor: pointer;
-		z-index: 3;
-		pointer-events: all;
-		border: none;
-		width: 40px;
-		height: 40px;
-		font-size: 12px;
-		padding: 0;
-		background: #fff;
-		outline-offset: -2px;
-
-		&[aria-disabled="true"] {
-			.wc-block-product-gallery-large-image-next-previous__icon {
-				opacity: 30%;
-			}
-			cursor: not-allowed;
-		}
-	}
-
-	&.alignleft {
+	&:where(.alignleft) {
 		justify-content: flex-start;
 		gap: 0;
 	}
 
-	&.alignright {
+	&:where(.alignright) {
 		justify-content: flex-end;
 		gap: 0;
 	}
 
-	&.aligncenter {
+	&:where(.aligncenter) {
 		justify-content: center;
 		gap: 0;
 	}
 
-	&.aligntop {
+	&:where(.aligntop) {
 		align-items: flex-start;
 	}
 
-	&.alignbottom {
+	&:where(.alignbottom) {
 		align-items: flex-end;
 	}
 }
 
+
+:where(.wc-block-product-gallery-large-image-next-previous__icon) {
+	color: inherit;
+}
+
+// Icons are centred but they are perceived off hence adjusting with padding.
+:where(.wc-block-product-gallery-large-image-next-previous__icon--left) {
+	padding: 2px 2px 0 0;
+}
+
+:where(.wc-block-product-gallery-large-image-next-previous__icon--right) {
+	padding: 2px 0 0 2px;
+}
+
+:where(.wc-block-product-gallery-large-image-next-previous__button) {
+	cursor: pointer;
+	z-index: 3;
+	pointer-events: all;
+	border: none;
+	width: 40px;
+	height: 40px;
+	font-size: 12px;
+	padding: 0;
+	background: #fff;
+	outline-offset: -2px;
+}
+
+:where(.wc-block-product-gallery-large-image-next-previous__button[aria-disabled="true"]) {
+	:where(.wc-block-product-gallery-large-image-next-previous__icon) {
+		opacity: 30%;
+	}
+	cursor: not-allowed;
+}
+
 @mixin vertical-thumbnails {
-	.wc-block-product-gallery-thumbnails__scrollable {
+	:where(.wc-block-product-gallery-thumbnails__scrollable) {
 		flex-direction: column;
 	}
 
 	@for $i from 10 through 50 {
-		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
+		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
 			flex-basis: calc($i * 1%);
 			aspect-ratio: 1 / calc(100 / $i);
 		}
@@ -173,106 +174,104 @@ $dialog-padding: 20px;
 }
 
 @mixin horizontal-thumbnails {
-	.wc-block-product-gallery-thumbnails__thumbnail {
+	:where(.wc-block-product-gallery-thumbnails__thumbnail) {
 		height: 100%;
 		width: auto;
 		flex: 0 0 auto;
 	}
 
-	.wc-block-product-gallery-thumbnails__thumbnail__image {
+	:where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
 		height: 100%;
 		width: auto;
 	}
 
-	.wc-block-product-gallery-thumbnails__scrollable {
+	:where(.wc-block-product-gallery-thumbnails__scrollable) {
 		flex-direction: row;
 		scrollbar-width: auto;
 		overflow-y: hidden;
 	}
 }
 
-.wc-block-product-gallery-thumbnails {
+:where(.wc-block-product-gallery-thumbnails) {
 	position: relative;
 
 	// Use the vertical thumbnails as a default. The default layout attributes from block.json are not set
 	// until manipulated hence the need for the mixin.
 	@include vertical-thumbnails;
 
-	&__scrollable {
-		height: 100%;
-		display: flex;
-		gap: $thumbnails-gap;
-		overflow: auto;
-		scrollbar-width: none;
-		pointer-events: auto;
+	$gradient-size: 14%;
+	$gradient-mid-step-size: 6%;
+	$gradient-mid-step: rgba(0, 0, 0, 0.3);
+
+	$gradient: transparent 0, $gradient-mid-step $gradient-mid-step-size,
+		rgb(0, 0, 0) $gradient-size;
+	$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size),
+		$gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
+
+	&.wc-block-product-gallery-thumbnails--overflow-top {
+		mask-image: linear-gradient(to bottom, $gradient);
 	}
 
-	&__thumbnail {
-		display: flex;
+	&.wc-block-product-gallery-thumbnails--overflow-bottom {
+		mask-image: linear-gradient(to top, $gradient);
 	}
 
-	&__thumbnail__image {
-		cursor: pointer;
-		max-width: 100%;
-		max-height: 100%;
-		object-fit: cover;
-		width: fit-content;
-		outline-offset: -2px;
-
-		&--is-active {
-			pointer-events: none;
-			cursor: default;
-			filter: brightness(0.8);
-		}
+	&.wc-block-product-gallery-thumbnails--overflow-top.wc-block-product-gallery-thumbnails--overflow-bottom {
+		mask-image: linear-gradient(to bottom, $gradient, $gradient-end);
 	}
 
-	&.wc-block-product-gallery-thumbnails--overflow {
-		$gradient-size: 14%;
-		$gradient-mid-step-size: 6%;
-		$gradient-mid-step: rgba(0, 0, 0, 0.3);
-
-		$gradient: transparent 0, $gradient-mid-step $gradient-mid-step-size,
-			rgb(0, 0, 0) $gradient-size;
-		$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size),
-			$gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
-
-		&-top {
-			mask-image: linear-gradient(to bottom, $gradient);
-		}
-
-		&-bottom {
-			mask-image: linear-gradient(to top, $gradient);
-		}
-
-		&-top.wc-block-product-gallery-thumbnails--overflow-bottom {
-			mask-image: linear-gradient(to bottom, $gradient, $gradient-end);
-		}
-
-		&-left {
-			mask-image: linear-gradient(to right, $gradient);
-		}
-
-		&-right {
-			mask-image: linear-gradient(to left, $gradient);
-		}
-
-		&-left.wc-block-product-gallery-thumbnails--overflow-right {
-			mask-image: linear-gradient(to right, $gradient, $gradient-end);
-		}
+	&.wc-block-product-gallery-thumbnails--overflow-left {
+		mask-image: linear-gradient(to right, $gradient);
 	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-right {
+		mask-image: linear-gradient(to left, $gradient);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-left.wc-block-product-gallery-thumbnails--overflow-right {
+		mask-image: linear-gradient(to right, $gradient, $gradient-end);
+	}
+}
+
+:where(.wc-block-product-gallery-thumbnails__scrollable) {
+	height: 100%;
+	display: flex;
+	gap: $thumbnails-gap;
+	overflow: auto;
+	scrollbar-width: none;
+	pointer-events: auto;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail) {
+	display: flex;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
+	cursor: pointer;
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: cover;
+	width: fit-content;
+	outline-offset: -2px;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
+	pointer-events: none;
+	cursor: default;
+	filter: brightness(0.8);
 }
 
 // Percentage width
-.is-horizontal .wc-block-product-gallery-thumbnails {
+:where(.is-horizontal .wc-block-product-gallery-thumbnails) {
 	@include vertical-thumbnails;
 }
 
-.is-vertical .wc-block-product-gallery-thumbnails {
+:where(.is-vertical .wc-block-product-gallery-thumbnails) {
 	@include horizontal-thumbnails;
 
 	// These are min - max range values for thumbnails size.
 	@for $i from 10 through 50 {
-		&.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i} {
+		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
 			width: 100%;
 			height: calc($i * 1%);
 			aspect-ratio: calc(100 / $i) / 1;
@@ -280,11 +279,11 @@ $dialog-padding: 20px;
 	}
 }
 
-body.wc-block-product-gallery-dialog-open {
+:where(body.wc-block-product-gallery-dialog-open) {
 	overflow: hidden;
 }
 
-.wc-block-product-gallery-dialog {
+:where(.wc-block-product-gallery-dialog) {
 	height: 100vh;
 	width: 100vw;
 	padding: 0;
@@ -296,59 +295,59 @@ body.wc-block-product-gallery-dialog-open {
 	z-index: 1000;
 	overflow: hidden;
 
-	.admin-bar & {
+	:where(.admin-bar) & {
 		// Subtract the admin bar height.
 		height: calc(100vh - $admin-bar-height);
 		top: $admin-bar-height;
 	}
+}
 
-	&__close-button {
-		padding: 5px;
-		position: absolute;
-		right: 25px;
-		top: 25px;
-		background: none;
-		border: none;
-		cursor: pointer;
-	}
+:where(.wc-block-product-gallery-dialog__close-button) {
+	padding: 5px;
+	position: absolute;
+	right: 25px;
+	top: 25px;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
 
-	&__content {
-		// Subtract the top and bottom padding.
-		height: calc(100vh - ($dialog-padding * 2));
-		overflow: hidden;
+:where(.wc-block-product-gallery-dialog__content) {
+	// Subtract the top and bottom padding.
+	height: calc(100vh - ($dialog-padding * 2));
+	overflow: hidden;
+	padding: 20px 0;
+
+	@media (min-width: 765px) {
 		padding: 20px 0;
-
-		@media (min-width: 765px) {
-			padding: 20px 0;
-		}
-
-		.admin-bar & {
-			// Subtract the admin bar height.
-			height: calc(100vh - ($dialog-padding * 2) - $admin-bar-height);
-		}
 	}
 
-	&__images-container {
-		height: 100%;
-		overflow-y: auto;
-		box-sizing: border-box;
-		padding: 3px 0;
+	:where(.admin-bar) & {
+		// Subtract the admin bar height.
+		height: calc(100vh - ($dialog-padding * 2) - $admin-bar-height);
+	}
+}
+
+:where(.wc-block-product-gallery-dialog__images-container) {
+	height: 100%;
+	overflow-y: auto;
+	box-sizing: border-box;
+	padding: 3px 0;
+}
+
+:where(.wc-block-product-gallery-dialog__images) {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	:where(img) {
+		max-width: 100%;
+		height: auto;
+		margin-bottom: 20px;
 	}
 
-	&__images {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		img {
-			max-width: 100%;
-			height: auto;
-			margin-bottom: 20px;
-
-			&:last-child {
-				margin-bottom: 0;
-			}
-		}
+	:where(img:last-child) {
+		margin-bottom: 0;
 	}
 }
 
@@ -357,18 +356,20 @@ body.wc-block-product-gallery-dialog-open {
 // - Thumbnails appear below the main gallery image and are arranged horizontally in a row
 // - Next/Previous buttons are hidden
 @include breakpoint("<600px") {
-	.is-vertical.wc-block-product-gallery,
-	.is-horizontal.wc-block-product-gallery,
-	.wc-block-product-gallery {
+	:where(.is-vertical.wc-block-product-gallery),
+	:where(.is-horizontal.wc-block-product-gallery),
+	:where(.wc-block-product-gallery) {
 		@include horizontal-thumbnails;
 		flex-direction: column;
 
-		.wc-block-product-gallery-large-image-next-previous {
+		// This rule is overriding a `display: flex` from WordPress core, that's
+		// why it needs a higher specificity.
+		.wc-block-product-gallery-large-image-next-previous.wc-block-product-gallery-large-image-next-previous {
 			display: none;
 		}
 
 		// Fixed size for thumbnails on mobile.
-		.wc-block-product-gallery-thumbnails {
+		:where(.wc-block-product-gallery-thumbnails) {
 			order: 1;
 			width: 100%;
 			height: 20%;
