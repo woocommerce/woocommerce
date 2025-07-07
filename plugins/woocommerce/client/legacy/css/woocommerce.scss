@@ -1229,13 +1229,11 @@ p.demo_store,
 		&__input {
 			box-sizing: border-box;
 			width: auto;
-			line-height: 1;
 			white-space: nowrap;
 		}
 
 		&__button {
 			box-sizing: border-box;
-			line-height: 1;
 			white-space: nowrap;
 		}
 
@@ -1247,6 +1245,7 @@ p.demo_store,
 
 	:where(.wc_bis_form__input, .wc_bis_form__button) {
 		padding: .9rem 1.1rem;
+		line-height: 1;
 	}
 
 	/**
