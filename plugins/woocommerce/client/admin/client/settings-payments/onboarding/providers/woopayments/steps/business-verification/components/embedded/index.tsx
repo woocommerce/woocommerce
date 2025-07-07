@@ -64,7 +64,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 				if ( ! publishableKey ) {
 					throw new Error(
 						__(
-							'Unable to start onboarding. If this problem persists, please contact support.',
+							'Unable to start the business verification session. If this problem persists, please contact support.',
 							'woocommerce'
 						)
 					);
@@ -86,7 +86,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 					err instanceof Error
 						? err.message
 						: __(
-								'Unable to start onboarding. If this problem persists, please contact support.',
+								'Unable to start the business verification session. If this problem persists, please contact support.',
 								'woocommerce'
 						  )
 				);
