@@ -3,10 +3,6 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-
-/**
- * External dependencies
- */
 import { useEditorContext } from '@woocommerce/base-context';
 
 /**
@@ -14,20 +10,11 @@ import { useEditorContext } from '@woocommerce/base-context';
  */
 import CheckoutExpressPayment from '../checkout-express-payment';
 
-// Mock the settings
-const mockSettings = {
-	CURRENT_USER_IS_ADMIN: false,
-};
-
-jest.mock( '@woocommerce/settings', () => mockSettings );
-
-// Mock the block data stores
 jest.mock( '@woocommerce/block-data', () => ( {
 	checkoutStore: 'wc/store/checkout',
 	paymentStore: 'wc/store/payment',
 } ) );
 
-// Mock the base context
 jest.mock( '@woocommerce/base-context', () => ( {
 	useEditorContext: jest.fn(),
 	noticeContexts: {
@@ -35,7 +22,13 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	},
 } ) );
 
-// Mock the components
+jest.mock( '@woocommerce/settings', () => ( {
+	CURRENT_USER_IS_ADMIN: false,
+} ) );
+
+// Create a reference to the mocked module
+const mockedSettings = jest.mocked( require( '@woocommerce/settings' ) );
+
 jest.mock( '@woocommerce/blocks-components', () => ( {
 	Title: jest.fn( ( { children, className, headingLevel } ) => (
 		<div
@@ -53,7 +46,6 @@ jest.mock( '@woocommerce/blocks-components', () => ( {
 	) ),
 } ) );
 
-// Mock the skeleton component
 jest.mock( '@woocommerce/base-components/skeleton', () => ( {
 	Skeleton: jest.fn( ( { width, height } ) => (
 		<div data-testid="skeleton" data-width={ width } data-height={ height }>
@@ -62,14 +54,12 @@ jest.mock( '@woocommerce/base-components/skeleton', () => ( {
 	) ),
 } ) );
 
-// Mock the ExpressPaymentMethods component
 jest.mock( '../../express-payment-methods', () =>
 	jest.fn( () => (
 		<div data-testid="express-payment-methods">Express Payment Methods</div>
 	) )
 );
 
-// Mock WordPress data
 jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 	dispatch: jest.fn(),
@@ -84,11 +74,10 @@ describe( 'CheckoutExpressPayment', () => {
 
 	describe( 'No registered express payment methods', () => {
 		beforeEach( () => {
-			// Reset mocks to ensure clean state
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			mockSettings.CURRENT_USER_IS_ADMIN = false;
+			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -112,7 +101,7 @@ describe( 'CheckoutExpressPayment', () => {
 			expect( container.firstChild ).toBeNull();
 		} );
 
-		it( 'should render StoreNoticesContainer when in editor', () => {
+		it( 'should render StoreNoticesContainer when in editor and user is not admin', () => {
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: true,
 			} );
@@ -126,8 +115,8 @@ describe( 'CheckoutExpressPayment', () => {
 			);
 		} );
 
-		it( 'should render StoreNoticesContainer when user is admin', () => {
-			mockSettings.CURRENT_USER_IS_ADMIN = true;
+		it( 'should render StoreNoticesContainer when in editor and user is admin', () => {
+			mockedSettings.CURRENT_USER_IS_ADMIN = true;
 
 			render( <CheckoutExpressPayment /> );
 
@@ -137,11 +126,10 @@ describe( 'CheckoutExpressPayment', () => {
 
 	describe( 'Registered but no valid express payment methods', () => {
 		beforeEach( () => {
-			// Reset mocks to ensure clean state
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			mockSettings.CURRENT_USER_IS_ADMIN = false;
+			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -183,7 +171,7 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render StoreNoticesContainer when user is admin', () => {
-			mockSettings.CURRENT_USER_IS_ADMIN = true;
+			mockedSettings.CURRENT_USER_IS_ADMIN = true;
 
 			render( <CheckoutExpressPayment /> );
 
@@ -214,6 +202,7 @@ describe( 'CheckoutExpressPayment', () => {
 						paypal: { name: 'paypal' },
 					},
 				} );
+			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 		} );
 
 		it( 'should render Express Checkout title', () => {
