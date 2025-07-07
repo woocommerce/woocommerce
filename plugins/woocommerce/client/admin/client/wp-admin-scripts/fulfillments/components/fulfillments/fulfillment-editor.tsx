@@ -29,10 +29,7 @@ import ShipmentViewer from '../shipment-form/shipment-viewer';
 import ShipmentForm from '../shipment-form';
 import { ShipmentFormProvider } from '../../context/shipment-form-context';
 import MetadataViewer from '../metadata-viewer';
-import {
-	getFulfillmentLockState,
-	hasPendingItems,
-} from '../../utils/fulfillment-utils';
+import { getFulfillmentLockState } from '../../utils/fulfillment-utils';
 import LockLabel from '../user-interface/lock-label';
 
 interface FulfillmentEditorProps {
@@ -68,7 +65,6 @@ export default function FulfillmentEditor( {
 	);
 
 	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
-	const hasPendingItemsInOrder = hasPendingItems( order, fulfillments );
 
 	// Reset error when order changes
 	useEffect( () => {
@@ -77,7 +73,11 @@ export default function FulfillmentEditor( {
 
 	const handleChevronClick = () => {
 		if ( isEditing ) return;
-		if ( ! hasPendingItemsInOrder && fulfillments.length === 1 ) return;
+		if (
+			itemsNotInAnyFulfillment.length === 0 &&
+			fulfillments.length === 1
+		)
+			return;
 		if ( ! expanded ) {
 			onExpand();
 		} else {
@@ -122,20 +122,18 @@ export default function FulfillmentEditor( {
 					}
 				</h3>
 				<FulfillmentStatusBadge fulfillment={ fulfillment } />
-				{ hasPendingItemsInOrder ||
-					( fulfillments.length > 1 && (
-						<Button __next40pxDefaultSize size="small">
-							<Icon
-								icon={
-									expanded
-										? 'arrow-up-alt2'
-										: 'arrow-down-alt2'
-								}
-								size={ 16 }
-								color={ isEditing ? '#dddddd' : undefined }
-							/>
-						</Button>
-					) ) }
+				{ ( itemsNotInAnyFulfillment.length > 0 ||
+					fulfillments.length > 1 ) && (
+					<Button __next40pxDefaultSize size="small">
+						<Icon
+							icon={
+								expanded ? 'arrow-up-alt2' : 'arrow-down-alt2'
+							}
+							size={ 16 }
+							color={ isEditing ? '#dddddd' : undefined }
+						/>
+					</Button>
+				) }
 			</div>
 			{ expanded && (
 				<div className="woocommerce-fulfillment-stored-fulfillment-list-item-content">
