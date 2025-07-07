@@ -108,10 +108,7 @@ const productButtonStore = {
 			}
 
 			if ( quantity > 0 ) {
-				return inTheCartText.replace(
-					'###',
-					quantity.toString()
-				);
+				return inTheCartText.replace( '###', quantity.toString() );
 			}
 
 			return addToCartText;
