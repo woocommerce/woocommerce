@@ -89,17 +89,20 @@ class AmazonLogisticsShippingProviderTest extends \WP_UnitTestCase {
 			array( 'ZX123456789012', 'IN', 'US', true, 100 ),
 			array( 'ZX123456789012', 'US', 'IN', true, 85 ),
 
+			// Fallback format - matches 15-20 character codes.
+			array( 'ABC123456789012', 'US', 'US', true, 60 ),  // 15 char fallback.
+			array( 'ABCD123456789012', 'US', 'US', true, 60 ), // 16 char fallback.
+			array( 'AMZN123456789012', 'US', 'US', true, 60 ), // 16 char fallback.
+
 			// Invalid formats.
 			array( 'TB123456789012', 'US', 'US', false, null ),  // Incomplete prefix.
-			array( 'ABC123456789012', 'US', 'US', false, null ),  // Wrong prefix.
 			array( '123456789012', 'US', 'US', false, null ),    // No prefix.
-			array( 'AMZN123456789012', 'US', 'US', false, null ), // Invalid AMZN format.
 			array( 'L123456789012', 'US', 'US', false, null ),   // Invalid L format (China Post).
 
 			// Invalid lengths.
 			array( 'TBA123', 'US', 'US', false, null ),        // Too short.
-			array( 'TBA1234567890123', 'US', 'US', false, null ), // Too long (13 digits).
-			array( 'TBA12345678901', 'US', 'US', false, null ), // Too short (11 digits).
+			array( 'TBA1234567890123456789012', 'US', 'US', false, null ), // Too long (24 chars).
+			array( 'TBA12345678901', 'US', 'US', true, 90 ), // 14 chars - matches TB[A-Z] pattern.
 
 			// Invalid country routes.
 			array( 'TBA123456789012', 'ZZ', 'US', false, null ), // Invalid origin.

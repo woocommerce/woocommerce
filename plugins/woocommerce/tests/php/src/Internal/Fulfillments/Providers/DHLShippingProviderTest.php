@@ -56,24 +56,57 @@ class DHLShippingProviderTest extends \WP_UnitTestCase {
 			// DHL Express formats.
 			array( 'JJD1234567890', 'DE', 'US', true, 98 ),  // JJD format.
 			array( 'JVGL1234567890', 'NL', 'DE', true, 98 ),  // JVGL format.
-			array( '12345678901', 'US', 'GB', true, 95 ),      // 11-digit AWB.
-			array( '1234567890', 'DE', 'FR', true, 85 ),       // 10-digit.
 
-			// DHL eCommerce formats.
+			// DHL Air Waybill without valid mod11 check digit (90).
+			array( '12345678903', 'US', 'GB', true, 90 ),      // 11-digit AWB without valid check digit.
+
+			// DHL Air Waybill with invalid check digit (90).
+			array( '12345678901', 'US', 'GB', true, 90 ),      // 11-digit AWB with invalid check digit.
+
+			// DHL 10-digit (gets 98 or 90 based on mod11 check digit).
+			array( '1234567890', 'DE', 'FR', true, 98 ),       // 10-digit with mod11 validation.
+			array( '1234567895', 'DE', 'FR', true, 90 ),       // 10-digit without valid mod11.
+
+			// Invalid country combinations (not supported by DHL).
+			array( '1234567896', 'BG', 'RO', false, null ),    // BG/RO not supported by DHL.
+			array( '1234567890', 'BG', 'RO', false, null ),    // BG/RO not supported by DHL.
+
+			// DHL eCommerce North America.
 			array( 'GM1234567890123456', 'US', 'CA', true, 95 ),  // US/CA optimized.
 			array( 'GM1234567890123456', 'DE', 'FR', true, 80 ),  // International.
-			array( 'LX123456789DE', 'US', 'DE', true, 90 ),       // International eCommerce.
-			array( 'RX123456789GB', 'DE', 'GB', true, 90 ),
-			array( '12345678901234', 'GB', 'US', true, 85 ),      // UK eCommerce.
 
-			// DHL Parcel formats.
-			array( '3SAB12345678', 'DE', 'NL', true, 95 ),       // European optimized.
-			array( '3SCD98765432', 'FR', 'BE', true, 95 ),
-			array( '3SXY12345678', 'US', 'CA', true, 85 ),       // Non-European.
+			// DHL eCommerce Asia-Pacific (92 score for pattern match).
+			array( 'LX123456789DE', 'US', 'DE', true, 92 ),       // LX pattern.
+			array( 'RX123456789GB', 'DE', 'GB', true, 92 ),       // RX pattern.
+			array( 'AU123456789AU', 'AU', 'US', true, 92 ),       // AU pattern.
+			array( 'AU123456789AU', 'DE', 'US', true, 92 ),       // AU pattern from DE.
+			array( 'TH123456789TH', 'AU', 'US', true, 92 ),       // TH pattern from AU.
+			array( 'TH123456789TH', 'DE', 'US', true, 92 ),       // TH pattern from DE.
+
+			// DHL eCommerce Europe (14-digit gets 60 score for non-DE domestic).
+			array( '12345678901234', 'GB', 'US', true, 60 ),      // 14-digit non-DE.
+
+			// DHL Parcel Europe (3S pattern gets 95 score).
+			array( '3SAB12345678', 'DE', 'NL', true, 95 ),       // 3S pattern.
+			array( '3SCD98765432', 'FR', 'BE', true, 95 ),       // 3S pattern.
+			array( '3SXY12345678', 'US', 'CA', true, 95 ),       // 3S pattern from US.
+
+			// DHL Same Day.
+			array( 'DSD123456789012', 'DE', 'US', true, 92 ),
+
+			// DHL Piece Numbers.
+			array( 'JD12345678901', 'DE', 'US', true, 90 ),
+
+			// DHL Supply Chain.
+			array( 'DSC1234567890123', 'DE', 'US', true, 85 ),
+
+			// DHL Legacy formats (matches S10 pattern, gets 75 score).
+			array( 'LZ123456787DE', 'DE', 'US', true, 75 ),  // Matches S10 pattern.
+			array( 'LZ123456789DE', 'DE', 'US', true, 75 ),  // Matches S10 pattern.
 
 			// DHL Global Forwarding.
 			array( '1AB1234', 'DE', 'US', true, 90 ),
-			array( 'ABC12345', 'US', 'GB', true, 90 ),
+			array( 'ABC12345', 'US', 'GB', true, 88 ),
 
 			// Invalid formats.
 			array( 'INVALID123', 'DE', 'US', false, null ),
@@ -107,8 +140,10 @@ class DHLShippingProviderTest extends \WP_UnitTestCase {
 			$this->assertEquals( $expected_score, $result['ambiguity_score'] );
 
 			// Verify URL matches expected service type.
-			if ( preg_match( '/^(GM|LX|RX)/', $tracking_number ) ) {
+			if ( preg_match( '/^(GM|LX|RX|CN|SG|MY|HK|AU|TH|420)/', $tracking_number ) ) {
 				$this->assertStringContainsString( 'dhlglobalmail.com', $result['url'] );
+			} elseif ( preg_match( '/^3S/', $tracking_number ) ) {
+				$this->assertStringContainsString( 'dhl.de', $result['url'] );
 			} else {
 				$this->assertStringContainsString( 'dhl.com/en/express', $result['url'] );
 			}
@@ -128,12 +163,12 @@ class DHLShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertEquals( 95, $us_result['ambiguity_score'] );
 		$this->assertEquals( 80, $de_result['ambiguity_score'] );
 
-		// 3S format scores higher from Europe
+		// 3S format gives same score regardless of origin
 		$de_result = $this->provider->try_parse_tracking_number( '3SAB12345678', 'DE', 'US' );
 		$us_result = $this->provider->try_parse_tracking_number( '3SAB12345678', 'US', 'DE' );
 
 		$this->assertEquals( 95, $de_result['ambiguity_score'] );
-		$this->assertEquals( 85, $us_result['ambiguity_score'] );
+		$this->assertEquals( 95, $us_result['ambiguity_score'] );
 	}
 
 	/**

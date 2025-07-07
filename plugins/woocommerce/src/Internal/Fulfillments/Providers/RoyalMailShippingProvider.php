@@ -12,23 +12,55 @@ use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 class RoyalMailShippingProvider extends AbstractShippingProvider {
 
 	/**
-	 * Royal Mail tracking number patterns.
+	 * Royal Mail tracking number patterns with enhanced service detection.
 	 *
 	 * @var array<string, array{patterns: array<int, string>, confidence: int}>
 	 */
 	private const TRACKING_PATTERNS = array(
 		'GB' => array( // United Kingdom.
 			'patterns'   => array(
-				'/^[A-Z]{2}\d{9}GB$/', // International format: XX#########GB.
-				'/^[A-Z]{2}\d{7}GB$/', // Alternative international format: XX#######GB.
-				'/^[A-Z]{1}\d{9}[A-Z]{1}$/', // Domestic format: X#########X.
-				'/^[A-Z]{2}\d{8}[A-Z]{2}$/', // Standard format: XX########XX.
-				'/^\d{13}$/', // 13-digit domestic tracking.
-				'/^\d{12}$/', // 12-digit domestic tracking.
-				'/^[A-Z]{2}\d{6}[A-Z]{2}$/', // Compact format: XX######XX.
-				'/^[A-Z]{4}\d{10}$/', // Special delivery format: XXXX##########.
+				// UPU S10 international formats.
+				'/^[A-Z]{2}\d{9}GB$/',        // International format: XX#########GB.
+				'/^[A-Z]{2}\d{7}GB$/',        // Alternative international format: XX#######GB.
+
+				// Domestic tracking formats.
+				'/^[A-Z]{1}\d{9}[A-Z]{1}$/',  // Domestic format: X#########X.
+				'/^[A-Z]{2}\d{8}[A-Z]{2}$/',  // Standard format: XX########XX.
+				'/^[A-Z]{2}\d{6}[A-Z]{2}$/',  // Compact format: XX######XX.
+
+				// Service-specific patterns.
+				'/^[A-Z]{4}\d{10}$/',         // Special delivery format: XXXX##########.
+				'/^SD\d{8,12}$/',             // Signed For service.
+				'/^SF\d{8,12}$/',             // Special Delivery.
+				'/^RM\d{8,12}$/',             // Royal Mail standard.
+
+				// Digital tracking formats.
+				'/^\d{16}$/',                 // 16-digit returns label or digital.
+				'/^\d{13}$/',                 // 13-digit domestic/international tracking.
+				'/^\d{12}$/',                 // 12-digit domestic tracking.
+				'/^\d{11}$/',                 // 11-digit domestic tracking.
+				'/^\d{10}$/',                 // 10-digit legacy Parcelforce/RM.
+				'/^\d{9}$/',                  // 9-digit legacy Parcelforce/RM.
+
+				// Parcelforce (Royal Mail Group).
+				'/^PF\d{8,12}$/',             // Parcelforce Express.
+				'/^[A-Z]{2}\d{8}PF$/',        // Parcelforce International.
+				'/^\d{13}$/',                 // Parcelforce Worldwide numeric.
+
+				// International tracked services.
+				'/^IT\d{9}GB$/',              // International Tracked.
+				'/^IE\d{9}GB$/',              // International Economy.
+				'/^IS\d{9}GB$/',              // International Standard.
+
+				// Business services.
+				'/^BF\d{8,12}$/',             // Business services.
+				'/^[A-Z]{3}\d{8,12}$/',       // Three-letter business codes.
+
+				// Legacy formats.
+				'/^[A-Z]{1}\d{8}[A-Z]{2}$/',  // Legacy format: X########XX.
+				'/^[0-9]{9}[A-Z]{3}$/',       // 9 digits + 3 letters.
 			),
-			'confidence' => 85,
+			'confidence' => 87,
 		),
 	);
 
@@ -76,7 +108,7 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 	 * @return array List of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
-		return array( 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AR', 'AS', 'AT', 'AU', 'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW' );
+		return array( 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW' );
 	}
 
 	/**
@@ -126,7 +158,7 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
+		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) ); // Normalize input.
 		if ( empty( $normalized ) ) {
 			return null;
 		}
@@ -139,24 +171,50 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		// Check country-specific patterns.
+		// Check country-specific patterns with enhanced validation.
 		if ( $this->validate_country_pattern( $normalized, $shipping_from ) ) {
 			$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'];
 
+			// Apply UPU S10 validation for international formats.
+			if ( preg_match( '/^[A-Z]{2}\d{7,9}GB$/', $normalized ) ) {
+				if ( FulfillmentUtils::check_s10_upu_format( $normalized ) ) {
+					$confidence = min( 98, $confidence + 8 ); // Strong boost for valid UPU.
+				}
+			}
+
+			// Apply check digit validation for numeric formats.
+			if ( preg_match( '/^\d{11,16}$/', $normalized ) ) {
+				if ( FulfillmentUtils::validate_mod10_check_digit( $normalized ) ) {
+					$confidence = min( 95, $confidence + 5 ); // Boost for valid check digit.
+				}
+			}
+
+			// Service-specific confidence boosts.
+			if ( preg_match( '/^(SD|SF)\d+/', $normalized ) ) {
+				$confidence = min( 96, $confidence + 6 ); // Special Delivery/Signed For.
+			} elseif ( preg_match( '/^PF\d+/', $normalized ) ) {
+				$confidence = min( 94, $confidence + 4 ); // Parcelforce.
+			} elseif ( preg_match( '/^(IT|IE|IS)\d+GB$/', $normalized ) ) {
+				$confidence = min( 95, $confidence + 5 ); // International tracked services.
+			} elseif ( preg_match( '/^(RM|BF)\d+/', $normalized ) ) {
+				$confidence = min( 92, $confidence + 3 ); // Standard Royal Mail/Business.
+			}
+
 			// Boost confidence for domestic shipments.
 			if ( 'GB' === $shipping_to ) {
-				$confidence = min( 92, $confidence + 7 );
+				$confidence = min( 98, $confidence + 5 );
 			}
 
 			// Boost confidence for common destinations (Europe).
-			$common_destinations = array( 'FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'IE' );
-			if ( in_array( $shipping_to, $common_destinations, true ) ) {
-				$confidence = min( 95, $confidence + 5 );
+			$european_destinations = array( 'FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'IE', 'AT', 'CH', 'PT', 'DK', 'SE', 'NO' );
+			if ( in_array( $shipping_to, $european_destinations, true ) ) {
+				$confidence = min( 95, $confidence + 3 );
 			}
 
-			// Boost confidence for UPU S10 format.
-			if ( FulfillmentUtils::check_s10_upu_format( $normalized ) ) {
-				$confidence = min( 100, $confidence + 5 );
+			// Boost for other common destinations.
+			$common_destinations = array( 'US', 'CA', 'AU', 'NZ', 'JP', 'SG', 'HK' );
+			if ( in_array( $shipping_to, $common_destinations, true ) ) {
+				$confidence = min( 93, $confidence + 2 );
 			}
 
 			return array(

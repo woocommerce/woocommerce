@@ -25,46 +25,52 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function trackingNumberProvider(): array {
 		return array(
-			// 1Z format - Universal UPS format (100).
+			// 1Z format with valid check digit (100).
 			array( '1Z12345E0205271688', 'US', 'DE', true, 100 ),
 			array( '1Z12345E0205271688', 'CA', 'US', true, 100 ),
 			array( '1Z12345E0205271688', 'GB', 'FR', true, 100 ),
 			array( '1z12345e0205271688', 'DE', 'IT', true, 100 ),
-			array( '1Z12345E020527168', 'US', 'DE', true, 100 ),
+			
+			// 1Z format with invalid check digit (95).
+			array( '1Z12345E0205271687', 'US', 'DE', true, 95 ),
 
-			// SurePost format (95).
-			array( '9274345678901234567890', 'US', 'US', true, 95 ),
-			array( '9274345678901234567890', 'CA', 'CA', true, 95 ),
+			// SurePost format (85 for US/CA).
+			array( '9274345678901234567890', 'US', 'US', true, 85 ),
+			array( '9274345678901234567890', 'CA', 'CA', true, 85 ),
 
-			// InfoNotice format (85).
-			array( 'J1234567890', 'US', 'US', true, 85 ),
-			array( 'J1234567890', 'CA', 'CA', true, 85 ),
-			array( 'j1234567890', 'DE', 'DE', true, 85 ),
-			array( 'J1234567890', 'US', 'CA', true, 85 ),
+			// T/H/V format (85).
+			array( 'T1234567890', 'US', 'US', true, 85 ),
+			array( 'H1234567890', 'US', 'US', true, 85 ),
+			array( 't1234567890', 'US', 'US', true, 85 ),
+			array( 'h1234567890', 'US', 'US', true, 85 ),
+			array( 'T1234567890', 'CA', 'CA', true, 85 ),
+			array( 'T1234567890', 'GB', 'GB', true, 85 ),
+			array( 'T1234567890', 'US', 'CA', true, 85 ),
 
-			// T/H format (90).
-			array( 'T1234567890', 'US', 'US', true, 90 ),
-			array( 'H1234567890', 'US', 'US', true, 90 ),
-			array( 't1234567890', 'US', 'US', true, 90 ),
-			array( 'h1234567890', 'US', 'US', true, 90 ),
-			array( 'T1234567890', 'CA', 'CA', true, 90 ),
-			array( 'T1234567890', 'GB', 'GB', true, 90 ),
-			array( 'T1234567890', 'US', 'CA', true, 90 ),
+			// InfoNotice format (80).
+			array( 'J1234567890', 'US', 'US', true, 80 ),
+			array( 'J1234567890', 'CA', 'CA', true, 80 ),
+			array( 'j1234567890', 'DE', 'DE', true, 80 ),
+			array( 'J1234567890', 'US', 'CA', true, 80 ),
 
-			// Mail Innovations formats (65-80).
-			array( '9123456789012345678901234567890123', 'CA', 'US', true, 80 ),
-			array( '9123456789012345678901234567890123', 'US', 'CA', true, 80 ),
-			array( '1234567890123456789012', 'US', 'CA', true, 65 ),
-			array( '1234567890123456789012', 'CA', 'US', true, 65 ),
+			// Mail Innovations formats - US/CA get higher scores.
+			array( '9123456789012345678901234567890123', 'US', 'CA', true, 85 ),
+			array( '9123456789012345678901234567890123', 'CA', 'US', true, 85 ),
+			array( '9123456789012345678901234567890123', 'DE', 'FR', true, 70 ),
 
-			// Domestic numeric formats (70-75).
-			array( '123456789012', 'US', 'US', true, 75 ),
+			// 12-digit with valid check digit (80).
+			array( '476618356000', 'US', 'US', true, 80 ),
+			// 12-digit with invalid check digit (80).
+			array( '476618356001', 'US', 'US', true, 80 ),
+
+			// Other numeric formats.
+			array( '1234567890', 'US', 'US', true, 75 ),
 			array( '123456789', 'US', 'US', true, 70 ),
-			array( '1234567890', 'US', 'US', true, 70 ),
+			array( '1234567890123456789012', 'US', 'CA', true, 60 ),
 
-			// Domestic-but-international-tracking countries.
+			// Domestic-but-international-tracking countries (boost +5).
 			array( '1Z12345E0205271688', 'IN', 'IN', true, 105 ),
-			array( 'T1234567890', 'HK', 'HK', true, 95 ),
+			array( 'T1234567890', 'HK', 'HK', true, 90 ), // 85+5
 
 			// Invalid formats.
 			array( 'INVALID123', 'CA', 'US', false, null ),
@@ -124,7 +130,7 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertNotNull( $us_domestic );
 		$this->assertNotNull( $ca_domestic );
 		$this->assertNotNull( $international );
-		$this->assertEquals( 90, $us_domestic['ambiguity_score'] );
+		$this->assertEquals( 85, $us_domestic['ambiguity_score'] );
 	}
 
 	/**
@@ -135,7 +141,7 @@ class UPSShippingProviderTest extends \WP_UnitTestCase {
 		$result   = $provider->try_parse_tracking_number( '9274345678901234567890', 'US', 'US' );
 
 		$this->assertNotNull( $result );
-		$this->assertEquals( 95, $result['ambiguity_score'] );
+		$this->assertEquals( 85, $result['ambiguity_score'] );
 	}
 
 	/**

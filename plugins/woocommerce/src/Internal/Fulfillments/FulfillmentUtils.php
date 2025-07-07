@@ -459,7 +459,7 @@ class FulfillmentUtils {
 	 *
 	 * @param string $tracking_number The tracking number without the check digit.
 	 *
-	 * @return int The calculated check digit.
+	 * @return bool True if the check digit is valid, false otherwise.
 	 */
 	public static function check_s10_upu_format( string $tracking_number ): bool {
 		if ( preg_match( '/^[A-Z]{2}\d{9}[A-Z]{2}$/', $tracking_number ) ) {
@@ -489,5 +489,169 @@ class FulfillmentUtils {
 
 		// Validate the check digit against the last digit of the tracking number.
 		return (int) $tracking_number[8] === $check_digit;
+	}
+
+	/**
+	 * Validate UPS 1Z tracking number using Mod 10 check digit.
+	 *
+	 * @param string $tracking_number The UPS 1Z tracking number.
+	 * @return bool True if valid, false otherwise.
+	 */
+	public static function validate_ups_1z_check_digit( string $tracking_number ): bool {
+		if ( ! preg_match( '/^1Z[0-9A-Z]{15,16}$/', $tracking_number ) ) {
+			return false;
+		}
+
+		// Extract the trackable part (remove 1Z prefix).
+		$trackable   = substr( $tracking_number, 2 );
+		$check_digit = (int) substr( $trackable, -1 );
+		$trackable   = substr( $trackable, 0, -1 );
+
+		$sum          = 0;
+		$odd_position = true;
+
+		// Process each character from right to left.
+		for ( $i = strlen( $trackable ) - 1; $i >= 0; $i-- ) {
+			$char  = $trackable[ $i ];
+			$value = is_numeric( $char ) ? (int) $char : ord( $char ) - 55; // A=10, B=11, etc.
+
+			if ( $odd_position ) {
+				$value *= 2;
+				if ( $value > 9 ) {
+					$value = (int) ( $value / 10 ) + ( $value % 10 );
+				}
+			}
+
+			$sum         += $value;
+			$odd_position = ! $odd_position;
+		}
+
+		$calculated_check = ( 10 - ( $sum % 10 ) ) % 10;
+		return $calculated_check === $check_digit;
+	}
+
+	/**
+	 * Validate Mod 7 check digit for numeric tracking numbers.
+	 *
+	 * @param string $tracking_number The numeric tracking number.
+	 * @return bool True if valid, false otherwise.
+	 */
+	public static function validate_mod7_check_digit( string $tracking_number ): bool {
+		if ( ! preg_match( '/^\d+$/', $tracking_number ) || strlen( $tracking_number ) < 2 ) {
+			return false;
+		}
+
+		$check_digit  = (int) substr( $tracking_number, -1 );
+		$number       = substr( $tracking_number, 0, -1 );
+		$sum          = 0;
+		$weights      = array( 3, 1, 3, 1, 3, 1, 3 ); // Mod 7 weights.
+		$weight_index = 0;
+		// Process each digit from right to left.
+		for ( $i = strlen( $number ) - 1; $i >= 0; $i-- ) {
+			$digit = (int) $number[ $i ];
+			$sum  += $digit * $weights[ $weight_index % count( $weights ) ];
+			++$weight_index;
+		}
+		$calculated_check = $sum % 7;
+		if ( 0 === $calculated_check ) {
+			$calculated_check = 7; // If the sum is a multiple of 7, the check digit is 7.
+		}
+		return $calculated_check === $check_digit;
+	}
+
+	/**
+	 * Validate Mod 10 check digit for numeric tracking numbers.
+	 *
+	 * @param string $tracking_number The numeric tracking number.
+	 * @return bool True if valid, false otherwise.
+	 */
+	public static function validate_mod10_check_digit( string $tracking_number ): bool {
+		if ( ! preg_match( '/^\d+$/', $tracking_number ) || strlen( $tracking_number ) < 2 ) {
+			return false;
+		}
+
+		$check_digit = (int) substr( $tracking_number, -1 );
+		$number      = substr( $tracking_number, 0, -1 );
+
+		$sum          = 0;
+		$odd_position = true;
+
+		// Process each digit from right to left.
+		for ( $i = strlen( $number ) - 1; $i >= 0; $i-- ) {
+			$digit = (int) $number[ $i ];
+
+			if ( $odd_position ) {
+				$digit *= 2;
+				if ( $digit > 9 ) {
+					$digit = (int) ( $digit / 10 ) + ( $digit % 10 );
+				}
+			}
+
+			$sum         += $digit;
+			$odd_position = ! $odd_position;
+		}
+
+		$calculated_check = ( 10 - ( $sum % 10 ) ) % 10;
+		return $calculated_check === $check_digit;
+	}
+
+	/**
+	 * Validate Mod 11 check digit for tracking numbers (used by DHL).
+	 *
+	 * @param string $tracking_number The tracking number.
+	 * @return bool True if valid, false otherwise.
+	 */
+	public static function validate_mod11_check_digit( string $tracking_number ): bool {
+		if ( ! preg_match( '/^\d+$/', $tracking_number ) || strlen( $tracking_number ) < 2 ) {
+			return false;
+		}
+
+		$check_digit = (int) substr( $tracking_number, -1 );
+		$number      = substr( $tracking_number, 0, -1 );
+
+		$weights      = array( 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 );
+		$sum          = 0;
+		$weight_index = 0;
+
+		// Process each digit from right to left.
+		for ( $i = strlen( $number ) - 1; $i >= 0; $i-- ) {
+			$digit = (int) $number[ $i ];
+			$sum  += $digit * $weights[ $weight_index % count( $weights ) ];
+			++$weight_index;
+		}
+
+		$calculated_check = 11 - ( $sum % 11 );
+		if ( 10 === $calculated_check ) {
+			$calculated_check = 0;
+		} elseif ( 11 === $calculated_check ) {
+			$calculated_check = 5;
+		}
+
+		return $calculated_check === $check_digit;
+	}
+
+	/**
+	 * Validate FedEx check digit for 12/14-digit tracking numbers.
+	 *
+	 * @param string $tracking_number The FedEx tracking number.
+	 * @return bool True if valid, false otherwise.
+	 */
+	public static function validate_fedex_check_digit( string $tracking_number ): bool {
+		if ( ! preg_match( '/^\d{12}$/', $tracking_number ) ) {
+			return false;
+		}
+		$digits           = str_split( substr( $tracking_number, 0, 11 ) );
+		$multipliers      = array( 3, 1, 7 );
+		$sum              = 0;
+		$multiplier_index = 0;
+		for ( $i = 10; $i >= 0; $i-- ) {
+			$sum             += $digits[ $i ] * $multipliers[ $multiplier_index ];
+			$multiplier_index = ( ++$multiplier_index ) % 3;
+		}
+		$check = $sum % 11;
+		if ( 10 === $check ) {
+			$check = 0;
+		}
+		return intval( $tracking_number[11] ) === $check;
 	}
 }
