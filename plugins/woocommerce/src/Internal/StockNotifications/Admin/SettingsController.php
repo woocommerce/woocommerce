@@ -236,6 +236,10 @@ class SettingsController {
 	 */
 	public static function process_product_object( $product ) {
 
+		if ( ! Config::allows_signups() ) {
+			return;
+		}
+
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			return;
 		}
@@ -244,13 +248,12 @@ class SettingsController {
 			return;
 		}
 
-		check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
-
-		/**
-		 * Hint: If the meta exists and the posted value is false, delete the meta.
-		 * Otherwise, add the meta.
-		 */
 		$posted_is_enabled = isset( $_POST[ self::PRODUCT_META_KEY ] );
-		$product->update_meta_data( self::PRODUCT_META_KEY, $posted_is_enabled ? 'yes' : 'no' );
+		$current_value     = $product->get_meta( self::PRODUCT_META_KEY );
+		if ( ( $posted_is_enabled && 'no' === $current_value ) || ( ! $posted_is_enabled && 'yes' === $current_value ) ) {
+			check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
+
+			$product->update_meta_data( self::PRODUCT_META_KEY, $posted_is_enabled ? 'yes' : 'no' );
+		}
 	}
 }
