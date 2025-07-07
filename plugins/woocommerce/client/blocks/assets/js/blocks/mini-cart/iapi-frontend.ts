@@ -34,6 +34,7 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
+	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-items-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
@@ -385,6 +386,20 @@ const { state: cartItemState } = store(
 				return (
 					catalogVisibility === 'hidden' ||
 					catalogVisibility === 'search'
+				);
+			},
+
+			get isLowInStockVisible(): boolean {
+				return (
+					! cartItemState.cartItem.show_backorder_badge &&
+					!! cartItemState.cartItem.low_stock_remaining
+				);
+			},
+
+			get lowInStockLabel(): string {
+				return lowInStockLabel.replace(
+					'%d',
+					cartItemState.cartItem.low_stock_remaining
 				);
 			},
 		},
