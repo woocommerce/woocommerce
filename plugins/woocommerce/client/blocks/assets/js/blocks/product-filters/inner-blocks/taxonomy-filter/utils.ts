@@ -16,6 +16,8 @@ const taxonomies = getSetting< TaxonomyItem[] >(
 
 export function getTaxonomyLabel( taxonomy: string ) {
 	const match = taxonomies.find( ( item ) => item.name === taxonomy );
-	if ( match ) return match.label;
+	if ( match ) {
+		return match.label;
+	}
 	return __( 'Taxonomy', 'woocommerce' );
 }
