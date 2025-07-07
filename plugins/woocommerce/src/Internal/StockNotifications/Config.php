@@ -117,4 +117,40 @@ class Config {
 
 		return self::$eligible_stock_statuses;
 	}
+
+	/**
+	 * Check if signups are allowed.
+	 *
+	 * @return bool
+	 */
+	public static function allows_signups(): bool {
+		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_allow_signups', 'no' );
+	}
+
+	/**
+	 * Check if double opt-in is required.
+	 *
+	 * @return bool
+	 */
+	public static function requires_double_opt_in(): bool {
+		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+	}
+
+	/**
+	 * Check if an account is required.
+	 *
+	 * @return bool
+	 */
+	public static function requires_account(): bool {
+		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_require_account', 'no' );
+	}
+
+	/**
+	 * Check if an account is created on signup.
+	 *
+	 * @return bool
+	 */
+	public static function creates_account_on_signup(): bool {
+		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' );
+	}
 }

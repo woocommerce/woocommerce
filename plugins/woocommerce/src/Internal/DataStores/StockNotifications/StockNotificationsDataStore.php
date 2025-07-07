@@ -550,6 +550,52 @@ CREATE TABLE $meta_table_name (
 	}
 
 	/**
+	 * Check if a notification exists by email.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param string $email The email address.
+	 * @return bool True if the notification exists, false otherwise.
+	 */
+	public function notification_exists_by_email( int $product_id, string $email ): bool {
+
+		if ( ! is_email( $email ) ) {
+			return false;
+		}
+
+		global $wpdb;
+
+		$table = $this->get_table_name();
+		$sql   = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			'SELECT 1 FROM %i WHERE product_id = %d AND user_email = %s AND status IN (%s, %s) LIMIT 1', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $table, $product_id, $email, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+		);
+		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Check if a notification exists by user ID.
+	 *
+	 * @param int $product_id The product ID.
+	 * @param int $user_id The user ID.
+	 * @return bool True if the notification exists, false otherwise.
+	 */
+	public function notification_exists_by_user_id( int $product_id, int $user_id ): bool {
+
+		if ( 0 === $user_id ) {
+			return false;
+		}
+
+		global $wpdb;
+
+		$table = $this->get_table_name();
+		$sql   = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			'SELECT 1 FROM %i WHERE product_id = %d AND user_id = %d AND status IN (%s, %s) LIMIT 1', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array( $table, $product_id, $user_id, NotificationStatus::ACTIVE, NotificationStatus::PENDING )
+		);
+		return (int) $wpdb->get_var( $sql ) > 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Get distinct notification creation dates.
 	 *
 	 * @return array
