@@ -55,7 +55,7 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 			testProduct
 		);
 
-		await expect( createResponse.statusCode ).toBe( 201 );
+		await expect( createResponse.status ).toBe( 201 );
 
 		testProduct.id = createResponse.data.id;
 
@@ -89,11 +89,17 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 
 		await expect(
 			apiClient.get( `/wc/v3/products/${ testProduct.id }` )
-		).rejects.toMatchObject( {
-			statusCode: 401,
-			data: {
-				message: 'Consumer key is invalid.',
-			},
-		} );
+		).rejects.toEqual(
+			expect.objectContaining( {
+				response: expect.objectContaining( {
+					status: 401,
+					data: expect.objectContaining( {
+						message: expect.stringContaining(
+							'Consumer key is invalid.'
+						),
+					} ),
+				} ),
+			} )
+		);
 	} );
 } );
