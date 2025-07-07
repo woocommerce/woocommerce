@@ -432,7 +432,11 @@ class MiniCart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		/**
+		 * In the cart and checkout pages, the block is either rendered hidden or removed.
+		 * It is not interactive, so it can fall back to the existing implementation.
+		 */
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
 			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
 		}
 
