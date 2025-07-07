@@ -142,6 +142,11 @@ class WooPaymentsService {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
+		if ( empty( $source ) ) {
+			// If no source is provided, we duse the default.
+			$source = self::SESSION_ENTRY_DEFAULT;
+		}
+
 		return array(
 			// This state is high-level data, independent of the type of onboarding flow.
 			'state'   => array(
@@ -343,12 +348,14 @@ class WooPaymentsService {
 	 * @param string $location  The location for which we are onboarding.
 	 *                          This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool   $overwrite Whether to overwrite the step status if it is already started and update the timestamp.
+	 * @param string $source    Optional. The source for the current onboarding flow.
+	 *                          If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return bool Whether the onboarding step was marked as started.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function mark_onboarding_step_started( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_started( string $step_id, string $location, bool $overwrite = false, string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
 		// Clear possible failed status for the step.
@@ -372,6 +379,7 @@ class WooPaymentsService {
 				$location,
 				array(
 					'step_id' => $step_id,
+					'source'  => $source,
 				)
 			);
 		}
@@ -420,12 +428,14 @@ class WooPaymentsService {
 	 * @param string $location  The location for which we are onboarding.
 	 *                          This is an ISO 3166-1 alpha-2 country code.
 	 * @param bool   $overwrite Whether to overwrite the step status if it is already completed and update the timestamp.
+	 * @param string $source    Optional. The source for the current onboarding flow.
+	 *                          If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return bool Whether the onboarding step was marked as completed.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
-	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false ): bool {
+	public function mark_onboarding_step_completed( string $step_id, string $location, bool $overwrite = false, string $source = self::SESSION_ENTRY_DEFAULT ): bool {
 		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
 
 		// Clear possible failed status for the step.
@@ -449,6 +459,7 @@ class WooPaymentsService {
 				$location,
 				array(
 					'step_id' => $step_id,
+					'source'  => $source,
 				)
 			);
 		}
@@ -873,7 +884,7 @@ class WooPaymentsService {
 	 *                                           If the onboarding action can not be performed due to the current state
 	 *                                           of the site or there was an error initializing the test account.
 	 */
-	public function onboarding_test_account_init( string $location, string $source = '' ): array {
+	public function onboarding_test_account_init( string $location, string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 		// Nothing to do if we already have a connected test account.
@@ -914,11 +925,6 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		if ( empty( $source ) ) {
-			// The default source is the WC Admin Payments settings.
-			$source = self::FROM_PAYMENT_SETTINGS;
-		}
 
 		try {
 			// Call the WooPayments API to initialize the test account.
@@ -1037,7 +1043,7 @@ class WooPaymentsService {
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session data could not be retrieved.
 	 */
-	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), string $source = '' ): array {
+	public function get_onboarding_kyc_session( string $location, array $self_assessment = array(), string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		if ( empty( $self_assessment ) ) {
@@ -1056,11 +1062,6 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		if ( empty( $source ) ) {
-			// The default source is the WC Admin Payments settings.
-			$source = self::FROM_PAYMENT_SETTINGS;
-		}
 
 		try {
 			// Call the WooPayments API to get the KYC session.
@@ -1173,7 +1174,7 @@ class WooPaymentsService {
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session could not be finished.
 	 */
-	public function finish_onboarding_kyc_session( string $location, string $source = '' ): array {
+	public function finish_onboarding_kyc_session( string $location, string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
 
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
@@ -1181,11 +1182,6 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		if ( empty( $source ) ) {
-			// The default source is the WC Admin Payments settings.
-			$source = self::FROM_PAYMENT_SETTINGS;
-		}
 
 		try {
 			// Call the WooPayments API to finalize the KYC session.
@@ -1270,7 +1266,7 @@ class WooPaymentsService {
 		);
 
 		// Mark the business verification step as completed.
-		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location );
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, false, $source );
 
 		// For sanity, make sure the test account step is blocked if not already completed,
 		// since we are doing live account KYC.
@@ -1344,7 +1340,7 @@ class WooPaymentsService {
 	 * @return array The response from the WooPayments API.
 	 * @throws ApiException If we could not reset onboarding or there was an error.
 	 */
-	public function reset_onboarding( string $location, string $from = '', string $source = '' ): array {
+	public function reset_onboarding( string $location, string $from = '', string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_action_is_acceptable();
 
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
@@ -1352,11 +1348,6 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		// If no source is provided, default to the WC Admin Payments settings.
-		if ( empty( $source ) ) {
-			$source = self::FROM_PAYMENT_SETTINGS;
-		}
 
 		// Before resetting the account, record its details for tracking purposes.
 		$event_props = array(
@@ -1435,7 +1426,7 @@ class WooPaymentsService {
 	 * @return array The response from the WooPayments API.
 	 * @throws ApiException If we could not disable the test account or there was an error.
 	 */
-	public function disable_test_account( string $location, string $from = '', string $source = '' ): array {
+	public function disable_test_account( string $location, string $from = '', string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_action_is_acceptable();
 
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
@@ -1443,11 +1434,6 @@ class WooPaymentsService {
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		// If no source is provided, default to the WC Admin Payments settings.
-		if ( empty( $source ) ) {
-			$source = self::FROM_PAYMENT_SETTINGS;
-		}
 
 		try {
 			// Call the WooPayments API to disable the test account and prepare for the switch to live.
