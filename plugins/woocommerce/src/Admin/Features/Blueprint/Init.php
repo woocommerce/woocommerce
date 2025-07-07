@@ -344,7 +344,9 @@ class Init {
 
 		// Build an array of installed theme slugs.
 		foreach ( $all_themes as $key => $theme ) {
-			$theme_slugs[] = strtolower( $key );
+			if ( is_string( $key ) ) {
+				$theme_slugs[] = strtolower( $key );
+			}
 		}
 
 		$api_response = $this->wp_themes_api(
