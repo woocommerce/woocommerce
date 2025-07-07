@@ -98,7 +98,9 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Initialize the DI container.
+	 * Sets up and configures the dependency injection container with all required services for email editor integration tests.
+	 *
+	 * Registers core services, controllers, template handlers, preprocessors, renderers, personalization, and email sending components in the container, making them available for test cases.
 	 */
 	protected function initContainer(): void {
 		$container = new Container();

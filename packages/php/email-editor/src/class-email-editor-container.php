@@ -51,13 +51,12 @@ class Email_Editor_Container {
 	}
 
 	/**
-	 * Loads the DI container for the Email editor.
+	 * Returns the singleton dependency injection container for the Email Editor package, initializing and registering all service dependencies if needed.
 	 *
-	 * @internal This uses the Blocks DI container. This container will be replaced
-	 * with a different compatible container.
+	 * If called with `$reset` set to true, the container and all registered dependencies are reconstructed.
 	 *
-	 * @param boolean $reset Used to reset the container to a fresh instance. Note: this means all dependencies will be reconstructed.
-	 * @return Container
+	 * @param bool $reset Whether to reset and rebuild the container instance.
+	 * @return Container The dependency injection container with all Email Editor services registered.
 	 */
 	public static function container( $reset = false ) {
 		static $container;

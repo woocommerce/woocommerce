@@ -66,13 +66,7 @@ class Renderer {
 
 
 	/**
-	 * Renderer constructor.
-	 *
-	 * @param Content_Renderer              $content_renderer Content renderer.
-	 * @param Templates                     $templates Templates.
-	 * @param Css_Inliner                   $css_inliner CSS Inliner.
-	 * @param Theme_Controller              $theme_controller Theme controller.
-	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry.
+	 * Initializes the Renderer with services for content rendering, template management, CSS inlining, theme control, and personalization tag handling.
 	 */
 	public function __construct(
 		Content_Renderer $content_renderer,
@@ -157,10 +151,12 @@ class Renderer {
 	}
 
 	/**
-	 * Renders the text version of the email template
+	 * Converts an HTML email template to plain text while preserving personalization tags.
 	 *
-	 * @param string $template HTML template.
-	 * @return string
+	 * Ensures the template is UTF-8 encoded, replaces personalization tags with placeholders before conversion, and restores them after converting HTML to plain text.
+	 *
+	 * @param string $template The HTML email template.
+	 * @return string The plain text version of the email with personalization tags preserved.
 	 */
 	private function render_text_version( $template ) {
 		$template = ( mb_detect_encoding( $template, 'UTF-8', true ) ) ? $template : mb_convert_encoding( $template, 'UTF-8', mb_list_encodings() );
@@ -180,10 +176,12 @@ class Renderer {
 	}
 
 	/**
-	 * Preserves personalization tags by replacing them with unique placeholders
+	 * Replaces personalization tags in the HTML template with unique placeholders to prevent them from being altered during processing.
 	 *
-	 * @param string $template HTML template.
-	 * @return string
+	 * Generates a mapping of placeholders to the original HTML comment tags for later restoration.
+	 *
+	 * @param string $template The HTML template containing personalization tags.
+	 * @return string The template with personalization tags replaced by unique placeholders.
 	 */
 	private function preserve_personalization_tags( string $template ): string {
 		$all_tags = $this->personalization_tags_registry->get_all();
@@ -212,10 +210,10 @@ class Renderer {
 	}
 
 	/**
-	 * Restores personalization tags from placeholders
+	 * Replaces personalization tag placeholders in the text with their original HTML comment tags.
 	 *
-	 * @param string $text Text content.
-	 * @return string
+	 * @param string $text The text containing personalization tag placeholders.
+	 * @return string The text with personalization tags restored.
 	 */
 	private function restore_personalization_tags( string $text ): string {
 		if ( empty( $this->personalization_tag_placeholders ) ) {
