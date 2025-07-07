@@ -10,12 +10,29 @@ on:
         description: 'Skip verification steps.'
         type: boolean
         required: true
-        default: false
       create_github_release:
         description: 'Create a draft GitHub release.'
         type: boolean
         required: true
-        default: false
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        type: string
+        required: false
+        default: ''
+      skip_verify:
+        description: 'Skip verification steps.'
+        type: boolean
+        required: true
+      create_github_release:
+        description: 'Create a draft GitHub release.'
+        type: boolean
+        required: true
+    outputs:
+      artifact_url:
+        description: 'URL of the built release artifact'
+        value: ${{ jobs.build.outputs.artifact-url }}
 
 permissions: {}
 
@@ -35,7 +52,7 @@ jobs:
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify === 'true') {
+                  if ('${{ inputs.skip_verify }}' === 'true') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
@@ -150,6 +167,8 @@ jobs:
     name: Build release zip file
     runs-on: ubuntu-latest
     needs: [ verify-prs, verify-release-versions ]
+    outputs:
+      artifact-url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     permissions:
       contents: read
     steps:
@@ -179,6 +198,7 @@ jobs:
         run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
 
       - name: Upload the zip file as an artifact
+        id: artifact-upload
         uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -186,6 +206,12 @@ jobs:
           name: woocommerce
           path: zipfile
           retention-days: 1
+
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
 
   create-release:
     name: Create GitHub release

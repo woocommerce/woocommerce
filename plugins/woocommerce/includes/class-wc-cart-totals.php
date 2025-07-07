@@ -758,7 +758,7 @@ final class WC_Cart_Totals {
 
 		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
 		$this->set_total( 'items_subtotal', $items_subtotal );
-		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
