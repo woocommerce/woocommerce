@@ -1526,6 +1526,48 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Send a Tracks event.
+	 *
+	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
+	 * properties to every event.
+	 *
+	 * @param string $name              The event name.
+	 *                                  If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
+	 * @param string $business_country  The business registration country code as set in the WooCommerce Payments settings.
+	 *                                  This is an ISO 3166-1 alpha-2 country code.
+	 * @param array  $properties        Optional. The event custom properties.
+	 *                                  These properties will be merged with the default properties.
+	 *                                  Default properties values take precedence over the provided ones.
+	 *
+	 * @return void
+	 */
+	public function record_event( string $name, string $business_country, array $properties = array() ) {
+		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
+			return;
+		}
+
+		// If the event name is empty, we don't record it.
+		if ( empty( $name ) ) {
+			return;
+		}
+
+		// If the event name is not prefixed with `settings_payments_`, we prefix it.
+		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
+			$name = self::EVENT_PREFIX . $name;
+		}
+
+		// Add default properties to every event and overwrite custom properties with the same keys.
+		$properties = array_merge(
+			$properties,
+			array(
+				'business_country' => $business_country,
+			),
+		);
+
+		wc_admin_record_tracks_event( $name, $properties );
+	}
+
+	/**
 	 * Check if an onboarding action should be allowed to be processed.
 	 *
 	 * @return void
@@ -2398,47 +2440,5 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
-	}
-
-	/**
-	 * Send a Tracks event.
-	 *
-	 * By default, Woo adds `url`, `blog_lang`, `blog_id`, `store_id`, `products_count`, and `wc_version`
-	 * properties to every event.
-	 *
-	 * @param string $name              The event name.
-	 *                                  If it is not prefixed with self::EVENT_PREFIX, it will be prefixed with it.
-	 * @param string $business_country  The business registration country code as set in the WooCommerce Payments settings.
-	 *                                  This is an ISO 3166-1 alpha-2 country code.
-	 * @param array  $properties        Optional. The event custom properties.
-	 *                                  These properties will be merged with the default properties.
-	 *                                  Default properties values take precedence over the provided ones.
-	 *
-	 * @return void
-	 */
-	private function record_event( string $name, string $business_country, array $properties = array() ) {
-		if ( ! function_exists( 'wc_admin_record_tracks_event' ) ) {
-			return;
-		}
-
-		// If the event name is empty, we don't record it.
-		if ( empty( $name ) ) {
-			return;
-		}
-
-		// If the event name is not prefixed with `settings_payments_`, we prefix it.
-		if ( ! str_starts_with( $name, self::EVENT_PREFIX ) ) {
-			$name = self::EVENT_PREFIX . $name;
-		}
-
-		// Add default properties to every event and overwrite custom properties with the same keys.
-		$properties = array_merge(
-			$properties,
-			array(
-				'business_country' => $business_country,
-			),
-		);
-
-		wc_admin_record_tracks_event( $name, $properties );
 	}
 }
