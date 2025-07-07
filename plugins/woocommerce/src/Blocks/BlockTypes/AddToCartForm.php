@@ -88,33 +88,6 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
-	 * Filter the quantity column for grouped products to add interactive context for each child.
-	 *
-	 * @param string     $value The HTML for the quantity input.
-	 * @param WC_Product $grouped_product_child The child product object.
-	 * @return string     The wrapped HTML with interactive context.
-	 */
-	public function filter_grouped_product_quantity_column( $value, $grouped_product_child ) {
-		// Only wrap if stepper style is enabled and the child is purchasable and in stock.
-		if ( ! Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) ) {
-			return $value;
-		}
-		if ( ! $grouped_product_child->is_purchasable() || $grouped_product_child->has_options() || ! $grouped_product_child->is_in_stock() ) {
-			return $value;
-		}
-		$child_id     = $grouped_product_child->get_id();
-		$context_json = esc_attr(
-			wp_json_encode(
-				array(
-					'childProductId' => $child_id,
-					'productType'    => 'grouped',
-				)
-			)
-		);
-		return '<div data-wp-interactive="woocommerce/add-to-cart-form" data-wp-context=' . $context_json . '>' . $value . '</div>';
-	}
-
-	/**
 	 * Add classes to the Add to Cart form input needed for the stepper style.
 	 *
 	 * @param string $product_html The Add to Cart form HTML.
