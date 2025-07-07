@@ -1,10 +1,11 @@
-name: 'Release: Notify in Slack when a new (pre)release is published'
+name: 'Release: Post-release published flows'
 on:
   release:
     types: [published]
 
 jobs:
   notify-release-published:
+    name: 'Notify in Slack when a new (pre)release is published'
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
 
@@ -19,3 +20,61 @@ jobs:
             :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
 
             (<!subteam^S086N376UTS> could you publish the release post? :ty2:)
+
+  update-global-changelog:
+    name: 'Update changelog.txt after any stable release'
+    runs-on: ubuntu-latest
+    if: ${{ ! contains( github.event.release.tag_name, 'wc-beta-tester' ) && ! contains( github.event.release.tag_name, '-rc' )  }}
+
+    steps:
+      - name: 'Fetch release readme.txt'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download "$RELEASE_TAG" --pattern 'woocommerce.zip'
+          unzip -qq woocommerce.zip
+
+          if [[ ! -e woocommerce/readme.txt  ]]; then
+            echo "::error::Could not find readme.txt in asset for release '$RELEASE_TAG'."
+            exit 1
+          fi
+      - name: 'Fetch latest changelog.txt and changelog script'
+        uses: 'actions/checkout@v4'
+        with:
+          ref: trunk
+          sparse-checkout: |
+            /changelog.txt
+            /.github/workflows/scripts/release-readme-to-changelog.php
+          sparse-checkout-cone-mode: false
+          path: trunk
+      - name: 'Update changelog.txt'
+        run: |
+          php ./trunk/.github/workflows/scripts/release-readme-to-changelog.php ./woocommerce/readme.txt ./trunk/changelog.txt
+      - name: 'Push changes and open PR'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Configure Git.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Push new changelog.txt.
+          branch_name="update-changelog-${{ github.event.release.tag_name }}-$(date +%s)"
+
+          cd trunk
+          git checkout -b "$branch_name"
+          git commit \
+            --all    \
+            --message 'Update changelog.txt after release ${{ github.event.release.tag_name }}'
+          git push origin "$branch_name"
+
+          # Open a PR.
+          gh pr create \
+            --title 'Update changelog.txt after ${{ github.event.release.tag_name }}' \
+            --body 'This PR updates the global changelog.txt file following the release of version ${{ github.event.release.tag_name }}.' \
+            --base trunk \
+            --head "$branch_name" \
+            --reviewer "${{ github.actor }}"

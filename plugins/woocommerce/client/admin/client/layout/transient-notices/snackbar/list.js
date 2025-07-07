@@ -57,21 +57,23 @@ function SnackbarList( {
 	return (
 		<div className={ className }>
 			{ children }
-			{ transitions( ( style, notice ) => (
-				<animated.div style={ style }>
-					<div
-						className="components-snackbar-list__notice-container"
-						ref={ ( ref ) => ref && refMap.set( notice, ref ) }
-					>
-						<Snackbar
-							{ ...omit( notice, [ 'content' ] ) }
-							onRemove={ removeNotice( notice ) }
+			<>
+				{ transitions( ( style, notice ) => (
+					<animated.div style={ style }>
+						<div
+							className="components-snackbar-list__notice-container"
+							ref={ ( ref ) => ref && refMap.set( notice, ref ) }
 						>
-							{ notice.content }
-						</Snackbar>
-					</div>
-				</animated.div>
-			) ) }
+							<Snackbar
+								{ ...omit( notice, [ 'content' ] ) }
+								onRemove={ removeNotice( notice ) }
+							>
+								{ notice.content }
+							</Snackbar>
+						</div>
+					</animated.div>
+				) ) }
+			</>
 		</div>
 	);
 }

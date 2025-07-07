@@ -145,7 +145,7 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 													data-wp-bind--aria-label="state.reduceQuantityLabel" 
 													class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
 												>
-													－
+													−
 												</button>
 												<button 
 													data-wp-bind--disabled="state.maximumReached" 

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@wordpress/components';
 import { isEmpty, mapValues } from 'lodash';
 
@@ -40,37 +40,54 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 		useBusinessVerificationContext();
 	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
+	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
+		useState( false );
 
-	const handleContinue = () => {
+	const handleContinue = (): Promise< void > => {
 		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
-			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_kyc_sub_step_completed',
-				{
-					sub_step_id: 'business',
-					country: data.country || 'unknown',
-					business_type: data.business_type || 'unknown',
-					mcc: data.mcc || 'unknown',
-					source: sessionEntryPoint,
-				}
-			);
+			setIsContinueButtonLoading( true );
 
-			// Complete business sub step.
-			completeSubStep(
+			// Complete the business sub-step.
+			return completeSubStep(
 				'business',
 				currentStep?.actions?.save?.href ?? undefined,
 				currentStep?.context?.sub_steps ?? {}
-			);
+			)
+				.then( () => {
+					recordPaymentsOnboardingEvent(
+						'woopayments_onboarding_modal_kyc_sub_step_completed',
+						{
+							sub_step_id: 'business',
+							country: data.country || 'unknown',
+							business_type: data.business_type || 'unknown',
+							mcc: data.mcc || 'unknown',
+							source: sessionEntryPoint,
+						}
+					);
 
-			return nextStep();
+					setIsContinueButtonLoading( false );
+
+					return nextStep();
+				} )
+				.catch( () => {
+					// Handle any errors that occur during the process.
+					setIsContinueButtonLoading( false );
+					// Error tracking is handled on the backend, so we don't need to do anything here.
+				} );
 		}
+
+		// If there are validation errors, set all fields as touched to show validation errors.
 		setTouched( mapValues( touched, () => true ) );
+
+		// Return a resolved promise when there are errors.
+		return Promise.resolve();
 	};
 
 	return (
 		<form
-			onSubmit={ ( event ) => {
+			onSubmit={ async ( event ) => {
 				event.preventDefault();
-				handleContinue();
+				await handleContinue();
 			} }
 		>
 			{ children }
@@ -89,6 +106,8 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 						}
 					);
 				} }
+				isBusy={ isContinueButtonLoading }
+				disabled={ isContinueButtonLoading }
 			>
 				{ strings.continue }
 			</Button>
