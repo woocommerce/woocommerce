@@ -132,7 +132,7 @@ class SignupService {
 			$user_id         = $account_created ? $account_created : $user_id;
 		}
 
-		$notification    = new Notification();
+		$notification = new Notification();
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_product_id( $product_id );
 		$notification->set_user_id( $user_id );
@@ -143,7 +143,6 @@ class SignupService {
 		}
 
 		if ( Config::requires_double_opt_in() ) {
-			// @todo: handle status transition for double opt-in token.
 			$notification->set_status( NotificationStatus::PENDING );
 		}
 

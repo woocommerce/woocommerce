@@ -31,7 +31,7 @@ class NotificationQuery {
 	/**
 	 * Check if a notification exists by email.
 	 *
-	 * @param int $product_id The product ID.
+	 * @param int    $product_id The product ID.
 	 * @param string $email The email address.
 	 * @return bool True if the notification exists, false otherwise.
 	 */

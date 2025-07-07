@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
