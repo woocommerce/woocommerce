@@ -45,17 +45,6 @@ export function createClient( baseURL, auth ) {
 		throw new Error( 'auth.type must be either "basic" or "oauth1"' );
 	}
 
-	// Warn or throw if Basic Auth is used over HTTP, except for localhost
-	const isHttp = baseURL.startsWith( 'http://' );
-	const isLocalhost =
-		baseURL.startsWith( 'http://localhost' ) ||
-		baseURL.startsWith( 'http://127.0.0.1' );
-	if ( auth.type === 'basic' && isHttp && ! isLocalhost ) {
-		console.warn(
-			'Warning: Using Basic Auth over HTTP exposes credentials in plaintext. Use HTTPS instead.'
-		);
-	}
-
 	// Ensure baseURL ends with '/'
 	if ( ! baseURL.endsWith( '/' ) ) {
 		baseURL += '/';
@@ -79,6 +68,17 @@ export function createClient( baseURL, auth ) {
 			username: auth.username,
 			password: auth.password,
 		};
+
+		// Warn if Basic Auth is used over HTTP, except for localhost
+		const isHttp = baseURL.startsWith( 'http' );
+		const isLocalhost =
+			baseURL.startsWith( 'http://localhost' ) ||
+			baseURL.startsWith( 'http://127.0.0.1' );
+		if ( isHttp && ! isLocalhost ) {
+			console.warn(
+				'Warning: Using Basic Auth over HTTP exposes credentials in plaintext!'
+			);
+		}
 	} else if ( auth.type === 'oauth1' ) {
 		oauth = new OAuth( {
 			consumer: {
@@ -131,6 +131,7 @@ export function createClient( baseURL, auth ) {
 		let oauthParams, headers;
 
 		if ( method === 'GET' ) {
+			// For GET, sign the query params and append both params and OAuth params to the URL
 			oauthParams = oauth.authorize( {
 				url,
 				method,
@@ -145,6 +146,7 @@ export function createClient( baseURL, auth ) {
 			url = urlObj.toString();
 			requestConfig = { ...requestConfig, url };
 		} else {
+			// For POST/PUT/DELETE, sign the body if form-encoded, otherwise sign as if body is empty (for JSON)
 			const isJson = (
 				axiosConfig.headers[ 'Content-Type' ] || ''
 			).includes( 'application/json' );
