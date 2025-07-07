@@ -257,11 +257,6 @@
 						}
 						return null;
 					default:
-						if ( ! isSearchError ) {
-							console.error(
-								'Automattic Address Suggestion: Unknown error'
-							);
-						}
 						return null;
 				}
 			};
@@ -273,7 +268,7 @@
 						country,
 						lang: document.documentElement.lang,
 						session_id: sessionId,
-						token: value,
+						token: value.key,
 					} );
 
 					try {
@@ -326,7 +321,7 @@
 						}
 
 						// Split JWT into parts
-						const [ , payload ] = value.split( '.' );
+						const [ , payload ] = value.key.split( '.' );
 						if ( ! payload ) {
 							permanentlyDisabledServices.push( key );
 							return false;
@@ -372,7 +367,7 @@
 						address_id: addressId,
 						session_id: sessionId,
 						lang: document.documentElement.lang,
-						token: value,
+						token: value.key,
 					} );
 
 					const response = await fetch(
@@ -392,6 +387,7 @@
 								{
 									detail: {
 										requestDurations,
+										provider: key,
 									},
 								}
 							)
@@ -410,6 +406,21 @@
 					return data;
 				},
 			} );
+
+			window.addEventListener(
+				'wc-address-autocomplete-service-request-durations',
+				( e ) => {
+					if ( ! value.canTelemetry || e.detail.provider !== key ) {
+						return;
+					}
+					// Send request durations to statsd, to keep track of the average request duration.
+					new Image().src = createStatsdURL( 'a8c-ac-service', {
+						name: 'request-durations',
+						value: e.detail.requestDurations,
+						type: 'timing',
+					} );
+				}
+			);
 		}
 	);
 } )();
@@ -446,15 +457,3 @@ function createStatsdURL( sectionName, events ) {
 
 	return `https://pixel.wp.com/boom.gif?json=${ encodedJson }`;
 }
-
-window.addEventListener(
-	'wc-address-autocomplete-service-request-durations',
-	( e ) => {
-		// Send request durations to statsd, to keep track of the average request duration.
-		new Image().src = createStatsdURL( 'a8c-ac-service', {
-			name: 'request-durations',
-			value: e.detail.requestDurations,
-			type: 'timing',
-		} );
-	}
-);

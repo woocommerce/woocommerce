@@ -40,6 +40,15 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	abstract public function get_address_service_jwt();
 
 	/**
+	 * Get the telemetry status for the address service, this is meant to be overridden by the implementor to return true if the service has permission to send telemetry data.
+	 *
+	 * @return bool The telemetry status for the address service.
+	 */
+	public function can_telemetry() {
+		return false;
+	}
+
+	/**
 	 * Loads up a JWT from cache or from the implementor side.
 	 *
 	 * @return string|null The JWT for the address service.
@@ -171,9 +180,10 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		wp_add_inline_script(
 			'a8c-address-autcomplete-service',
 			sprintf(
-				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ "%1$s" ] = %2$s;',
+				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ "%1$s" ] = { key: %2$s, canTelemetry: %3$s };',
 				$this->id,
-				wp_json_encode( $this->get_jwt() )
+				wp_json_encode( $this->get_jwt() ),
+				wp_json_encode( false !== $this->can_telemetry() && (bool) $this->can_telemetry() )
 			),
 			'before'
 		);
