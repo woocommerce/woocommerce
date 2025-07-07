@@ -8,7 +8,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Woo starter theme.
+Purple is the new WooCommerce starter theme, fully built with blocks and ready for modern commerce. Designed with apparel stores in mind, it features clean styles and a simplistic color palette that adapts to any brand. Packed with commerce-ready templates and curated patterns, Purple offers a versatile foundation for launching your next online store with ease and precision.
 
 == Changelog ==
 
