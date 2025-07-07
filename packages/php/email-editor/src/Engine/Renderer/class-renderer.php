@@ -157,7 +157,7 @@ class Renderer {
 	}
 
 	/**
-	 * Renders the text version of the email template
+	 * Renders the text version of the email template.
 	 *
 	 * @param string $template HTML template.
 	 * @return string
@@ -165,7 +165,7 @@ class Renderer {
 	private function render_text_version( $template ) {
 		$template = ( mb_detect_encoding( $template, 'UTF-8', true ) ) ? $template : mb_convert_encoding( $template, 'UTF-8', mb_list_encodings() );
 
-		// Preserve personalization tags by temporarily replacing them with unique placeholders
+		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
 
 		$result = Html2Text::convert( (string) $template );
@@ -173,38 +173,38 @@ class Renderer {
 			return '';
 		}
 
-		// Restore personalization tags from placeholders
+		// Restore personalization tags from placeholders.
 		$result = $this->restore_personalization_tags( $result );
 
 		return $result;
 	}
 
 	/**
-	 * Preserves personalization tags by replacing them with unique placeholders
+	 * Preserves personalization tags by replacing them with unique placeholders.
 	 *
 	 * @param string $template HTML template.
 	 * @return string
 	 */
 	private function preserve_personalization_tags( string $template ): string {
-		$all_tags = $this->personalization_tags_registry->get_all();
+		$all_tags                               = $this->personalization_tags_registry->get_all();
 		$this->personalization_tag_placeholders = array();
-		$counter = 0;
+		$counter                                = 0;
 
 		foreach ( $all_tags as $tag ) {
 			$token = $tag->get_token();
-			// Create a unique placeholder for each personalization tag
+			// Create a unique placeholder for each personalization tag.
 			$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter . '_' . md5( $token );
-			// Store the full HTML comment format
+			// Store the full HTML comment format.
 			$this->personalization_tag_placeholders[ $placeholder ] = '<!--' . $token . '-->';
-			$counter++;
+			++$counter;
 		}
 
-		// Replace all personalization tags with placeholders
+		// Replace all personalization tags with placeholders.
 		foreach ( $this->personalization_tag_placeholders as $placeholder => $html_comment ) {
-			// Escape the HTML comment for safe regex usage
+			// Escape the HTML comment for safe regex usage.
 			$escaped_html_comment = preg_quote( $html_comment, '/' );
-			// Match the exact HTML comment format
-			$pattern = '/' . $escaped_html_comment . '/';
+			// Match the exact HTML comment format.
+			$pattern  = '/' . $escaped_html_comment . '/';
 			$template = preg_replace( $pattern, $placeholder, $template );
 		}
 

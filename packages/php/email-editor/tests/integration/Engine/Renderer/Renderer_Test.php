@@ -63,14 +63,14 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$theme_controller_mock->method( 'get_styles' )->willReturn( $styles );
 		$theme_controller_mock->method( 'get_layout_settings' )->willReturn( array( 'contentSize' => '660px' ) );
 
-		// Create a mock for Personalization_Tags_Registry
+		// Create a mock for Personalization_Tags_Registry.
 		$personalization_tags_registry_mock = $this->createMock( \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry::class );
 		$personalization_tags_registry_mock->method( 'get_all' )->willReturn( array() );
 
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
-				'theme_controller' => $theme_controller_mock,
+				'theme_controller'              => $theme_controller_mock,
 				'personalization_tags_registry' => $personalization_tags_registry_mock,
 			)
 		);
@@ -217,20 +217,22 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		// Use the real Personalization_Tags_Registry and Personalization_Tag
+		// Use the real Personalization_Tags_Registry and Personalization_Tag.
 		$registry = new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry(
-			$this->di_container->get(\Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class)
+			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
 		);
 		$registry->register(
 			new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag(
 				'Customer Username',
 				'[woocommerce/customer-username]',
 				'Customer',
-				function () { return ''; }
+				function () {
+					return '';
+				}
 			)
 		);
 
-		// Override the renderer with our real registry
+		// Override the renderer with our real registry.
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
