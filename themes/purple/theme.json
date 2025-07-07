@@ -279,6 +279,13 @@
 			"core/post-content": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
+				},
+				"elements": {
+					"heading": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					}
 				}
 			},
 			"core/post-date": {
