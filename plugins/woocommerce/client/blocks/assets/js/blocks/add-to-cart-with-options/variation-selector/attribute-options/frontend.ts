@@ -51,7 +51,10 @@ function setAttribute( name: string, value: string | null ) {
 
 function setDefaultSelectedAttribute() {
 	const context = getContext< Context >();
-	setAttribute( context.name, context.selectedValue );
+
+	if ( context.selectedValue ) {
+		setAttribute( context.name, context.selectedValue );
+	}
 }
 
 /**
@@ -151,14 +154,6 @@ const { state } = store(
 					selectedAttributes,
 					availableVariations,
 				} );
-			},
-			get pillTabIndex(): number {
-				const { selectedValue } = getContext< Context >();
-				const { isPillSelected, index } = state;
-				if ( isPillSelected || ( index === 0 && ! selectedValue ) ) {
-					return 0;
-				}
-				return -1;
 			},
 			get index() {
 				const context = getContext< Context >();

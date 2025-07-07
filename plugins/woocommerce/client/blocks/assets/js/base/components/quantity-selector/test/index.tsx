@@ -6,7 +6,8 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import QuantitySelector, { QuantitySelectorProps } from '../index';
+import QuantitySelector from '../index';
+import type { QuantitySelectorProps } from '../types';
 
 const defaults = {
 	disabled: false,

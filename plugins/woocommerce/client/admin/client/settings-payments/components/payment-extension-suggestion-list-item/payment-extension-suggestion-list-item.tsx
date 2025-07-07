@@ -19,7 +19,7 @@ import {
 	isWooPayments,
 	hasIncentive,
 	isWooPayEligible,
-	recordPaymentsEvent,
+	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
@@ -41,11 +41,13 @@ type PaymentExtensionSuggestionListItemProps = {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Indicates whether the plugin is already installed.
@@ -143,13 +145,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 							variant="primary"
 							onClick={ () => {
 								if ( pluginInstalled ) {
-									// Record the event when user clicks on a gateway's enable button.
-									recordPaymentsEvent(
-										'provider_enable_click',
-										{
-											provider_id: suggestion.id,
-											suggestion_id: suggestion.id,
-										}
+									// Record the event when user clicks on a suggestion's enable button.
+									recordPaymentsProviderEvent(
+										'enable_click',
+										suggestion
 									);
 								}
 
@@ -164,7 +163,8 @@ export const PaymentExtensionSuggestionListItem = ( {
 									pluginInstalled
 										? null
 										: suggestion._links?.attach?.href ??
-												null
+												null,
+									'wc_settings_payments__main_suggestion'
 								);
 							} }
 							isBusy={ installingPlugin === suggestion.id }

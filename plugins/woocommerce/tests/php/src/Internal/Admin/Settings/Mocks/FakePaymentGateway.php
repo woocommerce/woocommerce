@@ -100,14 +100,14 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 *
 	 * @var bool
 	 */
-	public $onboarding_started = false;
+	public $onboarding_started;
 
 	/**
 	 * The onboarding completed flag.
 	 *
 	 * @var bool
 	 */
-	public $onboarding_completed = false;
+	public $onboarding_completed;
 
 	/**
 	 * The test mode onboarding flag.
@@ -132,6 +132,15 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 		// Go through the props and set them on the object.
 		foreach ( $props as $prop => $value ) {
 			$this->$prop = $value;
+		}
+
+		// Put in the default values for properties that are not set.
+		// Onboarding properties are set to the same value as account_connected by default.
+		if ( ! isset( $this->onboarding_started ) ) {
+			$this->onboarding_started = $this->account_connected;
+		}
+		if ( ! isset( $this->onboarding_completed ) ) {
+			$this->onboarding_completed = $this->account_connected;
 		}
 	}
 

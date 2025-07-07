@@ -8,6 +8,16 @@ import { dispatch, useDispatch } from '@wordpress/data';
 import { paymentSettingsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Internal dependencies
+ */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
+
 interface ReactivateLivePaymentsButtonProps {
 	/**
 	 * The text of the button.
@@ -36,6 +46,12 @@ export const ReactivateLivePaymentsButton = ( {
 		e.preventDefault();
 		setIsUpdating( true );
 
+		recordPaymentsEvent( 'reactivate_payments_button_click', {
+			provider_id: wooPaymentsProviderId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
+			suggestion_id: wooPaymentsSuggestionId,
+		} );
+
 		apiFetch( {
 			path: '/wc/v3/payments/settings',
 			method: 'POST',
@@ -59,6 +75,8 @@ export const ReactivateLivePaymentsButton = ( {
 					}
 				);
 
+				// Note: Switching from test to live payments is tracked on the backend (the `provider_live_payments_enabled` event).
+
 				// Force the providers to be refreshed.
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 
@@ -67,6 +85,12 @@ export const ReactivateLivePaymentsButton = ( {
 			.catch( () => {
 				// In case of errors, redirect to the gateway settings page.
 				setIsUpdating( false );
+
+				recordPaymentsEvent( 'reactivate_payments_error', {
+					provider_id: wooPaymentsProviderId,
+					provider_extension_slug: wooPaymentsExtensionSlug,
+					suggestion_id: wooPaymentsSuggestionId,
+				} );
 
 				createErrorNotice(
 					sprintf(
