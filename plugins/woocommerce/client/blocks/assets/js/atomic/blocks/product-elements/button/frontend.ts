@@ -197,7 +197,8 @@ const productButtonStore = {
 			// started yet.
 			if (
 				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE
+				context.animationStatus === AnimationStatus.IDLE &&
+				addToCartWithOptionsState.isFormValid
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
