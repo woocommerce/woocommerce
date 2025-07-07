@@ -397,4 +397,6 @@ function my_extension_initialize() {
 
     $GLOBALS['my_extension'] = My_Extension::instance();
 }
+
+add_action( 'plugins_loaded', 'my_extension_initialize', 10 );
 ```

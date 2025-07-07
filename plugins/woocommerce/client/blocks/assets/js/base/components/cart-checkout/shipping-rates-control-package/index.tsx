@@ -7,7 +7,7 @@ import { Panel } from '@woocommerce/blocks-components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
-import type { ReactElement } from 'react';
+import { CartShippingPackageShippingRate } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -26,9 +26,8 @@ export const ShippingRatesControlPackage = ( {
 	collapsible,
 	showItems,
 	highlightChecked = false,
-}: PackageProps ): ReactElement => {
-	const { selectShippingRate, isSelectingRate, shippingRates } =
-		useShippingData();
+}: PackageProps ) => {
+	const { selectShippingRate, shippingRates } = useShippingData();
 
 	const internalPackageCount = shippingRates?.length || 1;
 
@@ -62,16 +61,10 @@ export const ShippingRatesControlPackage = ( {
 	// We sometimes don't want to collapse even if we have multiple packages.
 	const shouldBeCollapsible = collapsible ?? multiplePackages;
 
-	const { selectedOptionNumber, selectedOption } = useMemo( () => {
-		return {
-			selectedOptionNumber: packageData?.shipping_rates?.findIndex(
-				( rate ) => rate?.selected
-			),
-			selectedOption: packageData?.shipping_rates?.find(
-				( rate ) => rate?.selected
-			),
-		};
-	}, [ packageData?.shipping_rates ] );
+	const selectedOption: CartShippingPackageShippingRate | undefined = useMemo(
+		() => packageData?.shipping_rates?.find( ( rate ) => rate?.selected ),
+		[ packageData?.shipping_rates ]
+	);
 
 	// Collapsible and non-collapsible header handling.
 	const header =
@@ -100,6 +93,7 @@ export const ShippingRatesControlPackage = ( {
 		},
 		[ packageId, selectShippingRate ]
 	);
+
 	const packageRatesProps = {
 		className,
 		noResultsMessage,
@@ -109,7 +103,6 @@ export const ShippingRatesControlPackage = ( {
 			( rate ) => rate.selected
 		),
 		renderOption,
-		disabled: isSelectingRate,
 		highlightChecked,
 	};
 
@@ -118,11 +111,7 @@ export const ShippingRatesControlPackage = ( {
 			<Panel
 				className={ clsx(
 					'wc-block-components-shipping-rates-control__package',
-					className,
-					{
-						'wc-block-components-shipping-rates-control__package--disabled':
-							isSelectingRate,
-					}
+					className
 				) }
 				// initialOpen remembers only the first value provided to it, so by the
 				// time we know we have several packages, initialOpen would be hardcoded to true.
@@ -140,17 +129,7 @@ export const ShippingRatesControlPackage = ( {
 		<div
 			className={ clsx(
 				'wc-block-components-shipping-rates-control__package',
-				className,
-				{
-					'wc-block-components-shipping-rates-control__package--disabled':
-						isSelectingRate,
-					'wc-block-components-shipping-rates-control__package--first-selected':
-						! isSelectingRate && selectedOptionNumber === 0,
-					'wc-block-components-shipping-rates-control__package--last-selected':
-						! isSelectingRate &&
-						selectedOptionNumber ===
-							packageData?.shipping_rates?.length - 1,
-				}
+				className
 			) }
 		>
 			{ header }
