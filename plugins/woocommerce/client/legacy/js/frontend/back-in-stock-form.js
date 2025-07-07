@@ -28,6 +28,9 @@
 
 	/**
 	 * Handle found variation.
+	 *
+	 * @param {Event} event The event object.
+	 * @param {Object} variation The variation object.
 	 */
 	BISFormManager.prototype.onFoundVariation = function( event, variation ) {
 		var form = event.data.bisForm;
@@ -44,6 +47,9 @@
 
 	/**
 	 * Handle show variation.
+	 *
+	 * @param {Event} event The event object.
+	 * @param {Object} variation The variation object.
 	 */
 	BISFormManager.prototype.onShowVariation = function( event, variation ) {
 		var form = event.data.bisForm;
@@ -62,6 +68,8 @@
 
 	/**
 	 * Handle announce reset.
+	 *
+	 * @param {Event} event The event object.
 	 */
 	BISFormManager.prototype.onAnnounceReset = function( event ) {
 		var form = event.data.bisForm;
@@ -71,6 +79,8 @@
 
 	/**
 	 * Handle send form.
+	 *
+	 * @param {Event} event The event object.
 	 */
 	BISFormManager.prototype.onSendForm = function( event ) {
 
@@ -97,11 +107,20 @@
 		}
 	};
 
+	/**
+	 * Extend jQuery.
+	 */
+	$.fn.extend( {
+		wc_back_in_stock_form: function() {
+			return this.each( function() {
+				new BISFormManager( $( this ) );
+			} );
+		}
+	} );
+
 	// Initialize the form manager on DOM ready.
 	$( function() {
-		$( '.variations_form' ).each( function() {
-			new BISFormManager( $( this ) );
-		});
+		$( '.variations_form' ).wc_back_in_stock_form();
 	});
 
 })( jQuery, document );
