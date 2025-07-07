@@ -2,7 +2,9 @@
 /**
  * Title: Related products collection
  * Slug: woostarter/related-products-collection
- * Categories: 
+ * Categories: woo-commerce, featured, featured-selling, call-to-action
+ * Keywords: woo-commerce, featured, featured-selling, call-to-action
+ * Description: A section with a heading and a 4 column product grid.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Related products collection"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

@@ -2,7 +2,7 @@
 /**
  * Title: About page with additional information
  * Slug: woostarter/page-about-additional-information
- * Categories: woocommerce
+ * Categories: woo-commerce, about, text, media, columns
  * Keywords: starter
  * Block Types: core/post-content
  * Post Types: page, wp_template
@@ -11,7 +11,5 @@
  */
 ?>
 <!-- wp:pattern {"slug":"woostarter/about-alternating-columns"} /-->
-
 <!-- wp:pattern {"slug":"woostarter/about-category-collection"} /-->
-
 <!-- wp:pattern {"slug":"woostarter/faq-question-list"} /-->

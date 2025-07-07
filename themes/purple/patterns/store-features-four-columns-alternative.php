@@ -2,8 +2,8 @@
 /**
  * Title: Four columns of store features with icons
  * Slug: woostarter/store-features-four-columns-alternative
- * Categories: text, about
- * Keywords: about, text
+ * Categories: text, about, media, columns
+ * Keywords: about, text, media, columns
  * Description: A four-column section with store featured services.
  */
 ?>

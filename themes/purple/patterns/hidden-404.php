@@ -3,10 +3,8 @@
  * Title: 404
  * Slug: woostarter/hidden-404
  * Inserter: no
- * 
  */
 ?>
-
 <!-- wp:group {"metadata":{"name":"Page not found"},"align":"full","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull"><!-- wp:spacer {"height":"var:preset|spacing|80"} -->
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>

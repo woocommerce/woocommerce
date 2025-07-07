@@ -2,7 +2,9 @@
 /**
  * Title: Two columns full width categories
  * Slug: woostarter/two-columns-full-width-categories
- * Categories: Columns, Gallery
+ * Categories: columns, gallery, media, featured
+ * Keywords: columns, gallery, media, featured
+ * Description: A section with a heading and a 2 column product grid.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Two Columns Fullwidth","categories":["Columns","Gallery"],"patternName":"woostarter/two-columns-full-width-categories"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->

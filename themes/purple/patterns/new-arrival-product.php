@@ -2,7 +2,9 @@
 /**
  * Title: New arrival product
  * Slug: woostarter/new-arrival-product
- * Categories: WooCommerce
+ * Categories: woo-commerce, featured, featured-selling, call-to-action
+ * Keywords: woo-commerce, featured, featured-selling, call-to-action
+ * Description: A new arrival product with a featured image, title, description and button.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"New arrival product"},"align":"full","backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

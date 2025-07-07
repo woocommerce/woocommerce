@@ -2,13 +2,12 @@
 /**
  * Title: Size chart
  * Slug: woostarter/size-chart
- * Categories: woocommerce
+ * Categories: woo-commerce, text
  * Keywords: size chart, table
  * Description: A size chart table.
  * Block Types: core/table
  */
 ?>
-
 <!-- wp:spacer {"height":"var:preset|spacing|60","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
 <div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->

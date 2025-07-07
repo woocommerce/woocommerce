@@ -2,8 +2,9 @@
 /**
  * Title: Best Sellers Collection
  * Slug: woostarter/woocommerce-best-sellers
- * Categories: WooCommerce
+ * Categories: woo-commerce, featured-selling
  * Block Types: woocommerce/product-collection
+ * Description: A section with a heading and a 4 column product grid.
  */
 ?>
 <!-- wp:group {"metadata":{"categories":["text","featured"],"patternName":"woostarter/product-related-4-column","name":"Products, 4 column with Heading"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|40","right":"var:preset|spacing|40"}}},"layout":{"type":"constrained"}} -->

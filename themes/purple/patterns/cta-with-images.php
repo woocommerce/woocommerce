@@ -2,7 +2,9 @@
 /**
  * Title: CTA with images
  * Slug: woostarter/cta-with-images
- * Categories: Call to Action, Gallery
+ * Categories: call-to-action, gallery, columns
+ * Keywords: call-to-action, gallery, images
+ * Description: A call to action with three images of different sizes.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Call to action with three images of different sizes"},"align":"full","className":"is-style-section-2","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->

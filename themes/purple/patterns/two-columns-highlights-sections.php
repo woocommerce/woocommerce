@@ -2,7 +2,9 @@
 /**
  * Title: Two columns highlights sections
  * Slug: woostarter/two-columns-highlights-sections
- * Categories: About
+ * Categories: about, columns, media, featured
+ * Keywords: about, columns, media, featured
+ * Description: A section with 2 columns of highlights
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Two columns highlights sections "},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"theme-2","layout":{"type":"constrained"}} -->

@@ -2,7 +2,9 @@
 /**
  * Title: Social media call to action with hero image
  * Slug: woostarter/social-media-call-to-action-with-hero-image
- * Categories: Banners, Call to Action
+ * Categories: banner, call-to-action, media
+ * Keywords: banner, call-to-action, media
+ * Description: A social media call to action with a hero image.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Social media call to action with hero image"},"align":"full","layout":{"type":"constrained"}} -->

@@ -5,10 +5,9 @@
  * Categories: page
  * Post Types: page, wp_template
  * Viewport width: 1400
+ * Description: A page template for the WooCommerce single product page.
  */
 ?>
-
-
 <!-- wp:group {"metadata":{"name":"Single Product"},"align":"wide","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide">
 
@@ -65,7 +64,7 @@
 
 			<!-- wp:woocommerce/add-to-cart-with-options /-->
 
-			<!-- wp:pattern {"slug":"woostarter/woocommerce-product-details"} /-->
+			<!-- wp:pattern {"slug":"woostarter/hidden-woocommerce-product-details"} /-->
 
 		</div>
 		<!-- /wp:column -->

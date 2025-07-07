@@ -2,8 +2,9 @@
 /**
  * Title: Featured products
  * Slug: woostarter/woocommerce-featured-products
- * Categories: WooCommerce
+ * Categories: woo-commerce, featured-selling
  * Block Types: woocommerce/product-collection
+ * Description: A section with a heading and a 4 column product grid.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Featured products"},"align":"wide","layout":{"type":"constrained"}} -->

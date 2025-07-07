@@ -2,7 +2,7 @@
 /**
  * Title: Stockists
  * Slug: woostarter/stockists
- * Categories: woocommerce
+ * Categories: woo-commerce, text, columns
  * Keywords: stockists, locations, columns
  * Description: A column layout to display stockists.
  * Block Types: core/columns

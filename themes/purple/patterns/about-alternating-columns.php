@@ -2,8 +2,8 @@
 /**
  * Title: About section with alternating columns
  * Slug: woostarter/about-alternating-columns
- * Categories: text, about, media
- * Keywords: about, text
+ * Categories: text, about, media, columns
+ * Keywords: about, text, image, media
  * Description: A section with alternating columns of text and an image.
  */
 ?>

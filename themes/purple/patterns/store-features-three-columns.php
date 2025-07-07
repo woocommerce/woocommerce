@@ -2,13 +2,11 @@
 /**
  * Title: Three columns of store features with icons
  * Slug: woostarter/store-features-three-columns
- * Categories: text, about
- * Keywords: about, text
+ * Categories: text, about, media, columns
+ * Keywords: about, text, media, columns
  * Description: A three-column section with store featured services.
- *
  */
 ?>
-
 <!-- wp:group {"metadata":{"name":"Small store features row with icons","categories":["text","about"],"patternName":"woostarter/store-features-four-columns"},"align":"full","style":{"spacing":{"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>

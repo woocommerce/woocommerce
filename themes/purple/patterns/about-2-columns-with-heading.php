@@ -2,8 +2,8 @@
 /**
  * Title: About 2 columns with heading
  * Slug: woostarter/about-2-columns-with-heading
- * Categories: text, about, media
- * Keywords: about, text
+ * Categories: text, about, media, columns
+ * Keywords: about, text, image, media
  * Description: A section with two columns of text, heading and an image.
  */
 ?>

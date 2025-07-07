@@ -2,11 +2,12 @@
 /**
  * Title: Product grids with filters
  * Slug: woostarter/product-grid-with-filters
- * Categories: WooCommerce
- * 
+ * Categories: woo-commerce
+ * Keywords: woo-commerce, product, grid, filters
+ * Description: A product grid with filters.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Product Archives","patternName":"woostarter/archive-product"},"align":"wide","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Product grids with filters","patternName":"woostarter/product-grid-with-filters"},"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide">
 
 <!-- wp:columns {"align":"wide"} -->

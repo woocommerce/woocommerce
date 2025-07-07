@@ -2,9 +2,9 @@
 /**
  * Title: Collection of categories with images	
  * Slug: woostarter/about-category-collection
- * Categories: text, about, media
- * Keywords: about, text
- * Description: An about page pattern.
+ * Categories: text, about, media, columns
+ * Keywords: about, text, image, media
+ * Description: A section with a collection of categories with images.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Collection of categories with images"},"align":"full","layout":{"type":"constrained"}} -->

@@ -1,12 +1,12 @@
 <?php
 /**
- * Title: More from the journal
- * Slug: woostarter/more-from-the-journal
+ * Title: List of posts with left aligned heading
+ * Slug: woostarter/posts-three-columns-left-aligned
  * Categories: posts
  * Block Types: core/query
  */
 ?>
-<!-- wp:group {"metadata":{"name":"More from the journal","categories":["posts"],"patternName":"woostarter/more-from-the-journal"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"List of posts with left aligned heading","categories":["posts"],"patternName":"woostarter/posts-three-columns-left-aligned"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--50)"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->

@@ -1,11 +1,10 @@
 <?php
 /**
  * Title: List of posts in three columns
- * Slug: woostarter/template-query-loop
- * Categories: posts
+ * Slug: woostarter/posts-three-columns
+ * Categories: posts, featured
  * Description: A list of posts, 3 columns, with featured image, post date and title.
  * Block Types: core/query
- *
  */
 ?>
 <!-- wp:group {"metadata":{"name":"List of posts in three columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

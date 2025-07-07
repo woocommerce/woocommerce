@@ -1,11 +1,10 @@
 <?php
 /**
  * Title: WooCommerce Product Details
- * Slug: woostarter/woocommerce-product-details
+ * Slug: woostarter/hidden-woocommerce-product-details
  * Inserter: no
  */
 ?>
-
 <!-- wp:woocommerce/product-details -->
 <div class="wp-block-woocommerce-product-details"><!-- wp:woocommerce/accordion-group {"style":{"spacing":{"blockGap":"0"}}} -->
 <div class="wp-block-woocommerce-accordion-group"><!-- wp:woocommerce/accordion-item -->

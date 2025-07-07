@@ -2,11 +2,11 @@
 /**
  * Title: Products, 4 column with Heading
  * Slug: woostarter/product-related-4-column
- * Categories: columns, featured
+ * Categories: woo-commerce, columns, featured, featured-selling
  * Block Types: woocommerce/product-collection
+ * Description: A section with a heading and a 4 column product grid.
  */
 ?>
-
 <!-- wp:group {"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:heading {"textAlign":"center","align":"wide","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|40"}}}} -->
 <h2 class="wp-block-heading alignwide has-text-align-center" style="padding-bottom:var(--wp--preset--spacing--40)"><?php esc_html_e( 'You might like', 'woostarter' ); ?></h2>

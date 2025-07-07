@@ -2,7 +2,9 @@
 /**
  * Title: Testimonial with logo
  * Slug: woostarter/testimonial-with-logo
- * Categories: Testimonials, Text
+ * Categories: testimonials, text, media
+ * Keywords: testimonials, text, media
+ * Description: A testimonial with centered text and a logo.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Testimonial with logo"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

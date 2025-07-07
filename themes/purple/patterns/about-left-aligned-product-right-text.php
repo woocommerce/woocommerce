@@ -5,10 +5,8 @@
  * Categories: text, about, media
  * Keywords: about, text, intro
  * Description: A section with a product image and a large sized paragraph.
- *
  */
 ?>
-
 <!-- wp:group {"metadata":{"categories":["about"],"name":"Left-aligned image, text on the right","patternName":"woostarter/left-aligned-product-right-text"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"},"blockGap":"0"},"dimensions":{"minHeight":""}},"layout":{"type":"constrained","justifyContent":"center"}} -->
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>

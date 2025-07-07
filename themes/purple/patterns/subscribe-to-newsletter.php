@@ -2,10 +2,12 @@
 /**
  * Title: Subscribe to newsletter section
  * Slug: woostarter/subscribe-to-newsletter
- * Categories: text, call-to-action
+ * Categories: text, call-to-action, columns
+ * Keywords: text, call-to-action, columns
+ * Description: A section with a heading and a newsletter subscription form.
  */
 ?>
-<!-- wp:group {"metadata":{"name":"Title on the left, form on the right"},"align":"full","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Subscribe to newsletter section"},"align":"full","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->

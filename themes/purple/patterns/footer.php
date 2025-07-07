@@ -4,6 +4,7 @@
  * Slug: woostarter/footer
  * Categories: footer
  * Block Types: core/template-part/footer
+ * Description: A footer pattern with social links and navigation.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Default Footer"},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} --><div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0"><!-- wp:spacer {"height":"var:preset|spacing|50"} -->

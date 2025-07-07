@@ -2,7 +2,9 @@
 /**
  * Title: Hero with text and one button
  * Slug: woostarter/hero-with-text-and-one-button
- * Categories: Banners
+ * Categories: banner, media, call-to-action
+ * Keywords: banner, media, call-to-action
+ * Description: A hero section with text and one button.
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Hero with text and two buttons"},"align":"full","layout":{"type":"constrained"}} -->

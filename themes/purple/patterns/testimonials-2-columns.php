@@ -2,11 +2,11 @@
 /**
  * Title: Testimonials in two columns
  * Slug: woostarter/testimonials-2-columns
- * Categories: testimonials
- *
+ * Categories: testimonials, text, media, columns
+ * Keywords: testimonials, text, media
+ * Description: A section with a heading and a 2 column testimonial grid.
  */
 ?>
-
 <!-- wp:group {"metadata":{"name":"Testimonials in two columns"},"align":"full","backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background"><!-- wp:spacer {"height":"var:preset|spacing|80"} -->
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>

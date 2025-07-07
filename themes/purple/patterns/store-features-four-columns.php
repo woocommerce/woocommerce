@@ -2,10 +2,9 @@
 /**
  * Title: Four columns of store features with icons
  * Slug: woostarter/store-features-four-columns
- * Categories: text, about
- * Keywords: about, text
+ * Categories: text, about, media, columns
+ * Keywords: about, text, media, columns
  * Description: A four-column section with store featured services.
- *
  */
 ?><!-- wp:group {"metadata":{"name":"Small store features row with icons","categories":["text","about"],"patternName":"woostarter/store-features-four-columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)"><!-- wp:columns {"isStackedOnMobile":false,"align":"wide","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|40"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
