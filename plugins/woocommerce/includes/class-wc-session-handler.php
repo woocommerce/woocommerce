@@ -508,7 +508,7 @@ class WC_Session_Handler extends WC_Session {
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds;
+		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
 		if ( $expiring_seconds > $max_expiring_seconds ) {
 			$expiring_seconds       = $max_expiring_seconds;
@@ -520,7 +520,7 @@ class WC_Session_Handler extends WC_Session {
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$expiration_seconds = intval( apply_filters( 'wc_session_expiration', $default_expiration_seconds ) ) ?: $default_expiration_seconds;
+		$expiration_seconds = intval( apply_filters( 'wc_session_expiration', $default_expiration_seconds ) ) ?: $default_expiration_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
 		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
 		if ( $expiration_seconds > $max_expiration_seconds ) {
@@ -531,7 +531,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( $session_limit_exceeded ) {
 			$transient_key = 'wc_session_handler_warning';
 			if ( false === get_transient( $transient_key ) ) {
-				wc_get_logger()->warning( 'Keeping sessions for longer than 30 days results in perfomance isues, the default is 2 days for guests and 7 days for logged in users, expiry has been capped to 30 days.', array( 'source' => 'wc_session_handler' ) );
+				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in perfomance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
 				set_transient( $transient_key, true, MONTH_IN_SECONDS );
 			}
 		}
