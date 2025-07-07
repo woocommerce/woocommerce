@@ -391,7 +391,7 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertIsArray( $uk_digits );
 		$this->assertIsArray( $uk_prefix );
 		$this->assertSame( 88, $uk_digits['ambiguity_score'] ); // 85+3=88 (intra-DPD boost)
-		$this->assertSame( 90, $uk_prefix['ambiguity_score'] ); // S10 service, confidence 90
+		$this->assertSame( 90, $uk_prefix['ambiguity_score'] ); // S10 service, confidence 90.
 
 		// Test German patterns.
 		$de_14_digits = $this->provider->try_parse_tracking_number( '12345678901234', 'DE', 'FR' );
