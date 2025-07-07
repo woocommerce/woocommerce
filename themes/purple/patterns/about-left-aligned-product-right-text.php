@@ -26,9 +26,10 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"default"}} -->
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:paragraph {"align":"center","style":{"typography":{"lineHeight":"1.2"}},"fontSize":"xx-large"} -->
-<p class="has-text-align-center has-xx-large-font-size" style="line-height:1.2"><?php esc_html_e('New Collection', 'purple');?></p>
-<!-- /wp:paragraph -->
+<div class="wp-block-column is-vertically-aligned-center">
+<!-- wp:heading {"textAlign":"center"} -->
+<h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('New Collection', 'purple');?></h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
 <p class="has-text-align-center has-theme-4-color has-text-color has-link-color has-small-font-size"><?php esc_html_e('Knitted with breathable 100% wool fibers.', 'purple');?></p>

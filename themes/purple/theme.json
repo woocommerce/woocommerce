@@ -257,6 +257,9 @@
 				}
 			},
 			"core/navigation": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
 				"elements": {
 					"link": {
 						"color": {
@@ -274,18 +277,6 @@
 				},
 				"spacing": {
 					"blockGap": "var(--wp--preset--spacing--40)"
-				}
-			},
-			"core/post-content": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-4)"
-				},
-				"elements": {
-					"heading": {
-						"color": {
-							"text": "var(--wp--preset--color--theme-2)"
-						}
-					}
 				}
 			},
 			"core/post-date": {
@@ -357,12 +348,10 @@
 					"text": "var(--wp--preset--color--theme-6)"
 				}
 			},
-			"core/site-tagline": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-4)"
-				}
-			},
 			"core/site-title": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
 				"elements": {
 					"link": {
 						"typography": {
@@ -400,6 +389,11 @@
 					"lineHeight": "1.18"
 				}
 			},
+			"woocommerce/product-rating": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
 			"woocommerce/accordion-item": {
 				"border": {
 					"bottom": {
@@ -413,6 +407,9 @@
 				}
 			},
 			"woocommerce/accordion-header": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
 				"spacing": {
 					"padding": {
 						"top": "0.75rem",
@@ -424,17 +421,22 @@
 					"fontWeight": "400"
 				}
 			},
-			"woocommerce/accordion-panel": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-4)"
-				}
-			},
 			"woocommerce/breadcrumbs": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--small)"
 				},
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
+				}
+			},
+			"woocommerce/customer-account": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
+			"woocommerce/mini-cart": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
 			"woocommerce/product-price": {
@@ -474,6 +476,11 @@
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
+			"woocommerce/product-reviews" : {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
 			"woocommerce/product-review-author-name" : {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--small)",
@@ -504,7 +511,7 @@
 		},
 		"color": {
 			"background": "var(--wp--preset--color--theme-1)",
-			"text": "var(--wp--preset--color--theme-2)"
+			"text": "var(--wp--preset--color--theme-4)"
 		},
 		"css": "",
 		"elements": {
@@ -602,6 +609,9 @@
 			},
 			"heading": {
 				"css": "&.has-background { padding: 0; }",
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				},
 				"typography": {
 					"fontStyle": "normal",
 					"fontWeight": "500"

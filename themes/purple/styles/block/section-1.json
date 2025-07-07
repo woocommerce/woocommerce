@@ -37,6 +37,11 @@
                     }
                 }
             },
+            "heading": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-5)"
+				}
+            },
             "link": {
                 "color": {
                     "text": "var(--wp--preset--color--theme-5)"
