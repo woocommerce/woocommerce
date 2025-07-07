@@ -79,6 +79,9 @@ class WooPaymentsService {
 	const FROM_PAYMENT_SETTINGS = 'WCADMIN_PAYMENT_SETTINGS';
 	const FROM_NOX_IN_CONTEXT   = 'WCADMIN_NOX_IN_CONTEXT';
 	const FROM_KYC              = 'KYC';
+	const FROM_WPCOM            = 'WPCOM';
+
+	const WPCOM_CONNECTION_RETURN_PARAM = 'wpcom_connection_return';
 
 	const EVENT_PREFIX = 'settings_payments_woopayments_';
 
@@ -1730,7 +1733,7 @@ class WooPaymentsService {
 					// If the source is LYS, we return the user to the Launch Your Store flow.
 					$return_url = $this->proxy->call_function(
 						'admin_url',
-						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments&wpcom_connection_return=1'
+						'admin.php?page=wc-admin&path=/launch-your-store' . self::ONBOARDING_PATH_BASE . '&sidebar=hub&content=payments'
 					);
 					break;
 				default:
@@ -1738,13 +1741,24 @@ class WooPaymentsService {
 					$return_url = $this->proxy->call_static(
 						Utils::class,
 						'wc_payments_settings_url',
-						self::ONBOARDING_PATH_BASE,
-						array(
-							'wpcom_connection_return' => '1', // URL query flag so we can properly identify when the user returns.
-						)
+						self::ONBOARDING_PATH_BASE
 					);
 					break;
 			}
+
+			// Add standardized query arguments to the return URL.
+			$return_url = add_query_arg(
+				array(
+					// URL query flag so we can properly identify when the user returns
+					// either by accepting or rejecting the WPCOM connection.
+					self::WPCOM_CONNECTION_RETURN_PARAM => '1',
+					// Keep the source.
+					'source'                            => $source,
+					// Attach the `from` parameter to more easily identify where the return request is coming from.
+					'from'                              => self::FROM_WPCOM,
+				),
+				$return_url
+			);
 
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
