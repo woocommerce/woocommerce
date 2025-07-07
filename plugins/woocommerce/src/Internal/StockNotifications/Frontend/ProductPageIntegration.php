@@ -200,7 +200,7 @@ class ProductPageIntegration {
 				array(
 					'button',
 					\wc_wp_theme_get_element_class_name( 'button' ),
-					'woocommerce_bis_form__button',
+					'wc_bis_form__button',
 				)
 			)
 		);

@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+
 /**
  * Settings controller for Customer Stock Notifications.
  */

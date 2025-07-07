@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc_bis_form__form-row">
 			<?php if ( $show_email_field ) : ?>
 
-				<label for="wc_bis_email_<?php echo absint( $product_id ); ?>"><?php echo esc_html_x( 'Email address to be notified when this product is back in stock', 'back in stock form', 'woocommerce' ); ?></label>
+				<label for="wc_bis_email_<?php echo absint( $product_id ); ?>" class="screen-reader-text"><?php echo esc_html_x( 'Email address to be notified when this product is back in stock', 'back in stock form', 'woocommerce' ); ?></label>
 				<input
 					type="email"
 					name="wc_bis_email"
