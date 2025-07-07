@@ -1330,8 +1330,12 @@ class CartController {
 
 				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
-					/* translators: %1$s: Attribute name, %2$s: Allowed values. */
-					sprintf( esc_html__( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woocommerce' ), $attribute_label, implode( ', ', $attribute->get_slugs() ) ),
+					sprintf(
+						/* translators: %1$s: Attribute name, %2$s: Allowed values. */
+						esc_html__( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woocommerce' ),
+						esc_html( $attribute_label ),
+						esc_html( implode( ', ', $attribute->get_slugs() ) )
+					),
 					400
 				);
 			}
@@ -1350,8 +1354,19 @@ class CartController {
 		if ( ! empty( $missing_attributes ) ) {
 			throw new RouteException(
 				'woocommerce_rest_missing_variation_data',
-				/* translators: %s: Attribute name. */
-				esc_html__( 'Missing variation data for variable product.', 'woocommerce' ) . ' ' . sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ),
+				esc_html__( 'Missing variation data for variable product.', 'woocommerce' ) . ' ' .
+				esc_html(
+					sprintf(
+						/* translators: %s: Attribute name. */
+						_n(
+							'%s is a required field',
+							'%s are required fields',
+							count( $missing_attributes ),
+							'woocommerce'
+						),
+						wc_format_list_of_items( $missing_attributes )
+					)
+				),
 				400
 			);
 		}
