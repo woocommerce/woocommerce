@@ -57,6 +57,8 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 		// translators: Save as in "Save $x".
 		$save_label = __( 'Save', 'woocommerce' );
 
+		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
+
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			array(
@@ -94,6 +96,9 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 									<div class="wc-block-cart-item__wrap">
 										<span data-wp-bind--hidden="!state.isProductHiddenFromCatalog" data-wp-text="state.cartItemName" class="wc-block-components-product-name"></span>
 										<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-text="state.cartItemName" data-wp-bind--href="state.cartItem.permalink" class="wc-block-components-product-name"></a>
+										<div data-wp-bind--hidden="!state.cartItem.show_backorder_badge" class="wc-block-components-product-badge wc-block-components-product-backorder-badge">
+											<?php echo esc_html( $available_on_backorder_label ); ?>
+										</div>
 										<div class="wc-block-cart-item__prices">
 											<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
 												<span class="screen-reader-text">
