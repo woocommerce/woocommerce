@@ -13,7 +13,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Inspector } from './inspector';
+import { TaxonomyFilterInspectorControls } from './inspector';
 import { termOptionsPreview } from './constants';
 import { EditProps } from './types';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
@@ -83,7 +83,7 @@ const Edit = ( props: EditProps ) => {
 	if ( ! taxonomy )
 		return (
 			<div { ...innerBlocksProps }>
-				<Inspector { ...props } />
+				<TaxonomyFilterInspectorControls { ...props } />
 				<Notice>
 					<p>
 						{ __(
@@ -97,7 +97,7 @@ const Edit = ( props: EditProps ) => {
 
 	return (
 		<div { ...innerBlocksProps }>
-			<Inspector { ...props } />
+			<TaxonomyFilterInspectorControls { ...props } />
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {

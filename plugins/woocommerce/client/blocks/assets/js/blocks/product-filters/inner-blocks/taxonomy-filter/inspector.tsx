@@ -15,7 +15,7 @@ import metadata from './block.json';
 import { updateFilterHeading } from '../../utils/update-filter-heading';
 import { getTaxonomyLabel } from './utils';
 
-export const Inspector = ( {
+export const TaxonomyFilterInspectorControls = ( {
 	attributes,
 	setAttributes,
 	clientId,
