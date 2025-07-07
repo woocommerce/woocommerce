@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -17,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class for filter clauses.
  */
-class QueryClauses implements QueryClausesGenerator {
+class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
@@ -49,6 +50,46 @@ class QueryClauses implements QueryClausesGenerator {
 		$args = $this->add_attribute_clauses(
 			$args,
 			$this->get_chosen_attributes( $wp_query->query_vars )
+		);
+
+		$args = $this->add_taxonomy_clauses(
+			$args,
+			$this->get_chosen_taxonomies( $wp_query->query_vars )
+		);
+
+		return $args;
+	}
+
+	/**
+	 * Add query clauses for main query.
+	 * WooCommerce handles attribute, price, and rating filters in the main query.
+	 * This method is used to add stock status and taxonomy filters to the main query.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
+	public function add_query_clauses_for_main_query( $args, $wp_query ) {
+		if (
+			! $wp_query->is_main_query() ||
+			'product_query' !== $wp_query->get( 'wc_query' )
+		) {
+			return $args;
+		}
+
+		if ( $wp_query->get( 'filter_stock_status' ) ) {
+			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
+			$stock_statuses = explode( ',', $stock_statuses );
+			$stock_statuses = array_filter( $stock_statuses );
+
+			$args = $this->add_stock_clauses( $args, $stock_statuses );
+		}
+
+		$args = $this->add_taxonomy_clauses(
+			$args,
+			$this->get_chosen_taxonomies( $wp_query->query_vars )
 		);
 
 		return $args;
@@ -240,6 +281,104 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
+	 * Add query clauses for taxonomy filter (e.g., product_cat, product_tag).
+	 *
+	 * @param array $args           Query args.
+	 * @param array $chosen_taxonomies {
+	 *     Chosen taxonomies array.
+	 *
+	 *     @type array {$taxonomy: Taxonomy name} {
+	 *         @type string[] $terms Chosen terms' slug.
+	 *     }
+	 * }
+	 * @return array
+	 */
+	public function add_taxonomy_clauses( $args, $chosen_taxonomies ) {
+		if ( empty( $chosen_taxonomies ) ) {
+			return $args;
+		}
+
+		global $wpdb;
+
+		$tax_queries = array();
+
+		foreach ( $chosen_taxonomies as $taxonomy => $terms ) {
+			if ( empty( $terms ) ) {
+				continue;
+			}
+
+			// Get term IDs from slugs
+			$term_ids = array();
+			foreach ( $terms as $term_slug ) {
+				$term = get_term_by( 'slug', $term_slug, $taxonomy );
+				if ( $term && ! is_wp_error( $term ) ) {
+					$term_ids[] = $term->term_id;
+				}
+			}
+
+			if ( empty( $term_ids ) ) {
+				continue;
+			}
+
+			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+
+			/*
+			 * Use EXISTS subquery for taxonomy filtering for several key benefits:
+			 *
+			 * 1. Performance: EXISTS stops execution as soon as the first matching row is found,
+			 *    making it faster than JOIN approaches that need to process all matches.
+			 *
+			 * 2. No duplicate rows: Unlike JOINs, EXISTS doesn't create duplicate rows when
+			 *    a product has multiple matching terms, eliminating the need for DISTINCT.
+			 *
+			 * 3. Clean boolean logic: We only care IF a product has the terms, not HOW MANY
+			 *    or which specific ones, making EXISTS semantically correct.
+			 *
+			 * 4. Efficient combination: Multiple taxonomy filters can be combined with AND
+			 *    without complex GROUP BY logic or performance degradation.
+			 */
+			$tax_queries[] = $wpdb->prepare(
+				"EXISTS (
+					SELECT 1 FROM {$wpdb->term_relationships} tr
+					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					WHERE tr.object_id = {$wpdb->posts}.ID
+					AND tt.taxonomy = %s
+					AND tt.term_id IN {$term_ids_list}
+				)",
+				$taxonomy
+			);
+		}
+
+		if ( ! empty( $tax_queries ) ) {
+			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Get all the term for current attribute.
+	 *
+	 * @param \WP_Term[] $all_terms      Aggreated terms array.
+	 * @param string     $taxonomy       Attribute taxonomy name.
+	 * @param int        $taxonomy_count Taxonomy count. If there is only one
+	 *                                   taxonomy, return all terms.
+	 * @return mixed
+	 */
+	private function get_current_attribute_terms( $all_terms, $taxonomy, $taxonomy_count ) {
+		if ( 1 === $taxonomy_count ) {
+			return $all_terms;
+		}
+
+		return array_filter(
+			$all_terms,
+			function ( $term ) use ( $taxonomy ) {
+				return $term->taxonomy === $taxonomy;
+			}
+		);
+	}
+
+	/**
 	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
 	 * @param string $sql SQL join.
@@ -390,6 +529,37 @@ class QueryClauses implements QueryClausesGenerator {
 		}
 
 		return $chosen_attributes;
+	}
+
+	/**
+	 * Get an array of taxonomies and terms selected from query arguments.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return array
+	 */
+	private function get_chosen_taxonomies( $query_vars ) {
+		$chosen_taxonomies = array();
+
+		if ( empty( $query_vars ) ) {
+			return $chosen_taxonomies;
+		}
+
+		$public_product_taxonomies = get_taxonomies( array(
+			'public' => true,
+			'object_type' => array( 'product' ),
+		) );
+
+		$taxonomy_filter_keys = array_map( function( $taxonomy ) {
+			return 'filter_' . $taxonomy;
+		}, $public_product_taxonomies );
+
+		foreach( $taxonomy_filter_keys as $taxonomy => $key ) {
+			if ( isset( $query_vars[ $key ] ) ) {
+				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $key ] ) );
+			}
+		}
+
+		return $chosen_taxonomies;
 	}
 
 	/**

@@ -33,36 +33,39 @@ class MainQueryController implements RegisterHooksInterface {
 
 	/**
 	 * Hook into actions and filters.
-	 */
-	public function register() {
-		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
-	}
-
-	/**
-	 * Filter the posts clauses of the main query to suport global filters.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
-	 * @param array     $args     Query args.
-	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return void
+	 */
+	public function register() {
+		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses_for_main_query' ), 10, 2 );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
+	}
+
+	/**
+	 * Register custom query vars for our filters. Price, stock status, and attribute query vars are
+	 * already registered at WC_Query.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param array $query_vars Query vars.
 	 * @return array
 	 */
-	public function main_query_filter( $args, $wp_query ) {
-		if (
-			! $wp_query->is_main_query() ||
-			'product_query' !== $wp_query->get( 'wc_query' )
-		) {
-			return $args;
+	public function add_query_vars( $query_vars ) {
+		$custom_query_vars = array(
+			'filter_stock_status',
+		);
+
+		$public_product_taxonomies = get_taxonomies( array(
+			'public' => true,
+			'object_type' => array( 'product' ),
+		) );
+
+		foreach( $public_product_taxonomies as $taxonomy ) {
+			$custom_query_vars[] = 'filter_' . $taxonomy;
 		}
 
-		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
-			$stock_statuses = explode( ',', $stock_statuses );
-			$stock_statuses = array_filter( $stock_statuses );
-
-			$args = $this->query_clauses->add_stock_clauses( $args, $stock_statuses );
-		}
-
-		return $args;
+		return array_merge( $query_vars, $custom_query_vars );
 	}
 }
