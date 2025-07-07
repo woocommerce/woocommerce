@@ -204,14 +204,11 @@ const addToCartWithOptionsStore = store(
 					quantityConstraints,
 					productId,
 				} = context;
-				const currentQuantity =
-					productType === 'grouped' && childProductId
-						? quantity[ childProductId ] || 0
-						: quantity[ productId ] || 0;
 				const id =
 					productType === 'grouped' && childProductId
 						? childProductId
 						: productId;
+				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
 					getDefaultConstraints( productType, childProductId );
@@ -228,14 +225,11 @@ const addToCartWithOptionsStore = store(
 					quantityConstraints,
 					productId,
 				} = context;
-				const currentQuantity =
-					productType === 'grouped' && childProductId
-						? quantity[ childProductId ] || 0
-						: quantity[ productId ] || 0;
 				const id =
 					productType === 'grouped' && childProductId
 						? childProductId
 						: productId;
+				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
 					getDefaultConstraints( productType, childProductId );
