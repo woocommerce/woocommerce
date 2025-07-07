@@ -23,7 +23,7 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
@@ -68,7 +68,8 @@ class Utils {
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInputChange' );
+			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInput' );
+			$processor->set_attribute( 'data-wp-on--change', 'actions.handleQuantityChange' );
 		}
 
 		$quantity_html = $processor->get_updated_html();
@@ -141,5 +142,33 @@ class Utils {
 
 		// Render with dynamic set to false to prevent calling render_callback.
 		return $new_block->render( array( 'dynamic' => false ) );
+	}
+
+	/**
+	 * Check if min and max purchase quantity are the same for a product.
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if min and max purchase quantity are the same, false otherwise.
+	 */
+	public static function is_min_max_quantity_same( $product ) {
+		/**
+		 * Filter the minimum quantity value allowed for the product.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param int        $min_purchase_quantity The minimum purchase quantity.
+		 * @param WC_Product $product               The product object.
+		 */
+		$min_purchase_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+		/**
+		 * Filter the maximum quantity value allowed for the product.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param int        $max_purchase_quantity The maximum purchase quantity.
+		 * @param WC_Product $product               The product object.
+		 */
+		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		return $min_purchase_quantity === $max_purchase_quantity;
 	}
 }
