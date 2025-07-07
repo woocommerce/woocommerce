@@ -1,4 +1,18 @@
+/* eslint-disable jsdoc/check-property-names */
 // @ts-check
+/**
+ * @typedef {Object} BasicAuth
+ * @property {'basic'}  type           Type of authentication ('basic')
+ * @property {string}   username       Username for basic authentication
+ * @property {string}   password       Password for basic authentication
+ *
+ * @typedef {Object} OAuth1Auth
+ * @property {'oauth1'} type           Type of authentication ('oauth1')
+ * @property {string}   consumerKey    OAuth1 consumer key
+ * @property {string}   consumerSecret OAuth1 consumer secret
+ *
+ * @typedef {BasicAuth|OAuth1Auth} Auth
+ */
 /**
  * External dependencies
  */
@@ -29,6 +43,17 @@ export function createClient( baseURL, auth ) {
 		}
 	} else {
 		throw new Error( 'auth.type must be either "basic" or "oauth1"' );
+	}
+
+	// Warn or throw if Basic Auth is used over HTTP, except for localhost
+	const isHttp = baseURL.startsWith( 'http://' );
+	const isLocalhost =
+		baseURL.startsWith( 'http://localhost' ) ||
+		baseURL.startsWith( 'http://127.0.0.1' );
+	if ( auth.type === 'basic' && isHttp && ! isLocalhost ) {
+		console.warn(
+			'Warning: Using Basic Auth over HTTP exposes credentials in plaintext. Use HTTPS instead.'
+		);
 	}
 
 	// Ensure baseURL ends with '/'
@@ -71,6 +96,31 @@ export function createClient( baseURL, auth ) {
 
 	const axiosInstance = axios.create( axiosConfig );
 
+	// Utility to redact sensitive fields from logs
+	function redact(
+		obj,
+		keys = [ 'password', 'token', 'authorization', 'cookie', 'secret' ]
+	) {
+		const shouldRedact = process.env.CI === 'true';
+		if ( ! shouldRedact ) return obj;
+		if ( ! obj || typeof obj !== 'object' ) return obj;
+		return Object.fromEntries(
+			Object.entries( obj ).map( ( [ k, v ] ) =>
+				keys.includes( k.toLowerCase() )
+					? [ k, '********' ]
+					: [ k, typeof v === 'object' ? redact( v, keys ) : v ]
+			)
+		);
+	}
+
+	// Centralized logging for requests, with redaction and formatting
+	function logRequest( label, details ) {
+		const redacted = Object.fromEntries(
+			Object.entries( details ).map( ( [ k, v ] ) => [ k, redact( v ) ] )
+		);
+		console.log( `[${ new Date().toISOString() }] ${ label }`, redacted );
+	}
+
 	function oauthRequest(
 		method,
 		path,
@@ -111,7 +161,7 @@ export function createClient( baseURL, auth ) {
 		}
 
 		if ( debug ) {
-			console.log( 'oauthRequest', {
+			logRequest( 'oauthRequest', {
 				method,
 				url,
 				params,
@@ -136,7 +186,12 @@ export function createClient( baseURL, auth ) {
 			}
 			const response = await axiosInstance.get( path, { params } );
 			if ( debug ) {
-				console.log( 'get', { path, params, response } );
+				logRequest( 'get', {
+					path,
+					params,
+					status: response?.status,
+					data: response?.data,
+				} );
 			}
 			return response;
 		},
@@ -154,7 +209,12 @@ export function createClient( baseURL, auth ) {
 			}
 			const response = await axiosInstance.post( path, data );
 			if ( debug ) {
-				console.log( 'post', { path, data, response } );
+				logRequest( 'post', {
+					path,
+					data,
+					status: response?.status,
+					response: response?.data,
+				} );
 			}
 			return response;
 		},
@@ -172,7 +232,12 @@ export function createClient( baseURL, auth ) {
 			}
 			const response = await axiosInstance.put( path, data );
 			if ( debug ) {
-				console.log( 'put', { path, data, response } );
+				logRequest( 'put', {
+					path,
+					data,
+					status: response?.status,
+					response: response?.data,
+				} );
 			}
 			return response;
 		},
@@ -192,7 +257,12 @@ export function createClient( baseURL, auth ) {
 				data: params,
 			} );
 			if ( debug ) {
-				console.log( 'delete', { path, params, response } );
+				logRequest( 'delete', {
+					path,
+					params,
+					status: response?.status,
+					response: response?.data,
+				} );
 			}
 			return response;
 		},
