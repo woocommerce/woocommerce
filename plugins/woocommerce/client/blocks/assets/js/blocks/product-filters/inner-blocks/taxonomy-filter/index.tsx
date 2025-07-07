@@ -33,7 +33,11 @@ registerBlockType( metadata, {
 	variations: taxonomies.map( ( item, index ) => {
 		return {
 			name: `product-filter-taxonomy-${ item.name }`,
-			title: item.label,
+			title: sprintf(
+				// translators: %s is the taxonomy label.
+				__( '%s Filter', 'woocommerce' ),
+				item.label
+			),
 			description: sprintf(
 				// translators: %s is the taxonomy label.
 				__(
