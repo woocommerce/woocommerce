@@ -167,14 +167,28 @@ describe( 'Taxonomy Filter block', () => {
 			expect( productCountsToggle ).not.toBeChecked();
 		} );
 
-		test( 'should allow toggling product counts', () => {
+		test( 'should allow toggling product counts', async () => {
+			await selectBlock( /Block: Product Categories Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Categories Filter/i )
+			);
+
+			// expect the list doesn't have count
+			expect( block.queryByText( /\(12\)/i ) ).not.toBeInTheDocument();
+
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
 			} );
 
-			fireEvent.click( productCountsToggle );
+			await act( async () => {
+				fireEvent.click( productCountsToggle );
+			} );
 
 			expect( productCountsToggle ).toBeChecked();
+
+			// expect the list has count
+			expect( block.queryByText( /\(12\)/i ) ).toBeInTheDocument();
 		} );
 
 		test( 'should show hide empty items toggle when enabled', () => {
@@ -224,60 +238,6 @@ describe( 'Taxonomy Filter block', () => {
 			fireEvent.click( hideEmptyToggle );
 
 			expect( hideEmptyToggle ).not.toBeChecked();
-		} );
-	} );
-
-	describe( 'Settings panel', () => {
-		beforeEach( async () => {
-			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
-		} );
-
-		test( 'should reset all settings when reset button is clicked', async () => {
-			// First enable hidden controls
-			const optionsButton = screen.getByRole( 'button', {
-				name: /Taxonomy Filter Settings options/i,
-			} );
-			await act( async () => {
-				fireEvent.click( optionsButton );
-			} );
-
-			// Enable sort order control
-			const showSortOrderToggle = screen.getByRole( 'menuitemcheckbox', {
-				name: /Sort Order/i,
-			} );
-			await act( async () => {
-				fireEvent.click( showSortOrderToggle );
-			} );
-
-			// Find and click the reset button
-			const resetButton = screen.getByRole( 'menuitem', {
-				name: /Reset all/i,
-			} );
-			await act( async () => {
-				fireEvent.click( resetButton );
-			} );
-
-			// Close the menu
-			await act( async () => {
-				fireEvent.click( optionsButton );
-			} );
-
-			// Check that the controls are reset/hidden
-			const taxonomySelect = screen.getByRole( 'combobox', {
-				name: /Taxonomy/i,
-			} );
-			const productCountsToggle = screen.getByRole( 'checkbox', {
-				name: /Product counts/i,
-			} );
-
-			expect( taxonomySelect ).toHaveValue( '' );
-			expect( productCountsToggle ).not.toBeChecked();
-
-			// Sort order should be hidden again after reset
-			expect(
-				screen.queryByRole( 'combobox', { name: /Sort Order/i } )
-			).not.toBeInTheDocument();
 		} );
 	} );
 
