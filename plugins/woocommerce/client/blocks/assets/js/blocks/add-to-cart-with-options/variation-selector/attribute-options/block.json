@@ -11,6 +11,14 @@
 		"optionStyle": {
 			"type": "string",
 			"enum": [ "pills", "dropdown" ]
+		},
+		"autoselect": {
+			"type": "boolean",
+			"default": false
+		},
+		"autoselectOnPageLoad": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"textdomain": "woocommerce",

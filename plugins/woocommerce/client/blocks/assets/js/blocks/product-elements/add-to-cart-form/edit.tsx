@@ -5,7 +5,13 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import { BlockEditProps } from '@wordpress/blocks';
-import { Disabled, Tooltip } from '@wordpress/components';
+import {
+        PanelBody,
+        Disabled,
+        Tooltip,
+        SelectControl,
+        ToggleControl,
+} from '@wordpress/components';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
 
@@ -17,7 +23,7 @@ import { UpgradeNotice } from './components/upgrade-notice';
 import type { Attributes } from './';
 
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
-	const { setAttributes } = props;
+	const { attributes, setAttributes } = props;
 
 	const quantitySelectorStyleClass =
 		props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input

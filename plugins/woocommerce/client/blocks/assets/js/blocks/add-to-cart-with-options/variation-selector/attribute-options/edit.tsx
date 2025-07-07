@@ -8,6 +8,7 @@ import {
 	Disabled,
 	PanelBody,
 	SelectControl,
+	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -61,7 +62,12 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, optionStyle } = attributes;
+	const {
+		className,
+		optionStyle,
+		autoselect,
+		autoselectOnPageLoad,
+	} = attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -119,6 +125,22 @@ export default function AttributeOptionsEdit(
 							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
+				</PanelBody>
+				<PanelBody title={ __( 'Autoselect', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __( 'Auto-select atrributes on user selection', 'woocommerce' ) }
+						help={ __( 'This controls which other attributes will be auto-selected when an attribute is changed. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
+						checked={ autoselect }
+						onChange={ () => setAttributes( { autoselect: ! autoselect } ) }
+						__nextHasNoMarginBottom
+					/>
+					<ToggleControl
+						label={ __( 'Auto-select on page load', 'woocommerce' ) }
+						help={ __( 'This controls whether or not attributes with only one possible option will be auto-selected upon loading the page.', 'woocommerce' ) }
+						checked={ autoselectOnPageLoad }
+						onChange={ () => setAttributes( { autoselectOnPageLoad: ! autoselectOnPageLoad } ) }
+						__nextHasNoMarginBottom
+					/>
 				</PanelBody>
 			</InspectorControls>
 
