@@ -319,7 +319,7 @@ class SignupService {
 		// Check for valid privacy terms.
 		if ( ! $is_logged_in && Config::creates_account_on_signup() && ! Config::requires_account() ) {
 			$opt_in = isset( $source['wc_bis_opt_in'] ) ? wc_clean( wp_unslash( $source['wc_bis_opt_in'] ) ) : false;
-			if ( 'true' !== $opt_in ) {
+			if ( 'on' !== $opt_in ) {
 				return new \WP_Error( self::ERROR_INVALID_OPT_IN );
 			}
 		}
