@@ -15,8 +15,8 @@
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide">
 
-<!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}}} -->
-<p class="has-text-align-center" style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Sourcing', 'purple');?></p>
+<!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}},"fontSize":"small"} -->
+<p class="has-text-align-center has-small-font-size" style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Sourcing', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"textAlign":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->

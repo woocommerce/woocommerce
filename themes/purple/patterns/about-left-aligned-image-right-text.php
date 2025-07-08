@@ -31,8 +31,8 @@
 <!-- wp:column {"verticalAlignment":"center","layout":{"type":"constrained","justifyContent":"left","contentSize":"460px"}} -->
 <div class="wp-block-column is-vertically-aligned-center">
 
-<!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}}} -->
-<p style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Production', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Production', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->

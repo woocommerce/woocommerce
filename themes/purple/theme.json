@@ -307,7 +307,7 @@
 			},
 			"core/post-title": {
 				"typography": {
-					"fontSize": "var(--wp--preset--font-size--x-large)",
+					"fontSize": "var(--wp--preset--font-size--large)",
 					"fontWeight": "500"
 				}
 			},

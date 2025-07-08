@@ -8,8 +8,8 @@
  */
 ?>
 <!-- wp:group {"metadata":{"name":"Testimonial with logo"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull has-theme-5-background-color has-background" style="padding-top:var(--wp--preset--spacing--80);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--80);padding-left:var(--wp--preset--spacing--50)"><!-- wp:heading {"textAlign":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.07rem","fontStyle":"normal","fontWeight":"400"}}} -->
-<h2 class="wp-block-heading has-text-align-center" style="font-style:normal;font-weight:400;letter-spacing:0.07rem;text-transform:uppercase"><?php esc_html_e('In the press', 'purple');?></h2>
+<div class="wp-block-group alignfull has-theme-5-background-color has-background" style="padding-top:var(--wp--preset--spacing--80);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--80);padding-left:var(--wp--preset--spacing--50)"><!-- wp:heading {"textAlign":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.07rem","fontStyle":"normal","fontWeight":"400"}},"fontSize":"small"} -->
+<h2 class="wp-block-heading has-text-align-center has-small-font-size" style="font-style:normal;font-weight:400;letter-spacing:0.07rem;text-transform:uppercase"><?php esc_html_e('In the press', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|40"} -->

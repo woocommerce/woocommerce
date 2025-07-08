@@ -16,8 +16,8 @@
 <!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
-<!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}}} -->
-<p style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Sourcing', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"1.12px"}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="letter-spacing:1.12px;text-transform:uppercase"><?php esc_html_e('Sourcing', 'purple');?></p>
 <!-- /wp:paragraph -->
 <!-- wp:heading {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}}} -->
 <h2 class="wp-block-heading" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:var(--wp--preset--spacing--30)"><?php esc_html_e('Our materials', 'purple');?></h2>
