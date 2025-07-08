@@ -227,11 +227,13 @@ class AssetsController extends \WP_UnitTestCase {
 	 * Tests that the additional resource hints don't use the cache when the version is invalid.
 	 *
 	 * @dataProvider resource_hints_invalid_cache_provider
+	 * @param string $key   The cache key to set to an invalid value.
+	 * @param string $value The cache value to set.
 	 *
 	 * @return void
 	 */
 	public function test_additional_resource_hints_invalid_cache( string $key, string $value ) {
-		$mock_version        = array(
+		$mock_version         = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
 			'wordpress'   => get_bloginfo( 'version' ),
 			'site_url'    => wp_guess_url(),
