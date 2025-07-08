@@ -1238,8 +1238,7 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
 
-		// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
 	}
 
 	return $value;
