@@ -43,6 +43,16 @@ const { singularItemsText, pluralItemsText } = getConfig(
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
+if ( ! window.wc?.blocksCheckout?.registerCheckoutFilters ) {
+	window.wc = window.wc || {};
+	window.wc.blocksCheckout = window.wc.blocksCheckout || {};
+	window.wc.blocksCheckout.registerCheckoutFilters = () => {
+		console.error(
+			'You are trying to access the `wc.blocksCheckout.registerCheckoutFilters` global without enqueuing `@woocommerce/blocks-checkout`. Please, enqueue it as a dependency of your script.'
+		);
+	};
+}
+
 type MiniCartContext = {
 	isOpen: boolean;
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
