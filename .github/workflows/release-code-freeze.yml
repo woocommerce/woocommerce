@@ -16,7 +16,7 @@ env:
 jobs:
   check-feature-freeze-event:
     name: Check for Feature Freeze events today
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
     steps:
@@ -67,7 +67,7 @@ jobs:
     name: Calculate versions and confirm repo is in a good state
     needs: check-feature-freeze-event
     if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
@@ -114,7 +114,7 @@ jobs:
 
   run-code-freeze:
     name: Perform code freeze
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: prepare-for-code-freeze
     permissions:
       contents: write

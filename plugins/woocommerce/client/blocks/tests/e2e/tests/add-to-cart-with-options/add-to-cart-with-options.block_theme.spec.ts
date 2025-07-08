@@ -134,7 +134,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await addToCartButton.click();
 
 			await expect(
-				page.getByText( ' No matching variation found.' )
+				page.getByText(
+					'Please select product attributes before adding to cart.'
+				)
 			).toBeVisible();
 		} );
 
