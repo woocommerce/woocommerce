@@ -47,7 +47,8 @@ export const TaxonomyFilterInspectorControls = ( {
 					setAttributes( {
 						taxonomy: '',
 						sortOrder: 'count-desc',
-						displayStyle: 'list',
+						displayStyle:
+							'woocommerce/product-filter-checkbox-list',
 						showCounts: false,
 						hideEmpty: true,
 					} );
@@ -123,10 +124,16 @@ export const TaxonomyFilterInspectorControls = ( {
 				</ToolsPanelItem>
 				<ToolsPanelItem
 					label={ __( 'Display Style', 'woocommerce' ) }
-					hasValue={ () => displayStyle !== 'list' }
+					hasValue={ () =>
+						displayStyle !==
+						'woocommerce/product-filter-checkbox-list'
+					}
 					isShownByDefault={ true }
 					onDeselect={ () =>
-						setAttributes( { displayStyle: 'list' } )
+						setAttributes( {
+							displayStyle:
+								'woocommerce/product-filter-checkbox-list',
+						} )
 					}
 				>
 					<DisplayStyleSwitcher
