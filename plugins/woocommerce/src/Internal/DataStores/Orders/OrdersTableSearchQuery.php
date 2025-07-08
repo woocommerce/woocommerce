@@ -184,7 +184,7 @@ class OrdersTableSearchQuery {
 				SELECT DISTINCT order_id
 				FROM $items_table
 				WHERE MATCH ( order_item_name ) AGAINST ( %s IN BOOLEAN MODE )
-			) AS " . self::PRODUCTS_JOIN_ALIAS . " ON " . self::PRODUCTS_JOIN_ALIAS . ".order_id = $orders_table.id",
+			) AS " . self::PRODUCTS_JOIN_ALIAS . ' ON ' . self::PRODUCTS_JOIN_ALIAS . ".order_id = $orders_table.id",
 			$search_pattern
 		);
 		// phpcs:enable
@@ -214,7 +214,7 @@ class OrdersTableSearchQuery {
 		// Support for phone was added in 9.4.
 		$maybe_phone_field = '';
 		if ( version_compare( get_option( 'woocommerce_db_version' ), '9.4.0', '>=' ) ) {
-			$maybe_phone_field = ", phone";
+			$maybe_phone_field = ', phone';
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -227,7 +227,7 @@ class OrdersTableSearchQuery {
 					address_1,  address_2, city,  state,
 					postcode,   country,   email  $maybe_phone_field
 				) AGAINST ( %s IN BOOLEAN MODE )
-			) AS " . self::CUSTOMERS_JOIN_ALIAS . " ON " . self::CUSTOMERS_JOIN_ALIAS . ".order_id = $orders_table.id",
+			) AS " . self::CUSTOMERS_JOIN_ALIAS . ' ON ' . self::CUSTOMERS_JOIN_ALIAS . ".order_id = $orders_table.id",
 			$search_pattern
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
