@@ -34,6 +34,7 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
+	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-items-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
@@ -370,6 +371,36 @@ const { state: cartItemState } = store(
 					: parseInt( totals.line_subtotal, 10 );
 
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
+			},
+
+			get isLineItemTotalDiscountVisible(): boolean {
+				return (
+					cartItemState.cartItemHasDiscount &&
+					cartItemState.cartItem.quantity > 1
+				);
+			},
+
+			get isProductHiddenFromCatalog(): boolean {
+				const { catalog_visibility: catalogVisibility } =
+					cartItemState.cartItem;
+				return (
+					catalogVisibility === 'hidden' ||
+					catalogVisibility === 'search'
+				);
+			},
+
+			get isLowInStockVisible(): boolean {
+				return (
+					! cartItemState.cartItem.show_backorder_badge &&
+					!! cartItemState.cartItem.low_stock_remaining
+				);
+			},
+
+			get lowInStockLabel(): string {
+				return lowInStockLabel.replace(
+					'%d',
+					cartItemState.cartItem.low_stock_remaining
+				);
 			},
 		},
 

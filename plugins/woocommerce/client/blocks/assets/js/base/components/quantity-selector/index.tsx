@@ -4,59 +4,20 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import clsx from 'clsx';
-import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
-import { DOWN, UP } from '@wordpress/keycodes';
+import {
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import { DOWN, ENTER, UP } from '@wordpress/keycodes';
 import { useDebouncedCallback } from 'use-debounce';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-
-export interface QuantitySelectorProps {
-	/**
-	 * Component wrapper classname
-	 *
-	 * @default 'wc-block-components-quantity-selector'
-	 */
-	className?: string;
-	/**
-	 * Current quantity
-	 */
-	quantity?: number;
-	/**
-	 * Minimum quantity
-	 */
-	minimum?: number;
-	/**
-	 * Maximum quantity
-	 */
-	maximum: number;
-	/**
-	 * Input step attribute.
-	 */
-	step?: number;
-	/**
-	 * Event handler triggered when the quantity is changed
-	 */
-	onChange: ( newQuantity: number ) => void;
-	/**
-	 * Name of the item the quantity selector refers to
-	 *
-	 * Used for a11y purposes
-	 */
-	itemName?: string;
-	/**
-	 * Whether the component should be interactable
-	 */
-	disabled: boolean;
-	/**
-	 * Whether the component should be editable
-	 *
-	 * @default true
-	 */
-	editable?: boolean;
-}
+import type { QuantitySelectorProps } from './types';
 
 const QuantitySelector = ( {
 	className,
@@ -70,7 +31,6 @@ const QuantitySelector = ( {
 	editable = true,
 }: QuantitySelectorProps ): JSX.Element => {
 	const classes = clsx( 'wc-block-components-quantity-selector', className );
-
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const decreaseButtonRef = useRef< HTMLButtonElement | null >( null );
 	const increaseButtonRef = useRef< HTMLButtonElement | null >( null );
@@ -78,6 +38,11 @@ const QuantitySelector = ( {
 	const canDecrease = ! disabled && quantity - step >= minimum;
 	const canIncrease =
 		! disabled && ( ! hasMaximum || quantity + step <= maximum );
+	const [ internalState, setInternalState ] = useState< number >( quantity );
+	const expectedQuantityRef = useRef< number >( quantity );
+	const expectedQuantityTypeRef = useRef< 'input' | 'increase' | 'decrease' >(
+		'input'
+	);
 
 	/**
 	 * The goal of this function is to normalize what was inserted,
@@ -101,63 +66,137 @@ const QuantitySelector = ( {
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
 			// We round off the value to our steps.
-			value = Math.floor( value / step ) * step;
+			value = Math.round( value / step ) * step;
 
-			// Only commit if the value has changed
-			if ( value !== initialValue ) {
-				onChange( value );
-			}
+			// Round to avoid floating-point precision errors (e.g., 1.4000000000000001 -> 1.4).
+			const stepDecimalPlaces =
+				step.toString().split( '.' )[ 1 ]?.length || 0;
+			value =
+				Math.round( value * Math.pow( 10, stepDecimalPlaces ) ) /
+				Math.pow( 10, stepDecimalPlaces );
+
+			return value;
 		},
-		[ hasMaximum, maximum, minimum, onChange, step ]
+		[ hasMaximum, maximum, minimum, step ]
 	);
 
-	/*
-	 * It's important to wait before normalizing or we end up with
-	 * a frustrating experience, for example, if the minimum is 2 and
-	 * the customer is trying to type "10", premature normalizing would
-	 * always kick in at "1" and turn that into 2.
-	 */
-	const debouncedNormalizeQuantity = useDebouncedCallback(
-		normalizeQuantity,
-		// This value is deliberately smaller than what's in useStoreCartItemQuantity so we don't end up with two requests.
-		300
+	// Debounced callback for onChange to prevent excessive server calls
+	const debouncedOnChange = useDebouncedCallback(
+		( newQuantity: number ) => {
+			onChange( newQuantity );
+		},
+		600 // 600ms delay
+	);
+
+	const commitValue = useCallback(
+		( value: number ) => {
+			if ( isNaN( value ) ) {
+				setInternalState( quantity );
+				return;
+			}
+			// Cancel any pending debounced changes to prevent race conditions
+			debouncedOnChange.cancel();
+
+			const normalized = normalizeQuantity( value );
+			setInternalState( normalized );
+
+			// Update expected quantity to prevent useEffect from overriding local state
+			expectedQuantityRef.current = normalized;
+
+			if ( normalized !== quantity ) {
+				onChange( normalized );
+			}
+		},
+		[ normalizeQuantity, quantity, debouncedOnChange, onChange ]
 	);
 
 	/**
-	 * Normalize qty on mount before render.
+	 * Normalize qty on mount before render, and keep in sync with the quantity prop.
 	 */
 	useLayoutEffect( () => {
-		normalizeQuantity( quantity );
+		if ( quantity === expectedQuantityRef.current ) {
+			return;
+		}
+		if (
+			expectedQuantityTypeRef.current === 'increase' &&
+			quantity < expectedQuantityRef.current
+		) {
+			return;
+		}
+		if (
+			expectedQuantityTypeRef.current === 'decrease' &&
+			quantity > expectedQuantityRef.current
+		) {
+			return;
+		}
+		setInternalState( quantity );
+		expectedQuantityRef.current = quantity;
+		expectedQuantityTypeRef.current = 'input';
 	}, [ quantity, normalizeQuantity ] );
 
 	/**
 	 * Handles keyboard up and down keys to change quantity value.
-	 *
-	 * @param {Object} event event data.
 	 */
-	const quantityInputOnKeyDown = useCallback(
-		( event ) => {
+	const handleInputKeyDown = useCallback(
+		( event: React.KeyboardEvent< HTMLInputElement > ) => {
 			const isArrowDown =
-				typeof event.key !== undefined
-					? event.key === 'ArrowDown'
-					: event.keyCode === DOWN;
-			const isArrowUp =
-				typeof event.key !== undefined
-					? event.key === 'ArrowUp'
-					: event.keyCode === UP;
+				event.key === 'ArrowDown' || event.keyCode === DOWN;
+			const isArrowUp = event.key === 'ArrowUp' || event.keyCode === UP;
+			const isEnter = event.key === 'Enter' || event.keyCode === ENTER;
 
-			if ( isArrowDown && canDecrease ) {
+			if ( isArrowDown ) {
 				event.preventDefault();
-				onChange( quantity - step );
+				decreaseButtonRef.current?.click();
 			}
 
-			if ( isArrowUp && canIncrease ) {
+			if ( isArrowUp ) {
 				event.preventDefault();
-				onChange( quantity + step );
+				increaseButtonRef.current?.click();
+			}
+
+			if ( isEnter ) {
+				event.preventDefault();
+				inputRef.current?.blur();
 			}
 		},
-		[ quantity, onChange, canIncrease, canDecrease, step ]
+		[]
 	);
+
+	const handleInputChange = useCallback(
+		( event: React.ChangeEvent< HTMLInputElement > ) => {
+			const raw = event.target.value;
+			const value = Number( raw );
+
+			setInternalState( value );
+
+			if ( isNaN( value ) ) {
+				debouncedOnChange.cancel();
+				return;
+			}
+
+			const normalized = normalizeQuantity( value );
+
+			// Update expected quantity to prevent useEffect from overriding local state
+			expectedQuantityRef.current = normalized;
+
+			// Only push if the value is valid and matches the normalized value
+			if ( normalized === value && normalized !== quantity ) {
+				debouncedOnChange( normalized );
+			} else {
+				// Cancel any pending debounced changes if the value is invalid
+				debouncedOnChange.cancel();
+			}
+		},
+		[ debouncedOnChange, normalizeQuantity, quantity ]
+	);
+
+	const handleInputBlur = useCallback( () => {
+		commitValue( internalState );
+	}, [ internalState, commitValue ] );
+
+	const formatValue = useCallback( ( value: number ) => {
+		return value.toString();
+	}, [] );
 
 	return (
 		<div className={ classes }>
@@ -170,22 +209,10 @@ const QuantitySelector = ( {
 				step={ step }
 				min={ minimum }
 				max={ maximum }
-				value={ quantity }
-				onKeyDown={ quantityInputOnKeyDown }
-				onChange={ ( event ) => {
-					// Inputs values are strings, we parse them here.
-					let value = parseInt( event.target.value, 10 );
-					// parseInt would throw NaN for anything not a number,
-					// so we revert value to the quantity value.
-					value = isNaN( value ) ? quantity : value;
-
-					if ( value !== quantity ) {
-						// we commit this value immediately.
-						onChange( value );
-						// but once the customer has stopped typing, we make sure his value is respecting the bounds (maximum value, minimum value, step value), and commit the normalized value.
-						debouncedNormalizeQuantity( value );
-					}
-				} }
+				value={ formatValue( internalState ) }
+				onKeyDown={ handleInputKeyDown }
+				onBlur={ handleInputBlur }
+				onChange={ handleInputChange }
 				aria-label={ sprintf(
 					/* translators: %s refers to the item name in the cart. */
 					__( 'Quantity of %s in your cart.', 'woocommerce' ),
@@ -204,8 +231,9 @@ const QuantitySelector = ( {
 						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
 						disabled={ ! canDecrease }
 						onClick={ () => {
-							const newQuantity = quantity - step;
-							onChange( newQuantity );
+							const newQuantity = internalState - step;
+							commitValue( newQuantity );
+							expectedQuantityTypeRef.current = 'decrease';
 							speak(
 								sprintf(
 									/* translators: %s refers to the item's new quantity in the cart. */
@@ -216,7 +244,6 @@ const QuantitySelector = ( {
 									newQuantity
 								)
 							);
-							normalizeQuantity( newQuantity );
 						} }
 					>
 						&#8722;
@@ -231,8 +258,9 @@ const QuantitySelector = ( {
 						disabled={ ! canIncrease }
 						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
 						onClick={ () => {
-							const newQuantity = quantity + step;
-							onChange( newQuantity );
+							const newQuantity = internalState + step;
+							commitValue( newQuantity );
+							expectedQuantityTypeRef.current = 'increase';
 							speak(
 								sprintf(
 									/* translators: %s refers to the item's new quantity in the cart. */
@@ -243,7 +271,6 @@ const QuantitySelector = ( {
 									newQuantity
 								)
 							);
-							normalizeQuantity( newQuantity );
 						} }
 					>
 						&#65291;

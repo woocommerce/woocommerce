@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a bug in which visiting an empty, non-default checkout block, would result in trying to create an order.

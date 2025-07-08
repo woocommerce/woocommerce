@@ -4,7 +4,8 @@ on:
     - cron: '0 18 * * *' # Every day at 18h UTC
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: write
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -70,6 +71,7 @@ jobs:
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
+      nextPrepReleaseBranch: ${{ steps.calculate-versions.outputs.nextPrepReleaseBranch }}
       nextTrunkVersion: ${{ steps.calculate-versions.outputs.nextTrunkVersion }}
     steps:
       - name: Verify no PRs open by the github-actions bot are open
@@ -102,10 +104,12 @@ jobs:
             const currentVersion = currentRelease.data.tag_name.replace(/[^0-9.]+/, '');
             const nextReleaseVersion = bumpMinorVersion(currentVersion);
             const nextReleaseBranch = `release/${nextReleaseVersion.slice(0, -2)}`;
+            const nextPrepReleaseBranch = `prep/${nextReleaseBranch}-for-next-dev-cycle-${nextReleaseVersion.slice(0, -2)}`;
             const nextTrunkVersion = bumpMinorVersion(nextReleaseVersion);
 
             core.setOutput('nextReleaseVersion', nextReleaseVersion);
             core.setOutput('nextReleaseBranch', nextReleaseBranch);
+            core.setOutput('nextPrepReleaseBranch', nextPrepReleaseBranch);
             core.setOutput('nextTrunkVersion', nextTrunkVersion);
 
   run-code-freeze:
@@ -164,15 +168,61 @@ jobs:
         run: |
           pnpm utils code-freeze version-bump ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}-dev -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -b trunk
 
-      # Notify Slack.
+  build-zip:
+    name: 'Build WooCommerce Release Zip'
+    uses: ./.github/workflows/release-build-zip-file.yml
+    needs: [prepare-for-code-freeze, run-code-freeze]
+    with:
+      skip_verify: true
+      create_github_release: false
+      branch: ${{ needs.prepare-for-code-freeze.outputs.nextPrepReleaseBranch }}
+
+  modify-zip-version:
+    name: 'Update version to Dev'
+    runs-on: ubuntu-latest
+    needs: [build-zip, prepare-for-code-freeze]
+    env:
+      DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev
+    outputs:
+      artifact_url: ${{ steps.upload-modified-zip.outputs.artifact-url }}
+    steps:
+      - name: Download original zip artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce
+          path: ./download
+
+      - name: Modify version in woocommerce.php
+        run: |
+          sed -i "s/\* Version:.*/\* Version: $DEV_VERSION/" ./download/woocommerce/woocommerce.php
+
+      - name: Create new zip file
+        run: |
+          cd ./download/woocommerce
+          ZIPFILE_NAME="woocommerce-$DEV_VERSION"
+          zip -r "../../$ZIPFILE_NAME.zip" .
+          echo "ZIPFILE_NAME=$ZIPFILE_NAME" >> $GITHUB_ENV
+
+      - name: Upload modified zip as artifact
+        id: upload-modified-zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIPFILE_NAME }}
+          path: ${{ env.ZIPFILE_NAME }}.zip
+
+  notify-slack:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    needs: [modify-zip-version, prepare-for-code-freeze]
+    steps:
       - name: Notify Slack on success
-        if: ${{ success() }}
         uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
             :ice_cube: Code Freeze completed for `${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}` :checking:
-            You can raise a code freeze exception if you need something to be included in this release.
+            If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
+            <${{ needs.modify-zip-version.outputs.artifact_url }}|Download zip>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
