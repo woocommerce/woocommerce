@@ -6,12 +6,12 @@ import type {
 	OptimisticCartItem,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
+import { CartVariationItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
-import { CartVariationItem } from '@woocommerce/types';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -74,6 +74,7 @@ const isCartItemMatched = (
 
 	return cartItem.variation.every(
 		( {
+			// eslint-disable-next-line
 			raw_attribute,
 			value,
 		}: {
