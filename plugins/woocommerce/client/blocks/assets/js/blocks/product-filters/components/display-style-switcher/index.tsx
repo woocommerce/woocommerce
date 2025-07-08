@@ -3,7 +3,7 @@
  */
 import { createBlock, getBlockTypes } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useDispatch } from '@wordpress/data';
 import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -33,7 +33,7 @@ export const DisplayStyleSwitcher = ( {
 		blockType.ancestor?.includes( parentBlockName )
 	);
 
-	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
+	const { insertBlock, replaceBlock } = useDispatch( 'core/block-editor' );
 
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, unknown > >( {} );
@@ -106,10 +106,9 @@ export function resetDisplayStyleBlock(
 		getInnerBlockByName( filterBlock, blockType.name )
 	);
 
-	const currentStyleBlock = getInnerBlockByName(
-		filterBlock,
-		currentStyle?.name || ''
-	);
+	const currentStyleBlock = currentStyle
+		? getInnerBlockByName( filterBlock, currentStyle.name )
+		: null;
 
 	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
 	if ( currentStyleBlock ) {

@@ -46,7 +46,6 @@ const Edit = ( props: EditProps ) => {
 						return a.value < b.value ? 1 : -1;
 					case 'count-asc':
 						return a.count > b.count ? 1 : -1;
-					case 'count-desc':
 					default:
 						return a.count < b.count ? 1 : -1;
 				}

@@ -17,7 +17,7 @@ import '../../checkbox-list';
 
 // Mock the getSetting function to return mock taxonomy data
 jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( ( key: string, defaultValue: any ) => {
+	getSetting: jest.fn( ( key: string, defaultValue: unknown ) => {
 		if ( key === 'filterableProductTaxonomies' ) {
 			return [
 				{
