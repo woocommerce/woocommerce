@@ -51,9 +51,9 @@ class CartTokenUtils {
 		$parts = JsonWebToken::get_parts( $cart_token )->payload;
 
 		return array(
-			'user_id' => strval( $parts->user_id ?? '' ),
-			'exp'     => intval( $parts->exp ?? 0 ),
-			'iss'     => strval( $parts->iss ?? '' ),
+			'user_id' => $parts->user_id ?? '',
+			'exp'     => $parts->exp ?? 0,
+			'iss'     => $parts->iss ?? '',
 		);
 	}
 
