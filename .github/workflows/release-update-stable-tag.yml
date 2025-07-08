@@ -58,7 +58,6 @@ jobs:
               console.log(`Major.minor version: ${majorMinor}`);
               console.log(`Release branch: ${branch}`);
               core.setOutput('version', versionInput);
-              core.setOutput('major-minor', majorMinor);
               core.setOutput('branch', branch);
             } else {
               core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z)`);
@@ -237,7 +236,10 @@ jobs:
         run: |
           echo "🔄 Processing branch: $BRANCH_NAME..."
 
-          git checkout "$BRANCH_NAME"
+          if ! git checkout "$BRANCH_NAME" 2>/dev/null; then
+            echo "Branch $BRANCH_NAME does not exist - skipping"
+            exit 0
+          fi
 
           README_PATH="plugins/woocommerce/readme.txt"
 
@@ -273,7 +275,6 @@ jobs:
   notify-release:
     runs-on: ubuntu-latest
     needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
-    if: ${{ github.event.inputs.allow-revert != 'true' }}
     steps:
       - name: 'Notify to announcements channel'
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
@@ -282,4 +283,4 @@ jobs:
           slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
           slack-optional-unfurl_links: false
           slack-text: |
-            :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
+            :woo-bounce: *<https://github.com/woocommerce/woocommerce/releases/tag/${{ github.event.inputs.version }}|WooCommerce ${{ github.event.inputs.version }}>* has been released! :rocket:
