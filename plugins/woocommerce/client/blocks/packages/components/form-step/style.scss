@@ -7,7 +7,15 @@
 	border: none;
 	padding: 0;
 	background: none;
-	margin: 0 0 $gap-largest 0;
+	margin: 0 0 $gap-larger 0;
+
+	display: flex;
+	flex-direction: column;
+	gap: $gap;
+
+	.wc-block-components-text-input:first-of-type {
+		margin-top: 0;
+	}
 
 	.is-mobile &,
 	.is-small & {
@@ -67,16 +75,18 @@
 		margin-bottom: 0;
 	}
 }
+
 .wc-block-components-checkout-step--with-step-number
 	.wc-block-components-checkout-step__content
 	> :last-child {
 	margin-bottom: 0;
 }
+
 .wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
 	margin-top: em($gap-smaller);
 }
+
 .wc-block-components-checkout-step__heading {
-	margin: 0 0 $gap-smaller;
 	position: relative;
 
 	.wc-block-components-express-payment-continue-rule
@@ -91,8 +101,15 @@
 	margin-top: 0;
 }
 
+.wc-block-components-checkout-step__heading-container {
+	display: flex;
+	flex-direction: column;
+	gap: $gap-smaller;
+}
+
 .wc-block-components-checkout-step__title {
-	margin: 0 $gap-small 0 0;
+	margin: 0;
+	margin-right: $gap-small;
 }
 
 .wc-block-components-checkout-step__heading-content {
@@ -104,15 +121,9 @@
 	}
 }
 
-.wc-block-checkout__shipping-option .wc-block-components-checkout-step__content,
-.wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
-	padding-top: $gap-smaller;
-}
-
 .wc-block-components-checkout-step__description {
-	@include font-size(small);
-	line-height: 1.2;
-	margin: 0 0 $gap;
+	@include font-regular-locked;
+	margin: 0;
 }
 
 @mixin step-number-mobile-styles {

@@ -72,21 +72,21 @@ const FormStep = ( {
 					{ legend || title }
 				</legend>
 			) }
-			{ !! title && (
-				<StepHeading
-					title={ title }
-					stepHeadingContent={ stepHeadingContent() }
-				/>
-			) }
-			<div className="wc-block-components-checkout-step__container">
+			<div className="wc-block-components-checkout-step__heading-container">
+				{ !! title && (
+					<StepHeading
+						title={ title }
+						stepHeadingContent={ stepHeadingContent() }
+					/>
+				) }
 				{ !! description && (
 					<p className="wc-block-components-checkout-step__description">
 						{ description }
 					</p>
 				) }
-				<div className="wc-block-components-checkout-step__content">
-					{ children }
-				</div>
+			</div>
+			<div className="wc-block-components-checkout-step__content">
+				{ children }
 			</div>
 		</Element>
 	);
