@@ -16,10 +16,9 @@ interface FulfillmentsDataStoreInterface {
 	/**
 	 * Read the fulfillment data.
 	 *
-	 * @param string $entity_type The entity type.
-	 * @param string $entity_id The entity ID.
+	 * @param int $order_id The order ID.
 	 *
 	 * @return Fulfillment[] Fulfillment object.
 	 */
-	public function read_fulfillments( string $entity_type, string $entity_id ): array;
+	public function read_fulfillments( int $order_id ): array;
 }

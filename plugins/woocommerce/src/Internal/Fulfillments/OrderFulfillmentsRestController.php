@@ -19,11 +19,6 @@ use WP_REST_Server;
 /**
  * OrderFulfillmentsRestController class file.
  *
- * !> Note: This REST controller is only created for `WC_Order` type of entities, that allow
- * !> managing fulfillments only for admins. Regular users can only view their fulfillments.
- * !>
- * !> If you are using another entity type for your fulfillments, you should create a new controller.
- *
  * @package Automattic\WooCommerce\Internal\Fulfillments
  */
 class OrderFulfillmentsRestController extends RestApiControllerBase {
@@ -217,7 +212,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Fetch fulfillments for the order.
 		try {
 			$datastore    = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments = $datastore->read_fulfillments( WC_Order::class, "$order_id" );
+			$fulfillments = $datastore->read_fulfillments( $order_id );
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
@@ -254,8 +249,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment = new Fulfillment();
 			$fulfillment->set_props( $request->get_json_params() );
 			$fulfillment->set_meta_data( $request->get_json_params()['meta_data'] );
-			$fulfillment->set_entity_type( WC_Order::class );
-			$fulfillment->set_entity_id( "$order_id" );
+			$fulfillment->set_order_id( $order_id );
 
 			$fulfillment->save();
 
@@ -1014,15 +1008,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'entity_type'    => array(
-				'description' => __( 'The type of entity for which the fulfillment is created.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'entity_id'      => array(
-				'description' => __( 'Unique identifier for the entity.', 'woocommerce' ),
-				'type'        => 'string',
+			'order_id'       => array(
+				'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
+				'type'        => 'integer',
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
@@ -1177,7 +1165,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @throws \Exception If the fulfillment ID is invalid.
 	 */
 	private function validate_fulfillment( Fulfillment $fulfillment, int $fulfillment_id, int $order_id ) {
-		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
+		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_order_id() !== $order_id ) {
 			throw new \Exception( esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ), );
 		}
 	}

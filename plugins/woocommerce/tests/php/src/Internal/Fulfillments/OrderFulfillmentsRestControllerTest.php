@@ -61,12 +61,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$order                     = WC_Helper_Order::create_order( get_current_user_id() );
 			self::$created_order_ids[] = $order->get_id();
 			for ( $fulfillment = 1; $fulfillment <= 10; $fulfillment++ ) {
-				FulfillmentsHelper::create_fulfillment(
-					array(
-						'entity_type' => WC_Order::class,
-						'entity_id'   => $order->get_id(),
-					)
-				);
+				FulfillmentsHelper::create_fulfillment( array( 'order_id' => $order->get_id() ) );
 			}
 		}
 	}
@@ -108,8 +103,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 10, count( $fulfillments ) );
 
 		foreach ( $fulfillments as $fulfillment ) {
-			$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
-			$this->assertEquals( self::$created_order_ids[0], $fulfillment['entity_id'] );
+			$this->assertEquals( self::$created_order_ids[0], $fulfillment['order_id'] );
 		}
 	}
 
@@ -195,8 +189,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => '' . $order->get_id(),
+					'order_id'     => $order->get_id(),
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
@@ -254,8 +247,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => '' . $order->get_id(),
+					'order_id'     => $order->get_id(),
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
@@ -297,8 +289,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $fulfillment );
 		$this->assertArrayHasKey( 'fulfillment_id', $fulfillment );
 		$this->assertNotNull( $fulfillment['fulfillment_id'] );
-		$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
-		$this->assertEquals( $order->get_id(), $fulfillment['entity_id'] );
+		$this->assertEquals( $order->get_id(), $fulfillment['order_id'] );
 		$this->assertEquals( 'unfulfilled', $fulfillment['status'] );
 		$this->assertEquals( false, $fulfillment['is_fulfilled'] );
 		$this->assertIsArray( $fulfillment['meta_data'] );
@@ -343,8 +334,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => '' . $order->get_id(),
+					'order_id'     => $order->get_id(),
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
@@ -395,8 +385,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => '' . $order->get_id(),
+					'order_id'     => $order->get_id(),
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
@@ -427,10 +416,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test creating a fulfillment with an invalid order ID.
 	 */
 	public function test_create_fulfillment_invalid_order_id() {
-		// Create a new order.
-		$order = WC_Helper_Order::create_order( get_current_user_id() );
-		$this->assertInstanceOf( WC_Order::class, $order );
-
 		// Set the current user to an admin.
 		wp_set_current_user( 1 );
 
@@ -440,8 +425,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => '' . $order->get_id(),
+					'order_id'     => '999999',
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
@@ -512,8 +496,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'fulfillment', $response->get_data() );
 		$fulfillment = $response->get_data()['fulfillment'];
 		$this->assertEquals( $fulfillments[0]['fulfillment_id'], $fulfillment['fulfillment_id'] );
-		$this->assertEquals( $fulfillments[0]['entity_type'], $fulfillment['entity_type'] );
-		$this->assertEquals( $fulfillments[0]['entity_id'], $fulfillment['entity_id'] );
+		$this->assertEquals( $fulfillments[0]['order_id'], $fulfillment['order_id'] );
 		$this->assertEquals( $fulfillments[0]['status'], $fulfillment['status'] );
 		$this->assertEquals( $fulfillments[0]['is_fulfilled'], $fulfillment['is_fulfilled'] );
 		$this->assertEquals( $fulfillments[0]['meta_data'], $fulfillment['meta_data'] );
@@ -788,8 +771,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'fulfillment_id', $fulfillment );
 		$this->assertNotNull( $fulfillment['fulfillment_id'] );
 
-		$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
-		$this->assertEquals( $order_id, $fulfillment['entity_id'] );
+		$this->assertEquals( $order_id, $fulfillment['order_id'] );
 		$this->assertEquals( 'fulfilled', $fulfillment['status'] );
 		$this->assertEquals( true, $fulfillment['is_fulfilled'] );
 

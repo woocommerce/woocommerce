@@ -99,14 +99,13 @@ class FulfillmentsController {
 
 		$schema = "CREATE TABLE {$wpdb->prefix}wc_order_fulfillments (
 			fulfillment_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-			entity_type varchar(255) NOT NULL,
-			entity_id bigint(20) unsigned NOT NULL,
+			order_id bigint(20) unsigned NOT NULL,
 			status varchar(255) NOT NULL,
 			is_fulfilled tinyint(1) NOT NULL DEFAULT 0,
 			date_updated datetime NOT NULL,
 			date_deleted datetime NULL,
 			PRIMARY KEY (fulfillment_id),
-			KEY entity_type_id (entity_type({$max_index_length}), entity_id)
+			KEY order_id (order_id)
 		) $collate;
 		CREATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta (
 			meta_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,

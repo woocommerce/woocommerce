@@ -142,8 +142,7 @@ class FulfillmentsSettings {
 
 		if ( ! empty( $auto_fulfill_items ) ) {
 			$fulfillment = new Fulfillment();
-			$fulfillment->set_entity_type( WC_Order::class );
-			$fulfillment->set_entity_id( (string) $order_id );
+			$fulfillment->set_order_id( $order_id );
 			$fulfillment->set_status( 'fulfilled' );
 			$fulfillment->set_items(
 				array_map(
@@ -180,7 +179,7 @@ class FulfillmentsSettings {
 		}
 
 		// If fulfillments already exist, skip auto-fulfillment.
-		$fulfillments = wc_get_container()->get( FulfillmentsDataStore::class )->read_fulfillments( \WC_Order::class, (string) $order_id );
+		$fulfillments = wc_get_container()->get( FulfillmentsDataStore::class )->read_fulfillments( $order_id );
 		if ( ! empty( $fulfillments ) ) {
 			return;
 		}

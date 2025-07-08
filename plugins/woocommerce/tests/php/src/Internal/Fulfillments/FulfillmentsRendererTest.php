@@ -137,8 +137,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$order->save();
 
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( WC_Order::class );
-		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_order_id( $order->get_id() );
 		$fulfillment->add_meta_data( '_tracking_number', '123456789' );
 		$fulfillment->add_meta_data( '_tracking_url', 'https://example.com/track/123456789' );
 		$fulfillment->add_meta_data( '_shipment_provider', 'UPS' );
@@ -243,7 +242,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
-		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		->read_fulfillments( $order->get_id() );
 
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
 		$this->assertEquals( 'fulfilled', $fulfillments[0]->get_status(), 'Fulfillment status is not set to Fulfilled.' );
@@ -275,8 +274,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		// Create an initial fulfillment with only one item.
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( WC_Order::class );
-		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_order_id( $order->get_id() );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -293,7 +291,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
-		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		->read_fulfillments( $order->get_id() );
 
 		$this->assertCount( 2, $fulfillments, 'Fulfillment was not created.' );
 		foreach ( $fulfillments as $fulfillment ) {
@@ -320,8 +318,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		// Fulfill the order without calling the bulk action first.
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( WC_Order::class );
-		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_order_id( $order->get_id() );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array_map(
@@ -341,7 +338,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
-		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		->read_fulfillments( $order->get_id() );
 
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
 		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );
@@ -367,8 +364,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		// Fulfill the order without calling the bulk action first.
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( WC_Order::class );
-		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_order_id( $order->get_id() );
 		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->set_items(
 			array_map(
@@ -388,7 +384,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
-		->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+		->read_fulfillments( $order->get_id() );
 
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
 		$this->assertEquals( $fulfillment->get_id(), $fulfillments[0]->get_id(), 'Fulfillment ID does not match.' );

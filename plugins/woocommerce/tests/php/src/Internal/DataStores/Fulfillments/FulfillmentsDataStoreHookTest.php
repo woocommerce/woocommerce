@@ -83,7 +83,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
 		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
-		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$fulfillments = $this->store->read_fulfillments( $this->order->get_id() );
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
 	}
 
@@ -108,7 +108,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
 
 		// Check that no fulfillment was created.
-		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$fulfillments = $this->store->read_fulfillments( $this->order->get_id() );
 		$this->assertCount( 0, $fulfillments, 'Fulfillment was created.' );
 	}
 
@@ -134,8 +134,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		// Compare the received fulfillment with the expected data.
 		$sent_data = $this->get_test_fulfillment_data( $this->order->get_id() );
-		$this->assertEquals( $received_fulfillment->get_entity_type(), $sent_data['entity_type'], );
-		$this->assertEquals( $received_fulfillment->get_entity_id(), $sent_data['entity_id'], );
+		$this->assertEquals( $received_fulfillment->get_order_id(), (int) $sent_data['order_id'], );
 		$this->assertEquals( $received_fulfillment->get_status(), $sent_data['status'], );
 		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $sent_data['is_fulfilled'], );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $sent_data['meta_data'][0]['value'] );
@@ -144,7 +143,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $received_fulfillment->get_id(), 'Fulfillment ID should not be null.' );
 		$this->assertGreaterThan( 0, $received_fulfillment->get_id(), 'Fulfillment ID should be greater than 0.' );
 
-		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
+		$fulfillments = $this->store->read_fulfillments( $this->order->get_id() );
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
 	}
 
@@ -235,8 +234,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		// Compare the received fulfillment with the expected data.
 		$this->assertEquals( $received_fulfillment->get_id(), $fulfillment->get_id() );
-		$this->assertEquals( $received_fulfillment->get_entity_type(), $fulfillment->get_entity_type() );
-		$this->assertEquals( $received_fulfillment->get_entity_id(), $fulfillment->get_entity_id() );
+		$this->assertEquals( $received_fulfillment->get_order_id(), $fulfillment->get_order_id() );
 		$this->assertEquals( $received_fulfillment->get_status(), $fulfillment->get_status() );
 		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $fulfillment->get_is_fulfilled() );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $fulfillment->get_meta( 'test_meta_key' ) );
@@ -430,8 +428,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		// Compare the received fulfillment with the expected data.
 		$this->assertEquals( $received_fulfillment->get_id(), $fulfillment->get_id() );
-		$this->assertEquals( $received_fulfillment->get_entity_type(), $fulfillment->get_entity_type() );
-		$this->assertEquals( $received_fulfillment->get_entity_id(), $fulfillment->get_entity_id() );
+		$this->assertEquals( $received_fulfillment->get_order_id(), $fulfillment->get_order_id() );
 		$this->assertEquals( $received_fulfillment->get_status(), $fulfillment->get_status() );
 		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $fulfillment->get_is_fulfilled() );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $fulfillment->get_meta( 'test_meta_key' ) );
@@ -527,8 +524,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $received_fulfillment, 'Received fulfillment should not be null.' );
 		$this->assertInstanceOf( Fulfillment::class, $received_fulfillment, 'Received fulfillment should be an instance of Fulfillment.' );
 		$this->assertEquals( $received_fulfillment->get_id(), $fulfillment_clone->get_id() );
-		$this->assertEquals( $received_fulfillment->get_entity_type(), $fulfillment_clone->get_entity_type() );
-		$this->assertEquals( $received_fulfillment->get_entity_id(), $fulfillment_clone->get_entity_id() );
+		$this->assertEquals( $received_fulfillment->get_order_id(), $fulfillment_clone->get_order_id() );
 		$this->assertEquals( $received_fulfillment->get_status(), $fulfillment_clone->get_status() );
 		$this->assertEquals( $received_fulfillment->get_is_fulfilled(), $fulfillment_clone->get_is_fulfilled() );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key' ), $fulfillment_clone->get_meta( 'test_meta_key' ) );
@@ -561,8 +557,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	 */
 	private function get_test_fulfillment_data( $order_id ): array {
 		return array(
-			'entity_type'  => WC_Order::class,
-			'entity_id'    => $order_id,
+			'order_id'     => $order_id,
 			'status'       => 'unfulfilled',
 			'is_fulfilled' => false,
 			'meta_data'    => array(

@@ -116,7 +116,7 @@ class FulfillmentsManager {
 		 */
 		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 		// Read all fulfillments for the order.
-		$fulfillments = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order->get_id() );
+		$fulfillments = $fulfillments_data_store->read_fulfillments( $order->get_id() );
 
 		// Update the fulfillment status of the order.
 		$last_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );

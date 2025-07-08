@@ -169,8 +169,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 		$fulfillments[] = FulfillmentsHelper::create_fulfillment(
 			array(
-				'entity_type'  => WC_Order::class,
-				'entity_id'    => $order->get_id(),
+				'order_id'     => $order->get_id(),
 				'status'       => 'unfulfilled',
 				'is_fulfilled' => false,
 			),

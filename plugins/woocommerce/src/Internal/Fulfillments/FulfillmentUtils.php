@@ -104,7 +104,7 @@ class FulfillmentUtils {
 	}
 
 	/**
-	 * Get the fulfillment status of the entity. This runs like a computed property, where
+	 * Get the fulfillment status of the order. This runs like a computed property, where
 	 * it checks the fulfillment status of each fulfillment attached to the order,
 	 * and computes the overall fulfillment status of the order.
 	 *

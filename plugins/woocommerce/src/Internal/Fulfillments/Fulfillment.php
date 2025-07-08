@@ -73,39 +73,21 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Get the entity type.
+	 * Get the order ID.
 	 *
-	 * @return string|null Entity type.
+	 * @return int|null Order ID.
 	 */
-	public function get_entity_type(): ?string {
-		return $this->data['entity_type'] ?? null;
+	public function get_order_id(): ?int {
+		return $this->data['order_id'] ?? null;
 	}
 
 	/**
-	 * Set the entity type.
+	 * Set the order ID.
 	 *
-	 * @param class-string|null $entity_type Entity type.
+	 * @param class-int|null $order_id Order ID.
 	 */
-	public function set_entity_type( ?string $entity_type ): void {
-		$this->data['entity_type'] = $entity_type;
-	}
-
-	/**
-	 * Get the entity ID.
-	 *
-	 * @return string|null Entity ID.
-	 */
-	public function get_entity_id(): ?string {
-		return $this->data['entity_id'] ?? null;
-	}
-
-	/**
-	 * Set the entity ID.
-	 *
-	 * @param class-string|null $entity_id Entity ID.
-	 */
-	public function set_entity_id( ?string $entity_id ): void {
-		$this->data['entity_id'] = $entity_id;
+	public function set_order_id( ?int $order_id ): void {
+		$this->data['order_id'] = $order_id;
 	}
 
 	/**
@@ -269,27 +251,18 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Get the order associated with this fulfillment.
 	 *
-	 * This method retrieves the order based on the entity type and entity ID.
-	 * If the entity type is `WC_Order`, it returns the order object.
+	 * This method retrieves the order based on the order ID.
 	 *
 	 * @return \WC_Order|null The order object or null if not found.
 	 */
 	public function get_order(): ?\WC_Order {
-		$entity_type = $this->get_entity_type();
-		$entity_id   = $this->get_entity_id();
-
-		if ( ! $entity_type || ! $entity_id ) {
+		$order_id = $this->get_order_id();
+		if ( ! $order_id ) {
 			return null;
 		}
 
-		if ( \WC_Order::class === $entity_type ) {
-			$order = wc_get_order( (int) $entity_id );
-			if ( $order instanceof \WC_Order ) {
-				return $order;
-			}
-		}
-
-		return null;
+		$order = wc_get_order( $order_id );
+		return $order instanceof \WC_Order ? $order : null;
 	}
 
 	/**

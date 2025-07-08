@@ -44,8 +44,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_fulfillment() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -66,12 +65,11 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the create method of the order fulfillment data store with invalid entity type.
+	 * Tests the create method of the order fulfillment data store with invalid order ID.
 	 */
-	public function test_create_fulfillment_throws_error_on_invalid_entity_type() {
+	public function test_create_fulfillment_throws_error_on_invalid_order_id() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( '' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( null );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -83,30 +81,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'Invalid entity type.' );
-
-		self::$order_fulfillment_data_store->create( $fulfillment );
-	}
-
-	/**
-	 * Tests the create method of the order fulfillment data store with invalid entity ID.
-	 */
-	public function test_create_fulfillment_throws_error_on_invalid_entity_id() {
-		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '' );
-		$fulfillment->set_status( 'unfulfilled' );
-		$fulfillment->set_items(
-			array(
-				array(
-					'item_id' => 1,
-					'qty'     => 2,
-				),
-			)
-		);
-
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'Invalid entity ID.' );
+		$this->expectExceptionMessage( 'Invalid order ID.' );
 
 		self::$order_fulfillment_data_store->create( $fulfillment );
 	}
@@ -116,8 +91,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_fulfillment_throws_error_on_invalid_items() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_props( array( 'meta_data' => array( '_items' => null ) ) );
 
@@ -132,8 +106,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_fulfillment_throws_error_on_empty_items() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( array() );
 
@@ -148,8 +121,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_fulfillment_throws_error_on_invalid_item() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -175,8 +147,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_read_fulfillment() {
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -209,8 +180,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	public function test_update_fulfillment() {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_id( 1 );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -226,7 +196,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 		self::$order_fulfillment_data_store->create( $fulfillment );
 
-		$fulfillment->set_entity_id( '456' );
+		$fulfillment->set_order_id( 456 );
 		$fulfillment->set_items(
 			array(
 				array(
@@ -252,8 +222,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	public function test_delete_fulfillment() {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_id( 1 );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
-		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items(
 			array(
@@ -281,8 +250,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		self::$order_fulfillment_data_store->delete( $fulfillment );
 		// The fulfillment should be reset to it's initial state.
 		$this->assertEquals( 0, $fulfillment->get_id() );
-		$this->assertEquals( null, $fulfillment->get_entity_type() );
-		$this->assertEquals( null, $fulfillment->get_entity_id() );
+		$this->assertEquals( null, $fulfillment->get_order_id() );
 		$this->assertEquals( array(), $fulfillment->get_items() );
 		$this->assertEquals( array(), $fulfillment->get_meta_data() );
 		$this->assertEquals( null, $fulfillment->get_date_updated() );
@@ -307,8 +275,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_id( '123' );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
@@ -342,8 +309,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_id( '123' );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
@@ -384,8 +350,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_id( '123' );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
@@ -439,8 +404,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$fulfillment = new Fulfillment();
-		$fulfillment->set_entity_id( '123' );
-		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_order_id( 123 );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
@@ -471,10 +435,9 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_read_fulfillments() {
 		$this->prepare_db_for_test();
-		$fulfillments = self::$order_fulfillment_data_store->read_fulfillments( 'order-fulfillment', '123' );
+		$fulfillments = self::$order_fulfillment_data_store->read_fulfillments( 123 );
 		$this->assertCount( 2, $fulfillments );
-		$this->assertEquals( '123', $fulfillments[0]->get_entity_id() );
-		$this->assertEquals( 'order-fulfillment', $fulfillments[0]->get_entity_type() );
+		$this->assertEquals( 123, $fulfillments[0]->get_order_id() );
 		$this->assertEquals(
 			array(
 				array(
@@ -485,8 +448,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			),
 			$fulfillments[0]->get_items(),
 		);
-		$this->assertEquals( '123', $fulfillments[1]->get_entity_id() );
-		$this->assertEquals( 'order-fulfillment', $fulfillments[1]->get_entity_type() );
+		$this->assertEquals( 123, $fulfillments[1]->get_order_id() );
 		$this->assertEquals(
 			array(
 				array(
@@ -501,17 +463,15 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	/**
 	 * Create a test fulfillment and save it to the database.
 	 *
-	 * @param string $entity_type The entity type.
-	 * @param string $entity_id The entity ID.
-	 * @param array  $items The items to fulfill.
+	 * @param int   $order_id The order ID.
+	 * @param array $items The items to fulfill.
 	 *
 	 * @return Fulfillment The created fulfillment object.
 	 */
-	private function create_test_fulfillment( string $entity_type, string $entity_id, array $items ) {
+	private function create_test_fulfillment( int $order_id, array $items ) {
 		$fulfillment = new Fulfillment();
 		$fulfillment->set_id( 0 );
-		$fulfillment->set_entity_type( $entity_type );
-		$fulfillment->set_entity_id( $entity_id );
+		$fulfillment->set_order_id( $order_id );
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
@@ -530,8 +490,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	private function prepare_db_for_test() {
 		$this->create_test_fulfillment(
-			'order-fulfillment',
-			'123',
+			123,
 			array(
 				array(
 					'item_id' => 1,
@@ -540,8 +499,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->create_test_fulfillment(
-			'order-fulfillment',
-			'456',
+			456,
 			array(
 				array(
 					'item_id' => 2,
@@ -550,8 +508,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->create_test_fulfillment(
-			'order-fulfillment',
-			'789',
+			789,
 			array(
 				array(
 					'item_id' => 3,
@@ -560,8 +517,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->create_test_fulfillment(
-			'order-fulfillment',
-			'123',
+			123,
 			array(
 				array(
 					'item_id' => 4,
@@ -570,8 +526,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->create_test_fulfillment(
-			'order-fulfillment',
-			'456',
+			456,
 			array(
 				array(
 					'item_id' => 5,
@@ -601,8 +556,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		if ( ! $is_deleted ) {
 			$this->assertNotNull( $record );
-			$this->assertEquals( $fulfillment->get_entity_type(), $record->entity_type );
-			$this->assertEquals( $fulfillment->get_entity_id(), $record->entity_id );
+			$this->assertEquals( $fulfillment->get_order_id(), $record->order_id );
 			$this->assertEquals( $fulfillment->get_date_updated(), $record->date_updated );
 			$this->assertEquals( $fulfillment->get_date_deleted(), $record->date_deleted );
 		} else {

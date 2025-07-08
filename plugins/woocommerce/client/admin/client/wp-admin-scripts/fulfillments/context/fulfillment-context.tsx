@@ -17,7 +17,6 @@ import {
 	SHIPPING_OPTION_META_KEY,
 	TRACKING_NUMBER_META_KEY,
 	TRACKING_URL_META_KEY,
-	WC_ORDER_CLASS,
 } from '../data/constants';
 
 interface FulfillmentContextProps {
@@ -94,8 +93,7 @@ export const FulfillmentProvider = ( {
 		_setFulfillment( {
 			id: fulfillment?.id ?? undefined,
 			fulfillment_id: fulfillment?.id ?? undefined,
-			entity_id: String( order.id ),
-			entity_type: WC_ORDER_CLASS,
+			order_id: order.id,
 			is_fulfilled: fulfillment?.is_fulfilled ?? false,
 			status: fulfillment?.status ?? 'unfulfilled',
 			meta_data: [

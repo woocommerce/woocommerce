@@ -36,11 +36,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 */
 	public function create( &$data ): void {
 		// Validate the fulfillment data.
-		if ( ! $data->get_entity_type() ) {
-			throw new \Exception( esc_html__( 'Invalid entity type.', 'woocommerce' ) );
-		}
-		if ( ! $data->get_entity_id() ) {
-			throw new \Exception( esc_html__( 'Invalid entity ID.', 'woocommerce' ) );
+		if ( ! $data->get_order_id() ) {
+			throw new \Exception( esc_html__( 'Invalid order ID.', 'woocommerce' ) );
 		}
 		if ( ! FulfillmentUtils::is_valid_fulfillment_status( $data->get_status() ) ) {
 			throw new \Exception( esc_html__( 'Invalid fulfillment status.', 'woocommerce' ) );
@@ -79,14 +76,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$rows_inserted = $wpdb->insert(
 			$wpdb->prefix . 'wc_order_fulfillments',
 			array(
-				'entity_type'  => $data->get_entity_type(),
-				'entity_id'    => $data->get_entity_id(),
+				'order_id'     => $data->get_order_id(),
 				'status'       => $data->get_status() ?? 'unfulfilled',
 				'is_fulfilled' => $data->get_is_fulfilled() ? 1 : 0,
 				'date_updated' => $data->get_date_updated(),
 				'date_deleted' => $data->get_date_deleted(),
 			),
-			array( '%s', '%s', '%s', '%d', '%s', '%s' )
+			array( '%d', '%s', '%d', '%s', '%s' )
 		);
 
 		// Check for errors.
@@ -215,8 +211,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
 			array(
-				'entity_type'  => $data->get_entity_type(),
-				'entity_id'    => $data->get_entity_id(),
+				'order_id'     => $data->get_order_id(),
 				'status'       => $data->get_status(),
 				'is_fulfilled' => $data->get_is_fulfilled() ? 1 : 0,
 				'date_updated' => current_time( 'mysql' ),
@@ -226,7 +221,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 				'fulfillment_id' => $data_id,
 				'date_deleted'   => null,
 			),
-			array( '%s', '%s', '%s', '%d', '%s', '%s' ),
+			array( '%d', '%s', '%d', '%s', '%s' ),
 			array( '%d' )
 		);
 
@@ -498,22 +493,20 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	/**
 	 * Method to read the fulfillment data.
 	 *
-	 * @param string $entity_type The entity type.
-	 * @param string $entity_id The entity ID.
+	 * @param int $order_id The order ID.
 	 *
 	 * @return Fulfillment[] Fulfillment object.
 	 *
 	 * @throws \Exception If the fulfillment data can't be read.
 	 */
-	public function read_fulfillments( string $entity_type, string $entity_id ): array {
+	public function read_fulfillments( int $order_id ): array {
 		// Read the fulfillment data from the database.
 		global $wpdb;
 
 		$fulfillment_data = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s AND date_deleted IS NULL",
-				$entity_type,
-				$entity_id
+				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE order_id = %d AND date_deleted IS NULL",
+				$order_id
 			),
 			ARRAY_A
 		);

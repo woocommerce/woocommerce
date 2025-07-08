@@ -27,8 +27,7 @@ class FulfillmentsHelper {
 			array_merge(
 				array(
 					'id'           => 0,
-					'entity_type'  => WC_Order::class,
-					'entity_id'    => 123,
+					'order_id'     => 123,
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 				),

@@ -205,7 +205,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $hook_called, 'Hook should be called if there are items.' );
 
 		$data_store   = new FulfillmentsDataStore();
-		$fulfillments = $data_store->read_fulfillments( WC_Order::class, '123' );
+		$fulfillments = $data_store->read_fulfillments( 123 );
 		$this->assertCount( $fulfillments_expected, $fulfillments, 'Fulfillments count does not match expected.' );
 
 		if ( $fulfillments_expected > 0 ) {

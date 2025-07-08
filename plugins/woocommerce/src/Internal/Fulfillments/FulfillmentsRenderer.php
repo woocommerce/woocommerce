@@ -284,8 +284,7 @@ class FulfillmentsRenderer {
 
 				if ( 0 < count( $remaining_items ) ) {
 					$fulfillment = new Fulfillment();
-					$fulfillment->set_entity_type( WC_Order::class );
-					$fulfillment->set_entity_id( (string) $order->get_id() );
+					$fulfillment->set_order_id( $order->get_id() );
 					$fulfillment->set_status( 'fulfilled' );
 					$fulfillment->set_items( $remaining_items );
 					$fulfillment->save();
@@ -578,7 +577,7 @@ class FulfillmentsRenderer {
 
 		// If not, fetch them and cache them.
 		$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
-		$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		$fulfillments                                 = $data_store->read_fulfillments( $order->get_id() );
 		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
 
 		return $fulfillments;

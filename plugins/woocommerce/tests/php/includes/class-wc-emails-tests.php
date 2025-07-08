@@ -73,10 +73,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 
 		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_id'   => $order->get_id(),
-				'entity_type' => 'WC_Order',
-			)
+			array( 'order_id' => $order->get_id() )
 		);
 
 		add_filter(

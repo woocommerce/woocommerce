@@ -41,17 +41,12 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_fulfillment_object_with_id_fetches_data_and_metadata() {
 		$order          = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$db_fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_id' => $order->get_id(),
-			)
-		);
+		$db_fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => $order->get_id() ) );
 		$fulfillment    = new Fulfillment( $db_fulfillment->get_id() );
 
 		$this->assertInstanceOf( Fulfillment::class, $fulfillment );
 		$this->assertEquals( $db_fulfillment->get_id(), $fulfillment->get_id() );
-		$this->assertEquals( $db_fulfillment->get_entity_type(), $fulfillment->get_entity_type() );
-		$this->assertEquals( $db_fulfillment->get_entity_id(), $fulfillment->get_entity_id() );
+		$this->assertEquals( $db_fulfillment->get_order_id(), $fulfillment->get_order_id() );
 		$this->assertEquals( $db_fulfillment->get_date_updated(), $fulfillment->get_date_updated() );
 		$this->assertEquals( $db_fulfillment->get_date_deleted(), $fulfillment->get_date_deleted() );
 		$this->assertEquals( $db_fulfillment->get_items(), $fulfillment->get_items() );
@@ -62,31 +57,18 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that Fulfillment object can be updated.
 	 */
 	public function test_fulfillment_object_update() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
-
-		$fulfillment->set_entity_type( 'updated-entity-type' );
-		$fulfillment->set_entity_id( '456' );
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
+		$fulfillment->set_order_id( 456 );
 		$fulfillment->save();
 
-		$this->assertEquals( 'updated-entity-type', $fulfillment->get_entity_type() );
-		$this->assertEquals( 456, $fulfillment->get_entity_id() );
+		$this->assertEquals( 456, $fulfillment->get_order_id() );
 	}
 
 	/**
 	 * Test that Fulfillment object can be soft deleted.
 	 */
 	public function test_fulfillment_object_soft_delete() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$fulfillment_id = $fulfillment->get_id();
 		$this->assertNotEquals( 0, $fulfillment_id );
@@ -102,12 +84,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that Fulfillment object can be created with items.
 	 */
 	public function test_fulfillment_object_with_items() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$items = array(
 			array(
@@ -134,12 +111,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that Fulfillment object can be created with metadata.
 	 */
 	public function test_fulfillment_object_with_metadata() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$fulfillment->add_meta_data( 'test_meta_key', 'test_meta_value', true );
 		$fulfillment->save();
@@ -151,12 +123,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that metadata can be updated.
 	 */
 	public function test_fulfillment_object_update_metadata() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$fulfillment->add_meta_data( 'test_meta_key', 'test_meta_value', true );
 		$fulfillment->save();
@@ -171,12 +138,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that metadata can be deleted.
 	 */
 	public function test_fulfillment_object_delete_metadata() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$fulfillment->add_meta_data( 'test_meta_key', 'test_meta_value', true );
 		$fulfillment->save();
@@ -192,12 +154,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_order() {
 		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => WC_Order::class,
-				'entity_id'   => $order->get_id(),
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => $order->get_id() ) );
 
 		$this->assertInstanceOf( \WC_Order::class, $fulfillment->get_order() );
 		$this->assertEquals( $order->get_id(), $fulfillment->get_order()->get_id() );
@@ -207,12 +164,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test fulfillment locking functionality.
 	 */
 	public function test_fulfillment_locking() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 
 		$this->assertFalse( $fulfillment->is_locked() );
 
@@ -229,12 +181,7 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	 * Test that the fulfillment status is validated correctly, and the fallback doesn't change is_fulfilled flag.
 	 */
 	public function test_fulfillment_status_validation() {
-		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array(
-				'entity_type' => 'order-fulfillment',
-				'entity_id'   => 123,
-			)
-		);
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'order_id' => 123 ) );
 		$fulfillment->set_status( 'unfulfilled' );
 		$this->assertEquals( 'unfulfilled', $fulfillment->get_status() );
 		$this->assertEquals( false, $fulfillment->get_is_fulfilled() );
