@@ -280,21 +280,21 @@ class OrdersTableSearchQuery {
 
 		if ( 'customer_email' === $search_filter ) {
 			return $wpdb->prepare(
-				"`$order_table`.billing_email LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				"`$order_table`.billing_email LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
 		if ( 'order_id' === $search_filter && is_numeric( $this->search_term ) ) {
 			return $wpdb->prepare(
-				"`$order_table`.id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				"`$order_table`.id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				absint( $this->search_term )
 			);
 		}
 
 		if ( 'transaction_id' === $search_filter ) {
 			return $wpdb->prepare(
-				"`$order_table`.transaction_id LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				"`$order_table`.transaction_id LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
