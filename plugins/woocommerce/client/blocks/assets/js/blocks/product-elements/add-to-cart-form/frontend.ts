@@ -4,15 +4,21 @@
 import { store, getContext } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
+export type ProductData = {
+	id: number;
+	type: string;
+	quantity: number;
+	quantityConstraints: {
+		min: number;
+		max: number | null;
+		step: number;
+	};
+	parentProductId: number | null;
+};
+
 export type Context = {
-	productId: number;
-	productType: string;
-	quantity: Record< number, number >;
-	childProductId: number;
-	quantityConstraints: Record<
-		number,
-		{ min: number; max: number | null; step: number }
-	>;
+	products: Record< number, ProductData >;
+	currentProductId: number;
 };
 
 const getInputElementFromEvent = (
@@ -27,26 +33,35 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
+const getProductIdFromInput = ( inputElement: HTMLInputElement ): number => {
+	// For grouped products, extract child ID from input name.
+	const childProductIdMatch = inputElement.name.match( /quantity\[(\d+)\]/ );
+	if ( childProductIdMatch ) {
+		return parseInt( childProductIdMatch[ 1 ], 10 );
+	}
+
+	const context = getContext< Context >();
+
+	// For simple products, use current product ID.
+	return context.currentProductId;
+};
+
 const getQuantityStateInfo = () => {
 	const context = getContext< Context >();
-	const {
-		quantity,
-		childProductId,
-		productType,
-		quantityConstraints,
-		productId,
-	} = context;
-	const id =
-		productType === 'grouped' && childProductId
-			? childProductId
-			: productId;
-	const constraints = quantityConstraints?.[ id ] || {
-		min: productType === 'grouped' && childProductId ? 0 : 1,
-		step: 1,
-		max: null,
+	const { products, currentProductId } = context;
+
+	const product = products[ currentProductId ];
+	if ( ! product ) {
+		return {
+			constraints: { min: 1, max: null, step: 1 },
+			currentQuantity: 0,
+		};
+	}
+
+	return {
+		constraints: product.quantityConstraints,
+		currentQuantity: product.quantity,
 	};
-	const currentQuantity = quantity?.[ id ] || 0;
-	return { constraints, currentQuantity };
 };
 
 const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
@@ -56,33 +71,24 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 		return;
 	}
 
-	const parsedValue = parseInt( inputElement.value, 10 );
 	const context = getContext< Context >();
-	const productType = context.productType;
-	const childProductIdMatch = inputElement.name.match( /quantity\[(\d+)\]/ );
-	const childProductId = childProductIdMatch
-		? parseInt( childProductIdMatch[ 1 ], 10 )
-		: context.childProductId;
-	const id =
-		productType === 'grouped' && childProductId
-			? childProductId
-			: context.productId;
-	const constraints = context.quantityConstraints?.[ id ] || {
-		min: productType === 'grouped' && childProductId ? 0 : 1,
-		step: 1,
-		max: null,
-	};
-	const minValue = constraints.min;
-	const maxValue = constraints.max;
-	const step = constraints.step;
+	const productId = getProductIdFromInput( inputElement );
+	const product = context.products[ productId ];
+
+	if ( ! product ) {
+		return;
+	}
+
+	const parsedValue = parseInt( inputElement.value, 10 );
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
+
 	return {
 		currentValue,
-		minValue,
-		maxValue,
-		step,
+		minValue: product.quantityConstraints.min,
+		maxValue: product.quantityConstraints.max,
+		step: product.quantityConstraints.step,
 		inputElement,
-		childProductId,
+		productId,
 	};
 };
 
@@ -112,20 +118,11 @@ store( 'woocommerce/add-to-cart-form', {
 				return;
 			}
 			const context = getContext< Context >();
-			const {
-				currentValue,
-				maxValue,
-				step,
-				inputElement,
-				childProductId,
-			} = inputData;
+			const { currentValue, maxValue, step, inputElement, productId } =
+				inputData;
 			const newValue = currentValue + step;
 			if ( maxValue === null || newValue <= maxValue ) {
-				const id = childProductId || context.productId;
-				context.quantity = {
-					...context.quantity,
-					[ id ]: newValue,
-				};
+				context.products[ productId ].quantity = newValue;
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -136,21 +133,11 @@ store( 'woocommerce/add-to-cart-form', {
 				return;
 			}
 			const context = getContext< Context >();
-			const {
-				currentValue,
-				minValue,
-				step,
-				inputElement,
-				childProductId,
-			} = inputData;
+			const { currentValue, minValue, step, inputElement, productId } =
+				inputData;
 			const newValue = currentValue - step;
-
 			if ( newValue >= minValue ) {
-				const id = childProductId || context.productId;
-				context.quantity = {
-					...context.quantity,
-					[ id ]: newValue,
-				};
+				context.products[ productId ].quantity = newValue;
 				inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			}
@@ -158,17 +145,13 @@ store( 'woocommerce/add-to-cart-form', {
 		handleInputChange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			const inputElement = event.target as HTMLInputElement;
 			const value = parseInt( inputElement.value, 10 );
-			const childProductIdMatch =
-				inputElement.name.match( /quantity\[(\d+)\]/ );
-			const childProductId = childProductIdMatch
-				? parseInt( childProductIdMatch[ 1 ], 10 )
-				: undefined;
 			const context = getContext< Context >();
-			const id = childProductId || context.productId;
-			context.quantity = {
-				...context.quantity,
-				[ id ]: isNaN( value ) ? 0 : value,
-			};
+			const productId = getProductIdFromInput( inputElement );
+			if ( context.products[ productId ] ) {
+				context.products[ productId ].quantity = isNaN( value )
+					? 0
+					: value;
+			}
 		},
 	},
 } );
