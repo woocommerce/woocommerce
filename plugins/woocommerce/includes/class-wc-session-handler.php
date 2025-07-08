@@ -138,7 +138,7 @@ class WC_Session_Handler extends WC_Session {
 				return false;
 			}
 
-			$cookie_session_data = $this->get_session( $cookie[0] );
+			$cookie_session_data = (array) $this->get_session( $cookie[0], array() );
 
 			// Cookie session was originally created via this token. Return and use cookie session to prevent creating a new clone.
 			if ( isset( $cookie_session_data['previous_customer_id'] ) && $cookie_session_data['previous_customer_id'] === $payload['user_id'] ) {
@@ -208,7 +208,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @param string $clone_from_customer_id The customer ID to clone from.
 	 */
 	private function clone_session_data( string $clone_from_customer_id ) {
-		$session_data                         = $this->get_session( $clone_from_customer_id, array() );
+		$session_data                         = (array) $this->get_session( $clone_from_customer_id, array() );
 		$session_data['previous_customer_id'] = $clone_from_customer_id;
 		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
@@ -722,13 +722,13 @@ class WC_Session_Handler extends WC_Session {
 	 *
 	 * @param string $customer_id Customer ID.
 	 * @param mixed  $default_value Default session value.
-	 * @return array
+	 * @return mixed Returns either the session data or the default value. Returns false if WP setup is in progress.
 	 */
 	public function get_session( $customer_id, $default_value = false ) {
 		global $wpdb;
 
 		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
-			return array();
+			return false;
 		}
 
 		// Try to get it from the cache, it will return false if not present or if object cache not in use.
@@ -747,7 +747,7 @@ class WC_Session_Handler extends WC_Session {
 			}
 		}
 
-		return (array) maybe_unserialize( $value );
+		return maybe_unserialize( $value );
 	}
 
 	/**

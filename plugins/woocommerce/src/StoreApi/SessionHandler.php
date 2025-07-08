@@ -66,8 +66,8 @@ final class SessionHandler extends WC_Session {
 	 *
 	 * @param string $customer_id Customer ID.
 	 * @param mixed  $default_value Default session value.
-	 *
-	 * @return string|array|bool
+
+	 * @return mixed Returns either the session data or the default value. Returns false if WP setup is in progress.
 	 */
 	public function get_session( $customer_id, $default_value = false ) {
 		global $wpdb;
