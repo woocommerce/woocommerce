@@ -18,6 +18,21 @@ $fontSizes: (
 	font-size: map.get($fontSizes, $sizeName) * $multiplier;
 }
 
+@mixin font-large-locked {
+	font-size: 22px;
+	line-height: 27px;
+}
+
+@mixin font-regular-locked {
+	font-size: 14px;
+	line-height: 20px;
+}
+
+@mixin font-small-locked {
+	font-size: 12px;
+	line-height: 16px;
+}
+
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
