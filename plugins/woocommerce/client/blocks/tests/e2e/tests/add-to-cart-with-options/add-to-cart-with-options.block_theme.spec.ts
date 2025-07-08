@@ -143,12 +143,20 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await logoNoOption.click();
 			await colorGreenOption.click();
-			await addToCartButton.click();
+
+			// Wait until the variation is found and the button becomes visually
+			// enabled.
+			// Note: The button is always enabled for accessibility reasons.
+			// Instead, we check directly for the "disabled" class, which grays
+			// out the button.
+			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await addToCartButton.click();
+
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
