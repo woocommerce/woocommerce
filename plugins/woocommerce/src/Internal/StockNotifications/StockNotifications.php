@@ -21,15 +21,25 @@ class StockNotifications {
 	 */
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'init_hooks' ) );
+		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
 	}
 
 	/**
-	 * Regiter hooks and services.
+	 * Handle the WooCommerce installation event.
+	 *
+	 * This method is called when WooCommerce is installed or updated.
+	 * It initializes the data retention controller to set up necessary tasks.
+	 */
+	public function on_install_or_update() {
+		wc_get_container()->get( DataRetentionController::class )->on_woo_install_or_update();
+	}
+
+	/**
+	 * Register hooks and services.
 	 *
 	 * @internal
 	 */
 	public function init_hooks() {
-
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 
 		$container = wc_get_container();
@@ -37,6 +47,7 @@ class StockNotifications {
 		$container->get( StockSyncController::class );
 		$container->get( NotificationsProcessor::class );
 		$container->get( PrivacyEraser::class );
+		$container->get( DataRetentionController::class );
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );

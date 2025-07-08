@@ -38,5 +38,15 @@
 				return false;
 			}
 		} );
+
+		$( 'input#woocommerce_customer_stock_notifications_require_double_opt_in' )
+			.on( 'change', function () {
+				if ( $( this ).is( ':checked' ) ) {
+					$( this ).closest( 'tr' ).next( 'tr' ).show();
+				} else {
+					$( this ).closest( 'tr' ).next( 'tr' ).hide();
+				}
+			} )
+			.trigger( 'change' );
 	} );
 } )( jQuery, window );

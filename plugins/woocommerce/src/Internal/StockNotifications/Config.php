@@ -117,4 +117,18 @@ class Config {
 
 		return self::$eligible_stock_statuses;
 	}
+
+	/**
+	 * How long to keep pending notifications before deleting them (in days).
+	 *
+	 * @return int
+	 */
+	public static function get_unverified_deletion_days_threshold(): int {
+		return absint(
+			get_option(
+				'wc_customer_stock_notifications_unverified_deletions_days_threshold',
+				0
+			)
+		);
+	}
 }
