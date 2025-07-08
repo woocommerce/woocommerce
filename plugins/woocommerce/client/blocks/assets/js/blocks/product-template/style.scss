@@ -83,3 +83,21 @@ $min-product-width: 150px;
 .is-product-collection-layout-list .wc-block-product:not(:last-child) {
 	margin-bottom: 1.2rem;
 }
+
+/**
+ * Carousel layout
+ */
+.is-product-collection-layout-carousel {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	gap: $grid-gap;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-padding: 0 $grid-gap;
+
+	.wc-block-product {
+		scroll-snap-align: center;
+		min-width: $min-product-width;
+	}
+}
