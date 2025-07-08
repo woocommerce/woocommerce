@@ -54,14 +54,14 @@ const CheckoutExpressPayment = () => {
 	} );
 	const { isEditor } = useEditorContext();
 
-	const hasNoRegisteredExpressPaymentMethods =
-		Object.keys( registeredExpressPaymentMethods ).length === 0;
+	const hasRegisteredExpressPaymentMethods =
+		Object.keys( registeredExpressPaymentMethods ).length > 0;
 
 	// The store has registered express payment methods but they are not initialized.
 	// We don't know if the methods pass the canMakePayment check.
 	const hasRegisteredNotInitializedExpressPayments =
 		! expressPaymentMethodsInitialized &&
-		Object.keys( registeredExpressPaymentMethods ).length > 0;
+		hasRegisteredExpressPaymentMethods;
 
 	// The store has available express payment methods but they are not initialized.
 	const hasNoValidRegisteredExpressPayments =
@@ -69,7 +69,7 @@ const CheckoutExpressPayment = () => {
 		Object.keys( availableExpressPaymentMethods ).length === 0;
 
 	if (
-		hasNoRegisteredExpressPaymentMethods ||
+		! hasRegisteredExpressPaymentMethods ||
 		hasNoValidRegisteredExpressPayments
 	) {
 		// Make sure errors are shown in the editor and for admins. For example,
