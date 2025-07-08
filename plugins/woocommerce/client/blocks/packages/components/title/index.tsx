@@ -22,10 +22,7 @@ const Title = ( {
 
 	return (
 		<TagName
-			className={ clsx(
-				'wc-block-components-title wp-block-heading',
-				className
-			) }
+			className={ clsx( 'wc-block-components-title', className ) }
 			{ ...props }
 		>
 			{ children }
