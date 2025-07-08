@@ -36,14 +36,13 @@ const ProductImage = ( {
 				alt: '',
 		  };
 
-	return (
-		<img
-			{ ...imageProps }
-			alt={ imageProps.alt }
-			width={ width }
-			height={ height }
-		/>
-	);
+  return (
+    <img
+      { ...imageProps }
+      { ...( width && { width } ) }
+      { ...( height && { height } ) }
+    />
+  );
 };
 
 export default ProductImage;
