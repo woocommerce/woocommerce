@@ -46,6 +46,23 @@ async function setup( attributes: BlockAttributes ) {
 	return initializeEditor( testBlock );
 }
 
+/**
+ * Helper function to enable a control via the dropdown menu
+ */
+function enableControl( controlName: string ) {
+	const optionsButton = screen.getByRole( 'button', {
+		name: /Taxonomy Filter Settings options/i,
+	} );
+	fireEvent.click( optionsButton );
+
+	const controlToggle = screen.getByRole( 'menuitemcheckbox', {
+		name: new RegExp( controlName, 'i' ),
+	} );
+	fireEvent.click( controlToggle );
+
+	fireEvent.click( optionsButton ); // Close menu
+}
+
 describe( 'Taxonomy Filter block', () => {
 	describe( 'Initial display', () => {
 		test( 'should show notice when no taxonomy is selected', async () => {
@@ -108,20 +125,7 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should show sort order control with default value when enabled', () => {
-			// First open the dropdown menu to enable the sort order control
-			const optionsButton = screen.getByRole( 'button', {
-				name: /Taxonomy Filter Settings options/i,
-			} );
-			fireEvent.click( optionsButton );
-
-			// Enable the sort order control
-			const showSortOrderToggle = screen.getByRole( 'menuitemcheckbox', {
-				name: /Sort Order/i,
-			} );
-			fireEvent.click( showSortOrderToggle );
-
-			// Close the menu
-			fireEvent.click( optionsButton );
+			enableControl( 'Sort Order' );
 
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
@@ -132,20 +136,7 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should allow changing sort order when enabled', () => {
-			// First open the dropdown menu to enable the sort order control
-			const optionsButton = screen.getByRole( 'button', {
-				name: /Taxonomy Filter Settings options/i,
-			} );
-			fireEvent.click( optionsButton );
-
-			// Enable the sort order control
-			const showSortOrderToggle = screen.getByRole( 'menuitemcheckbox', {
-				name: /Sort Order/i,
-			} );
-			fireEvent.click( showSortOrderToggle );
-
-			// Close the menu
-			fireEvent.click( optionsButton );
+			enableControl( 'Sort Order' );
 
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
@@ -174,8 +165,8 @@ describe( 'Taxonomy Filter block', () => {
 				screen.getByLabelText( /Block: Product Categories Filter/i )
 			);
 
-			// expect the list doesn't have count
-			expect( block.queryByText( /\(12\)/i ) ).not.toBeInTheDocument();
+			// expect the list doesn't have count indicators
+			expect( block.queryAllByText( /\(\d+\)/ ) ).toHaveLength( 0 );
 
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
@@ -187,25 +178,14 @@ describe( 'Taxonomy Filter block', () => {
 
 			expect( productCountsToggle ).toBeChecked();
 
-			// expect the list has count
-			expect( block.queryByText( /\(12\)/i ) ).toBeInTheDocument();
+			// expect the list has count indicators
+			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
+				0
+			);
 		} );
 
 		test( 'should show hide empty items toggle when enabled', () => {
-			// First open the dropdown menu to enable the hide empty control
-			const optionsButton = screen.getByRole( 'button', {
-				name: /Taxonomy Filter Settings options/i,
-			} );
-			fireEvent.click( optionsButton );
-
-			// Enable the hide empty control
-			const showHideEmptyToggle = screen.getByRole( 'menuitemcheckbox', {
-				name: /Hide items with no products/i,
-			} );
-			fireEvent.click( showHideEmptyToggle );
-
-			// Close the menu
-			fireEvent.click( optionsButton );
+			enableControl( 'Hide items with no products' );
 
 			const hideEmptyToggle = screen.getByRole( 'checkbox', {
 				name: /Hide items with no products/i,
@@ -216,20 +196,7 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should allow toggling hide empty items when enabled', () => {
-			// First open the dropdown menu to enable the hide empty control
-			const optionsButton = screen.getByRole( 'button', {
-				name: /Taxonomy Filter Settings options/i,
-			} );
-			fireEvent.click( optionsButton );
-
-			// Enable the hide empty control
-			const showHideEmptyToggle = screen.getByRole( 'menuitemcheckbox', {
-				name: /Hide items with no products/i,
-			} );
-			fireEvent.click( showHideEmptyToggle );
-
-			// Close the menu
-			fireEvent.click( optionsButton );
+			enableControl( 'Hide items with no products' );
 
 			const hideEmptyToggle = screen.getByRole( 'checkbox', {
 				name: /Hide items with no products/i,
