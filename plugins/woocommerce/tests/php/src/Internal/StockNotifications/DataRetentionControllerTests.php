@@ -9,16 +9,28 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
 /**
- * PrivacyEraser tests.
+ * DataRetentionControllerTests tests.
  */
 class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 
+	/**
+	 * The controller instance.
+	 *
+	 * @var DataRetentionController
+	 */
 	private $controller;
 
+	/**
+	 * Set up test case
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->controller = new DataRetentionController();
 	}
+
+	/**
+	 * Clean up after tests
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->controller->clear_daily_task();
