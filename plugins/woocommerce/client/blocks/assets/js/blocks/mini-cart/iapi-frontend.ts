@@ -43,10 +43,14 @@ const { singularItemsText, pluralItemsText } = getConfig(
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
-if ( ! window.wc?.blocksCheckout?.registerCheckoutFilters ) {
+// Inject a dummy `registerCheckoutFilters` function to inform the user if the
+// global is not available because they forgot to enqueue the
+// `@woocommerce/blocks-checkout` package.
+if ( ! ( window.wc as any )?.blocksCheckout?.registerCheckoutFilters ) {
 	window.wc = window.wc || {};
-	window.wc.blocksCheckout = window.wc.blocksCheckout || {};
-	window.wc.blocksCheckout.registerCheckoutFilters = () => {
+	( window.wc as any ).blocksCheckout =
+		( window.wc as any ).blocksCheckout || {};
+	( window.wc as any ).blocksCheckout.registerCheckoutFilters = () => {
 		console.error(
 			'You are trying to access the `wc.blocksCheckout.registerCheckoutFilters` global without enqueuing `@woocommerce/blocks-checkout`. Please, enqueue it as a dependency of your script.'
 		);
