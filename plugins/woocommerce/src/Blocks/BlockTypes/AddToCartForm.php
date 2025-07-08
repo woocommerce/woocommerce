@@ -110,8 +110,7 @@ class AddToCartForm extends AbstractBlock {
 		$context_json = esc_attr(
 			wp_json_encode(
 				array(
-					'childProductId' => $child_id,
-					'productType'    => 'grouped',
+					'currentProductId' => $child_id,
 				)
 			)
 		);
@@ -337,24 +336,42 @@ class AddToCartForm extends AbstractBlock {
 			$context    = array();
 			$product_id = $product->get_id();
 
-			if ( $product->is_type( 'grouped' ) ) {
-				$context['groupedProductIds']   = array();
-				$context['quantityConstraints'] = array();
+			$context['products'] = array();
 
+			if ( $product->is_type( 'grouped' ) ) {
+				// Add parent product.
+				$context['products'][ $product_id ] = array(
+					'id'                  => $product_id,
+					'type'                => 'grouped',
+					'quantity'            => 0,
+					'quantityConstraints' => $this->get_quantity_constraints( $product ),
+					'parentProductId'     => null,
+				);
+
+				// Add child products.
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $child_product->is_purchasable() && $child_product->is_in_stock() && ! $child_product->has_options() ) {
-						$context['groupedProductIds'][]                      = $child_product_id;
-						$context['quantityConstraints'][ $child_product_id ] = $this->get_quantity_constraints( $child_product, true );
+						$context['products'][ $child_product_id ] = array(
+							'id'                  => $child_product_id,
+							'type'                => $child_product->get_type(),
+							'quantity'            => 0,
+							'quantityConstraints' => $this->get_quantity_constraints( $child_product, true ),
+							'parentProductId'     => $product_id,
+						);
 					}
 				}
 			} else {
-				$context['quantityConstraints'] = array(
-					$product_id => $this->get_quantity_constraints( $product ),
+				$context['products'][ $product_id ] = array(
+					'id'                  => $product_id,
+					'type'                => $product->get_type(),
+					'quantity'            => 0,
+					'quantityConstraints' => $this->get_quantity_constraints( $product ),
+					'parentProductId'     => null,
 				);
-				$context['productId']           = $product_id;
-				$context['productType']         = $product->get_type();
 			}
+
+			$context['currentProductId'] = $product_id;
 		}
 
 		$form = sprintf(
