@@ -1,0 +1,26 @@
+name: Test canonical extensions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Check if community contribution
+        env:
+            REPOSITORIES: ${{ env.CANONICAL_EXTENSIONS }}
+            GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+            GH_REPO: ${{ github.repository }}
+        run: |
+            printf '9.9.0-rc.1\n\n\nhttps://github.com/woocommerce/woocommerce\n' | pnpm run-canonical-extensions-tests
+
+            # Which WooCommerce version should we use for testing (e.g., 9.9.0-rc.1, 9.9.0, nightly, rc or stable)?:
+            # Which WordPress version should we use for testing (e.g., 6.8, latest or empty to use defaults)?:
+            # Which PHP version should we use for testing (e.g., 7.4, 8.4 or empty to use defaults)?:
+            # Which GitHub repositories needs to be tested (e.g. https://github.com/woocommerce/woocommerce, space separated list or empty to use defaults)?:
