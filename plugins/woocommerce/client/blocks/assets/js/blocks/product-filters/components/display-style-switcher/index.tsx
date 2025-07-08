@@ -89,3 +89,37 @@ export const DisplayStyleSwitcher = ( {
 		</ToggleGroupControl>
 	);
 };
+
+export function resetDisplayStyleBlock(
+	clientId: string,
+	defaultStyle: string,
+	parentBlockName: string
+) {
+	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
+	if ( ! filterBlock ) return;
+
+	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
+		blockType.ancestor?.includes( parentBlockName )
+	);
+
+	const currentStyle = displayStyleOptions.find( ( blockType ) =>
+		getInnerBlockByName( filterBlock, blockType.name )
+	);
+
+	const currentStyleBlock = getInnerBlockByName(
+		filterBlock,
+		currentStyle?.name || ''
+	);
+
+	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
+	if ( currentStyleBlock ) {
+		replaceBlock( currentStyleBlock.clientId, createBlock( defaultStyle ) );
+	} else {
+		insertBlock(
+			createBlock( defaultStyle ),
+			filterBlock.innerBlocks.length,
+			filterBlock.clientId,
+			false
+		);
+	}
+}

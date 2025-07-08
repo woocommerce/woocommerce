@@ -17,10 +17,22 @@ import {
  * Internal dependencies
  */
 import type { EditProps, TaxonomyItem } from './types';
-import { DisplayStyleSwitcher } from '../../components/display-style-switcher';
+import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '../../components/display-style-switcher';
 import metadata from './block.json';
 import { updateFilterHeading } from '../../utils/update-filter-heading';
 import { getTaxonomyLabel } from './utils';
+
+const taxonomies = getSetting< TaxonomyItem[] >(
+	'filterableProductTaxonomies',
+	[]
+);
+const taxonomyOptions = taxonomies.map( ( item ) => ( {
+	label: item.label,
+	value: item.name,
+} ) );
 
 export const TaxonomyFilterInspectorControls = ( {
 	attributes,
@@ -30,34 +42,33 @@ export const TaxonomyFilterInspectorControls = ( {
 	const { taxonomy, showCounts, sortOrder, hideEmpty, displayStyle } =
 		attributes;
 
-	const taxonomies = getSetting< TaxonomyItem[] >(
-		'filterableProductTaxonomies',
-		[]
-	);
-	const taxonomyOptions = taxonomies.map( ( item ) => ( {
-		label: item.label,
-		value: item.name,
-	} ) );
-
 	return (
 		<InspectorControls>
 			<ToolsPanel
 				label={ __( 'Taxonomy Filter Settings', 'woocommerce' ) }
 				resetAll={ () => {
 					setAttributes( {
-						taxonomy: '',
-						sortOrder: 'count-desc',
-						displayStyle:
-							'woocommerce/product-filter-checkbox-list',
-						showCounts: false,
-						hideEmpty: true,
+						taxonomy: metadata.attributes.taxonomy.default,
+						sortOrder: metadata.attributes.sortOrder.default,
+						displayStyle: metadata.attributes.displayStyle.default,
+						showCounts: metadata.attributes.showCounts.default,
+						hideEmpty: metadata.attributes.hideEmpty.default,
 					} );
+					resetDisplayStyleBlock(
+						clientId,
+						metadata.attributes.displayStyle.default,
+						metadata.name
+					);
 				} }
 			>
 				<ToolsPanelItem
 					label={ __( 'Taxonomy', 'woocommerce' ) }
 					hasValue={ () => !! taxonomy }
-					onDeselect={ () => setAttributes( { taxonomy: '' } ) }
+					onDeselect={ () =>
+						setAttributes( {
+							taxonomy: metadata.attributes.taxonomy.default,
+						} )
+					}
 					isShownByDefault={ true }
 				>
 					<SelectControl
@@ -87,7 +98,9 @@ export const TaxonomyFilterInspectorControls = ( {
 					label={ __( 'Sort Order', 'woocommerce' ) }
 					hasValue={ () => sortOrder !== 'count-desc' }
 					onDeselect={ () =>
-						setAttributes( { sortOrder: 'count-desc' } )
+						setAttributes( {
+							sortOrder: metadata.attributes.sortOrder.default,
+						} )
 					}
 				>
 					<SelectControl
@@ -129,12 +142,17 @@ export const TaxonomyFilterInspectorControls = ( {
 						'woocommerce/product-filter-checkbox-list'
 					}
 					isShownByDefault={ true }
-					onDeselect={ () =>
+					onDeselect={ () => {
 						setAttributes( {
 							displayStyle:
-								'woocommerce/product-filter-checkbox-list',
-						} )
-					}
+								metadata.attributes.displayStyle.default,
+						} );
+						resetDisplayStyleBlock(
+							clientId,
+							metadata.attributes.displayStyle.default,
+							metadata.name
+						);
+					} }
 				>
 					<DisplayStyleSwitcher
 						clientId={ clientId }
@@ -148,7 +166,11 @@ export const TaxonomyFilterInspectorControls = ( {
 				<ToolsPanelItem
 					label={ __( 'Product counts', 'woocommerce' ) }
 					hasValue={ () => showCounts }
-					onDeselect={ () => setAttributes( { showCounts: false } ) }
+					onDeselect={ () =>
+						setAttributes( {
+							showCounts: metadata.attributes.showCounts.default,
+						} )
+					}
 					isShownByDefault={ true }
 				>
 					<ToggleControl
@@ -162,7 +184,11 @@ export const TaxonomyFilterInspectorControls = ( {
 				<ToolsPanelItem
 					label={ __( 'Hide items with no products', 'woocommerce' ) }
 					hasValue={ () => ! hideEmpty }
-					onDeselect={ () => setAttributes( { hideEmpty: false } ) }
+					onDeselect={ () =>
+						setAttributes( {
+							hideEmpty: metadata.attributes.hideEmpty.default,
+						} )
+					}
 				>
 					<ToggleControl
 						label={ __(
