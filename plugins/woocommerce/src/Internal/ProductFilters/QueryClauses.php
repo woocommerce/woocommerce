@@ -302,20 +302,18 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$tax_queries = array();
 
-		foreach ( $chosen_taxonomies as $taxonomy => $terms ) {
-			if ( empty( $terms ) ) {
-				continue;
-			}
+		$all_terms = get_terms( array(
+			'taxonomy'   => array_keys( $chosen_taxonomies ),
+			'slug'       => array_merge( ...array_values( $chosen_taxonomies ) ),
+		) );
 
-			// Get term IDs from slugs
-			$term_ids = array();
-			foreach ( $terms as $term_slug ) {
-				$term = get_term_by( 'slug', $term_slug, $taxonomy );
-				if ( $term && ! is_wp_error( $term ) ) {
-					$term_ids[] = $term->term_id;
-				}
-			}
+		$term_ids_by_taxonomy = array();
 
+		foreach ( $all_terms as $term ) {
+			$term_ids_by_taxonomy[ $term->taxonomy ][] = $term->term_id;
+		}
+
+		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
 			if ( empty( $term_ids ) ) {
 				continue;
 			}
@@ -553,9 +551,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return 'filter_' . $taxonomy;
 		}, $public_product_taxonomies );
 
-		foreach( $taxonomy_filter_keys as $taxonomy => $key ) {
-			if ( isset( $query_vars[ $key ] ) ) {
-				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $key ] ) );
+		foreach( $taxonomy_filter_keys as $taxonomy => $param_key ) {
+			if ( isset( $query_vars[ $param_key ] ) ) {
+				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $param_key ] ) );
 			}
 		}
 
