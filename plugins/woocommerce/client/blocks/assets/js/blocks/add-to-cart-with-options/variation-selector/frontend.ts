@@ -36,12 +36,56 @@ type Context = AddToCartWithOptionsStoreContext & {
 	options: Option[];
 };
 
+var autoselect_lock = false; // When true, do not handle clicks on attributes
+
 // Set selected pill styles for proper contrast.
 setStyles();
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+function attributesAutoselect( $variation_selectors ) {
+	$variation_selectors.each( function () {
+		const $current_variation_selector = $( this );
+		// Options that HAVE a value and are NOT disabled
+		// OR pill inputs
+		const $valid_choices = $current_variation_selector.find( 'option:not([value=""], [disabled], [class*="disabled"]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input' );
+		if ( $valid_choices.length === 1 ) {
+			// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
+			const $selected = $current_variation_selector.find(':checked');
+			if ( $selected.length === 0 || $selected.val() !== $valid_choices.val() ) {
+				// No option selected, OR the selected value is not the same as the only valid one
+				autoselect_lock = true;
+				if ( $valid_choices.is( 'input' ) ) {
+					// Pills
+					$valid_choices.click();
+				} else if ( $valid_choices.is( 'option') ) {
+					// Dropdowns
+					const $select = $valid_choices.parent( 'select' );
+					$select.val( $valid_choices.val() );
+					const ev = new Event('change');
+					$select[0].dispatchEvent(ev);
+				}
+				autoselect_lock = false;
+			}
+		}
+	} );
+}
+
+function attributesAutoselectOthers() {
+	const context = getContext< Context >(),
+		$form = $( 'form.wc-block-add-to-cart-with-options.cart' ),
+		$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
+		autoselect =
+			$variation_selectors.first().data( 'autoselect' ) ||
+			false;
+	if ( autoselect && context.selectedValue !== '' ) {
+		const $target_variation_selector = $variation_selectors.has( `[name="${ context.name }"]` );
+		const $other_variation_selectors = $variation_selectors.not( $target_variation_selector );
+		attributesAutoselect( $other_variation_selectors );
+	}
+}
 
 /**
  * Check if the attribute value is valid given the other selected attributes and
@@ -242,11 +286,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
+				!autoselect_lock && attributesAutoselectOthers();
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
+				!autoselect_lock && attributesAutoselectOthers();
 			},
 		},
 		callbacks: {
