@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove entity_type column from fulfillments table as it's no longer needed
