@@ -286,7 +286,7 @@ function wc_format_refund_total( $amount ) {
  * @return string
  */
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
-	$number = $number ?? '0';
+	$number = $number ?? '';
 
 	if ( '' === $number ) {
 		return '';
