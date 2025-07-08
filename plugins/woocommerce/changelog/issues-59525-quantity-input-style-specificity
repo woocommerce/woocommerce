@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Reduce quantity selector block style rules specificity
