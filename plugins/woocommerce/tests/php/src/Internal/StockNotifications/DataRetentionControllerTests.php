@@ -78,18 +78,18 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 		);
 
 		$notification_pending = new Notification();
-		$notification_pending->set_user_email( 'jon@doe.com' );
+		$notification_pending->set_user_email( 'pending@test.com' );
 		$notification_pending->set_product_id( 1 );
 		$notification_pending->set_status( NotificationStatus::PENDING );
-		$notification_pending->save();
+		$pending_id = $notification_pending->save();
 
 		$notification_expired = new Notification();
-		$notification_expired->set_user_email( 'jon@doe.com' );
+		$notification_expired->set_user_email( 'expired@test.com' );
 		$notification_expired->set_product_id( 1 );
 		$notification_expired->set_status( NotificationStatus::PENDING );
 		$expired_time = time() - ( ( $days_until_deletion + 1 ) * DAY_IN_SECONDS );
 		$notification_expired->set_date_created( gmdate( 'Y-m-d H:i:s', $expired_time ) );
-		$notification_expired->save();
+		$expired_id = $notification_expired->save();
 
 		$notifications = NotificationQuery::get_notifications( array() );
 
@@ -100,5 +100,11 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 		$notifications_after = NotificationQuery::get_notifications( array() );
 
 		$this->assertCount( 1, $notifications_after );
+
+		$pending_notification_after = new Notification( $pending_id );
+		$this->assertEquals( 'pending@test.com', $pending_notification_after->get_user_email() );
+
+		$this->expectException( \Exception::class );
+		new Notification( $expired_id);
 	}
 }
