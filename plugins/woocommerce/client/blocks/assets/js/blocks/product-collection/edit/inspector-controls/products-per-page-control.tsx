@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import {
 	RangeControl,
-	// @ts-expect-error Using experimental features
+	Notice,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -17,6 +17,7 @@ import { DEFAULT_QUERY } from '../../constants';
 
 const MIN_PRODUCTS_PER_PAGE = 1;
 const MAX_PRODUCTS_PER_PAGE = 100;
+const CAROUSEL_PERFORMANCE_WARNING_THRESHOLD = 30;
 
 const defaultLabel = __( 'Products per page', 'woocommerce' );
 const carouselLabel = __( 'Products in carousel', 'woocommerce' );
@@ -37,6 +38,8 @@ const ProductsPerPageControl = ( {
 	};
 
 	const label = getLabel( carouselVariant );
+	const perPage = query.perPage || DEFAULT_QUERY.perPage;
+	const showPerformanceWarning = carouselVariant && perPage > CAROUSEL_PERFORMANCE_WARNING_THRESHOLD;
 
 	return (
 		<ToolsPanelItem
@@ -46,6 +49,18 @@ const ProductsPerPageControl = ( {
 			onDeselect={ deselectCallback }
 			resetAllFilter={ deselectCallback }
 		>
+			{ showPerformanceWarning && (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="wc-block-editor-product-collection__carousel-performance-warning"
+				>
+					{ __(
+						'High product counts in carousel may impact performance. Consider reducing the number of products for better user experience.',
+						'woocommerce'
+					) }
+				</Notice>
+			) }
 			<RangeControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
@@ -54,7 +69,6 @@ const ProductsPerPageControl = ( {
 				max={ MAX_PRODUCTS_PER_PAGE }
 				onChange={ ( newPerPage: number ) => {
 					if (
-						isNaN( newPerPage ) ||
 						newPerPage < MIN_PRODUCTS_PER_PAGE ||
 						newPerPage > MAX_PRODUCTS_PER_PAGE
 					) {
@@ -63,7 +77,7 @@ const ProductsPerPageControl = ( {
 					setQueryAttribute( { perPage: newPerPage } );
 					trackInteraction( CoreFilterNames.PRODUCTS_PER_PAGE );
 				} }
-				value={ query.perPage || DEFAULT_QUERY.perPage }
+				value={ perPage }
 			/>
 		</ToolsPanelItem>
 	);
