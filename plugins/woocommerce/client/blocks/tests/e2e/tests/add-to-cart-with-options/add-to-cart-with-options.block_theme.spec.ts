@@ -235,6 +235,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await pageObject.switchProductType( 'Variable Product' );
 
+		// Verify inner blocks have loaded.
+		await expect(
+			editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
+
 		const attributeOptionsBlock = await editor.getBlockByName(
 			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
 		);
@@ -244,9 +253,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// We need to make sure the block updated before saving.
 		// @see https://github.com/woocommerce/woocommerce/issues/57718
-		await expect(
-			editor.canvas.getByLabel( 'Color', { exact: true } )
-		).toBeVisible();
+		await expect( async () => {
+			await page.getByRole( 'radio', { name: 'Dropdown' } ).isChecked();
+		} ).toPass();
 
 		await editor.saveSiteEditorEntities();
 
