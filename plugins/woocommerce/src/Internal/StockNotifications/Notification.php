@@ -449,4 +449,79 @@ class Notification extends \WC_Data {
 
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();
 	}
+
+	public function has_valid_verification_data(): bool {
+		$action_key = $this->get_meta('email_link_action_key' );
+
+		if ( empty( $action_key) ) {
+			return false;
+		}
+
+		if ( ! str_contains( $action_key, ':' ) ) {
+			return false;
+		}
+
+		list( $requested_timestamp, $key ) = explode( ':', $action_key, 2 );
+		$expiration_duration = Config::get_unverified_deletion_days_threshold() * DAY_IN_SECONDS;
+
+		if ( 0 !== $expiration_duration && ( time() - (int) $requested_timestamp ) > $expiration_duration ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function setup_verification_data() {
+		$key = time() . ':' . wp_generate_password( 20, false );
+		$this->update_meta_data( 'email_link_action_key', $key );
+	}
+
+	public function maybe_setup_verification_data( bool $persist ): void {
+		$opt_in_required = get_option( 'woocommerce_customer_stock_notifications_opt_in_required', 'no' );
+
+		if ( 'no' === $opt_in_required ) {
+			return;
+		}
+
+		if ( $this->has_valid_verification_data() ) {
+			return;
+		}
+
+		$this->setup_verification_data();
+
+		if ( $persist ) {
+			$this->save();
+		}
+	}
+
+	public function has_valid_unsubscription_data(): bool {
+		$action_key = $this->get_meta('email_link_action_key' );
+
+		if ( empty( $action_key) ) {
+			return false;
+		}
+
+		if ( str_contains( $action_key, ':' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function setup_unsubscription_data() {
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'email_link_action_key', $key );
+	}
+
+	public function maybe_setup_unsubscription_data( bool $persist ): void {
+		if ( $this->has_valid_unsubscription_data() ) {
+			return;
+		}
+
+		$this->setup_unsubscription_data();
+
+		if ( $persist ) {
+			$this->save();
+		}
+	}
 }

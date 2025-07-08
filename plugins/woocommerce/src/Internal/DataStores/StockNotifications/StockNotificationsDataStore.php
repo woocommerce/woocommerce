@@ -571,8 +571,4 @@ CREATE TABLE $meta_table_name (
 
 		return $results;
 	}
-
-	public function maybe_setup_verification_data( bool $persist ): void {
-
-	}
 }
