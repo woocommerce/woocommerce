@@ -278,26 +278,28 @@ class OrdersTableSearchQuery {
 
 		$order_table = $this->query->get_table_name( 'orders' );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
 		if ( 'customer_email' === $search_filter ) {
 			return $wpdb->prepare(
-				"`$order_table`.billing_email LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"`$order_table`.billing_email LIKE %s",
 				$wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
 		if ( 'order_id' === $search_filter && is_numeric( $this->search_term ) ) {
 			return $wpdb->prepare(
-				"`$order_table`.id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"`$order_table`.id = %d",
 				absint( $this->search_term )
 			);
 		}
 
 		if ( 'transaction_id' === $search_filter ) {
 			return $wpdb->prepare(
-				"`$order_table`.transaction_id LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"`$order_table`.transaction_id LIKE %s",
 				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( 'products' === $search_filter ) {
 			return $this->get_where_for_products();
