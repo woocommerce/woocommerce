@@ -242,7 +242,7 @@ jobs:
               action: 'feature-freeze',
               version: '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}',
               build_zip: '${{ needs.modify-zip-version.outputs.artifact_url }}',
-              post_status: 'draft'
+              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
 
             const requestBody = JSON.stringify({
@@ -270,5 +270,6 @@ jobs:
         env:
           WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
           WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
 
     
