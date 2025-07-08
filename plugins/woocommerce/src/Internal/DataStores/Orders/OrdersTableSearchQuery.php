@@ -179,6 +179,7 @@ class OrdersTableSearchQuery {
 		$search_pattern = $wpdb->esc_like( $db_util->sanitise_boolean_fts_search_term( $this->search_term ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->prepare(
 			"LEFT JOIN (
 				SELECT DISTINCT order_id
@@ -187,7 +188,8 @@ class OrdersTableSearchQuery {
 			) AS " . self::PRODUCTS_JOIN_ALIAS . ' ON ' . self::PRODUCTS_JOIN_ALIAS . ".order_id = $orders_table.id",
 			$search_pattern
 		);
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -218,6 +220,7 @@ class OrdersTableSearchQuery {
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->prepare(
 			"LEFT JOIN (
 				SELECT DISTINCT order_id
@@ -231,6 +234,7 @@ class OrdersTableSearchQuery {
 			$search_pattern
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
