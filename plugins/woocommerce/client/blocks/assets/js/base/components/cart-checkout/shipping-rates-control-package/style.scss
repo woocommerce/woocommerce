@@ -56,8 +56,12 @@
 	}
 }
 
+.wc-block-components-shipping-rates-control__package-title {
+	@include font-regular-locked;
+}
+
 .wc-block-components-shipping-rates-control__package-items {
-	@include font-size(small);
+	@include font-small-locked;
 	display: inline-block;
 	list-style: none;
 	margin: 0;

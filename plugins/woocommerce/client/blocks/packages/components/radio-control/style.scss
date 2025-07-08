@@ -1,3 +1,10 @@
+// padding-left here is aligned with the size and space around radio input
+// element, we need to reserve at least this amount of space for the label
+// to not overflow the input. Input has position: absolute set, so it doesn't
+// take any space on its own.
+// *real* left padding + size of the input + space between input and label
+$content-padding-left: calc($gap + 24px + $gap-smaller);
+
 .wc-block-components-radio-control--highlight-checked {
 	position: relative;
 
@@ -117,23 +124,20 @@
 	}
 }
 
+// extracted from the styles below to increase specificity
+.wc-block-components-radio-control .wc-block-components-radio-control__option {
+	margin: 0;
+}
+
 .wc-block-components-radio-control__option {
 	@include reset-color();
 	@include reset-typography();
-	display: block;
-	margin: em($gap) 0;
-	margin-top: 0;
-	// padding-left here is aligned with the size of the radio input element,
-	// we need to reserve at least this amount of space for the label to not
-	// overflow the input. Input has position: absolute set, so it doesn't
-	// take any space on its own.
-	padding: 0 calc($gap + em(24px)) 0 em($gap-huge);
 	position: relative;
+	display: block;
 	cursor: pointer;
 
-	&:last-child {
-		margin-bottom: 0;
-	}
+	padding: $gap;
+	padding-left: $content-padding-left;
 }
 
 .wc-block-components-radio-control__option-layout {
@@ -176,7 +180,7 @@
 	text-wrap: balance;
 
 	.wc-block-components-radio-control__description {
-		margin: $gap-smaller 0;
+		margin: $gap-smallest 0;
 	}
 
 	.wc-block-components-radio-control__secondary-description {
@@ -189,16 +193,12 @@
 
 .wc-block-components-radio-control__label,
 .wc-block-components-radio-control__secondary-label {
-	// Currently, max() CSS function calls need to be wrapped with unquote.
-	// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
-	// These values should be the same as the control input height.
-	line-height: string.unquote("max(1.5rem, 24px)");
+	@include font-regular-locked;
 }
 
 .wc-block-components-radio-control__description,
 .wc-block-components-radio-control__secondary-description {
-	@include font-size(small);
-	line-height: 1.55;
+	@include font-regular-locked;
 }
 
 // Extra class for specificity.
@@ -209,17 +209,14 @@
 		border: 1px solid $universal-border-medium;
 		border-radius: 50%;
 		display: inline-block;
-		height: em(24px); // =1.5rem
-		min-height: 24px;
-		min-width: 24px;
-		width: em(24px);
-		// The code belows centers the input vertically.
+		height: 20px;
+		width: 20px;
 		position: absolute;
 		left: $gap;
 		top: 50%;
 		transform: translate(0, -45%);
-		margin: inherit;
-		cursor: pointer;
+		margin: 0;
+
 		&:checked {
 			border: 1px solid $universal-border-strong;
 		}
@@ -234,15 +231,13 @@
 			border-radius: 50%;
 			content: "";
 			display: block;
-			height: em(12px);
+			height: 10px;
+			width: 10px;
 			left: 50%;
 			margin: 0;
-			min-height: 12px;
-			min-width: 12px;
 			position: absolute;
 			top: 50%;
 			transform: translate(-50%, -50%);
-			width: em(12px);
 		}
 
 		.has-dark-controls & {

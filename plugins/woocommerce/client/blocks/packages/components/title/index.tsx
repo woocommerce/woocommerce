@@ -18,11 +18,13 @@ const Title = ( {
 	headingLevel,
 	...props
 }: TitleProps ): JSX.Element => {
-	const buttonClassName = clsx( 'wc-block-components-title', className );
-	const TagName = `h${ headingLevel }` as keyof JSX.IntrinsicElements;
+	const TagName = `h${ headingLevel }` as const;
 
 	return (
-		<TagName className={ buttonClassName } { ...props }>
+		<TagName
+			className={ clsx( 'wc-block-components-title', className ) }
+			{ ...props }
+		>
 			{ children }
 		</TagName>
 	);
