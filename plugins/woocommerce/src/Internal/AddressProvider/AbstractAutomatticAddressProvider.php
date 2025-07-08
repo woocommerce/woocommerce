@@ -163,22 +163,22 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 
 
 	/**
-	 * Enqueues the checkout script, checks if it's already registred or not so we don't dubplicate, and prints out the JWT to the page to be consumed.
+	 * Enqueues the checkout script, checks if it's already registered or not so we don't dubplicate, and prints out the JWT to the page to be consumed.
 	 */
 	public function load_scripts() {
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		if ( ! wp_script_is( 'a8c-address-autcomplete-service', 'registred' ) ) {
-			wp_register_script( 'a8c-address-autcomplete-service', self::get_asset_url( 'assets/js/frontend/a8c-address-autocomplete-service' . $suffix . '.js' ), array( 'wc-address-autocomplete' ), $version, array( 'strategy' => 'defer' ) );
+		if ( ! wp_script_is( 'a8c-address-autocomplete-service', 'registred' ) ) {
+			wp_register_script( 'a8c-address-autocomplete-service', self::get_asset_url( 'assets/js/frontend/a8c-address-autocomplete-service' . $suffix . '.js' ), array( 'wc-address-autocomplete' ), $version, array( 'strategy' => 'defer' ) );
 		}
 
-		if ( ! wp_script_is( 'a8c-address-autcomplete-service', 'enqueued' ) ) {
-			wp_enqueue_script( 'a8c-address-autcomplete-service' );
+		if ( ! wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) ) {
+			wp_enqueue_script( 'a8c-address-autocomplete-service' );
 		}
 
 		wp_add_inline_script(
-			'a8c-address-autcomplete-service',
+			'a8c-address-autocomplete-service',
 			sprintf(
 				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ "%1$s" ] = { key: %2$s, canTelemetry: %3$s };',
 				$this->id,
