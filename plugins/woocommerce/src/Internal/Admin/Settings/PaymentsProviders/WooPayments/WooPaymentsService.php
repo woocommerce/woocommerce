@@ -891,9 +891,6 @@ class WooPaymentsService {
 	 *                              If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The result of the test account initialization.
-	 * @throws ApiArgumentException If the given onboarding step ID or step data is invalid.
-	 *                                           If the onboarding action can not be performed due to the current state
-	 *                                           of the site or there was an error initializing the test account.
 	 * @throws ApiException If the given onboarding step ID or step data is invalid.
 	 *                                           If the onboarding action can not be performed due to the current state
 	 *                                           of the site or there was an error initializing the test account.
@@ -1058,7 +1055,6 @@ class WooPaymentsService {
 	 *                                     If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The KYC account session data.
-	 * @throws ApiArgumentException
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session data could not be retrieved.
 	 */
@@ -1194,7 +1190,6 @@ class WooPaymentsService {
 	 *                              If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
-	 * @throws ApiArgumentException
 	 * @throws ApiException If the extension is not active, step requirements are not met, or
 	 *                      the KYC session could not be finished.
 	 */
@@ -1456,7 +1451,6 @@ class WooPaymentsService {
 	 *                              If not provided, it will identify the source as the WC Admin Payments settings.
 	 *
 	 * @return array The response from the WooPayments API.
-	 * @throws ApiArgumentException
 	 * @throws ApiException If we could not disable the test account or there was an error.
 	 */
 	public function disable_test_account( string $location, string $from = '', ?string $source = self::SESSION_ENTRY_DEFAULT ): array {
