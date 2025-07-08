@@ -58,7 +58,7 @@ final class SessionHandler extends WC_Session {
 
 		$this->_customer_id       = $payload['user_id'];
 		$this->session_expiration = $payload['exp'];
-		$this->_data              = (array) $this->get_session( $this->_customer_id, array() );
+		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
 	}
 
 	/**
@@ -104,7 +104,7 @@ final class SessionHandler extends WC_Session {
 				$wpdb->prepare(
 					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
 					$this->table,
-					$this->_customer_id,
+					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->session_expiration
 				)

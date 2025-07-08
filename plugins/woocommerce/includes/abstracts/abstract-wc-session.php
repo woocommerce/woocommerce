@@ -132,11 +132,11 @@ abstract class WC_Session {
 	}
 
 	/**
-	 * Get customer ID.
+	 * Get customer ID. If the session is not initialized, returns an empty string.
 	 *
-	 * @return ?string
+	 * @return string
 	 */
 	public function get_customer_id() {
-		return $this->_customer_id;
+		return $this->_customer_id ?? '';
 	}
 }
