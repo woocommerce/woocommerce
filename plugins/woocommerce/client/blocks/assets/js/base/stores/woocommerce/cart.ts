@@ -85,6 +85,18 @@ function emitSyncEvent( {
 	);
 }
 
+function getUserFriendlyErrorMessage(
+	error: Error | ApiErrorResponse
+): string {
+	if (
+		( error as ApiErrorResponse ).code ===
+		'woocommerce_rest_missing_attributes'
+	) {
+		return 'Please select product attributes before adding to cart.';
+	}
+	return error.message;
+}
+
 // Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
 	'woocommerce',
@@ -370,7 +382,7 @@ const { state, actions } = store< Store >(
 
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: error.message,
+					notice: getUserFriendlyErrorMessage( error ),
 					type: 'error',
 					dismissible: true,
 				} );
