@@ -79,13 +79,12 @@
 }
 
 .wc-block-components-address-form__address_2-toggle {
+	@include font-regular-locked;
 	display: inline-block;
 	background: none;
 	border: none;
 	color: inherit;
 	cursor: pointer;
-	font-family: inherit;
-	font-size: inherit;
 	margin-top: $gap;
 	text-align: left;
 	width: 100%;
