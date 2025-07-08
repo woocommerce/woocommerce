@@ -57,7 +57,9 @@ addFilter(
 				...blockSettings,
 				variations: blockSettings.variations.map(
 					( variation: { name: string } ) => {
-						if ( variation.name === 'area_add-to-cart-with-options' ) {
+						if (
+							variation.name === 'area_add-to-cart-with-options'
+						) {
 							return {
 								...variation,
 								scope: [],
