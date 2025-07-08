@@ -6,7 +6,7 @@ on:
 jobs:
   notify-release-published:
     name: 'Notify in Slack when a new (pre)release is published'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
 
     steps:
@@ -23,7 +23,7 @@ jobs:
 
   update-global-changelog:
     name: 'Update changelog.txt after any stable release'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     if: ${{ ! contains( github.event.release.tag_name, 'wc-beta-tester' ) && ! contains( github.event.release.tag_name, '-rc' )  }}
 
     steps:

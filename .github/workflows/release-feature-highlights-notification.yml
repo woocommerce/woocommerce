@@ -6,7 +6,7 @@ on:
 
 jobs:
   check-feature-freeze:
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       event-version: ${{ steps.find-feature-freeze-event.outputs.event-version }}
       event-title: ${{ steps.find-feature-freeze-event.outputs.event-title }}
@@ -67,7 +67,7 @@ jobs:
   notify-upcoming-feature-freeze:
     needs: check-feature-freeze
     if: needs.check-feature-freeze.outputs.event-title != ''
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - name: Send feature highlight reminder notification
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
