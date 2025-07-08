@@ -12,8 +12,8 @@
 <div style="height:var(--wp--preset--spacing--80)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
-<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size"><?php esc_html_e('Our products are crafted with meticulous attention to quality, using only the finest materials and ingredients. Designed to deliver exceptional performance, each item undergoes rigorous testing to ensure it meets the highest standards.', 'purple');?></p>
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php esc_html_e('Our products are crafted with meticulous attention to quality, using only the finest materials and ingredients. Designed to deliver exceptional performance, each item undergoes rigorous testing to ensure it meets the highest standards.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|80"} -->

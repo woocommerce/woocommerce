@@ -13,8 +13,8 @@
 <!-- /wp:spacer -->
 
 <!-- wp:group {"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color"><?php esc_html_e('These size charts are a guide to help you find the right size for you. As many pieces are designed in a unique way, we suggest you also refer to the specific garment lengths and measurements provided in the product descriptions.', 'purple');?></p>
+<div class="wp-block-group"><!-- wp:paragraph  -->
+<p><?php esc_html_e('These size charts are a guide to help you find the right size for you. As many pieces are designed in a unique way, we suggest you also refer to the specific garment lengths and measurements provided in the product descriptions.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
@@ -33,16 +33,16 @@
 <h2 class="wp-block-heading"><?php esc_html_e('How to measure', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color"><?php esc_html_e('CHEST: Measure around the fullest part of your chest, keeping the tape measure horizontal.', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('CHEST: Measure around the fullest part of your chest, keeping the tape measure horizontal.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color"><?php esc_html_e('WAIST :Measure around your natural waistline, at the narrowest point.', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('WAIST: Measure around your natural waistline, at the narrowest point.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color"><?php esc_html_e('ARM LENGTH: Measure from shoulder point to just below the wrist.', 'purple');?>   </p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('ARM LENGTH: Measure from shoulder point to just below the wrist.', 'purple');?>   </p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

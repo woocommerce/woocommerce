@@ -28,8 +28,8 @@
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop new arrivals', 'purple');?></a></div>
 <!-- /wp:button -->
 
-<!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-2","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-theme-2-color has-theme-1-background-color has-text-color has-background has-link-color wp-element-button"><?php esc_html_e('Shop all products', 'purple');?></a></div>
+<!-- wp:button {"className":"is-style-button-1"} -->
+<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop all products', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div></div>

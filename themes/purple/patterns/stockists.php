@@ -14,8 +14,8 @@
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"constrained","justifyContent":"left"}} -->
-<div class="wp-block-group alignwide" style="padding-right:0;padding-left:0"><!-- wp:heading {"textAlign":"left","level":1,"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<h1 class="wp-block-heading has-text-align-left has-theme-2-color has-text-color has-link-color"><?php esc_html_e('Stockists', 'purple');?></h1>
+<div class="wp-block-group alignwide" style="padding-right:0;padding-left:0"><!-- wp:heading {"textAlign":"left","level":1,"style":{}} -->
+<h1 class="wp-block-heading has-text-align-left"><?php esc_html_e('Stockists', 'purple');?></h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -31,8 +31,8 @@
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:group {"metadata":{"name":"Europe"},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading has-theme-2-color has-text-color has-link-color"><?php esc_html_e('Europe', 'purple');?></h2>
+<div class="wp-block-group"><!-- wp:heading -->
+<h2><?php esc_html_e('Europe', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
@@ -103,8 +103,8 @@ echo sprintf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' )
 <!-- /wp:spacer -->
 
 <!-- wp:group {"metadata":{"name":"Asia \u0026 Australia"},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading has-theme-2-color has-text-color has-link-color"><?php esc_html_e('Asia &amp; Australia', 'purple');?></h2>
+<div class="wp-block-group"><!-- wp:heading -->
+<h2><?php esc_html_e('Asia &amp; Australia', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
@@ -173,8 +173,8 @@ echo sprintf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' )
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:group {"metadata":{"name":"North America"},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading has-theme-2-color has-text-color has-link-color"><?php esc_html_e('North America', 'purple');?></h2>
+<div class="wp-block-group"><!-- wp:heading -->
+<h2><?php esc_html_e('North America', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
@@ -245,8 +245,8 @@ echo sprintf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' )
 <!-- /wp:spacer -->
 
 <!-- wp:group {"metadata":{"name":"South America"},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading has-theme-2-color has-text-color has-link-color"><?php esc_html_e('South America', 'purple');?></h2>
+<div class="wp-block-group"><!-- wp:heading -->
+<h2><?php esc_html_e('South America', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->

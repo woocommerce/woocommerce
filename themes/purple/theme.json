@@ -439,6 +439,11 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
+			"woocommerce/product-gallery-large-image-next-previous": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
 			"woocommerce/product-price": {
 				"typography": {
 					"fontSize":  "var(--wp--preset--font-size--large)",

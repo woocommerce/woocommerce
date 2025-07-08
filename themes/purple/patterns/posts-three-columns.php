@@ -8,12 +8,12 @@
  */
 ?>
 <!-- wp:group {"metadata":{"name":"List of posts in three columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--50)"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.07rem"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
-<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-small-font-size" style="letter-spacing:0.07rem;text-transform:uppercase"><?php esc_html_e('Journal', 'purple');?></p>
+<div class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--50)"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.07rem"}}} -->
+<p class="has-text-align-center" style="letter-spacing:0.07rem;text-transform:uppercase"><?php esc_html_e('Journal', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading {"textAlign":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}},"spacing":{"margin":{"bottom":"var:preset|spacing|50","top":"var:preset|spacing|30"}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading has-text-align-center has-theme-2-color has-text-color has-link-color" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:var(--wp--preset--spacing--50)"><?php esc_html_e('Latest News', 'purple');?></h2>
+<!-- wp:heading {"textAlign":"center","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50","top":"var:preset|spacing|30"}}}} -->
+<h2 class="wp-block-heading has-text-align-center" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:var(--wp--preset--spacing--50)"><?php esc_html_e('Latest News', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:query {"queryId":0,"query":{"perPage":2,"pages":0,"offset":"0","postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide","layout":{"type":"default"}} -->

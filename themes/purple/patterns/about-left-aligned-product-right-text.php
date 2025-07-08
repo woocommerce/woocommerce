@@ -31,8 +31,8 @@
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('New Collection', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-text-align-center has-theme-4-color has-text-color has-link-color has-small-font-size"><?php esc_html_e('Knitted with breathable 100% wool fibers.', 'purple');?></p>
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php esc_html_e('Knitted with breathable 100% wool fibers.', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"flex","justifyContent":"center"}} -->

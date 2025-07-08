@@ -100,8 +100,8 @@
 
 <!-- wp:woocommerce/product-filter-clear-button -->
 <!-- wp:buttons {"layout":{"type":"flex","verticalAlignment":"stretched"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"textAlign":"center","textColor":"theme-4","className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
-<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-theme-4-color has-text-color has-background has-link-color has-medium-font-size has-text-align-center has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e('Clear filters', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"textAlign":"center","className":"wc-block-product-filter-clear-button is-style-outline","style":{"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium","spacing":{"padding":{"left":"0px","right":"0px","top":"0px","bottom":"0px"}},"border":{"radius":"0px","width":"0px","style":"none"},"color":{"background":"#00000000"}},"fontSize":"medium"} -->
+<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline"><a class="wp-block-button__link has-background has-medium-font-size has-text-align-center has-custom-font-size wp-element-button" style="border-style:none;border-width:0px;border-radius:0px;background-color:#00000000;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;text-decoration:underline"><?php esc_html_e('Clear filters', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 <!-- /wp:woocommerce/product-filter-clear-button --></div>

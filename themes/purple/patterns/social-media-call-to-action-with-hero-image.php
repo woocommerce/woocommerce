@@ -13,8 +13,8 @@
 <p class="has-text-align-center has-x-large-font-size"><?php esc_html_e('Follow us on Instagram', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"align":"center","style":{"typography":{"fontStyle":"normal","fontWeight":"300"},"elements":{"link":{"color":{"text":"var:preset|color|theme-1"}}}},"textColor":"theme-1","fontSize":"medium"} -->
-<p class="has-text-align-center has-theme-1-color has-text-color has-link-color has-medium-font-size" style="font-style:normal;font-weight:300"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontStyle":"normal","fontWeight":"300"}}} -->
+<p class="has-text-align-center" style="font-style:normal;font-weight:300"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
 echo sprintf( esc_html__( '%1$s@example%2$s', 'purple' ), '<a href="#">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>

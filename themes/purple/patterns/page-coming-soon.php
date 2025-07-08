@@ -16,8 +16,8 @@
 <h1><?php esc_html_e('Coming soon', 'purple');?></h1>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.3"},"spacing":{"margin":{"right":"var:preset|spacing|80"}},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color has-link-color" style="margin-right:var(--wp--preset--spacing--80);line-height:1.3"><?php esc_html_e('Our store is in the works and will be launching soon.', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1.3"},"spacing":{"margin":{"right":"var:preset|spacing|80"}}}} -->
+<p style="margin-right:var(--wp--preset--spacing--80);line-height:1.3"><?php esc_html_e('Our store is in the works and will be launching soon.', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->

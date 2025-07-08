@@ -12,12 +12,12 @@
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"wide","layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"wide","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}},"spacing":{"margin":{"bottom":"0","top":"0"}}},"textColor":"theme-2"} -->
-<h2 class="wp-block-heading alignwide has-text-align-left has-theme-2-color has-text-color has-link-color" style="margin-top:0;margin-bottom:0"><?php esc_html_e('More from the journal', 'purple');?></h2>
+<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"wide","style":{"spacing":{"margin":{"bottom":"0","top":"0"}}}} -->
+<h2 class="wp-block-heading alignwide has-text-align-left" style="margin-top:0;margin-bottom:0"><?php esc_html_e('More from the journal', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4"} -->
-<p class="has-theme-4-color has-text-color has-link-color"><?php esc_html_e('The latest news on sustainability, knitwear and clothing care guides.', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('The latest news on sustainability, knitwear and clothing care guides.', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

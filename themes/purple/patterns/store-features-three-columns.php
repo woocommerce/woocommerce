@@ -21,12 +21,12 @@
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
-<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}},"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Free Shipping', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}}} -->
+<p style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Free Shipping', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-theme-4-color has-text-color has-link-color has-small-font-size" style="line-height:1"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
 echo sprintf( esc_html__( 'No taxes or duties (see %1$sexceptions%2$s).', 'purple' ), '<a href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
@@ -40,12 +40,12 @@ echo sprintf( esc_html__( 'No taxes or duties (see %1$sexceptions%2$s).', 'purpl
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
-<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}},"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Gift Wrapping', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}}} -->
+<p style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Gift Wrapping', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-theme-4-color has-text-color has-link-color has-small-font-size" style="line-height:1"><?php esc_html_e('Beautiful premium wrapping paper.', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('Beautiful premium wrapping paper.', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -58,12 +58,12 @@ echo sprintf( esc_html__( 'No taxes or duties (see %1$sexceptions%2$s).', 'purpl
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
-<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}},"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Free Returns', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"400","lineHeight":"1.5"}}} -->
+<p style="font-style:normal;font-weight:400;line-height:1.5"><?php esc_html_e('Free Returns', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-theme-4-color has-text-color has-link-color has-small-font-size" style="line-height:1"><?php esc_html_e('If you don’t love it, you can return it.', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('If you don’t love it, you can return it.', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
