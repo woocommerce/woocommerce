@@ -1,7 +1,6 @@
 @mixin title {
 	@include reset-box();
 	@include font-large-locked;
-	// @include font-size(large);
 	word-break: break-word;
 }
 
