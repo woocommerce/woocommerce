@@ -204,13 +204,18 @@ class AddToCartForm extends AbstractBlock {
 		$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
 
 		$min = max( $min, 0 );
-		$max = 0 < $max ? $max : '';
-		if ( '' !== $max && $max < $min ) {
-			$max = $min;
+		// Ensure step is positive.
+		$step = max( $step, 1 );
+
+		// Handle max value: -1 means unlimited, 0 or less becomes null.
+		if ( $max > 0 ) {
+			$max = max( $max, $min );
+		} else {
+			$max = null;
 		}
 		return array(
 			'min'  => $is_grouped_child ? 0 : (int) $min,
-			'max'  => ( '' !== $max && -1 !== $max ) ? (int) $max : null,
+			'max'  => null !== $max ? (int) $max : null,
 			'step' => (int) $step,
 		);
 	}
