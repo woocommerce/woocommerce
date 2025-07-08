@@ -125,17 +125,10 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
-	 * Add query clauses for attribute filter.
+	 * Add query clauses for product attributes.
 	 *
 	 * @param array $args              Query args.
-	 * @param array $chosen_attributes {
-	 *     Chosen attributes array.
-	 *
-	 *     @type array {$taxonomy: Attribute taxonomy name} {
-	 *         @type string[] $terms      Chosen terms' slug.
-	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
-	 *     }
-	 * }
+	 * @param array $chosen_attributes Chosen attributes.
 	 * @return array
 	 */
 	public function add_attribute_clauses( $args, $chosen_attributes ) {
@@ -155,15 +148,24 @@ class QueryClauses implements QueryClausesGenerator {
 		}
 
 		$attribute_ids_for_and_filtering = array();
-		$all_terms                       = get_terms(
+		$clauses                         = array();
+
+		// Get all terms for all attribute taxonomies in one query for better performance.
+		$all_terms = get_terms(
 			array(
-				'include'    => array_keys( $chosen_attributes ),
-				'hide_empty' => false,
+				'taxonomy' => array_keys( $chosen_attributes ),
+				'slug'     => array_merge( ...array_column( $chosen_attributes, 'terms' ) ),
 			)
 		);
 
+		// Group terms by taxonomy for easier processing.
+		$terms_by_taxonomy = array();
+		foreach ( $all_terms as $term ) {
+			$terms_by_taxonomy[ $term->taxonomy ][] = $term;
+		}
+
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
-			$current_attribute_terms    = $this->get_current_attribute_terms( $all_terms, $taxonomy, count( $chosen_attributes ) );
+			$current_attribute_terms    = $terms_by_taxonomy[ $taxonomy ] ?? array();
 			$term_ids_by_slug           = wp_list_pluck( $current_attribute_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );
@@ -216,28 +218,6 @@ class QueryClauses implements QueryClausesGenerator {
 		}
 
 		return $args;
-	}
-
-	/**
-	 * Get all the term for current attribute.
-	 *
-	 * @param \WP_Term[] $all_terms      Aggreated terms array.
-	 * @param string     $taxonomy       Attribute taxonomy name.
-	 * @param int        $taxonomy_count Taxonomy count. If there is only one
-	 *                                   taxonomy, return all terms.
-	 * @return mixed
-	 */
-	private function get_current_attribute_terms( $all_terms, $taxonomy, $taxonomy_count ) {
-		if ( 1 === $taxonomy_count ) {
-			return $all_terms;
-		}
-
-		return array_filter(
-			$all_terms,
-			function ( $term ) use ( $taxonomy ) {
-				return $term->taxonomy === $taxonomy;
-			}
-		);
 	}
 
 	/**
