@@ -444,6 +444,26 @@
 					"fontSize": "var(--wp--preset--font-size--medium)"
 				}
 			},
+			"woocommerce/product-filter-attribute": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
+			"woocommerce/product-filter-price": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
+			"woocommerce/product-filter-rating": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
+			"woocommerce/product-filter-status": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			},
 			"woocommerce/product-gallery-large-image-next-previous": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
