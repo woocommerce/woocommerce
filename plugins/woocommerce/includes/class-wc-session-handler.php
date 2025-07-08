@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class.
@@ -7,9 +7,8 @@
  *
  * @class    WC_Session_Handler
  * @package  WooCommerce\Classes
+ * @internal "Missing required strict_types declaration" rule has been ignored to prevent errors with `StringUtil::starts_with` when used on a nonce action which could be -1 rather than a string.
  */
-
-declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\StringUtil;
