@@ -324,23 +324,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$search_arg    = trim( $request['search'] ?? '' );
 
 		if ( $search_fields && $search_arg ) {
-			// Validate search_fields against allowed fields.
-			$allowed_fields = array( 'name', 'global_unique_id' );
-			if ( wc_product_sku_enabled() ) {
-				$allowed_fields[] = 'sku';
-			}
-			$search_fields = array_intersect( $search_fields, $allowed_fields );
+			$tokens = array_filter( array_map( 'trim', explode( ' ', $search_arg ) ) );
 
-			if ( $search_fields ) {
-				$tokens = array_filter( array_map( 'trim', explode( ' ', $search_arg ) ) );
+			$this->search_fields_tokens = array(
+				'fields' => $search_fields,
+				'tokens' => array_map( 'esc_sql', $tokens ),
+			);
 
-				$this->search_fields_tokens = array(
-					'fields' => $search_fields,
-					'tokens' => array_map( 'esc_sql', $tokens ),
-				);
-
-				unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $args['s'] );
-			}
+			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $args['s'] );
 		}
 
 		$search_name_or_sku_arg = $request['search_name_or_sku'] ?? '';
