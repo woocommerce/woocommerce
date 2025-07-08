@@ -94,7 +94,6 @@ CREATE TABLE $table_name (
 	date_notified_gmt datetime NULL,
 	date_cancelled_gmt datetime NULL,
 	cancellation_source varchar(30) NULL,
-	email_link_action_key varchar(255) NULL,
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
 	KEY user_lookup (user_id, product_id, status),
@@ -173,7 +172,6 @@ CREATE TABLE $meta_table_name (
 				'date_notified_gmt'     => $notification->get_date_notified( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_notified( 'edit' )->getTimestamp() ) : null,
 				'date_cancelled_gmt'    => $notification->get_date_cancelled( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_cancelled( 'edit' )->getTimestamp() ) : null,
 				'cancellation_source'   => $notification->get_cancellation_source( 'edit' ),
-				'email_link_action_key' => $notification->get_email_link_action_key( 'edit' ),
 			),
 			array(
 				'%d',
@@ -244,7 +242,6 @@ CREATE TABLE $meta_table_name (
 				'date_notified'         => wc_string_to_timestamp( $data->date_notified_gmt ),
 				'date_cancelled'        => wc_string_to_timestamp( $data->date_cancelled_gmt ),
 				'cancellation_source'   => $data->cancellation_source,
-				'email_link_action_key' => $data->email_link_action_key,
 			)
 		);
 
@@ -268,7 +265,7 @@ CREATE TABLE $meta_table_name (
 		$changes = $notification->get_changes();
 		$result  = 0;
 
-		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source', 'email_link_action_key' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
 
 			if ( ! array_key_exists( 'date_modified', $changes ) ) {
 				$notification->set_date_modified( time() );
@@ -288,7 +285,6 @@ CREATE TABLE $meta_table_name (
 					'date_notified_gmt'     => $notification->get_date_notified( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_notified( 'edit' )->getTimestamp() ) : null,
 					'date_cancelled_gmt'    => $notification->get_date_cancelled( 'edit' ) ? gmdate( 'Y-m-d H:i:s', $notification->get_date_cancelled( 'edit' )->getTimestamp() ) : null,
 					'cancellation_source'   => $notification->get_cancellation_source( 'edit' ),
-					'email_link_action_key' => $notification->get_email_link_action_key( 'edit' ),
 				),
 				array( 'id' => $notification->get_id() ),
 				array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),

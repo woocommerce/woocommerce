@@ -48,7 +48,6 @@ class Notification extends \WC_Data {
 		'date_last_attempt'    => null,
 		'date_cancelled'       => null,
 		'cancellation_source'  => null,
-		'email_link_action_key' => '',
 	);
 
 	/**
@@ -185,10 +184,6 @@ class Notification extends \WC_Data {
 	 */
 	public function get_cancellation_source( $context = 'view' ) {
 		return $this->get_prop( 'cancellation_source', $context );
-	}
-
-	public function get_email_link_action_key( $context = 'view' ) {
-		return $this->get_prop( 'email_link_action_key', $context );
 	}
 
 	/**
@@ -331,10 +326,6 @@ class Notification extends \WC_Data {
 		$this->set_prop( 'cancellation_source', $cancellation_source );
 	}
 
-	public function set_email_link_action_key( $hashed_key ) {
-		$this->set_prop( 'email_link_action_key', $hashed_key );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| Other Methods
@@ -457,30 +448,5 @@ class Notification extends \WC_Data {
 		}
 
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();
-	}
-
-	public function get_email_link( $action ) {
-		$key = wp_generate_password( 20, false );
-		$hashed = wp_fast_hash( $key );
-
-		$this->set_email_link_action_key( $hashed );
-		$this->save();
-
-		return add_query_arg(
-			array(
-				'action' => $action,
-				'key'    => $key,
-				'id'     => $this->get_id(),
-			),
-			get_site_url()
-		);
-	}
-
-	public function verify_email_link_action_key( $key ) {
-		$hash = $this->get_email_link_action_key();
-		if (  empty( $hash ) || empty( $key ) ) {
-			return false;
-		}
-		return wp_verify_fast_hash( $key, $hash );
 	}
 }
