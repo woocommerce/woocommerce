@@ -218,11 +218,8 @@ const Edit = ( {
 		[ attributes.align, attributes.template, setAttributes ]
 	);
 
-	const {
-		getDescription,
-		getSkeleton,
-		blockifyConfig,
-	} = conversionConfig[ templateType ];
+	const { getDescription, getSkeleton, blockifyConfig } =
+		conversionConfig[ templateType ];
 
 	const skeleton = getSkeleton ? (
 		getSkeleton()
@@ -235,7 +232,7 @@ const Edit = ( {
 	);
 
 	const canConvert = templateDetails?.type ? true : false;
-	const placeholderDescription = getDescription( templateTitle, canConvert );
+	const placeholderDescription = getDescription( templateTitle );
 
 	return (
 		<div { ...blockProps }>
