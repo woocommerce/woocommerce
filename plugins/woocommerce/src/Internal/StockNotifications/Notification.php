@@ -458,4 +458,29 @@ class Notification extends \WC_Data {
 
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();
 	}
+
+	public function get_email_link( $action ) {
+		$key = wp_generate_password( 20, false );
+		$hashed = wp_fast_hash( $key );
+
+		$this->set_email_link_action_key( $hashed );
+		$this->save();
+
+		return add_query_arg(
+			array(
+				'action' => $action,
+				'key'    => $key,
+				'id'     => $this->get_id(),
+			),
+			get_site_url()
+		);
+	}
+
+	public function verify_email_link_action_key( $key ) {
+		$hash = $this->get_email_link_action_key();
+		if (  empty( $hash ) || empty( $key ) ) {
+			return false;
+		}
+		return wp_verify_fast_hash( $key, $hash );
+	}
 }
