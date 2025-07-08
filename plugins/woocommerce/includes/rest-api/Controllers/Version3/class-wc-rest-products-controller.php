@@ -510,8 +510,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Only join if we need meta table search.
 		if ( ! $this->search_fields_tokens &&
-			 ! $this->search_sku_arg_value &&
-			 ! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
+			! $this->search_sku_arg_value &&
+			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
 			return $join;
 		}
 
@@ -539,7 +539,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		} elseif ( $this->search_name_or_sku_tokens ) {
 			$searchable_fields = wc_product_sku_enabled() ? array( 'name', 'sku' ) : array( 'name' );
-			$where .= $this->build_dynamic_search_clauses(
+			$where            .= $this->build_dynamic_search_clauses(
 				$this->search_name_or_sku_tokens,
 				$searchable_fields
 			);
@@ -581,7 +581,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$field_token_clauses = array();
 
 			foreach ( $tokens as $token ) {
-				$like_search = '%' . $wpdb->esc_like( $token ) . '%';
+				$like_search           = '%' . $wpdb->esc_like( $token ) . '%';
 				$field_token_clauses[] = '(' . $db_column . ' LIKE ' . $wpdb->prepare( '%s', $like_search ) . ')';
 			}
 
