@@ -28,6 +28,11 @@ $fontSizes: (
 	line-height: 20px;
 }
 
+@mixin font-small-locked {
+	font-size: 12px;
+	line-height: 16px;
+}
+
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
