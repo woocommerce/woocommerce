@@ -531,7 +531,7 @@ class WC_Session_Handler extends WC_Session {
 		if ( $session_limit_exceeded ) {
 			$transient_key = 'wc_session_handler_warning';
 			if ( false === get_transient( $transient_key ) ) {
-				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in perfomance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
+				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in performance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
 				set_transient( $transient_key, true, MONTH_IN_SECONDS );
 			}
 		}
