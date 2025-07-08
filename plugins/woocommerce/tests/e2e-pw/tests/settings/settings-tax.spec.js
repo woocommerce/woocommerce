@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 
 test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

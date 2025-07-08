@@ -1,8 +1,15 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const test = baseTest.extend( {
