@@ -190,7 +190,8 @@ const addToCartWithOptionsStore = store(
 				};
 			},
 			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -205,6 +206,20 @@ const addToCartWithOptionsStore = store(
 						attribute,
 						value,
 					} );
+				}
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				if ( matchedVariation && jQuery ) {
+					jQuery( 'form.variations_form' )
+						.trigger( 'show_variation', [
+							matchedVariation,
+							matchedVariation.is_in_stock,
+						] )
+						.trigger( 'found_variation', [ matchedVariation ] );
 				}
 			},
 			removeAttribute( attribute: string ) {
