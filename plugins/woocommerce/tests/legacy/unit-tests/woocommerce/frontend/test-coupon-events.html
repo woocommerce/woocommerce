@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WooCommerce Coupon Events Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>WooCommerce Coupon Events Test</h1>
+    
+    <div id="test-results">
+        <h2>Event Test Results:</h2>
+        <ul id="event-log"></ul>
+    </div>
+
+    <script>
+        // Test implementation to verify coupon events
+        $(document).ready(function() {
+            var eventLog = $('#event-log');
+            
+            function logEvent(eventName, data) {
+                var timestamp = new Date().toLocaleTimeString();
+                var logEntry = $('<li></li>').html(
+                    '<strong>' + timestamp + '</strong> - ' + eventName + ': ' + JSON.stringify(data)
+                );
+                eventLog.append(logEntry);
+            }
+            
+            // Listen for successful coupon application events
+            $(document.body).on('applied_coupon', function(event, couponCode) {
+                logEvent('applied_coupon', { coupon_code: couponCode });
+            });
+            
+            $(document.body).on('applied_coupon_in_checkout', function(event, couponCode) {
+                logEvent('applied_coupon_in_checkout', { coupon_code: couponCode });
+            });
+            
+            // Listen for coupon removal events
+            $(document.body).on('removed_coupon', function(event, couponCode) {
+                logEvent('removed_coupon', { coupon_code: couponCode });
+            });
+            
+            $(document.body).on('removed_coupon_in_checkout', function(event, couponCode) {
+                logEvent('removed_coupon_in_checkout', { coupon_code: couponCode });
+            });
+            
+            // Listen for NEW coupon error events
+            $(document.body).on('coupon_error', function(event, couponCode, errorResponse) {
+                logEvent('coupon_error', { 
+                    coupon_code: couponCode, 
+                    error: errorResponse 
+                });
+            });
+            
+            $(document.body).on('coupon_error_in_checkout', function(event, couponCode, errorResponse) {
+                logEvent('coupon_error_in_checkout', { 
+                    coupon_code: couponCode, 
+                    error: errorResponse 
+                });
+            });
+            
+            // Simulate triggering events for testing
+            function testEvents() {
+                logEvent('TEST START', 'Simulating coupon events...');
+                
+                // Simulate successful coupon application
+                $(document.body).trigger('applied_coupon', ['TESTCOUPON']);
+                
+                // Simulate coupon error
+                $(document.body).trigger('coupon_error', ['INVALIDCOUPON', 'Coupon code "INVALIDCOUPON" does not exist!']);
+                
+                // Simulate checkout events
+                $(document.body).trigger('applied_coupon_in_checkout', ['CHECKOUTCOUPON']);
+                $(document.body).trigger('coupon_error_in_checkout', ['EXPIREDCOUPON', 'This coupon has expired.']);
+                
+                logEvent('TEST END', 'Event simulation complete');
+            }
+            
+            // Add test button
+            $('<button>Test Events</button>')
+                .click(testEvents)
+                .insertBefore('#test-results');
+        });
+    </script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #event-log {
+            list-style: none;
+            padding: 0;
+        }
+        #event-log li {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-left: 3px solid #ddd;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            background: #0073aa;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</body>
+</html>

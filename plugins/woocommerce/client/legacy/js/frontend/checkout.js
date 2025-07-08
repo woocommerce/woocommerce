@@ -1035,17 +1035,23 @@ jQuery( function ( $ ) {
 								$form.before( response );
 							} );
 							self.clear_coupon_input();
+							
+							$( document.body ).trigger(
+								'applied_coupon_in_checkout',
+								[ data.coupon_code ]
+							);
 						} else {
 							self.show_coupon_error(
 								response,
 								$coupon_field.parent()
 							);
+							
+							$( document.body ).trigger(
+								'coupon_error_in_checkout',
+								[ data.coupon_code, response ]
+							);
 						}
 
-						$( document.body ).trigger(
-							'applied_coupon_in_checkout',
-							[ data.coupon_code ]
-						);
 						$( document.body ).trigger( 'update_checkout', {
 							update_shipping_method: false,
 						} );

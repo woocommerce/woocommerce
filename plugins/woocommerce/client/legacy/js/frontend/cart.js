@@ -617,17 +617,21 @@ jQuery( function ( $ ) {
 					// Coupon errors are shown under the input.
 					if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
 						show_notice( response );
+						$( document.body ).trigger( 'applied_coupon', [
+							coupon_code,
+						] );
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
 
 						if ( $coupon_wrapper.length > 0 ) {
 							show_coupon_error( response, $coupon_wrapper, false );
 						}
+						
+						$( document.body ).trigger( 'coupon_error', [
+							coupon_code,
+							response,
+						] );
 					}
-
-					$( document.body ).trigger( 'applied_coupon', [
-						coupon_code,
-					] );
 				},
 				complete: function () {
 					unblock( $form );
