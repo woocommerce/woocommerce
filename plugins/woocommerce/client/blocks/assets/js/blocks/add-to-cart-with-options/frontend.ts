@@ -47,9 +47,7 @@ const getInputElementFromEvent = (
 	let inputElement = null;
 
 	if ( event.target instanceof HTMLButtonElement ) {
-		inputElement = event.target.parentElement?.querySelector(
-			'.input-text.qty.text'
-		);
+		inputElement = event.target.parentElement?.querySelector( '.qty' );
 	}
 
 	if ( event.target instanceof HTMLInputElement ) {
