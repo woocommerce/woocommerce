@@ -97,12 +97,11 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from either the request or the cookie. If neither are present, generate a new customer ID.
+	 * Initialize the session from either the request or the cookie.
 	 */
 	private function init_session() {
-		if ( ! $this->init_session_from_request() && ! $this->init_session_from_cookie() ) {
-			$this->_customer_id = $this->generate_customer_id();
-			$this->_data        = $this->get_session_data();
+		if ( ! $this->init_session_from_request() ) {
+			$this->init_session_cookie();
 		}
 	}
 
@@ -155,16 +154,6 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from the cookie.
-	 *
-	 * @return bool
-	 */
-	private function init_session_from_cookie() {
-		$this->init_session_cookie();
-		return null !== $this->_customer_id;
-	}
-
-	/**
 	 * Setup cookie and customer ID.
 	 *
 	 * @since 3.6.0
@@ -173,6 +162,9 @@ class WC_Session_Handler extends WC_Session {
 		$cookie = $this->get_session_cookie();
 
 		if ( ! $cookie ) {
+			// If there is no cookie, generate a new session/customer ID.
+			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 			return;
 		}
 
