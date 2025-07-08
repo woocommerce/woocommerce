@@ -37,14 +37,6 @@ final class WC_Cart_Totals {
 	protected $cart;
 
 	/**
-	 * Reference to customer object.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-	protected $customer;
-
-	/**
 	 * Line items to calculate.
 	 *
 	 * @since 3.2.0
@@ -137,8 +129,12 @@ final class WC_Cart_Totals {
 			throw new Exception( 'A valid WC_Cart object is required' );
 		}
 
+		// Check if customer is VAT exempt, if customer is defined.
+		$customer               = $cart->get_customer();
+		$is_customer_vat_exempt = $customer && $customer->get_is_vat_exempt();
+
 		$this->cart          = $cart;
-		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
+		$this->calculate_tax = wc_tax_enabled() && ! $is_customer_vat_exempt;
 		$this->calculate();
 	}
 
@@ -722,7 +718,8 @@ final class WC_Cart_Totals {
 		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
 
 		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-		$is_customer_vat_exempt          = $this->cart->get_customer()->get_is_vat_exempt();
+		$customer                        = $this->cart->get_customer();
+		$is_customer_vat_exempt          = $customer && $customer->get_is_vat_exempt();
 
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
@@ -761,7 +758,7 @@ final class WC_Cart_Totals {
 
 		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
 		$this->set_total( 'items_subtotal', $items_subtotal );
-		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );

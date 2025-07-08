@@ -252,16 +252,6 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 					'woocommerce_output_related_products'  => 20,
 				),
 			),
-			'woocommerce_before_add_to_cart_form'       => array(
-				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
-				'position'    => 'before',
-				'hooked'      => array(),
-			),
-			'woocommerce_after_add_to_cart_form'        => array(
-				'block_names' => array( 'woocommerce/add-to-cart-with-options' ),
-				'position'    => 'after',
-				'hooked'      => array(),
-			),
 		);
 	}
 
