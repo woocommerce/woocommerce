@@ -18,27 +18,27 @@ final class SessionHandler extends WC_Session {
 	 *
 	 * @var string
 	 */
-	protected $token;
+	protected $token = '';
 
 	/**
 	 * Table name for session data.
 	 *
 	 * @var string Custom session table name
 	 */
-	protected $table;
+	protected $table = '';
 
 	/**
 	 * Expiration timestamp.
 	 *
 	 * @var int
 	 */
-	protected $session_expiration;
+	protected $session_expiration = 0;
 
 	/**
 	 * Constructor for the session class.
 	 */
 	public function __construct() {
-		$this->token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+		$this->token = (string) wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
 		$this->table = $GLOBALS['wpdb']->prefix . 'woocommerce_sessions';
 	}
 
