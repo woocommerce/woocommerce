@@ -1395,6 +1395,11 @@ final class WooCommerce {
 	 * Register recurring actions.
 	 */
 	public function register_recurring_actions() {
+		// Check if Action Scheduler is available.
+		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
+			return;
+		}
+
 		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
 
 		// Schedule daily sales event at midnight tomorrow.

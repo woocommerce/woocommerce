@@ -1226,7 +1226,11 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
 	// Clear existing scheduled events.
-	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	} else {
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	}
 
 	if ( '' !== $value ) {
 		/**
@@ -1238,7 +1242,11 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
 
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+		} else {
+			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		}
 	}
 
 	return $value;
