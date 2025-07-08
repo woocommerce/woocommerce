@@ -23,8 +23,8 @@
 <p style="font-style:normal;font-weight:400;line-height:1"><?php esc_html_e('Customer Care', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}},"fontSize":"small"} -->
-<p class="has-small-font-size" style="line-height:1"><?php esc_html_e('Mon - Fri, 10am - 9pm', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('Mon - Fri, 10am - 9pm', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -43,8 +43,8 @@
 <p style="font-style:normal;font-weight:400;line-height:1"><?php esc_html_e('Gift Package', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}},"fontSize":"small"} -->
-<p class="has-small-font-size" style="line-height:1"><?php esc_html_e('Free packaging over $100', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('Free packaging over $100', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -67,8 +67,8 @@
 <p style="font-style:normal;font-weight:400;line-height:1"><?php esc_html_e('Easy Returns', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}},"fontSize":"small"} -->
-<p class="has-small-font-size" style="line-height:1"><?php esc_html_e('40-day extended returns', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('40-day extended returns', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -87,8 +87,8 @@
 <p style="font-style:normal;font-weight:400;line-height:1"><?php esc_html_e('Repair Service', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}},"fontSize":"small"} -->
-<p class="has-small-font-size" style="line-height:1"><?php esc_html_e('On-demand clothing repair', 'purple');?></p>
+<!-- wp:paragraph {"style":{"typography":{"lineHeight":"1"}}} -->
+<p style="line-height:1"><?php esc_html_e('On-demand clothing repair', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>

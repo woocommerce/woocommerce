@@ -45,8 +45,8 @@
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('A brighter, better wardrobe', 'purple');?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center","fontSize":"medium"} -->
-<p class="has-text-align-center has-medium-font-size"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element */ 
 echo sprintf( esc_html__( '%1$sShop now%2$s', 'purple' ), '<a href="' . esc_url( '/shop' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>

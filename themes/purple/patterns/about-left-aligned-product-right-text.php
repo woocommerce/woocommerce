@@ -17,8 +17,8 @@
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%">
 	
 <!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-view1.webp","alt":"<?php esc_attr_e('An illustration of of folded shirts', 'purple');?>","dimRatio":10,"isDark":false,"style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background" alt="<?php esc_attr_e('An illustration of of folded shirts', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-view1.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-10 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size"></p>
+<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background" alt="<?php esc_attr_e('An illustration of of folded shirts', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-view1.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-10 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…"} -->
+<p class="has-text-align-center"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover -->
 

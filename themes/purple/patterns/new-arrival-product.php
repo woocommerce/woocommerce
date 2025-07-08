@@ -21,8 +21,8 @@
 <div style="height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
-<!-- wp:heading {"textAlign":"center","fontSize":"xx-large"} -->
-<h2 class="wp-block-heading has-text-align-center has-xx-large-font-size"><?php esc_html_e('New arrival: Socks', 'purple');?></h2>
+<!-- wp:heading {"textAlign":"center"} -->
+<h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('New arrival: Socks', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
@@ -30,8 +30,8 @@
 <!-- /wp:spacer -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"fontSize":"medium"} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-medium-font-size has-custom-font-size wp-element-button"><?php esc_html_e('Shop now', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop now', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

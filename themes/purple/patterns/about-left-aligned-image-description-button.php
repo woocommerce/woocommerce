@@ -11,8 +11,8 @@
 <div class="wp-block-group alignfull is-style-section-2" style="margin-top:0;margin-bottom:0"><!-- wp:columns {"align":"wide","className":"is-style-default","style":{"spacing":{"blockGap":{"left":"0"}}}} -->
 <div class="wp-block-columns alignwide is-style-default"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp","alt":"<?php esc_html_e('Placeholder image', 'purple');?>","dimRatio":0,"overlayColor":"theme-2","isUserOverlayColor":true,"sizeSlug":"large","style":{"dimensions":{"aspectRatio":"4/3"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover"><img class="wp-block-cover__image-background size-large" alt="<?php esc_attr_e('Placeholder image', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
-<p class="has-text-align-center has-large-font-size"></p>
+<div class="wp-block-cover"><img class="wp-block-cover__image-background size-large" alt="<?php esc_attr_e('Placeholder image', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pattern-placeholder.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-0 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"Write title…"} -->
+<p class="has-text-align-center"></p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover --></div>
 <!-- /wp:column -->
@@ -23,8 +23,8 @@
 <!-- wp:spacer {"height":"var:preset|spacing|50"} -->
 <div style="height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
-<!-- wp:heading {"fontSize":"xx-large","style":{"spacing":{"margin":{"top":"0"}}}} -->
-<h2 class="wp-block-heading has-xx-large-font-size" style="margin-top:0"><?php esc_html_e('Honest materials', 'purple');?></h2>
+<!-- wp:heading {"style":{"spacing":{"margin":{"top":"0"}}}} -->
+<h2 class="wp-block-heading" style="margin-top:0"><?php esc_html_e('Honest materials', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->

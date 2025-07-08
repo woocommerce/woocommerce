@@ -29,7 +29,7 @@
 <!-- wp:woocommerce/product-sale-badge {"align":"left","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}}} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"large","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20","top":"0"}},"typography":{"lineHeight":"1.4"}},"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left"} /-->
 <!-- /wp:woocommerce/product-template --></div>

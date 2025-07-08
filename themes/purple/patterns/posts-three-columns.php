@@ -27,7 +27,7 @@
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:post-date /-->
 
-<!-- wp:post-title {"level":3,"isLink":true,"fontSize":"x-large"} /--></div>
+<!-- wp:post-title {"level":3,"isLink":true} /--></div>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
 <!-- /wp:query --></div>

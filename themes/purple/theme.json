@@ -439,6 +439,11 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
+			"woocommerce/order-confirmation-status": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)"
+				}
+			},
 			"woocommerce/product-gallery-large-image-next-previous": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"

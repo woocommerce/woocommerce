@@ -20,8 +20,8 @@
 <figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_attr_e('Check icon.', 'purple');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size"><?php esc_html_e('Premium quality: our product selection is carefully curated by our team', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('Premium quality: our product selection is carefully curated by our team', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -34,8 +34,8 @@
 <figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_attr_e('Check icon.', 'purple');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size"><?php esc_html_e('Ethically produced: our product selection is carefully curated by our team', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('Ethically produced: our product selection is carefully curated by our team', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -48,8 +48,8 @@
 <figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_attr_e('Check icon.', 'purple');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size"><?php esc_html_e('Timeless design: our product selection is carefully curated by our team', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('Timeless design: our product selection is carefully curated by our team', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -62,8 +62,8 @@
 <figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.webp" alt="<?php esc_attr_e('Check icon.', 'purple');?>" class="wp-image-475" style="width:30px"/></figure>
 <!-- /wp:image -->
 
-<!-- wp:paragraph {"fontSize":"large"} -->
-<p class="has-large-font-size"><?php esc_html_e('Built to last: our product selection is carefully curated by our team', 'purple');?></p>
+<!-- wp:paragraph -->
+<p><?php esc_html_e('Built to last: our product selection is carefully curated by our team', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

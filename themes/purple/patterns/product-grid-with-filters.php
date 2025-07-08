@@ -12,21 +12,21 @@
 
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"width":"22%"} -->
-<div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}},"fontSize":"medium"} -->
-<h3 class="wp-block-heading has-medium-font-size" style="margin-top:0;margin-bottom:0;font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e('Filter by:', 'purple');?></h3>
+<div class="wp-block-column" style="flex-basis:22%"><!-- wp:heading {"level":3,"style":{"margin":{"top":"0","bottom":"0"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"lineHeight":1.6,"fontStyle":"normal","fontWeight":"400"}}} -->
+<h3 class="wp-block-heading" style="margin-top:0;margin-bottom:0;font-style:normal;font-weight:400;line-height:1.6"><?php esc_html_e('Filter by:', 'purple');?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"88%"} -->
-<div class="wp-block-column" style="flex-basis:88%"><!-- wp:group {"className":"alignwide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"fontSize":"medium","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
-<div class="wp-block-group alignwide has-medium-font-size" style="margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-results-count /-->
+<div class="wp-block-column" style="flex-basis:88%"><!-- wp:group {"className":"alignwide","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<div class="wp-block-group alignwide" style="margin-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/product-results-count /-->
 
 <!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php esc_html_e('Sort by:', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woocommerce/catalog-sorting {"fontSize":"medium","style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>
+<!-- wp:woocommerce/catalog-sorting {"style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -117,9 +117,9 @@
 <!-- /wp:woocommerce/product-image -->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group"><!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<div class="wp-block-group"><!-- wp:post-title {"textAlign":"left","level":3,"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"medium","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
 <!-- /wp:group -->
  <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
 <div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
@@ -144,8 +144,8 @@
 
 <!-- wp:woocommerce/product-collection-no-results -->
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","flexWrap":"wrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"medium"} -->
-<p class="has-medium-font-size"><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */ 
+<div class="wp-block-group"><!-- wp:paragraph -->
+<p><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */ 
 echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->

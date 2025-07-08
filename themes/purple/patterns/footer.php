@@ -35,8 +35,8 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"15%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3,"fontSize":"medium"} -->
-<h3 class="wp-block-heading has-text-align-left has-medium-font-size"><?php esc_html_e('Shop', 'purple');?></h3>
+<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3} -->
+<h3 class="wp-block-heading has-text-align-left"><?php esc_html_e('Shop', 'purple');?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
@@ -57,8 +57,8 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"15%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3,"fontSize":"medium"} -->
-<h3 class="wp-block-heading has-text-align-left has-medium-font-size"><?php esc_html_e('Info', 'purple');?></h3>
+<div class="wp-block-column" style="flex-basis:15%"><!-- wp:heading {"textAlign":"left","level":3} -->
+<h3 class="wp-block-heading has-text-align-left"><?php esc_html_e('Info', 'purple');?></h3>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"var:preset|spacing|20"} -->
@@ -93,12 +93,12 @@
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-<div class="wp-block-group alignfull" style="padding-right:0;padding-left:0"><!-- wp:paragraph {"align":"left","style":{"typography":{"textTransform":"uppercase"}},"fontSize":"small"} -->
-<p class="has-text-align-left has-small-font-size" style="text-transform:uppercase"><?php esc_html_e('© 2025', 'purple');?></p>
+<div class="wp-block-group alignfull" style="padding-right:0;padding-left:0"><!-- wp:paragraph {"align":"left","style":{"typography":{"textTransform":"uppercase"}}} -->
+<p class="has-text-align-left" style="text-transform:uppercase"><?php esc_html_e('© 2025', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"align":"left","fontSize":"small"} -->
-<p class="has-text-align-left has-small-font-size"><?php esc_html_e('Designed with WordPress', 'purple');?></p>
+<!-- wp:paragraph {"align":"left"} -->
+<p class="has-text-align-left"><?php esc_html_e('Designed with WordPress', 'purple');?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
