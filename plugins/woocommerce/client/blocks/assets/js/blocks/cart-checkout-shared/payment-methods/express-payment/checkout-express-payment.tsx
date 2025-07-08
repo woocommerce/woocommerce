@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
-import { Title, StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
@@ -113,16 +114,13 @@ const CheckoutExpressPayment = () => {
 				) }
 			>
 				<div className="wc-block-components-express-payment__title-container">
-					<Title
-						className="wc-block-components-express-payment__title"
-						headingLevel="2"
-					>
+					<h2 className="wc-block-components-express-payment__title">
 						{ hasRegisteredNotInitializedExpressPayments ? (
 							<Skeleton width="127px" height="18px" />
 						) : (
 							__( ' Express Checkout', 'woocommerce' )
 						) }
-					</Title>
+					</h2>
 				</div>
 				<div className="wc-block-components-express-payment__content">
 					<StoreNoticesContainer
