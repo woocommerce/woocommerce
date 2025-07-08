@@ -13,7 +13,7 @@ on:
 jobs:
   extract-versions:
     name: Extract release current and previous versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
@@ -141,7 +141,7 @@ jobs:
   count-commits-and-contributors:
     name: Count commits and contributors between releases
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       commit_count: ${{ steps.count-commits.outputs.commit_count }}
       contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
@@ -177,7 +177,7 @@ jobs:
   generate-contributors-list:
     name: Generate contributors list
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
       artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
@@ -238,7 +238,7 @@ jobs:
   db-updates:
     name: Check for database updates
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
       updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
@@ -362,7 +362,7 @@ jobs:
   send-slack-notification:
     name: Send Slack Notification
     needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - name: Send Slack message
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0

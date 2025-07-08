@@ -179,7 +179,7 @@ jobs:
 
   modify-zip-version:
     name: 'Update version to Dev'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [build-zip, prepare-for-code-freeze]
     env:
       DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev
@@ -212,7 +212,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [modify-zip-version, prepare-for-code-freeze]
     steps:
       - name: Notify Slack on success
