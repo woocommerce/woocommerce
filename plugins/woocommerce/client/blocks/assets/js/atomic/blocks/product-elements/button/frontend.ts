@@ -194,10 +194,12 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
+
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE &&
-				addToCartWithOptionsState.isFormValid
+				( addToCartWithOptionsState.isFormValid === undefined ||
+					addToCartWithOptionsState.isFormValid )
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
