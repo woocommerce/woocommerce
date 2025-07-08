@@ -12,7 +12,10 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import {
 	CartResponseTotals,
@@ -21,6 +24,7 @@ import {
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
 
 /**
  * Internal dependencies
@@ -73,6 +77,7 @@ const TotalsFooterItem = ( {
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { receiveCart, ...cart } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
@@ -135,19 +140,23 @@ const TotalsFooterItem = ( {
 			value={ value }
 			description={
 				<>
-					{ SHOW_TAXES && parsedTaxValue !== 0 && (
-						<p className="wc-block-components-totals-footer-item-tax">
-							{ createInterpolateElement( description, {
-								TaxAmount: (
-									<FormattedMonetaryAmount
-										className="wc-block-components-totals-footer-item-tax-value"
-										currency={ currency }
-										value={ parsedTaxValue }
-									/>
-								),
-							} ) }
-						</p>
-					) }
+					{ SHOW_TAXES &&
+						parsedTaxValue !== 0 &&
+						( isLoading ? (
+							<Skeleton width="45px" height="1.4em" />
+						) : (
+							<p className="wc-block-components-totals-footer-item-tax">
+								{ createInterpolateElement( description, {
+									TaxAmount: (
+										<FormattedMonetaryAmount
+											className="wc-block-components-totals-footer-item-tax-value"
+											currency={ currency }
+											value={ parsedTaxValue }
+										/>
+									),
+								} ) }
+							</p>
+						) ) }
 					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
@@ -158,7 +167,7 @@ const TotalsFooterItem = ( {
 					) }
 				</>
 			}
-			showSkeleton={ cart.cartIsLoading }
+			showSkeleton={ isLoading }
 		/>
 	);
 };

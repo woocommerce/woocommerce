@@ -6,12 +6,14 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import FormattedMonetaryAmount from '../../formatted-monetary-amount';
 import './style.scss';
+import { __ } from '@wordpress/i18n';
 
 export interface TotalsItemProps {
 	className?: string | undefined;
@@ -59,7 +61,12 @@ const TotalsItem = ( {
 				{ label }
 			</span>
 			{ ! value || showSkeleton ? (
-				<Skeleton width="45px" height="1em" />
+				<>
+					<VisuallyHidden aria-live="polite">
+						{ __( 'Loading price… ', 'woocommerce' ) }
+					</VisuallyHidden>
+					<Skeleton width="45px" height="1em" />
+				</>
 			) : (
 				<TotalsItemValue value={ value } currency={ currency } />
 			) }
