@@ -117,6 +117,6 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'pending@test.com', $pending_notification_after->get_user_email() );
 
 		$this->expectException( \Exception::class );
-		new Notification( $expired_id);
+		new Notification( $expired_id );
 	}
 }
