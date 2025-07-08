@@ -126,7 +126,7 @@ class Config {
 	public static function get_unverified_deletion_days_threshold(): int {
 		return absint(
 			get_option(
-				'wc_customer_stock_notifications_unverified_deletions_days_threshold',
+				'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
 				0
 			)
 		);
