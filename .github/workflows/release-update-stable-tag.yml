@@ -70,34 +70,41 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get trunk version
+        id: get-trunk-version
+        run: |
+          git checkout trunk
+          TRUNK_VERSION=$(awk '/Version:/ {print $3}' plugins/woocommerce/woocommerce.php | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*/\1/' | sed 's/-.*//')
+          echo "Trunk version is $TRUNK_VERSION"
+          echo "trunk-version=$TRUNK_VERSION" >> $GITHUB_OUTPUT
+
       - name: Get target branches for stable tag update
         id: get-branches
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          MAJOR_MINOR="${{ steps.extract-version.outputs.major-minor }}"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const targetVersion = '${{ steps.extract-version.outputs.version }}';
+            const trunkVersion = '${{ steps.get-trunk-version.outputs.trunk-version }}';
 
-          # Get all remote branches that match the pattern "release/x.y"
-          all_branches=$(git ls-remote --heads origin | grep -E "refs/heads/release/[0-9]+\.[0-9]+$" | cut -f2 | sed "s|refs/heads/||")
+            console.log(`Target version: ${targetVersion}`);
+            console.log(`Trunk version: ${trunkVersion}`);
 
-          matching_branches=("trunk" "release/$MAJOR_MINOR")
+            const [targetMajor, targetMinor] = targetVersion.split('.').map(Number);
+            const [trunkMajor, trunkMinor] = trunkVersion.split('.').map(Number);
 
-          for branch_name in $all_branches; do
-              version=$(echo "$branch_name" | sed "s|release/||")
+            const branches = ['trunk'];
 
-              if [[ $(php -r "echo version_compare('$version', '$MAJOR_MINOR');") == 1 ]]; then
-                  matching_branches+=("$branch_name")
-              fi
-          done
+            for (let major = targetMajor; major <= trunkMajor; major++) {
+              const startMinor = (major === targetMajor) ? targetMinor : 0;
+              const endMinor = (major === trunkMajor) ? trunkMinor : 9;
 
-          branches_json="["
-          sep=""
-          for branch in "${matching_branches[@]}"; do
-            branches_json="$branches_json$sep\"$branch\""
-            sep=","
-          done
-          branches_json="$branches_json]"
-          echo "Target branches: ${matching_branches[@]}"
-          echo "branches=$branches_json" >> $GITHUB_OUTPUT
+              for (let minor = startMinor; minor <= endMinor; minor++) {
+                branches.push(`release/${major}.${minor}`);
+              }
+            }
+
+            console.log('Target branches:', branches);
+            core.setOutput('branches', JSON.stringify(branches));
 
       - name: Verify release branch exists
         run: |
@@ -206,6 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
+      fail-fast: false
       matrix:
         branch: ${{ fromJSON(needs.validate-release.outputs.target-branches) }}
     steps:
