@@ -7,7 +7,12 @@
 	border: none;
 	padding: 0;
 	background: none;
-	margin: 0 0 $gap-largest 0;
+	margin: 0 0 $gap-larger 0;
+
+	.wc-block-components-text-input:first-of-type,
+	.wc-block-components-country-input {
+		margin-top: 0;
+	}
 
 	@include cart-checkout-below-medium-container {
 		padding-left: 0;
@@ -83,7 +88,6 @@
 }
 
 .wc-block-components-checkout-step__heading {
-	margin: 0 0 $gap-smaller;
 	position: relative;
 
 	.wc-block-components-express-payment-continue-rule
@@ -98,8 +102,16 @@
 	margin-top: 0;
 }
 
+.wc-block-components-checkout-step__heading-container {
+	display: flex;
+	flex-direction: column;
+	gap: $gap-smaller;
+	margin-bottom: $gap;
+}
+
 .wc-block-components-checkout-step__title {
-	margin: 0 $gap-small 0 0;
+	margin: 0;
+	margin-right: $gap-small;
 }
 
 .wc-block-components-checkout-step__heading-content {
@@ -111,15 +123,9 @@
 	}
 }
 
-.wc-block-checkout__shipping-option .wc-block-components-checkout-step__content,
-.wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
-	padding-top: $gap-smaller;
-}
-
 .wc-block-components-checkout-step__description {
-	@include font-size(small);
-	line-height: 1.2;
-	margin: 0 0 $gap;
+	@include font-regular-locked;
+	margin: 0;
 }
 
 .wc-block-checkout__form--with-step-numbers {
