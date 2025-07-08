@@ -5,8 +5,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
-use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
 /**
  * Privacy eraser for WooCommerce Customer Stock Notifications.
@@ -53,14 +54,14 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'done'           => true,
 		);
 
-		$notifications = \WC_Data_Store::load( 'stock_notification' )->query(
+		$notifications = NotificationQuery::get_notifications(
 			array(
 				'user_email' => $email_address,
 			)
 		);
 
 		foreach ( $notifications as $notification_id ) {
-			$notification    = new Notification( $notification_id );
+			$notification    = Factory::get_notification( $notification_id );
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );

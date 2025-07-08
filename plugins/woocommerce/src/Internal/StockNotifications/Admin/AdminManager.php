@@ -52,7 +52,17 @@ class AdminManager {
 		/*
 		 * Enqueue specific styles & scripts.
 		 */
-		if ( 'woocommerce_page_wc-customer-stock-notifications' !== $screen_id ) {
+		if (
+			! in_array(
+				$screen_id,
+				array( 'woocommerce_page_wc-customer-stock-notifications', 'woocommerce_page_wc-settings' ),
+				true
+			)
+		) {
+			return;
+		}
+		//phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( 'woocommerce_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'customer_stock_notifications' !== $_GET['section'] ) {
 			return;
 		}
 
