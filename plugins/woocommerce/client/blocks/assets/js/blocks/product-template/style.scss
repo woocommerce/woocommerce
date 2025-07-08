@@ -93,8 +93,9 @@ $min-product-width: 150px;
 	flex-wrap: nowrap;
 	gap: $grid-gap;
 	overflow-x: auto;
+	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
-	scroll-padding: 0 $grid-gap;
+	scroll-padding: 0 50%;
 
 	.wc-block-product {
 		scroll-snap-align: center;
