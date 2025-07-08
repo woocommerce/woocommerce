@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.4.0) - 2025-07-08 
+
+-   Minor - Added api-client module [#59409]
+-   Patch - Monorepo: build RAM usage optimization. [#58861]
+-   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
+-   Patch - Monorepo: consolidate @wordpress/babel-preset-default, @wordpress/browserslist-config, glob packages versions. [#56392]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+
 ## [0.3.1](https://www.npmjs.com/package/@woocommerce/e2e-utils-playwright/v/0.3.1) - 2025-03-06 
 
 -   Patch - Updated the editor canvas frame locator to support changes in Gutenberg 20.6 [#56083]

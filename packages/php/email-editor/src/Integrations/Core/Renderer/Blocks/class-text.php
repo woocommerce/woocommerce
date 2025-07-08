@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * This renderer covers both core/paragraph and core/heading blocks
@@ -81,27 +82,19 @@ class Text extends Abstract_Block_Renderer {
 		}
 
 		$compiled_styles = $this->compile_css( $block_styles['declarations'], $styles );
-		$table_styles    = 'border-collapse: separate;'; // Needed because of border radius.
 
-		return sprintf(
-			'<table
-            role="presentation"
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%%"
-            style="%1$s"
-          >
-            <tr>
-              <td class="%2$s" style="%3$s" align="%4$s">%5$s</td>
-            </tr>
-          </table>',
-			esc_attr( $table_styles ),
-			esc_attr( $classes ),
-			esc_attr( $compiled_styles ),
-			esc_attr( $styles['text-align'] ),
-			$block_content
+		$table_attrs = array(
+			'style' => 'border-collapse: separate;', // Needed because of border radius.
+			'width' => '100%',
 		);
+
+		$cell_attrs = array(
+			'class' => $classes,
+			'style' => $compiled_styles,
+			'align' => $styles['text-align'],
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( $block_content, $table_attrs, $cell_attrs );
 	}
 
 	/**

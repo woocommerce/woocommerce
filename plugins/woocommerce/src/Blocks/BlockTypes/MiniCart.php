@@ -432,7 +432,11 @@ class MiniCart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		/**
+		 * In the cart and checkout pages, the block is either rendered hidden or removed.
+		 * It is not interactive, so it can fall back to the existing implementation.
+		 */
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
 			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
 		}
 
@@ -553,7 +557,7 @@ class MiniCart extends AbstractBlock {
 						data-wp-bind--role="state.drawerRole"
 						data-wp-bind--aria-modal="context.isOpen"
 						data-wp-bind--aria-hidden="!context.isOpen"
-						data-wp-bind--tab-index="state.drawerTabIndex"
+						data-wp-bind--tabindex="state.drawerTabIndex"
 						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
 					>
 						<div class="wc-block-components-drawer__content">

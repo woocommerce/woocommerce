@@ -4,6 +4,7 @@
 import { registerProductBlockType } from '@woocommerce/atomic-utils';
 import { Icon, button } from '@wordpress/icons';
 import type { BlockConfiguration } from '@wordpress/blocks';
+import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -28,6 +29,16 @@ const blockConfig = {
 		),
 	},
 	ancestor: [ 'woocommerce/single-product' ],
+	transforms: {
+		to: [
+			{
+				type: 'block',
+				blocks: [ 'woocommerce/add-to-cart-with-options' ],
+				transform: () =>
+					createBlock( 'woocommerce/add-to-cart-with-options' ),
+			},
+		],
+	},
 	save() {
 		return null;
 	},
