@@ -95,10 +95,12 @@ $min-product-width: 150px;
 	overflow-x: auto;
 	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
-	scroll-padding: 0 50%;
+	scroll-padding: 0 30%;
 
 	.wc-block-product {
 		scroll-snap-align: center;
 		min-width: $min-product-width;
+		flex-basis: 0;
+		flex-grow: 1;
 	}
 }
