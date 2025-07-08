@@ -1862,12 +1862,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$search_fields_enum = array( 'name', 'global_unique_id' );
+		if ( wc_product_sku_enabled() ) {
+			$search_fields_enum[] = 'sku';
+		}
+
 		$params['search_fields'] = array(
 			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id. This argument takes precedence over all other search parameters.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
-				'enum' => array( 'name', 'sku', 'global_unique_id' ),
+				'enum' => $search_fields_enum,
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_slug_list',
