@@ -198,8 +198,8 @@ const productButtonStore = {
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE &&
-				( addToCartWithOptionsState.isFormValid === undefined ||
-					addToCartWithOptionsState.isFormValid )
+				( addToCartWithOptionsState?.isFormValid === undefined ||
+					addToCartWithOptionsState?.isFormValid )
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
