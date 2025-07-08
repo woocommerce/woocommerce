@@ -5,14 +5,14 @@ on:
 
 jobs:
   run-tests:
-    name: Run tests
+    name: Test canonical extensions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
 
-      - name: Check if community contribution
+      - name: Run target repositories testing workflows
         env:
             REPOSITORIES: ${{ env.CANONICAL_EXTENSIONS }}
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
