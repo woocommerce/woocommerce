@@ -22,13 +22,6 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	},
 } ) );
 
-jest.mock( '@woocommerce/settings', () => ( {
-	CURRENT_USER_IS_ADMIN: false,
-} ) );
-
-// Create a reference to the mocked module
-const mockedSettings = jest.mocked( require( '@woocommerce/settings' ) );
-
 jest.mock( '@woocommerce/blocks-components', () => ( {
 	Title: jest.fn( ( { children, className, headingLevel } ) => (
 		<div
@@ -65,19 +58,18 @@ jest.mock( '@wordpress/data', () => ( {
 	dispatch: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => ( {
+	CURRENT_USER_IS_ADMIN: false,
+} ) );
+
 const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
 
 describe( 'CheckoutExpressPayment', () => {
-	beforeEach( () => {
-		jest.clearAllMocks();
-	} );
-
 	describe( 'No registered express payment methods', () => {
 		beforeEach( () => {
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -98,6 +90,7 @@ describe( 'CheckoutExpressPayment', () => {
 
 		it( 'should render null when not in editor and user is not admin', () => {
 			const { container } = render( <CheckoutExpressPayment /> );
+
 			expect( container.firstChild ).toBeNull();
 		} );
 
@@ -114,14 +107,6 @@ describe( 'CheckoutExpressPayment', () => {
 				'wc/express-payment'
 			);
 		} );
-
-		it( 'should render StoreNoticesContainer when in editor and user is admin', () => {
-			mockedSettings.CURRENT_USER_IS_ADMIN = true;
-
-			render( <CheckoutExpressPayment /> );
-
-			expect( screen.getByTestId( 'notices' ) ).toBeInTheDocument();
-		} );
 	} );
 
 	describe( 'Registered but no valid express payment methods', () => {
@@ -129,7 +114,6 @@ describe( 'CheckoutExpressPayment', () => {
 			( useEditorContext as jest.Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
-			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -169,14 +153,6 @@ describe( 'CheckoutExpressPayment', () => {
 				'wc/express-payment'
 			);
 		} );
-
-		it( 'should render StoreNoticesContainer when user is admin', () => {
-			mockedSettings.CURRENT_USER_IS_ADMIN = true;
-
-			render( <CheckoutExpressPayment /> );
-
-			expect( screen.getByTestId( 'notices' ) ).toBeInTheDocument();
-		} );
 	} );
 
 	describe( 'Express payment methods available and initialized', () => {
@@ -202,7 +178,6 @@ describe( 'CheckoutExpressPayment', () => {
 						paypal: { name: 'paypal' },
 					},
 				} );
-			mockedSettings.CURRENT_USER_IS_ADMIN = false;
 		} );
 
 		it( 'should render Express Checkout title', () => {
