@@ -73,7 +73,6 @@ jobs:
       - name: Get trunk version
         id: get-trunk-version
         run: |
-          git checkout trunk
           TRUNK_VERSION=$(awk '/Version:/ {print $3}' plugins/woocommerce/woocommerce.php | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*/\1/' | sed 's/-.*//')
           echo "Trunk version is $TRUNK_VERSION"
           echo "trunk-version=$TRUNK_VERSION" >> $GITHUB_OUTPUT
