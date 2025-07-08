@@ -230,18 +230,18 @@ CREATE TABLE $meta_table_name (
 
 		$notification->set_props(
 			array(
-				'id'                    => $data->id,
-				'product_id'            => $data->product_id,
-				'user_id'               => $data->user_id,
-				'user_email'            => $data->user_email,
-				'status'                => $data->status,
-				'date_created'          => wc_string_to_timestamp( $data->date_created_gmt ),
-				'date_modified'         => wc_string_to_timestamp( $data->date_modified_gmt ),
-				'date_confirmed'        => wc_string_to_timestamp( $data->date_confirmed_gmt ),
-				'date_last_attempt'     => wc_string_to_timestamp( $data->date_last_attempt_gmt ),
-				'date_notified'         => wc_string_to_timestamp( $data->date_notified_gmt ),
-				'date_cancelled'        => wc_string_to_timestamp( $data->date_cancelled_gmt ),
-				'cancellation_source'   => $data->cancellation_source,
+				'id'                  => $data->id,
+				'product_id'          => $data->product_id,
+				'user_id'             => $data->user_id,
+				'user_email'          => $data->user_email,
+				'status'              => $data->status,
+				'date_created'        => wc_string_to_timestamp( $data->date_created_gmt ),
+				'date_modified'       => wc_string_to_timestamp( $data->date_modified_gmt ),
+				'date_confirmed'      => wc_string_to_timestamp( $data->date_confirmed_gmt ),
+				'date_last_attempt'   => wc_string_to_timestamp( $data->date_last_attempt_gmt ),
+				'date_notified'       => wc_string_to_timestamp( $data->date_notified_gmt ),
+				'date_cancelled'      => wc_string_to_timestamp( $data->date_cancelled_gmt ),
+				'cancellation_source' => $data->cancellation_source,
 			)
 		);
 

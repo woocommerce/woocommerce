@@ -38,16 +38,16 @@ class Notification extends \WC_Data {
 	 */
 	protected $data = array(
 		'status'               => NotificationStatus::PENDING,
-		'product_id'           => 0,
-		'user_id'              => 0,
-		'user_email'           => '',
-		'date_created'         => null,
-		'date_confirmed'       => null,
-		'date_modified'        => null,
-		'date_notified'        => null,
-		'date_last_attempt'    => null,
-		'date_cancelled'       => null,
-		'cancellation_source'  => null,
+		'product_id'          => 0,
+		'user_id'             => 0,
+		'user_email'          => '',
+		'date_created'        => null,
+		'date_confirmed'      => null,
+		'date_modified'       => null,
+		'date_notified'       => null,
+		'date_last_attempt'   => null,
+		'date_cancelled'      => null,
+		'cancellation_source' => null,
 	);
 
 	/**
