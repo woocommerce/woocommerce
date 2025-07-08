@@ -38,9 +38,9 @@
                 }
             },
             "heading": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-1)"
-				}
+                "color": {
+                    "text": "var(--wp--preset--color--theme-1)"
+                }
             },
             "link": {
                 "color": {
