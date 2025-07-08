@@ -60,6 +60,7 @@ $block_settings = array(
 ```
 
 The render callback should accept three parameters:
+
 - `string $block_content` - The original block HTML content
 - `array $parsed_block` - The parsed block data including attributes
 - `Rendering_Context $rendering_context` - Email rendering context
@@ -74,7 +75,7 @@ The recommended approach is to use the `block_type_metadata_settings` filter to 
 /**
  * Add email support to custom blocks.
  */
-function add_email_support_to_blocks( $settings ) {
+function add_email_support_to_blocks( $settings, $metadata ) {
     // List of blocks that should support email rendering
     $email_supported_blocks = array(
         'my-plugin/custom-block',
@@ -94,7 +95,7 @@ function add_email_support_to_blocks( $settings ) {
 
     return $settings;
 }
-add_filter( 'block_type_metadata_settings', 'add_email_support_to_blocks', 10, 1 );
+add_filter( 'block_type_metadata_settings', 'add_email_support_to_blocks', 10, 2 );
 ```
 
 ### Method 2: Direct Block Registration
@@ -166,10 +167,10 @@ class Custom_Block_Renderer extends Abstract_Block_Renderer {
         // Build email-compatible HTML
         $styles = array();
         if ( $text_color ) {
-            $styles[] = "color: {$text_color}";
+            $styles[] = 'color: ' . esc_attr( sanitize_hex_color( $text_color ) );
         }
         if ( $bg_color ) {
-            $styles[] = "background-color: {$bg_color}";
+            $styles[] = 'background-color: ' . esc_attr( sanitize_hex_color( $bg_color ) );
         }
         
         $style_attr = ! empty( $styles ) ? ' style="' . implode( '; ', $styles ) . '"' : '';
@@ -193,13 +194,13 @@ The `Rendering_Context` object provides access to theme settings and other rende
 ```php
 public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
     // Get theme settings
-    $theme = $rendering_context->get_theme_settings();
+    $theme_settings = $rendering_context->get_theme_settings();
     
-    // Access theme colors, fonts, etc.
-    $theme_settings = $theme->get_theme_styles();
+    // Theme style values
+    $theme_styles = $rendering_context->get_theme_styles();
 
     // Get the theme json
-    $theme_settings = $theme->get_theme_json();
+    $theme_json = $rendering_context->get_theme_json();
     
     // Use theme values in your rendering logic
     // ...
@@ -361,7 +362,7 @@ JS
         category: 'widgets',
         description: __('A newsletter signup form for emails.', 'my-plugin'),
 		supports: {
-			email: true,
+			email: true, // required for the email editor.
 		},
         attributes: {
             title: {
