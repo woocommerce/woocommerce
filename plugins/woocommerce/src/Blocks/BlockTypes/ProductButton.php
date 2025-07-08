@@ -98,26 +98,6 @@ class ProductButton extends AbstractBlock {
 
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		wp_interactivity_state(
-			'woocommerce/product-button',
-			array(
-				'addToCartText'    => function () use ( $product ) {
-					$context = wp_interactivity_get_context();
-					$quantity = $context['tempQuantity'];
-					$add_to_cart_text = $context['addToCartText'];
-
-					return $quantity > 0 ? sprintf(
-						/* translators: %s: product number. */
-						__( '%s in cart', 'woocommerce' ),
-						$quantity
-					) : $add_to_cart_text;
-				},
-				'inTheCartText'    => $this->get_in_the_cart_text( $product ),
-				'noticeId'         => '',
-				'hasPressedButton' => false,
-			)
-		);
-
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
@@ -163,12 +143,15 @@ class ProductButton extends AbstractBlock {
 		}
 
 		$context = array(
-			'quantityToAdd'   => $default_quantity,
-			'productId'       => $product->get_id(),
-			'productType'     => $product->get_type(),
-			'addToCartText'   => $add_to_cart_text,
-			'tempQuantity'    => $number_of_items_in_cart,
-			'animationStatus' => 'IDLE',
+			'quantityToAdd'    => $default_quantity,
+			'productId'        => $product->get_id(),
+			'productType'      => $product->get_type(),
+			'addToCartText'    => $add_to_cart_text,
+			'tempQuantity'     => $number_of_items_in_cart,
+			'animationStatus'  => 'IDLE',
+			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
+			'noticeId'         => '',
+			'hasPressedButton' => false,
 		);
 
 		if ( $product->is_type( 'grouped' ) ) {
@@ -185,6 +168,21 @@ class ProductButton extends AbstractBlock {
 				'rel'  => 'nofollow',
 			);
 		}
+
+		wp_interactivity_state(
+			'woocommerce/product-button',
+			array(
+				'addToCartText' => function () use ( $add_to_cart_text, $number_of_items_in_cart ) {
+					return $number_of_items_in_cart > 0
+					? sprintf(
+						/* translators: %s: product quantity. */
+						__( '%s in cart', 'woocommerce' ),
+						$number_of_items_in_cart
+					)
+					: $add_to_cart_text;
+				},
+			)
+		);
 
 		/**
 		 * Allow filtering of the add to cart button arguments.
@@ -213,9 +211,10 @@ class ProductButton extends AbstractBlock {
 
 		$div_directives = '
 			data-wp-interactive="woocommerce/product-button"
-			data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
 			data-wp-init="actions.refreshCartItems"
 		';
+
+		$context_directives = wp_interactivity_data_wp_context( $context );
 
 		$button_directives = $is_descendant_of_add_to_cart_form ?
 			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid"' :
@@ -255,6 +254,7 @@ class ProductButton extends AbstractBlock {
 		$html = strtr(
 			'<div {wrapper_attributes}
 					{div_directives}
+					{context_directives}
 				>
 					<{html_element}
 						class="{button_classes}"
@@ -270,6 +270,7 @@ class ProductButton extends AbstractBlock {
 				'{wrapper_attributes}'     => $wrapper_attributes,
 				'{html_element}'           => $html_element,
 				'{button_classes}'         => $button_classes,
+				'{context_directives}'     => $context_directives,
 				'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 				'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
 				'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
