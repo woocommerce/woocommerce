@@ -12,13 +12,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Config;
 class SettingsController {
 
 	/**
-	 * Meta key for the enable signups option per product.
-	 *
-	 * @var string
-	 */
-	public const PRODUCT_META_KEY = 'customer_stock_notifications_enable_signups';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -174,7 +167,7 @@ class SettingsController {
 			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_allow_signups' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && Config::allows_signups() ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
@@ -206,12 +199,12 @@ class SettingsController {
 			return;
 		}
 
-		$enable_signups = 'no' !== $product_object->get_meta( self::PRODUCT_META_KEY ) ? 'yes' : 'no';
+		$enable_signups = 'no' !== $product_object->get_meta( Config::get_product_signups_meta_key() ) ? 'yes' : 'no';
 
 		wp_nonce_field( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
 		woocommerce_wp_checkbox(
 			array(
-				'id'            => self::PRODUCT_META_KEY,
+				'id'            => Config::get_product_signups_meta_key(),
 				'label'         => __( 'Stock notifications', 'woocommerce' ),
 				'value'         => $enable_signups,
 				'wrapper_class' => implode(
@@ -248,12 +241,12 @@ class SettingsController {
 			return;
 		}
 
-		$posted_is_enabled = isset( $_POST[ self::PRODUCT_META_KEY ] );
-		$current_value     = $product->get_meta( self::PRODUCT_META_KEY );
+		$posted_is_enabled = isset( $_POST[ Config::get_product_signups_meta_key() ] );
+		$current_value     = $product->get_meta( Config::get_product_signups_meta_key() );
 		if ( ( $posted_is_enabled && 'no' === $current_value ) || ( ! $posted_is_enabled && 'yes' === $current_value ) ) {
 			check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
 
-			$product->update_meta_data( self::PRODUCT_META_KEY, $posted_is_enabled ? 'yes' : 'no' );
+			$product->update_meta_data( Config::get_product_signups_meta_key(), $posted_is_enabled ? 'yes' : 'no' );
 		}
 	}
 }

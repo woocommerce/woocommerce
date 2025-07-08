@@ -119,6 +119,15 @@ class Config {
 	}
 
 	/**
+	 * Get the metadata name for product-level signups.
+	 *
+	 * @return string
+	 */
+	public static function get_product_signups_meta_key(): string {
+		return 'customer_stock_notifications_enable_signups';
+	}
+
+	/**
 	 * Check if signups are allowed.
 	 *
 	 * @return bool

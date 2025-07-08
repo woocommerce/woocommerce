@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagementHelper;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use WC_Product;
 
 /**
@@ -91,7 +90,7 @@ class EligibilityService {
 			return $this->product_allows_signups( $parent_product );
 		}
 
-		return 'no' !== $product->get_meta( SettingsController::PRODUCT_META_KEY );
+		return 'no' !== $product->get_meta( Config::get_product_signups_meta_key() );
 	}
 
 	/**
