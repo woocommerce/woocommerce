@@ -6,9 +6,11 @@ import { Button } from '@wordpress/components';
 import {
 	OfflinePaymentMethodProvider,
 	PaymentGatewayProvider,
+	paymentGatewaysStore,
 	PaymentsProviderType,
 } from '@woocommerce/data';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -50,6 +52,8 @@ export const SettingsButton = ( {
 }: SettingsButtonProps ) => {
 	const isOffline = gatewayProvider._type === PaymentsProviderType.OfflinePm;
 	const navigate = useNavigate();
+	const { invalidateResolutionForStoreSelector } =
+		useDispatch( paymentGatewaysStore );
 	const recordButtonClickEvent = () => {
 		recordPaymentsProviderEvent( 'provider_manage_click', gatewayProvider );
 	};
@@ -62,6 +66,7 @@ export const SettingsButton = ( {
 			onClick={ () => {
 				recordButtonClickEvent();
 				if ( isOffline ) {
+					invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 					navigate( removeOriginFromURL( settingsHref ) );
 				}
 			} }
