@@ -19,6 +19,8 @@ jobs:
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
             GH_REPO: ${{ github.repository }}
         run: |
+            exit 1
+          
             printf "9.9.0-rc.1\n\n\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
 
             # Which WooCommerce version should we use for testing (e.g., 9.9.0-rc.1, 9.9.0, nightly, rc or stable)?:

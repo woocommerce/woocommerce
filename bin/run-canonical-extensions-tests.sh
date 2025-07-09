@@ -10,10 +10,6 @@ echo ''
 
 # Request and sanitize testing parameters inputs.
 read -r -p "Which WooCommerce version should we use for testing (e.g., 9.9.0-rc.1, 9.9.0, nightly, rc or stable)?: " version
-if [[ $version != 'nightly' ]] && [[ $version != 'rc' ]] && [[ $version != 'stable' ]]; then
-	echo -n 'Verifying: '
-	gh release view $version --json tagName --jq '.tagName' || exit 1
-fi
 read -r -p "Which WordPress version should we use for testing (e.g., 6.8, latest or empty to use defaults)?: " wordpress
 read -r -p "Which PHP version should we use for testing (e.g., 7.4, 8.4 or empty to use defaults)?: " php
 read -r -p "Which GitHub repositories needs to be tested (e.g. https://github.com/woocommerce/woocommerce, space separated list or empty to use defaults)?: " -a repositories
@@ -25,6 +21,20 @@ if [[ ${#repositories[@]} -eq 0 ]]; then
 	( gh variable get CANONICAL_EXTENSIONS > $file && echo 'done' ) || ( echo 'error' && exit 1 )
 	repositories=( $( cat $file | tr -d '\r' | tr '\n' ' ' ) )
 fi
+
+echo -n 'Verifying inputs: ';
+file='/tmp/WOOCOMMERCE_QIT_ENVIRONMENTS'
+curl -s 'https://qit.woo.com/wp-json/cd/v1/environment' --output $file || ( echo 'error (fetch available environments information)' && exit 1 )
+if [[ $( cat $file | jq "(.woocommerce_versions | index(\"$version\"))" ) == 'null' ]]; then
+  echo 'error (invalid WooCommerce version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+fi
+if [[ $wordpress != '' ]] && [[ $( cat $file | jq "(.wordpress_versions | index(\"$wordpress\"))" ) == 'null' ]]; then
+  echo 'error (invalid WordPress version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+fi
+if [[ $php != '' ]] && [[ $( cat $file | jq "(.php_versions | has(\"$php\"))" ) == 'false' ]]; then
+  echo 'error (invalid PHP version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+fi
+echo 'ok'
 
 # Sort out which repositories provide the necessary workflows first.
 filtered=()
