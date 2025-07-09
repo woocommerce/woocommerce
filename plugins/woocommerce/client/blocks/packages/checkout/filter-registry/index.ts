@@ -39,9 +39,11 @@ declare global {
 }
 
 window.wc = window.wc || {};
-window.wc._internalBlocksCheckoutFilters =
-	window.wc._internalBlocksCheckoutFilters || {};
 
+let checkoutFilters: Record<
+	string,
+	Record< string, CheckoutFilterFunction >
+> = {};
 let cachedValues: Record< string, unknown > = {};
 
 /**
@@ -65,8 +67,8 @@ export const registerCheckoutFilters = (
 	}
 	// Clear cached values when registering new filters because otherwise we get outdated results when applying them.
 	cachedValues = {};
-	window.wc._internalBlocksCheckoutFilters = {
-		...window.wc._internalBlocksCheckoutFilters,
+	checkoutFilters = {
+		...checkoutFilters,
 		[ namespace ]: filters,
 	};
 };
@@ -97,14 +99,9 @@ export const __experimentalRegisterCheckoutFilters = (
  *                      name.
  */
 const getCheckoutFilters = ( filterName: string ): CheckoutFilterFunction[] => {
-	const namespaces = Object.keys( window.wc._internalBlocksCheckoutFilters );
+	const namespaces = Object.keys( checkoutFilters );
 	const filters = namespaces
-		.map(
-			( namespace ) =>
-				window.wc._internalBlocksCheckoutFilters[ namespace ][
-					filterName
-				]
-		)
+		.map( ( namespace ) => checkoutFilters[ namespace ][ filterName ] )
 		.filter( Boolean );
 	return filters;
 };
