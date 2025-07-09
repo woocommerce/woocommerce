@@ -64,7 +64,7 @@ done
 running=()
 echo "Launching checks (${#filtered[@]} repo(s))"
 for repository in ${filtered[@]}; do
-	echo -n "    -- $repository:"
+	echo -n "    -- $repository :"
 
 	# Report identified workflow details.
 	workflow=$( gh workflow list --json path,id --repo $repository | jq --compact-output '.[]' | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml)' )
@@ -94,7 +94,12 @@ done
 echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):" && echo -n '    '
 result=()
 while [ ${#running[@]} -gt 0 ]; do
-	echo -n '.'
+	if [ -z ${CI+y} ]; then
+    	echo -n '.'
+    else
+    	echo '.'
+    fi
+
 	sleep 1m
 	temp=()
 	for entry in ${running[@]}; do
@@ -108,7 +113,13 @@ while [ ${#running[@]} -gt 0 ]; do
 				conclusion=$( gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${repository##https://github.com/}/actions/runs/$id --jq '.conclusion' )
 				status="$status:$conclusion"
 			fi
-			echo -n '✓'
+
+			if [ -z ${CI+y} ]; then
+				echo -n '✓'
+			else
+				echo "✓ $repository"
+			fi
+
 			result+=( "$entry;$status" )
 		else
 			temp+=( $entry )
@@ -121,5 +132,5 @@ echo ''
 echo "All runs completed:"
 for entry in ${result[@]}; do
 	fragments=( ${entry//;/ } )
-	echo "    -- ${fragments[0]}: status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
+	echo "    -- ${fragments[0]} : status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
 done
