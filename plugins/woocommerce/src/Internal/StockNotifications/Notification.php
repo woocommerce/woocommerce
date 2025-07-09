@@ -459,17 +459,12 @@ class Notification extends \WC_Data {
 	 */
 	public function has_valid_verification_data(): bool {
 		$action_key = $this->get_meta( 'email_link_action_key' );
-
-		if ( empty( $action_key) ) {
-			return false;
-		}
-
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
 		list( $requested_timestamp, $key ) = explode( ':', $action_key, 2 );
-		$expiration_duration = Config::get_unverified_deletion_days_threshold() * DAY_IN_SECONDS;
+		$expiration_duration = Config::get_verification_expiration_time_threshold();
 
 		if ( 0 !== $expiration_duration && ( time() - (int) $requested_timestamp ) > $expiration_duration ) {
 			return false;
@@ -496,12 +491,6 @@ class Notification extends \WC_Data {
 	 * @param bool $persist Whether to persist the changes to the database.
 	 */
 	public function maybe_setup_verification_data( bool $persist ): void {
-		$opt_in_required = get_option( 'woocommerce_customer_stock_notifications_opt_in_required', 'no' );
-
-		if ( 'no' === $opt_in_required ) {
-			return;
-		}
-
 		if ( $this->has_valid_verification_data() ) {
 			return;
 		}
@@ -522,10 +511,6 @@ class Notification extends \WC_Data {
 	 */
 	public function has_valid_unsubscription_data(): bool {
 		$action_key = $this->get_meta( 'email_link_action_key' );
-
-		if ( empty( $action_key) ) {
-			return false;
-		}
 
 		if ( str_contains( $action_key, ':' ) ) {
 			return false;
