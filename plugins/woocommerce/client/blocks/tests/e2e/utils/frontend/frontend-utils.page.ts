@@ -35,6 +35,17 @@ async function waitForFunction(
 	);
 }
 
+const STORE_API_CART_WRITE_REQUEST_URLS = [
+	'/cart/add-item',
+	'/batch',
+	'/cart/remove-item',
+	'/cart/update-item',
+	'/cart/apply-coupon/',
+	'/cart/remove-coupon/',
+	'/cart/update-customer',
+	'/cart/select-shipping-rate',
+];
+
 export class FrontendUtils {
 	page: Page;
 	requestUtils: RequestUtils;
@@ -56,21 +67,38 @@ export class FrontendUtils {
 	 * Start tracking cart-related requests and return a function to wait for completion
 	 */
 	private trackCartRequests( timeout = 5000 ) {
-		const pendingRequests = new Set< string >();
+		// key: request url, value: count of pending requests with this url
+		const pendingRequests = new Map< string, number >();
 
 		const requestHandler = ( request: Request ) => {
 			const url = request.url();
 			if (
-				url.includes( '/cart' ) ||
-				url.includes( '/add_to_cart' ) ||
-				url.includes( '/batch' )
+				STORE_API_CART_WRITE_REQUEST_URLS.some( ( cartUrl ) =>
+					url.includes( cartUrl )
+				)
 			) {
-				pendingRequests.add( request.url() );
+				pendingRequests.set(
+					url,
+					( pendingRequests.get( url ) ?? 0 ) + 1
+				);
 			}
 		};
 
 		const responseHandler = ( response: Response ) => {
-			pendingRequests.delete( response.url() );
+			const url = response.url();
+			const pendingRequestCount = pendingRequests.get( url );
+
+			// means we're not dealing with cart request
+			if ( pendingRequestCount === undefined ) {
+				return;
+			}
+
+			if ( pendingRequestCount === 1 ) {
+				pendingRequests.delete( url );
+				return;
+			}
+
+			pendingRequests.set( url, pendingRequestCount - 1 );
 		};
 
 		this.page.on( 'request', requestHandler );
