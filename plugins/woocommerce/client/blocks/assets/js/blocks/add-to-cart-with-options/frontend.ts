@@ -208,11 +208,13 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes[ index ] = {
 						attribute,
 						value,
+						raw_attribute: attribute,
 					};
 				} else {
 					selectedAttributes.push( {
 						attribute,
 						value,
+						raw_attribute: attribute,
 					} );
 				}
 			},

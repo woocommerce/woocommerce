@@ -83,7 +83,7 @@ const isCartItemMatched = (
 		} ) =>
 			selectedItem.some( ( item ) => {
 				return (
-					item.attribute === raw_attribute &&
+					item.raw_attribute === raw_attribute &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
 						( item.value && value === '' ) ) // Handle "any" attribute type
 				);
@@ -192,6 +192,7 @@ const productButtonStore = {
 			yield actions.addCartItem( {
 				id: state.productId,
 				quantity: state.quantity + context.quantityToAdd,
+				type: context.productType
 			} );
 
 			context.displayViewCart = true;
