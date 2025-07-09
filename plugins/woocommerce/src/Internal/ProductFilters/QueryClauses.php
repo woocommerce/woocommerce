@@ -594,11 +594,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		return array_map(
 			function ( $taxonomy ) use ( $map ) {
 				if ( isset( $map[ $taxonomy->name ] ) ) {
-						return $map[ $taxonomy->name ];
-				}
-
-				if ( ! empty( $taxonomy->rewrite['slug'] ) ) {
-					return $taxonomy->rewrite['slug'];
+					return $map[ $taxonomy->name ];
 				}
 
 				return $taxonomy->name;
