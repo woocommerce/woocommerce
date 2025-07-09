@@ -21,7 +21,10 @@ const CreatePassword = () => {
 		useDispatch( validationStore );
 
 	useEffect( () => {
-		if ( customerPassword && passwordStrength < 2 ) {
+		if ( ! customerPassword ) {
+			return;
+		}
+		if ( passwordStrength < 2 ) {
 			setValidationErrors( {
 				'account-password': {
 					message: __(
