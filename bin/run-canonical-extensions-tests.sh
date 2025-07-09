@@ -97,7 +97,7 @@ while [ ${#running[@]} -gt 0 ]; do
 	if [ -z ${CI+y} ]; then
     	echo -n '.'
     else
-    	echo '.'
+    	echo '    .'
     fi
 
 	sleep 1m
@@ -117,7 +117,7 @@ while [ ${#running[@]} -gt 0 ]; do
 			if [ -z ${CI+y} ]; then
 				echo -n '✓'
 			else
-				echo "✓ $repository"
+				echo "    ✓ $repository"
 			fi
 
 			result+=( "$entry;$status" )
