@@ -40,7 +40,9 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		ob_start();
-		$shop_url = get_permalink( wc_get_page_id( 'shop' ) );
+		$shop_url                     = get_permalink( wc_get_page_id( 'shop' ) );
+		$default_start_shopping_label = __( 'Start shopping', 'woocommerce' );
+		$start_shopping_label         = $attributes['startShoppingButtonLabel'] ? $attributes['startShoppingButtonLabel'] : $default_start_shopping_label;
 		?>
 		<div class="wp-block-button has-text-align-center">
 			<a
@@ -49,7 +51,7 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 				class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-shopping-button-block wc-block-mini-cart__shopping-button contained"
 			>
 				<div class="wc-block-components-button__text">
-					<?php esc_html_e( 'Start shopping', 'woocommerce' ); ?>
+					<?php echo esc_html( $start_shopping_label ); ?>
 				</div>
 			</a>
 		</div>
