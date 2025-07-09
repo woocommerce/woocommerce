@@ -329,7 +329,7 @@ const { state, actions } = store< Store >(
 					// Dispatches the event to sync the @wordpress/data store.
 					emitSyncEvent( { quantityChanges } );
 
-					const errors = [];
+					// Show all errors from the batch responses.
 					for ( const response of json.responses ) {
 						const body = response?.body;
 						if (
@@ -338,13 +338,8 @@ const { state, actions } = store< Store >(
 							'code' in body &&
 							'message' in body
 						) {
-							errors.push( body );
+							actions.showNoticeError( body as ApiErrorResponse );
 						}
-					}
-					if ( errors.length ) {
-						errors.forEach( ( error ) =>
-							actions.showNoticeError( error as ApiErrorResponse )
-						);
 					}
 				} catch ( error ) {
 					// Reverts the optimistic update.
