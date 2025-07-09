@@ -3,6 +3,18 @@ name: Test canonical extensions
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      woocommerce_version:
+        description: 'WooCommerce version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        required: true
+      wordpress_version:
+        description: 'WordPress version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        required: false
+        default: ''
+      php_version:
+        description: 'PHP version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        required: false
+        default: ''
 
 jobs:
   run-tests:
@@ -11,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Run target repositories testing workflows
         env:
@@ -22,8 +34,3 @@ jobs:
             exit 1
           
             printf "9.9.0-rc.1\n\n\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
-
-            # Which WooCommerce version should we use for testing (e.g., 9.9.0-rc.1, 9.9.0, nightly, rc or stable)?:
-            # Which WordPress version should we use for testing (e.g., 6.8, latest or empty to use defaults)?:
-            # Which PHP version should we use for testing (e.g., 7.4, 8.4 or empty to use defaults)?:
-            # Which GitHub repositories needs to be tested (e.g. https://github.com/woocommerce/woocommerce, space separated list or empty to use defaults)?:
