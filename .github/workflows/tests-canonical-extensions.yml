@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       woocommerce_version:
-        description: 'WooCommerce version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        description: 'WooCommerce version to use for testing (as per https://qit.woo.com/wp-json/cd/v1/environment)?'
         required: true
       wordpress_version:
-        description: 'WordPress version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        description: 'WordPress version to use for testing (as per https://qit.woo.com/wp-json/cd/v1/environment)?'
         required: false
         default: ''
       php_version:
-        description: 'PHP version to use for testing (see https://qit.woo.com/wp-json/cd/v1/environment)?'
+        description: 'PHP version to use for testing (as per https://qit.woo.com/wp-json/cd/v1/environment)?'
         required: false
         default: ''
 
