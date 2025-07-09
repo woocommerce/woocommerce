@@ -23,13 +23,14 @@ jest.mock( '@wordpress/api-fetch' );
 
 jest.mock( '@wordpress/components', () => ( {
 	...jest.requireActual( '@wordpress/components' ),
-	TextControl: ( { value, onChange, placeholder } ) => (
+	TextControl: ( { value, onChange, placeholder, onKeyDown } ) => (
 		<div data-testid="text-control">
 			<input
 				type="text"
 				value={ value }
 				placeholder={ placeholder }
 				onChange={ ( e ) => onChange( e.target.value ) }
+				onKeyDown={ onKeyDown }
 			/>
 		</div>
 	),
@@ -122,6 +123,57 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '12345678';
 		render( <ShipmentTrackingNumberForm /> );
 		fireEvent.click( screen.getByTestId( 'edit-icon' ) );
+		expect(
+			screen.getByPlaceholderText( 'Enter tracking number' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'calls handleTrackingNumberLookup when Enter key is pressed', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '1Z12345E0291980793',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
+			},
+		} );
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: '1Z12345E0291980793' } } );
+		fireEvent.keyDown( input, { key: 'Enter' } );
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
+				'1Z12345E0291980793'
+			);
+		} );
+		await expect( mockContext.setShipmentProvider ).toHaveBeenCalledWith(
+			'ups'
+		);
+		await expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?tracknum=1Z12345E0291980793'
+		);
+	} );
+
+	it( 'does not call handleTrackingNumberLookup when Enter key is pressed with empty input', () => {
+		mockContext.trackingNumber = '';
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.keyDown( input, { key: 'Enter' } );
+
+		expect( mockContext.setTrackingNumber ).not.toHaveBeenCalled();
+	} );
+
+	it( 'switches to edit mode when tracking number is clicked', () => {
+		mockContext.trackingNumber = '1Z12345E0291980793';
+		render( <ShipmentTrackingNumberForm /> );
+		const trackingNumberSpan = screen.getByRole( 'button', {
+			name: '1Z12345E0291980793',
+		} );
+		fireEvent.click( trackingNumberSpan );
+
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
 		).toBeInTheDocument();

@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import ShipmentProviders from '../data/shipment-providers';
-import { Fulfillment, FulfillmentItem, LineItem, Order } from '../data/types';
+import { Fulfillment, FulfillmentItem, Order } from '../data/types';
 import { store as FulfillmentStore } from '../data/store';
 
 export function getFulfillmentMeta< T >(
@@ -33,26 +33,6 @@ export function getFulfillmentItems(
 		'_items',
 		[]
 	) as Array< FulfillmentItem >;
-}
-
-export function hasPendingItems(
-	order: Order,
-	fulfillments: Fulfillment[]
-): boolean {
-	return order.line_items.some( ( item: LineItem ) => {
-		const totalFulfilledQty = fulfillments.reduce(
-			( total, fulfillment ) => {
-				const fulfillmentItems = getFulfillmentItems( fulfillment );
-				const fulfillmentItemInOrder = fulfillmentItems.find(
-					( fItem: FulfillmentItem ) => fItem.item_id === item.id
-				);
-				return total + ( fulfillmentItemInOrder?.qty || 0 );
-			},
-			0
-		);
-
-		return totalFulfilledQty < item.quantity;
-	} );
 }
 
 export async function refreshOrderFulfillmentStatus( orderId: number ) {
