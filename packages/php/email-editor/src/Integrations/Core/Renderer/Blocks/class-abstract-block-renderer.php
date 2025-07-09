@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -60,14 +61,24 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 			return $content;
 		}
 
-		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%2$s"><tr><td style="%3$s"><![endif]-->
-      <div class="email-block-layout" style="%2$s %3$s">%1$s</div>
-      <!--[if mso | IE]></td></tr></table><![endif]-->',
-			$content,
-			esc_attr( $gap_style ),
-			esc_attr( $padding_style )
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+			'style' => $gap_style,
 		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			esc_attr( $gap_style ),
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**

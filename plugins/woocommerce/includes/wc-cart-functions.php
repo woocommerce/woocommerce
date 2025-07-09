@@ -88,8 +88,33 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	$product_id = null;
 	foreach ( $products as $product_id => $qty ) {
-		/* translators: %s: product name */
-		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
+		/**
+		 * Filters the quantity HTML for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $qty_html The quantity HTML.
+		 * @param int    $product_id The product ID.
+		 */
+		$title = apply_filters( 'woocommerce_add_to_cart_qty_html', ( 1 !== $qty ? wc_stock_amount( $qty ) . ' &times; ' : '' ), $product_id );
+
+		/**
+		 * Filters the item name in quotes for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $item_name_in_quotes The item name in quotes.
+		 * @param int    $product_id The product ID.
+		 */
+		$title .= apply_filters(
+			'woocommerce_add_to_cart_item_name_in_quotes',
+			sprintf(
+				/* translators: %s: product name */
+				_x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ),
+				wp_strip_all_tags( get_the_title( $product_id ) )
+			),
+			$product_id
+		);
+
+		$titles[] = $title;
 		$count   += $qty;
 	}
 
