@@ -8,8 +8,16 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
-import { cloneAuthenticatedRepo } from '../../../core/git';
-import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
+import {
+	checkoutRemoteBranch,
+	cloneAuthenticatedRepo,
+} from '../../../core/git';
+import {
+	updateTrunkChangelog,
+	updateReleaseBranchChangelogs,
+	updateBranchChangelog,
+	updateIntermediateBranches,
+} from './lib';
 import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
@@ -91,7 +99,12 @@ export const changelogCommand = new Command( 'changelog' )
 		await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
-			releaseBranch,
+			releaseBranchChanges
+		);
+
+		await updateIntermediateBranches(
+			options,
+			tmpRepoPath,
 			releaseBranchChanges
 		);
 	} );
