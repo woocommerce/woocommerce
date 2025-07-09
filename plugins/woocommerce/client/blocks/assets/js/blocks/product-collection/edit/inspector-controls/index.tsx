@@ -42,6 +42,7 @@ import {
 	InheritQueryControl,
 	FilterableControl,
 } from './use-page-context-control';
+import usePaginationLayout from './use-pagination-layout';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -71,69 +72,8 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
-	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, dimensions, displayLayout, collection } = attributes;
-
-	// --- Carousel pagination logic ---
-	const clientId = props.clientId;
-	const previousLayoutType = useRef<LayoutOptions>(displayLayout.type);
-	const innerBlocks = useSelect(
-		( select ) =>
-			clientId ? select( blockEditorStore ).getBlocks( clientId ) : [],
-		[clientId]
-	);
-	const { insertBlock, removeBlock, updateBlockAttributes } = useDispatch( blockEditorStore );
-
-	// Effect to handle carousel pagination block.
-	useEffect( () => {
-		const paginationBlocks = innerBlocks.filter(
-			(block: any) => block.name === coreQueryPaginationBlockName
-		);
-		const paginationBlockClientId = paginationBlocks[0]?.clientId;
-
-		// When switching to carousel layout, add pagination block if it doesn't exist.
-		if (
-			clientId &&
-			displayLayout?.type === LayoutOptions.CAROUSEL &&
-			previousLayoutType.current !== LayoutOptions.CAROUSEL
-		) {
-			const newAttributes = {
-				paginationArrow: 'chevron',
-				showLabel: false,
-				layout: { type: 'flex', justifyContent: 'center' },
-			};
-
-			if ( ! paginationBlockClientId ) {
-				const paginationBlock = createBlock( coreQueryPaginationBlockName, newAttributes );
-				insertBlock( paginationBlock, innerBlocks.length, clientId, false );
-			} else {
-				updateBlockAttributes( paginationBlockClientId, newAttributes );
-			}
-		}
-
-		// When switching FROM carousel layout remove or update pagination block if it exists.
-		if (
-			clientId &&
-			displayLayout?.type !== LayoutOptions.CAROUSEL &&
-			previousLayoutType.current === LayoutOptions.CAROUSEL
-		) {
-
-			if ( paginationBlockClientId ) {
-				if ( ! collection ) {
-					updateBlockAttributes( paginationBlockClientId, {
-						paginationArrow: 'none',
-						showLabel: true,
-						layout: { type: 'flex', justifyContent: 'center' },
-					} );
-				} else {
-					removeBlock( paginationBlockClientId, false );
-				}
-			}
-		}
-
-		previousLayoutType.current = displayLayout.type;
-	}, [ displayLayout.type, innerBlocks, clientId, insertBlock ]);
-	// --- End carousel pagination logic ---
+	const { attributes, context, setAttributes, clientId } = props;
+	const { query, hideControls, dimensions, displayLayout } = attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -153,6 +93,7 @@ const ProductCollectionInspectorControls = (
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
+	usePaginationLayout( clientId, attributes );
 
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
