@@ -1,6 +1,7 @@
 name: Test canonical extensions
 
 on:
+  pull_request: 
   workflow_dispatch:
     inputs:
       woocommerce_version:

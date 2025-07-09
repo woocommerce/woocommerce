@@ -108,7 +108,7 @@ while [ ${#running[@]} -gt 0 ]; do
 				conclusion=$( gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${repository##https://github.com/}/actions/runs/$id --jq '.conclusion' )
 				status="$status:$conclusion"
 			fi
-			echo "    ✓ ${repository##*/}"
+			echo "    ✓ ${repository##*/} ($status)"
 			result+=( "$entry;$status" )
 		else
 			temp+=( $entry )
