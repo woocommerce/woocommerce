@@ -119,7 +119,7 @@ class Marketplace {
 	 * @return array
 	 */
 	public function add_woo_plugin_install_action_link( $tabs ) {
-		$tabs[ self::MARKETPLACE_TAB_SLUG ] = 'Woo';
+		$tabs[ self::MARKETPLACE_TAB_SLUG ] = 'WooCommerce Marketplace';
 		return $tabs;
 	}
 
