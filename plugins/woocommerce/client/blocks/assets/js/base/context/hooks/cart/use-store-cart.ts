@@ -137,13 +137,28 @@ export const useStoreCart = (
 	const { cartData, cartErrors, cartTotals, cartIsLoading, isLoadingRates } =
 		useSelect( ( select ) => {
 			const store = select( cartStore );
+
+			// Base loading state - whether initial cart data resolution has finished
+			const baseCartIsLoading =
+				// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
+				! store.hasFinishedResolution( 'getCartData' );
+
+			// Get pending states
+			const productsPendingAdd = store.getProductsPendingAdd();
+			const itemsPendingQuantity = store.getItemsPendingQuantityUpdate();
+			const itemsPendingDelete = store.getItemsPendingDelete();
+
+			// Cart is loading if initial resolution is pending OR any operations are pending
+			const hasPendingItemsOperations =
+				productsPendingAdd.length > 0 ||
+				itemsPendingQuantity.length > 0 ||
+				itemsPendingDelete.length > 0;
+
 			return {
 				cartData: store.getCartData(),
 				cartErrors: store.getCartErrors(),
 				cartTotals: store.getCartTotals(),
-				cartIsLoading:
-					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-					! store.hasFinishedResolution( 'getCartData' ),
+				cartIsLoading: baseCartIsLoading || hasPendingItemsOperations,
 				isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
 			};
 		}, [] );
