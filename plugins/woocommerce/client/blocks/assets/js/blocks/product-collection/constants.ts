@@ -176,6 +176,7 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 ];
 
 export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const nextPreviousArrowsBlockName = 'woocommerce/product-gallery-large-image-next-previous';
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
 	coreQueryPaginationBlockName,
 	{
