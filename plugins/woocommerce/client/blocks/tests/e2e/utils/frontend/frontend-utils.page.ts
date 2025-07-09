@@ -31,7 +31,7 @@ async function waitForFunction(
 	} while ( performance.now() - startTime < timeout );
 
 	throw new Error(
-		`Timeout reached after ${ timeout }ms waiting for requests to complete.`
+		`Timeout reached after ${ timeout }ms waiting for condition to be met.`
 	);
 }
 
