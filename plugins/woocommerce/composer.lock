@@ -4,8 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "66cd040767dcc115cc8018307ec36356",
+    "content-hash": "166e4b10e17a0e69dc92e3345288ede0",
     "packages": [
+        {
+            "name": "automattic/block-delimiter",
+            "version": "v0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/block-delimiter.git",
+                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/block-delimiter/zipball/b303cdc29656df4efbd0753adb8c284d8b986f04",
+                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "automattic/jetpack-changelogger": "^6.0.5",
+                "automattic/phpunit-select-config": "^1.0.3",
+                "yoast/phpunit-polyfills": "^4.0.0"
+            },
+            "suggest": {
+                "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+            },
+            "type": "jetpack-library",
+            "extra": {
+                "autotagger": true,
+                "textdomain": "jetpack-block-delimiter",
+                "mirror-repo": "Automattic/block-delimiter",
+                "branch-alias": {
+                    "dev-trunk": "0.2.x-dev"
+                },
+                "changelogger": {
+                    "link-template": "https://github.com/Automattic/block-delimiter/compare/v${old}...v${new}"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Efficiently work with block structure",
+            "support": {
+                "source": "https://github.com/Automattic/block-delimiter/tree/v0.2.1"
+            },
+            "time": "2025-06-23T19:59:34+00:00"
+        },
         {
             "name": "automattic/jetpack-a8c-mc-stats",
             "version": "v3.0.5",

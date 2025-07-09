@@ -75,7 +75,6 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 
 		ob_start();
 		?>
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		<div data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
 			<div class="wp-block-woocommerce-mini-cart-products-table-block wc-block-mini-cart__products-table">
 				<table class="wc-block-cart-items wc-block-mini-cart-items" tabindex="-1">
@@ -208,6 +207,10 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 					</tbody>
 				</table>
 			</div>
+			<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo $content;
+			?>
 		</div>
 		<?php
 		return ob_get_clean();
