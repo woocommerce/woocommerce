@@ -29,6 +29,7 @@ interface GroupedCartItem {
 	id: number;
 	quantity: number;
 	variation: CartVariationItem[];
+	type: string;
 }
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -202,6 +203,7 @@ const addToCartWithOptionsStore = store(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
 				);
+
 				if ( index >= 0 ) {
 					selectedAttributes[ index ] = {
 						attribute,
@@ -366,6 +368,7 @@ const addToCartWithOptionsStore = store(
 							id: childProductId,
 							quantity: newQuantity,
 							variation: selectedAttributes,
+							type: productType,
 						} );
 					}
 
@@ -396,6 +399,7 @@ const addToCartWithOptionsStore = store(
 						id: productId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
+						type: productType,
 					} );
 				}
 			},
