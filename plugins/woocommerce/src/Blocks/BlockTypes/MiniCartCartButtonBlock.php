@@ -29,7 +29,7 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 		$cart_page_url             = get_permalink( $cart_page_id );
 		// Default style class is not added by default, so it needs to be added manually if it doesn't exist.
 		$block_style_default_class = '';
-		if ( ! isset ( $attributes['classname]'] ) || ! strpos( $attributes['classname'], 'is-style-' ) ){
+		if ( ! isset( $attributes['className'] ) || strpos( $attributes['className'], 'is-style-' ) === false ) {
 			$block_style_default_class = 'is-style-outline';
 		}
 		$wrapper_attributes     = get_block_wrapper_attributes( array( 'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-cart ' . $block_style_default_class ) );
