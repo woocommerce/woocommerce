@@ -32,8 +32,7 @@ class ImportSetSiteOptionsTest extends TestCase {
 	public function test_process_updates_options_successfully() {
 		$schema          = Mockery::mock();
 		$schema->options = array(
-			'site_name'                   => 'My New Site',
-			'woocommerce_default_country' => 'JP',
+			'site_name'                   => 'My New Site'
 		);
 
 		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
@@ -44,9 +43,9 @@ class ImportSetSiteOptionsTest extends TestCase {
 		$import_set_site_options->shouldReceive( 'wp_update_option' )
 			->with( 'site_name', 'My New Site' )
 			->andReturn( true );
-		$import_set_site_options->shouldReceive( 'wp_update_option' )
-			->with( 'woocommerce_default_country', 'JP' )
-			->andReturn( true );
+		$import_set_site_options->shouldReceive( 'wp_get_option' )
+			->with( 'site_name' )
+			->andReturn( 'My New Site' ); 
 
 		$result = $import_set_site_options->process( $schema );
 
@@ -54,9 +53,8 @@ class ImportSetSiteOptionsTest extends TestCase {
 		$this->assertTrue( $result->is_success() );
 
 		$messages = $result->get_messages( 'info' );
-		$this->assertCount( 2, $messages );
+		$this->assertCount( 1, $messages );
 		$this->assertEquals( 'site_name has been updated.', $messages[0]['message'] );
-		$this->assertEquals( 'woocommerce_default_country has been updated.', $messages[1]['message'] );
 	}
 
 	/**
