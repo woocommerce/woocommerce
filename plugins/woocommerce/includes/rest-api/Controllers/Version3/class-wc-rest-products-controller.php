@@ -328,7 +328,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			$this->search_fields_tokens = array(
 				'fields' => $search_fields,
-				'tokens' => array_map( 'esc_sql', $tokens ),
+				'tokens' => $tokens,
 			);
 
 			unset( $request['search'], $request['search_sku'], $request['sku'], $request['search_name_or_sku'], $args['s'] );
@@ -339,7 +339,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		if ( '' !== $search_name_or_sku_arg ) {
 			// Do a tokenized search for name or SKU. Supersedes the 'search', 'search_sku' and 'sku' arguments.
 			$tokens                          = array_filter( array_map( 'trim', explode( ' ', $search_name_or_sku_arg ) ) );
-			$this->search_name_or_sku_tokens = array_map( 'esc_sql', $tokens );
+			$this->search_name_or_sku_tokens = $tokens;
 
 			unset( $request['search'] );
 			unset( $args['s'] );
