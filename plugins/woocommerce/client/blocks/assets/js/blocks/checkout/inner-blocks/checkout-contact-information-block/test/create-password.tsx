@@ -3,6 +3,8 @@
  */
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { checkoutStore } from '@woocommerce/block-data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,6 +17,7 @@ describe( 'CreatePassword', () => {
 	beforeEach( () => {
 		user = userEvent.setup();
 		jest.clearAllMocks();
+		dispatch( checkoutStore ).__internalSetCustomerPassword( '' );
 	} );
 
 	it( 'renders the password input field', () => {
