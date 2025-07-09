@@ -124,4 +124,56 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$product_name = $notification->get_product_name();
 		$this->assertEquals( $variation_product->get_name(), $product_name );
 	}
+
+	/**
+	 * Test getting and checking unsubscribe key.
+	 */
+	public function test_get_and_check_unsubscribe_key() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_unsubscribe_key( false );
+		$this->assertIsString( $key );
+		$this->assertTrue( $notification->check_unsubscribe_key( $key ) );
+		$this->assertFalse( $notification->check_unsubscribe_key( 'invalid_key' ) );
+	}
+
+	/**
+	 * Test getting and checking verification key.
+	 */
+	public function test_get_and_check_verification_key() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_verification_key( false );
+		$this->assertIsString( $key );
+		$this->assertTrue( $notification->check_verification_key( $key ) );
+		$this->assertFalse( $notification->check_verification_key( 'invalid_key' ) );
+	}
+
+	/**
+	 * Test checking verification key with an expired key.
+	 */
+	public function test_check_verification_key_expired_key() {
+		add_filter(
+			'woocommerce_bis_verification_expiration_time_threshold',
+			function() {
+				return 0;
+			}
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+
+		$key = $notification->get_verification_key( false );
+
+		sleep( 1 );
+
+		$this->assertFalse( $notification->check_verification_key( $key ) );
+	}
 }
