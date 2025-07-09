@@ -92,13 +92,9 @@ jobs:
 
             const branches = ['trunk'];
 
-            for (let major = targetMajor; major <= trunkMajor; major++) {
-              const startMinor = (major === targetMajor) ? targetMinor : 0;
-              const endMinor = (major === trunkMajor) ? trunkMinor : 9;
-
-              for (let minor = startMinor; minor <= endMinor; minor++) {
-                branches.push(`release/${major}.${minor}`);
-              }
+            const branches = ['trunk'];
+            for (let v = Number(`${targetMajor}.${targetMinor}`); v < Number(`${trunkMajor}.${trunkMinor}`); v += 0.1) {
+              branches.push(`release/${v.toFixed(1)}`);
             }
 
             console.log('Target branches:', branches);
