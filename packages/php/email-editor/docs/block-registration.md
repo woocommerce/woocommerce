@@ -69,7 +69,9 @@ The render callback should accept three parameters:
 
 ### Method 1: Using block_type_metadata_settings Filter
 
-The recommended approach is to use the `block_type_metadata_settings` filter to modify block settings during registration:
+The recommended approach is to add the `supports.email` to the block.json file or the JS client-side registration.
+
+Another approach is to use the `block_type_metadata_settings` filter to modify block settings during registration:
 
 ```php
 /**
