@@ -121,5 +121,9 @@ echo ''
 echo "All runs completed:"
 for entry in ${result[@]}; do
 	fragments=( ${entry//;/ } )
-	echo "    -- ${fragments[0]##*/} : status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
+	if [ -z ${CI+y} ]; then
+		echo "    -- ${fragments[0]##*/} : status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
+	else
+		echo "    -- ${fragments[0]##*/} : status ${fragments[2]} (https://github.com/*/*/actions/runs/${fragments[1]})"
+	fi
 done
