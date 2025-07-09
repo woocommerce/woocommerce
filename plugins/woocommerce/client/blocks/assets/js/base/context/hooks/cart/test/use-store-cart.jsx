@@ -105,6 +105,9 @@ describe( 'useStoreCart', () => {
 				isAddressFieldsForShippingRatesUpdating: jest
 					.fn()
 					.mockReturnValue( false ),
+				getProductsPendingAdd: jest.fn().mockReturnValue( [] ),
+				getItemsPendingQuantityUpdate: jest.fn().mockReturnValue( [] ),
+				getItemsPendingDelete: jest.fn().mockReturnValue( [] ),
 			},
 		};
 		registry.registerStore( storeKey, {

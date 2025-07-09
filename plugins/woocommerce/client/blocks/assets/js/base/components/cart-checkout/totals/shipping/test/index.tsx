@@ -150,11 +150,13 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 describe( 'TotalsShipping', () => {
 	it( 'shows skeleton when loading', () => {
 		// Set loading state to true
-		( baseContextHooks.useOrderSummaryLoadingState as any ).mockReturnValue(
-			{
-				isLoading: true,
-			}
-		);
+		(
+			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+				typeof baseContextHooks.useOrderSummaryLoadingState
+			>
+		 ).mockReturnValue( {
+			isLoading: true,
+		} );
 
 		render(
 			<SlotFillProvider>
@@ -166,12 +168,14 @@ describe( 'TotalsShipping', () => {
 	} );
 
 	it( 'shows FREE if shipping cost is 0', () => {
-		// Set loading state to true
-		( baseContextHooks.useOrderSummaryLoadingState as any ).mockReturnValue(
-			{
-				isLoading: false,
-			}
-		);
+		// Set loading state to false
+		(
+			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+				typeof baseContextHooks.useOrderSummaryLoadingState
+			>
+		 ).mockReturnValue( {
+			isLoading: false,
+		} );
 		(
 			baseContextHooks.useStoreCart as jest.MockedFunction<
 				typeof baseContextHooks.useStoreCart
