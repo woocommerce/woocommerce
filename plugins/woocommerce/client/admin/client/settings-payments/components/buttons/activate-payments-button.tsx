@@ -16,7 +16,7 @@ import {
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import {
-	wooPaymentsExtensionSlug,
+	wooPaymentsExtensionSlug, wooPaymentsOnboardingSessionEntrySettings,
 	wooPaymentsProviderId,
 	wooPaymentsSuggestionId,
 } from '~/settings-payments/constants';
@@ -88,7 +88,11 @@ export const ActivatePaymentsButton = ( {
 				if ( onboardingType === 'native_in_context' ) {
 					// Open the onboarding modal.
 					recordPaymentsOnboardingEvent(
-						'woopayments_onboarding_modal_opened'
+						'woopayments_onboarding_modal_opened',
+						{
+							from: 'activate_payments_button',
+							source: wooPaymentsOnboardingSessionEntrySettings,
+						}
 					);
 					setOnboardingModalOpen( true );
 				} else {

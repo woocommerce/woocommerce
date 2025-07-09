@@ -19,6 +19,7 @@ import {
 	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
+import {wooPaymentsOnboardingSessionEntrySettings} from "~/settings-payments/constants";
 
 interface CompleteSetupButtonProps {
 	/**
@@ -103,7 +104,11 @@ export const CompleteSetupButton = ( {
 
 		if ( onboardingType === 'native_in_context' ) {
 			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_opened'
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'complete_setup_button',
+					source: wooPaymentsOnboardingSessionEntrySettings,
+				}
 			);
 			setOnboardingModalOpen( true );
 		} else if ( ! accountConnected || ! onboardingStarted ) {

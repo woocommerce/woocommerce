@@ -21,6 +21,7 @@ import {
 	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
+import {wooPaymentsOnboardingSessionEntrySettings} from "~/settings-payments/constants";
 
 interface EnableGatewayButtonProps {
 	/**
@@ -148,7 +149,11 @@ export const EnableGatewayButton = ( {
 							setOnboardingModalOpen
 						) {
 							recordPaymentsOnboardingEvent(
-								'woopayments_onboarding_modal_opened'
+								'woopayments_onboarding_modal_opened',
+								{
+									from: 'enable_gateway_button',
+									source: wooPaymentsOnboardingSessionEntrySettings,
+								}
 							);
 							setOnboardingModalOpen( true );
 						} else if ( gatewayHasRecommendedPaymentMethods ) {
