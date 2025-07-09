@@ -184,8 +184,8 @@
 				// Clean up cache if it gets too large (more than 100 entries)
 				if ( searchCache.size > 100 ) {
 					// Remove oldest entries (first 20 entries)
-					const entries = Array.from( searchCache.entries() );
-					entries.slice( 0, 20 ).forEach( ( [ key ] ) => {
+					const keys = Array.from( searchCache.keys() );
+					keys.slice( 0, 20 ).forEach( ( [ key ] ) => {
 						searchCache.delete( key );
 					} );
 				}
@@ -266,7 +266,7 @@
 					const params = new URLSearchParams( {
 						query: inputValue,
 						country,
-						lang: document.documentElement.lang,
+						lang: document.documentElement.lang || navigator.lang,
 						session_id: sessionId,
 						token: value.key,
 					} );
