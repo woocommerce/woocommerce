@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
