@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fixed an issue that prevented importing a Blueprint configuration from a Live site.
+
