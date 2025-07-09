@@ -94,7 +94,8 @@ done
 echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):" && echo -n '    '
 result=()
 while [ ${#running[@]} -gt 0 ]; do
-	echo -n '.' && sleep 1m
+	echo -n '.'
+	sleep 1m
 	temp=()
 	for entry in ${running[@]}; do
 		fragments=( ${entry//;/ } )
