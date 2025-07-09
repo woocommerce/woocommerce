@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Notification extends \WC_Data {
 
-	/**
+	/*
 	 * This is the name of this object type.
 	 *
 	 * @var string
@@ -512,7 +512,7 @@ class Notification extends \WC_Data {
 	 * return string
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key = wp_generate_password( 20, false );
+		$key  = wp_generate_password( 20, false );
 		$hash = wp_fast_hash( $key );
 		$this->update_meta_data( 'email_link_action_key', $hash );
 

@@ -142,24 +142,11 @@ class Config {
 		 * Filter the verification codes expiration time (in seconds).
 		 *
 		 * @param int $threshold
-		 * @deprecated x.x.x
-		 */
-		$threshold = (int) apply_filters_deprecated(
-			'woocommerce_bis_verification_expiration_time_threshold',
-			array( HOUR_IN_SECONDS ),
-			'x.x.x',
-			'woocommerce_customer_stock_notifications_verification_expiration_time_threshold'
-		);
-
-		/**
-		 * Filter the verification codes expiration time (in seconds).
-		 *
-		 * @param int $threshold
-		 * @since x.x.x
+		 * @since 0.0.0
 		 */
 		return (int) apply_filters(
-			'woocommerce_customer_stock_notifications_verification_expiration_time_threshold',
-			$threshold
+			'woocommerce_bis_verification_expiration_time_threshold',
+			DAY_IN_SECONDS
 		);
 	}
 }
