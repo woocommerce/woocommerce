@@ -19,9 +19,9 @@ import { getToday } from '../../get-version/lib';
 /**
  * Perform changelog adjustments after Jetpack Changelogger has run.
  *
- * @param {string} 	override    Time override.
+ * @param {string}  override        Time override.
  * @param {boolean} appendChangelog Whether to append the changelog or replace it.
- * @param {string} 	tmpRepoPath Path where the temporary repo is cloned.
+ * @param {string}  tmpRepoPath     Path where the temporary repo is cloned.
  */
 const updateReleaseChangelogs = async (
 	override: string,
@@ -339,13 +339,12 @@ function getTargetBranches(
 
 	const branches: string[] = [];
 
-	for ( let major = targetMajor; major <= trunkMajor; major++ ) {
-		const startMinor = major === targetMajor ? targetMinor + 1 : 0;
-		const endMinor = major === trunkMajor ? trunkMinor : 9;
-
-		for ( let minor = startMinor; minor <= endMinor; minor++ ) {
-			branches.push( `release/${ major }.${ minor }` );
-		}
+	for (
+		let v = Number( `${ targetMajor }.${ targetMinor }` ) + 0.1;
+		v < Number( `${ trunkMajor }.${ trunkMinor }` );
+		v += 0.1
+	) {
+		branches.push( `release/${ v.toFixed( 1 ) }` );
 	}
 
 	return branches;
