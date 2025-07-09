@@ -12,8 +12,7 @@
 		"inserter": true,
 		"color": {
 			"text": true,
-			"background": true,
-			"__experimentalSkipSerialization": true
+			"background": true
 		}
 	},
 	"attributes": {
