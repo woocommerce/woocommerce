@@ -87,13 +87,16 @@ function emitSyncEvent( {
 function getUserFriendlyErrorMessage(
 	error: Error | ApiErrorResponse
 ): string {
-	if (
-		( error as ApiErrorResponse ).code ===
-		'woocommerce_rest_missing_attributes'
-	) {
-		return 'Please select product attributes before adding to cart.';
+	const code = ( error as ApiErrorResponse )?.code;
+
+	switch ( code ) {
+		case 'woocommerce_rest_missing_attributes':
+			return 'Please select product attributes before adding to cart.';
+		case 'no_successful_cart_response':
+			return 'This product can only be purchased once. You cannot add it to your cart again.';
+		default:
+			return error.message;
 	}
-	return error.message;
 }
 
 // Todo: export this store once the store is public.
@@ -294,9 +297,10 @@ const { state, actions } = store< Store >(
 
 					// Checks if the last successful cart response is valid.
 					if ( ! lastSuccessfulCartResponse ) {
-						throw new Error(
-							'No successful cart response received.'
-						);
+						throw generateError( {
+							code: 'no_successful_cart_response',
+							message: 'No successful cart response received.',
+						} );
 					}
 
 					// Checks if the last successful response contains any errors.
@@ -324,6 +328,24 @@ const { state, actions } = store< Store >(
 
 					// Dispatches the event to sync the @wordpress/data store.
 					emitSyncEvent( { quantityChanges } );
+
+					const errors = [];
+					for ( const response of json.responses ) {
+						const body = response?.body;
+						if (
+							body &&
+							typeof body === 'object' &&
+							'code' in body &&
+							'message' in body
+						) {
+							errors.push( body );
+						}
+					}
+					if ( errors.length ) {
+						errors.forEach( ( error ) =>
+							actions.showNoticeError( error as ApiErrorResponse )
+						);
+					}
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
