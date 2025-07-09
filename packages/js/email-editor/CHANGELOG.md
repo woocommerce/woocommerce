@@ -1,3 +1,5 @@
+# Changelog 
+
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.0) - 2025-07-09 
 
 -   Patch - Add fallback for Navigator component to the email editor [#58083]
