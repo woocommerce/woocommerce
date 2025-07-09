@@ -192,7 +192,7 @@ const productButtonStore = {
 			yield actions.addCartItem( {
 				id: state.productId,
 				quantity: state.quantity + context.quantityToAdd,
-				type: context.productType
+				type: context.productType,
 			} );
 
 			context.displayViewCart = true;
