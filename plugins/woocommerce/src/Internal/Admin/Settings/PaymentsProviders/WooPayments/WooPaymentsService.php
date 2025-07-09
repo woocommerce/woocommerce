@@ -1069,6 +1069,8 @@ class WooPaymentsService {
 				array(
 					'self_assessment' => $self_assessment,
 					'capabilities'    => $selected_payment_methods,
+					// Migrate to live account if the current one is a test_drive one.
+					'migrate_to_live' => $this->has_test_account(),
 				)
 			);
 		} catch ( Exception $e ) {
