@@ -245,6 +245,10 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * Enqueues the checkout script, checks if it's already registered or not so we don't duplicate, and prints out the JWT to the page to be consumed.
 	 */
 	public function load_scripts() {
+		if ( ! $this->get_jwt() ) {
+			return;
+		}
+
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
