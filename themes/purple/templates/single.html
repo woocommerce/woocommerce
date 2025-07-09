@@ -51,7 +51,11 @@
 	<!-- /wp:spacer -->
 	
 	<!-- wp:comments {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-	<div class="wp-block-comments" style="margin-top:0;margin-bottom:0"><!-- wp:comments-title {"showPostTitle":false,"showCommentsCount":false,"level":3} /-->
+	<div class="wp-block-comments" style="margin-top:0;margin-bottom:0"><!-- wp:comments-title {"level":3} /-->
+
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
 
 	<!-- wp:post-comments-form /-->
 
@@ -86,9 +90,6 @@
 	<!-- /wp:column --></div>
 	<!-- /wp:columns -->
 	
-	<!-- wp:spacer {"height":"var:preset|spacing|60"} -->
-	<div style="height:var(--wp--preset--spacing--60)" aria-hidden="true" class="wp-block-spacer"></div>
-	<!-- /wp:spacer -->
 	<!-- /wp:comment-template --></div>
 	<!-- /wp:comments --></div>
 	<!-- /wp:group --></main>
