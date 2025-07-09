@@ -9,22 +9,19 @@ import { Icon, button } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import AddToCartWithOptionsQuantitySelectorEdit from './edit';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
-	registerBlockType( metadata, {
-		edit: AddToCartWithOptionsQuantitySelectorEdit,
-		attributes: metadata.attributes,
-		icon: {
-			src: (
-				<Icon
-					icon={ button }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
-		save() {
-			return null;
-		},
-	} );
-}
+registerBlockType( metadata, {
+	edit: AddToCartWithOptionsQuantitySelectorEdit,
+	attributes: metadata.attributes,
+	icon: {
+		src: (
+			<Icon
+				icon={ button }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	save() {
+		return null;
+	},
+} );

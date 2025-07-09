@@ -155,7 +155,7 @@ export default function ProductPreviewModal( {
 			closeButtonLabel={ __( 'Close product preview', 'woocommerce' ) }
 			size="large"
 			focusOnMount="firstElement"
-			title={ __( 'Official WooCommerce Marketplace', 'woocommerce' ) }
+			title={ __( 'The WooCommerce Marketplace', 'woocommerce' ) }
 		>
 			{ productHeader }
 			<div className="woocommerce-marketplace__product-preview-modal__content">

@@ -34,6 +34,13 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	protected $products;
 
 	/**
+	 * Product categories.
+	 *
+	 * @var array
+	 */
+	protected $product_categories;
+
+	/**
 	 * Backup options.
 	 *
 	 * @var array
@@ -80,30 +87,44 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		$this->remove_all_products();
 		$this->empty_lookup_tables();
 
+		$this->product_categories = array(
+			'cat-1' => $this->fixture_data->get_product_category( array( 'name' => 'Cat 1' ) ),
+			'cat-2' => $this->fixture_data->get_product_category( array( 'name' => 'Cat 2' ) ),
+			'cat-3' => $this->fixture_data->get_product_category( array( 'name' => 'Cat 3' ) ),
+		);
+
 		$this->products_data = array(
 			array(
 				'name'          => 'Product 1',
 				'regular_price' => 10,
 				'stock_status'  => ProductStockStatus::ON_BACKORDER,
+				'category_ids'  => array( $this->product_categories['cat-1']['term_id'] ),
 			),
 			array(
 				'name'          => 'Product 2',
 				'regular_price' => 20,
 				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'category_ids'  => array( $this->product_categories['cat-2']['term_id'] ),
 			),
 			array(
 				'name'          => 'Product 3',
 				'regular_price' => 30,
 				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				'category_ids'  => array(
+					$this->product_categories['cat-2']['term_id'],
+					$this->product_categories['cat-3']['term_id'],
+				),
 			),
 			array(
 				'name'          => 'Product 4',
 				'regular_price' => 40,
 				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'category_ids'  => array( $this->product_categories['cat-1']['term_id'] ),
 			),
 			array(
 				'name'         => 'Product 5',
 				'stock_status' => ProductStockStatus::IN_STOCK,
+				'category_ids' => array( $this->product_categories['cat-1']['term_id'] ),
 				'variations'   => array(
 					array(
 						'attributes' => array(
@@ -128,6 +149,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'         => 'Product 6',
 				'stock_status' => ProductStockStatus::IN_STOCK,
+				'category_ids' => array( $this->product_categories['cat-1']['term_id'] ),
 				'variations'   => array(
 					array(
 						'attributes' => array(
@@ -165,6 +187,7 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 		$this->remove_all_attributes();
 		$this->remove_all_products();
+		$this->remove_all_product_categories();
 		$this->empty_lookup_tables();
 
 		foreach ( $this->backup_options as $option => $value ) {
@@ -231,6 +254,15 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			}
 
 			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Remove all product taxonomies.
+	 */
+	private function remove_all_product_categories() {
+		foreach ( $this->product_categories as $term ) {
+			wp_delete_term( $term['term_id'], 'product_cat' );
 		}
 	}
 

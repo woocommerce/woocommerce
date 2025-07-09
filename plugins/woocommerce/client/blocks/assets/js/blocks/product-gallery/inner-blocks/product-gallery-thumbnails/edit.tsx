@@ -3,10 +3,9 @@
  */
 import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody } from '@wordpress/components';
-import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { useRef, useState, useEffect } from '@wordpress/element';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import type { ProductResponseImageItem } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -41,9 +40,8 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-	const { thumbnailSize } = attributes;
+	const { thumbnailSize, aspectRatio } = attributes;
 
-	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 	const productContext = useProductDataContext();
 	const product = productContext?.product;
 
@@ -53,7 +51,7 @@ export const Edit = ( {
 	const productThumbnails = isProductContext
 		? prepareProductImages( product?.images )
 		: Array( MAX_THUMBNAILS ).fill( {
-				src: placeholderSrc,
+				src: PLACEHOLDER_IMG_SRC,
 				alt: '',
 		  } );
 
@@ -100,16 +98,17 @@ export const Edit = ( {
 		}
 	);
 	const blockProps = useBlockProps( { className } );
+	const imageStyles: Record< string, string | undefined > = {
+		aspectRatio,
+	};
 
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody>
-					<ProductGalleryThumbnailsBlockSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
-					/>
-				</PanelBody>
+				<ProductGalleryThumbnailsBlockSettings
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+				/>
 			</InspectorControls>
 			{ renderThumbnails && (
 				<div { ...blockProps }>
@@ -118,23 +117,24 @@ export const Edit = ( {
 						className="wc-block-product-gallery-thumbnails__scrollable"
 					>
 						{ productThumbnails.map( ( { src, alt }, index ) => {
-							const thumbnailClassName = clsx(
-								'wc-block-product-gallery-thumbnails__thumbnail',
+							const imageClassName = clsx(
+								'wc-block-product-gallery-thumbnails__thumbnail__image',
 								{
-									'wc-block-product-gallery-thumbnails__thumbnail--active':
+									'wc-block-product-gallery-thumbnails__thumbnail__image--is-active':
 										index === 0,
 								}
 							);
 							return (
 								<div
-									className={ thumbnailClassName }
+									className="wc-block-product-gallery-thumbnails__thumbnail"
 									key={ index }
 								>
 									<img
-										className="wc-block-product-gallery-thumbnails__thumbnail__image"
+										className={ imageClassName }
 										src={ src }
 										alt={ alt }
 										loading="lazy"
+										style={ imageStyles }
 									/>
 								</div>
 							);

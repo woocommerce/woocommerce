@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import type { CurrencyResponse } from './currency';
-import type { CartItem } from './cart';
+import type { CartItem, CartShippingRate } from './cart';
 import type { ProductResponseItem } from './product-response';
 
 export interface CartResponseTotalsItem extends CurrencyResponse {
@@ -66,14 +66,7 @@ export interface CartResponseShippingPackageShippingRate
 	selected: boolean;
 }
 
-export interface CartResponseShippingRate {
-	/* PackageId can be a string, WooCommerce Subscriptions uses strings for example, but WooCommerce core uses numbers */
-	package_id: number | string;
-	name: string;
-	destination: ResponseBaseAddress;
-	items: Array< ShippingRateItem >;
-	shipping_rates: Array< CartResponseShippingPackageShippingRate >;
-}
+export type CartResponseShippingRate = CartShippingRate;
 
 export interface CartResponseShippingAddress
 	extends ResponseBaseAddress,

@@ -12,11 +12,9 @@ export type EditProps = BlockEditProps< BlockAttributes >;
 
 export type FilterOptionItem = {
 	label: string;
-	ariaLabel: string;
 	value: string;
 	selected?: boolean;
-	type: string;
-	data?: Record< string, unknown >;
+	count: number;
 };
 
 export type FilterBlockContext = {
@@ -29,6 +27,7 @@ export type FilterBlockContext = {
 			maxPrice: number;
 			maxRange: number;
 		};
+		showCounts?: boolean;
 	};
 };
 

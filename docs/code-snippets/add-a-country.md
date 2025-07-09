@@ -1,8 +1,10 @@
 ---
 post_title: Add a country
-menu_title: Add a country
-tags: code-snippet
+sidebar_label: Add a country
+
 ---
+
+# Add a country
 
 Add a country using to your countries list using this code snippet:
 

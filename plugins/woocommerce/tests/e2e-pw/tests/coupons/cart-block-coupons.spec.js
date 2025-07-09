@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import {
+	addAProductToCart,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { WC_API_PATH } from '../../utils/api-client';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 
 const simpleProductName = 'Cart Coupons Product';
@@ -128,7 +130,7 @@ test.describe(
 				// apply all coupon types
 				for ( let i = 0; i < coupons.length; i++ ) {
 					await page
-						.getByRole( 'button', { name: 'Add a coupon' } )
+						.getByRole( 'button', { name: 'Add coupons' } )
 						.click();
 					await page
 						.getByLabel( 'Enter code' )
@@ -175,7 +177,7 @@ test.describe(
 				// add all coupons and verify prices
 				for ( let i = 0; i < coupons.length; i++ ) {
 					await page
-						.getByRole( 'button', { name: 'Add a coupon' } )
+						.getByRole( 'button', { name: 'Add coupons' } )
 						.click();
 					await page
 						.getByLabel( 'Enter code' )
@@ -207,6 +209,15 @@ test.describe(
 						.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
 						.click();
 					await expect(
+						page
+							.locator(
+								'.wc-block-components-notice-banner__content'
+							)
+							.getByText(
+								`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
+							)
+					).toBeVisible();
+					await expect(
 						page.locator(
 							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 						)
@@ -221,7 +232,7 @@ test.describe(
 			async ( { page } ) => {
 				// try to add two same coupons and verify the error message
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
@@ -235,7 +246,7 @@ test.describe(
 						)
 				).toBeVisible();
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
@@ -255,7 +266,7 @@ test.describe(
 			async ( { page } ) => {
 				// add coupon with usage limit
 				await page
-					.getByRole( 'button', { name: 'Add a coupon' } )
+					.getByRole( 'button', { name: 'Add coupons' } )
 					.click();
 				await page.getByLabel( 'Enter code' ).fill( couponLimitedCode );
 				await page.getByText( 'Apply', { exact: true } ).click();

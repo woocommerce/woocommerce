@@ -10,16 +10,20 @@ import {
 	Button,
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
-import { paymentGatewaysStore, optionsStore } from '@woocommerce/data';
+import {
+	paymentGatewaysStore,
+	optionsStore,
+	paymentSettingsStore,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import '../settings-payments-body.scss';
+import { Settings } from '~/settings-payments/components/settings';
 import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { BankAccountsList } from '~/settings-payments/components/bank-accounts-list';
 import { BankAccount } from '~/settings-payments/components/bank-accounts-list/types';
-import { Settings } from '~/settings-payments/components/settings';
 
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
@@ -43,6 +47,9 @@ export const SettingsPaymentsBacs = () => {
 		} ),
 		[]
 	);
+
+	const { invalidateResolution, invalidateResolutionForStoreSelector } =
+		useDispatch( paymentSettingsStore );
 
 	const { accountsOption, isLoadingAccounts } = useSelect( ( select ) => {
 		const selectors = select( optionsStore );
@@ -127,6 +134,7 @@ export const SettingsPaymentsBacs = () => {
 					settings,
 				} ),
 			] );
+			setHasChanges( false );
 			createSuccessNotice(
 				__( 'Settings updated successfully', 'woocommerce' )
 			);
@@ -136,7 +144,8 @@ export const SettingsPaymentsBacs = () => {
 			);
 		} finally {
 			setIsSaving( false );
-			setHasChanges( false );
+			invalidateResolution( 'getPaymentProviders', [] );
+			invalidateResolutionForStoreSelector( 'getOfflinePaymentGateways' );
 		}
 	};
 

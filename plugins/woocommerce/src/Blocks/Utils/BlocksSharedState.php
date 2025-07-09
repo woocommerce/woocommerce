@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use InvalidArgumentException;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
@@ -40,6 +45,15 @@ trait BlocksSharedState {
 	 * @var mixed
 	 */
 	private static $blocks_shared_cart_state;
+
+	/**
+	 * Prevent caching on certain pages
+	 */
+	private static function prevent_cache() {
+		\WC_Cache_Helper::set_nocache_constants();
+		nocache_headers();
+	}
+
 
 	/**
 	 * Check that the consent statement was passed.
@@ -85,9 +99,25 @@ trait BlocksSharedState {
 		self::check_consent( $consent_statement );
 
 		if ( null === self::$blocks_shared_cart_state ) {
-			self::$blocks_shared_cart_state = isset( WC()->cart )
-				? rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) )->data
-				: array();
+			$cart_exists       = isset( WC()->cart );
+			$cart_has_contents = $cart_exists && ! WC()->cart->is_empty();
+			if ( $cart_exists ) {
+				$cart_controller = new CartController();
+				$cart_object     = $cart_controller->get_cart_for_response();
+
+				$store_api         = Package::container()->get( StoreApi::class );
+				$schema_controller = $store_api->container()->get( SchemaController::class );
+				$cart_schema       = $schema_controller->get( CartSchema::IDENTIFIER );
+				$cart_response     = $cart_schema->get_item_response( $cart_object );
+
+				self::$blocks_shared_cart_state = $cart_response;
+			} else {
+				self::$blocks_shared_cart_state = array();
+			}
+
+			if ( $cart_has_contents ) {
+				self::prevent_cache();
+			}
 
 			wp_interactivity_state(
 				'woocommerce',

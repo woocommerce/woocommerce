@@ -172,7 +172,7 @@ describe( 'Payment recommendations', () => {
 		expect( container.firstChild ).toBeNull();
 	} );
 
-	it( 'should trigger event settings_payment_recommendations_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	it( 'should trigger event settings_payment_recommendations_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		( isWCPaySupported as jest.Mock ).mockReturnValue( true );
 		( useSelect as jest.Mock ).mockReturnValue( {
 			installedPaymentGateways: {},
@@ -183,9 +183,7 @@ describe( 'Payment recommendations', () => {
 		const { container } = render( <PaymentRecommendations /> );
 
 		expect( container.firstChild ).not.toBeNull();
-		fireEvent.click(
-			screen.getByText( 'Official WooCommerce Marketplace' )
-		);
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payment_recommendations_visit_marketplace_click',
 			{}
@@ -334,13 +332,16 @@ describe( 'Payment recommendations', () => {
 			expect( queryByText( 'another' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+		it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+			const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+			( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+
 			const { container, getByText } = render(
 				<PaymentRecommendations />
 			);
 
 			expect( container.firstChild ).not.toBeNull();
-			fireEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+			fireEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 			expect( mockLocation.href ).toContain(
 				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 			);

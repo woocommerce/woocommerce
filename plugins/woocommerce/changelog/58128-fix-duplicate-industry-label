@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue where a duplicate “Select an industry” label is shown.
