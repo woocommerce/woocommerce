@@ -28,6 +28,7 @@ import {
 	wooPaymentsExtensionSlug,
 	wooPaymentsProviderId,
 	wooPaymentsSuggestionId,
+	wooPaymentsOnboardingSessionEntryLYS,
 } from '~/settings-payments/constants';
 
 const InstallWooPaymentsStep = ( {
@@ -46,7 +47,7 @@ const InstallWooPaymentsStep = ( {
 			{
 				step: 'install_woopayments',
 				from: 'lys',
-				source: 'lys',
+				source: wooPaymentsOnboardingSessionEntryLYS,
 			}
 		);
 	}, [] );
