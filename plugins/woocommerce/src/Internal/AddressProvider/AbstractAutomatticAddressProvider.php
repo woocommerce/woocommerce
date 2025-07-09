@@ -163,13 +163,13 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 
 
 	/**
-	 * Enqueues the checkout script, checks if it's already registered or not so we don't dubplicate, and prints out the JWT to the page to be consumed.
+	 * Enqueues the checkout script, checks if it's already registered or not so we don't duplicate, and prints out the JWT to the page to be consumed.
 	 */
 	public function load_scripts() {
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		if ( ! wp_script_is( 'a8c-address-autocomplete-service', 'registred' ) ) {
+		if ( ! wp_script_is( 'a8c-address-autocomplete-service', 'registered' ) ) {
 			wp_register_script( 'a8c-address-autocomplete-service', self::get_asset_url( 'assets/js/frontend/a8c-address-autocomplete-service' . $suffix . '.js' ), array( 'wc-address-autocomplete' ), $version, array( 'strategy' => 'defer' ) );
 		}
 
@@ -181,7 +181,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 			'a8c-address-autocomplete-service',
 			sprintf(
 				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ "%1$s" ] = { key: %2$s, canTelemetry: %3$s };',
-				$this->id,
+				wp_json_encode( $this->id ),
 				wp_json_encode( $this->get_jwt() ),
 				wp_json_encode( false !== $this->can_telemetry() && (bool) $this->can_telemetry() )
 			),
