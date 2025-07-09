@@ -21,7 +21,7 @@ import {
 	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
-import {wooPaymentsOnboardingSessionEntrySettings} from "~/settings-payments/constants";
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 interface EnableGatewayButtonProps {
 	/**

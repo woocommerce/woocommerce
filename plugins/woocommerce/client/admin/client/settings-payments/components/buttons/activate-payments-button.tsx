@@ -16,7 +16,8 @@ import {
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import {
-	wooPaymentsExtensionSlug, wooPaymentsOnboardingSessionEntrySettings,
+	wooPaymentsExtensionSlug,
+	wooPaymentsOnboardingSessionEntrySettings,
 	wooPaymentsProviderId,
 	wooPaymentsSuggestionId,
 } from '~/settings-payments/constants';
