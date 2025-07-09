@@ -4,12 +4,12 @@
 import {
 	addAProductToCart,
 	getOrderIdFromUrl,
+	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,

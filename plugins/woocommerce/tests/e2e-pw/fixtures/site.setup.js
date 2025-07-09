@@ -1,10 +1,14 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as setup } from './fixtures';
 import { setComingSoon } from '../utils/coming-soon';
 import { skipOnboardingWizard } from '../utils/onboarding';
-import { WC_API_PATH } from '../utils/api-client';
 
 setup( 'setup site', async ( { baseURL, restApi } ) => {
 	await setup.step( 'configure HPOS', async () => {
