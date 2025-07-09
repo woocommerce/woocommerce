@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
  */
 import { Fulfillment, Order } from '../data/types';
 import { store as FulfillmentsStore } from '../data/store';
-import { hasPendingItems } from '../utils/fulfillment-utils';
+import { getItemsNotInAnyFulfillment } from '../utils/order-utils';
 
 interface FulfillmentDrawerContextProps {
 	fulfillments: Fulfillment[];
@@ -81,7 +81,9 @@ export const FulfillmentDrawerProvider = ( {
 
 	useLayoutEffect( () => {
 		const hasPendingItemsInOrder =
-			order && fulfillments && hasPendingItems( order, fulfillments );
+			order &&
+			fulfillments &&
+			getItemsNotInAnyFulfillment( fulfillments, order ).length > 0;
 
 		if ( hasPendingItemsInOrder ) {
 			// If there are pending items in the order and multiple fulfillments,
