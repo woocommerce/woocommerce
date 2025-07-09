@@ -176,16 +176,16 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->restore_session_data();
 
+		/**
+		 * This clears the session if the cookie is invalid.
+		 *
+		 * Previously this also cleared the session when $this->_data was empty, and the cart was not yet initialised,
+		 * however this caused a conflict with WooCommerce Payments session handler which overrides this class.
+		 *
+		 * Ref: https://github.com/woocommerce/woocommerce/pull/57652
+		 * See also: https://github.com/woocommerce/woocommerce/pull/59530
+		 */
 		if ( ! $this->is_session_cookie_valid() ) {
-			$this->destroy_session();
-		} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
-			/**
-			 * Only destroy an empty session if the cart has not been previously initialized.
-			 * We cannot always safely remove the session cookie and destroy the session if the cart is already
-			 * initialized as $this->forget_session() calls `wc_empty_cart()` and can't be removed without potentially
-			 * breaking backward compatibility in cases where another extension already loaded and modified the cart
-			 * before the session.
-			 */
 			$this->destroy_session();
 		}
 
