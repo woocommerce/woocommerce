@@ -1,7 +1,6 @@
 name: Test canonical extensions
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       woocommerce_version:
@@ -33,4 +32,4 @@ jobs:
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
             GH_REPO: ${{ github.repository }}
         run: |
-            printf "rc\n\n\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
+            printf "${{ github.event.inputs.woocommerce_version }}\n${{ github.event.inputs.wordpress_version }}\n${{ github.event.inputs.php_version }}\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
