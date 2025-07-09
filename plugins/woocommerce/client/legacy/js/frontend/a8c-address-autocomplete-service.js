@@ -195,6 +195,7 @@
 					keys.slice( 0, 20 ).forEach( ( key ) => {
 						searchCache.delete( key );
 					} );
+				}
 			};
 
 			// Shared error handling function
