@@ -91,15 +91,10 @@ for repository in ${filtered[@]}; do
 	echo ''
 done
 
-echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):" && echo -n '    '
+echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):"
 result=()
 while [ ${#running[@]} -gt 0 ]; do
-	if [ -z ${CI+y} ]; then
-    	echo -n '.'
-    else
-    	echo '    .'
-    fi
-
+	echo '    .'
 	sleep 1m
 	temp=()
 	for entry in ${running[@]}; do
@@ -113,13 +108,7 @@ while [ ${#running[@]} -gt 0 ]; do
 				conclusion=$( gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${repository##https://github.com/}/actions/runs/$id --jq '.conclusion' )
 				status="$status:$conclusion"
 			fi
-
-			if [ -z ${CI+y} ]; then
-				echo -n '✓'
-			else
-				echo "    ✓ $repository"
-			fi
-
+			echo "    ✓ $repository"
 			result+=( "$entry;$status" )
 		else
 			temp+=( $entry )
