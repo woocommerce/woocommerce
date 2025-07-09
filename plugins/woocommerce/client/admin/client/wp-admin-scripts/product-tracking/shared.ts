@@ -599,11 +599,19 @@ const attachProductVariationsTracks = () => {
 				const selectElement = document.querySelector(
 					'#field_to_edit'
 				) as HTMLSelectElement | null;
+				if ( ! selectElement ) {
+					return;
+				}
 				// Get the index of the selected option
-				const selectedIndex = selectElement?.selectedIndex ?? -1;
+				const selectedIndex = selectElement.selectedIndex;
+				const selectedOption = selectElement.options[ selectedIndex ];
+				if ( ! selectedOption ) {
+					return;
+				}
+
 				recordEvent( 'product_variations_buttons', {
 					action: 'bulk_actions',
-					selected: selectElement?.options[ selectedIndex ]?.value,
+					selected: selectedOption?.value,
 				} );
 			},
 		},
