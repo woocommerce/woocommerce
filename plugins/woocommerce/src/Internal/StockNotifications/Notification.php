@@ -37,7 +37,7 @@ class Notification extends \WC_Data {
 	 * @var array
 	 */
 	protected $data = array(
-		'status'               => NotificationStatus::PENDING,
+		'status'              => NotificationStatus::PENDING,
 		'product_id'          => 0,
 		'user_id'             => 0,
 		'user_email'          => '',
@@ -450,8 +450,15 @@ class Notification extends \WC_Data {
 		return $product->get_parent_id() ? $product->get_name() : $product->get_title();
 	}
 
+	/**
+	 * Check if the notification has valid verification data.
+	 *
+	 * This is used to determine if the notification can be verified via email link.
+	 *
+	 * @return bool
+	 */
 	public function has_valid_verification_data(): bool {
-		$action_key = $this->get_meta('email_link_action_key' );
+		$action_key = $this->get_meta( 'email_link_action_key' );
 
 		if ( empty( $action_key) ) {
 			return false;
@@ -471,11 +478,23 @@ class Notification extends \WC_Data {
 		return true;
 	}
 
+	/**
+	 * Setup verification data for the notification.
+	 *
+	 * This is used to generate a unique key for email verification links.
+	 */
 	public function setup_verification_data() {
 		$key = time() . ':' . wp_generate_password( 20, false );
 		$this->update_meta_data( 'email_link_action_key', $key );
 	}
 
+	/**
+	 * Maybe setup verification data for the notification.
+	 *
+	 * This is used to ensure that the notification has valid verification data.
+	 *
+	 * @param bool $persist Whether to persist the changes to the database.
+	 */
 	public function maybe_setup_verification_data( bool $persist ): void {
 		$opt_in_required = get_option( 'woocommerce_customer_stock_notifications_opt_in_required', 'no' );
 
@@ -494,8 +513,15 @@ class Notification extends \WC_Data {
 		}
 	}
 
+	/**
+	 * Check if the notification has valid unsubscription data.
+	 *
+	 * This is used to determine if the notification can be unsubscribed via email link.
+	 *
+	 * @return bool
+	 */
 	public function has_valid_unsubscription_data(): bool {
-		$action_key = $this->get_meta('email_link_action_key' );
+		$action_key = $this->get_meta( 'email_link_action_key' );
 
 		if ( empty( $action_key) ) {
 			return false;
@@ -508,11 +534,23 @@ class Notification extends \WC_Data {
 		return true;
 	}
 
+	/**
+	 * Setup unsubscription data for the notification.
+	 *
+	 * This is used to generate a unique key for email unsubscription links.
+	 */
 	public function setup_unsubscription_data() {
 		$key = wp_generate_password( 20, false );
 		$this->update_meta_data( 'email_link_action_key', $key );
 	}
 
+	/**
+	 * Maybe setup unsubscription data for the notification.
+	 *
+	 * This is used to ensure that the notification has valid unsubscription data.
+	 *
+	 * @param bool $persist Whether to persist the changes to the database.
+	 */
 	public function maybe_setup_unsubscription_data( bool $persist ): void {
 		if ( $this->has_valid_unsubscription_data() ) {
 			return;
