@@ -25,6 +25,41 @@ class ImportSetSiteOptionsTest extends TestCase {
 	}
 
 	/**
+	 * Test that a warning is added when the stored option value differs from the intended value, possibly due to a hook override.
+	 *
+	 * @return void
+	 */
+	public function test_process_adds_warn() {
+		$schema          = Mockery::mock();
+		$schema->options = array(
+			'site_name' => 'New Site',
+		);
+
+		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
+			->makePartial()
+			->shouldAllowMockingProtectedMethods();
+
+		// Simulate successful update attempt.
+		$import_set_site_options->shouldReceive( 'wp_update_option' )
+			->with( 'site_name', 'New Site' )
+			->andReturn( true );
+
+		// Simulate hook override - return a different value than expected.
+		$import_set_site_options->shouldReceive( 'wp_get_option' )
+			->with( 'site_name' )
+			->andReturn( 'Something Else' );
+
+		$result = $import_set_site_options->process( $schema );
+
+		$this->assertInstanceOf( StepProcessorResult::class, $result );
+		$this->assertTrue( $result->is_success() );
+
+		$messages = $result->get_messages( 'warn' );
+		$this->assertCount( 1, $messages );
+		$this->assertEquals( 'site_name was intended to be set, but the stored value may have been overridden by a hook.', $messages[0]['message'] );
+	}
+
+	/**
 	 * Test successful update of site options.
 	 *
 	 * @return void
@@ -32,7 +67,7 @@ class ImportSetSiteOptionsTest extends TestCase {
 	public function test_process_updates_options_successfully() {
 		$schema          = Mockery::mock();
 		$schema->options = array(
-			'site_name'                   => 'My New Site'
+			'site_name' => 'My New Site',
 		);
 
 		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
@@ -45,7 +80,7 @@ class ImportSetSiteOptionsTest extends TestCase {
 			->andReturn( true );
 		$import_set_site_options->shouldReceive( 'wp_get_option' )
 			->with( 'site_name' )
-			->andReturn( 'My New Site' ); 
+			->andReturn( 'My New Site' );
 
 		$result = $import_set_site_options->process( $schema );
 
