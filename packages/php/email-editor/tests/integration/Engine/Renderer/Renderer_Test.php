@@ -240,7 +240,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 
-		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--></p><!-- /wp:paragraph -->';
+		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
 		wp_update_post(
 			array(
 				'ID'           => $this->email_post->ID,
@@ -253,8 +253,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'Preheader content',
 			'en'
 		);
+		// Debug output for rendered text and html if assertion fails.
+		if (strpos($rendered['text'], '<!--[woocommerce/customer-username]-->') === false) {
+			fwrite(STDERR, "\n[DEBUG] Rendered text version:\n" . $rendered['text'] . "\n");
+			fwrite(STDERR, "\n[DEBUG] Rendered HTML version:\n" . $rendered['html'] . "\n");
+		}
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['html'] );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['text'] );
 	}
 
 	/**

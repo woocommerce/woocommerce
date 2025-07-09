@@ -185,29 +185,46 @@ class Renderer {
 	}
 
 	/**
-	 * Preserves personalization tags by replacing them with unique placeholders.
+	 * Preserves personalization tags by replacing them with unique placeholders (not inside comments).
 	 *
 	 * @param string $template HTML template.
 	 * @return string
 	 */
 	private function preserve_personalization_tags( string $template ): string {
-		$all_tags                               = $this->personalization_tags_registry->get_all();
+		$all_registered_tags = $this->personalization_tags_registry->get_all();
 		$this->personalization_tag_placeholders = array();
-		$counter                                = 0;
+		$counter = 0;
 
-		foreach ( $all_tags as $tag ) {
-			$token = $tag->get_token();
-			// Create a unique placeholder for each personalization tag (counter is sufficient).
-			$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
-			// Store the full HTML comment format.
-			$this->personalization_tag_placeholders[ $placeholder ] = '<!--' . $token . '-->';
-			++$counter;
+
+		$base_tokens = array(); // all the tokens used in the email, e.g. [woocommerce/customer-username]
+		$token_prefixes = array(); // all the used prefixes, e.g. woocommerce, mailpoet, etc.
+		foreach ( $all_registered_tags as $tag ) {
+			$token = $tag->get_token(); // e.g. [woocommerce/customer-username]
+			$base_tokens[ $token ] = true;
+			// Remove brackets for regex matching, escape for regex.
+			$token_prefixes[] = preg_quote( substr( $token, 1, -1 ), '/' );
 		}
 
-		// Replace all personalization tags with placeholders (exact string replacement).
-		$template = str_replace(
-			array_values( $this->personalization_tag_placeholders ),
-			array_keys( $this->personalization_tag_placeholders ),
+		if ( empty( $token_prefixes ) ) {
+			return $template;
+		}
+
+		// Match all of the code comments that look like a personalization tags.
+		$pattern = '/<!--\[(' . implode( '|', $token_prefixes ) . ')(?:\s+[^\]]*)?\]-->/';
+
+		$template = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( &$counter, $base_tokens ) {
+				// $matches[1] is the token without brackets, add brackets for lookup.
+				$base_token = '[' . $matches[1] . ']';
+				if ( isset( $base_tokens[ $base_token ] ) ) {
+					$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
+					$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];
+					++$counter;
+					return $placeholder;
+				}
+				return $matches[0];
+			},
 			$template
 		);
 
