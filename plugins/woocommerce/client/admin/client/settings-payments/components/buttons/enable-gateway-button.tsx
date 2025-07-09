@@ -117,7 +117,9 @@ export const EnableGatewayButton = ( {
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordPaymentsProviderEvent( 'enable_click', gatewayProvider );
+		recordPaymentsProviderEvent( 'enable_click', gatewayProvider, {
+			incentive_id: incentive ? incentive.promo_id : 'none',
+		} );
 
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
@@ -191,6 +193,9 @@ export const EnableGatewayButton = ( {
 							gatewayProvider,
 							{
 								reason: 'needs_setup',
+								incentive_id: incentive
+									? incentive.promo_id
+									: 'none',
 							}
 						);
 					}
@@ -212,6 +217,7 @@ export const EnableGatewayButton = ( {
 				// Record the event when the gateway could not be enabled.
 				recordPaymentsProviderEvent( 'enable_failed', gatewayProvider, {
 					reason: 'error',
+					incentive_id: incentive ? incentive.promo_id : 'none',
 				} );
 
 				// In case of errors, redirect to the gateway settings page.
