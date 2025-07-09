@@ -192,10 +192,9 @@
 				if ( searchCache.size > 100 ) {
 					// Remove oldest entries (first 20 entries)
 					const keys = Array.from( searchCache.keys() );
-					keys.slice( 0, 20 ).forEach( ( [ key ] ) => {
+					keys.slice( 0, 20 ).forEach( ( key ) => {
 						searchCache.delete( key );
 					} );
-				}
 			};
 
 			// Shared error handling function
