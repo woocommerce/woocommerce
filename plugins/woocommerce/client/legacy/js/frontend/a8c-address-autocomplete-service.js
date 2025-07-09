@@ -8,6 +8,16 @@
 	const MAX_SERVICE_ERROR_RETRIES = 3;
 
 	/**
+	 * Generate a unique session ID using crypto.randomUUID if available, otherwise fallback to Math.random
+	 * @returns {string} A unique session ID
+	 */
+	function generateSessionId() {
+		return crypto && crypto.randomUUID
+			? crypto.randomUUID()
+			: Math.random().toString( 36 ).substring( 2 );
+	}
+
+	/**
 	 * Debounce function from lodash, modified to return a promise.
 	 */
 	function debounce( func, wait, options ) {
@@ -161,10 +171,7 @@
 
 	Object.entries( a8cAddressAutocompleteServiceKeys ).forEach(
 		( [ key, value ] ) => {
-			let sessionId =
-				crypto && crypto.randomUUID
-					? crypto.randomUUID()
-					: Math.random().toString( 36 ).substring( 2 );
+			let sessionId = generateSessionId();
 			let requestDurations = [];
 			let serviceErrorRetries = 0;
 			// Cache for search results - key: `${inputValue}:${country}`, value: data
@@ -194,7 +201,7 @@
 			// Shared error handling function
 			const handleApiError = ( data, response ) => {
 				if ( ! data.code && ! data.error ) {
-					return null; // No error to handle
+					return; // No error to handle
 				}
 
 				const errorCode = data.code || data.error;
@@ -208,41 +215,39 @@
 					case 'missing_jwt_token':
 						permanentlyDisabledServices.push( key );
 						console.error(
-							'Automattic Address Suggestion has been disabled due to invalid JWT token'
+							`Automattic Address Suggestion (${ key }) has been disabled due to invalid JWT token`
 						);
-						return null;
+						return;
 					case 'rate_limit_exceeded':
 						permanentlyDisabledServices.push( key );
 						setTimeout( () => {
-							permanentlyDisabledServices.splice(
-								permanentlyDisabledServices.indexOf( key ),
-								1
-							);
+							const index =
+								permanentlyDisabledServices.indexOf( key );
+							if ( index !== -1 ) {
+								permanentlyDisabledServices.splice( index, 1 );
+							}
 						}, response.headers.get( 'RateLimit-Retry-After' ) * 1000 );
 						console.error(
-							'Automattic Address Suggestion has been disabled due to rate limit exceeded'
+							`Automattic Address Suggestion (${ key }) has been disabled due to rate limit exceeded`
 						);
-						return null;
+						return;
 					case 'missing_query':
-						return null;
+						return;
 					case 'no_suggestions':
-						return [];
+						return;
 					case 'missing_address_id':
 						console.error(
-							'Automattic Address Suggestion: Missing address ID'
+							`Automattic Address Suggestion (${ key }) has been disabled due to missing address ID`
 						);
-						return null;
+						return;
 					case 'no_place':
 						console.error(
-							'Automattic Address Suggestion: No place found'
+							`Automattic Address Suggestion (${ key }) has been disabled due to no place found`
 						);
-						return null;
+						return;
 					case 'missing_session_id':
-						sessionId =
-							crypto && crypto.randomUUID
-								? crypto.randomUUID()
-								: Math.random().toString( 36 ).substring( 2 );
-						return null;
+						sessionId = generateSessionId();
+						return;
 					case 'woo_address_suggestion_internal_error':
 					case 'woo_address_suggestion_service_error':
 					case 'woo_address_suggestion_server_error':
@@ -252,12 +257,12 @@
 						) {
 							permanentlyDisabledServices.push( key );
 							console.error(
-								'Automattic Address Suggestion has been disabled due to internal service error'
+								`Automattic Address Suggestion (${ key }) has been disabled due to internal service error`
 							);
 						}
-						return null;
+						return;
 					default:
-						return null;
+						return;
 				}
 			};
 
@@ -272,19 +277,16 @@
 					} );
 
 					try {
-						const startTime = Date.now();
+						const startTime = performance.now();
 						const response = await fetch(
 							`${ searchUrl }?${ params.toString() }`
 						);
-						const endTime = Date.now();
+						const endTime = performance.now();
 						requestDurations.push( endTime - startTime );
 						let data = await response.json();
 
 						// Handle errors using shared function
-						const errorResult = handleApiError( data, response );
-						if ( errorResult !== null ) {
-							return errorResult;
-						}
+						handleApiError( data, response );
 
 						if ( Array.isArray( data ) ) {
 							data = data.map( ( item ) => ( {
@@ -303,7 +305,7 @@
 							return [];
 						}
 						console.error(
-							'Error fetching address suggestions:',
+							`Error fetching address suggestions for ${ key }:`,
 							e
 						);
 						return [];
@@ -376,10 +378,7 @@
 
 					let data = await response.json();
 					// Reset session ID after successful select
-					sessionId =
-						crypto && crypto.randomUUID
-							? crypto.randomUUID()
-							: Math.random().toString( 36 ).substring( 2 );
+					sessionId = generateSessionId();
 					try {
 						dispatchEvent(
 							new CustomEvent(
@@ -398,10 +397,7 @@
 					requestDurations = [];
 
 					// Handle errors using shared function
-					const errorResult = handleApiError( data, response );
-					if ( errorResult !== null ) {
-						return errorResult;
-					}
+					handleApiError( data, response );
 
 					return data;
 				},

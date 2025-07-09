@@ -51,21 +51,24 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	/**
 	 * Loads up a JWT from cache or from the implementor side.
 	 *
-	 * @return string|null The JWT for the address service.
+	 * @return void
 	 */
 	public function load_jwt() {
+		$last_fetch_attempt = $this->get_cached_option( 'last_fetch_attempt' );
+		if ( $last_fetch_attempt && $last_fetch_attempt > time() - HOUR_IN_SECONDS ) {
+			return;
+		}
 
 		// If we already have a loaded, valid token, we return early.
 		if ( $this->jwt && JsonWebToken::shallow_validate( $this->jwt ) ) {
-			return $this->jwt;
+			return;
 		}
 
-		$transient_key = $this->id . 'address_autocomplete_jwt';
-		$cached_jwt    = get_transient( $transient_key );
+		$cached_jwt = $this->get_cached_option( 'address_autocomplete_jwt' );
 		// If we have a cached, valid token, we load it to class and return early.
 		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) && 'local' !== wp_get_environment_type() ) {
-			$this->jwt = $cached_jwt;
-			return $this->jwt;
+			$this->jwt = $cached_jwt['data'];
+			return;
 		}
 
 		// Otherwise, we fetch a fresh token.
@@ -73,13 +76,13 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 			$fresh_jwt = $this->get_address_service_jwt();
 			if ( $fresh_jwt && JsonWebToken::shallow_validate( $fresh_jwt ) ) {
 				$this->set_jwt( $fresh_jwt );
-				return $this->jwt;
+				return;
 			}
 		} catch ( \Exception $e ) {
 			wc_get_logger()->error( sprintf( 'Failed loding JWT for %1$s address autocomplete service with error %2$s.', $this->name, $e->getMessage() ), 'address-autocomplete' );
+		} finally {
+			$this->update_cached_option( 'last_fetch_attempt', time(), HOUR_IN_SECONDS );
 		}
-
-		return $this->jwt;
 	}
 
 	/**
@@ -89,7 +92,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 */
 	public function get_jwt() {
 		if ( null === $this->jwt ) {
-			return $this->load_jwt();
+			$this->load_jwt();
 		}
 
 		return $this->jwt;
@@ -103,9 +106,16 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	public function set_jwt( $jwt ) {
 		$this->jwt = $jwt;
 		if ( null !== $jwt ) {
-			set_transient( $this->id . 'address_autocomplete_jwt', $jwt, $this->get_jwt_cache_duration( $jwt ) );
+			$cache_duration = $this->get_jwt_cache_duration( $jwt );
+			// If the token is expired, we don't cache it and we fetch a new one.
+			if ( 0 === $cache_duration ) {
+				$this->jwt = null;
+				$this->load_jwt();
+				return;
+			}
+			$this->update_cached_option( 'address_autocomplete_jwt', $jwt, $cache_duration );
 		} else {
-			delete_transient( $this->id . 'address_autocomplete_jwt' );
+			$this->delete_cached_option( 'address_autocomplete_jwt' );
 		}
 	}
 
@@ -116,14 +126,10 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * @return int The cache duration for the JWT.
 	 */
 	public function get_jwt_cache_duration( $jwt ) {
-		if ( JsonWebToken::shallow_validate( $jwt ) ) {
-			$parts = JsonWebToken::get_parts( $jwt );
-			if ( property_exists( $parts->payload, 'exp' ) ) {
-				return $parts->payload->exp - time();
-			}
+		$parts = JsonWebToken::get_parts( $jwt );
+		if ( property_exists( $parts->payload, 'exp' ) ) {
+			return max( $parts->payload->exp - time(), 0 );
 		}
-
-		return DAY_IN_SECONDS;
 	}
 
 	/**
@@ -140,6 +146,79 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		}
 
 		return $setting;
+	}
+
+	/**
+	 * Gets the cached option.
+	 *
+	 * @param string $key The key of the option.
+	 * @return mixed|null The cached option.
+	 */
+	private function get_cached_option( $key ) {
+		$data = get_option( $this->id . '_' . $key );
+		if ( is_array( $data ) && isset( $data['data'] ) ) {
+			if ( ! self::is_expired( $data ) ) {
+				return $data['data'];
+			}
+			$this->delete_cached_option( $key );
+		}
+		return null;
+	}
+
+	/**
+	 * Updates the cached option.
+	 *
+	 * @param string $key The key of the option.
+	 * @param mixed  $value The value of the option.
+	 * @param int    $ttl The TTL of the option.
+	 */
+	private function update_cached_option( $key, $value, $ttl = DAY_IN_SECONDS ) {
+		$result = update_option(
+			$this->id . '_' . $key,
+			array(
+				'data'    => $value,
+				'updated' => time(),
+				'ttl'     => $ttl,
+			),
+			false
+		);
+		if ( false === $result ) {
+			wp_cache_delete( $this->id . '_' . $key, 'options' );
+		}
+	}
+
+	/**
+	 * Deletes the cached option.
+	 *
+	 * @param string $key The key of the option.
+	 */
+	private function delete_cached_option( $key ) {
+		if ( delete_option( $this->id . '_' . $key ) ) {
+			wp_cache_delete( $this->id . '_' . $key, 'options' );
+		}
+	}
+
+	/**
+	 * Checks if the cache value is expired.
+	 *
+	 * @param array $cache_contents The cache contents.
+	 *
+	 * @return boolean True if the contents are expired. False otherwise.
+	 */
+	private static function is_expired( $cache_contents ) {
+		if ( ! is_array( $cache_contents ) || ! isset( $cache_contents['updated'] ) || ! isset( $cache_contents['ttl'] ) ) {
+			// Treat bad/invalid cache contents as expired.
+			return true;
+		}
+
+		// Double-check that we have integers for `updated` and `ttl`.
+		if ( ! is_int( $cache_contents['updated'] ) || ! is_int( $cache_contents['ttl'] ) ) {
+			return true;
+		}
+
+		$expires = $cache_contents['updated'] + $cache_contents['ttl'];
+		$now     = time();
+		return $expires < $now;
 	}
 
 	/**
