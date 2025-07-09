@@ -295,39 +295,22 @@ const { state, actions } = store< Store >(
 						successfulResponses.length - 1
 					]?.body as Cart;
 
-					// Checks if the last successful cart response is valid.
-					if ( ! lastSuccessfulCartResponse ) {
-						throw generateError( {
-							code: 'no_successful_cart_response',
-							message: 'No successful cart response received.',
+					// Only update the cart and trigger events if there is at least one successful response.
+					if ( successfulResponses.length > 0 ) {
+						// Use the last successful response to update the local cart.
+						const cartResponse = lastSuccessfulCartResponse;
+
+						// Updates the local cart.
+						state.cart = cartResponse;
+
+						// Dispatches a legacy event.
+						triggerAddedToCartEvent( {
+							preserveCartData: true,
 						} );
+
+						// Dispatches the event to sync the @wordpress/data store.
+						emitSyncEvent( { quantityChanges } );
 					}
-
-					// Checks if the last successful response contains any errors.
-					if (
-						lastSuccessfulCartResponse?.errors &&
-						Array.isArray( lastSuccessfulCartResponse.errors )
-					) {
-						lastSuccessfulCartResponse.errors.forEach(
-							( error ) => {
-								actions.showNoticeError( error );
-							}
-						);
-					}
-
-					// Use the last successful response to update the local cart.
-					const cartResponse = lastSuccessfulCartResponse;
-
-					// Updates the local cart.
-					state.cart = cartResponse;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
-					} );
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
 
 					// Show all errors from the batch responses.
 					for ( const response of json.responses ) {
