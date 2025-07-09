@@ -32,4 +32,5 @@ jobs:
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
             GH_REPO: ${{ github.repository }}
         run: |
-            printf "${{ github.event.inputs.woocommerce_version }}\n${{ github.event.inputs.wordpress_version }}\n${{ github.event.inputs.php_version }}\n\n" | pnpm run-canonical-extensions-tests
+            # printf "rc\n\n\n\n" | pnpm run-canonical-extensions-tests
+            # printf "${{ github.event.inputs.woocommerce_version }}\n${{ github.event.inputs.wordpress_version }}\n${{ github.event.inputs.php_version }}\n\n" | pnpm run-canonical-extensions-tests
