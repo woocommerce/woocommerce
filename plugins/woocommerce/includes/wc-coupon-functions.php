@@ -112,12 +112,15 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 	}
 
 	$data_store = WC_Data_Store::load( 'coupon' );
-	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+	
+	// Use the same sanitization for cache key as the database lookup to ensure consistency
+	$sanitized_code = wc_sanitize_coupon_code( $code );
+	$ids = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $sanitized_code, 'coupons' );
 
 	if ( false === $ids ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
-			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $sanitized_code, $ids, 'coupons' );
 		}
 	}
 
