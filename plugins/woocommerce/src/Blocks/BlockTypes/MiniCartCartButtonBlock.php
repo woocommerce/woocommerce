@@ -27,11 +27,12 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 		$view_cart_text         = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_view_cart_text;
 		$cart_page_id           = wc_get_page_id( 'cart' );
 		$cart_page_url          = get_permalink( $cart_page_id );
+		$wrapper_attributes     = get_block_wrapper_attributes( array( 'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-cart' ) );
 
 		ob_start();
 
 		?>
-		<a href="<?php echo esc_url( $cart_page_url ); ?>" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-cart-button-block wc-block-mini-cart__footer-cart outlined">
+		<a href="<?php echo esc_url( $cart_page_url ); ?>" <?php echo $wrapper_attributes; ?>>
 			<div class="wc-block-components-button__text">
 				<?php echo esc_html( $view_cart_text ); ?>
 			</div>
