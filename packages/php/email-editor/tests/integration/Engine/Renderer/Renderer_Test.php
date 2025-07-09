@@ -217,7 +217,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		// Use the real Personalization_Tags_Registry and Personalization_Tag.
 		$registry = new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry(
 			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
 		);
@@ -232,7 +231,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 
-		// Override the renderer with our real registry.
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
@@ -253,11 +251,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'Preheader content',
 			'en'
 		);
-		// Debug output for rendered text and html if assertion fails.
-		if (strpos($rendered['text'], '<!--[woocommerce/customer-username]-->') === false) {
-			fwrite(STDERR, "\n[DEBUG] Rendered text version:\n" . $rendered['text'] . "\n");
-			fwrite(STDERR, "\n[DEBUG] Rendered HTML version:\n" . $rendered['html'] . "\n");
-		}
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );

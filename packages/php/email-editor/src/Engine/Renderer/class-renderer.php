@@ -191,15 +191,14 @@ class Renderer {
 	 * @return string
 	 */
 	private function preserve_personalization_tags( string $template ): string {
-		$all_registered_tags = $this->personalization_tags_registry->get_all();
+		$all_registered_tags                    = $this->personalization_tags_registry->get_all();
 		$this->personalization_tag_placeholders = array();
-		$counter = 0;
+		$counter                                = 0;
 
-
-		$base_tokens = array(); // all the tokens used in the email, e.g. [woocommerce/customer-username]
-		$token_prefixes = array(); // all the used prefixes, e.g. woocommerce, mailpoet, etc.
+		$base_tokens    = array(); // All the tokens used in the email, e.g. [woocommerce/customer-username].
+		$token_prefixes = array(); // All the used prefixes, e.g. woocommerce, mailpoet, etc.
 		foreach ( $all_registered_tags as $tag ) {
-			$token = $tag->get_token(); // e.g. [woocommerce/customer-username]
+			$token                 = $tag->get_token(); // E.g. [woocommerce/customer-username].
 			$base_tokens[ $token ] = true;
 			// Remove brackets for regex matching, escape for regex.
 			$token_prefixes[] = preg_quote( substr( $token, 1, -1 ), '/' );
@@ -228,7 +227,7 @@ class Renderer {
 			$template
 		);
 
-		return $template;
+		return $template ?? '';
 	}
 
 	/**
