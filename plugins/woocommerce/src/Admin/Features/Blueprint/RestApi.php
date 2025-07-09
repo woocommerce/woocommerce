@@ -272,6 +272,10 @@ class RestApi {
 			$session_token = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'bp_', true );
 		}
 
+		if ( false === get_transient( 'blueprint_import_session_' . $session_token ) ) {
+			set_transient( 'blueprint_import_session_' . $session_token, true, 10 * MINUTE_IN_SECONDS );
+		}
+
 		if ( ! $this->can_import_blueprint( $session_token ) ) {
 			return array(
 				'success'  => false,
@@ -282,10 +286,6 @@ class RestApi {
 					),
 				),
 			);
-		}
-
-		if ( false === get_transient( 'blueprint_import_session_' . $session_token ) ) {
-			set_transient( 'blueprint_import_session_' . $session_token, true, 10 * MINUTE_IN_SECONDS );
 		}
 
 		// Get the raw body size.
