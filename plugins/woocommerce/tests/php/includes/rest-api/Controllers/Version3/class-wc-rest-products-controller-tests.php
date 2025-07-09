@@ -1642,11 +1642,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the `search_fields` parameter requires all tokens to match within one field.
+	 * Test that the `search_fields` parameter supports cross-field matching.
 	 *
 	 * @return void
 	 */
-	public function test_products_search_requires_all_tokens_to_match_in_one_field() {
+	public function test_products_search_supports_cross_field_matching() {
 		$test_product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -1667,7 +1667,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 
-		$this->assertEquals( 0, count( $response_products ) );
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
 	}
 
 	/**
@@ -1746,6 +1747,94 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 1, count( $response_products ) );
 		$this->assertEquals( 'Premium Wool Scarf', $response_products[0]['name'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with description field.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_description_field() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'        => 'Blue Widget',
+				'description' => 'A premium quality winter scarf made from wool.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'description' ),
+				'search'        => 'winter wool',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with short_description field.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_short_description_field() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'              => 'Green Gadget',
+				'short_description' => 'Perfect for summer activities.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'short_description' ),
+				'search'        => 'summer activities',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with mixed content fields.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_mixed_content_fields() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'              => 'Red Tool',
+				'description'       => 'Essential tool for professionals.',
+				'short_description' => 'High quality craftsmanship.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'description', 'short_description' ),
+				'search'        => 'quality professionals',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
 	}
 
 	/**

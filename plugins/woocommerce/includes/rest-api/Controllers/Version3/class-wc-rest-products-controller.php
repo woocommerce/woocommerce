@@ -565,32 +565,34 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		$column_map = array(
-			'name'             => "{$wpdb->posts}.post_title",
-			'sku'              => 'wc_product_meta_lookup.sku',
-			'global_unique_id' => 'wc_product_meta_lookup.global_unique_id',
+			'name'              => "{$wpdb->posts}.post_title",
+			'sku'               => 'wc_product_meta_lookup.sku',
+			'global_unique_id'  => 'wc_product_meta_lookup.global_unique_id',
+			'description'       => "{$wpdb->posts}.post_content",
+			'short_description' => "{$wpdb->posts}.post_excerpt",
 		);
 
 		$field_clauses = array();
 
-		foreach ( $fields as $field ) {
-			if ( ! isset( $column_map[ $field ] ) ) {
-				continue;
-			}
-
-			$db_column           = $column_map[ $field ];
+		foreach ( $tokens as $token ) {
+			$like_search         = '%' . $wpdb->esc_like( $token ) . '%';
 			$field_token_clauses = array();
 
-			foreach ( $tokens as $token ) {
-				$like_search           = '%' . $wpdb->esc_like( $token ) . '%';
+			foreach ( $fields as $field ) {
+				if ( ! isset( $column_map[ $field ] ) ) {
+					continue;
+				}
+
+				$db_column             = $column_map[ $field ];
 				$field_token_clauses[] = '(' . $db_column . ' LIKE ' . $wpdb->prepare( '%s', $like_search ) . ')';
 			}
 
 			if ( $field_token_clauses ) {
-				$field_clauses[] = '(' . implode( ' AND ', $field_token_clauses ) . ')';
+				$field_clauses[] = '(' . implode( ' OR ', $field_token_clauses ) . ')';
 			}
 		}
 
-		return $field_clauses ? ' AND (' . implode( ' OR ', $field_clauses ) . ')' : '';
+		return $field_clauses ? ' AND (' . implode( ' AND ', $field_clauses ) . ')' : '';
 	}
 
 	/**
@@ -1862,13 +1864,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$search_fields_enum = array( 'name', 'global_unique_id' );
+		$search_fields_enum = array( 'name', 'global_unique_id', 'description', 'short_description' );
 		if ( wc_product_sku_enabled() ) {
 			$search_fields_enum[] = 'sku';
 		}
 
 		$params['search_fields'] = array(
-			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id. This argument takes precedence over all other search parameters.', 'woocommerce' ),
+			'description'       => __( 'Limit search to specific fields when used with search parameter. Available fields: name, sku, global_unique_id, description, short_description. This argument takes precedence over all other search parameters.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
