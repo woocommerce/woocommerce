@@ -28,7 +28,7 @@ class WPPostsImporter {
 	 * @param array $posts The posts to process.
 	 * @return array
 	 */
-	public function register_product_attribute_taxonomies( $posts ): array {
+	public function register_product_attribute_taxonomies( $posts ) {
 		if ( ! is_array( $posts ) || empty( $posts ) ) {
 			return $posts;
 		}
