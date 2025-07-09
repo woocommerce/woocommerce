@@ -19,9 +19,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
-import { coreQueryPaginationBlockName } from '../../constants';
 
 /**
  * Internal dependencies
@@ -42,7 +39,7 @@ import {
 	InheritQueryControl,
 	FilterableControl,
 } from './use-page-context-control';
-import usePaginationLayout from './use-pagination-layout';
+import useLayoutAdjustments from './use-layout-adjustments';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -93,7 +90,7 @@ const ProductCollectionInspectorControls = (
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
-	usePaginationLayout( clientId, attributes );
+	useLayoutAdjustments( clientId, attributes );
 
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
