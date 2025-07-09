@@ -26,13 +26,13 @@ echo -n 'Verifying inputs: ';
 file='/tmp/WOOCOMMERCE_QIT_ENVIRONMENTS'
 curl -s 'https://qit.woo.com/wp-json/cd/v1/environment' --output $file || ( echo 'error (fetch available environments information)' && exit 1 )
 if [[ $( cat $file | jq "(.woocommerce_versions | index(\"$version\"))" ) == 'null' ]]; then
-  echo 'error (invalid WooCommerce version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+  echo 'error (invalid WooCommerce version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
 fi
 if [[ $wordpress != '' ]] && [[ $( cat $file | jq "(.wordpress_versions | index(\"$wordpress\"))" ) == 'null' ]]; then
-  echo 'error (invalid WordPress version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+  echo 'error (invalid WordPress version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
 fi
 if [[ $php != '' ]] && [[ $( cat $file | jq "(.php_versions | has(\"$php\"))" ) == 'false' ]]; then
-  echo 'error (invalid PHP version, see https://qit.woo.com/wp-json/cd/v1/environment)' && exit 1
+  echo 'error (invalid PHP version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
 fi
 echo 'ok'
 

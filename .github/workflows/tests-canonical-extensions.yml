@@ -33,4 +33,4 @@ jobs:
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
             GH_REPO: ${{ github.repository }}
         run: |
-            printf "9.9.0-rc.1\n\n\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
+            printf "rc\n\n\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
