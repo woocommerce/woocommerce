@@ -12,7 +12,6 @@ import { BusinessVerificationContextProvider } from './data/business-verificatio
 import { OnboardingForm } from './components/form';
 import BusinessDetails from './sections/business-details';
 import EmbeddedKyc from './sections/embedded-kyc';
-import ActivatePayments from './sections/activate-payments';
 import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
@@ -36,14 +35,8 @@ export const BusinessVerificationStep: React.FC = () => {
 		country: currentStep?.context?.fields?.location,
 		...( currentStep?.context?.self_assessment ?? {} ),
 	};
-	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
 
-	// Only include the activate step if the user has a test account.
-	const subStepsList = [
-		...( hasTestAccount ? [ 'activate' ] : [] ),
-		'business',
-		'embedded',
-	];
+	const subStepsList = [ 'business', 'embedded' ];
 
 	// Find the first not completed sub-step.
 	const initialStep = subStepsList.find( ( stepId ) => {
@@ -95,11 +88,6 @@ export const BusinessVerificationStep: React.FC = () => {
 							);
 						} }
 					>
-						{ hasTestAccount && (
-							<Step name="activate" showHeading={ false }>
-								<ActivatePayments />
-							</Step>
-						) }
 						<Step name="business">
 							<OnboardingForm>
 								<BusinessDetails />
