@@ -145,10 +145,7 @@ class WooPaymentsService {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
-		if ( empty( $source ) ) {
-			// If no source is provided, we duse the default.
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		return array(
 			// This state is high-level data, independent of the type of onboarding flow.
@@ -376,9 +373,7 @@ class WooPaymentsService {
 		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
 
 		if ( $result ) {
-			if ( empty( $source ) ) {
-				$source = self::SESSION_ENTRY_DEFAULT;
-			}
+			$source = $this->validate_onboarding_source( $source );
 
 			// Record an event for the step being started.
 			$this->record_event(
@@ -460,9 +455,7 @@ class WooPaymentsService {
 		$result = $this->save_nox_profile_onboarding_step_entry( $step_id, $location, 'statuses', $statuses );
 
 		if ( $result ) {
-			if ( empty( $source ) ) {
-				$source = self::SESSION_ENTRY_DEFAULT;
-			}
+			$source = $this->validate_onboarding_source( $source );
 
 			// Record an event for the step being completed.
 			$this->record_event(
@@ -937,9 +930,7 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		if ( empty( $source ) ) {
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to initialize the test account.
@@ -1078,9 +1069,7 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		if ( empty( $source ) ) {
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to get the KYC session.
@@ -1202,9 +1191,7 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		if ( empty( $source ) ) {
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to finalize the KYC session.
@@ -1372,9 +1359,7 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		if ( empty( $source ) ) {
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		// Before resetting the account, record its details for tracking purposes.
 		$event_props = array(
@@ -1462,9 +1447,7 @@ class WooPaymentsService {
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		if ( empty( $source ) ) {
-			$source = self::SESSION_ENTRY_DEFAULT;
-		}
+		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to disable the test account and prepare for the switch to live.
@@ -2468,5 +2451,25 @@ class WooPaymentsService {
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Check the onboarding source and ensure it is a valid value.
+	 *
+	 * @param string|null $source The source of the onboarding request.
+	 *
+	 * @return string The validated onboarding source.
+	 */
+	private function validate_onboarding_source( ?string $source ): string {
+		if ( empty( $source ) ) {
+			return self::SESSION_ENTRY_DEFAULT;
+		}
+
+		$valid_sources = array(
+			self::SESSION_ENTRY_DEFAULT,
+			self::SESSION_ENTRY_LYS,
+		);
+
+		return in_array( $source, $valid_sources, true ) ? $source : self::SESSION_ENTRY_DEFAULT;
 	}
 }
