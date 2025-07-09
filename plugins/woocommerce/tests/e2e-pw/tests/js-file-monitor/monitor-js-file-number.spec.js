@@ -61,6 +61,20 @@ test.describe( 'Keeps track of the number of JS files included on key shopper pa
 				'script[src]',
 				( scripts ) => scripts.length
 			);
+
+			// Log all script sources for debugging
+			const scriptSources = await page.$$eval(
+				'script[src]',
+				( scripts ) => scripts.map( ( script ) => script.src )
+			);
+			console.log(
+				`\n${ name } (${ url }) loaded ${ javascriptFiles } JS files:`
+			);
+			scriptSources.forEach( ( src, index ) => {
+				console.log( `  ${ index + 1 }. ${ src }` );
+			} );
+			console.log( '' );
+
 			await expect
 				.soft(
 					javascriptFiles,
