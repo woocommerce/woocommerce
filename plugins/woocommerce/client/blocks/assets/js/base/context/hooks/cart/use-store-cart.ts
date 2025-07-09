@@ -139,9 +139,10 @@ export const useStoreCart = (
 			const store = select( cartStore );
 
 			// Base loading state - whether initial cart data resolution has finished
-			const baseCartIsLoading =
-				// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-				! store.hasFinishedResolution( 'getCartData' );
+			const baseCartIsLoading = ! store.hasFinishedResolution(
+				'getCartData',
+				[]
+			);
 
 			// Get pending states
 			const productsPendingAdd = store.getProductsPendingAdd();
