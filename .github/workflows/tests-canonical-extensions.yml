@@ -28,8 +28,7 @@ jobs:
 
       - name: Run target repositories testing workflows
         env:
-            REPOSITORIES: ${{ env.CANONICAL_EXTENSIONS }}
             GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
             GH_REPO: ${{ github.repository }}
         run: |
-            printf "${{ github.event.inputs.woocommerce_version }}\n${{ github.event.inputs.wordpress_version }}\n${{ github.event.inputs.php_version }}\n$REPOSITORIES\n" | pnpm run-canonical-extensions-tests
+            printf "${{ github.event.inputs.woocommerce_version }}\n${{ github.event.inputs.wordpress_version }}\n${{ github.event.inputs.php_version }}\n\n" | pnpm run-canonical-extensions-tests
