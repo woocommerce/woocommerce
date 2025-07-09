@@ -53,19 +53,6 @@ class MainQueryController implements RegisterHooksInterface {
 	 * @return array
 	 */
 	public function add_query_vars( $query_vars ) {
-		$custom_query_vars = array(
-			'filter_stock_status',
-		);
-
-		$public_product_taxonomies = get_taxonomies( array(
-			'public' => true,
-			'object_type' => array( 'product' ),
-		) );
-
-		foreach( $public_product_taxonomies as $taxonomy ) {
-			$custom_query_vars[] = 'filter_' . $taxonomy;
-		}
-
-		return array_merge( $query_vars, $custom_query_vars );
+		return array_merge( $query_vars, $this->query_clauses->get_filter_url_params() );
 	}
 }

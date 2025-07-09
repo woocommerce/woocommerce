@@ -302,10 +302,12 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$tax_queries = array();
 
-		$all_terms = get_terms( array(
-			'taxonomy'   => array_keys( $chosen_taxonomies ),
-			'slug'       => array_merge( ...array_values( $chosen_taxonomies ) ),
-		) );
+		$all_terms = get_terms(
+			array(
+				'taxonomy' => array_keys( $chosen_taxonomies ),
+				'slug'     => array_merge( ...array_values( $chosen_taxonomies ) ),
+			)
+		);
 
 		$term_ids_by_taxonomy = array();
 
@@ -335,6 +337,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			 * 4. Efficient combination: Multiple taxonomy filters can be combined with AND
 			 *    without complex GROUP BY logic or performance degradation.
 			 */
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 			$tax_queries[] = $wpdb->prepare(
 				"EXISTS (
 					SELECT 1 FROM {$wpdb->term_relationships} tr
@@ -542,22 +545,66 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $chosen_taxonomies;
 		}
 
-		$public_product_taxonomies = get_taxonomies( array(
-			'public' => true,
-			'object_type' => array( 'product' ),
-		) );
-
-		$taxonomy_filter_keys = array_map( function( $taxonomy ) {
-			return 'filter_' . $taxonomy;
-		}, $public_product_taxonomies );
-
-		foreach( $taxonomy_filter_keys as $taxonomy => $param_key ) {
-			if ( isset( $query_vars[ $param_key ] ) ) {
-				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $param_key ] ) );
+		foreach ( $this->get_taxonomy_url_params_mapping() as $taxonomy => $param ) {
+			if ( isset( $query_vars[ $param ] ) ) {
+				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) );
 			}
 		}
 
 		return $chosen_taxonomies;
+	}
+
+	/**
+	 * Get the filter URL params for the product filters.
+	 *
+	 * @return array
+	 */
+	public function get_filter_url_params() {
+		return array_values(
+			array_merge(
+				array(
+					'filter_stock_status',
+				),
+				array_values( $this->get_taxonomy_url_params_mapping() ),
+			)
+		);
+	}
+
+	/**
+	 * Get the taxonomy URL params for the product filters.
+	 *
+	 * @return array
+	 */
+	private function get_taxonomy_url_params_mapping() {
+		$public_product_taxonomies = get_taxonomies(
+			array(
+				'public'      => true,
+				'object_type' => array( 'product' ),
+			),
+			'objects'
+		);
+
+		// We have control over these built-in taxonomies.
+		$map = array(
+			'product_cat'   => 'category',
+			'product_tag'   => 'tag',
+			'product_brand' => 'brand',
+		);
+
+		return array_map(
+			function ( $taxonomy ) use ( $map ) {
+				if ( isset( $map[ $taxonomy->name ] ) ) {
+						return $map[ $taxonomy->name ];
+				}
+
+				if ( ! empty( $taxonomy->rewrite['slug'] ) ) {
+					return $taxonomy->rewrite['slug'];
+				}
+
+				return $taxonomy->name;
+			},
+			$public_product_taxonomies
+		);
 	}
 
 	/**

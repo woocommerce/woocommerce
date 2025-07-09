@@ -22,4 +22,11 @@ interface MainQueryClausesGenerator {
 	 * @return array
 	 */
 	public function add_query_clauses_for_main_query( array $args, \WP_Query $wp_query );
+
+	/**
+	 * Get the filter URL params for the product filters.
+	 *
+	 * @return array
+	 */
+	public function get_filter_url_params();
 }
