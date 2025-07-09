@@ -194,6 +194,7 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
+			// We skip the animation altogether if the single product page Add to Cart + Options form is invalid.
 
 			if (
 				context.tempQuantity !== state.quantity &&
