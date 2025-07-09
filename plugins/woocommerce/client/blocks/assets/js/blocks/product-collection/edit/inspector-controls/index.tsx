@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { InspectorControls } from '@wordpress/block-editor';
+import { store as blockEditorStore, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { type ElementType, useMemo } from '@wordpress/element';
+import { useMemo, useEffect, useRef } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import {
@@ -16,10 +16,12 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
 	PanelBody,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { createBlock } from '@wordpress/blocks';
+import { coreQueryPaginationBlockName } from '../../constants';
 
 /**
  * Internal dependencies
@@ -70,7 +72,68 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, dimensions, displayLayout } = attributes;
+	const { query, hideControls, dimensions, displayLayout, collection } = attributes;
+
+	// --- Carousel pagination logic ---
+	const clientId = props.clientId;
+	const previousLayoutType = useRef<LayoutOptions>(displayLayout.type);
+	const innerBlocks = useSelect(
+		( select ) =>
+			clientId ? select( blockEditorStore ).getBlocks( clientId ) : [],
+		[clientId]
+	);
+	const { insertBlock, removeBlock, updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	// Effect to handle carousel pagination block.
+	useEffect( () => {
+		const paginationBlocks = innerBlocks.filter(
+			(block: any) => block.name === coreQueryPaginationBlockName
+		);
+		const paginationBlockClientId = paginationBlocks[0]?.clientId;
+
+		// When switching to carousel layout, add pagination block if it doesn't exist.
+		if (
+			clientId &&
+			displayLayout?.type === LayoutOptions.CAROUSEL &&
+			previousLayoutType.current !== LayoutOptions.CAROUSEL
+		) {
+			const newAttributes = {
+				paginationArrow: 'chevron',
+				showLabel: false,
+				layout: { type: 'flex', justifyContent: 'center' },
+			};
+
+			if ( ! paginationBlockClientId ) {
+				const paginationBlock = createBlock( coreQueryPaginationBlockName, newAttributes );
+				insertBlock( paginationBlock, innerBlocks.length, clientId, false );
+			} else {
+				updateBlockAttributes( paginationBlockClientId, newAttributes );
+			}
+		}
+
+		// When switching FROM carousel layout remove or update pagination block if it exists.
+		if (
+			clientId &&
+			displayLayout?.type !== LayoutOptions.CAROUSEL &&
+			previousLayoutType.current === LayoutOptions.CAROUSEL
+		) {
+
+			if ( paginationBlockClientId ) {
+				if ( ! collection ) {
+					updateBlockAttributes( paginationBlockClientId, {
+						paginationArrow: 'none',
+						showLabel: true,
+						layout: { type: 'flex', justifyContent: 'center' },
+					} );
+				} else {
+					removeBlock( paginationBlockClientId, false );
+				}
+			}
+		}
+
+		previousLayoutType.current = displayLayout.type;
+	}, [ displayLayout.type, innerBlocks, clientId, insertBlock ]);
+	// --- End carousel pagination logic ---
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
