@@ -3,6 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+
 /**
  * Product Filter: Taxonomy Block.
  */
@@ -98,6 +102,73 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Render the block.
+	 *
+	 * @param array    $block_attributes Block attributes.
+	 * @param string   $content          Block content.
+	 * @param WP_Block $block            Block instance.
+	 * @return string Rendered block type output.
+	 */
+	protected function render( $block_attributes, $content, $block ) {
+		// Skip rendering in admin or during AJAX requests.
+		if ( is_admin() || wp_doing_ajax() ) {
+			return '';
+		}
+
+		// TODO: Implement full frontend rendering logic similar to ProductFilterAttribute.
+		// This will include taxonomy term counts, interactive filtering, and proper HTML output.
+		return '';
+	}
+
+	/**
+	 * Retrieve the taxonomy term counts for current block.
+	 *
+	 * @param WP_Block $block    Block instance.
+	 * @param string   $taxonomy Taxonomy slug.
+	 * @return array Term counts with term_id as key and count as value.
+	 */
+	private function get_taxonomy_term_counts( $block, $taxonomy ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		// Remove current taxonomy from query vars to avoid circular counting.
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+
+		if ( isset( $taxonomy_params[ $taxonomy ] ) ) {
+			$param_key = $taxonomy_params[ $taxonomy ];
+			unset( $query_vars[ $param_key ] );
+		}
+
+		/**
+		 * Prevent circular counting when calculating filter counts with active attribute filters.
+		 * Removes product attribute taxonomy filters to ensure accurate cross-filter counting.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/pull/52759
+		 */
+		if ( isset( $query_vars['taxonomy'] ) && false !== strpos( $query_vars['taxonomy'], 'pa_' ) ) {
+			unset(
+				$query_vars['taxonomy'],
+				$query_vars['term']
+			);
+		}
+
+		// Remove from tax_query if present.
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $taxonomy );
+		}
+
+		$counts = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) )->get_taxonomy_counts( $query_vars, $taxonomy );
+
+		return $counts;
 	}
 
 	/**
