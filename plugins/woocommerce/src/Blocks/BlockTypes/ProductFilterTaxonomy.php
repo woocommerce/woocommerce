@@ -36,19 +36,23 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_taxonomies() {
-		$taxonomies    = get_object_taxonomies( 'product', 'objects' );
+		$public_product_taxonomies = get_taxonomies(
+			array(
+				'public'      => true,
+				'object_type' => array( 'product' ),
+			),
+			'objects'
+		);
 		$taxonomy_data = array();
 
-		foreach ( $taxonomies as $taxonomy ) {
-			if ( $taxonomy->public && 'product_shipping_class' !== $taxonomy->name ) {
-				$taxonomy_data[] = array(
-					'label'  => $taxonomy->label,
-					'name'   => $taxonomy->name,
-					'labels' => array(
-						'singular_name' => $taxonomy->labels->singular_name,
-					),
-				);
-			}
+		foreach ( $public_product_taxonomies as $taxonomy ) {
+			$taxonomy_data[] = array(
+				'label'  => $taxonomy->label,
+				'name'   => $taxonomy->name,
+				'labels' => array(
+					'singular_name' => $taxonomy->labels->singular_name,
+				),
+			);
 		}
 
 		return $taxonomy_data;

@@ -19,16 +19,25 @@ class MainQueryController implements RegisterHooksInterface {
 	private $query_clauses;
 
 	/**
+	 * Hold the filter params.
+	 *
+	 * @var Params
+	 */
+	private $params;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param QueryClauses $query_clauses Instance of QueryClauses.
+	 * @param Params       $params        Instance of Params.
 	 *
 	 * @return void
 	 */
-	final public function init( QueryClauses $query_clauses ): void {
+	final public function init( QueryClauses $query_clauses, Params $params ): void {
 		$this->query_clauses = $query_clauses;
+		$this->params        = $params;
 	}
 
 	/**
@@ -38,7 +47,7 @@ class MainQueryController implements RegisterHooksInterface {
 	 *
 	 * @return void
 	 */
-	public function register() {
+	public function register(): void {
 		add_filter( 'posts_clauses', array( $this->query_clauses, 'add_query_clauses_for_main_query' ), 10, 2 );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
 	}
@@ -52,7 +61,7 @@ class MainQueryController implements RegisterHooksInterface {
 	 * @param array $query_vars Query vars.
 	 * @return array
 	 */
-	public function add_query_vars( $query_vars ) {
-		return array_merge( $query_vars, $this->query_clauses->get_filter_url_params() );
+	public function add_query_vars( array $query_vars ): array {
+		return array_merge( $query_vars, $this->params->get_param_keys() );
 	}
 }

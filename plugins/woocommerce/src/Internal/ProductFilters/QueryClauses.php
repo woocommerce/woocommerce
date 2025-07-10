@@ -19,6 +19,22 @@ defined( 'ABSPATH' ) || exit;
  * Class for filter clauses.
  */
 class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
+	/**
+	 * Hold the filter params.
+	 *
+	 * @var Params
+	 */
+	private $params;
+
+	/**
+	 * Initialize the query clauses.
+	 *
+	 * @param Params $params The filter params.
+	 * @return void
+	 */
+	final public function init( Params $params ): void {
+		$this->params = $params;
+	}
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
@@ -30,7 +46,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( $args, $wp_query ) {
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
 			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
 			$stock_statuses = explode( ',', $stock_statuses );
@@ -71,7 +87,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses_for_main_query( $args, $wp_query ) {
+	public function add_query_clauses_for_main_query( array $args, \WP_Query $wp_query ): array {
 		if (
 			! $wp_query->is_main_query() ||
 			'product_query' !== $wp_query->get( 'wc_query' )
@@ -102,7 +118,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param array $stock_statuses Stock statuses to be queried.
 	 * @return array
 	 */
-	public function add_stock_clauses( $args, $stock_statuses ) {
+	public function add_stock_clauses( array $args, array $stock_statuses ): array {
 		$stock_statuses = array_filter( $stock_statuses );
 
 		if ( empty( $stock_statuses ) ) {
@@ -132,7 +148,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * }
 	 * @return array
 	 */
-	public function add_price_clauses( $args, $price_range ) {
+	public function add_price_clauses( array $args, array $price_range ): array {
 		if ( ! isset( $price_range['min_price'] ) && ! isset( $price_range['max_price'] ) ) {
 			return $args;
 		}
@@ -180,7 +196,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 *
 	 * @return array
 	 */
-	public function add_attribute_clauses( $args, $chosen_attributes ) {
+	public function add_attribute_clauses( array $args, array $chosen_attributes ): array {
 		if ( empty( $chosen_attributes ) ) {
 			return $args;
 		}
@@ -293,7 +309,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * }
 	 * @return array
 	 */
-	public function add_taxonomy_clauses( $args, $chosen_taxonomies ) {
+	public function add_taxonomy_clauses( array $args, array $chosen_taxonomies ): array {
 		if ( empty( $chosen_taxonomies ) ) {
 			return $args;
 		}
@@ -366,7 +382,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 *                                   taxonomy, return all terms.
 	 * @return mixed
 	 */
-	private function get_current_attribute_terms( $all_terms, $taxonomy, $taxonomy_count ) {
+	private function get_current_attribute_terms( array $all_terms, string $taxonomy, int $taxonomy_count ): array {
 		if ( 1 === $taxonomy_count ) {
 			return $all_terms;
 		}
@@ -385,7 +401,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param string $sql SQL join.
 	 * @return string
 	 */
-	private function append_product_sorting_table_join( $sql ) {
+	private function append_product_sorting_table_join( string $sql ): string {
 		global $wpdb;
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
@@ -402,7 +418,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 *
 	 * @return boolean
 	 */
-	private function should_adjust_price_filters_for_displayed_taxes() {
+	private function should_adjust_price_filters_for_displayed_taxes(): bool {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
 		$database = wc_prices_include_tax() ? 'incl' : 'excl';
 
@@ -417,7 +433,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param string $operator Comparison operator for column. Accepts '>=' or '<='.
 	 * @return string Constructed query.
 	 */
-	private function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
+	private function get_price_filter_query_for_displayed_taxes( float $price_filter, string $column = 'min_price', string $operator = '>=' ): string {
 		global $wpdb;
 
 		if ( ! in_array( $operator, array( '>=', '<=' ), true ) ) {
@@ -469,7 +485,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param string $tax_class Tax class for adjustment.
 	 * @return float
 	 */
-	private function adjust_price_filter_for_tax_class( $price_filter, $tax_class ) {
+	private function adjust_price_filter_for_tax_class( float $price_filter, string $tax_class ): float {
 		$tax_display    = get_option( 'woocommerce_tax_display_shop' );
 		$tax_rates      = WC_Tax::get_rates( $tax_class );
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
@@ -506,7 +522,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param array $query_vars The WP_Query arguments.
 	 * @return array
 	 */
-	private function get_chosen_attributes( $query_vars ) {
+	private function get_chosen_attributes( array $query_vars ): array {
 		$chosen_attributes = array();
 
 		if ( empty( $query_vars ) ) {
@@ -538,69 +554,20 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @param array $query_vars The WP_Query arguments.
 	 * @return array
 	 */
-	private function get_chosen_taxonomies( $query_vars ) {
+	private function get_chosen_taxonomies( array $query_vars ): array {
 		$chosen_taxonomies = array();
 
 		if ( empty( $query_vars ) ) {
 			return $chosen_taxonomies;
 		}
 
-		foreach ( $this->get_taxonomy_url_params_mapping() as $taxonomy => $param ) {
+		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
 			if ( isset( $query_vars[ $param ] ) ) {
 				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) );
 			}
 		}
 
-		return $chosen_taxonomies;
-	}
-
-	/**
-	 * Get the filter URL params for the product filters.
-	 *
-	 * @return array
-	 */
-	public function get_filter_url_params() {
-		return array_values(
-			array_merge(
-				array(
-					'filter_stock_status',
-				),
-				array_values( $this->get_taxonomy_url_params_mapping() ),
-			)
-		);
-	}
-
-	/**
-	 * Get the taxonomy URL params for the product filters.
-	 *
-	 * @return array
-	 */
-	private function get_taxonomy_url_params_mapping() {
-		$public_product_taxonomies = get_taxonomies(
-			array(
-				'public'      => true,
-				'object_type' => array( 'product' ),
-			),
-			'objects'
-		);
-
-		// We have control over these built-in taxonomies.
-		$map = array(
-			'product_cat'   => 'category',
-			'product_tag'   => 'tag',
-			'product_brand' => 'brand',
-		);
-
-		return array_map(
-			function ( $taxonomy ) use ( $map ) {
-				if ( isset( $map[ $taxonomy->name ] ) ) {
-					return $map[ $taxonomy->name ];
-				}
-
-				return $taxonomy->name;
-			},
-			$public_product_taxonomies
-		);
+		return array_filter( $chosen_taxonomies );
 	}
 
 	/**
@@ -608,7 +575,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 *
 	 * @return string
 	 */
-	private function get_lookup_table_name() {
+	private function get_lookup_table_name(): string {
 		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
 	}
 }
