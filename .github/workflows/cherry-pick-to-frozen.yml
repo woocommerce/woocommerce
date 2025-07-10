@@ -193,7 +193,7 @@ jobs:
           slack-optional-unfurl_links: false
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
-            :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `trunk`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
+            :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `${{ env.NEXT_BRANCH }}`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
             ${{ env.ADD_CP_TO_TRUNK_NAG == 'true' && '\n\nNOTE: This PR might need to be cherry-picked trunk and is not currently labeled for it.' || '' }}
 
   handle-failures:
@@ -237,7 +237,7 @@ jobs:
             const workflowLink = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
             let body = (merger ? merger + ' ' : '') +
-                       '❌ **Cherry-pick to `trunk` failed.**\n\n' +
+                       '❌ **Cherry-pick to \`${process.env.NEXT_BRANCH}\` failed.**\n\n' +
                        '**Error:** ' + errorMsg + '\n\n' +
                        '---\n\n' +
                        'IMPORTANT: Merging this PR to the appropriate branches is critical to the release process.\n\n' +

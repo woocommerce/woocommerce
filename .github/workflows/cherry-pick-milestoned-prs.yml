@@ -127,7 +127,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: ${{ needs.cherry-pick-milestoned.outputs.cherry_pick_pr_number }},
-              milestone: '${{ github.event.pull_request.milestone.number }}'
+              milestone:  ${{ github.event.pull_request.milestone.number }}
             })
 
       # Comment on original PR about cherry-pick success
@@ -329,7 +329,7 @@ jobs:
   handle-failures-next:
     needs: [prepare, cherry-pick-next]
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.cherry-pick-next.outputs.status == 'failure' }}
+    if: ${{ always() && needs.cherry-pick-next.outputs.status == 'failed' }}
     steps:
       - name: Handle failure for next branch
         if: ${{ needs.cherry-pick-next.outputs.status == 'failed' }}
