@@ -14,6 +14,15 @@ jQuery( function ( $ ) {
 		}
 	} );
 
+	// Global accessibility handler for all links with role="button"
+	// This ensures both spacebar and enter keypresses trigger click events, as per ARIA specification
+	$( document.body ).on( 'keydown', 'a[role="button"]', function ( event ) {
+		if ( event.key === ' ' || event.key === 'Enter' ) {
+			event.preventDefault();
+			$( this ).trigger( 'click' );
+		}
+	} );
+
 	var noticeID = $( '.woocommerce-store-notice' ).data( 'noticeId' ) || '',
 		cookieName = 'store_notice' + noticeID;
 
