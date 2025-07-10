@@ -226,8 +226,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$all_terms = get_terms(
 			array(
-				'taxonomy' => array_keys( $chosen_attributes ),
-				'slug'     => $all_terms_slugs,
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_terms_slugs,
+				'hide_empty' => false,
 			)
 		);
 
