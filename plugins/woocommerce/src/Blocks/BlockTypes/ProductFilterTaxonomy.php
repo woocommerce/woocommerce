@@ -36,7 +36,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_taxonomies() {
-		$public_product_taxonomies = get_taxonomies(
+		$taxonomies    = get_taxonomies(
 			array(
 				'public'      => true,
 				'object_type' => array( 'product' ),
@@ -45,7 +45,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		);
 		$taxonomy_data = array();
 
-		foreach ( $public_product_taxonomies as $taxonomy ) {
+		foreach ( $taxonomies as $taxonomy ) {
 			$taxonomy_data[] = array(
 				'label'  => $taxonomy->label,
 				'name'   => $taxonomy->name,
