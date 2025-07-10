@@ -279,8 +279,75 @@ class FilterData {
 
 		/**
 		 * Filter the results. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
 		 */
-		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
+
+		$this->set_cache( $transient_key, $results );
+
+		return $results;
+	}
+
+	/**
+	 * Get taxonomy counts for the current products.
+	 *
+	 * @param array  $query_vars The WP_Query arguments.
+	 * @param string $taxonomy_to_count   Taxonomy name.
+	 * @return array termId=>count pairs.
+	 */
+	public function get_taxonomy_counts( array $query_vars, string $taxonomy_to_count ) {
+		/**
+		 * Filter the data. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
+		 */
+		$pre_filter_counts = apply_filters( 'woocommerce_pre_product_filter_data', null, 'taxonomy', $query_vars, array( 'taxonomy' => $taxonomy_to_count ) );
+
+		if ( is_array( $pre_filter_counts ) ) {
+			return $pre_filter_counts;
+		}
+
+		$transient_key = $this->get_transient_key( $query_vars, 'taxonomy', array( 'taxonomy' => $taxonomy_to_count ) );
+		$cached_data   = $this->get_cache( $transient_key );
+
+		if ( ! empty( $cached_data ) ) {
+			return $cached_data;
+		}
+
+		$results     = array();
+		$product_ids = $this->get_cached_product_ids( $query_vars );
+
+		if ( $product_ids ) {
+			global $wpdb;
+
+			$taxonomies_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $taxonomy_to_count ) ) . '")';
+			$taxonomy_count_sql      = "
+				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, term_taxonomy.term_taxonomy_id as term_count_id
+				FROM {$wpdb->term_relationships} AS term_relationships
+				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+				WHERE term_relationships.object_id IN ( {$product_ids} )
+				{$taxonomies_to_count_sql}
+				GROUP BY term_taxonomy.term_taxonomy_id
+			";
+
+			/**
+			 * We can't use $wpdb->prepare() here because using %s with
+			 * $wpdb->prepare() for a subquery won't work as it will escape the
+			 * SQL query.
+			 * We're using the query as is, same as Core does.
+			 */
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$results = $wpdb->get_results( $taxonomy_count_sql );
+			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+		}
+
+		/**
+		 * Filter the results. @see get_filtered_price() for full documentation.
+		 *
+		 * @since 9.9.0
+		 */
+		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'taxonomy', $query_vars, array( 'taxonomy' => $taxonomy_to_count ) );
 
 		$this->set_cache( $transient_key, $results );
 
