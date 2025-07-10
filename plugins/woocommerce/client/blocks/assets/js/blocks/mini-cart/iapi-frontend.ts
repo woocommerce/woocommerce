@@ -35,7 +35,7 @@ const {
 	quantityDescriptionLabel,
 	removeFromCartLabel,
 	lowInStockLabel,
-} = getConfig( 'woocommerce/mini-cart-items-block' );
+} = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
