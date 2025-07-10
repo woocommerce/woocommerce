@@ -62,31 +62,15 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 
 		$cached_jwt = $this->get_cached_option( 'address_autocomplete_jwt' );
 		// If we have a cached, valid token, we load it to class and return early.
-		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) && 'local' !== wp_get_environment_type() ) {
+		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) ) {
 			$this->jwt = $cached_jwt['data'];
 			return;
 		}
 
 		$retry_data = $this->get_cached_option( 'jwt_retry_data' );
 
-		// Check if we should wait before trying again.
-		if ( $retry_data && isset( $retry_data['try_after'] ) && $retry_data['try_after'] > time() && 'local' !== wp_get_environment_type() ) {
+		if ( $retry_data && isset( $retry_data['try_after'] ) && $retry_data['try_after'] > time() ) {
 			return;
-		}
-
-		// Otherwise, we fetch a fresh token with retry logic.
-		$this->fetch_jwt_with_retry();
-	}
-
-	/**
-	 * Fetches JWT with retry logic.
-	 *
-	 * @return void
-	 */
-	private function fetch_jwt_with_retry() {
-		$retry_data = $this->get_cached_option( 'jwt_retry_data' );
-		if ( ! $retry_data ) {
-			$retry_data = array( 'attempts' => 0 );
 		}
 
 		try {
@@ -98,20 +82,20 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 				return;
 			}
 		} catch ( \Exception $e ) {
+			$retry_data['attempts'] = isset( $retry_data['attempts'] ) ? $retry_data['attempts'] + 1 : 1;
 			wc_get_logger()->error(
 				sprintf(
 					'Failed loading JWT for %1$s address autocomplete service (attempt %2$d) with error %3$s.',
 					$this->name,
-					$retry_data['attempts']++,
+					$retry_data['attempts'],
 					$e->getMessage()
 				),
 				'address-autocomplete'
 			);
+			$backoff_hours           = pow( 2, $retry_data['attempts'] - 1 ); // 1, 2, 4, 8 hours.
+			$retry_data['try_after'] = time() + ( $backoff_hours * HOUR_IN_SECONDS );
+			$this->update_cached_option( 'jwt_retry_data', $retry_data, DAY_IN_SECONDS );
 		}
-
-		$backoff_hours           = pow( 2, $retry_data['attempts'] - 1 ); // 1, 2, 4, 8 hours.
-		$retry_data['try_after'] = time() + ( $backoff_hours * HOUR_IN_SECONDS );
-		$this->update_cached_option( 'jwt_retry_data', $retry_data, DAY_IN_SECONDS );
 	}
 
 	/**

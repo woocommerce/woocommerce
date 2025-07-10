@@ -61,7 +61,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 
 		// Clear any existing options.
 		delete_option( 'test-provider_address_autocomplete_jwt' );
-		delete_option( 'test-provider_last_fetch_attempt' );
+		delete_option( 'test-provider_jwt_retry_data' );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 
 		// Clean up options.
 		delete_option( 'test-provider_address_autocomplete_jwt' );
-		delete_option( 'test-provider_last_fetch_attempt' );
+		delete_option( 'test-provider_jwt_retry_data' );
 	}
 
 	/**
@@ -212,7 +212,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 			->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				$this->stringContains( 'Failed loding JWT for Test Provider address autocomplete service with error Test exception.' ),
+				$this->stringContains( 'Failed loading JWT for Test Provider address autocomplete service (attempt 1) with error Test exception.' ),
 				'address-autocomplete'
 			);
 
@@ -548,7 +548,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 		// Call load_scripts.
 		$provider->load_scripts();
 
-				// Check if inline script was added.
+		// Check if inline script was added.
 		global $wp_scripts;
 		$script = $wp_scripts->get_data( 'a8c-address-autocomplete-service', 'data' );
 
@@ -589,7 +589,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 		// Call load_scripts.
 		$provider->load_scripts();
 
-				// Check if inline script was added with null JWT.
+		// Check if inline script was added with null JWT.
 		global $wp_scripts;
 		$script = $wp_scripts->get_data( 'a8c-address-autocomplete-service', 'data' );
 
@@ -643,5 +643,219 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 		// Script should still be registered and enqueued only once.
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
+	}
+
+	/**
+	 * Test backoff logic for multiple failure scenarios.
+	 */
+	public function test_backoff_logic_for_multiple_failures() {
+		$provider = new class() extends AbstractAutomatticAddressProvider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'test-provider';
+				$this->name = 'Test Provider';
+				parent::__construct();
+			}
+
+			/**
+			 * Get address service JWT.
+			 *
+			 * @throws \Exception Always throws an exception to test retry logic.
+			 */
+			public function get_address_service_jwt() {
+				throw new \Exception( 'Test failure' );
+			}
+		};
+
+		// Test different attempt numbers and their expected backoff periods.
+		$test_cases = array(
+			1 => array(
+				'attempts'         => 0,
+				'expected_hours'   => 1,
+				'expected_attempt' => 1,
+			),
+			2 => array(
+				'attempts'         => 1,
+				'expected_hours'   => 2,
+				'expected_attempt' => 2,
+			),
+			3 => array(
+				'attempts'         => 2,
+				'expected_hours'   => 4,
+				'expected_attempt' => 3,
+			),
+			4 => array(
+				'attempts'         => 3,
+				'expected_hours'   => 8,
+				'expected_attempt' => 4,
+			),
+		);
+
+		foreach ( $test_cases as $test_number => $test_case ) {
+			// Set up retry data for this test case.
+			if ( $test_case['attempts'] > 0 ) {
+				update_option(
+					'test-provider_jwt_retry_data',
+					array(
+						'data'    => array(
+							'attempts'  => $test_case['attempts'],
+							'try_after' => time() - 10, // Allow retry (10 seconds ago).
+						),
+						'updated' => time() - 10,
+						'ttl'     => DAY_IN_SECONDS,
+					),
+					false
+				);
+			} else {
+				// Clear any existing retry data for first attempt.
+				delete_option( 'test-provider_jwt_retry_data' );
+			}
+
+			// Create a new mock logger for each test case to avoid conflicts.
+			$mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
+			$mock_logger
+				->expects( $this->once() )
+				->method( 'error' )
+				->with(
+					$this->stringContains( sprintf( 'Failed loading JWT for Test Provider address autocomplete service (attempt %d) with error Test failure.', $test_case['expected_attempt'] ) ),
+					'address-autocomplete'
+				);
+
+			// Temporarily override the logger for this test case.
+			add_filter(
+				'woocommerce_logging_class',
+				function () use ( $mock_logger ) {
+					return $mock_logger;
+				}
+			);
+
+			// Attempt should fail and update retry data.
+			$provider->get_jwt();
+
+			// Remove the temporary logger override.
+			remove_all_filters( 'woocommerce_logging_class' );
+
+			// Check that retry data was set correctly.
+			$retry_data = get_option( 'test-provider_jwt_retry_data' );
+			$this->assertNotNull( $retry_data, "Retry data should be set for test case {$test_number}" );
+			$this->assertEquals( $test_case['expected_attempt'], $retry_data['data']['attempts'], "Attempt count should be {$test_case['expected_attempt']} for test case {$test_number}" );
+			$this->assertArrayHasKey( 'try_after', $retry_data['data'], "try_after should be set for test case {$test_number}" );
+
+			// Calculate expected try_after time.
+			$expected_try_after = time() + ( $test_case['expected_hours'] * HOUR_IN_SECONDS );
+			$this->assertGreaterThanOrEqual( $expected_try_after - 10, $retry_data['data']['try_after'], "try_after should be at least {$expected_try_after} for test case {$test_number}" ); // Allow 10 second tolerance.
+			$this->assertLessThanOrEqual( $expected_try_after + 10, $retry_data['data']['try_after'], "try_after should be at most {$expected_try_after} for test case {$test_number}" );
+		}
+	}
+
+	/**
+	 * Test that retry is prevented when try_after time hasn't passed.
+	 */
+	public function test_retry_prevented_when_try_after_time_not_passed() {
+		$provider = new class() extends AbstractAutomatticAddressProvider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'test-provider';
+				$this->name = 'Test Provider';
+				parent::__construct();
+			}
+
+			/**
+			 * Get address service JWT.
+			 *
+			 * @throws \Exception Always throws an exception to test retry logic.
+			 */
+			public function get_address_service_jwt() {
+				throw new \Exception( 'Test failure' );
+			}
+		};
+
+		// Set up retry data with try_after in the future.
+		update_option(
+			'test-provider_jwt_retry_data',
+			array(
+				'data'    => array(
+					'attempts'  => 1,
+					'try_after' => time() + 3600, // 1 hour in the future.
+				),
+				'updated' => time(),
+				'ttl'     => DAY_IN_SECONDS,
+			),
+			false
+		);
+
+		// Should not attempt to fetch JWT because try_after time hasn't passed.
+		$provider->get_jwt();
+
+		// Verify that no error was logged (no attempt was made).
+		$this->mock_logger
+			->expects( $this->never() )
+			->method( 'error' );
+
+		// Retry data should remain unchanged.
+		$retry_data = get_option( 'test-provider_jwt_retry_data' );
+		$this->assertEquals( 1, $retry_data['data']['attempts'] );
+	}
+
+	/**
+	 * Test that retry data is cleared on successful JWT fetch.
+	 */
+	public function test_retry_data_cleared_on_successful_jwt_fetch() {
+		$provider = new class() extends AbstractAutomatticAddressProvider {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id   = 'test-provider';
+				$this->name = 'Test Provider';
+				parent::__construct();
+			}
+
+			/**
+			 * Get address service JWT.
+			 *
+			 * @return string
+			 */
+			public function get_address_service_jwt() {
+				// Return a valid JWT for testing.
+				return JsonWebToken::create(
+					array(
+						'iss' => 'test-issuer',
+						'aud' => 'test-audience',
+						'exp' => time() + 3600, // 1 hour from now.
+						'iat' => time(),
+					),
+					'test-secret'
+				);
+			}
+		};
+
+		// Set up retry data to simulate previous failures.
+		update_option(
+			'test-provider_jwt_retry_data',
+			array(
+				'data'    => array(
+					'attempts'  => 2,
+					'try_after' => time() - 10, // Allow retry (10 seconds ago).
+				),
+				'updated' => time() - 10,
+				'ttl'     => DAY_IN_SECONDS,
+			),
+			false
+		);
+
+		// Successful JWT fetch should clear retry data.
+		$jwt = $provider->get_jwt();
+
+		$this->assertNotNull( $jwt );
+		$this->assertTrue( JsonWebToken::shallow_validate( $jwt ) );
+
+		// Retry data should be deleted.
+		$retry_data = get_option( 'test-provider_jwt_retry_data' );
+		$this->assertFalse( $retry_data );
 	}
 }

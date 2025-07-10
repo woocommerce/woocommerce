@@ -174,28 +174,57 @@
 			let sessionId = generateSessionId();
 			let requestDurations = [];
 			let serviceErrorRetries = 0;
-			// Cache for search results - key: `${inputValue}:${country}`, value: data
-			const searchCache = new Map();
+			// LRU Cache for search results - key: `${inputValue}:${country}`, value: data
+			class LRUCache {
+				constructor( maxSize = 100 ) {
+					this.maxSize = maxSize;
+					this.cache = new Map();
+				}
+
+				get( key ) {
+					if ( this.cache.has( key ) ) {
+						// Move to end (most recently used)
+						const value = this.cache.get( key );
+						this.cache.delete( key );
+						this.cache.set( key, value );
+						return value;
+					}
+					return null;
+				}
+
+				set( key, value ) {
+					if ( this.cache.has( key ) ) {
+						// Remove existing entry to move to end
+						this.cache.delete( key );
+					} else if ( this.cache.size >= this.maxSize ) {
+						// Remove least recently used (first entry)
+						const firstKey = this.cache.keys().next().value;
+						this.cache.delete( firstKey );
+					}
+					this.cache.set( key, value );
+				}
+
+				clear() {
+					this.cache.clear();
+				}
+
+				get size() {
+					return this.cache.size;
+				}
+			}
+
+			const searchCache = new LRUCache( 100 );
 
 			// Helper function to check cache
 			const getCachedResult = ( inputValue, country ) => {
 				const cacheKey = `${ inputValue }:${ country }`;
-				return searchCache.get( cacheKey ) || null;
+				return searchCache.get( cacheKey );
 			};
 
 			// Helper function to store result in cache
 			const cacheResult = ( inputValue, country, data ) => {
 				const cacheKey = `${ inputValue }:${ country }`;
 				searchCache.set( cacheKey, data );
-
-				// Clean up cache if it gets too large (more than 100 entries)
-				if ( searchCache.size > 100 ) {
-					// Remove oldest entries (first 20 entries)
-					const keys = Array.from( searchCache.keys() );
-					keys.slice( 0, 20 ).forEach( ( key ) => {
-						searchCache.delete( key );
-					} );
-				}
 			};
 
 			// Shared error handling function
@@ -226,7 +255,7 @@
 							if ( index !== -1 ) {
 								permanentlyDisabledServices.splice( index, 1 );
 							}
-						}, response.headers.get( 'RateLimit-Retry-After' ) * 1000 );
+						}, ( Number( response.headers.get( 'RateLimit-Retry-After' ) ) || 60 ) * 1000 );
 						console.error(
 							`Automattic Address Suggestion (${ key }) has been disabled due to rate limit exceeded`
 						);
