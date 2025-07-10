@@ -84,12 +84,23 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		foreach ( array_keys( $product_attributes_map ) as $attribute_name ) {
 			$param_key = "filter_{$attribute_name}";
-			if ( ! empty( $params[ $param_key ] ) && is_string( $params[ $param_key ] ) ) {
-				$term_slugs                                  = explode( ',', $params[ $param_key ] );
-				$active_attributes[ "pa_{$attribute_name}" ] = $term_slugs;
-				$query_types[ $attribute_name ]              = $params[ 'query_type_' . $attribute_name ] ?? 'or';
-				$all_term_slugs                              = array_merge( $all_term_slugs, $term_slugs );
+
+			if ( empty( $params[ $param_key ] ) || ! is_string( $params[ $param_key ] ) ) {
+				continue;
 			}
+
+			// Filter out empty slugs and trim whitespace
+			$term_slugs = array_filter(
+				array_map( 'trim', explode( ',', $params[ $param_key ] ) ),
+			);
+
+			if ( empty( $term_slugs ) ) {
+				continue;
+			}
+
+			$active_attributes[ "pa_{$attribute_name}" ] = $term_slugs;
+			$query_types[ $attribute_name ]              = $params[ 'query_type_' . $attribute_name ] ?? 'or';
+			$all_term_slugs                              = array_merge( $all_term_slugs, $term_slugs );
 		}
 
 		if ( empty( $active_attributes ) ) {
@@ -104,7 +115,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			)
 		);
 
-		if ( is_wp_error( $attribute_terms ) ) {
+		if ( is_wp_error( $attribute_terms ) || empty( $attribute_terms ) ) {
 			return $items;
 		}
 
