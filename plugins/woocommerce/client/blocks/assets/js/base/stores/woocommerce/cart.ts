@@ -27,7 +27,7 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type CartItemType =  Omit<OptimisticCartItem, 'variation'> & {
+export type ClientCartItemType =  Omit<OptimisticCartItem, 'variation'> & {
     variation?: SelectedAttributesType[];
 };
 
@@ -42,8 +42,8 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: CartItemType ) => void;
-		batchAddCartItems: ( items: CartItemType[] ) => void;
+		addCartItem: ( args: ClientCartItemType ) => void;
+		batchAddCartItems: ( items: ClientCartItemType[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
