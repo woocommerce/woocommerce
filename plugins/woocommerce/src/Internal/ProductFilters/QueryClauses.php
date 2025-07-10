@@ -374,6 +374,8 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		if ( ! empty( $tax_queries ) ) {
 			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
+		} else {
+			$args['where'] .= ' AND 1=0';
 		}
 
 		return $args;
