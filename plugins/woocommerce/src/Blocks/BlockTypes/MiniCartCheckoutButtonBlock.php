@@ -30,7 +30,7 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 		$wrapper_attributes          = get_block_wrapper_attributes(
 			array(
 				'href'  => esc_url( $checkout_page_url ),
-				'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout'
+				'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout',
 			)
 		);
 

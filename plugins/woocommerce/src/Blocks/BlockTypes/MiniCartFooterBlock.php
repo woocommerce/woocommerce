@@ -35,8 +35,8 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$wrapper_attributes               = get_block_wrapper_attributes(
 			array(
 				'data-wp-interactive' => 'woocommerce/mini-cart-footer-block',
-				'class'               => 'wc-block-mini-cart__footer'
-			) 
+				'class'               => 'wc-block-mini-cart__footer',
+			)
 		);
 
 		if ( $html->next_tag( 'bdi' ) ) {
