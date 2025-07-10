@@ -42,6 +42,9 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
 		$remove_item_label  = __( 'Remove item', 'woocommerce' );
+		$head_product_label = __( 'Product', 'woocommerce' );
+		$head_details_label = __( 'Details', 'woocommerce' );
+		$head_total_label   = __( 'Total', 'woocommerce' );
 
 		// translators: %s is the name of the product in cart.
 		$reduce_quantity_label = __( 'Reduce quantity of %s', 'woocommerce' );
@@ -74,15 +77,32 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			)
 		);
 
+		$wrapper_attributes = array(
+			'class' => 'wc-block-mini-cart__products-table',
+		);
+
 		ob_start();
 		?>
-		<div class="wp-block-woocommerce-mini-cart-products-table-block wc-block-mini-cart__products-table">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<table class="wc-block-cart-items wc-block-mini-cart-items" tabindex="-1">
 				<caption class="screen-reader-text">
 					<h2>
 						<?php echo esc_html( $screen_reader_text ); ?>
 					</h2>
 				</caption>
+				<thead>
+					<tr class="wc-block-cart-items__header">
+						<th class="wc-block-cart-items__header-image">
+							<span><?php echo esc_html( $head_product_label ); ?></span>
+						</th>
+						<th class="wc-block-cart-items__header-product">
+							<span><?php echo esc_html( $head_details_label ); ?></span>
+						</th>
+						<th class="wc-block-cart-items__header-total">
+							<span><?php echo esc_html( $head_total_label ); ?></span>
+						</th>
+					</tr>
+				</thead>
 				<tbody>
 					<template
 						data-wp-each--cart-item="woocommerce::state.cart.items"
