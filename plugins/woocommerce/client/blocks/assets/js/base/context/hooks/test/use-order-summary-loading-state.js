@@ -119,14 +119,6 @@ describe( 'useOrderSummaryLoadingState', () => {
 		expect( result.current.isLoading ).toBe( true );
 	} );
 
-	it( 'should pass context parameter to useStoreCartCoupons', () => {
-		const testContext = 'wc/checkout';
-
-		renderHook( () => useOrderSummaryLoadingState( testContext ) );
-
-		expect( useStoreCartCoupons ).toHaveBeenCalledWith( testContext );
-	} );
-
 	it( 'should call useSelect with correct selector function and empty dependency array', () => {
 		renderHook( () => useOrderSummaryLoadingState() );
 

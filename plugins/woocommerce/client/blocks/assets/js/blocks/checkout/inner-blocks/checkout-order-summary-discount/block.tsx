@@ -28,7 +28,7 @@ const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } =
 		useStoreCartCoupons( 'wc/checkout' );
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (

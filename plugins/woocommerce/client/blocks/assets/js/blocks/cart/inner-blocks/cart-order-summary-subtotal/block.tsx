@@ -10,7 +10,7 @@ import {
 
 const Block = ( { className = '' }: { className?: string } ) => {
 	const { cartTotals } = useStoreCart();
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/cart' );
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	// Hide if there are no other totals to show.
 	if (

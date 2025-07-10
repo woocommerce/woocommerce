@@ -17,7 +17,7 @@ const Block = ( {
 	showRateAfterTaxName: boolean;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 	const displayCartPricesIncludingTax = getSetting(
 		'displayCartPricesIncludingTax',
 		false

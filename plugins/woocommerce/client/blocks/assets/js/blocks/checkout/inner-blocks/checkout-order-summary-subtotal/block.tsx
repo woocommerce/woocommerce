@@ -10,7 +10,7 @@ import {
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 	const { cartTotals } = useStoreCart();
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (

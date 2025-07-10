@@ -17,7 +17,7 @@ const Block = ( {
 	showRateAfterTaxName: boolean;
 } ) => {
 	const { cartTotals } = useStoreCart();
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	const displayCartPricesIncludingTax = getSetting(
 		'displayCartPricesIncludingTax',

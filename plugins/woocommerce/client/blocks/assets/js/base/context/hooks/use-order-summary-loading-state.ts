@@ -14,10 +14,9 @@ import { useStoreCartCoupons } from './cart/use-store-cart-coupons';
  * Custom hook that provides comprehensive loading states for Order Summary components.
  * This hook combines various loading states that can affect order totals and pricing.
  */
-export const useOrderSummaryLoadingState = ( context = '' ) => {
+export const useOrderSummaryLoadingState = () => {
 	const { cartIsLoading, isLoadingRates } = useStoreCart();
-	const { isApplyingCoupon, isRemovingCoupon } =
-		useStoreCartCoupons( context );
+	const { isApplyingCoupon, isRemovingCoupon } = useStoreCartCoupons();
 
 	const isCalculating = useSelect(
 		( select ) => select( checkoutStore ).isCalculating(),

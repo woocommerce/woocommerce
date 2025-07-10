@@ -77,7 +77,7 @@ const TotalsFooterItem = ( {
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { receiveCart, ...cart } = useStoreCart();
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',

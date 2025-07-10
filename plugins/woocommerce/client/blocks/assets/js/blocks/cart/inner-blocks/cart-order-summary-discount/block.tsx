@@ -27,7 +27,7 @@ const DiscountSlotFill = (): JSX.Element => {
 const Block = ( { className }: { className: string } ) => {
 	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } = useStoreCartCoupons( 'wc/cart' );
-	const { isLoading } = useOrderSummaryLoadingState( 'wc/cart' );
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	// Hide all but the slot/fill if there are no coupons to show.
 	if ( ! cartCoupons.length ) {
