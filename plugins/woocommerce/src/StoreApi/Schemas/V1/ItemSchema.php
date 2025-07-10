@@ -152,13 +152,13 @@ abstract class ItemSchema extends ProductSchema {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						],
-						'attribute' => [
+						'attribute'     => [
 							'description' => __( 'Variation attribute name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
-						'value'     => [
+						'value'         => [
 							'description' => __( 'Variation attribute value.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
