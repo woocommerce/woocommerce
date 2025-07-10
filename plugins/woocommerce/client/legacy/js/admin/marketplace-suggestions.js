@@ -16,6 +16,14 @@
 		// All are prefixed by {WC_Tracks::PREFIX}.
 		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
 
+		// Helper function to construct admin URLs similar to getAdminLink from @woocommerce/settings
+		function getAdminLink( path ) {
+			if ( ! marketplace_suggestions.admin_base_url || ! path ) {
+				return '';
+			}
+			return marketplace_suggestions.admin_base_url + path;
+		}
+
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
 		function dismissSuggestion( context, product, promoted, url, suggestionSlug ) {
 			// hide the suggestion in the UI
@@ -109,11 +117,20 @@
 		}
 
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( context, product, promoted, slug, url, text, isButton ) {
+		function renderLinkout( context, product, promoted, slug, url, iamUrl, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
-
 			var utmUrl = addURLParameters( context, url );
-			linkoutButton.setAttribute( 'href', utmUrl );
+			var isInternalLink = false;
+			var targetUrl = '';
+
+			if ( iamUrl ) {
+				targetUrl = getAdminLink( iamUrl );
+				isInternalLink = true;
+			} else {
+				targetUrl = utmUrl;
+			}
+
+			linkoutButton.setAttribute( 'href', targetUrl );
 
 			// By default, CTA links should open in same tab (and feel integrated with Woo).
 			// Exception: when editing products, use new tab. User may have product edits
@@ -136,7 +153,7 @@
 					context: context,
 					product: product || '',
 					promoted: promoted || '',
-					target: url || ''
+					target: targetUrl || ''
 				} );
 			};
 
@@ -144,9 +161,11 @@
 				linkoutButton.classList.add( 'button' );
 			} else {
 				linkoutButton.classList.add( 'linkout' );
+				if ( !isInternalLink ) {
 				var linkoutIcon = document.createElement( 'span' );
-				linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
-				linkoutButton.appendChild( linkoutIcon );
+					linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
+					linkoutButton.appendChild( linkoutIcon );
+				}
 			}
 
 			return linkoutButton;
@@ -207,7 +226,7 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 
 			if ( ! linkText ) {
@@ -216,7 +235,7 @@
 
 			container.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( context, product, promoted, slug, url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton );
 				container.appendChild( linkoutElement );
 			}
 
@@ -229,7 +248,20 @@
 
 		// Render a "list item" style suggestion.
 		// These are used in onboarding style contexts, e.g. products list empty state.
-		function renderListItem( context, product, promoted, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem(
+			context,
+			product,
+			promoted,
+			slug,
+			iconUrl,
+			title,
+			copy,
+			url,
+			iamUrl,
+			linkText,
+			linkIsButton,
+			allowDismiss
+		) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
@@ -242,7 +274,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss )
 			);
 
 			return container;
@@ -399,6 +431,7 @@
 						suggestionsToDisplay[ i ].title,
 						suggestionsToDisplay[ i ].copy,
 						suggestionsToDisplay[ i ].url,
+						suggestionsToDisplay[ i ]['iam-url'] || '',
 						linkText,
 						linkoutIsButton,
 						allowDismiss
