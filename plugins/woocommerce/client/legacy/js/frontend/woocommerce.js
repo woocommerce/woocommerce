@@ -16,10 +16,14 @@ jQuery( function ( $ ) {
 
 	// Global accessibility handler for all links with role="button"
 	// This ensures both spacebar and enter keypresses trigger click events, as per ARIA specification
-	$( document.body ).on( 'keydown', 'a[role="button"]', function ( event ) {
+	document.body.addEventListener( 'keydown', function ( event ) {
+		if ( ! event.target.matches( 'a[role="button"]' ) ) {
+			return;
+		}
+
 		if ( event.key === ' ' || event.key === 'Enter' ) {
 			event.preventDefault();
-			$( this ).trigger( 'click' );
+			event.target.click();
 		}
 	} );
 
@@ -182,7 +186,10 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
-	$( document.body ).on( 'item_removed_from_classic_cart updated_wc_div', focus_populate_live_region );
+	$( document.body ).on(
+		'item_removed_from_classic_cart updated_wc_div',
+		focus_populate_live_region
+	);
 } );
 
 /**
