@@ -143,7 +143,14 @@ const TotalsFooterItem = ( {
 					{ SHOW_TAXES &&
 						parsedTaxValue !== 0 &&
 						( isLoading ? (
-							<Skeleton width="45px" height="1.4em" />
+							<Skeleton
+								width="45px"
+								height="1.4em"
+								ariaMessage={ __(
+									'Loading price… ',
+									'woocommerce'
+								) }
+							/>
 						) : (
 							<p className="wc-block-components-totals-footer-item-tax">
 								{ createInterpolateElement( description, {

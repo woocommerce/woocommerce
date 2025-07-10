@@ -6,7 +6,6 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
-import { VisuallyHidden } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -62,10 +61,11 @@ const TotalsItem = ( {
 			</span>
 			{ ! value || showSkeleton ? (
 				<>
-					<VisuallyHidden aria-live="polite">
-						{ __( 'Loading price… ', 'woocommerce' ) }
-					</VisuallyHidden>
-					<Skeleton width="45px" height="1em" />
+					<Skeleton
+						width="45px"
+						height="1em"
+						ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+					/>
 				</>
 			) : (
 				<TotalsItemValue value={ value } currency={ currency } />
