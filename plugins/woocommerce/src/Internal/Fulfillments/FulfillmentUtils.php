@@ -25,10 +25,11 @@ class FulfillmentUtils {
 		$items_in_fulfillments = self::get_all_items_of_fulfillments( $fulfillments );
 		$order_items           = array_map(
 			function ( $item ) use ( $order ) {
+				// Refunded item quantities are saved as negative values in the order.
 				return array(
 					'item_id' => $item->get_id(),
 					'item'    => $item,
-					'qty'     => $item->get_quantity() - $order->get_qty_refunded_for_item( $item ),
+					'qty'     => $item->get_quantity() + $order->get_qty_refunded_for_item( $item->get_id() ),
 				);
 			},
 			$order->get_items() ?? array()
@@ -116,7 +117,8 @@ class FulfillmentUtils {
 	public static function calculate_order_fulfillment_status( WC_Order $order, $fulfillments = array() ): string {
 		$has_fulfillments = ! empty( $fulfillments );
 		if ( $has_fulfillments ) {
-			$pending_items  = self::get_pending_items( $order, $fulfillments );
+			$pending_items = self::get_pending_items( $order, $fulfillments );
+
 			$all_fulfilled  = true;
 			$some_fulfilled = false;
 

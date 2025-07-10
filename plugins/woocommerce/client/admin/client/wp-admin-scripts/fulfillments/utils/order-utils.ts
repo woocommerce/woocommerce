@@ -6,7 +6,7 @@ import { range } from 'lodash';
 /**
  * Internal dependencies
  */
-import { Fulfillment, LineItem, Order } from '../data/types';
+import { Fulfillment, LineItem, Order, Refund } from '../data/types';
 import { getFulfillmentItems } from './fulfillment-utils';
 
 /**
@@ -154,26 +154,46 @@ const reduceItems = (
  */
 export const getItemsNotInAnyFulfillment = (
 	fulfillments: Fulfillment[],
-	order: Order
+	order: Order,
+	refunds: Refund[] = []
 ): ItemSelection[] => {
-	// If there are no fulfillments, return all items from the order.
-	if ( fulfillments.length === 0 ) {
-		return getItemsFromOrder( order );
+	let itemsFromOrder = getItemsFromOrder( order );
+
+	if ( refunds.length > 0 ) {
+		const itemsRefunded = refunds.reduce( ( acc, refund ) => {
+			const refundedItems = refund.line_items.map(
+				( item: LineItem ) => ( {
+					// Refunded items have a different item_id, find the original item in the order.
+					item_id:
+						itemsFromOrder.find(
+							( orderItem ) =>
+								orderItem.item.product_id === item.product_id
+						)?.item_id || item.id,
+					item,
+					selection: range( -item.quantity ).map( ( index ) => ( {
+						index,
+						checked: true,
+					} ) ),
+				} )
+			);
+			return combineItems( acc, refundedItems );
+		}, [] as ItemSelection[] );
+
+		// Reduce the refunded items from the order items.
+		itemsFromOrder = reduceItems( itemsFromOrder, itemsRefunded );
 	}
 
-	// If there are fulfillments, combine the items from all fulfillments and reduce them from the order items.
-	const itemsFromFulfillments = fulfillments.reduce( ( acc, fulfillment ) => {
-		const items = getItemsFromFulfillment( order, fulfillment );
-		return combineItems( acc, items );
-	}, [] as ItemSelection[] );
-	const itemsFromOrder = getItemsFromOrder( order );
+	if ( fulfillments.length > 0 ) {
+		// If there are fulfillments, combine the items from all fulfillments and reduce them from the order items.
+		const itemsInAnyFulfillment = fulfillments.reduce(
+			( acc, fulfillment ) => {
+				const items = getItemsFromFulfillment( order, fulfillment );
+				return combineItems( acc, items );
+			},
+			[] as ItemSelection[]
+		);
+		itemsFromOrder = reduceItems( itemsFromOrder, itemsInAnyFulfillment );
+	}
 
-	const itemsNotInAnyFulfillment = reduceItems(
-		itemsFromOrder,
-		itemsFromFulfillments
-	);
-
-	return itemsNotInAnyFulfillment.filter(
-		( item ) => item.selection.length > 0
-	);
+	return itemsFromOrder.filter( ( item ) => item.selection.length > 0 );
 };
