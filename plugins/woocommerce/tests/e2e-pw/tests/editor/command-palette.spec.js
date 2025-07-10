@@ -1,14 +1,16 @@
 /**
  * External dependencies
  */
-import { disableWelcomeModal } from '@woocommerce/e2e-utils-playwright';
+import {
+	disableWelcomeModal,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 
 // need to figure out whether tests are being run on a mac
 const macOS = process.platform === 'darwin';

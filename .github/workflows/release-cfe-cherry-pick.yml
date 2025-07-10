@@ -22,7 +22,7 @@ permissions: {}
 jobs:
     verify:
         name: Verify
-        runs-on: ubuntu-latest
+        runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
         permissions:
             contents: read
             pull-requests: read
@@ -75,7 +75,7 @@ jobs:
 
     prep:
         name: Prep inputs
-        runs-on: ubuntu-latest
+        runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
         if: needs.verify.outputs.run == 'true'
         needs: verify
         outputs:
@@ -105,7 +105,7 @@ jobs:
 
     check-release-branch-exists:
         name: Check for existence of release branch
-        runs-on: ubuntu-latest
+        runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
         needs: prep
         steps:
             - name: Check for release branch
@@ -124,7 +124,7 @@ jobs:
 
     cherry-pick-run:
         name: Run cherry pick tool
-        runs-on: ubuntu-latest
+        runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
         permissions:
           actions: write
           contents: write
