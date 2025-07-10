@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\Block_Delimiter;
 
 /**
  * Mini-Cart class.
@@ -75,6 +76,26 @@ class MiniCart extends AbstractBlock {
 	);
 
 	/**
+	 * WooCommerce mini-cart template blocks.
+	 *
+	 * @var array
+	 */
+	const MINI_CART_TEMPLATE_BLOCKS = array(
+		'woocommerce/mini-cart-contents',
+		'woocommerce/filled-mini-cart-contents-block',
+		'woocommerce/mini-cart-title-block',
+		'woocommerce/mini-cart-title-label-block',
+		'woocommerce/mini-cart-title-items-counter-block',
+		'woocommerce/mini-cart-items-block',
+		'woocommerce/mini-cart-products-table-block',
+		'woocommerce/mini-cart-footer-block',
+		'woocommerce/mini-cart-cart-button-block',
+		'woocommerce/mini-cart-checkout-button-block',
+		'woocommerce/empty-mini-cart-contents-block',
+		'woocommerce/mini-cart-shopping-button-block',
+	);
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -131,11 +152,11 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string;
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
+			'dependencies' => array( 'wc-blocks' ),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -151,11 +172,11 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
-		];
+			'dependencies' => array(),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -165,7 +186,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**
@@ -175,7 +196,7 @@ class MiniCart extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		if ( is_cart() || is_checkout() ) {
 			return;
 		}
@@ -468,7 +489,8 @@ class MiniCart extends AbstractBlock {
 			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 			$wrapper_styles                   = $classes_styles['styles'];
-			$template_part_contents           = $this->get_template_part_contents( 'experimental-iapi-mini-cart' );
+			$template_part_contents           = $this->get_template_part_contents( false );
+			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -579,13 +601,72 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
+	 * Process template contents to remove unwanted div wrappers.
+	 *
+	 * The old Mini Cart template had extra divs nested within the block tags
+	 * that are no longer necessary since we don't render the Mini Cart with
+	 * React anymore. To maintain compatibility with user saved templates that
+	 * have these wrapper divs, we must remove them.
+	 *
+	 * @param string $template_contents The template contents to process.
+	 * @return string The processed template contents.
+	 */
+	protected function process_template_contents( $template_contents ) {
+		$p               = new \WP_HTML_Tag_Processor( $template_contents );
+		$is_old_template = $p->next_tag(
+			array(
+				'tag_name'   => 'div',
+				'class_name' => 'wp-block-woocommerce-mini-cart-contents',
+			)
+		);
+
+		if ( ! $is_old_template ) {
+			return $template_contents;
+		}
+
+		$output                   = '';
+		$was_at                   = 0;
+		$is_mini_cart_block_stack = array( false );
+
+		foreach ( Block_Delimiter::scan_delimiters( $template_contents ) as $where => $delimiter ) {
+			list( $at, $length ) = $where;
+			$block_type          = $delimiter->allocate_and_return_block_type();
+			$delimiter_type      = $delimiter->get_delimiter_type();
+
+			if ( ! $is_mini_cart_block_stack[ array_key_last( $is_mini_cart_block_stack ) ] ) {
+				// Copy content up to and including this block delimiter.
+				$output .= substr( $template_contents, $was_at, $at + $length - $was_at );
+			} else {
+				// Just copy the block delimiter, skipping the wrapper div that existed before.
+				$output .= substr( $template_contents, $at, $length );
+			}
+
+			// Update the position to the end of the block delimiter.
+			$was_at = $at + $length;
+
+			if ( Block_Delimiter::OPENER === $delimiter_type ) {
+				// Add the Mini Cart block info to a stack.
+				$is_mini_cart_block_stack[] = in_array( $block_type, self::MINI_CART_TEMPLATE_BLOCKS, true );
+			} elseif ( Block_Delimiter::CLOSER === $delimiter_type ) {
+				// Pop the last Mini Cart block info from the stack.
+				array_pop( $is_mini_cart_block_stack );
+			}
+		}
+
+		// Add any remaining content.
+		$output .= substr( $template_contents, $was_at );
+
+		return $output;
+	}
+
+	/**
 	 * Get the mini cart template part contents to render inside the drawer.
 	 *
-	 * @param string $template_name  The name of the template part to get the contents of.
-	 *
+	 * @param bool $do_blocks Whether to apply do_blocks() to the template part contents.
 	 * @return string The contents of the template part.
 	 */
-	protected function get_template_part_contents( $template_name = 'mini-cart' ) {
+	protected function get_template_part_contents( $do_blocks = true ) {
+		$template_name          = 'mini-cart';
 		$template_part_contents = '';
 
 		// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
@@ -599,14 +680,23 @@ class MiniCart extends AbstractBlock {
 		$template_part = get_block_template( $template_slug_to_load . '//' . $template_name, 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
-			$template_part_contents = do_blocks( $template_part->content );
+			if ( $do_blocks ) {
+				$template_part_contents = do_blocks( $template_part->content );
+			} else {
+				$template_part_contents = $template_part->content;
+			}
 		}
 
 		if ( '' === $template_part_contents ) {
-			$template_part_contents = do_blocks(
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' )
-			);
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$file_contents = file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' );
+			if ( $do_blocks ) {
+				$template_part_contents = do_blocks(
+					$file_contents
+				);
+			} else {
+				$template_part_contents = $file_contents;
+			}
 		}
 
 		return $template_part_contents;
@@ -662,8 +752,8 @@ class MiniCart extends AbstractBlock {
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
-						. wp_kses_post( $template_part_contents ) .
-						'</div>
+					. wp_kses_post( $template_part_contents ) .
+					'</div>
 					</div>
 				</div>
 			</div>
@@ -733,11 +823,11 @@ class MiniCart extends AbstractBlock {
 
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--mini-cart-contents-block' );
-		$shared_chunks = [ 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' ];
+		$shared_chunks = array( 'cart-blocks/cart-line-items--mini-cart-contents-block/products-table-frontend' );
 
 		foreach ( array_merge( $chunks, $vendor_chunks, $shared_chunks ) as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
-			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
+			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), array(), true );
 			$translations[] = $wp_scripts->print_translations( $handle, false );
 			wp_deregister_script( $handle );
 		}

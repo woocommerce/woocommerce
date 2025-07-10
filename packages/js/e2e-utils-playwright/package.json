@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/e2e-utils-playwright",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"description": "End-To-End (E2E) test Playwright utils for WooCommerce",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-utils-playwright/README.md",
 	"repository": {
@@ -36,6 +36,10 @@
 		"@wordpress/babel-preset-default": "next",
 		"jest": "27.5.x",
 		"wireit": "0.14.12"
+	},
+	"dependencies": {
+		"axios": "^1.6.0",
+		"oauth-1.0a": "^2.2.6"
 	},
 	"publishConfig": {
 		"access": "public"
