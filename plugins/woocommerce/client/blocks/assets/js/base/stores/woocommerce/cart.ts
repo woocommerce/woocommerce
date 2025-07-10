@@ -92,8 +92,6 @@ function getUserFriendlyErrorMessage(
 	switch ( code ) {
 		case 'woocommerce_rest_missing_attributes':
 			return 'Please select product attributes before adding to cart.';
-		case 'no_successful_cart_response':
-			return 'This product can only be purchased once. You cannot add it to your cart again.';
 		default:
 			return error.message;
 	}
@@ -283,7 +281,6 @@ const { state, actions } = store< Store >(
 							throw generateError( response );
 					} );
 
-					// Gets the last successful cart response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -291,17 +288,23 @@ const { state, actions } = store< Store >(
 									response.status < 300
 						  )
 						: [];
-					const lastSuccessfulCartResponse = successfulResponses[
-						successfulResponses.length - 1
-					]?.body as Cart;
+
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 &&
+									response.status >= 300
+						  )
+						: [];
 
 					// Only update the cart and trigger events if there is at least one successful response.
 					if ( successfulResponses.length > 0 ) {
-						// Use the last successful response to update the local cart.
-						const cartResponse = lastSuccessfulCartResponse;
+						const lastSuccessfulCartResponse = successfulResponses[
+							successfulResponses.length - 1
+						]?.body as Cart;
 
-						// Updates the local cart.
-						state.cart = cartResponse;
+						// Use the last successful response to update the local cart.
+						state.cart = lastSuccessfulCartResponse;
 
 						// Dispatches a legacy event.
 						triggerAddedToCartEvent( {
@@ -312,18 +315,17 @@ const { state, actions } = store< Store >(
 						emitSyncEvent( { quantityChanges } );
 					}
 
-					// Show all errors from the batch responses.
-					for ( const response of json.responses ) {
-						const body = response?.body;
+					// Show error notices for all failed responses.
+					errorResponses.forEach( ( response ) => {
 						if (
-							body &&
-							typeof body === 'object' &&
-							'code' in body &&
-							'message' in body
+							response.body &&
+							typeof response.body === 'object'
 						) {
-							actions.showNoticeError( body as ApiErrorResponse );
+							actions.showNoticeError(
+								response.body as ApiErrorResponse
+							);
 						}
-					}
+					} );
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
