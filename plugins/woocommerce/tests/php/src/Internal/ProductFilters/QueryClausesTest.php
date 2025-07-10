@@ -220,7 +220,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 							return false;
 						}
 
-						// Check if product has any of the requested terms (OR logic)
+						// Check if product has any of the requested terms (OR logic).
 						if ( empty( array_intersect( $terms, $product_terms ) ) ) {
 							return false;
 						}

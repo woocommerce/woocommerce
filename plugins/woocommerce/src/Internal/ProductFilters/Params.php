@@ -35,12 +35,12 @@ class Params implements FilterUrlParam {
 			$keys = array_merge( $keys, array_values( $params ) );
 			if ( 'attribute' === $taxonomy ) {
 				$query_type_params = array_map(
-					function( $param ) {
+					function ( $param ) {
 						return 'query_type_' . $param;
 					},
 					array_keys( $params )
 				);
-				$keys = array_merge( $keys, $query_type_params );
+				$keys              = array_merge( $keys, $query_type_params );
 			}
 		}
 
@@ -69,18 +69,18 @@ class Params implements FilterUrlParam {
 	 */
 	private function init_params(): void {
 		self::$params = array(
-			'price' => array(
+			'price'     => array(
 				'min_price',
 				'max_price',
 			),
-			'rating' => array(
+			'rating'    => array(
 				'rating_filter',
 			),
-			'status' => array(
+			'status'    => array(
 				'filter_stock_status',
 			),
 			'attribute' => $this->get_attribute_params(),
-			'taxonomy' => $this->get_taxonomy_params(),
+			'taxonomy'  => $this->get_taxonomy_params(),
 		);
 	}
 

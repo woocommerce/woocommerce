@@ -101,9 +101,24 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->product_tags = array(
-			'tag-1' => $this->fixture_data->get_product_tag( array( 'name' => 'Tag 1', 'slug' => 'tag-1' ) ),
-			'tag-2' => $this->fixture_data->get_product_tag( array( 'name' => 'Tag 2', 'slug' => 'tag-2' ) ),
-			'tag-3' => $this->fixture_data->get_product_tag( array( 'name' => 'Tag 3', 'slug' => 'tag-3' ) ),
+			'tag-1' => $this->fixture_data->get_product_tag(
+				array(
+					'name' => 'Tag 1',
+					'slug' => 'tag-1',
+				)
+			),
+			'tag-2' => $this->fixture_data->get_product_tag(
+				array(
+					'name' => 'Tag 2',
+					'slug' => 'tag-2',
+				)
+			),
+			'tag-3' => $this->fixture_data->get_product_tag(
+				array(
+					'name' => 'Tag 3',
+					'slug' => 'tag-3',
+				)
+			),
 		);
 
 		$this->products_data = array(
@@ -141,8 +156,8 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'         => 'Product 5',
 				'stock_status' => ProductStockStatus::IN_STOCK,
-				'category_ids'  => array( $this->product_categories['cat-1']['term_id'] ),
-				'tag_ids'       => array( $this->product_tags['tag-2']['term_id'] ),
+				'category_ids' => array( $this->product_categories['cat-1']['term_id'] ),
+				'tag_ids'      => array( $this->product_tags['tag-2']['term_id'] ),
 				'variations'   => array(
 					array(
 						'attributes' => array(
@@ -167,8 +182,8 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			array(
 				'name'         => 'Product 6',
 				'stock_status' => ProductStockStatus::IN_STOCK,
-				'category_ids'  => array( $this->product_categories['cat-1']['term_id'] ),
-				'tag_ids'       => array( $this->product_tags['tag-3']['term_id'] ),
+				'category_ids' => array( $this->product_categories['cat-1']['term_id'] ),
+				'tag_ids'      => array( $this->product_tags['tag-3']['term_id'] ),
 				'variations'   => array(
 					array(
 						'attributes' => array(
