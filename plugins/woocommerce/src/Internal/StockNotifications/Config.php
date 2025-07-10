@@ -146,7 +146,7 @@ class Config {
 		 */
 		return (int) apply_filters(
 			'woocommerce_bis_verification_expiration_time_threshold',
-			DAY_IN_SECONDS
+			HOUR_IN_SECONDS
 		);
 	}
 }
