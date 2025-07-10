@@ -388,28 +388,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	}
 
 	/**
-	 * Get all the term for current attribute.
-	 *
-	 * @param \WP_Term[] $all_terms      Aggreated terms array.
-	 * @param string     $taxonomy       Attribute taxonomy name.
-	 * @param int        $taxonomy_count Taxonomy count. If there is only one
-	 *                                   taxonomy, return all terms.
-	 * @return mixed
-	 */
-	private function get_current_attribute_terms( array $all_terms, string $taxonomy, int $taxonomy_count ): array {
-		if ( 1 === $taxonomy_count ) {
-			return $all_terms;
-		}
-
-		return array_filter(
-			$all_terms,
-			function ( $term ) use ( $taxonomy ) {
-				return $term->taxonomy === $taxonomy;
-			}
-		);
-	}
-
-	/**
 	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
 	 * @param string $sql SQL join.
