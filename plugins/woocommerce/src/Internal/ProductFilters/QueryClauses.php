@@ -335,6 +335,10 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			)
 		);
 
+		if ( is_wp_error( $all_terms ) ) {
+			return $args;
+		}
+
 		$term_ids_by_taxonomy = array();
 
 		foreach ( $all_terms as $term ) {
