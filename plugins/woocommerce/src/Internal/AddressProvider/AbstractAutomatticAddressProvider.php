@@ -67,23 +67,51 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 			return;
 		}
 
-		$last_fetch_attempt = $this->get_cached_option( 'last_fetch_attempt' );
-		if ( $last_fetch_attempt && $last_fetch_attempt > time() - HOUR_IN_SECONDS && 'local' !== wp_get_environment_type() ) {
+		$retry_data = $this->get_cached_option( 'jwt_retry_data' );
+
+		// Check if we should wait before trying again.
+		if ( $retry_data && isset( $retry_data['try_after'] ) && $retry_data['try_after'] > time() && 'local' !== wp_get_environment_type() ) {
 			return;
 		}
 
-		// Otherwise, we fetch a fresh token.
+		// Otherwise, we fetch a fresh token with retry logic.
+		$this->fetch_jwt_with_retry();
+	}
+
+	/**
+	 * Fetches JWT with retry logic.
+	 *
+	 * @return void
+	 */
+	private function fetch_jwt_with_retry() {
+		$retry_data = $this->get_cached_option( 'jwt_retry_data' );
+		if ( ! $retry_data ) {
+			$retry_data = array( 'attempts' => 0 );
+		}
+
 		try {
 			$fresh_jwt = $this->get_address_service_jwt();
 			if ( $fresh_jwt && JsonWebToken::shallow_validate( $fresh_jwt ) ) {
 				$this->set_jwt( $fresh_jwt );
+				// Clear retry data on success.
+				$this->delete_cached_option( 'jwt_retry_data' );
 				return;
 			}
 		} catch ( \Exception $e ) {
-			wc_get_logger()->error( sprintf( 'Failed loding JWT for %1$s address autocomplete service with error %2$s.', $this->name, $e->getMessage() ), 'address-autocomplete' );
-		} finally {
-			$this->update_cached_option( 'last_fetch_attempt', time(), HOUR_IN_SECONDS );
+			wc_get_logger()->error(
+				sprintf(
+					'Failed loading JWT for %1$s address autocomplete service (attempt %2$d) with error %3$s.',
+					$this->name,
+					$retry_data['attempts']++,
+					$e->getMessage()
+				),
+				'address-autocomplete'
+			);
 		}
+
+		$backoff_hours           = pow( 2, $retry_data['attempts'] - 1 ); // 1, 2, 4, 8 hours.
+		$retry_data['try_after'] = time() + ( $backoff_hours * HOUR_IN_SECONDS );
+		$this->update_cached_option( 'jwt_retry_data', $retry_data, DAY_IN_SECONDS );
 	}
 
 	/**
