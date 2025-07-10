@@ -455,7 +455,7 @@ class Notification extends \WC_Data {
 	 * This method checks if the key is valid by verifying the hash and checking the expiration time.
 	 *
 	 * @param string $key The key to check.
-	 * @return bool
+	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
 		$action_key = $this->get_meta( 'email_link_action_key' );
@@ -481,6 +481,7 @@ class Notification extends \WC_Data {
 	 * This is used to ensure that the notification has valid verification data.
 	 *
 	 * @param bool $persist If true, save the changes to the database.
+	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
 		$key = wp_generate_password( 20, false );
@@ -497,18 +498,19 @@ class Notification extends \WC_Data {
 	 * Check if the given key is a valid unsubscribe key.
 	 *
 	 * @param string $key The key to check.
-	 * @return bool
+	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_unsubscribe_key( string $key ): bool {
 		return wp_verify_fast_hash( $key, $this->get_meta( 'email_link_action_key' ) );
 	}
 
 	/**
-	 * Get the unsubscribe key for email links.
+	 * Maybe setup verification data for the notification.
 	 *
-	 * @param bool $persist Save the changes to the database if true.
+	 * This is used to ensure that the notification has valid verification data.
 	 *
-	 * return string
+	 * @param bool $persist If true, save the changes to the database.
+	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
 		$key  = wp_generate_password( 20, false );
