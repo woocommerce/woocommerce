@@ -164,7 +164,7 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect( screen.getByText( 'Shipping' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Loading price…' ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
 	} );
 
 	it( 'shows FREE if shipping cost is 0', () => {
