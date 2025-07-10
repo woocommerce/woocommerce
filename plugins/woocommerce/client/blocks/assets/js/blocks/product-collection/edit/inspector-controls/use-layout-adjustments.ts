@@ -52,7 +52,7 @@ const useLayoutAdjustments = (
 		[ productTemplateBlockClientId ]
 	);
 
-	const { insertBlock, removeBlock, replaceBlock, replaceInnerBlocks } =
+	const { insertBlock, removeBlock, replaceBlock } =
 		useDispatch( blockEditorStore );
 
 	useEffect( () => {
@@ -84,7 +84,7 @@ const useLayoutAdjustments = (
 			// when replacing the product template block with the group block that
 			// contains the same product template block.
 			removeBlock( productTemplateBlockClientId, false );
-			insertBlock( groupBlock, 0, clientId );
+			insertBlock( groupBlock, productTemplateBlockIndex, clientId );
 
 			if ( paginationBlockClientId ) {
 				removeBlock( paginationBlockClientId, false );
