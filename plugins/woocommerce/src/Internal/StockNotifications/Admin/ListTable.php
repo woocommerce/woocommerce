@@ -188,7 +188,7 @@ class ListTable extends \WP_List_Table {
 
 		echo wp_kses_post(
 			sprintf(
-				'<a target="_blank" href="' . admin_url( 'post.php?post=%d&notification_action=edit' ) . '">%s</a>',
+				'<a target="_blank" href="' . admin_url( 'post.php?post=%d&action=edit' ) . '">%s</a>',
 				$product->get_parent_id() ? absint( $product->get_parent_id() ) : absint( $product->get_id() ),
 				$name
 			)
