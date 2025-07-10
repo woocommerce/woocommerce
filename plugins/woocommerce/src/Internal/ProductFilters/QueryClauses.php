@@ -321,8 +321,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$all_terms = get_terms(
 			array(
-				'taxonomy' => array_keys( $chosen_taxonomies ),
-				'slug'     => array_merge( ...array_values( $chosen_taxonomies ) ),
+				'taxonomy'   => array_keys( $chosen_taxonomies ),
+				'slug'       => array_merge( ...array_values( $chosen_taxonomies ) ),
+				'hide_empty' => false,
 			)
 		);
 
