@@ -161,7 +161,7 @@ class QueryClauses implements QueryClausesGenerator {
 		// Get all terms for all attribute taxonomies in one query for better performance.
 		$all_terms_slugs = array();
 		foreach ( $chosen_attributes as $data ) {
-			if ( isset( $data['terms'] ) && is_array( $data['terms'] ) ) {
+			if ( ! empty( $data['terms'] ) && is_array( $data['terms'] ) ) {
 				$all_terms_slugs = array_merge( $all_terms_slugs, $data['terms'] );
 			}
 		}
