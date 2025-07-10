@@ -87,13 +87,14 @@ function emitSyncEvent( {
 function getUserFriendlyErrorMessage(
 	error: Error | ApiErrorResponse
 ): string {
-	if (
-		( error as ApiErrorResponse ).code ===
-		'woocommerce_rest_missing_attributes'
-	) {
-		return 'Please select product attributes before adding to cart.';
+	const code = ( error as ApiErrorResponse )?.code;
+
+	switch ( code ) {
+		case 'woocommerce_rest_missing_attributes':
+			return 'Please select product attributes before adding to cart.';
+		default:
+			return error.message;
 	}
-	return error.message;
 }
 
 // Todo: export this store once the store is public.
@@ -280,7 +281,6 @@ const { state, actions } = store< Store >(
 							throw generateError( response );
 					} );
 
-					// Gets the last successful cart response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -288,42 +288,44 @@ const { state, actions } = store< Store >(
 									response.status < 300
 						  )
 						: [];
-					const lastSuccessfulCartResponse = successfulResponses[
-						successfulResponses.length - 1
-					]?.body as Cart;
 
-					// Checks if the last successful cart response is valid.
-					if ( ! lastSuccessfulCartResponse ) {
-						throw new Error(
-							'No successful cart response received.'
-						);
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					// Only update the cart and trigger events if there is at least one successful response.
+					if ( successfulResponses.length > 0 ) {
+						const lastSuccessfulCartResponse = successfulResponses[
+							successfulResponses.length - 1
+						]?.body as Cart;
+
+						// Use the last successful response to update the local cart.
+						state.cart = lastSuccessfulCartResponse;
+
+						// Dispatches a legacy event.
+						triggerAddedToCartEvent( {
+							preserveCartData: true,
+						} );
+
+						// Dispatches the event to sync the @wordpress/data store.
+						emitSyncEvent( { quantityChanges } );
 					}
 
-					// Checks if the last successful response contains any errors.
-					if (
-						lastSuccessfulCartResponse?.errors &&
-						Array.isArray( lastSuccessfulCartResponse.errors )
-					) {
-						lastSuccessfulCartResponse.errors.forEach(
-							( error ) => {
-								actions.showNoticeError( error );
-							}
-						);
-					}
-
-					// Use the last successful response to update the local cart.
-					const cartResponse = lastSuccessfulCartResponse;
-
-					// Updates the local cart.
-					state.cart = cartResponse;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
+					// Show error notices for all failed responses.
+					errorResponses.forEach( ( response ) => {
+						if (
+							response.body &&
+							typeof response.body === 'object'
+						) {
+							actions.showNoticeError(
+								response.body as ApiErrorResponse
+							);
+						}
 					} );
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
