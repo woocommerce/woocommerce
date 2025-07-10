@@ -26,7 +26,7 @@ class FulfillmentsManager {
 		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'wc_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
-		add_filter( 'woocommerce_order_refunded', array( $this, 'update_fulfillments_after_refund' ), 10, 1 );
+		add_filter( 'woocommerce_order_refunded', array( $this, 'update_fulfillments_after_refund' ), 10, 2 );
 		add_filter( 'woocommerce_delete_order_refund', array( $this, 'update_fulfillment_status_after_refund_deleted' ), 10, 1 );
 
 		$this->init_fulfillment_status_hooks();
@@ -163,20 +163,50 @@ class FulfillmentsManager {
 	 * and items are correctly adjusted based on the refund.
 	 *
 	 * @param int $order_id The ID of the order being refunded.
+	 * @param int $refund_id The ID of the refund being processed.
 	 *
 	 * @return void
 	 */
-	public function update_fulfillments_after_refund( int $order_id ): void {
-		$order = wc_get_order( $order_id );
-		if ( ! $order instanceof \WC_Order ) {
-			return;
+	public function update_fulfillments_after_refund( int $order_id, int $refund_id ): void {
+		// We just need to process the new refund being added, as other refunds may have already been processed.
+		// If we re-process all refunds of the order, we may remove more items from fulfillments than necessary,
+		// which could lead to incorrect fulfillment statuses.
+		if ( ! $order_id || ! $refund_id ) {
+			return; // If the order ID or refund ID is not valid, do nothing.
 		}
 
+		// Get the refund object.
+		$refund = wc_get_order( $refund_id );
+		if ( ! $refund instanceof \WC_Order && $refund->get_parent_id() !== $order_id ) {
+			return; // If the refund is not a valid order, or the parent is wrong, do nothing.
+		}
+
+		// Get the order object.
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return; // If the order is not valid, do nothing.
+		}
+
+		// Get the fulfillments data store and read all fulfillments for the order.
 		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 		$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
 		if ( empty( $fulfillments ) ) {
 			return; // No fulfillments found for the order.
 		}
+
+		// Preparation: We need to reduce the quantities of items in fulfillments based on the refunded quantities.
+		// Not remove the same refunded quantities from all fulfillments, but from all fulfillments combined.
+
+		$items_refunded = array_map(
+			function ( $item ) {
+				return array(
+					'item_id' => $item->get_id(),
+					'qty'     => $item->get_quantity(),
+				);
+			},
+			$refund->get_items()
+		);
+		$items_refunded = array_column( $items_refunded, 'qty', 'item_id' );
 
 		foreach ( $fulfillments as $fulfillment ) {
 			if ( ! $fulfillment instanceof Fulfillment ) {
@@ -184,7 +214,7 @@ class FulfillmentsManager {
 			}
 
 			if ( $fulfillment->get_is_fulfilled() ) {
-				continue; // Skip if the fulfillment is already fulfilled.
+				continue; // Skip if the fulfillment is already fulfilled. We don't remove items from fulfilled fulfillments.
 			}
 
 			// Get the items from the fulfillment.
@@ -196,10 +226,15 @@ class FulfillmentsManager {
 			// Adjust the items based on the refund.
 			$new_items = array();
 			foreach ( $items as $item ) {
-				if ( isset( $item['qty'] ) && isset( $item['item_id'] ) ) {
-					$item['qty'] += $order->get_qty_refunded_for_item( $item['item_id'] );
-					if ( $item['qty'] < 0 ) {
-						$item['qty'] = 0; // Ensure quantity does not go negative.
+				if ( isset( $item['qty'] ) && isset( $item['item_id'] ) && isset( $items_refunded[ $item['item_id'] ] ) ) {
+					if ( $items_refunded[ $item['item_id'] ] <= $item['qty'] ) {
+						// If the refunded quantity is less than or equal to the item quantity, reduce the item quantity.
+						$item['qty']                       += $items_refunded[ $item['item_id'] ];
+						$items_refunded[ $item['item_id'] ] = 0; // Set refunded quantity to zero after adjustment.
+					} else {
+						// If the refunded quantity is greater than the item quantity, set the item quantity to zero.
+						$item['qty']                         = 0;
+						$items_refunded[ $item['item_id'] ] += $item['qty']; // Reduce the refunded quantity.
 					}
 					$new_items[] = $item; // Add the adjusted item to the new items array.
 				}
