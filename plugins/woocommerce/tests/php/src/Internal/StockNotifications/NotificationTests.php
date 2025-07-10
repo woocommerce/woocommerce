@@ -161,7 +161,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	public function test_check_verification_key_expired_key() {
 		add_filter(
 			'woocommerce_bis_verification_expiration_time_threshold',
-			function() {
+			function () {
 				return 0;
 			}
 		);

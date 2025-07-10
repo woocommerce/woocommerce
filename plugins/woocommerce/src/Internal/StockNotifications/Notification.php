@@ -16,8 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Notification data class.
  */
 class Notification extends \WC_Data {
-
-	/*
+	/**
 	 * This is the name of this object type.
 	 *
 	 * @var string
@@ -507,7 +506,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Get the unsubscribe key for email links.
 	 *
-	 * @param bool $persist If true, save the changes to the database.
+	 * @param bool $persist Save the changes to the database if true.
 	 *
 	 * return string
 	 */
