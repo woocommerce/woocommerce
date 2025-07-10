@@ -49,7 +49,7 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 			<a
 				data-wp-interactive="woocommerce/mini-cart-shopping-button-block"
 				href="<?php echo esc_attr( $shop_url ); ?>"
-				<?php echo $wrapper_attributes; ?>
+				<?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 				<div class="wc-block-components-button__text">
 					<?php echo esc_html( $start_shopping_label ); ?>

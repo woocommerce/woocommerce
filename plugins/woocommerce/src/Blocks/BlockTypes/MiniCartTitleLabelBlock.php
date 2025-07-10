@@ -44,7 +44,7 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 
 		ob_start();
 		?>
-		<span <?php echo $wrapper_attributes ?>>
+		<span <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php echo esc_html( $cart_label ); ?>
 		</span>
 		<?php

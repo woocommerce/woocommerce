@@ -41,7 +41,7 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 		$wrapper_attributes = get_block_wrapper_attributes();
 		ob_start();
 		?>
-		<div <?php echo $wrapper_attributes ?>>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<h2 class="wc-block-mini-cart__title">
 				<?php
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
