@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove unused 'WooCommerce Blocks Test Helper' plugin after confirming it is no longer referenced in E2E tests.
