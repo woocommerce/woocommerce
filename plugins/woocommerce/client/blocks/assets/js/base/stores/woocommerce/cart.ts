@@ -27,8 +27,8 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItemType =  Omit<OptimisticCartItem, 'variation'> & {
-    variation?: SelectedAttributesType[];
+export type ClientCartItemType = Omit< OptimisticCartItem, 'variation' > & {
+	variation?: SelectedAttributesType[];
 };
 
 export type Store = {

@@ -7,7 +7,6 @@ import type {
 	SelectedAttributesType,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
-import { CartVariationItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
