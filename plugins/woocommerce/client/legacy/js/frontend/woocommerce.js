@@ -182,13 +182,7 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
-	// Note: Spacebar support for .remove_from_cart_button (which has role="button")
-	// is now handled by the global a[role="button"] keydown handler above
-
-	$( document.body ).on(
-		'item_removed_from_classic_cart updated_wc_div',
-		focus_populate_live_region
-	);
+	$( document.body ).on( 'item_removed_from_classic_cart updated_wc_div', focus_populate_live_region );
 } );
 
 /**
