@@ -576,12 +576,12 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
-			if ( isset( $query_vars[ $param ] ) ) {
+			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
 				$chosen_taxonomies[ $taxonomy ] = array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) );
 			}
 		}
 
-		return array_filter( $chosen_taxonomies );
+		return $chosen_taxonomies;
 	}
 
 	/**
