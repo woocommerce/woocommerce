@@ -17,7 +17,7 @@ import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
  */
 import { triggerAddedToCartEvent } from './legacy-events';
 
-export type SelectedAttributesType = Omit< CartVariationItem, 'raw_attribute' >;
+export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 export type OptimisticCartItem = {
 	key?: string;
@@ -27,8 +27,8 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItemType = Omit< OptimisticCartItem, 'variation' > & {
-	variation?: SelectedAttributesType[];
+export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
+	variation?: SelectedAttributes[];
 };
 
 export type Store = {
@@ -42,8 +42,8 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: ClientCartItemType ) => void;
-		batchAddCartItems: ( items: ClientCartItemType[] ) => void;
+		addCartItem: ( args: ClientCartItem ) => void;
+		batchAddCartItems: ( items: ClientCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;

@@ -5,7 +5,7 @@ import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
-	SelectedAttributesType,
+	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
@@ -20,7 +20,7 @@ export type AvailableVariation = {
 export type Context = {
 	productId: number;
 	productType: string;
-	selectedAttributes: SelectedAttributesType[];
+	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -30,7 +30,7 @@ export type Context = {
 interface GroupedCartItem {
 	id: number;
 	quantity: number;
-	variation: SelectedAttributesType[];
+	variation: SelectedAttributes[];
 	type: string;
 }
 
@@ -95,7 +95,7 @@ const getInputData = (
 
 const getMatchedVariation = (
 	availableVariations: AvailableVariation[],
-	selectedAttributes: SelectedAttributesType[]
+	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
 		! Array.isArray( availableVariations ) ||
@@ -176,7 +176,7 @@ const addToCartWithOptionsStore = store(
 				);
 				return matchedVariation?.variation_id || null;
 			},
-			get selectedAttributes(): SelectedAttributesType[] {
+			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return [];

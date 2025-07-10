@@ -4,7 +4,7 @@
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type {
 	OptimisticCartItem,
-	SelectedAttributesType,
+	SelectedAttributes,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
 
@@ -58,7 +58,7 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 
 const isCartItemMatched = (
 	cartItem: OptimisticCartItem,
-	selectedItem: SelectedAttributesType[]
+	selectedItem: SelectedAttributes[]
 ) => {
 	if (
 		! Array.isArray( cartItem.variation ) ||
@@ -81,7 +81,7 @@ const isCartItemMatched = (
 			raw_attribute: string;
 			value: string;
 		} ) =>
-			selectedItem.some( ( item: SelectedAttributesType ) => {
+			selectedItem.some( ( item: SelectedAttributes ) => {
 				return (
 					item.attribute === raw_attribute &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
