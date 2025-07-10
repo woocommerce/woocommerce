@@ -100,7 +100,6 @@ test.describe( 'Merchant → Checkout', () => {
 	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
-
 		test( 'Merchant can see T&S and Privacy Policy links without checkbox', async ( {
 			page,
 			frontendUtils,
