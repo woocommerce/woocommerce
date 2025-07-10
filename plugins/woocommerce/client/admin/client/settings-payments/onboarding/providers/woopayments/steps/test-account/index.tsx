@@ -173,15 +173,20 @@ const TestAccountStep = () => {
 		useState( false );
 
 	const handleContinue = () => {
+		setIsContinueButtonLoading( true );
+
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
 			step: currentStep?.id || 'unknown',
 			action: 'activate_payments',
 			source: sessionEntryPoint,
 		} );
 
-		setIsContinueButtonLoading( true );
-
-		navigateToNextStep();
+		apiFetch( {
+			url: currentStep?.actions?.finish?.href,
+			method: 'POST',
+		} ).then( () => {
+			navigateToNextStep();
+		} );
 	};
 
 	const resetState = useCallback( () => {
