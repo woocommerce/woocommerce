@@ -30,6 +30,7 @@ class MainQueryController implements RegisterHooksInterface {
 	/**
 	 * Initialize dependencies.
 	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param QueryClauses $query_clauses Instance of QueryClauses.
 	 * @param Params       $params        Instance of Params.
 	 *

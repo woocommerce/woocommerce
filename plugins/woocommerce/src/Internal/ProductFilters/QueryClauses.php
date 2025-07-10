@@ -31,6 +31,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	/**
 	 * Initialize the query clauses.
 	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param Params $params The filter params.
 	 * @return void
 	 */
