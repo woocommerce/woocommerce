@@ -63,7 +63,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		$cached_jwt = $this->get_cached_option( 'address_autocomplete_jwt' );
 		// If we have a cached, valid token, we load it to class and return early.
 		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) ) {
-			$this->jwt = $cached_jwt['data'];
+			$this->jwt = $cached_jwt;
 			return;
 		}
 
