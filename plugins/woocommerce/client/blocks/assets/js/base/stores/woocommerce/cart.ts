@@ -292,7 +292,7 @@ const { state, actions } = store< Store >(
 					const errorResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
-									response.status < 200 &&
+									response.status < 200 ||
 									response.status >= 300
 						  )
 						: [];
