@@ -161,6 +161,8 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		pointer-events: none;
 
 		.wc-block-product-gallery-large-image-next-previous__button {
+			// Since blocks are overlaping here, we need to override the pointer-events: none.
+			// This is the way to make the block selectable in editor.
 			pointer-events: auto;
 		}
 	}
