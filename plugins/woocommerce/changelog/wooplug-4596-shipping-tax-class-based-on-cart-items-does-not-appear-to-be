@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Shipping tax now correctly applies no tax when the inherited cart item tax class does not have shipping tax enabled, instead of falling back to standard rates.

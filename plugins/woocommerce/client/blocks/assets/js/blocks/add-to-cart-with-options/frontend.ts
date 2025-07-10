@@ -12,13 +12,13 @@ export type AvailableVariation = {
 	attributes: Record< string, string >;
 	variation_id: number;
 	price_html: string;
+	is_in_stock: boolean;
 };
 
 export type Context = {
 	productId: number;
 	productType: string;
 	selectedAttributes: CartVariationItem[];
-	variationId: number | null;
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -47,9 +47,7 @@ const getInputElementFromEvent = (
 	let inputElement = null;
 
 	if ( event.target instanceof HTMLButtonElement ) {
-		inputElement = event.target.parentElement?.querySelector(
-			'.input-text.qty.text'
-		);
+		inputElement = event.target.parentElement?.querySelector( '.qty' );
 	}
 
 	if ( event.target instanceof HTMLInputElement ) {
@@ -147,11 +145,21 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { productType } = getContext< Context >();
+				const { availableVariations, selectedAttributes, productType } =
+					getContext< Context >();
 				if ( productType !== 'variable' ) {
 					return true;
 				}
-				return !! addToCartWithOptionsStore.state.variationId;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				// Variable products must be in stock and have a selected variation
+				return Boolean(
+					matchedVariation?.is_in_stock &&
+						matchedVariation?.variation_id
+				);
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -217,6 +225,7 @@ const addToCartWithOptionsStore = store(
 				const {
 					currentValue,
 					maxValue,
+					minValue,
 					step,
 					childProductId,
 					inputElement,
@@ -224,11 +233,12 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue + step;
 
 				if ( maxValue === undefined || newValue <= maxValue ) {
+					const updatedValue = Math.max( minValue, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
+						updatedValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
+					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -241,6 +251,7 @@ const addToCartWithOptionsStore = store(
 				}
 				const {
 					currentValue,
+					maxValue,
 					minValue,
 					step,
 					childProductId,
@@ -249,15 +260,57 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue - step;
 
 				if ( newValue >= minValue ) {
+					const updatedValue = Math.min(
+						maxValue ?? Infinity,
+						newValue
+					);
+					addToCartWithOptionsStore.actions.setQuantity(
+						updatedValue,
+						childProductId
+					);
+					inputElement.value = updatedValue.toString();
+					dispatchChangeEvent( inputElement );
+				}
+			},
+			handleQuantityInput: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, currentValue } = inputData;
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					currentValue,
+					childProductId
+				);
+			},
+			handleQuantityChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, maxValue, minValue, currentValue } =
+					inputData;
+
+				const newValue = Math.min(
+					maxValue ?? Infinity,
+					Math.max( minValue, currentValue )
+				);
+
+				if ( event.target.value !== newValue.toString() ) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						newValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
-					dispatchChangeEvent( inputElement );
+					event.target.value = newValue.toString();
+					dispatchChangeEvent( event.target );
 				}
 			},
-			handleCheckboxQuantityChange: (
+			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );

@@ -38,7 +38,8 @@ class MiniCartTitleLabelBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_title_label_block( $attributes, $content, $block ) {
-		$cart_label = __( 'Your cart', 'woocommerce' );
+		$default_cart_label = __( 'Your cart', 'woocommerce' );
+		$cart_label         = $attributes['label'] ? $attributes['label'] : $default_cart_label;
 
 		ob_start();
 		?>

@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-const { faker } = require( '@faker-js/faker' );
+import { faker } from '@faker-js/faker';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 import { getFakeProduct } from '../../utils/data';
 
 async function saveProductChanges( page ) {
@@ -30,6 +30,21 @@ async function saveBulkProductChanges( page ) {
 			.locator( 'div.notice > p' )
 			.filter( { hasText: /(\d+) product(s)? updated/ } )
 	).toBeVisible();
+}
+
+async function selectProduct( page, product ) {
+	await page
+		.getByLabel( `Select ${ product.name }` )
+		.and(
+			page.locator( `input[type="checkbox"][value="${ product.id }"]` )
+		)
+		.click();
+}
+
+async function selectAllProducts( page, products ) {
+	for ( const product of products ) {
+		await selectProduct( page, product );
+	}
 }
 
 const test = baseTest.extend( {
@@ -123,16 +138,7 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 	const stockQtyIncrease = 10;
 
 	await test.step( 'select and bulk edit the products', async () => {
-		for ( const product of products ) {
-			await page
-				.getByLabel( `Select ${ product.name }` )
-				.and(
-					page.locator(
-						`input[type="checkbox"][value="${ product.id }"]`
-					)
-				)
-				.click();
-		}
+		await selectAllProducts( page, products );
 
 		await page
 			.locator( '#bulk-action-selector-top' )
@@ -223,9 +229,7 @@ test(
 		const salePriceDecrease = 10;
 
 		await test.step( 'select and bulk edit the products', async () => {
-			for ( const product of products ) {
-				await page.getByLabel( `Select ${ product.name }` ).click();
-			}
+			await selectAllProducts( page, products );
 
 			await page
 				.locator( '#bulk-action-selector-top' )
@@ -280,9 +284,7 @@ test(
 		await test.step( 'Update products leaving the "Sale > Change to" empty', async () => {
 			await page.goto( `wp-admin/edit.php?post_type=product` );
 
-			for ( const product of products ) {
-				await page.getByLabel( `Select ${ product.name }` ).click();
-			}
+			await selectAllProducts( page, products );
 
 			await page
 				.locator( '#bulk-action-selector-top' )
@@ -323,9 +325,7 @@ test(
 		await test.step( 'Update products with the "Sale > Decrease existing sale price" option', async () => {
 			await page.goto( `wp-admin/edit.php?post_type=product` );
 
-			for ( const product of products ) {
-				await page.getByLabel( `Select ${ product.name }` ).click();
-			}
+			await selectAllProducts( page, products );
 
 			await page
 				.locator( '#bulk-action-selector-top' )
@@ -393,7 +393,7 @@ test(
 		await test.step( 'Update products with the "Sale > Increase existing sale price" option', async () => {
 			await page.goto( `wp-admin/edit.php?post_type=product` );
 
-			await page.getByLabel( `Select ${ product.name }` ).click();
+			await selectProduct( page, product );
 
 			await page
 				.locator( '#bulk-action-selector-top' )

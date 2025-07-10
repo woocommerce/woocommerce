@@ -97,6 +97,9 @@
 		border-radius: 0 $universal-border-radius $universal-border-radius 0;
 		order: 3;
 	}
+	&[hidden] {
+		display: none;
+	}
 }
 
 .theme-twentyseventeen {
