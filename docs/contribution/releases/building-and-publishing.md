@@ -41,7 +41,7 @@ sidebar_label: Building and Publishing
 3. Validate that the new release is available:
    * https://plugins.svn.wordpress.org/woocommerce/tags/ should list the version number.
    * The new version should also be available inside the Previous versions dropdown [inside the Advanced Options screen on the WordPress.org plugin page](https://wordpress.org/plugins/woocommerce/advanced/).
-4. If this is not an `RC` release, [Deploy the release to our staging environments](#tbd) and monitor for any issues.
+4. If this is not an `RC` release, [Deploy the release to our staging environments](https://wp.me/PCYsg-18BQ) and monitor for any issues.
 5. Publish the previously created GitHub [draft release tag](https://github.com/woocommerce/woocommerce/releases).
    * Check off Set as a pre-release if you’re releasing an RC. Otherwise, check off Set as the latest release.
 6. Ping Dev Advocacy in the #woo-core-releases channel in Slack notifying them of the release and asking them to update or publish the release post. Provide links to both the GitHub tag as well as the ZIP from WordPress.org as part of your message.
