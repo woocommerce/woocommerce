@@ -27,7 +27,6 @@ sidebar_label: Building and Publishing
    3. Review and merge the PRs, updating if necessary.
       * Ensure that the date in the changelog is also correct.
 2. (Skip for `-rc.1`) Run the version-bump workflow to update the WooCommerce version in relevant files on the release branch ahead of the release:
-   * **PENDING WOOPLUG-4238**
    * This command will give you a link to a PR. Review and merge the PR once CI passes.
 3. Build the release ZIP file by running the [“Release: Build ZIP file” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml).
    1. Run the workflow from the release branch and set "Create a draft GitHub release" to `true`.
