@@ -4,6 +4,7 @@
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type {
 	OptimisticCartItem,
+	SelectedAttributesType,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
 import { CartVariationItem } from '@woocommerce/types';
@@ -58,7 +59,7 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 
 const isCartItemMatched = (
 	cartItem: OptimisticCartItem,
-	selectedItem: CartVariationItem[]
+	selectedItem: SelectedAttributesType[]
 ) => {
 	if (
 		! Array.isArray( cartItem.variation ) ||
@@ -81,9 +82,9 @@ const isCartItemMatched = (
 			raw_attribute: string;
 			value: string;
 		} ) =>
-			selectedItem.some( ( item ) => {
+			selectedItem.some( ( item: SelectedAttributesType ) => {
 				return (
-					item.raw_attribute === raw_attribute &&
+					item.attribute === raw_attribute &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
 						( item.value && value === '' ) ) // Handle "any" attribute type
 				);

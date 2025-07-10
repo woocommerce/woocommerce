@@ -3,8 +3,10 @@
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { CartVariationItem } from '@woocommerce/types';
+import type {
+	Store as WooCommerce,
+	SelectedAttributesType,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -18,7 +20,7 @@ export type AvailableVariation = {
 export type Context = {
 	productId: number;
 	productType: string;
-	selectedAttributes: CartVariationItem[];
+	selectedAttributes: SelectedAttributesType[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -28,7 +30,7 @@ export type Context = {
 interface GroupedCartItem {
 	id: number;
 	quantity: number;
-	variation: CartVariationItem[];
+	variation: SelectedAttributesType[];
 	type: string;
 }
 
@@ -95,7 +97,7 @@ const getInputData = (
 
 const getMatchedVariation = (
 	availableVariations: AvailableVariation[],
-	selectedAttributes: CartVariationItem[]
+	selectedAttributes: SelectedAttributesType[]
 ) => {
 	if (
 		! Array.isArray( availableVariations ) ||
@@ -176,7 +178,7 @@ const addToCartWithOptionsStore = store(
 				);
 				return matchedVariation?.variation_id || null;
 			},
-			get selectedAttributes(): CartVariationItem[] {
+			get selectedAttributes(): SelectedAttributesType[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return [];
@@ -208,13 +210,11 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes[ index ] = {
 						attribute,
 						value,
-						raw_attribute: attribute,
 					};
 				} else {
 					selectedAttributes.push( {
 						attribute,
 						value,
-						raw_attribute: attribute,
 					} );
 				}
 			},
