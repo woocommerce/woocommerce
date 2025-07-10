@@ -91,8 +91,6 @@ jobs:
             const [trunkMajor, trunkMinor] = trunkVersion.split('.').map(Number);
 
             const branches = ['trunk'];
-
-            const branches = ['trunk'];
             for (let v = Number(`${targetMajor}.${targetMinor}`); v < Number(`${trunkMajor}.${trunkMinor}`); v += 0.1) {
               branches.push(`release/${v.toFixed(1)}`);
             }
