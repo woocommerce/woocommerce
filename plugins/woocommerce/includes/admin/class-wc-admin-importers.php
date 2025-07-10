@@ -173,7 +173,7 @@ class WC_Admin_Importers {
 	 * This code grabs the file before it is imported and ensures the taxonomies are created.
 	 */
 	public function post_importer_compatibility() {
-		wc_deprecated_function( 'post_importer_compatibility', '10.1.0', 'Compatibility with the WP WXR importer is filtering the posts instead of initializing at the start and having to re-parse the file.' );
+		wc_deprecated_function( 'post_importer_compatibility', '10.1.0', 'A new integration with the WP WXR importer now filters the posts during import and registers the taxonomies, instead of initializing them at the start of the import and having to re-parse the file.' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) ) {
