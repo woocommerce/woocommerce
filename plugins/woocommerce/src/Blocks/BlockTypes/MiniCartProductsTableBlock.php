@@ -77,8 +77,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			)
 		);
 
-		$wrapper_attributes = array(
-			'class' => 'wc-block-mini-cart__products-table',
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => 'wc-block-mini-cart__products-table',
+			)
 		);
 
 		ob_start();
