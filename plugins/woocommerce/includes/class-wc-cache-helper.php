@@ -26,7 +26,7 @@ class WC_Cache_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_action( 'wp_headers', array( __CLASS__, 'prevent_caching' ) );
+		add_action( 'wp_headers', array( __CLASS__, 'prevent_caching' ), 5 ); // Lower priority than default to facilitate plugins enforcing `no-store` if desired.
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
@@ -40,6 +40,7 @@ class WC_Cache_Helper {
 	 * Prevent caching on certain pages.
 	 *
 	 * @since 3.6.0
+	 * @since 10.1.0 This is now a callback for the `wp_headers` filter as opposed to a callback for the `wp` action.
 	 *
 	 * @param array<string, string> $headers Header names and field values.
 	 * @return array<string, string> Filtered headers.
@@ -56,20 +57,57 @@ class WC_Cache_Helper {
 
 		self::set_nocache_constants();
 
-		// These directives are all included in `wp_get_nocache_headers()`, with the exclusion of `no-store` for the sake of bfcache.
-		$new_directives = array(
-			// Prevent caching the response in reverse proxies.
-			'private',
-
-			// Ensure freshness of the response but without `no-store` so that bfcache won't be disabled.
-			'no-cache',
-			'must-revalidate',
-			'max-age=0',
-		);
-		$old_directives = array();
+		// Gather the original Cache-Control directives as well as the nocache ones to merge into one new Cache-Control header.
 		if ( isset( $headers['Cache-Control'] ) ) {
-			$old_directives = preg_split( '/\s*,\s*/', $headers['Cache-Control'] );
+			$old_directives = preg_split( '/\s*,\s*/', trim( $headers['Cache-Control'] ) );
+		} else {
+			$old_directives = array();
 		}
+		$nocache_headers = wp_get_nocache_headers();
+		if ( isset( $nocache_headers['Cache-Control'] ) ) {
+			$new_directives = preg_split( '/\s*,\s*/', trim( $nocache_headers['Cache-Control'] ) );
+		} else {
+			$new_directives = array();
+		}
+
+		$headers = array_merge( $headers, $nocache_headers );
+
+		/*
+		 * If the user is not logged in, remove the `no-store` directive so that bfcache is not blocked for visitors,
+		 * allowing them to benefit from instant back/forward navigations in the storefront. This essentially undoes
+		 * <https://core.trac.wordpress.org/ticket/61942> which seems to have been excessive since the `private`
+		 * directive was already being sent to prevent the page from being cached in a proxy server.
+		 *
+		 * Note that <https://core.trac.wordpress.org/ticket/63636> proposes removing `no-store` for logged-in users as
+		 * well. When that happens, the following if statement can be removed since core would no longer be sending
+		 * `no-store` in the first place.
+		 *
+		 * If a site really wants to enforce the `no-store` directive for some reason, they can do so by making sure
+		 * that the `no-store` directive is added to the `Cache-Control` header via the `wp_headers` filter, for
+		 * example:
+		 *
+		 *     add_filter( 'wp_headers', function ( $headers ) {
+		 *         if ( isset( $headers['Cache-Control'] ) ) {
+		 *             $directives = preg_split( ':\s*,\s*:', trim( $headers['Cache-Control'] ) );
+		 *             if ( in_array( 'private', $directives, true ) ) {
+		 *                 $headers['Cache-Control'] = join(
+		 *                     ', ',
+		 *                     array_unique(
+		 *                         array_merge(
+		 *                             $directives,
+		 *                             array( 'no-store' )
+		 *                         )
+		 *                     )
+		 *                 );
+		 *             }
+		 *         }
+		 *         return $headers;
+		 *     } );
+		 */
+		if ( ! is_user_logged_in() ) {
+			$new_directives = array_diff( $new_directives, array( 'no-store' ) );
+		}
+
 		$headers['Cache-Control'] = implode( ', ', array_unique( array_merge( $old_directives, $new_directives ) ) );
 
 		return $headers;
