@@ -166,6 +166,10 @@ class QueryClauses implements QueryClausesGenerator {
 			)
 		);
 
+		if ( is_wp_error( $all_terms ) ) {
+			return $args;
+		}
+
 		// Group terms by taxonomy for easier processing.
 		$terms_by_taxonomy = array();
 		foreach ( $all_terms as $term ) {
