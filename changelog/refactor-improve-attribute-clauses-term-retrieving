@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Product Filters: Optimize attribute term retrieval in QueryClauses to use single query instead of multiple calls.

@@ -128,7 +128,15 @@ class QueryClauses implements QueryClausesGenerator {
 	 * Add query clauses for product attributes.
 	 *
 	 * @param array $args              Query args.
-	 * @param array $chosen_attributes Chosen attributes.
+	 * @param array $chosen_attributes {
+	 *     Chosen attributes array.
+	 *
+	 *     @type array {$taxonomy: Attribute taxonomy name} {
+	 *         @type string[] $terms      Chosen terms' slug.
+	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
+	 *     }
+	 * }
+	 *
 	 * @return array
 	 */
 	public function add_attribute_clauses( $args, $chosen_attributes ) {
