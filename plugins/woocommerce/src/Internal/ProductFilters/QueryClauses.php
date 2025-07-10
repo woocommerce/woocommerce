@@ -125,7 +125,7 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
-	 * Add query clauses for product attributes.
+	 * Add query clauses for filtering products by attributes.
 	 *
 	 * @param array $args              Query args.
 	 * @param array $chosen_attributes {
@@ -159,10 +159,17 @@ class QueryClauses implements QueryClausesGenerator {
 		$clauses                         = array();
 
 		// Get all terms for all attribute taxonomies in one query for better performance.
+		$all_terms_slugs = array();
+		foreach ( $chosen_attributes as $data ) {
+			if ( isset( $data['terms'] ) && is_array( $data['terms'] ) ) {
+				$all_terms_slugs = array_merge( $all_terms_slugs, $data['terms'] );
+			}
+		}
+
 		$all_terms = get_terms(
 			array(
 				'taxonomy' => array_keys( $chosen_attributes ),
-				'slug'     => array_merge( ...array_column( $chosen_attributes, 'terms' ) ),
+				'slug'     => $all_terms_slugs,
 			)
 		);
 
