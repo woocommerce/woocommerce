@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add to Cart + Options block: make sure individually sold products quantities are reset when they are children of a grouped product
