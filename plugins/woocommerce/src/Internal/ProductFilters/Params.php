@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Single source of truth for managing all filter params.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class Params implements FilterUrlParam {
 	/**
@@ -22,7 +24,6 @@ class Params implements FilterUrlParam {
 	/**
 	 * Get the param keys.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @return array
 	 */
 	public function get_param_keys(): array {
@@ -50,7 +51,6 @@ class Params implements FilterUrlParam {
 	/**
 	 * Get the param.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 * @param string $type The type of param to get.
 	 * @return array
 	 */

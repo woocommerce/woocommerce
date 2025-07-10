@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Provider class.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class FilterDataProvider {
 	/**
@@ -24,8 +26,6 @@ class FilterDataProvider {
 
 	/**
 	 * Get the data provider with desired query clauses generator.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param QueryClausesGenerator $query_clauses_generator The query clauses generator instance.
 	 */

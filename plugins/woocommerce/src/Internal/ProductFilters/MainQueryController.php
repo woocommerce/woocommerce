@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 defined( 'ABSPATH' ) || exit;
 /**
  * Hooks into WordPress filters to handle product filters for the main query.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class MainQueryController implements RegisterHooksInterface {
 
@@ -28,8 +30,6 @@ class MainQueryController implements RegisterHooksInterface {
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @param QueryClauses $query_clauses Instance of QueryClauses.
 	 * @param Params       $params        Instance of Params.
 	 *
@@ -43,8 +43,6 @@ class MainQueryController implements RegisterHooksInterface {
 	/**
 	 * Hook into actions and filters.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @return void
 	 */
 	public function register(): void {
@@ -55,8 +53,6 @@ class MainQueryController implements RegisterHooksInterface {
 	/**
 	 * Register custom query vars for our filters. Price, stock status, and attribute query vars are
 	 * already registered at WC_Query.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array $query_vars Query vars.
 	 * @return array

@@ -17,6 +17,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for filter clauses.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	/**
@@ -28,8 +30,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 	/**
 	 * Initialize the query clauses.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param Params $params The filter params.
 	 * @return void
@@ -83,8 +83,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * WooCommerce handles attribute, price, and rating filters in the main query.
 	 * This method is used to add stock status and taxonomy filters to the main query.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
@@ -116,8 +114,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	/**
 	 * Add query clauses for stock filter.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @param array $args           Query args.
 	 * @param array $stock_statuses Stock statuses to be queried.
 	 * @return array
@@ -142,8 +138,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 	/**
 	 * Add query clauses for price filter.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array $args        Query args.
 	 * @param array $price_range {
@@ -189,8 +183,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 	/**
 	 * Add query clauses for filtering products by attributes.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array $args              Query args.
 	 * @param array $chosen_attributes {
@@ -306,8 +298,6 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 	/**
 	 * Add query clauses for taxonomy filter (e.g., product_cat, product_tag).
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array $args           Query args.
 	 * @param array $chosen_taxonomies {

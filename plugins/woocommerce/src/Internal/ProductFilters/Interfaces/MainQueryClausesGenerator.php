@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * MainQueryClausesGenerator interface.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 interface MainQueryClausesGenerator {
 

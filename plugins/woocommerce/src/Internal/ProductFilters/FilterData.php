@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for filter counts.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class FilterData {
 	/**
@@ -31,8 +33,6 @@ class FilterData {
 
 	/**
 	 * Get price data for current products.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array $query_vars The WP_Query arguments.
 	 * @return object
@@ -108,8 +108,6 @@ class FilterData {
 	/**
 	 * Get stock status counts for the current products.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @param array $query_vars The WP_Query arguments.
 	 * @param array $statuses   Array of stock status values to count.
 	 * @return array status=>count pairs.
@@ -172,8 +170,6 @@ class FilterData {
 	/**
 	 * Get rating counts for the current products.
 	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 *
 	 * @param array $query_vars The WP_Query arguments.
 	 * @return array rating=>count pairs.
 	 */
@@ -232,8 +228,6 @@ class FilterData {
 
 	/**
 	 * Get attribute counts for the current products.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array  $query_vars         The WP_Query arguments.
 	 * @param string $attribute_to_count Attribute taxonomy name.
@@ -299,8 +293,6 @@ class FilterData {
 
 	/**
 	 * Get taxonomy counts for the current products.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
 	 * @param array  $query_vars The WP_Query arguments.
 	 * @param string $taxonomy_to_count   Taxonomy name.

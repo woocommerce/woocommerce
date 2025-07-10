@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\ProductFilters\Interfaces;
 
 /**
  * Interface for filter URL parameters.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 interface FilterUrlParam {
 	/**
