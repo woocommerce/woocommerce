@@ -381,7 +381,17 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_columns['stock']        = __( 'Stock', 'woocommerce' );
 		}
 
-		return $export_columns;
+		/**
+		 * Filter to prepare extra column names in the export columns array for the variations report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_columns Export columns (column_id => label).
+		 */
+		return apply_filters(
+			'woocommerce_report_variations_export_columns',
+			$export_columns
+		);
 	}
 
 	/**
@@ -404,6 +414,22 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_item['stock']        = $item['extended_info']['stock_quantity'];
 		}
 
-		return $export_item;
+		/**
+		 * Filter to allow developers to add or modify column headers for the
+		 * Analytics > Variations export.
+		 *
+		 * Developers can use this filter to add custom columns to the exported CSV
+		 * and data grid for product variations.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_columns Export columns as an associative array (column_id => label).
+		 *
+		 * @return array Modified export columns.
+		 */
+		return apply_filters(
+			'woocommerce_report_variations_prepare_export_item',
+			$export_item
+		);
 	}
 }
