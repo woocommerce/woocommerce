@@ -54,10 +54,6 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * @return void
 	 */
 	public function load_jwt() {
-		$last_fetch_attempt = $this->get_cached_option( 'last_fetch_attempt' );
-		if ( $last_fetch_attempt && $last_fetch_attempt > time() - HOUR_IN_SECONDS ) {
-			return;
-		}
 
 		// If we already have a loaded, valid token, we return early.
 		if ( $this->jwt && JsonWebToken::shallow_validate( $this->jwt ) ) {
@@ -68,6 +64,11 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		// If we have a cached, valid token, we load it to class and return early.
 		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) && 'local' !== wp_get_environment_type() ) {
 			$this->jwt = $cached_jwt['data'];
+			return;
+		}
+
+		$last_fetch_attempt = $this->get_cached_option( 'last_fetch_attempt' );
+		if ( $last_fetch_attempt && $last_fetch_attempt > time() - HOUR_IN_SECONDS && 'local' !== wp_get_environment_type() ) {
 			return;
 		}
 
@@ -263,7 +264,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 		wp_add_inline_script(
 			'a8c-address-autocomplete-service',
 			sprintf(
-				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ "%1$s" ] = { key: %2$s, canTelemetry: %3$s };',
+				'var a8cAddressAutocompleteServiceKeys = a8cAddressAutocompleteServiceKeys || {}; a8cAddressAutocompleteServiceKeys[ %1$s ] = { key: %2$s, canTelemetry: %3$s };',
 				wp_json_encode( $this->id ),
 				wp_json_encode( $this->get_jwt() ),
 				wp_json_encode( false !== $this->can_telemetry() && (bool) $this->can_telemetry() )
