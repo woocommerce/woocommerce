@@ -125,6 +125,15 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return '';
 		}
 
+		// Validate that this taxonomy is configured in the parameter map.
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+
+		if ( ! isset( $taxonomy_params[ $taxonomy ] ) ) {
+			return '';
+		}
+
 		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
 		$hide_empty      = $block_attributes['hideEmpty'] ?? true;
 		$orderby         = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
@@ -149,17 +158,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		// Get selected terms from filter params.
-		$container       = wc_get_container();
-		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
-		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
-		$filter_params   = $block->context['filterParams'] ?? array();
-		$selected_terms  = array();
+		$filter_params  = $block->context['filterParams'] ?? array();
+		$selected_terms = array();
+		$param_key      = $taxonomy_params[ $taxonomy ];
 
-		if ( isset( $taxonomy_params[ $taxonomy ] ) ) {
-			$param_key = $taxonomy_params[ $taxonomy ];
-			if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
-				$selected_terms = array_filter( explode( ',', $filter_params[ $param_key ] ) );
-			}
+		if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
+			$selected_terms = array_filter( explode( ',', $filter_params[ $param_key ] ) );
 		}
 
 		$filter_context = array(
