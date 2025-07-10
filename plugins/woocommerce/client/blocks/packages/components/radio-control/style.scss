@@ -189,16 +189,12 @@
 
 .wc-block-components-radio-control__label,
 .wc-block-components-radio-control__secondary-label {
-	// Currently, max() CSS function calls need to be wrapped with unquote.
-	// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
-	// These values should be the same as the control input height.
-	line-height: string.unquote("max(1.5rem, 24px)");
+	@include font-regular-locked;
 }
 
 .wc-block-components-radio-control__description,
 .wc-block-components-radio-control__secondary-description {
-	@include font-size(small);
-	line-height: 1.55;
+	@include font-regular-locked;
 }
 
 // Extra class for specificity.

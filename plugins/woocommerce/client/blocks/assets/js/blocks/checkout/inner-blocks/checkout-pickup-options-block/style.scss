@@ -5,17 +5,21 @@
 			margin: 0;
 			padding: em($gap) em($gap-small) em($gap) em($gap-huge);
 		}
+
 		.wc-block-components-shipping-rates-control__no-results-notice {
 			margin: em($gap-small) 0;
 		}
+
 		.wc-block-components-radio-control
 			.wc-block-components-radio-control__input {
 			top: auto;
 			transform: none;
 		}
+
 		.wc-block-components-radio-control__option-layout {
 			display: block;
 		}
+
 		.wc-block-components-radio-control__label-group {
 			width: 100%;
 			display: flex;
@@ -24,12 +28,14 @@
 				margin-left: auto;
 			}
 		}
+
 		.wc-block-components-radio-control__label-group {
 			em {
 				text-transform: uppercase;
 				font-style: inherit;
 			}
 		}
+
 		.wc-block-components-radio-control__option-checked {
 			.wc-block-components-radio-control__description-group {
 				.read-more-content {
@@ -42,44 +48,50 @@
 				}
 			}
 		}
+
 		.wc-block-components-radio-control__description-group {
-			display: block;
-			width: calc(100% + em(math.div($gap-huge, 0.875)));
+			@include font-regular-locked;
+
+			display: flex;
+			flex-direction: column;
+			gap: $gap-smallest;
+
 			box-sizing: border-box;
-			border-radius: $universal-border-radius;
-			padding: 1px em($gap-small);
+			padding: 0 em($gap-small);
 			margin-left: -(em($gap-huge));
-			margin-top: em($gap);
-			@include font-size(regular);
+			margin-top: $gap-small;
+
 			.read-more-content {
 				position: absolute;
 				visibility: hidden;
 				z-index: -1;
 			}
 		}
+
 		.wc-block-components-radio-control__description,
 		.wc-block-components-radio-control__secondary-description {
 			width: 100%;
 			text-align: left;
 			margin: 0;
 			display: block;
-			@include font-size(regular);
 		}
-		.wc-block-components-radio-control__description
-			+ .wc-block-components-radio-control__secondary-description {
-			margin-top: em($gap-small);
-		}
+
 		.wc-block-components-radio-control__description {
+			display: flex;
+			align-items: center;
+			gap: $gap-smallest;
+
 			color: $gray-700;
 
 			.has-dark-controls & {
 				color: $gray-300;
 			}
 
-			> svg {
-				vertical-align: middle;
-				margin-top: -4px;
+			.wc-block-editor-components-block-icon {
 				fill: currentColor;
+				// Pixel perfect alignement needed as internal padding of the SVG
+				// is inconsistent (top one bigger that the bottom one).
+				margin-top: -2px;
 			}
 		}
 	}
