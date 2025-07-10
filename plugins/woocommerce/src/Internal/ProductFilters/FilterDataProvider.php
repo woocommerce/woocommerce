@@ -25,6 +25,8 @@ class FilterDataProvider {
 	/**
 	 * Get the data provider with desired query clauses generator.
 	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
 	 * @param QueryClausesGenerator $query_clauses_generator The query clauses generator instance.
 	 */
 	public function with( QueryClausesGenerator $query_clauses_generator ) {

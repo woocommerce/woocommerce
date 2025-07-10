@@ -16,6 +16,8 @@ class CacheController implements RegisterHooksInterface {
 
 	/**
 	 * Hook into actions and filters.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function register() {
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
