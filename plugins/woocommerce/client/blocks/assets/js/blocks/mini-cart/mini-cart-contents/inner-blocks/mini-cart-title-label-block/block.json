@@ -24,7 +24,8 @@
 	},
 	"attributes": {
 		"label": {
-			"type": "string"
+			"type": "string",
+			"default": ""
 		}
 	},
 	"parent": [
