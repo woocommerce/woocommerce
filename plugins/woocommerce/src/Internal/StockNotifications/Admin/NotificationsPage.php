@@ -29,7 +29,7 @@ class NotificationsPage {
 	 * Render page.
 	 */
 	public function output() {
-		$table = new ListTable();
+		$table = wc_get_container()->get( ListTable::class );
 		$table->process_actions();
 		$this->output_admin_notice();
 		$table->prepare_items();
