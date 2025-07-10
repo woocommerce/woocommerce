@@ -148,7 +148,9 @@ $max-button-width: calc(100% / #{$max-button-columns});
 .editor-styles-wrapper
 	.wp-block-woocommerce-product-collection
 	.wp-block-post-title {
-	a:where(:not(.wp-element-button)) {
+	a:where(:not(.wp-element-button)),
+	.wp-block-woocommerce-product-collection
+	.wc-block-product-gallery-large-image-next-previous {
 		pointer-events: none;
 	}
 }
