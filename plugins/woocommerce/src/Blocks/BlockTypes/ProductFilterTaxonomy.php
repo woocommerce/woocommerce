@@ -52,20 +52,20 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array Active filters items.
 	 */
 	public function prepare_selected_filters( $items, $params ) {
-		$container = wc_get_container();
+		$container      = wc_get_container();
 		$params_handler = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
 
-		// Use centralized parameter mapping to avoid hardcoding URL parameter formats
+		// Use centralized parameter mapping to avoid hardcoding URL parameter formats.
 		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
 
 		$active_taxonomies = array();
-		$all_term_slugs = array();
+		$all_term_slugs    = array();
 
 		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
 			if ( ! empty( $params[ $param_key ] ) && is_string( $params[ $param_key ] ) ) {
-				$term_slugs = explode( ',', $params[ $param_key ] );
+				$term_slugs                          = explode( ',', $params[ $param_key ] );
 				$active_taxonomies[ $taxonomy_slug ] = $term_slugs;
-				$all_term_slugs = array_merge( $all_term_slugs, $term_slugs );
+				$all_term_slugs                      = array_merge( $all_term_slugs, $term_slugs );
 			}
 		}
 
@@ -73,12 +73,14 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return $items;
 		}
 
-		// Single query for all taxonomies and terms to avoid N+1 query problem
-		$terms = get_terms( array(
-			'taxonomy'   => array_keys( $active_taxonomies ),
-			'slug'       => array_unique( $all_term_slugs ),
-			'hide_empty' => false,
-		) );
+		// Single query for all taxonomies and terms to avoid N+1 query problem.
+		$terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $active_taxonomies ),
+				'slug'       => array_unique( $all_term_slugs ),
+				'hide_empty' => false,
+			)
+		);
 
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return $items;
