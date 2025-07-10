@@ -77,6 +77,7 @@ const productFiltersStore = {
 			}
 
 			activeFilters.forEach( ( filter ) => {
+				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
 				if ( ! value ) return;
@@ -100,6 +101,11 @@ const productFiltersStore = {
 					addParam( `filter_${ slug }`, value );
 					params[ `query_type_${ slug }` ] =
 						filter.attributeQueryType || 'or';
+				}
+
+				if ( type.includes( 'taxonomy' ) ) {
+					const [ , taxonomy ] = type.split( '/' );
+					addParam( `filter_${ taxonomy }`, value );
 				}
 			} );
 			return params;
