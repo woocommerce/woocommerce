@@ -114,13 +114,109 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 */
 	protected function render( $block_attributes, $content, $block ) {
 		// Skip rendering in admin or during AJAX requests.
-		if ( is_admin() || wp_doing_ajax() ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $block_attributes['taxonomy'] ) ) {
 			return '';
 		}
 
-		// TODO: Implement full frontend rendering logic similar to ProductFilterAttribute.
-		// This will include taxonomy term counts, interactive filtering, and proper HTML output.
-		return '';
+		$taxonomy        = $block_attributes['taxonomy'];
+		$taxonomy_object = get_taxonomy( $taxonomy );
+
+		if ( ! $taxonomy_object || ! taxonomy_exists( $taxonomy ) ) {
+			return '';
+		}
+
+		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
+		$hide_empty      = $block_attributes['hideEmpty'] ?? true;
+		$orderby         = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
+		$order           = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
+
+		$args = array(
+			'taxonomy' => $taxonomy,
+			'orderby'  => $orderby,
+			'order'    => $order,
+		);
+
+		if ( $hide_empty ) {
+			$args['include'] = array_keys( $taxonomy_counts );
+		} else {
+			$args['hide_empty'] = false;
+		}
+
+		$taxonomy_terms = get_terms( $args );
+
+		if ( is_wp_error( $taxonomy_terms ) ) {
+			return '';
+		}
+
+		// Get selected terms from filter params.
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+		$filter_params   = $block->context['filterParams'] ?? array();
+		$selected_terms  = array();
+
+		if ( isset( $taxonomy_params[ $taxonomy ] ) ) {
+			$param_key = $taxonomy_params[ $taxonomy ];
+			if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
+				$selected_terms = array_filter( explode( ',', $filter_params[ $param_key ] ) );
+			}
+		}
+
+		$filter_context = array(
+			'showCounts' => $block_attributes['showCounts'] ?? false,
+			'items'      => array(),
+			'groupLabel' => $taxonomy_object->labels->singular_name,
+		);
+
+		if ( ! empty( $taxonomy_counts ) ) {
+			$taxonomy_options = array_map(
+				function ( $term ) use ( $block_attributes, $taxonomy_counts, $selected_terms, $taxonomy ) {
+					$term          = (array) $term;
+					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
+
+					return array(
+						'label'    => $term['name'],
+						'value'    => $term['slug'],
+						'selected' => in_array( $term['slug'], $selected_terms, true ),
+						'count'    => $term['count'],
+						'type'     => 'taxonomy/' . $taxonomy,
+					);
+				},
+				$taxonomy_terms
+			);
+
+			$filter_context['items'] = $taxonomy_options;
+		}
+
+		$wrapper_attributes = array(
+			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_block_type() ),
+			'data-wp-context'     => wp_json_encode(
+				array(
+					'activeLabelTemplate' => $taxonomy_object->labels->singular_name . ': {{label}}',
+					'filterType'          => 'taxonomy/' . $taxonomy,
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+		);
+
+		if ( empty( $filter_context['items'] ) ) {
+			$wrapper_attributes['hidden'] = true;
+			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
+		}
+
+		return sprintf(
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
+		);
 	}
 
 	/**
