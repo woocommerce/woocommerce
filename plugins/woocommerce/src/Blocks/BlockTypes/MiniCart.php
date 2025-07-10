@@ -588,7 +588,7 @@ class MiniCart extends AbstractBlock {
 							echo $this->get_include_tax_label_markup( $attributes );
 						?>
 					<?php endif; ?>
-				</a>
+					</button>
 				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
 					<div 
 						data-wp-bind--role="state.drawerRole"
