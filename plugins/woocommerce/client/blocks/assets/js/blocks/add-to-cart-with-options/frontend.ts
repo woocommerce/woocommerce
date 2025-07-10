@@ -50,9 +50,7 @@ const getInputElementFromEvent = (
 	let inputElement = null;
 
 	if ( event.target instanceof HTMLButtonElement ) {
-		inputElement = event.target.parentElement?.querySelector(
-			'.input-text.qty.text'
-		);
+		inputElement = event.target.parentElement?.querySelector( '.qty' );
 	}
 
 	if ( event.target instanceof HTMLInputElement ) {
@@ -314,12 +312,14 @@ const addToCartWithOptionsStore = store(
 					Math.max( minValue, currentValue )
 				);
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					newValue,
-					childProductId
-				);
-				event.target.value = newValue.toString();
-				dispatchChangeEvent( event.target );
+				if ( event.target.value !== newValue.toString() ) {
+					addToCartWithOptionsStore.actions.setQuantity(
+						newValue,
+						childProductId
+					);
+					event.target.value = newValue.toString();
+					dispatchChangeEvent( event.target );
+				}
 			},
 			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >

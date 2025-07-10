@@ -35,7 +35,7 @@
 			font-size: inherit;
 		}
 
-		:where(input[type="number"].input-text.qty.text) {
+		:where(input[type="number"].qty) {
 			-moz-appearance: textfield;
 			border: unset;
 			text-align: center;
