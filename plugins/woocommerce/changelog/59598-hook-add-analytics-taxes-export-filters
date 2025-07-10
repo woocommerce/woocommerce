@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add: Filter hooks to extend columns and row data in the Analytics > Taxes export, matching the extensibility found in Orders, Products, Categories, Coupons, Downloads, and Variations exports.
