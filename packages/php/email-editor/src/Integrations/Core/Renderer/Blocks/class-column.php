@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -107,18 +108,27 @@ class Column extends Abstract_Block_Renderer {
 			$content_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
 		}
 
-		return '
-      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . Styles_Helper::parse_value( $block_attributes['width'] ) . '">
-        <table class="' . esc_attr( $content_classname ) . '" style="' . esc_attr( $content_css ) . '" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-          <tbody>
-            <tr>
-              <td align="left" style="text-align:left;' . esc_attr( $padding_css ) . '">
-                {column_content}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    ';
+		// Create the inner table using the helper.
+		$inner_table_attrs = array(
+			'class' => $content_classname,
+			'style' => $content_css,
+			'width' => '100%',
+		);
+
+		$inner_cell_attrs = array(
+			'align' => 'left',
+			'style' => 'text-align:left;' . $padding_css,
+		);
+
+		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
+
+		// Create the outer td element (since this is meant to be used within a columns structure).
+		$wrapper_cell_attrs = array(
+			'class' => $wrapper_classname,
+			'style' => $wrapper_css,
+			'width' => Styles_Helper::parse_value( $block_attributes['width'] ),
+		);
+
+		return Table_Wrapper_Helper::render_table_cell( $inner_table, $wrapper_cell_attrs );
 	}
 }

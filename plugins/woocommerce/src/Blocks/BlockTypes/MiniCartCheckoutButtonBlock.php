@@ -23,9 +23,10 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
-		$go_to_checkout_text = __( 'Go to checkout', 'woocommerce' );
-		$checkout_page_id    = wc_get_page_id( 'checkout' );
-		$checkout_page_url   = get_permalink( $checkout_page_id );
+		$default_go_to_checkout_text = __( 'Go to checkout', 'woocommerce' );
+		$go_to_checkout_text         = $attributes['checkoutButtonLabel'] ? $attributes['checkoutButtonLabel'] : $default_go_to_checkout_text;
+		$checkout_page_id            = wc_get_page_id( 'checkout' );
+		$checkout_page_url           = get_permalink( $checkout_page_id );
 
 		ob_start();
 		?>

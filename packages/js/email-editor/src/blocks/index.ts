@@ -28,6 +28,8 @@ import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { modifyMoveToTrashAction } from './core/move-to-trash';
 
+export { getAllowedBlockNames } from './utils';
+
 export function initBlocks() {
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();

@@ -32,7 +32,7 @@ interface URLStrategy {
 		stepPath: string,
 		currentParams?: Record< string, string >
 	) => string;
-	preserveParams?: string[]; // params to preserve when navigating
+	preserveParams?: string[]; // params to preserve when navigating.
 }
 
 /**
@@ -45,6 +45,7 @@ const defaultURLStrategy: URLStrategy = {
 			tab: 'checkout',
 		} );
 	},
+	preserveParams: [ 'source', 'from' ], // params to preserve when navigating.
 };
 
 /**
@@ -62,6 +63,13 @@ const OnboardingContext = createContext< OnboardingContextType >( {
 	closeModal: () => undefined,
 	justCompletedStepId: null,
 	setJustCompletedStepId: () => undefined,
+	sessionEntryPoint: '',
+	snackbar: {
+		show: false,
+		duration: 4000,
+		message: '',
+	},
+	setSnackbar: () => undefined,
 } );
 
 export const useOnboardingContext = () => useContext( OnboardingContext );
@@ -72,14 +80,14 @@ export const OnboardingProvider: React.FC< {
 	closeModal: () => void;
 	onFinish?: () => void;
 	urlStrategy?: URLStrategy;
-	source?: string | null;
+	sessionEntryPoint?: string;
 } > = ( {
 	children,
 	onboardingSteps,
 	closeModal,
 	onFinish,
 	urlStrategy,
-	source,
+	sessionEntryPoint = 'settings_payments', // This should match the value of WooPaymentsService::SESSION_ENTRY_DEFAULT.
 } ) => {
 	const history = getHistory();
 
@@ -97,6 +105,17 @@ export const OnboardingProvider: React.FC< {
 		null
 	);
 
+	const [ snackbar, setSnackbar ] = useState< {
+		show: boolean;
+		message: string;
+		duration?: number;
+		className?: string;
+	} >( {
+		show: false,
+		duration: 4000,
+		message: '',
+	} );
+
 	const setJustCompletedStepId = useCallback( ( stepId: string | null ) => {
 		setStepId( stepId );
 	}, [] );
@@ -112,13 +131,13 @@ export const OnboardingProvider: React.FC< {
 	const { storeData, isStoreLoading } = useSelect(
 		( select ) => ( {
 			storeData: select( woopaymentsOnboardingStore ).getOnboardingData(
-				source
+				sessionEntryPoint
 			),
 			isStoreLoading: select(
 				woopaymentsOnboardingStore
 			).isOnboardingDataRequestPending(),
 		} ),
-		[ source ]
+		[ sessionEntryPoint ]
 	);
 
 	/**
@@ -236,10 +255,11 @@ export const OnboardingProvider: React.FC< {
 		setIsStateStoreLoading( true );
 		setJustCompletedStepId( null );
 		setAllSteps( [] );
+		setSnackbar( { show: false, message: '' } );
 	};
 
 	const refreshStoreData = () => {
-		// Reset the onboarding data both in the store and local state when the onboardingcontext mounts.
+		// Reset the onboarding data both in the store and local state when the onboarding context mounts.
 		// This is important to ensure that the onboarding data is cleared when the modal is closed.
 		// This is to avoid stale data when the modal is opened again.
 		resetLocalState();
@@ -342,6 +362,9 @@ export const OnboardingProvider: React.FC< {
 				},
 				justCompletedStepId,
 				setJustCompletedStepId,
+				sessionEntryPoint,
+				snackbar,
+				setSnackbar,
 			} }
 		>
 			{ children }

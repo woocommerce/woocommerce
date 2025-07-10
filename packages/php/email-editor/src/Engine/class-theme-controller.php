@@ -250,9 +250,9 @@ class Theme_Controller {
 
 			if ( 'button' === $key ) {
 				$selector      = '.wp-block-button';
-				$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => '.wp-block-button' ) )['css'];
+				$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => '.wp-block-button' ) )['css'] ?? '';
 				// Add color to link element.
-				$css_elements .= wp_style_engine_get_styles( array( 'color' => array( 'text' => $elements_style['color']['text'] ?? '' ) ), array( 'selector' => '.wp-block-button a' ) )['css'];
+				$css_elements .= wp_style_engine_get_styles( array( 'color' => array( 'text' => $elements_style['color']['text'] ?? '' ) ), array( 'selector' => '.wp-block-button a' ) )['css'] ?? '';
 				continue;
 			}
 
@@ -265,7 +265,7 @@ class Theme_Controller {
 					break;
 			}
 
-			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'];
+			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'] ?? '';
 		}
 
 		$result = $css_presets . $css_blocks . $css_elements;

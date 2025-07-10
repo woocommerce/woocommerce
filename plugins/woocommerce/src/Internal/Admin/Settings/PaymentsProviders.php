@@ -4,12 +4,30 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Affirm;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayClearpay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payfast;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paymob;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payoneer;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayPal;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paystack;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paytrail;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
@@ -69,10 +87,33 @@ class PaymentsProviders {
 		'woocommerce_payments'      => WooPayments::class,
 		'ppcp-gateway'              => PayPal::class,
 		'stripe'                    => Stripe::class,
+		'stripe_*'                  => Stripe::class,
 		'mollie'                    => Mollie::class,
 		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
 		'amazon_payments_advanced*' => AmazonPay::class,
 		'woo-mercado-pago-*'        => MercadoPago::class,
+		'affirm'                    => Affirm::class,
+		'klarna_payments'           => Klarna::class,
+		'afterpay'                  => AfterpayClearpay::class,
+		'clearpay'                  => AfterpayClearpay::class,
+		'antom_*'                   => Antom::class,
+		'razorpay'                  => Razorpay::class,
+		'paystack'                  => Paystack::class,
+		'paystack-*'                => Paystack::class,
+		'payfast'                   => Payfast::class,
+		'payoneer-*'                => Payoneer::class,
+		'payubiz'                   => PayUIndia::class,
+		'paymob'                    => Paymob::class,
+		'paymob-*'                  => Paymob::class,
+		'airwallex_*'               => Airwallex::class,
+		'vivawallet*'               => Vivacom::class,
+		'tilopay'                   => Tilopay::class,
+		'helio'                     => HelioPay::class,
+		'paytrail'                  => Paytrail::class,
+		'monei'                     => Monei::class,
+		'monei_*'                   => Monei::class,
+		'gocardless'                => GoCardless::class,
+		'kco'                       => KlarnaCheckout::class,
 	);
 
 	/**
@@ -90,6 +131,25 @@ class PaymentsProviders {
 		ExtensionSuggestions::MOLLIE            => Mollie::class,
 		ExtensionSuggestions::AMAZON_PAY        => AmazonPay::class,
 		ExtensionSuggestions::MERCADO_PAGO      => MercadoPago::class,
+		ExtensionSuggestions::AFFIRM            => Affirm::class,
+		ExtensionSuggestions::KLARNA            => Klarna::class,
+		ExtensionSuggestions::AFTERPAY          => AfterpayClearpay::class,
+		ExtensionSuggestions::CLEARPAY          => AfterpayClearpay::class,
+		ExtensionSuggestions::ANTOM             => Antom::class,
+		ExtensionSuggestions::RAZORPAY          => Razorpay::class,
+		ExtensionSuggestions::PAYSTACK          => Paystack::class,
+		ExtensionSuggestions::PAYFAST           => Payfast::class,
+		ExtensionSuggestions::PAYONEER          => Payoneer::class,
+		ExtensionSuggestions::PAYU_INDIA        => PayUIndia::class,
+		ExtensionSuggestions::PAYMOB            => Paymob::class,
+		ExtensionSuggestions::AIRWALLEX         => Airwallex::class,
+		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
+		ExtensionSuggestions::TILOPAY           => Tilopay::class,
+		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
+		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
+		ExtensionSuggestions::MONEI             => Monei::class,
+		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
+		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
 	);
 
 	/**
@@ -326,7 +386,7 @@ class PaymentsProviders {
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
 	 * @param int                $payment_gateway_order The order of the payment gateway.
 	 * @param string             $country_code          Optional. The country code for which the details are being gathered.
-	 *                                                  This should be a ISO 3166-1 alpha-2 country code.
+	 *                                                  This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway details.
 	 */
@@ -344,7 +404,7 @@ class PaymentsProviders {
 	 * @param WC_Payment_Gateway $payment_gateway       The payment gateway object.
 	 * @param int                $payment_gateway_order The order of the payment gateway.
 	 * @param string             $country_code          Optional. The country code for which the details are being gathered.
-	 *                                                  This should be a ISO 3166-1 alpha-2 country code.
+	 *                                                  This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway base details.
 	 */
@@ -580,7 +640,13 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_id( string $id ): ?array {
-		return $this->extension_suggestions->get_by_id( $id );
+		$suggestion = $this->extension_suggestions->get_by_id( $id );
+		if ( ! is_null( $suggestion ) ) {
+			// Enhance the suggestion details.
+			$suggestion = $this->enhance_extension_suggestion( $suggestion );
+		}
+
+		return $suggestion;
 	}
 
 	/**
@@ -592,7 +658,13 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
-		return $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
+		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
+		if ( ! is_null( $suggestion ) ) {
+			// Enhance the suggestion details.
+			$suggestion = $this->enhance_extension_suggestion( $suggestion );
+		}
+
+		return $suggestion;
 	}
 
 	/**
@@ -1030,7 +1102,6 @@ class PaymentsProviders {
 		if ( empty( $mollie_suggestion ) ) {
 			return $payment_gateways;
 		}
-		$mollie_suggestion = $this->enhance_extension_suggestion( $mollie_suggestion );
 		// Do nothing if the plugin is not active.
 		if ( self::EXTENSION_ACTIVE !== $mollie_suggestion['plugin']['status'] ) {
 			return $payment_gateways;
@@ -1048,7 +1119,7 @@ class PaymentsProviders {
 	 * @param array              $gateway_details The gateway details to enhance.
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 * @param string             $country_code    The country code for which the details are being enhanced.
-	 *                                            This should be a ISO 3166-1 alpha-2 country code.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The enhanced gateway details.
 	 */
@@ -1065,9 +1136,6 @@ class PaymentsProviders {
 		// The suggestions only know about the normalized (aka official) plugin slug.
 		$suggestion = $this->get_extension_suggestion_by_plugin_slug( $normalized_plugin_slug, $country_code );
 		if ( ! is_null( $suggestion ) ) {
-			// Enhance the suggestion details.
-			$suggestion = $this->enhance_extension_suggestion( $suggestion );
-
 			// The title, description, icon, and image from the suggestion take precedence over the ones from the gateway.
 			// This is temporary until we update the partner extensions.
 			// Do not override the title and description for certain suggestions because theirs are more descriptive
