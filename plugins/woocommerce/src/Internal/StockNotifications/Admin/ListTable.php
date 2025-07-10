@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 
 /**
  * Notifications list table for Customer Stock Notifications.
@@ -65,7 +66,27 @@ class ListTable extends \WP_List_Table {
 	public $data_store;
 
 	/**
+	 * Eligibility service.
+	 *
+	 * @var EligibilityService
+	 */
+	public $eligibility_service;
+
+	/**
+	 * Init.
+	 *
+	 * @internal
+	 *
+	 * @param EligibilityService $eligibility_service Eligibility service.
+	 */
+	final public function init( EligibilityService $eligibility_service ) {
+		$this->eligibility_service = $eligibility_service;
+	}
+
+	/**
 	 * Constructor.
+	 *
+	 * @return void
 	 */
 	public function __construct() {
 
@@ -352,8 +373,14 @@ class ListTable extends \WP_List_Table {
 		}
 
 		if ( ! empty( $_GET['customer_stock_notifications_product_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$filter                   = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['product_id'] = array( $filter );
+			$filter  = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$product = wc_get_product( $filter );
+			if ( $product instanceof \WC_Product ) {
+				$target_ids               = $this->eligibility_service->get_target_product_ids( $product );
+				$query_args['product_id'] = $target_ids;
+			} else {
+				NotificationsPage::add_notice( __( 'Invalid product selected.', 'woocommerce' ), 'error' );
+			}
 		}
 
 		if ( ! empty( $_GET['customer_stock_notifications_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -661,46 +688,6 @@ class ListTable extends \WP_List_Table {
 	}
 
 	/**
-	 * Calculate total items.
-	 *
-	 * @return void
-	 */
-	private function calculate_total_items(): void {
-
-		// Count active notifications.
-		$this->total_active_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::ACTIVE,
-			)
-		);
-
-		// Count pending notifications.
-		$this->total_pending_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::PENDING,
-			)
-		);
-
-		// Count cancelled notifications.
-		$this->total_cancelled_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::CANCELLED,
-			)
-		);
-
-		// Count sent notifications.
-		$this->total_sent_items = $this->data_store->query(
-			array(
-				'return' => 'count',
-				'status' => NotificationStatus::SENT,
-			)
-		);
-	}
-
-	/**
 	 * Process actions.
 	 */
 	public function process_actions(): void {
@@ -770,7 +757,7 @@ class ListTable extends \WP_List_Table {
 		if ( 'enable' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
 
-				$notification = new Notification( $id );
+				$notification = Factory::get_notification( $id );
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$this->data_store->update( $notification );
 
@@ -791,7 +778,7 @@ class ListTable extends \WP_List_Table {
 
 		} elseif ( 'cancel' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
-				$notification = new Notification( $id );
+				$notification = Factory::get_notification( $id );
 				$notification->set_status( NotificationStatus::CANCELLED );
 				$this->data_store->update( $notification );
 			}
@@ -812,7 +799,7 @@ class ListTable extends \WP_List_Table {
 
 		} elseif ( 'delete' === $this->current_action() ) {
 			foreach ( $notifications as $id ) {
-				$notification = new Notification( $id );
+				$notification = Factory::get_notification( $id );
 				$this->data_store->delete( $notification );
 			}
 
