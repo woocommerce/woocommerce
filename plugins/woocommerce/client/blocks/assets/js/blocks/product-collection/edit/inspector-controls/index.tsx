@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store as blockEditorStore, InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo, useEffect, useRef } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
@@ -104,7 +104,8 @@ const ProductCollectionInspectorControls = (
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
 	const showColumnsControl = ! isCarouselLayout;
 	const showMaxPagesToShowControl =
-		showCustomQueryControls && ! isCarouselLayout &&
+		showCustomQueryControls &&
+		! isCarouselLayout &&
 		shouldShowFilter( CoreFilterNames.MAX_PAGES_TO_SHOW );
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
@@ -184,7 +185,10 @@ const ProductCollectionInspectorControls = (
 				<LayoutOptionsControl { ...displayControlProps } />
 				<WidthOptionsControl { ...dimensionsControlProps } />
 				{ showProductsPerPageControl && (
-					<ProductsPerPageControl { ...queryControlProps } carouselVariant={ isCarouselLayout } />
+					<ProductsPerPageControl
+						{ ...queryControlProps }
+						carouselVariant={ isCarouselLayout }
+					/>
 				) }
 				{ showColumnsControl && (
 					<ColumnsControl { ...displayControlProps } />
@@ -286,7 +290,7 @@ const shouldDisplayUpgradeNotice = (
 // - notice was displayed more than X times
 // We do that to prevent showing the notice again after Products on
 // other page were updated or local storage was cleared or user
-// switched to another machine/browser etc.
+// switched to another machine/browser.
 const shouldBeUnmarkedAsConverted = (
 	props: ProductCollectionEditComponentProps
 ) => {
