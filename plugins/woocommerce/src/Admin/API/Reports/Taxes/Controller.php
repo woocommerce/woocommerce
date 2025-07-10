@@ -226,7 +226,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'tax_code'     => __( 'Tax code', 'woocommerce' ),
 			'rate'         => __( 'Rate', 'woocommerce' ),
 			'total_tax'    => __( 'Total tax', 'woocommerce' ),
@@ -234,7 +234,25 @@ class Controller extends GenericController implements ExportableInterface {
 			'shipping_tax' => __( 'Shipping tax', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 		);
+
+		/**
+		 * Filter to allow developers to add or modify column headers for the
+		 * Analytics > Taxes export.
+		 *
+		 * Developers can use this filter to add custom columns to the exported CSV
+		 * and data grid for taxes report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_columns Export columns as an associative array (column_id => label).
+		 * @return array Modified export columns.
+		 */
+		return apply_filters(
+			'woocommerce_report_taxes_export_columns',
+			$export_columns
+		);
 	}
+
 
 	/**
 	 * Get the column values for export.
@@ -243,7 +261,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
-		return array(
+		$export_item = array(
 			'tax_code'     => \WC_Tax::get_rate_code(
 				(object) array(
 					'tax_rate_id'       => $item['tax_rate_id'],
@@ -258,6 +276,25 @@ class Controller extends GenericController implements ExportableInterface {
 			'order_tax'    => self::csv_number_format( $item['order_tax'] ),
 			'shipping_tax' => self::csv_number_format( $item['shipping_tax'] ),
 			'orders_count' => $item['orders_count'],
+		);
+
+		/**
+		 * Filter to allow developers to add or modify row data for the
+		 * Analytics > Taxes export.
+		 *
+		 * Developers can use this filter to add data for custom columns to the exported CSV
+		 * and data grid for taxes report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_item Export item data as an associative array (column_id => value).
+		 * @param array $item        Raw item data from report query.
+		 * @return array Modified export item data.
+		 */
+		return apply_filters(
+			'woocommerce_report_taxes_prepare_export_item',
+			$export_item,
+			$item
 		);
 	}
 }
