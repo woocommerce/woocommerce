@@ -53,7 +53,26 @@ async function setup( attributes: BlockAttributes ) {
 	const testBlock = [
 		{
 			name: 'woocommerce/product-filter-taxonomy',
-			attributes,
+			attributes: {
+				...attributes,
+				// Enable preview mode for UI tests
+				isPreview: true,
+			},
+		},
+	];
+	return initializeEditor( testBlock );
+}
+
+// Helper function for tests that need to test real data behavior
+async function setupRealData( attributes: BlockAttributes ) {
+	const testBlock = [
+		{
+			name: 'woocommerce/product-filter-taxonomy',
+			attributes: {
+				...attributes,
+				// Disable preview mode for real data tests
+				isPreview: false,
+			},
 		},
 	];
 	return initializeEditor( testBlock );
@@ -147,6 +166,15 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should allow toggling product counts', async () => {
+			await selectBlock( /Block: Product Categories Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Categories Filter/i )
+			);
+
+			// expect the list doesn't have count indicators initially
+			expect( block.queryAllByText( /\(\d+\)/ ) ).toHaveLength( 0 );
+
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
 			} );
@@ -156,6 +184,11 @@ describe( 'Taxonomy Filter block', () => {
 			} );
 
 			expect( productCountsToggle ).toBeChecked();
+
+			// expect the list has count indicators after toggling
+			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
+				0
+			);
 		} );
 	} );
 
@@ -176,6 +209,20 @@ describe( 'Taxonomy Filter block', () => {
 			expect( sortOrderSelect ).toHaveValue( 'count-desc' );
 		} );
 
+		test( 'should allow changing sort order when enabled', () => {
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			fireEvent.change( sortOrderSelect, {
+				target: { value: 'name-asc' },
+			} );
+
+			expect( sortOrderSelect ).toHaveValue( 'name-asc' );
+		} );
+
 		test( 'should show hide empty items toggle when enabled', () => {
 			enableControl( 'Hide items with no products' );
 
@@ -185,6 +232,78 @@ describe( 'Taxonomy Filter block', () => {
 
 			expect( hideEmptyToggle ).toBeInTheDocument();
 			expect( hideEmptyToggle ).toBeChecked(); // Default is true
+		} );
+
+		test( 'should allow toggling hide empty items when enabled', () => {
+			enableControl( 'Hide items with no products' );
+
+			const hideEmptyToggle = screen.getByRole( 'checkbox', {
+				name: /Hide items with no products/i,
+			} );
+
+			fireEvent.click( hideEmptyToggle );
+
+			expect( hideEmptyToggle ).not.toBeChecked();
+		} );
+	} );
+
+	describe( 'Attribute combinations', () => {
+		test( 'should handle all attributes set correctly', async () => {
+			await setup( {
+				taxonomy: 'product_cat',
+				showCounts: true,
+				displayStyle: 'dropdown',
+				sortOrder: 'name-asc',
+				hideEmpty: false,
+			} );
+			await selectBlock( /Block: Product Categories Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Categories Filter/i )
+			);
+
+			// Should display the heading
+			expect(
+				block.getByText( /Product Categories/i )
+			).toBeInTheDocument();
+
+			// Check that all controls reflect the set attributes
+			expect(
+				screen.getByRole( 'combobox', { name: /Taxonomy/i } )
+			).toHaveValue( 'product_cat' );
+			expect(
+				screen.getByRole( 'checkbox', { name: /Product counts/i } )
+			).toBeChecked();
+
+			// Since we set attributes, these controls should already be visible
+			expect(
+				screen.getByRole( 'combobox', { name: /Sort Order/i } )
+			).toHaveValue( 'name-asc' );
+			expect(
+				screen.getByRole( 'checkbox', {
+					name: /Hide items with no products/i,
+				} )
+			).not.toBeChecked();
+		} );
+
+		test( 'should handle product tags taxonomy', async () => {
+			await setup( {
+				taxonomy: 'product_tag',
+				showCounts: true,
+			} );
+			await selectBlock( /Block: Product Tags Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Tags Filter/i )
+			);
+
+			// Should display the taxonomy label as heading
+			expect( block.getByText( /Product Tags/i ) ).toBeInTheDocument();
+
+			// Should show count indicators since showCounts is true
+			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
+				0
+			);
 		} );
 	} );
 } );
