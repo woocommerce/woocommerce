@@ -253,24 +253,28 @@ jobs:
             hmac.update(requestBody);
             const signature = hmac.digest('hex');
             
-            const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Hub-Signature-256': `sha256=${signature}`
-              },
-              body: requestBody
-            });
-            
-            if (!response.ok) {
-              if (response.status === 409) {
-                console.log('Webhook request failed: Duplicate post detected (409)');
-              } else if (response.status === 403) {
-                console.log('Webhook request failed: Invalid secret (403)');
+            try {
+              const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Hub-Signature-256': `sha256=${signature}`
+                },
+                body: requestBody
+              });
+              
+              if (!response.ok) {
+                if (response.status === 409) {
+                  console.log('Webhook request failed: Duplicate post detected (409)');
+                } else if (response.status === 403) {
+                  console.log('Webhook request failed: Invalid secret (403)');
+                }
+                core.setFailed(`Webhook request failed with status ${response.status}`);
+              } else {
+                console.log('Webhook triggered successfully');
               }
-              core.setFailed(`Webhook request failed with status ${response.status}`);
-            } else {
-              console.log('Webhook triggered successfully');
+            } catch (error) {
+              core.setFailed(`Webhook request failed: ${error.message}`);
             }
         env:
           WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
