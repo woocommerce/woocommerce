@@ -249,7 +249,7 @@ describe( 'CheckoutExpressPayment', () => {
 	} );
 
 	describe( 'Processing states', () => {
-		it( 'should add disabled class when isProcessing', () => {
+		it( 'should add accessibility attributes when isProcessing', () => {
 			mockUseSelect
 				.mockReturnValueOnce( {
 					isCalculating: false,
@@ -275,8 +275,22 @@ describe( 'CheckoutExpressPayment', () => {
 			const expressPaymentContainer = document.querySelector(
 				'.wc-block-components-express-payment--checkout'
 			);
-			expect( expressPaymentContainer ).toHaveClass(
-				'wc-block-components-express-payment--disabled'
+
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-disabled',
+				'true'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-busy',
+				'true'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-live',
+				'polite'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-label',
+				expect.stringContaining( 'Processing express checkout' )
 			);
 		} );
 

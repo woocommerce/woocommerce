@@ -34,7 +34,7 @@ const CheckoutExpressPayment = () => {
 			isComplete: store.isComplete(),
 			hasError: store.hasError(),
 		};
-	} );
+	}, [] );
 	const {
 		availableExpressPaymentMethods,
 		expressPaymentMethodsInitialized,
@@ -51,7 +51,7 @@ const CheckoutExpressPayment = () => {
 			registeredExpressPaymentMethods:
 				store.getRegisteredExpressPaymentMethods(),
 		};
-	} );
+	}, [] );
 	const { isEditor } = useEditorContext();
 
 	const hasRegisteredExpressPaymentMethods =
@@ -101,6 +101,15 @@ const CheckoutExpressPayment = () => {
 						'wc-block-components-express-payment--disabled':
 							isExpressPaymentMethodActive || checkoutProcessing,
 					}
+				) }
+				aria-disabled={
+					isExpressPaymentMethodActive || checkoutProcessing
+				}
+				aria-busy={ checkoutProcessing }
+				aria-live="polite"
+				aria-label={ __(
+					'Processing express checkout',
+					'woocommerce'
 				) }
 			>
 				<div className="wc-block-components-express-payment__title-container">
