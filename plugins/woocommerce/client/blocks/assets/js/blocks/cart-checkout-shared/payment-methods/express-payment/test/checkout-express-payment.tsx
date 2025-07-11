@@ -137,7 +137,7 @@ describe( 'CheckoutExpressPayment', () => {
 
 		it( 'should render null when not in editor and user is not admin', () => {
 			const { container } = render( <CheckoutExpressPayment /> );
-			expect( container.firstChild ).toBeNull();
+			expect( container ).toBeEmptyDOMElement();
 		} );
 
 		it( 'should render StoreNoticesContainer when in editor', () => {
