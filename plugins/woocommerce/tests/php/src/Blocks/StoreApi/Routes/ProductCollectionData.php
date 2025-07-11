@@ -52,6 +52,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( null, $data['rating_counts'] );
+		$this->assertEquals( null, $data['taxonomy_counts'] );
 	}
 
 	/**
@@ -69,6 +70,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( '10000', $data['price_range']->max_price );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( null, $data['rating_counts'] );
+		$this->assertEquals( null, $data['taxonomy_counts'] );
 	}
 
 	/**
@@ -102,6 +104,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['rating_counts'] );
+		$this->assertEquals( null, $data['taxonomy_counts'] );
 
 		$this->assertIsArray( $data );
 
@@ -137,6 +140,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['rating_counts'] );
+		$this->assertEquals( null, $data['taxonomy_counts'] );
 
 		$this->assertIsArray( $data );
 
@@ -156,6 +160,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
+		$this->assertEquals( null, $data['taxonomy_counts'] );
 		$this->assertEquals(
 			array(
 				(object) array(
@@ -172,6 +177,85 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * Test taxonomy calculation method.
+	 */
+	public function test_calculate_taxonomy_counts() {
+		$fixtures = new FixtureData();
+
+		// Create test categories.
+		$category1 = wp_insert_term( 'Test Category 1', 'product_cat' );
+		$category2 = wp_insert_term( 'Test Category 2', 'product_cat' );
+
+		// Assign products to categories.
+		wp_set_post_terms( $this->products[0]->get_id(), array( $category1['term_id'] ), 'product_cat' );
+		wp_set_post_terms( $this->products[1]->get_id(), array( $category1['term_id'], $category2['term_id'] ), 'product_cat' );
+
+		// Test product_cat taxonomy.
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$request->set_param(
+			'calculate_taxonomy_counts',
+			array(
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( null, $data['price_range'] );
+		$this->assertEquals( null, $data['attribute_counts'] );
+		$this->assertEquals( null, $data['rating_counts'] );
+
+		$this->assertIsArray( $data['taxonomy_counts'] );
+		$this->assertNotEmpty( $data['taxonomy_counts'] );
+
+		// Verify structure of taxonomy counts.
+		foreach ( $data['taxonomy_counts'] as $taxonomy_count ) {
+			$this->assertTrue( property_exists( $taxonomy_count, 'term' ) );
+			$this->assertTrue( property_exists( $taxonomy_count, 'count' ) );
+			$this->assertIsInt( $taxonomy_count->term );
+			$this->assertIsInt( $taxonomy_count->count );
+		}
+
+		// Find our test categories in the results.
+		$found_categories = array_filter(
+			$data['taxonomy_counts'],
+			function ( $item ) use ( $category1, $category2 ) {
+				return in_array( $item->term, array( $category1['term_id'], $category2['term_id'] ), true );
+			}
+		);
+
+		$this->assertNotEmpty( $found_categories, 'Test categories should be found in taxonomy counts' );
+
+		// Test multiple taxonomies.
+		$tag1 = wp_insert_term( 'Test Tag 1', 'product_tag' );
+		wp_set_post_terms( $this->products[0]->get_id(), array( $tag1['term_id'] ), 'product_tag' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
+		$request->set_param(
+			'calculate_taxonomy_counts',
+			array(
+				array(
+					'taxonomy' => 'product_cat',
+				),
+				array(
+					'taxonomy' => 'product_tag',
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertIsArray( $data['taxonomy_counts'] );
+		$this->assertNotEmpty( $data['taxonomy_counts'] );
+	}
+
+	/**
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
@@ -182,6 +266,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertArrayHasKey( 'calculate_price_range', $params );
 		$this->assertArrayHasKey( 'calculate_attribute_counts', $params );
 		$this->assertArrayHasKey( 'calculate_rating_counts', $params );
+		$this->assertArrayHasKey( 'calculate_taxonomy_counts', $params );
 	}
 
 	/**
@@ -195,6 +280,10 @@ class ProductCollectionData extends ControllerTestCase {
 				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
+
+		// Create test category for taxonomy counts.
+		$category = wp_insert_term( 'Schema Test Category', 'product_cat' );
+		wp_set_post_terms( $product->get_id(), array( $category['term_id'] ), 'product_cat' );
 
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-collection-data' );
@@ -212,6 +301,14 @@ class ProductCollectionData extends ControllerTestCase {
 			)
 		);
 		$request->set_param( 'calculate_rating_counts', true );
+		$request->set_param(
+			'calculate_taxonomy_counts',
+			array(
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			)
+		);
 		$response = rest_get_server()->dispatch( $request );
 		$validate = new ValidateSchema( $schema );
 
