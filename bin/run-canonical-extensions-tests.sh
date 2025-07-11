@@ -55,7 +55,7 @@ skipped=( $( printf '%s\n' "${skipped[@]}" | sort ) )
 echo ''
 
 # Report the skipped repositories.
-echo "Skipping due to missing target workflows or access permissions (${#skipped[@]} repo(s))"
+echo "Skipping due to missing target workflows or not access to repository (${#skipped[@]} repo(s))"
 for repository in ${skipped[@]}; do
 	echo "    -- ${repository##*/}"
 done
