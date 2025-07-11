@@ -105,7 +105,11 @@ const productFiltersStore = {
 
 				if ( type.includes( 'taxonomy' ) ) {
 					const [ , taxonomy ] = type.split( '/' );
-					addParam( `filter_${ taxonomy }`, value );
+					const config = getConfig( BLOCK_NAME );
+					const taxonomyParamsMap = config?.taxonomyParamsMap || {};
+					const paramKey =
+						taxonomyParamsMap[ taxonomy ] || `filter_${ taxonomy }`;
+					addParam( paramKey, value );
 				}
 			} );
 			return params;

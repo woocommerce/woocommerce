@@ -134,6 +134,14 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return '';
 		}
 
+		// Pass taxonomy parameter mapping to frontend via interactivity config.
+		wp_interactivity_config(
+			'woocommerce/product-filters',
+			array(
+				'taxonomyParamsMap' => $taxonomy_params,
+			)
+		);
+
 		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
 		$hide_empty      = $block_attributes['hideEmpty'] ?? true;
 		$orderby         = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
