@@ -73,9 +73,17 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 			)
 		);
 
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-interactive' => esc_attr( $this->get_full_block_name() ),
+				'class'               => 'wc-block-mini-cart__items',
+				'tabindex'            => '-1',
+			)
+		);
+
 		ob_start();
 		?>
-		<div data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wp-block-woocommerce-mini-cart-products-table-block wc-block-mini-cart__products-table">
 				<table class="wc-block-cart-items wc-block-mini-cart-items" tabindex="-1">
 					<caption class="screen-reader-text">
