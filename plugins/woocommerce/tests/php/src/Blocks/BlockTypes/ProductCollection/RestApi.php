@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
@@ -35,7 +36,7 @@ class RestApi extends \WP_UnitTestCase {
 		$args    = array(
 			'posts_per_page' => 9,
 		);
-		$request = $this->build_request();
+		$request = Utils::build_request();
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
@@ -92,7 +93,7 @@ class RestApi extends \WP_UnitTestCase {
 			),
 		);
 
-		$request = $this->build_request( $params );
+		$request = Utils::build_request( $params );
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
