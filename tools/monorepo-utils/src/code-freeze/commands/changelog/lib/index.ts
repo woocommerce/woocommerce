@@ -320,31 +320,59 @@ async function getTrunkWooCommerceVersion(
 	return version;
 }
 
+function getNextVersion( currentVersion: string ) {
+	const parts = currentVersion.split( '.' ).map( Number );
+	let major = parts[ 0 ];
+	let minor = parts[ 1 ];
+
+	minor++;
+
+	// If minor exceeds 9, reset to 0 and increment major
+	if ( minor > 9 ) {
+		major++;
+		minor = 0;
+	}
+
+	return `${ major }.${ minor }`;
+}
+
 /**
  * Generates a list of release branch names between the target version and the trunk version.
  * Each branch name follows the format `release/{major}.{minor}`.
  *
- * @param trunkVersion  the current trunk version in the "major.minor" format (e.g., "8.7").
  * @param targetVersion the target version in the "major.minor" format (e.g., "9.5").
+ * @param trunkVersion  the current trunk version in the "major.minor" format (e.g., "8.7").
  * @return An array of branch names representing all release branches between the target and trunk versions.
  */
 function getTargetBranches(
-	trunkVersion: string,
-	targetVersion: string
+	targetVersion: string,
+	trunkVersion: string
 ): string[] {
+	const [ currentMajor, currentMinor ] = trunkVersion
+		.split( '.' )
+		.map( Number );
 	const [ targetMajor, targetMinor ] = targetVersion
 		.split( '.' )
 		.map( Number );
-	const [ trunkMajor, trunkMinor ] = trunkVersion.split( '.' ).map( Number );
 
-	const branches: string[] = [];
-
-	for (
-		let v = Number( `${ targetMajor }.${ targetMinor }` ) + 0.1;
-		v < Number( `${ trunkMajor }.${ trunkMinor }` );
-		v += 0.1
+	// Check if the target is greater than the trunk version
+	if (
+		targetMajor < currentMajor ||
+		( targetMajor === currentMajor && targetMinor <= currentMinor )
 	) {
-		branches.push( `release/${ v.toFixed( 1 ) }` );
+		Logger.notice(
+			`Target version ${ targetVersion } is not greater than trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+		);
+		return [];
+	}
+
+	const branches = [];
+	let version = getNextVersion( trunkVersion );
+
+	while ( version !== targetVersion ) {
+		Logger.notice( `Adding intermediate branch for version ${ version }` );
+		branches.push( `release/${ version }` );
+		version = getNextVersion( version );
 	}
 
 	return branches;
@@ -375,21 +403,18 @@ export const updateIntermediateBranches = async (
 	}
 
 	const targetBranches = getTargetBranches( trunkVersion, options.version );
+	Logger.notice(
+		`Target branches to update: ${ targetBranches.join( ', ' ) }`
+	);
 
 	for ( const targetBranch of targetBranches ) {
 		try {
-			Logger.notice(
-				`Updating changelogs for target branch: ${ targetBranch }`
-			);
-
 			await updateBranchChangelog(
 				options,
 				tmpRepoPath,
 				targetBranch,
 				releaseBranchChanges
 			);
-
-			Logger.notice( `Successfully updated ${ targetBranch }` );
 		} catch ( error ) {
 			Logger.error(
 				`Failed to update ${ targetBranch }: ${ error.message }`
