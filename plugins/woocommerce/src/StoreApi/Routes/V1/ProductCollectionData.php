@@ -73,6 +73,7 @@ class ProductCollectionData extends AbstractRoute {
 			'attribute_counts'    => null,
 			'stock_status_counts' => null,
 			'rating_counts'       => null,
+			'taxonomy_counts'     => null,
 		];
 		$filters = new ProductQueryFilters();
 
@@ -218,6 +219,23 @@ class ProductCollectionData extends AbstractRoute {
 			'description' => __( 'If true, calculates rating counts for products in the collection.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'default'     => false,
+		];
+
+		$params['calculate_taxonomy_counts'] = [
+			'description' => __( 'If requested, calculates taxonomy term counts for products in the collection.', 'woocommerce' ),
+			'type'        => 'array',
+			'items'       => [
+				'type'       => 'object',
+				'properties' => [
+					'taxonomy'   => [
+						'description' => __( 'Taxonomy name.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+				],
+			],
+			'default'     => [],
 		];
 
 		return $params;
