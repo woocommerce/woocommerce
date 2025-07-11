@@ -121,15 +121,8 @@
 		function renderLinkout( context, product, promoted, slug, url, iamUrl, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 			var utmUrl = addURLParameters( context, url );
-			var isInternalLink = false;
-			var targetUrl = '';
-
-			if ( iamUrl ) {
-				targetUrl = getAdminLink( iamUrl );
-				isInternalLink = true;
-			} else {
-				targetUrl = utmUrl;
-			}
+			var isInternalLink = Boolean( iamUrl );
+			var targetUrl = isInternalLink ? getAdminLink( iamUrl ) : utmUrl;
 
 			linkoutButton.setAttribute( 'href', targetUrl );
 
