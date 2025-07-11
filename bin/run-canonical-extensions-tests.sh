@@ -42,7 +42,7 @@ skipped=()
 echo -n "Looking up repositories (${#repositories[@]}): "
 for repository in ${repositories[@]}; do
 	repository=${repository%/}
-	match=$( ( gh workflow list --json path --jq '.[].path' --repo $repository | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml|manual_qit.yml)' | wc -l | tr -d '[:space:]' ) || echo '0' )
+	match=$( ( gh workflow list --json path --jq '.[].path' --repo $repository 2>/dev/null | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml|manual_qit.yml)' | wc -l | tr -d '[:space:]' ) || echo '0' )
 	if [[ $match == '1' ]]; then
 		filtered+=( $repository )
 	else
