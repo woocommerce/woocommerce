@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+FeaturesUtil: Skip feature compability declarations on front-end requests to avoid unnecessary get_plugins() calls
