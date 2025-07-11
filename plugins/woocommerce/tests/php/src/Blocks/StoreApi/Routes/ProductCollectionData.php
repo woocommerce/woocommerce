@@ -242,6 +242,39 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data['taxonomy_counts'] );
 		$this->assertNotEmpty( $data['taxonomy_counts'] );
+
+		// Find our test categories and tag in the results.
+		$found_categories = array_filter(
+			$data['taxonomy_counts'],
+			function ( $item ) use ( $category1, $category2 ) {
+				return in_array( $item->term, array( $category1['term_id'], $category2['term_id'] ), true );
+			}
+		);
+
+		$found_tags = array_filter(
+			$data['taxonomy_counts'],
+			function ( $item ) use ( $tag1 ) {
+				return $item->term === $tag1['term_id'];
+			}
+		);
+
+		$this->assertNotEmpty( $found_categories, 'Test categories should be found in taxonomy counts' );
+		$this->assertNotEmpty( $found_tags, 'Test tag should be found in taxonomy counts' );
+
+		// Verify the counts are correct.
+		foreach ( $found_categories as $category ) {
+			if ( $category->term === $category1['term_id'] ) {
+				$this->assertEquals( 2, $category->count, 'Category 1 should have 2 products' );
+			} elseif ( $category->term === $category2['term_id'] ) {
+				$this->assertEquals( 1, $category->count, 'Category 2 should have 1 product' );
+			}
+		}
+
+		foreach ( $found_tags as $tag ) {
+			if ( $tag->term === $tag1['term_id'] ) {
+				$this->assertEquals( 1, $tag->count, 'Tag 1 should have 1 product' );
+			}
+		}
 	}
 
 	/**
