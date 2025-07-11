@@ -709,7 +709,7 @@ class WC_Helper_Updater {
 				continue;
 			}
 
-			if ( ! is_plugin_active( $theme['_filename'] ) ) {
+			if ( get_stylesheet() !== $theme['_stylesheet'] ) {
 				continue;
 			}
 
