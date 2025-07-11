@@ -80,7 +80,7 @@ const LaunchStoreController = () => {
 	const handlePaymentsClose = () => {
 		// We are not actually closing a modal here, but we use the same event name for consistency.
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed', {
-			from: 'lys',
+			from: 'lys_modal_close_button',
 			source: wooPaymentsOnboardingSessionEntryLYS,
 		} );
 
