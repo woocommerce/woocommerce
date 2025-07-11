@@ -199,7 +199,7 @@ jobs:
   handle-failures:
     needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
     runs-on: ubuntu-latest
-    if: ${{ always() && needs.cherry-pick.outputs.status == 'failure' }}
+    if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
     steps:
       - name: Handle failure
         run: echo "Processing cherry-pick failure"
