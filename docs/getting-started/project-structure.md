@@ -40,12 +40,12 @@ When adding WooCommerce to a WordPress installation, you can either install the 
 
 Each plugin, package, and tool has its own `package.json` file containing project-specific dependencies and scripts. Most projects also contain a `README.md` file with any project-specific setup instructions and documentation.
 
-- [**Plugins**](http://plugins): Our repository contains plugins that relate to or otherwise aid in the development of WooCommerce.  
-  - [**WooCommerce Core**](http://plugins/woocommerce): The core WooCommerce plugin is available in the plugins directory.  
-- [**Packages**](http://packages): Contained within the packages directory are all of the [PHP](http://packages/php) and [JavaScript](http://packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.  
-- [**Tools**](http://tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
+* [**Plugins**](http://github.com/woocommerce/woocommerce/tree/trunk/plugins): Our repository contains plugins that relate to or otherwise aid in the development of WooCommerce.  
+    * [**WooCommerce Core**](http://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce): The core WooCommerce plugin is available in the plugins directory.  
+* [**Packages**](http://github.com/woocommerce/woocommerce/tree/trunk/packages): Contained within the packages directory are all of the [PHP](http://github.com/woocommerce/woocommerce/tree/trunk/packages/php) and [JavaScript](http://github.com/woocommerce/woocommerce/tree/trunk/packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.  
+* [**Tools**](http://github.com/woocommerce/woocommerce/tree/trunk/tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
 
-If you'd like to learn more about how our monorepo works, [please check out this guide here](http://tools/README.md).
+If you'd like to learn more about how our monorepo works, [please check out this guide here](http://github.com/woocommerce/woocommerce/tree/trunk/tools/README.md).
 
 ## Theming and Extending Functionality
 

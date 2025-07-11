@@ -26,7 +26,7 @@ runs:
     using: 'composite'
     steps:
         - name: 'Setup PNPM'
-          uses: 'pnpm/action-setup@v4'
+          uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         # Next step is rudimentary - fixes a know composite action bug during post-actions:
         # Error: Index was out of range. Must be non-negative and less than the size of the collection.
         - name: 'Read PNPM version'
@@ -34,14 +34,14 @@ runs:
           shell: 'bash'
           run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
-          uses: 'actions/setup-node@v4'
+          uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
           with:
               node-version-file: '.nvmrc'
               # The built-in caching is not fit to per-package caching we are aiming.
               cache: ''
         - name: 'Setup PHP'
           if: ${{ inputs.php-version != 'false' && inputs.build-type != 'dependencies' }}
-          uses: 'shivammathur/setup-php@v2'
+          uses: 'shivammathur/setup-php@0f7f1d08e3e32076e51cae65eb0b0c871405b16e' # v2.34.1
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'

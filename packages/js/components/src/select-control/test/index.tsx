@@ -53,6 +53,65 @@ describe( 'SelectControl', () => {
 		expect( queryByRole( 'option', { name: 'bar' } ) ).toBeNull();
 	} );
 
+	it( "returns Türkiye when searching for Türkiye when ignoreDiacritics is true ", async () => {
+		const options: Option[] = [
+			{ key: '1', label: 'One', value: { id: 'one' } },
+			{ key: '2', label: 'Two', value: { id: 'two' } },
+			{ key: '3', label: 'Türkiye', value: { id: 'türkiye' } },
+		];
+
+		const { getByRole } = render(
+			<SelectControl ignoreDiacritics={ true } isSearchable options={ options } />
+		);
+
+		userEvent.type( getByRole( 'combobox' ), 'Türkiye' );
+
+		await waitFor( () =>
+			expect(
+				getByRole( 'option', { name: 'Türkiye' } )
+			).toBeInTheDocument()
+		);
+	} );
+
+	it( "returns Türkiye when searching for Turkiye when ignoreDiacritics is true", async () => {
+		const options: Option[] = [
+			{ key: '1', label: 'One', value: { id: 'one' } },
+			{ key: '2', label: 'Two', value: { id: 'two' } },
+			{ key: '3', label: 'Türkiye', value: { id: 'türkiye' } },
+		];
+
+		const { getByRole } = render(
+			<SelectControl ignoreDiacritics={ true } isSearchable options={ options } />
+		);
+
+		userEvent.type( getByRole( 'combobox' ), 'Turkiye' );
+
+		await waitFor( () =>
+			expect(
+				getByRole( 'option', { name: 'Türkiye' } )
+			).toBeInTheDocument()
+		);
+	} );
+
+	it( "does not return Türkiye when searching for Turkiye when ignoreDiacritics is false", async () => {
+		const options: Option[] = [
+			{ key: '1', label: 'One', value: { id: 'one' } },
+			{ key: '2', label: 'Two', value: { id: 'two' } },
+			{ key: '3', label: 'Türkiye', value: { id: 'türkiye' } },
+		];
+
+		const { getByRole, queryByRole } = render(
+			<SelectControl ignoreDiacritics={ false } isSearchable options={ options } />
+		);
+
+		userEvent.type( getByRole( 'combobox' ), 'Turkiye' );
+
+		await waitFor(() => {
+			expect( queryByRole( 'option', { name: 'Türkiye' } ) ).toBeNull();
+		});
+
+	} );
+
 	it( "doesn't return matching excluded elements", async () => {
 		const { getByRole, queryByRole } = render(
 			<SelectControl

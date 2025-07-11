@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Behind a feature flag de-register the bundled `@wordpress/interactivity` and `interactivity-router` modules and register/bundle our own within WooCommerce.

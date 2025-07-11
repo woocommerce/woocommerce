@@ -16,10 +16,14 @@ const universalLock =
 interface Context {
 	addToCartText: string;
 	productId: number;
+	productType: string;
+	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
+	hasPressedButton: boolean;
+	inTheCartText: string;
 }
 
 enum AnimationStatus {
@@ -54,6 +58,7 @@ const productButtonStore = {
 			const product = wooState.cart?.items.find(
 				( item ) => item.id === state.productId
 			);
+
 			return product?.quantity || 0;
 		},
 		get slideInAnimation() {
@@ -65,8 +70,15 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		get addToCartText(): string {
-			const { animationStatus, tempQuantity, addToCartText } =
-				getContext< Context >();
+			const {
+				animationStatus,
+				tempQuantity,
+				addToCartText,
+				productType,
+				groupedProductIds,
+				hasPressedButton,
+				inTheCartText,
+			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
 			// when the second part of the animation hasn't started yet.
@@ -77,9 +89,29 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( quantity === 0 ) return addToCartText;
+			if ( productType === 'grouped' ) {
+				const groupedProductIdsInCart = groupedProductIds?.map(
+					( productId ) => {
+						const product = wooState.cart?.items.find(
+							( item ) => item.id === productId
+						);
+						return product?.quantity || 0;
+					}
+				);
+				if (
+					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
+					hasPressedButton
+				) {
+					return inTheCartText;
+				}
+				return addToCartText;
+			}
 
-			return state.inTheCartText.replace( '###', quantity.toString() );
+			if ( quantity > 0 ) {
+				return inTheCartText.replace( '###', quantity.toString() );
+			}
+
+			return addToCartText;
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
@@ -139,6 +171,10 @@ const productButtonStore = {
 				context.animationStatus = AnimationStatus.IDLE;
 			}
 		},
+		handlePressedState() {
+			const context = getContext< Context >();
+			context.hasPressedButton = true;
+		},
 	},
 	callbacks: {
 		syncTempQuantityOnLoad() {
@@ -158,9 +194,13 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
+			// We skip the animation altogether if the single product page Add to Cart + Options form is invalid.
+
 			if (
 				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE
+				context.animationStatus === AnimationStatus.IDLE &&
+				( addToCartWithOptionsState?.isFormValid === undefined ||
+					addToCartWithOptionsState?.isFormValid )
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}

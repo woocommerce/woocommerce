@@ -10,7 +10,7 @@ import {
 import { TreeSelectControl } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { paymentGatewaysStore } from '@woocommerce/data';
+import { paymentGatewaysStore, paymentSettingsStore } from '@woocommerce/data';
 import { useState, useEffect } from '@wordpress/element';
 
 /**
@@ -18,8 +18,8 @@ import { useState, useEffect } from '@wordpress/element';
  */
 import '../settings-payments-body.scss';
 import { mapShippingMethodsOptions } from '~/settings-payments/offline/utils';
-import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 import { Settings } from '~/settings-payments/components/settings';
+import { FieldPlaceholder } from '~/settings-payments/components/field-placeholder';
 
 /**
  * This page is used to manage the settings for the Cash on delivery payment gateway.
@@ -41,6 +41,12 @@ export const SettingsPaymentsCod = () => {
 
 	const { updatePaymentGateway, invalidateResolutionForStoreSelector } =
 		useDispatch( paymentGatewaysStore );
+
+	const {
+		invalidateResolution,
+		invalidateResolutionForStoreSelector:
+			invalidateResolutionForPaymentSettings,
+	} = useDispatch( paymentSettingsStore );
 
 	const [ formValues, setFormValues ] = useState<
 		Record< string, string | boolean | string[] >
@@ -89,18 +95,23 @@ export const SettingsPaymentsCod = () => {
 			settings,
 		} )
 			.then( () => {
+				setHasChanges( false );
 				invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 				createSuccessNotice(
 					__( 'Settings updated successfully', 'woocommerce' )
 				);
-				setIsSaving( false );
-				setHasChanges( false );
 			} )
 			.catch( () => {
 				createErrorNotice(
 					__( 'Failed to update settings', 'woocommerce' )
 				);
+			} )
+			.finally( () => {
 				setIsSaving( false );
+				invalidateResolution( 'getPaymentProviders', [] );
+				invalidateResolutionForPaymentSettings(
+					'getOfflinePaymentGateways'
+				);
 			} );
 	};
 

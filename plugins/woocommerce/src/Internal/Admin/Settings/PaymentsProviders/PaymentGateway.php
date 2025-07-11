@@ -7,9 +7,13 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
+use WC_Gateway_BACS;
+use WC_Gateway_COD;
+use WC_Gateway_Cheque;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,7 +46,7 @@ class PaymentGateway {
 	 * @param int                $order        Optional. The order to assign.
 	 *                                         Defaults to 0 if not provided.
 	 * @param string             $country_code Optional. The country code for which the details are being gathered.
-	 *                                         This should be a ISO 3166-1 alpha-2 country code.
+	 *                                         This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway provider details.
 	 */
@@ -120,9 +124,16 @@ class PaymentGateway {
 	 */
 	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
 		$title = $payment_gateway->get_method_title();
+		// If we still couldn't get the WC admin title, fall back to the main title.
+		if ( ! is_string( $title ) || empty( $title ) ) {
+			$title = $payment_gateway->get_title();
+		}
+		// If we still couldn't get the title, return a default value.
 		if ( ! is_string( $title ) || empty( $title ) ) {
 			return esc_html__( 'Unknown', 'woocommerce' );
 		}
+
+		// No HTML tags allowed in the title.
 		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the title.
@@ -142,9 +153,16 @@ class PaymentGateway {
 	 */
 	public function get_description( WC_Payment_Gateway $payment_gateway ): string {
 		$description = $payment_gateway->get_method_description();
+		// If we couldn't get the WC admin description, fall back to the main description.
+		if ( ! is_string( $description ) || empty( $description ) ) {
+			$description = $payment_gateway->get_description();
+		}
+		// If we still couldn't get the description, use an empty string since the description is not critical.
 		if ( ! is_string( $description ) || empty( $description ) ) {
 			return '';
 		}
+
+		// No HTML tags allowed in the description.
 		$description = wp_strip_all_tags( html_entity_decode( $description, ENT_QUOTES | ENT_SUBSTITUTE ), true );
 
 		// Truncate the description.
@@ -213,7 +231,22 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is enabled, false otherwise.
 	 */
 	public function is_enabled( WC_Payment_Gateway $payment_gateway ): bool {
-		return filter_var( $payment_gateway->enabled, FILTER_VALIDATE_BOOLEAN );
+		try {
+			return wc_string_to_bool( $payment_gateway->enabled ?? 'no' );
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is enabled: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that the gateway is not enabled.
+		return false;
 	}
 
 	/**
@@ -224,7 +257,33 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway needs setup, false otherwise.
 	 */
 	public function needs_setup( WC_Payment_Gateway $payment_gateway ): bool {
-		return filter_var( $payment_gateway->needs_setup(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			$needs_setup = wc_string_to_bool( $payment_gateway->needs_setup() );
+			// If we get a true value, it means the gateway needs setup.
+			if ( $needs_setup ) {
+				return true;
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway needs setup: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we get a false value, it might mean that it doesn't need setup,
+		// but it can also mean that the gateway does not provide the information and just falls back to the default.
+		// Check if there is a connected account, as that is the most common indicator of a setup.
+		if ( ! $this->is_account_connected( $payment_gateway ) ) {
+			return true;
+		}
+
+		// If we reach here, just assume that the gateway does not need setup.
+		return false;
 	}
 
 	/**
@@ -238,25 +297,52 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in test mode.
-		if ( is_callable( array( $payment_gateway, 'is_test_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_test_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_test_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_in_test_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-
-		// Try various gateway option entries to check if the payment gateway is in test mode.
-		if ( is_callable( array( $payment_gateway, 'get_option' ) ) ) {
-			$test_mode = filter_var( $payment_gateway->get_option( 'test_mode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-			if ( ! is_null( $test_mode ) ) {
-				return $test_mode;
+		try {
+			// Try various gateway methods to check if the payment gateway is in test mode.
+			if ( is_callable( array( $payment_gateway, 'is_test_mode' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_test_mode() );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_test_mode' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_in_test_mode() );
 			}
 
-			$test_mode = filter_var( $payment_gateway->get_option( 'testmode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-			if ( ! is_null( $test_mode ) ) {
-				return $test_mode;
+			// Try various gateway public properties to check if the payment gateway is in test mode.
+			if ( isset( $payment_gateway->testmode ) ) {
+				return wc_string_to_bool( $payment_gateway->testmode );
 			}
+			if ( isset( $payment_gateway->test_mode ) ) {
+				return wc_string_to_bool( $payment_gateway->test_mode );
+			}
+
+			// Try various gateway option entries to check if the payment gateway is in test mode.
+			if ( is_callable( array( $payment_gateway, 'get_option' ) ) ) {
+				$test_mode = filter_var( $payment_gateway->get_option( 'test_mode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				if ( ! is_null( $test_mode ) ) {
+					return $test_mode;
+				}
+
+				$test_mode = filter_var( $payment_gateway->get_option( 'testmode', 'not_found' ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				if ( ! is_null( $test_mode ) ) {
+					return $test_mode;
+				}
+
+				$mode = strtolower( (string) $payment_gateway->get_option( 'mode', 'not_found' ) );
+				if ( in_array( $mode, array( 'test', 'sandbox', 'dev' ), true ) ) {
+					return true;
+				} elseif ( in_array( $mode, array( 'live', 'production', 'prod' ), true ) ) {
+					return false;
+				}
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		return false;
@@ -273,12 +359,24 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in dev mode.
-		if ( is_callable( array( $payment_gateway, 'is_dev_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_dev_mode(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
-			return filter_var( $payment_gateway->is_in_dev_mode(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			// Try various gateway methods to check if the payment gateway is in dev mode.
+			if ( is_callable( array( $payment_gateway, 'is_dev_mode' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_dev_mode() );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_dev_mode' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_in_dev_mode() );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in dev mode: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		return false;
@@ -287,18 +385,32 @@ class PaymentGateway {
 	/**
 	 * Check if the payment gateway has a payments processor account connected.
 	 *
+	 * Note: Be extra careful if you override this method and rely on needs_setup() since it could lead to an infinite loop.
+	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway account is connected, false otherwise.
 	 *              If the payment gateway does not provide the information, it will return true.
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
-			return filter_var( $payment_gateway->is_account_connected(), FILTER_VALIDATE_BOOLEAN );
-		}
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_account_connected() );
+			}
 
-		if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
-			return filter_var( $payment_gateway->is_connected(), FILTER_VALIDATE_BOOLEAN );
+			if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_connected() );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway account is connected: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		// Fall back to assuming that it is connected. This is the safest option.
@@ -315,8 +427,20 @@ class PaymentGateway {
 	 *              it will infer it from having a connected account.
 	 */
 	public function is_onboarding_started( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
-			return filter_var( $payment_gateway->is_onboarding_started(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_onboarding_started() );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway onboarding started: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		// Fall back to inferring this from having a connected account.
@@ -338,13 +462,25 @@ class PaymentGateway {
 			return false;
 		}
 
-		if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
-			return filter_var( $payment_gateway->is_onboarding_completed(), FILTER_VALIDATE_BOOLEAN );
-		}
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_onboarding_completed() );
+			}
 
-		// Note: This is what WooPayments provides, but it should become standard.
-		if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
-			return ! filter_var( $payment_gateway->is_account_partially_onboarded(), FILTER_VALIDATE_BOOLEAN );
+			// Note: This is what WooPayments provides, but it should become standard.
+			if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
+				return ! wc_string_to_bool( $payment_gateway->is_account_partially_onboarded() );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway onboarding is completed: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		// Fall back to inferring this from having a connected account.
@@ -352,7 +488,7 @@ class PaymentGateway {
 	}
 
 	/**
-	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox).
 	 *
 	 * This is a best-effort attempt, as there is no standard way to determine this.
 	 * Trust the true value, but don't consider a false value as definitive.
@@ -362,12 +498,24 @@ class PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		// Try various gateway methods to check if the payment gateway is in test mode onboarding.
-		if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
-			return filter_var( $payment_gateway->is_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
-		}
-		if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
-			return filter_var( $payment_gateway->is_in_test_mode_onboarding(), FILTER_VALIDATE_BOOLEAN );
+		try {
+			// Try various gateway methods to check if the payment gateway is in test mode onboarding.
+			if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_test_mode_onboarding() );
+			}
+			if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
+				return wc_string_to_bool( $payment_gateway->is_in_test_mode_onboarding() );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway is in test mode onboarding: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		return false;
@@ -381,8 +529,31 @@ class PaymentGateway {
 	 * @return string The settings URL for the payment gateway.
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
-		if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-			return (string) $payment_gateway->get_settings_url();
+		try {
+			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
+				return (string) $payment_gateway->get_settings_url();
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get gateway settings URL: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// Special handling for offline payment gateways to use the front-end navigation.
+		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
+			return Utils::wc_payments_settings_url(
+				null,
+				array(
+					'path' => '/offline/' . strtolower( $payment_gateway->id ),
+					'from' => Payments::FROM_PAYMENTS_SETTINGS,
+				)
+			);
 		}
 
 		return Utils::wc_payments_settings_url(
@@ -406,11 +577,23 @@ class PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
-			// If we received no return URL, we will set the WC Payments Settings page as the return URL.
-			$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
+		try {
+			if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
+				// If we received no return URL, we will set the WC Payments Settings page as the return URL.
+				$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
-			return (string) $payment_gateway->get_connection_url( $return_url );
+				return (string) $payment_gateway->get_connection_url( $return_url );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get gateway connection URL: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
 		}
 
 		// Fall back to pointing users to the payment gateway settings page to handle onboarding.
@@ -547,7 +730,7 @@ class PaymentGateway {
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 * @param string             $country_code    Optional. The country code for which to get recommended payment methods.
-	 *                                            This should be a ISO 3166-1 alpha-2 country code.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The recommended payment methods list for the payment gateway.
 	 *               Empty array if there are none.
@@ -558,13 +741,27 @@ class PaymentGateway {
 			return array();
 		}
 
-		// Get the "raw" recommended payment methods from the payment gateway.
-		$recommended_pms = call_user_func_array(
-			array( $payment_gateway, 'get_recommended_payment_methods' ),
-			array( 'country_code' => $country_code ),
-		);
-		if ( ! is_array( $recommended_pms ) ) {
-			// Bail if the recommended payment methods are not an array.
+		try {
+			// Get the "raw" recommended payment methods from the payment gateway.
+			$recommended_pms = call_user_func_array(
+				array( $payment_gateway, 'get_recommended_payment_methods' ),
+				array( 'country_code' => $country_code ),
+			);
+			if ( ! is_array( $recommended_pms ) ) {
+				// Bail if the recommended payment methods are not an array.
+				return array();
+			}
+		} catch ( Throwable $e ) {
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get recommended payment methods: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+
 			return array();
 		}
 
@@ -637,9 +834,9 @@ class PaymentGateway {
 			'id'          => sanitize_key( $recommended_pm['id'] ),
 			'_order'      => $order,
 			// Default to enabled if not explicit.
-			'enabled'     => filter_var( $recommended_pm['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN ),
+			'enabled'     => wc_string_to_bool( $recommended_pm['enabled'] ?? true ),
 			// Default to not required if not explicit.
-			'required'    => filter_var( $recommended_pm['required'] ?? false, FILTER_VALIDATE_BOOLEAN ),
+			'required'    => wc_string_to_bool( $recommended_pm['required'] ?? false ),
 			'title'       => sanitize_text_field( $recommended_pm['title'] ),
 			'description' => '',
 			'icon'        => '',
@@ -698,7 +895,15 @@ class PaymentGateway {
 				$reflector      = new \ReflectionClass( get_class( $payment_gateway ) );
 				$class_filename = $reflector->getFileName();
 			} catch ( Throwable $e ) {
-				// Bail if we couldn't get the gateway class filename.
+				// Bail but log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->debug(
+					'Failed to get gateway class filename: ' . $e->getMessage(),
+					array(
+						'gateway'   => $payment_gateway->id,
+						'source'    => 'settings-payments',
+						'exception' => $e,
+					)
+				);
 				return null;
 			}
 		}

@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { createElement, Component } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 /**
@@ -97,12 +97,7 @@ class EmptyContent extends Component {
 	render() {
 		const { className, title, message, illustration } = this.props;
 		return (
-			<div
-				className={ classnames(
-					'woocommerce-empty-content',
-					className
-				) }
-			>
+			<div className={ clsx( 'woocommerce-empty-content', className ) }>
 				{ illustration && this.renderIllustration() }
 				{ title ? (
 					<H className="woocommerce-empty-content__title">

@@ -8,8 +8,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a button block.
@@ -63,24 +64,24 @@ class Button extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	public function render( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
-		return $this->render_content( $block_content, $parsed_block, $settings_controller );
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		return $this->render_content( $block_content, $parsed_block, $rendering_context );
 	}
 
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		if ( empty( $parsed_block['innerHTML'] ) ) {
 			return '';
 		}
@@ -111,8 +112,8 @@ class Button extends Abstract_Block_Renderer {
 			array(
 				'color' => array_filter(
 					array(
-						'background' => $block_attributes['backgroundColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['textColor'] ) : null,
+						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
+						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
 					)
 				),
 			),
@@ -126,22 +127,26 @@ class Button extends Abstract_Block_Renderer {
 		$wrapper_styles = $this->get_wrapper_styles( $block_styles );
 		$link_styles    = $this->get_link_styles( $block_styles );
 
-		return sprintf(
-			'<table border="0" cellspacing="0" cellpadding="0" role="presentation" style="width:%1$s;">
-        <tr>
-          <td align="%2$s" valign="middle" role="presentation" class="%3$s" style="%4$s">
-            <a class="button-link %5$s" style="%6$s" href="%7$s" target="_blank">%8$s</a>
-          </td>
-        </tr>
-      </table>',
-			esc_attr( $block_attributes['width'] ? '100%' : 'auto' ),
-			esc_attr( $block_attributes['textAlign'] ),
-			esc_attr( $wrapper_styles->classname . ' ' . $block_classname ),
-			esc_attr( $wrapper_styles->css ),
+		$table_attrs = array(
+			'style' => 'width:' . ( $block_attributes['width'] ? '100%' : 'auto' ) . ';',
+		);
+
+		$cell_attrs = array(
+			'class'  => $wrapper_styles->classname . ' ' . $block_classname,
+			'style'  => $wrapper_styles->css,
+			'align'  => $block_attributes['textAlign'],
+			'valign' => 'middle',
+			'role'   => 'presentation',
+		);
+
+		$button_content = sprintf(
+			'<a class="button-link %1$s" style="%2$s" href="%3$s" target="_blank">%4$s</a>',
 			esc_attr( $link_styles->classname ),
 			esc_attr( $link_styles->css ),
 			esc_url( $button_url ),
-			$button_text,
+			$button_text
 		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( $button_content, $table_attrs, $cell_attrs );
 	}
 }

@@ -45,7 +45,7 @@ class WC_Admin_Webhooks {
 	 */
 	private function is_webhook_settings_page() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section'];
+		return is_wc_admin_settings_page() && isset( $_GET['tab'], $_GET['section'] ) && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section'];
 	}
 
 	/**

@@ -100,7 +100,7 @@ pnpm install -frozen-lockfile
 
 Use the following CLI command to compile the JavaScript and CSS that WooCommerce needs to operate:
 
-```
+```shell
 pnpm build
 ```
 
@@ -110,7 +110,7 @@ Note: If you try to run WooCommerce on your server without generating the compil
 
 To load the WooCommerce plugin into your local develop environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress develoment environment.
 
-```
+```shell
 ln -s woocommerce/plugins/woocommerce /path-to-local/wp-content/plugins
 ```
 
@@ -118,7 +118,7 @@ ln -s woocommerce/plugins/woocommerce /path-to-local/wp-content/plugins
 
 Alternatively, you can generate a `woocommerce.zip` file with the following command:
 
-```
+```shell
 pnpm build:zip
 ```
 

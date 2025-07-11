@@ -10,6 +10,7 @@ declare(strict_types = 1);
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 
 /**
  * Test cases for the Personalization_Tags_Registry class.
@@ -26,7 +27,8 @@ class PersonalizationTagsRegistryTest extends TestCase {
 	 * Set up the test case.
 	 */
 	protected function setUp(): void {
-		$this->registry = new Personalization_Tags_Registry();
+		$logger         = new Email_Editor_Logger();
+		$this->registry = new Personalization_Tags_Registry( $logger );
 	}
 
 	/**

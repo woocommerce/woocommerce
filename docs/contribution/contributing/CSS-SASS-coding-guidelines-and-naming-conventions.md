@@ -35,7 +35,7 @@ When adding classes just remember;
 
 **Note:** `.woocommerce-loop-product` is not the chosen classname _because_ the block is nested within `.woocommerce-loop`. It's to be specific so that we can have separate classes for single products, cart products etc. _Nested blocks do not need to inherit their parents full name_.
 
-You can read more about BEM key concepts [here](https://en.bem.info/methodology/key-concepts/).
+You can read more about BEM key concepts [in the BEM methodology documentation](https://en.bem.info/methodology/key-concepts/).
 
 #### TL;DR
 

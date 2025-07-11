@@ -4,6 +4,7 @@ post_title: HPOS CLI Tools
 ---
 
 # HPOS CLI Tools
+
 ## Overview
 
 We have a number of [WP-CLI commands](https://developer.woocommerce.com/docs/category/wc-cli/) that can be used to manage HPOS-related functionality, all of which live under the `wp wc hpos` namespace (though you may come across blog posts and older documentation referencing the now-deprecated `wp wc cot` namespace).
@@ -333,7 +334,7 @@ Warning: Differences found for order 100126:
 
 If reconciling is not necessary, the `--force` flag can be used to skip the verification checks:
 
-```plaintext
+```plaintext
 $ wp wc hpos cleanup 100126 --force
 Starting cleanup for 1 order...
 HPOS cleanup  100% [=====================================================================================================================] 0:00 / 0:00

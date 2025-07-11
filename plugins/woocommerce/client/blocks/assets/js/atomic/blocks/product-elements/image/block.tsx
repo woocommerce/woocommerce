@@ -26,15 +26,32 @@ import {
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
-import { BlockAttributes, ImageSizing } from './types';
+import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
+
+const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
+	// Default to placeholder image if no product images are available.
+	if ( ! product.images.length ) {
+		return null;
+	}
+
+	if ( imageId ) {
+		// If an image ID is provided, use that image or fallback to featured image.
+		const image = product.images.find( ( img ) => img.id === imageId );
+		return image || product.images[ 0 ];
+	}
+
+	// If no image ID is provided, use the featured image.
+	return product.images[ 0 ];
+};
 
 const ImagePlaceholder = ( props ): JSX.Element => {
 	return (
 		<img
 			{ ...props }
 			src={ PLACEHOLDER_IMG_SRC }
-			alt={ props.alt }
+			// Decorative image with no value, so alt should be empty.
+			alt=""
 			width={ undefined }
 			height={ undefined }
 		/>
@@ -95,17 +112,13 @@ const Image = ( {
 					{ ...imageProps }
 				/>
 			) }
-			{ ! image && (
-				<ImagePlaceholder
-					style={ imageStyles }
-					alt={ imageProps.alt }
-				/>
-			) }
+			{ ! image && <ImagePlaceholder style={ imageStyles } /> }
 		</>
 	);
 };
 
 type Props = BlockAttributes &
+	Pick< ProductImageContext, 'imageId' > &
 	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
 
 type LegacyProps = Props & {
@@ -132,6 +145,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		children,
 		className,
 		height,
+		imageId,
 		imageSizing = ImageSizing.SINGLE,
 		scale,
 		showProductLink = true,
@@ -139,12 +153,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		width,
 		...restProps
 	} = props;
+
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	if ( ! product.id ) {
+	if ( ! product?.id ) {
 		return (
 			<>
 				<div
@@ -165,22 +180,28 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			</>
 		);
 	}
-	const hasProductImages = !! product.images.length;
-	const image = hasProductImages ? product.images[ 0 ] : null;
+
+	const image = chooseImage( product, imageId );
+
+	if ( image ) {
+		image.alt = image.alt || decodeEntities( product.name );
+	}
+
 	const ParentComponent = showProductLink ? 'a' : Fragment;
-	const anchorLabel = sprintf(
-		/* translators: %s is referring to the product name */
-		__( 'Link to %s', 'woocommerce' ),
-		product.name
-	);
+	const anchorLabel = product?.name
+		? // translators: %s is the product name.
+		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+		: '';
 	const anchorProps = {
-		href: product.permalink,
-		...( ! hasProductImages && { 'aria-label': anchorLabel } ),
-		onClick: () => {
-			dispatchStoreEvent( 'product-view-link', {
-				product,
-			} );
-		},
+		href: showProductLink ? product?.permalink : undefined,
+		...( showProductLink && {
+			'aria-label': anchorLabel,
+			onClick: () => {
+				dispatchStoreEvent( 'product-view-link', {
+					product,
+				} );
+			},
+		} ),
 	};
 
 	return (

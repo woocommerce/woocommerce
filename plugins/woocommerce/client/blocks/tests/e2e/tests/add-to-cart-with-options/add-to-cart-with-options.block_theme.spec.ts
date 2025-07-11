@@ -9,12 +9,11 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 
 const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
-	pageObject: async ( { page, admin, editor, requestUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
-			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -27,8 +26,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 		admin,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -62,8 +59,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await pageObject.setFeatureFlags();
-
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
@@ -86,8 +81,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -108,18 +101,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
+		await page.getByLabel( 'Product quantity' ).fill( '1' );
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '6 in cart' );
+		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
-	test( "'X in cart' text reflects the correct amount in variations", async ( {
+	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -134,20 +126,79 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const productPrice = page
+			.locator( '.wp-block-woocommerce-product-price' )
+			.first();
 
-		await logoNoOption.click();
-		await colorGreenOption.click();
+		await test.step( 'displays an error when attributes are not selected', async () => {
+			await addToCartButton.click();
+
+			await expect(
+				page.getByText(
+					'Please select product attributes before adding to cart.'
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'updates product price when attributes are selected', async () => {
+			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+
+			await logoNoOption.click();
+			await colorGreenOption.click();
+
+			// Wait until the variation is found and the button becomes visually
+			// enabled.
+			// Note: The button is always enabled for accessibility reasons.
+			// Instead, we check directly for the "disabled" class, which grays
+			// out the button.
+			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+
+			await expect( productPrice ).toHaveText( '$45.00' );
+		} );
+
+		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await addToCartButton.click();
+
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
+
+		await test.step( '"X in cart" text reflects the correct amount in variations', async () => {
+			await colorBlueOption.click();
+
+			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+			await colorGreenOption.click();
+
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
+	} );
+
+	test( 'allows adding grouped products to cart', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of Beanie'
+		);
+		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByText( 'Add to cart' ).first();
+
 		await addToCartButton.click();
 
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-		await colorBlueOption.click();
-
-		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
-
-		await colorGreenOption.click();
-
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -155,8 +206,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -182,11 +231,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		await pageObject.setFeatureFlags();
-
 		await pageObject.updateSingleProductTemplate();
 
 		await pageObject.switchProductType( 'Variable Product' );
+
+		// Verify inner blocks have loaded.
+		await expect(
+			editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
 
 		const attributeOptionsBlock = await editor.getBlockByName(
 			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
@@ -194,6 +250,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( attributeOptionsBlock.first() );
 
 		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+
+		// We need to make sure the block updated before saving.
+		// @see https://github.com/woocommerce/woocommerce/issues/57718
+		await expect( async () => {
+			await page.getByRole( 'radio', { name: 'Dropdown' } ).isChecked();
+		} ).toPass();
 
 		await editor.saveSiteEditorEntities();
 

@@ -2,9 +2,9 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.0.0",
+	"version": "10.1.0",
 	"type": "wordpress-plugin",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"repositories": [
@@ -36,6 +36,7 @@
 	],
 	"require": {
 		"php": ">=7.4",
+		"automattic/block-delimiter": "0.2.1",
 		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
 		"automattic/jetpack-autoloader": "5.0.0",
 		"automattic/jetpack-config": "3.0.0",

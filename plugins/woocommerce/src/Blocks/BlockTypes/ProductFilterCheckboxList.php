@@ -67,64 +67,69 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<ul class="wc-block-product-filter-checkbox-list__list" aria-label="<?php echo esc_attr__( 'Filter Options', 'woocommerce' ); ?>">
-				<?php foreach ( $items as $item ) { ?>
-					<?php $item_id = $item['type'] . '-' . $item['value']; ?>
-					<li
-						data-wp-key="<?php echo esc_attr( $item_id ); ?>"
-						class="wc-block-product-filter-checkbox-list__item"
-						<?php if ( ! $item['selected'] ) : ?>
-							<?php if ( $count >= $remaining_initial_unchecked ) : ?>
-								data-wp-bind--hidden="!context.showAll"
-								hidden
-							<?php else : ?>
-								<?php ++$count; ?>
-							<?php endif; ?>
-						<?php endif; ?>
-					>
-						<label
-							class="wc-block-product-filter-checkbox-list__label"
-							for="<?php echo esc_attr( $item_id ); ?>"
-						>
-							<span class="wc-block-product-filter-checkbox-list__input-wrapper">
-								<input
-									id="<?php echo esc_attr( $item_id ); ?>"
-									class="wc-block-product-filter-checkbox-list__input"
-									type="checkbox"
-									aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
-									data-wp-on--change="actions.toggleFilter"
-									value="<?php echo esc_attr( $item['value'] ); ?>"
-									data-wp-bind--checked="state.isFilterSelected"
-									<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								>
-								<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-								</svg>
-							</span>
-							<span class="wc-block-product-filter-checkbox-list__text-wrapper">
-								<span class="wc-block-product-filter-checkbox-list__text">
-									<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<?php if ( $show_counts ) : ?>
-									<span class="wc-block-product-filter-checkbox-list__count">
-										(<?php echo esc_html( $item['count'] ); ?>)
-									</span>
+			<fieldset>
+				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
+				<?php endif; ?>
+				<div class="wc-block-product-filter-checkbox-list__item">
+					<?php foreach ( $items as $item ) { ?>
+						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
+						<div
+							data-wp-key="<?php echo esc_attr( $item_id ); ?>"
+							class="wc-block-product-filter-checkbox-list__item"
+							<?php if ( ! $item['selected'] ) : ?>
+								<?php if ( $count >= $remaining_initial_unchecked ) : ?>
+									data-wp-bind--hidden="!context.showAll"
+									hidden
+								<?php else : ?>
+									<?php ++$count; ?>
 								<?php endif; ?>
-							</span>
-						</label>
-					</li>
-				<?php } ?>
-			</ul>
-			<?php if ( count( $items ) > $show_initially ) : ?>
-				<button
-					class="wc-block-product-filter-checkbox-list__show-more"
-					data-wp-bind--hidden="context.showAll"
-					data-wp-on--click="actions.showAllListItems"
-					hidden
-				>
-					<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
-				</button>
-			<?php endif; ?>
+							<?php endif; ?>
+						>
+							<label
+								class="wc-block-product-filter-checkbox-list__label"
+								for="<?php echo esc_attr( $item_id ); ?>"
+							>
+								<span class="wc-block-product-filter-checkbox-list__input-wrapper">
+									<input
+										id="<?php echo esc_attr( $item_id ); ?>"
+										class="wc-block-product-filter-checkbox-list__input"
+										type="checkbox"
+										aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
+										data-wp-on--change="actions.toggleFilter"
+										value="<?php echo esc_attr( $item['value'] ); ?>"
+										data-wp-bind--checked="state.isFilterSelected"
+										<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									>
+									<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</span>
+								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
+									<span class="wc-block-product-filter-checkbox-list__text">
+										<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</span>
+									<?php if ( $show_counts ) : ?>
+										<span class="wc-block-product-filter-checkbox-list__count">
+											(<?php echo esc_html( $item['count'] ); ?>)
+										</span>
+									<?php endif; ?>
+								</span>
+							</label>
+						</div>
+					<?php } ?>
+				</div>
+				<?php if ( count( $items ) > $show_initially ) : ?>
+					<button
+						class="wc-block-product-filter-checkbox-list__show-more"
+						data-wp-bind--hidden="context.showAll"
+						data-wp-on--click="actions.showAllListItems"
+						hidden
+					>
+						<?php echo esc_html__( 'Show more…', 'woocommerce' ); ?>
+					</button>
+				<?php endif; ?>
+			</fieldset>
 		</div>
 		<?php
 		return ob_get_clean();

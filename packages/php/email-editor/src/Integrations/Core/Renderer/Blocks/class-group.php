@@ -8,8 +8,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -17,14 +18,14 @@ use WP_Style_Engine;
  */
 class Group extends Abstract_Block_Renderer {
 	/**
-	 * Renders the block content.
+	 * Renders the block content
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content      = '';
 		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
 
@@ -35,18 +36,18 @@ class Group extends Abstract_Block_Renderer {
 		return str_replace(
 			'{group_content}',
 			$content,
-			$this->get_block_wrapper( $block_content, $parsed_block, $settings_controller )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Returns the block wrapper.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function get_block_wrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function get_block_wrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 		$block_attributes   = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
@@ -64,9 +65,9 @@ class Group extends Abstract_Block_Renderer {
 			array(
 				'color'      => array_filter(
 					array(
-						'background' => $block_attributes['backgroundColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-						'border'     => $block_attributes['borderColor'] ? $settings_controller->translate_slug_to_color( $block_attributes['borderColor'] ) : null,
+						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
+						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
+						'border'     => $block_attributes['borderColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] ) : null,
 					)
 				),
 				'background' => $block_attributes['style']['background'] ?? array(),
@@ -87,20 +88,18 @@ class Group extends Abstract_Block_Renderer {
 		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
 		$width                           = $parsed_block['email_attrs']['width'] ?? '100%';
 
-		return sprintf(
-			'<table class="email-block-group %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tbody>
-          <tr>
-            <td class="email-block-group-content" style="%2$s" width="%4$s">
-              {group_content}
-            </td>
-          </tr>
-        </tbody>
-      </table>',
-			esc_attr( WP_Style_Engine::compile_css( $table_styles, '' ) ),
-			esc_attr( WP_Style_Engine::compile_css( $cell_styles, '' ) ),
-			esc_attr( $original_classname ),
-			esc_attr( $width ),
+		$table_attrs = array(
+			'class' => 'email-block-group ' . $original_classname,
+			'style' => WP_Style_Engine::compile_css( $table_styles, '' ),
+			'width' => '100%',
 		);
+
+		$cell_attrs = array(
+			'class' => 'email-block-group-content',
+			'style' => WP_Style_Engine::compile_css( $cell_styles, '' ),
+			'width' => $width,
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( '{group_content}', $table_attrs, $cell_attrs );
 	}
 }

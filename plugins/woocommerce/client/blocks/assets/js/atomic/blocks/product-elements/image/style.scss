@@ -66,8 +66,6 @@
 }
 
 .wc-block-components-product-image {
-	margin: 0 0 $gap-small;
-
 	&__inner-container {
 		display: flex;
 		flex-direction: column;
@@ -77,7 +75,6 @@
 		left: 0;
 		right: 0;
 		top: 0;
-		z-index: 1;
 	}
 }
 

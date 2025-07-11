@@ -4,6 +4,8 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -331,6 +333,53 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertEquals( 'original_value', $data['created_via'] );
+	}
+
+	/**
+	 * Describes the behavior of order creation (and updates) when the provided customer ID is valid
+	 * as well as when it is invalid (ie, the customer does not belong to the current blog).
+	 *
+	 * @return void
+	 */
+	public function test_valid_and_invalid_customer_ids(): void {
+		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
+		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_a->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$order_id = $response->get_data()['id'];
+		$this->assertEquals( 201, $response->get_status(), 'The order was created.' );
+		$this->assertEquals( $customer_a->get_id(), $response->get_data()['customer_id'], 'The order is associated with the expected customer' );
+
+		// Simulate a multisite network in which $customer_b is not a member of the blog.
+		$legacy_proxy_mock = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy_mock->register_function_mocks(
+			array(
+				'is_multisite'           => function () {
+					return true;
+				},
+				'is_user_member_of_blog' => function () {
+					return false;
+				},
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not created, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
+
+		// Repeat the last test, except by performing an order update (instead of order creation).
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
 	}
 
 	/**
