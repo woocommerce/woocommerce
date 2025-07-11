@@ -218,16 +218,22 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
 		const quantityInput = screen.getByLabelText(
 			`Quantity of ${ itemName } in your cart.`
 		);
-		expect( quantityInput.value ).toBe( '2' );
+
+		await waitFor( () => {
+			expect( quantityInput.value ).toBe( '2' );
+		} );
 
 		act( () => {
 			dispatch( storeKey ).receiveCart( cart );
 		} );
 
-		expect( quantityInput.value ).toBe( '5' );
+		await waitFor( () => {
+			expect( quantityInput.value ).toBe( '5' );
+		} );
 
 		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
 		expect( console ).toHaveErrored();

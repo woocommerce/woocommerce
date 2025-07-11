@@ -23,6 +23,7 @@ interface Context {
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
+	inTheCartText: string;
 }
 
 enum AnimationStatus {
@@ -76,6 +77,7 @@ const productButtonStore = {
 				productType,
 				groupedProductIds,
 				hasPressedButton,
+				inTheCartText,
 			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -100,16 +102,13 @@ const productButtonStore = {
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
 					hasPressedButton
 				) {
-					return state.inTheCartText;
+					return inTheCartText;
 				}
 				return addToCartText;
 			}
 
 			if ( quantity > 0 ) {
-				return state.inTheCartText.replace(
-					'###',
-					quantity.toString()
-				);
+				return inTheCartText.replace( '###', quantity.toString() );
 			}
 
 			return addToCartText;
@@ -195,9 +194,13 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
+			// We skip the animation altogether if the single product page Add to Cart + Options form is invalid.
+
 			if (
 				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE
+				context.animationStatus === AnimationStatus.IDLE &&
+				( addToCartWithOptionsState?.isFormValid === undefined ||
+					addToCartWithOptionsState?.isFormValid )
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}

@@ -27,7 +27,8 @@
 	},
 	"attributes": {
 		"label": {
-			"type": "string"
+			"type": "string",
+			"default": ""
 		}
 	},
 	"parent": [ "woocommerce/mini-cart-title-block" ],

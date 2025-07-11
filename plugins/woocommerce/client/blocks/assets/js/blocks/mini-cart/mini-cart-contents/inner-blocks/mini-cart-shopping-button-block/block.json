@@ -26,6 +26,10 @@
 				"remove": false,
 				"move": false
 			}
+		},
+		"startShoppingButtonLabel": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"styles": [

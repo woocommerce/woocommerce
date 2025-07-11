@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes schema mismatch between client and server for additional fields that caused unexpected results.
