@@ -39,13 +39,17 @@ class MiniCartItemsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class'    => 'wc-block-mini-cart__items',
+				'tabindex' => '-1',
+			)
+		);
+
 		ob_start();
 		?>
-		<div data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>" class="wp-block-woocommerce-mini-cart-items-block wc-block-mini-cart__items" tabindex="-1">
-			<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo $content;
-			?>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<?php
 		return ob_get_clean();

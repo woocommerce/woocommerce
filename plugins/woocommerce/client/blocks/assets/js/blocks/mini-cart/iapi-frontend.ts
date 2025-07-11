@@ -193,7 +193,7 @@ store< MiniCart >(
 );
 
 const { state: cartItemState } = store(
-	'woocommerce/mini-cart-items-block',
+	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to
