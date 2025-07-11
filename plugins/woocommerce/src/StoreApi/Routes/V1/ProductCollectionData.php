@@ -169,14 +169,7 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
-			$taxonomies = [];
-
-			foreach ( $request['calculate_taxonomy_counts'] as $taxonomy_to_count ) {
-				if ( ! empty( $taxonomy_to_count['taxonomy'] ) ) {
-					$taxonomies[] = $taxonomy_to_count['taxonomy'];
-				}
-			}
-
+			$taxonomies = $request['calculate_taxonomy_counts'];
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
@@ -248,15 +241,8 @@ class ProductCollectionData extends AbstractRoute {
 			'description' => __( 'If requested, calculates taxonomy term counts for products in the collection.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => [
-				'type'       => 'object',
-				'properties' => [
-					'taxonomy'   => [
-						'description' => __( 'Taxonomy name.', 'woocommerce' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-						'readonly'    => true,
-					],
-				],
+				'type'        => 'string',
+				'description' => __( 'Taxonomy name.', 'woocommerce' ),
 			],
 			'default'     => [],
 		];

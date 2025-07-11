@@ -194,11 +194,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
 		$request->set_param(
 			'calculate_taxonomy_counts',
-			array(
-				array(
-					'taxonomy' => 'product_cat',
-				),
-			)
+			array( 'product_cat' )
 		);
 
 		$response = rest_get_server()->dispatch( $request );
@@ -237,14 +233,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
 		$request->set_param(
 			'calculate_taxonomy_counts',
-			array(
-				array(
-					'taxonomy' => 'product_cat',
-				),
-				array(
-					'taxonomy' => 'product_tag',
-				),
-			)
+			array( 'product_cat', 'product_tag' )
 		);
 
 		$response = rest_get_server()->dispatch( $request );
@@ -303,11 +292,7 @@ class ProductCollectionData extends ControllerTestCase {
 		$request->set_param( 'calculate_rating_counts', true );
 		$request->set_param(
 			'calculate_taxonomy_counts',
-			array(
-				array(
-					'taxonomy' => 'product_cat',
-				),
-			)
+			array( 'product_cat' )
 		);
 		$response = rest_get_server()->dispatch( $request );
 		$validate = new ValidateSchema( $schema );
