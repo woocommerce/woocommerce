@@ -90,7 +90,7 @@ $border-width: 1px;
 	.wc-block-components-title.wc-block-components-express-payment__title {
 		flex-grow: 0;
 		transform: translateY(-50%);
-		@include font-size(smaller);
+		font-size: 14px;
 	}
 
 	.wc-block-components-express-payment__content {
@@ -144,7 +144,7 @@ $border-width: 1px;
 	align-items: center;
 	text-align: center;
 	margin: $gap-large 0;
-	@include font-size(smaller);
+	font-size: 14px;
 
 	&::before {
 		margin-right: 10px;
