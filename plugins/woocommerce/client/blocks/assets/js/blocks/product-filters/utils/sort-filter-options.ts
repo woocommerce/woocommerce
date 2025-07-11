@@ -6,7 +6,7 @@ import type { FilterOptionItem } from '../types';
 /**
  * Sorts filter options based on the specified sort order
  *
- * @param options - Array of filter option items to sort
+ * @param options   - Array of filter option items to sort
  * @param sortOrder - Sort order (name-asc, name-desc, count-asc, count-desc)
  * @return Sorted array of filter option items
  */
