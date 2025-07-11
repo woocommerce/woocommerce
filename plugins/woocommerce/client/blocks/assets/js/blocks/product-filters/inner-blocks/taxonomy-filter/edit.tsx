@@ -9,6 +9,10 @@ import {
 import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { objectHasProp } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -22,37 +26,130 @@ import type { FilterOptionItem } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
+import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
 
-	const { taxonomy, isPreview, displayStyle, showCounts, sortOrder } =
-		blockAttributes;
+	const {
+		taxonomy,
+		isPreview,
+		displayStyle,
+		showCounts,
+		sortOrder,
+		hideEmpty,
+	} = blockAttributes;
 
-	// For now, use fake data - will be replaced with real taxonomy data later
 	const [ termOptions, setTermOptions ] = useState< FilterOptionItem[] >(
 		[]
 	);
 	const [ isOptionsLoading, setIsOptionsLoading ] =
 		useState< boolean >( true );
 
+	// Fetch taxonomy terms using WordPress core data
+	const { taxonomyTerms, isTermsLoading } = useSelect(
+		( select ) => {
+			if ( ! taxonomy || isPreview ) {
+				return { taxonomyTerms: [], isTermsLoading: false };
+			}
+
+			const { getEntityRecords, hasFinishedResolution } =
+				select( coreStore );
+			const selectorArgs = [
+				'taxonomy',
+				taxonomy,
+				{
+					per_page: -1,
+					hide_empty: hideEmpty,
+					orderby: 'name',
+					order: 'asc',
+				},
+			];
+
+			return {
+				taxonomyTerms: getEntityRecords( ...selectorArgs ) || [],
+				isTermsLoading: ! hasFinishedResolution(
+					'getEntityRecords',
+					selectorArgs
+				),
+			};
+		},
+		[ taxonomy, hideEmpty, isPreview ]
+	);
+
+	// Fetch taxonomy counts using the updated useCollectionData hook
+	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
+		useCollectionData( {
+			queryTaxonomy: taxonomy,
+			queryState: {},
+			isEditor: true,
+		} );
+
 	useEffect( () => {
-		setTermOptions( [
-			...termOptionsPreview.sort( ( a, b ) => {
-				switch ( sortOrder ) {
-					case 'name-asc':
-						return a.value > b.value ? 1 : -1;
-					case 'name-desc':
-						return a.value < b.value ? 1 : -1;
-					case 'count-asc':
-						return a.count > b.count ? 1 : -1;
-					default:
-						return a.count < b.count ? 1 : -1;
+		if ( isPreview ) {
+			// Use preview data for preview mode
+			setTermOptions(
+				sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
+			);
+			setIsOptionsLoading( false );
+			return;
+		}
+
+		if ( isTermsLoading || isFilterCountsLoading ) {
+			setIsOptionsLoading( true );
+			return;
+		}
+
+		if ( ! taxonomy || ! taxonomyTerms.length ) {
+			setTermOptions( [] );
+			setIsOptionsLoading( false );
+			return;
+		}
+
+		// Get taxonomy counts from the API response
+		const taxonomyCounts =
+			objectHasProp( filteredCounts, 'taxonomy_counts' ) &&
+			Array.isArray( filteredCounts.taxonomy_counts )
+				? filteredCounts.taxonomy_counts
+				: [];
+
+		// Create a map for quick lookup of counts by term ID
+		const countsMap = new Map(
+			taxonomyCounts.map( ( item ) => [ item.term, item.count ] )
+		);
+
+		// Process the terms
+		const processedTerms = taxonomyTerms
+			.map( ( term ): FilterOptionItem | null => {
+				const count = countsMap.get( term.id ) || 0;
+
+				// If hideEmpty is true and count is 0, exclude this term
+				if ( hideEmpty && count === 0 ) {
+					return null;
 				}
-			} ),
-		] );
+
+				return {
+					label: term.name,
+					value: term.slug,
+					selected: false,
+					count,
+				};
+			} )
+			.filter( ( term ): term is FilterOptionItem => term !== null );
+
+		// Sort the processed terms
+		setTermOptions( sortFilterOptions( processedTerms, sortOrder ) );
 		setIsOptionsLoading( false );
-	}, [ sortOrder ] );
+	}, [
+		taxonomy,
+		taxonomyTerms,
+		filteredCounts,
+		sortOrder,
+		hideEmpty,
+		isPreview,
+		isTermsLoading,
+		isFilterCountsLoading,
+	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
@@ -79,6 +176,9 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
+	const isLoading =
+		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
+
 	if ( ! taxonomy )
 		return (
 			<div { ...innerBlocksProps }>
@@ -87,6 +187,21 @@ const Edit = ( props: EditProps ) => {
 					<p>
 						{ __(
 							'Please select a taxonomy to use this filter!',
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			</div>
+		);
+
+	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 )
+		return (
+			<div { ...innerBlocksProps }>
+				<TaxonomyFilterInspectorControls { ...props } />
+				<Notice>
+					<p>
+						{ __(
+							'There are no products with the selected taxonomy.',
 							'woocommerce'
 						) }
 					</p>
@@ -105,7 +220,7 @@ const Edit = ( props: EditProps ) => {
 								termOptions.length === 0 && isPreview
 									? termOptionsPreview
 									: termOptions,
-							isLoading: isOptionsLoading,
+							isLoading,
 							showCounts,
 						},
 					} }
