@@ -169,7 +169,7 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
-			$taxonomies = $request['calculate_taxonomy_counts'];
+			$taxonomies              = $request['calculate_taxonomy_counts'];
 			$data['taxonomy_counts'] = [];
 
 			if ( $taxonomies ) {
