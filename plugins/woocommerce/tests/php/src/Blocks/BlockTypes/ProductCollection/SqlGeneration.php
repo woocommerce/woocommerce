@@ -3,10 +3,10 @@
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
 use WC_Tax;
 use WP_Query;
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Tests for the ProductCollection block SQL generation and database optimization

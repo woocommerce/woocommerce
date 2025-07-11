@@ -3,8 +3,8 @@
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
-use WC_Helper_Product;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use WC_Helper_Product;
 
 /**
  * Tests for the ProductCollection block collection handlers
