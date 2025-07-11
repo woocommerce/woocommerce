@@ -243,7 +243,7 @@ class ProductQueryFilters {
 		// Get counts for each taxonomy individually.
 		foreach ( $taxonomies as $taxonomy ) {
 			$counts     = $filter_data->get_taxonomy_counts( $query_vars, $taxonomy );
-			$all_counts = array_merge( $all_counts, $counts );
+			$all_counts = $all_counts + $counts; // Use + operator to preserve keys
 		}
 
 		return $all_counts;
