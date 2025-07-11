@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  *
  * @group query-building
  */
-class ProductCollectionQueryBuilder extends \WP_UnitTestCase {
+class QueryBuilder extends \WP_UnitTestCase {
 	/**
 	 * This variable holds our Product Query object.
 	 *

@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  *
  * @group sql-generation
  */
-class ProductCollectionSqlGeneration extends \WP_UnitTestCase {
+class SqlGeneration extends \WP_UnitTestCase {
 	/**
 	 * This variable holds our Product Query object.
 	 *

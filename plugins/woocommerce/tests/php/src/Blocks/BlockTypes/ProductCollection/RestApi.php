@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  *
  * @group rest-api
  */
-class ProductCollectionRestApi extends \WP_UnitTestCase {
+class RestApi extends \WP_UnitTestCase {
 	/**
 	 * This variable holds our Product Query object.
 	 *

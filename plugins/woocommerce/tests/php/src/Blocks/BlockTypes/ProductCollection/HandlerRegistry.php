@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  *
  * @group handlers
  */
-class ProductCollectionHandlers extends \WP_UnitTestCase {
+class HandlerRegistry extends \WP_UnitTestCase {
 	/**
 	 * This variable holds our Product Query object.
 	 *
