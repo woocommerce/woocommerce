@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 
 /**
  * Partner payments extension suggestions provider class.
+ *
+ * @internal
  */
 class PaymentsExtensionSuggestions {
 	/*

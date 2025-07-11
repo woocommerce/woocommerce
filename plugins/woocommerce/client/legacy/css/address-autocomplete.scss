@@ -57,7 +57,8 @@
 
 	// Search icon styles
 	&.autocomplete-available {
-		input#billing_address_1, input#shipping_address_1 {
+		input#billing_address_1,
+		input#shipping_address_1 {
 			padding-right: calc(1.1rem + 16px); // Adjust padding for icon
 		}
 
@@ -75,11 +76,13 @@
 
 			// Mask needed to ensure the SVG has the correct color.
 			background-color: var(--wc-form-color-text, #444);
-			mask: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==') no-repeat center;
+			mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==")
+				no-repeat center;
 			mask-size: contain;
 
 			// Safari support.
-			-webkit-mask: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==') no-repeat center;
+			-webkit-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==")
+				no-repeat center;
 			-webkit-mask-size: contain;
 		}
 	}

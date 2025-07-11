@@ -10,6 +10,8 @@ use Exception;
 defined( 'ABSPATH' ) || exit;
 /**
  * Payments settings service class.
+ *
+ * @internal
  */
 class Payments {
 
