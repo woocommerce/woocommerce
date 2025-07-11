@@ -42,7 +42,7 @@ skipped=()
 echo -n "Looking up repositories (${#repositories[@]}): "
 for repository in ${repositories[@]}; do
 	repository=${repository%/}
-	match=$( ( gh workflow list --json path --jq '.[].path' --repo $repository | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml)' | wc -l | tr -d '[:space:]' ) || echo '0' )
+	match=$( ( gh workflow list --json path --jq '.[].path' --repo $repository | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml|manual_qit.yml)' | wc -l | tr -d '[:space:]' ) || echo '0' )
 	if [[ $match == '1' ]]; then
 		filtered+=( $repository )
 	else
@@ -67,7 +67,7 @@ for repository in ${filtered[@]}; do
 	echo -n "    -- ${repository##*/} :"
 
 	# Report identified workflow details.
-	workflow=$( gh workflow list --json path,id --repo $repository | jq --compact-output '.[]' | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml)' )
+	workflow=$( gh workflow list --json path,id --repo https://github.com/woocommerce/woocommerce-gateway-stripe | jq --compact-output '.[]' | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml|manual_qit.yml)' )
 	workflow_path=$( echo $workflow | jq --raw-output '( .path )' )
 	workflow_id=$( echo $workflow | jq --raw-output '( .id )' )
 	echo -n " workflow ${workflow_path} (#${workflow_id})"
