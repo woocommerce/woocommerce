@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
@@ -19,37 +20,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
-	 * Return starting point for parsed block test data.
-	 * Using a method instead of property to avoid sharing data between tests.
-	 */
-	private function get_base_parsed_block() {
-		return array(
-			'blockName' => 'woocommerce/product-collection',
-			'attrs'     => array(
-				'query' => array(
-					'perPage'                  => 9,
-					'pages'                    => 0,
-					'offset'                   => 0,
-					'postType'                 => 'product',
-					'order'                    => 'desc',
-					'orderBy'                  => 'date',
-					'search'                   => '',
-					'exclude'                  => array(),
-					'sticky'                   => '',
-					'inherit'                  => true,
-					'isProductCollectionBlock' => true,
-					'woocommerceAttributes'    => array(),
-					'woocommerceStockStatus'   => array(
-						ProductStockStatus::IN_STOCK,
-						ProductStockStatus::OUT_OF_STOCK,
-						ProductStockStatus::ON_BACKORDER,
-					),
-				),
-			),
-		);
-	}
-
-	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
@@ -64,7 +34,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
 		if ( empty( $parsed_block ) ) {
-			$parsed_block = $this->get_base_parsed_block();
+			$parsed_block = Utils::get_base_parsed_block();
 		}
 
 		$this->block_instance->set_parsed_block( $parsed_block );
@@ -79,7 +49,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging featured queries.
 	 */
 	public function test_merging_featured_queries() {
-		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block                               = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['featured'] = true;
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -103,7 +73,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$on_sale_product_ids = array( 1, 2, 3, 4 );
 		set_transient( 'wc_products_onsale', $on_sale_product_ids, DAY_IN_SECONDS * 30 );
 
-		$parsed_block                                        = $this->get_base_parsed_block();
+		$parsed_block                                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -121,7 +91,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging stock status queries.
 	 */
 	public function test_merging_stock_status_queries() {
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
 			ProductStockStatus::OUT_OF_STOCK,
 			ProductStockStatus::ON_BACKORDER,
@@ -144,7 +114,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * queries instead of meta query for stock status.
 	 */
 	public function test_merging_default_stock_queries() {
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
 			ProductStockStatus::IN_STOCK,
 			ProductStockStatus::OUT_OF_STOCK,
@@ -156,7 +126,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$this->assertEmpty( $merged_query['meta_query'] );
 
 		// Test with hide out of stock items option enabled.
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
 			ProductStockStatus::IN_STOCK,
 			ProductStockStatus::ON_BACKORDER,
@@ -171,7 +141,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging attribute queries.
 	 */
 	public function test_merging_attribute_queries() {
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceAttributes'] = array(
 			array(
 				'taxonomy' => 'pa_test',
@@ -214,7 +184,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging order by rating queries.
 	 */
 	public function test_merging_order_by_rating_queries() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -230,7 +200,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
 
@@ -249,7 +219,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging multiple queries.
 	 */
 	public function test_merging_multiple_queries() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 		$parsed_block['attrs']['query']['woocommerceStockStatus'] = array(
 			ProductStockStatus::IN_STOCK,
@@ -395,7 +365,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_merging_time_frame_before_queries() {
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 
-		$parsed_block                                = $this->get_base_parsed_block();
+		$parsed_block                                = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['timeFrame'] = array(
 			'operator' => 'not-in',
 			'value'    => $time_frame_date,
@@ -419,7 +389,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_merging_time_frame_after_queries() {
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 
-		$parsed_block                                = $this->get_base_parsed_block();
+		$parsed_block                                = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['timeFrame'] = array(
 			'operator' => 'in',
 			'value'    => $time_frame_date,
@@ -599,7 +569,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test that price range queries are set so they can be picked up in the `posts_clauses` filter.
 	 */
 	public function test_price_range_queries() {
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 1,
 			'max' => 100,
@@ -622,7 +592,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_handpicked_products_queries() {
 		$handpicked_product_ids = array( 1, 2, 3, 4 );
 
-		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -643,7 +613,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		// The only ID present in ALL of the exclusive filters is 4.
 		$expected_product_ids = array( 4 );
 
-		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block                               = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
@@ -663,7 +633,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$existing_id_filter     = array( 1, 4 );
 		$handpicked_product_ids = array( 2, 3 );
 
-		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block                               = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
@@ -676,7 +646,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test the menu_order sorting functionality.
 	 */
 	public function test_menu_order_sorting() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		$parsed_block['attrs']['query']['order']   = 'asc';
 		$merged_query                              = $this->initialize_merged_query( $parsed_block );
@@ -689,7 +659,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test the random sorting functionality.
 	 */
 	public function test_random_sorting() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'random';
 		$merged_query                              = $this->initialize_merged_query( $parsed_block );
 

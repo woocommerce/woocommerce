@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
 
 /**
@@ -18,37 +18,6 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	 * @var ProductCollectionMock
 	 */
 	private $block_instance;
-
-	/**
-	 * Return starting point for parsed block test data.
-	 * Using a method instead of property to avoid sharing data between tests.
-	 */
-	private function get_base_parsed_block() {
-		return array(
-			'blockName' => 'woocommerce/product-collection',
-			'attrs'     => array(
-				'query' => array(
-					'perPage'                  => 9,
-					'pages'                    => 0,
-					'offset'                   => 0,
-					'postType'                 => 'product',
-					'order'                    => 'desc',
-					'orderBy'                  => 'date',
-					'search'                   => '',
-					'exclude'                  => array(),
-					'sticky'                   => '',
-					'inherit'                  => true,
-					'isProductCollectionBlock' => true,
-					'woocommerceAttributes'    => array(),
-					'woocommerceStockStatus'   => array(
-						ProductStockStatus::IN_STOCK,
-						ProductStockStatus::OUT_OF_STOCK,
-						ProductStockStatus::ON_BACKORDER,
-					),
-				),
-			),
-		);
-	}
 
 	/**
 	 * Build a simplified request for testing.
@@ -94,7 +63,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	 */
 	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
 		if ( empty( $parsed_block ) ) {
-			$parsed_block = $this->get_base_parsed_block();
+			$parsed_block = Utils::get_base_parsed_block();
 		}
 
 		$this->block_instance->set_parsed_block( $parsed_block );
@@ -137,7 +106,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				}
 			);
 
-		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'test-collection';
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
@@ -261,7 +230,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
 
 		// Frontend.
-		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/related';
 		$parsed_block['attrs']['query']['productReference'] = 1;
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
@@ -295,7 +264,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$test_product->save();
 
 		// Frontend.
-		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/upsells';
 		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
@@ -326,7 +295,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$test_product->save();
 
 		// Frontend.
-		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/cross-sells';
 		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
@@ -352,7 +321,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	 */
 	public function test_collection_hand_picked_empty() {
 		// Frontend.
-		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array();
 		$result_frontend = $this->initialize_merged_query( $parsed_block );
@@ -380,7 +349,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$product_ids = array( 4, 2, 7, 1 );
 
 		// Frontend.
-		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $product_ids;
 		$result_frontend = $this->initialize_merged_query( $parsed_block );

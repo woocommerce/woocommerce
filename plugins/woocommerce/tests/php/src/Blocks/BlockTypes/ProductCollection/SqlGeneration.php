@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
 use WC_Tax;
 use WP_Query;
@@ -20,37 +20,6 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * @var ProductCollectionMock
 	 */
 	private $block_instance;
-
-	/**
-	 * Return starting point for parsed block test data.
-	 * Using a method instead of property to avoid sharing data between tests.
-	 */
-	private function get_base_parsed_block() {
-		return array(
-			'blockName' => 'woocommerce/product-collection',
-			'attrs'     => array(
-				'query' => array(
-					'perPage'                  => 9,
-					'pages'                    => 0,
-					'offset'                   => 0,
-					'postType'                 => 'product',
-					'order'                    => 'desc',
-					'orderBy'                  => 'date',
-					'search'                   => '',
-					'exclude'                  => array(),
-					'sticky'                   => '',
-					'inherit'                  => true,
-					'isProductCollectionBlock' => true,
-					'woocommerceAttributes'    => array(),
-					'woocommerceStockStatus'   => array(
-						ProductStockStatus::IN_STOCK,
-						ProductStockStatus::OUT_OF_STOCK,
-						ProductStockStatus::ON_BACKORDER,
-					),
-				),
-			),
-		);
-	}
 
 	/**
 	 * Build a simplified request for testing.
@@ -96,7 +65,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 */
 	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
 		if ( empty( $parsed_block ) ) {
-			$parsed_block = $this->get_base_parsed_block();
+			$parsed_block = Utils::get_base_parsed_block();
 		}
 
 		$this->block_instance->set_parsed_block( $parsed_block );
@@ -111,7 +80,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Tests that empty price range clauses are not added to the query.
 	 */
 	public function test_price_range_clauses_empty() {
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 0,
 			'max' => 0,
@@ -137,7 +106,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Tests that the minimum in a price range is added if set.
 	 */
 	public function test_price_range_clauses_min_price() {
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 1,
 		);
@@ -160,7 +129,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Tests that the maximum in a price range is added if set.
 	 */
 	public function test_price_range_clauses_max_price() {
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'max' => 1,
 		);
@@ -183,7 +152,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Tests that the both the minimum and maximum in a price range is added if set.
 	 */
 	public function test_price_range_clauses_min_max_price() {
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 1,
 			'max' => 2,
@@ -212,7 +181,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 1,
 			'max' => 2,
@@ -249,7 +218,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$product->set_tax_class( 'collection-test' );
 		$product->save();
 
-		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block                                 = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['priceRange'] = array(
 			'min' => 1,
 			'max' => 2,
@@ -280,7 +249,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Test the add_price_sorting_posts_clauses method.
 	 */
 	public function test_add_price_sorting_posts_clauses() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'price';
 
 		$parsed_block['attrs']['query']['order'] = 'asc';
@@ -300,7 +269,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Test the add_sales_sorting_posts_clauses method.
 	 */
 	public function test_add_sales_sorting_posts_clauses() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'sales';
 
 		$parsed_block['attrs']['query']['order'] = 'asc';
@@ -335,7 +304,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$product3->set_name( 'Beanie' );
 		$product3->save();
 
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		$parsed_block['attrs']['query']['order']   = 'asc';
 		$parsed_block['attrs']['query']['perPage'] = 10;
@@ -522,7 +491,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 	 * Tests that menu_order sorting generates correct SQL clauses with title fallback.
 	 */
 	public function test_menu_order_sql_clauses_with_title_fallback() {
-		$parsed_block                              = $this->get_base_parsed_block();
+		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		unset( $parsed_block['attrs']['query']['order'] );
 
