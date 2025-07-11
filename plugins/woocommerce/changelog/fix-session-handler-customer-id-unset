@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Restore previous behaviour where init_session_cookie will create a new customer_id if no cookie exists.
+
+
