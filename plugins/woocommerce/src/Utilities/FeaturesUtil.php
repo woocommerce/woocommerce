@@ -55,6 +55,9 @@ class FeaturesUtil {
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 */
 	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
+		if ( ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron() && ! wp_is_json_request() && ! defined( 'WP_CLI' ) ) {
+			return true; // Pretend success; compatibility isn't used on frontend anyway. This avoids disk access.
+		}
 		$plugin_id = wc_get_container()->get( PluginUtil::class )->get_wp_plugin_id( $plugin_file );
 
 		if ( ! $plugin_id ) {
