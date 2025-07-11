@@ -112,11 +112,18 @@ class Params implements FilterUrlParam {
 			'objects'
 		);
 
-		$params = array();
-		foreach ( $public_product_taxonomies as $taxonomy ) {
-			$params[ $taxonomy->name ] = "filter_$taxonomy->name";
-		}
+		// We have control over built-in taxonomies, so we can use prettier names.
+		$map = array(
+			'product_cat'   => 'categories',
+			'product_tag'   => 'tags',
+			'product_brand' => 'brands',
+		);
 
-		return $params;
+		return array_map(
+			function ( $taxonomy ) use ( $map ) {
+				return $map[ $taxonomy->name ] ?? "filter_$taxonomy->name";
+			},
+			$public_product_taxonomies
+		);
 	}
 }
