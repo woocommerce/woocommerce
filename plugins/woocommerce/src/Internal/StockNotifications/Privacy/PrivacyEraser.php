@@ -69,6 +69,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			$notification->set_cancellation_source( NotificationCancellationSource::USER );
 			$notification->set_date_cancelled( current_time( 'mysql' ) );
 			$notification->update_meta_data( '_anonymized', 'yes' );
+			$notification->update_meta_data( 'email_link_action_key', '' );
 			$notification->save();
 			$response['messages'][] = sprintf(
 			/* translators: %d the numeric product ID */

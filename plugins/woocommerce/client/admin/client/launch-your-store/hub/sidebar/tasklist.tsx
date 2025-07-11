@@ -22,6 +22,8 @@ import {
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -144,16 +146,26 @@ export function taskClickedAction( event: {
 			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
 			( ( ! wooPaymentsIsActive &&
 				! wooPaymentsHasOtherProvidersEnabled ) ||
-				// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
+				// Use case 2: Merchant has the WooPayments extension installed, but they have not completed setup.
 				( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
 				// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
 				( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
-				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.)
+				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
 				( wooPaymentsIsActive &&
 					wooPaymentsHasOtherProvidersNeedSetup ) )
 		) {
+			// Record the "modal" being opened to keep consistency with the Payments Settings flow.
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'lys_sidebar_task',
+					source: wooPaymentsOnboardingSessionEntryLYS,
+				}
+			);
+
 			return { type: 'SHOW_PAYMENTS' };
 		}
+		// Otherwise, we navigate to the task's action URL - this will generally be the Payments Settings page.
 	}
 
 	if ( event.task.actionUrl ) {

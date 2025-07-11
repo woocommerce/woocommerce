@@ -20,8 +20,8 @@ class DataRetentionController {
 	 */
 	public function __construct() {
 		add_action( self::DAILY_TASK_HOOK, array( $this, 'do_wc_customer_stock_notifications_daily' ) );
-		add_action( 'update_option_wc_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
-		add_action( 'add_option_wc_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		add_action( 'update_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
+		add_action( 'add_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'schedule_or_unschedule_daily_task' ), 10, 2 );
 		register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'clear_daily_task' ) );
 	}
 
