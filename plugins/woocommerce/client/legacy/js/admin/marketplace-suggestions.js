@@ -18,10 +18,11 @@
 
 		// Helper function to construct admin URLs similar to getAdminLink from @woocommerce/settings
 		function getAdminLink( path ) {
-			if ( ! marketplace_suggestions.admin_base_url || ! path ) {
+			if ( ! marketplace_suggestions.admin_base_url || ! path || typeof path !== 'string' ) {
 				return '';
 			}
-			return marketplace_suggestions.admin_base_url + path;
+			var cleanPath = path.charAt(0) === '/' ? path.slice(1) : path;
+			return marketplace_suggestions.admin_base_url + cleanPath;
 		}
 
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.

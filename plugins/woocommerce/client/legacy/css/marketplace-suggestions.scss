@@ -106,7 +106,7 @@ a.suggestion-dismiss::before {
 			flex: 1 1 30%;
 			min-width: 160px;
 			text-align: right;
-			text-wrap: nowrap;
+			white-space: nowrap;
 
 			.suggestion-dismiss {
 				text-decoration: none;
