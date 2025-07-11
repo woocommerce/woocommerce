@@ -55,23 +55,7 @@ async function setup( attributes: BlockAttributes ) {
 			name: 'woocommerce/product-filter-taxonomy',
 			attributes: {
 				...attributes,
-				// Enable preview mode for UI tests
 				isPreview: true,
-			},
-		},
-	];
-	return initializeEditor( testBlock );
-}
-
-// Helper function for tests that need to test real data behavior
-async function setupRealData( attributes: BlockAttributes ) {
-	const testBlock = [
-		{
-			name: 'woocommerce/product-filter-taxonomy',
-			attributes: {
-				...attributes,
-				// Disable preview mode for real data tests
-				isPreview: false,
 			},
 		},
 	];
