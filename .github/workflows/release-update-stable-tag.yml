@@ -81,6 +81,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            function getNextVersion(version) {
+              const [major, minor] = version.split('.').map(Number);
+              return minor < 9
+                ? `${major}.${minor + 1}`
+                : `${major + 1}.0`;
+            }
+
             const targetVersion = '${{ steps.extract-version.outputs.version }}';
             const trunkVersion = '${{ steps.get-trunk-version.outputs.trunk-version }}';
 
@@ -90,9 +97,17 @@ jobs:
             const [targetMajor, targetMinor] = targetVersion.split('.').map(Number);
             const [trunkMajor, trunkMinor] = trunkVersion.split('.').map(Number);
 
+            if (targetMajor > trunkMajor || (targetMajor === trunkMajor && targetMinor > trunkMinor)) {
+              core.setFailed(`Target version ${targetVersion} is greater than trunk version ${trunkVersion}.`);
+              return;
+            }
+
             const branches = ['trunk'];
-            for (let v = Number(`${targetMajor}.${targetMinor}`); v < Number(`${trunkMajor}.${trunkMinor}`); v += 0.1) {
-              branches.push(`release/${v.toFixed(1)}`);
+
+            let version = targetVersion;
+            while ( version !== trunkVersion ) {
+              branches.push( `release/${ version }` );
+              version = getNextVersion( version );
             }
 
             console.log('Target branches:', branches);
