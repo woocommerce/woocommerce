@@ -92,7 +92,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			self::$products[] = wc_get_product( $child_product_id );
 		}
 		self::$products[] = $grouped_product;
-		$grouped_product  = wc_get_product( $grouped_product->get_id() );
 
 		foreach ( self::$products as $product ) {
 			$product->add_meta_data( 'test1', 'test1', true );

@@ -164,7 +164,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Get the minimum price from visible child products.
 	 *
 	 * @since 10.1.0
-	 * @return string|float Minimum price or empty string if no children
+	 * @return string Minimum price or empty string if no children
 	 */
 	public function get_min_price() {
 		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
@@ -181,7 +181,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Get the maximum price from visible child products.
 	 *
 	 * @since 10.1.0
-	 * @return string|float Maximum price or empty string if no children
+	 * @return string Maximum price or empty string if no children
 	 */
 	public function get_max_price() {
 		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
