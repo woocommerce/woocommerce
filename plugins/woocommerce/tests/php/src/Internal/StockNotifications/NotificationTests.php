@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
 
 /**
  * NotificationTests data tests.
@@ -123,5 +125,106 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 		$product_name = $notification->get_product_name();
 		$this->assertEquals( $variation_product->get_name(), $product_name );
+	}
+
+	/**
+	 * Test getting and checking unsubscribe key.
+	 */
+	public function test_get_and_check_unsubscribe_key() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_unsubscribe_key( false );
+		$this->assertIsString( $key );
+		$this->assertTrue( $notification->check_unsubscribe_key( $key ) );
+		$this->assertFalse( $notification->check_unsubscribe_key( 'invalid_key' ) );
+	}
+
+	/**
+	 * Test getting and checking verification key.
+	 */
+	public function test_get_and_check_verification_key() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_verification_key( false );
+		$this->assertIsString( $key );
+		$this->assertTrue( $notification->check_verification_key( $key ) );
+		$this->assertFalse( $notification->check_verification_key( 'invalid_key' ) );
+	}
+
+	/**
+	 * Test verification key persistence.
+	 */
+	public function test_verification_key_persistence() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_verification_key( false );
+		$this->assertIsString( $key );
+
+		// Refetch.
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertFalse( $notification->check_verification_key( $key ) );
+
+		// Re-create.
+		$key2 = $notification->get_verification_key( true );
+		$this->assertNotEquals( $key, $key2 );
+
+		// Refetch.
+		$notification = new Notification( $notification->get_id() );
+		$this->assertNotEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertTrue( $notification->check_verification_key( $key2 ) );
+	}
+
+	/**
+	 * Test persistance of the unsubscribe key.
+	 */
+	public function test_unsubscribe_key_persistence() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$key = $notification->get_unsubscribe_key( false );
+		$this->assertIsString( $key );
+
+		// Refetch.
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertFalse( $notification->check_unsubscribe_key( $key ) );
+
+		// Re-create.
+		$key2 = $notification->get_unsubscribe_key( true );
+		$this->assertNotEquals( $key, $key2 );
+
+		// Refetch.
+		$notification = new Notification( $notification->get_id() );
+		$this->assertNotEmpty( $notification->get_meta( 'email_link_action_key' ) );
+		$this->assertTrue( $notification->check_unsubscribe_key( $key2 ) );
+	}
+
+	/**
+	 * Test verification key expiration.
+	 */
+	public function test_verification_key_expiration() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		// Save a custom key.
+		$key = time() - Config::get_verification_expiration_time_threshold() - 1 . ':' . HasherHelper::wp_fast_hash( 'test' );
+		$notification->update_meta_data( 'email_link_action_key', $key );
+		$notification->save();
+
+		$this->assertFalse( $notification->check_verification_key( 'test' ) );
 	}
 }
