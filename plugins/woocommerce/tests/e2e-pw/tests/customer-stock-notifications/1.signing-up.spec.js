@@ -29,20 +29,19 @@ const { test, request } = require( '@playwright/test' );
 			await setOption(
 				request,
 				baseURL,
-				'wc_bis_account_required',
-				'no'
-			);
-			await setOption( request, baseURL, 'wc_bis_opt_in_required', 'no' );
-			await setOption(
-				request,
-				baseURL,
-				'wc_bis_double_opt_in_required',
+				'woocommerce_customer_stock_notifications_require_account',
 				'no'
 			);
 			await setOption(
 				request,
 				baseURL,
-				'wc_feature_woocommerce_back_in_stock_notifications_enabled',
+				'woocommerce_customer_stock_notifications_require_double_opt_in',
+				'no'
+			);
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customer_stock_notifications_allow_signups',
 				'yes'
 			);
 			helper = new AcceptanceHelper( baseURL, page );
