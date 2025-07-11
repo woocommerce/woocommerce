@@ -474,6 +474,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
+		// TRIGGER BLOCK E2E TESTS.
 		wp_enqueue_script_module( $this->get_full_block_name() );
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
