@@ -148,6 +148,7 @@ class WC_Product_Grouped extends WC_Product {
 		return $this->get_prop( 'children', $context );
 	}
 
+
 	/**
 	 * Return the product's children - visible only.
 	 *
@@ -157,6 +158,40 @@ class WC_Product_Grouped extends WC_Product {
 	public function get_visible_children() {
 		$grouped_products = array_map( 'wc_get_product', $this->get_children() );
 		return array_filter( $grouped_products, 'wc_products_array_filter_visible_grouped' );
+	}
+
+	/**
+	 * Get the minimum price from visible child products.
+	 *
+	 * @since 10.1.0
+	 * @return string|float Minimum price or empty string if no children
+	 */
+	public function get_min_price() {
+		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$min_price = array_map( 'wc_get_price_to_display', $children );
+
+		if ( empty( $min_price ) ) {
+			return '';
+		}
+
+		return (string) min( $min_price );
+	}
+
+	/**
+	 * Get the maximum price from visible child products.
+	 *
+	 * @since 10.1.0
+	 * @return string|float Maximum price or empty string if no children
+	 */
+	public function get_max_price() {
+		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$max_price = array_map( 'wc_get_price_to_display', $children );
+
+		if ( empty( $max_price ) ) {
+			return '';
+		}
+
+		return (string) max( $max_price );
 	}
 
 	/*
