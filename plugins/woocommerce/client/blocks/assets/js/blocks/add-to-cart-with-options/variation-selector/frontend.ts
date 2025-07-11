@@ -297,10 +297,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			setDefaultSelectedAttribute() {
-				const context = getContext< Context >();
+				const context = getContext< Context >(),
+					$form = $( 'form.wc-block-add-to-cart-with-options.cart' ),
+					$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
+					autoselectOnPageLoad =
+						$variation_selectors.first().data( 'autoselectOnPageLoad' ) ||
+						false;
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
+				}
+				if ( autoselectOnPageLoad ) {
+					const $target_variation_selector = $variation_selectors.has( `[name="${ context.name }"]` );
+					attributesAutoselect( $target_variation_selector );
 				}
 			},
 			setSelectedVariationId: () => {
