@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use WC_Helper_Product;
-use WP_Query;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
