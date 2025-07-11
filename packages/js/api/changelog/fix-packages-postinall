@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Remove PHP and Composer dependencies for packaged JS packages

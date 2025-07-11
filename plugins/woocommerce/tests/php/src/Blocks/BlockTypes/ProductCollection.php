@@ -1581,4 +1581,268 @@ class ProductCollection extends \WP_UnitTestCase {
 		$this->assertEquals( $product_ids, $result_frontend['post__in'] );
 		$this->assertEquals( $product_ids, $result_editor['post__in'] );
 	}
+
+	/**
+	 * Tests that the by-category collection handler works as expected.
+	 */
+	public function test_collection_by_category() {
+		$electronics_cat    = wp_create_term( 'Electronics', 'product_cat' );
+		$electronics_cat_id = $electronics_cat['term_id'];
+
+		$clothing_cat    = wp_create_term( 'Clothing', 'product_cat' );
+		$clothing_cat_id = $clothing_cat['term_id'];
+
+		$laptop = WC_Helper_Product::create_simple_product();
+		$laptop->set_name( 'Laptop' );
+		$laptop->save();
+
+		$phone = WC_Helper_Product::create_simple_product();
+		$phone->set_name( 'Phone' );
+		$phone->save();
+
+		$tshirt = WC_Helper_Product::create_simple_product();
+		$tshirt->set_name( 'T-Shirt' );
+		$tshirt->save();
+
+		$unassigned_product = WC_Helper_Product::create_simple_product();
+		$unassigned_product->set_name( 'Unassigned Product' );
+		$unassigned_product->save();
+
+		// Assign products to categories.
+		wp_set_object_terms( $laptop->get_id(), $electronics_cat_id, 'product_cat' );
+		wp_set_object_terms( $phone->get_id(), $electronics_cat_id, 'product_cat' );
+		wp_set_object_terms( $tshirt->get_id(), $clothing_cat_id, 'product_cat' );
+		// unassigned_product has no category.
+
+		// Test filtering by Electronics category - Frontend.
+		$merged_query = $this->initialize_merged_query(
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_cat',
+						'terms'            => array( $electronics_cat_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Should return laptop and phone (both in Electronics category).
+		$this->assertContains( $laptop->get_id(), $found_product_ids );
+		$this->assertContains( $phone->get_id(), $found_product_ids );
+		$this->assertNotContains( $tshirt->get_id(), $found_product_ids );
+		$this->assertNotContains( $unassigned_product->get_id(), $found_product_ids );
+
+		// Test filtering by Electronics category - Editor.
+		$args    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_cat',
+					'terms'            => array( $electronics_cat_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request = $this->build_request();
+
+		$updated_query    = $this->block_instance->update_rest_query_in_editor( $args, $request );
+		$editor_query     = new WP_Query( $updated_query );
+		$editor_found_ids = wp_list_pluck( $editor_query->posts, 'ID' );
+
+		// Should return laptop and phone in editor as well.
+		$this->assertContains( $laptop->get_id(), $editor_found_ids );
+		$this->assertContains( $phone->get_id(), $editor_found_ids );
+		$this->assertNotContains( $tshirt->get_id(), $editor_found_ids );
+		$this->assertNotContains( $unassigned_product->get_id(), $editor_found_ids );
+
+		// Test filtering by Clothing category.
+		$merged_query_clothing = $this->initialize_merged_query(
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_cat',
+						'terms'            => array( $clothing_cat_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query_clothing     = new WP_Query( $merged_query_clothing );
+		$found_clothing_ids = wp_list_pluck( $query_clothing->posts, 'ID' );
+
+		// Should return only t-shirt.
+		$this->assertNotContains( $laptop->get_id(), $found_clothing_ids );
+		$this->assertNotContains( $phone->get_id(), $found_clothing_ids );
+		$this->assertContains( $tshirt->get_id(), $found_clothing_ids );
+		$this->assertNotContains( $unassigned_product->get_id(), $found_clothing_ids );
+
+		// Test filtering by Clothing category - Editor.
+		$args_clothing    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_cat',
+					'terms'            => array( $clothing_cat_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request_clothing = $this->build_request();
+
+		$updated_query_clothing = $this->block_instance->update_rest_query_in_editor( $args_clothing, $request_clothing );
+		$editor_query_clothing  = new WP_Query( $updated_query_clothing );
+		$editor_clothing_ids    = wp_list_pluck( $editor_query_clothing->posts, 'ID' );
+
+		// Should return only t-shirt in editor as well.
+		$this->assertNotContains( $laptop->get_id(), $editor_clothing_ids );
+		$this->assertNotContains( $phone->get_id(), $editor_clothing_ids );
+		$this->assertContains( $tshirt->get_id(), $editor_clothing_ids );
+		$this->assertNotContains( $unassigned_product->get_id(), $editor_clothing_ids );
+
+		$laptop->delete();
+		$phone->delete();
+		$tshirt->delete();
+		$unassigned_product->delete();
+		wp_delete_term( $electronics_cat_id, 'product_cat' );
+		wp_delete_term( $clothing_cat_id, 'product_cat' );
+	}
+
+	/**
+	 * Tests that the by-tag collection handler works as expected.
+	 */
+	public function test_collection_by_tag() {
+		// Create test tags.
+		$featured_tag    = wp_create_term( 'Featured', 'product_tag' );
+		$featured_tag_id = $featured_tag['term_id'];
+
+		$sale_tag    = wp_create_term( 'Sale', 'product_tag' );
+		$sale_tag_id = $sale_tag['term_id'];
+
+		// Create test products.
+		$featured_product = WC_Helper_Product::create_simple_product();
+		$featured_product->set_name( 'Featured Product' );
+		$featured_product->save();
+
+		$sale_product = WC_Helper_Product::create_simple_product();
+		$sale_product->set_name( 'Sale Product' );
+		$sale_product->save();
+
+		$regular_product = WC_Helper_Product::create_simple_product();
+		$regular_product->set_name( 'Regular Product' );
+		$regular_product->save();
+
+		// Assign products to tags.
+		wp_set_object_terms( $featured_product->get_id(), $featured_tag_id, 'product_tag' );
+		wp_set_object_terms( $sale_product->get_id(), $sale_tag_id, 'product_tag' );
+		// regular_product has no tags.
+
+		// Test filtering by Featured tag - Frontend.
+		$merged_query = $this->initialize_merged_query(
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_tag',
+						'terms'            => array( $featured_tag_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Should return only featured product.
+		$this->assertContains( $featured_product->get_id(), $found_product_ids );
+		$this->assertNotContains( $sale_product->get_id(), $found_product_ids );
+		$this->assertNotContains( $regular_product->get_id(), $found_product_ids );
+
+		// Test filtering by Featured tag - Editor.
+		$args    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_tag',
+					'terms'            => array( $featured_tag_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request = $this->build_request();
+
+		$updated_query    = $this->block_instance->update_rest_query_in_editor( $args, $request );
+		$editor_query     = new WP_Query( $updated_query );
+		$editor_found_ids = wp_list_pluck( $editor_query->posts, 'ID' );
+
+		// Should return only featured product in editor as well.
+		$this->assertContains( $featured_product->get_id(), $editor_found_ids );
+		$this->assertNotContains( $sale_product->get_id(), $editor_found_ids );
+		$this->assertNotContains( $regular_product->get_id(), $editor_found_ids );
+
+		// Test filtering by Sale tag - Frontend.
+		$merged_query_sale = $this->initialize_merged_query(
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_tag',
+						'terms'            => array( $sale_tag_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query_sale     = new WP_Query( $merged_query_sale );
+		$found_sale_ids = wp_list_pluck( $query_sale->posts, 'ID' );
+
+		// Should return only sale product.
+		$this->assertNotContains( $featured_product->get_id(), $found_sale_ids );
+		$this->assertContains( $sale_product->get_id(), $found_sale_ids );
+		$this->assertNotContains( $regular_product->get_id(), $found_sale_ids );
+
+		// Test filtering by Sale tag - Editor.
+		$args_sale    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_tag',
+					'terms'            => array( $sale_tag_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request_sale = $this->build_request();
+
+		$updated_query_sale = $this->block_instance->update_rest_query_in_editor( $args_sale, $request_sale );
+		$editor_query_sale  = new WP_Query( $updated_query_sale );
+		$editor_sale_ids    = wp_list_pluck( $editor_query_sale->posts, 'ID' );
+
+		// Should return only sale product in editor as well.
+		$this->assertNotContains( $featured_product->get_id(), $editor_sale_ids );
+		$this->assertContains( $sale_product->get_id(), $editor_sale_ids );
+		$this->assertNotContains( $regular_product->get_id(), $editor_sale_ids );
+
+		$featured_product->delete();
+		$sale_product->delete();
+		$regular_product->delete();
+		wp_delete_term( $featured_tag_id, 'product_tag' );
+		wp_delete_term( $sale_tag_id, 'product_tag' );
+	}
 }

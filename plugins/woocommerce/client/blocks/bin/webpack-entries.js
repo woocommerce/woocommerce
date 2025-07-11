@@ -131,6 +131,9 @@ const blocks = {
 	'product-filter-active': {
 		customDir: 'product-filters/inner-blocks/active-filters',
 	},
+	'product-filter-taxonomy': {
+		customDir: 'product-filters/inner-blocks/taxonomy-filter',
+	},
 	'product-filter-removable-chips': {
 		customDir: 'product-filters/inner-blocks/removable-chips',
 	},

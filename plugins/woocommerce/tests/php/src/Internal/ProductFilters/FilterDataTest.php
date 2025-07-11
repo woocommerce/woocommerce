@@ -267,6 +267,40 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Test taxonomy count without filter.
+	 */
+	public function test_get_taxonomy_counts_with_default_query() {
+		$wp_query                 = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars               = array_filter( $wp_query->query_vars );
+		$actual_taxonomy_counts   = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
+		$expected_taxonomy_counts = $this->get_expected_category_counts();
+
+		$this->assertEqualsCanonicalizing( $expected_taxonomy_counts, $actual_taxonomy_counts );
+	}
+
+	/**
+	 * @testdox Test taxonomy count with max price.
+	 */
+	public function test_get_taxonomy_counts_with_max_price() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'max_price', 35 );
+
+		$query_vars               = array_filter( $wp_query->query_vars );
+		$actual_taxonomy_counts   = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
+		$expected_taxonomy_counts = $this->get_expected_category_counts(
+			function ( $product_data ) {
+				if ( ! isset( $product_data['regular_price'] ) ) {
+					return false;
+				}
+
+				return $product_data['regular_price'] <= 35;
+			}
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_taxonomy_counts, $actual_taxonomy_counts );
+	}
+
+	/**
 	 * Get expected attribute count from product data and map them with actual term IDs.
 	 *
 	 * @param string   $attribute_name  WP_Query instance.
@@ -305,6 +339,39 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		}
 
 		return $attribute_counts_by_term_id;
+	}
+
+	/**
+	 * Get expected category count from product data and map them with actual term IDs.
+	 *
+	 * @param callable $filter_callback Callback passed to filter test products.
+	 */
+	private function get_expected_category_counts( $filter_callback = null ) {
+		$category_counts_by_term_id = array();
+
+		if ( $filter_callback ) {
+			$filtered_products_data = array_filter(
+				$this->products_data,
+				$filter_callback
+			);
+		} else {
+			$filtered_products_data = $this->products_data;
+		}
+
+		foreach ( $filtered_products_data as $product_data ) {
+			if ( empty( $product_data['category_ids'] ) ) {
+				continue;
+			}
+
+			foreach ( $product_data['category_ids'] as $product_category_id ) {
+				if ( ! isset( $category_counts_by_term_id[ $product_category_id ] ) ) {
+					$category_counts_by_term_id[ $product_category_id ] = 0;
+				}
+				$category_counts_by_term_id[ $product_category_id ] += 1;
+			}
+		}
+
+		return $category_counts_by_term_id;
 	}
 
 	/**

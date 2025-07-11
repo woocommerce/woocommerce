@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
@@ -7,7 +12,6 @@ import { updateProduct } from '../../../utils/product-block-editor';
 import { clickOnTab } from '../../../utils/simple-products';
 import attributesData from './fixtures/attributes';
 import { waitForGlobalAttributesLoaded } from './helpers/wait-for-global-attributes-loaded';
-import { WC_API_PATH } from '../../../utils/api-client';
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.

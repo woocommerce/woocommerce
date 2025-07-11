@@ -10,10 +10,6 @@ echo ''
 
 # Request and sanitize testing parameters inputs.
 read -r -p "Which WooCommerce version should we use for testing (e.g., 9.9.0-rc.1, 9.9.0, nightly, rc or stable)?: " version
-if [[ $version != 'nightly' ]] && [[ $version != 'rc' ]] && [[ $version != 'stable' ]]; then
-	echo -n 'Verifying: '
-	gh release view $version --json tagName --jq '.tagName' || exit 1
-fi
 read -r -p "Which WordPress version should we use for testing (e.g., 6.8, latest or empty to use defaults)?: " wordpress
 read -r -p "Which PHP version should we use for testing (e.g., 7.4, 8.4 or empty to use defaults)?: " php
 read -r -p "Which GitHub repositories needs to be tested (e.g. https://github.com/woocommerce/woocommerce, space separated list or empty to use defaults)?: " -a repositories
@@ -25,6 +21,20 @@ if [[ ${#repositories[@]} -eq 0 ]]; then
 	( gh variable get CANONICAL_EXTENSIONS > $file && echo 'done' ) || ( echo 'error' && exit 1 )
 	repositories=( $( cat $file | tr -d '\r' | tr '\n' ' ' ) )
 fi
+
+echo -n 'Verifying inputs: ';
+file='/tmp/WOOCOMMERCE_QIT_ENVIRONMENTS'
+curl -s 'https://qit.woo.com/wp-json/cd/v1/environment' --output $file || ( echo 'error (fetch available environments information)' && exit 1 )
+if [[ $( cat $file | jq "(.woocommerce_versions | index(\"$version\"))" ) == 'null' ]]; then
+  echo 'error (invalid WooCommerce version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
+fi
+if [[ $wordpress != '' ]] && [[ $( cat $file | jq "(.wordpress_versions | index(\"$wordpress\"))" ) == 'null' ]]; then
+  echo 'error (invalid WordPress version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
+fi
+if [[ $php != '' ]] && [[ $( cat $file | jq "(.php_versions | has(\"$php\"))" ) == 'false' ]]; then
+  echo 'error (invalid PHP version, see https://qit.woo.com/wp-json/cd/v1/environment )' && exit 1
+fi
+echo 'ok'
 
 # Sort out which repositories provide the necessary workflows first.
 filtered=()
@@ -47,14 +57,14 @@ echo ''
 # Report the skipped repositories.
 echo "Skipping due to missing target workflows or access permissions (${#skipped[@]} repo(s))"
 for repository in ${skipped[@]}; do
-	echo "    -- $repository"
+	echo "    -- ${repository##*/}"
 done
 
 # Run checks for the target repositories.
 running=()
 echo "Launching checks (${#filtered[@]} repo(s))"
 for repository in ${filtered[@]}; do
-	echo -n "    -- $repository:"
+	echo -n "    -- ${repository##*/} :"
 
 	# Report identified workflow details.
 	workflow=$( gh workflow list --json path,id --repo $repository | jq --compact-output '.[]' | grep -E '.github/workflows/(manual-ci.yml|ci-manual.yml)' )
@@ -67,7 +77,7 @@ for repository in ${filtered[@]}; do
 	echo -n " previous run #${previous_run} "
 
 	# Start a new run and report back.
-	echo "{\"wc-version\":\"$version\", \"wp-version\":\"$wordpress\", \"php-version\":\"$php\", \"qit-tests\":\"WooCommerce Pre-Release Tests (includes Activation, WooCommerce E2E and API tests)\"}" | gh workflow run ${workflow_id} --json --repo $repository >/dev/null
+	( echo "{\"wc-version\":\"$version\", \"wp-version\":\"$wordpress\", \"php-version\":\"$php\", \"qit-tests\":\"WooCommerce Pre-Release Tests (includes Activation, WooCommerce E2E and API tests)\"}" | gh workflow run ${workflow_id} --json --repo $repository >/dev/null 2>&1) || echo -n '[insufficient permissions] '
 	for i in {1..10}; do
 	    echo -n '.' && sleep 1s
 	    last_run=$( gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${repository##https://github.com/}/actions/workflows/${workflow_id}/runs?per_page=1 --jq '.workflow_runs.[].id' )
@@ -81,10 +91,11 @@ for repository in ${filtered[@]}; do
 	echo ''
 done
 
-echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):" && echo -n '    '
+echo "Waiting for completion (${#running[@]} run(s), 1 min check interval, takes at least 40 min):"
 result=()
 while [ ${#running[@]} -gt 0 ]; do
-	echo -n '.' && sleep 1m
+	echo '    .'
+	sleep 1m
 	temp=()
 	for entry in ${running[@]}; do
 		fragments=( ${entry//;/ } )
@@ -97,7 +108,7 @@ while [ ${#running[@]} -gt 0 ]; do
 				conclusion=$( gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${repository##https://github.com/}/actions/runs/$id --jq '.conclusion' )
 				status="$status:$conclusion"
 			fi
-			echo -n '✓'
+			echo "    ✓ ${repository##*/} ($status)"
 			result+=( "$entry;$status" )
 		else
 			temp+=( $entry )
@@ -110,5 +121,9 @@ echo ''
 echo "All runs completed:"
 for entry in ${result[@]}; do
 	fragments=( ${entry//;/ } )
-	echo "    -- ${fragments[0]}: status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
+	if [ -z ${CI+y} ]; then
+		echo "    -- ${fragments[0]##*/} : status ${fragments[2]} (${fragments[0]}/actions/runs/${fragments[1]})"
+	else
+		echo "    -- ${fragments[0]##*/} : status ${fragments[2]} (https://github.com/*/*/actions/runs/${fragments[1]})"
+	fi
 done
