@@ -34,7 +34,8 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-} = getConfig( 'woocommerce/mini-cart-items-block' );
+	lowInStockLabel,
+} = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
@@ -192,7 +193,7 @@ store< MiniCart >(
 );
 
 const { state: cartItemState } = store(
-	'woocommerce/mini-cart-items-block',
+	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to
@@ -370,6 +371,36 @@ const { state: cartItemState } = store(
 					: parseInt( totals.line_subtotal, 10 );
 
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
+			},
+
+			get isLineItemTotalDiscountVisible(): boolean {
+				return (
+					cartItemState.cartItemHasDiscount &&
+					cartItemState.cartItem.quantity > 1
+				);
+			},
+
+			get isProductHiddenFromCatalog(): boolean {
+				const { catalog_visibility: catalogVisibility } =
+					cartItemState.cartItem;
+				return (
+					catalogVisibility === 'hidden' ||
+					catalogVisibility === 'search'
+				);
+			},
+
+			get isLowInStockVisible(): boolean {
+				return (
+					! cartItemState.cartItem.show_backorder_badge &&
+					!! cartItemState.cartItem.low_stock_remaining
+				);
+			},
+
+			get lowInStockLabel(): string {
+				return lowInStockLabel.replace(
+					'%d',
+					cartItemState.cartItem.low_stock_remaining
+				);
 			},
 		},
 

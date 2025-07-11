@@ -17,12 +17,18 @@ import { fromDotNotation } from './';
  * Instruct the backend to finalize the embedded KYC session.
  *
  * @param apiUrl The API URL.
+ * @param source Optional source for the entire onboarding session flow.
  */
-export const finalizeEmbeddedKycSession = async ( apiUrl: string ) => {
+export const finalizeEmbeddedKycSession = async (
+	apiUrl: string,
+	source?: string
+) => {
 	return await apiFetch< FinalizeEmbeddedKycSessionResponse >( {
 		url: apiUrl,
 		method: 'POST',
-		data: {},
+		data: {
+			source,
+		},
 	} );
 };
 
@@ -68,10 +74,12 @@ export const completeSubStep = (
  *
  * @param data   The form data.
  * @param apiUrl The API URL.
+ * @param source Optional source for the entire onboarding session flow.
  */
 export const createEmbeddedKycSession = async (
 	data: OnboardingFields,
-	apiUrl: string
+	apiUrl: string,
+	source?: string
 ): Promise< EmbeddedKycSessionCreateResult > => {
 	const selfAssessmentData = fromDotNotation( data );
 	const requestData: Record< string, unknown > = {};
@@ -79,6 +87,11 @@ export const createEmbeddedKycSession = async (
 	// Only pass the self assessment data if at least one field is set.
 	if ( Object.keys( selfAssessmentData ).length > 0 ) {
 		requestData.self_assessment = selfAssessmentData;
+	}
+
+	// If a source is provided, include it in the request data.
+	if ( source ) {
+		requestData.source = source;
 	}
 
 	return await apiFetch< EmbeddedKycSessionCreateResult >( {

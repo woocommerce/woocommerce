@@ -1,6 +1,3 @@
-'package: @woocommerce/api':
-  - packages/js/api/**/*
-    
 'package: @woocommerce/e2e-utils-playwright':
   - packages/js/e2e-utils-playwright/**/*
 

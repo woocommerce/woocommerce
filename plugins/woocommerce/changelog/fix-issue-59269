@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Add to Cart + Options block to show user-friendly error when individually sold product is already in cart

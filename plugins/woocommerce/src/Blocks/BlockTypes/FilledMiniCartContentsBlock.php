@@ -39,9 +39,16 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_filled_mini_cart_contents( $attributes, $content, $block ) {
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-bind--hidden' => 'state.cartIsEmpty',
+				'data-wp-interactive'  => 'woocommerce/mini-cart',
+			)
+		);
+
 		ob_start();
 		?>
-		<div data-wp-bind--hidden="state.cartIsEmpty" data-wp-interactive="woocommerce/mini-cart" class="wp-block-woocommerce-filled-mini-cart-contents-block">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo $content;

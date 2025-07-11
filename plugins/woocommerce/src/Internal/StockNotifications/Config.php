@@ -18,21 +18,28 @@ class Config {
 	 *
 	 * @var array<string>
 	 */
-	private static array $supported_product_types = array();
+	private static $supported_product_types;
 
 	/**
 	 * Runtime cache for supported product statuses.
 	 *
 	 * @var array<string>
 	 */
-	private static array $supported_product_statuses = array();
+	private static $supported_product_statuses;
 
 	/**
 	 * Runtime cache for eligible stock statuses.
 	 *
 	 * @var array<string>
 	 */
-	private static array $eligible_stock_statuses = array();
+	private static $eligible_stock_statuses;
+
+	/**
+	 * Runtime cache for verification expiration time threshold.
+	 *
+	 * @var int
+	 */
+	private static $verification_expiration_time_threshold;
 
 	/**
 	 * Get the supported product types.
@@ -40,7 +47,7 @@ class Config {
 	 * @return array<string>
 	 */
 	public static function get_supported_product_types(): array {
-		if ( ! empty( self::$supported_product_types ) ) {
+		if ( is_array( self::$supported_product_types ) ) {
 			return self::$supported_product_types;
 		}
 
@@ -69,7 +76,7 @@ class Config {
 	 * @return array<string>
 	 */
 	public static function get_supported_product_statuses(): array {
-		if ( ! empty( self::$supported_product_statuses ) ) {
+		if ( is_array( self::$supported_product_statuses ) ) {
 			return self::$supported_product_statuses;
 		}
 
@@ -96,7 +103,7 @@ class Config {
 	 * @return array<string>
 	 */
 	public static function get_eligible_stock_statuses(): array {
-		if ( ! empty( self::$eligible_stock_statuses ) ) {
+		if ( is_array( self::$eligible_stock_statuses ) ) {
 			return self::$eligible_stock_statuses;
 		}
 
@@ -161,5 +168,43 @@ class Config {
 	 */
 	public static function creates_account_on_signup(): bool {
 		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' );
+	}
+
+	/**
+	 * How long to keep pending notifications before deleting them (in days).
+	 *
+	 * @return int
+	 */
+	public static function get_unverified_deletion_days_threshold(): int {
+		return absint(
+			get_option(
+				'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
+				0
+			)
+		);
+	}
+
+	/**
+	 * Returns verification codes expiration time threshold (in seconds).
+	 *
+	 * @return int
+	 */
+	public static function get_verification_expiration_time_threshold(): int {
+		if ( ! is_null( self::$verification_expiration_time_threshold ) ) {
+			return self::$verification_expiration_time_threshold;
+		}
+
+		/**
+		 * Filter the verification codes expiration time (in seconds).
+		 *
+		 * @param int $threshold
+		 * @since 0.0.0
+		 */
+		self::$verification_expiration_time_threshold = (int) apply_filters(
+			'woocommerce_customer_stock_notifications_verification_expiration_time_threshold',
+			HOUR_IN_SECONDS
+		);
+
+		return self::$verification_expiration_time_threshold;
 	}
 }
