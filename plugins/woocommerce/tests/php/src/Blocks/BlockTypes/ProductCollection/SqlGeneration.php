@@ -22,35 +22,6 @@ class SqlGeneration extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
-	 * Build a simplified request for testing.
-	 *
-	 * @param array $params The parameters to set on the request.
-	 * @return WP_REST_Request
-	 */
-	private function build_request( $params = array() ) {
-		$params = wp_parse_args(
-			$params,
-			array(
-				'featured'               => false,
-				'woocommerceOnSale'      => false,
-				'woocommerceAttributes'  => array(),
-				'woocommerceStockStatus' => array(),
-				'timeFrame'              => array(),
-				'priceRange'             => array(),
-			)
-		);
-
-		$params['isProductCollectionBlock'] = true;
-
-		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
-		foreach ( $params as $param => $value ) {
-			$request->set_param( $param, $value );
-		}
-
-		return $request;
-	}
-
-	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
@@ -369,7 +340,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$product3->set_menu_order( 5 );
 		$product3->save();
 
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array(
 				'orderby'  => 'menu_order',
 				'order'    => 'asc',
@@ -414,7 +385,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$this->assertLessThan( $pos_product1, $pos_product2 );
 
 		// Test descending order.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array(
 				'orderby'  => 'menu_order',
 				'order'    => 'desc',
@@ -464,7 +435,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'order' => 'desc',
 		);
 
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array(
 				'orderby' => 'menu_order',
 			)
@@ -475,7 +446,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$this->assertEquals( 'menu_order', $updated_query['orderby'] );
 		$this->assertEquals( 'desc', $updated_query['order'] );
 
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array(
 				'orderby' => 'menu_order',
 			)

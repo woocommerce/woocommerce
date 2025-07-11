@@ -40,4 +40,33 @@ class Utils {
 			),
 		);
 	}
+
+	/**
+	 * Build a simplified request for testing.
+	 *
+	 * @param array $params The parameters to set on the request.
+	 * @return WP_REST_Request
+	 */
+	public static function build_request( $params = array() ) {
+		$params = wp_parse_args(
+			$params,
+			array(
+				'featured'               => false,
+				'woocommerceOnSale'      => false,
+				'woocommerceAttributes'  => array(),
+				'woocommerceStockStatus' => array(),
+				'timeFrame'              => array(),
+				'priceRange'             => array(),
+			)
+		);
+
+		$params['isProductCollectionBlock'] = true;
+
+		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
+		foreach ( $params as $param => $value ) {
+			$request->set_param( $param, $value );
+		}
+
+		return $request;
+	}
 }

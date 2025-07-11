@@ -20,35 +20,6 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
-	 * Build a simplified request for testing.
-	 *
-	 * @param array $params The parameters to set on the request.
-	 * @return WP_REST_Request
-	 */
-	private function build_request( $params = array() ) {
-		$params = wp_parse_args(
-			$params,
-			array(
-				'featured'               => false,
-				'woocommerceOnSale'      => false,
-				'woocommerceAttributes'  => array(),
-				'woocommerceStockStatus' => array(),
-				'timeFrame'              => array(),
-				'priceRange'             => array(),
-			)
-		);
-
-		$params['isProductCollectionBlock'] = true;
-
-		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
-		foreach ( $params as $param => $value ) {
-			$request->set_param( $param, $value );
-		}
-
-		return $request;
-	}
-
-	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
@@ -149,7 +120,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 			);
 
 		$args    = array();
-		$request = $this->build_request();
+		$request = Utils::build_request();
 		$request->set_param(
 			'productCollectionQueryContext',
 			array(
@@ -190,7 +161,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 			);
 
 		$args    = array();
-		$request = $this->build_request();
+		$request = Utils::build_request();
 		$request->set_param(
 			'productCollectionQueryContext',
 			array(
@@ -236,7 +207,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array( 'productReference' => 1 )
 		);
 		$request->set_param(
@@ -270,7 +241,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array( 'productReference' => $test_product->get_id() )
 		);
 		$request->set_param(
@@ -301,7 +272,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array( 'productReference' => $test_product->get_id() )
 		);
 		$request->set_param(
@@ -327,7 +298,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$result_frontend = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array( 'woocommerceHandPickedProducts' => array() )
 		);
 		$request->set_param(
@@ -355,7 +326,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$result_frontend = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request(
+		$request = Utils::build_request(
 			array( 'woocommerceHandPickedProducts' => $product_ids )
 		);
 		$request->set_param(
