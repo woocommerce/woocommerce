@@ -159,7 +159,7 @@ export const PaymentsContent = ( {} ) => {
 			suggestion_id: wooPaymentsSuggestionId,
 			provider_extension_slug: wooPaymentsExtensionSlug,
 			from: 'lys',
-			source: 'lys',
+			source: wooPaymentsOnboardingSessionEntryLYS,
 		} );
 
 		// Install and activate the WooPayments plugin.
@@ -178,7 +178,7 @@ export const PaymentsContent = ( {} ) => {
 						suggestion_id: wooPaymentsSuggestionId,
 						provider_extension_slug: wooPaymentsExtensionSlug,
 						from: 'lys',
-						source: 'lys',
+						source: wooPaymentsOnboardingSessionEntryLYS,
 					} );
 				}
 				// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
@@ -196,7 +196,7 @@ export const PaymentsContent = ( {} ) => {
 					suggestion_id: wooPaymentsSuggestionId,
 					provider_extension_slug: wooPaymentsExtensionSlug,
 					from: 'lys',
-					source: 'lys',
+					source: wooPaymentsOnboardingSessionEntryLYS,
 					reason: 'error',
 				} );
 				createNoticesFromResponse( response );
