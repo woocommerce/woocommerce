@@ -270,7 +270,7 @@ jobs:
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-optional-unfurl_links: false
           slack-text: |
-            :warning: *Cherry pick from `${{ env.BASE_BRANCH }}` to `trunk` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
+            :warning: *Cherry pick from `${{ env.BASE_BRANCH }}` to `${{ env.NEXT_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
             Please resolve before releasing.  
             Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
             ${{ env.ADD_CP_TO_TRUNK_NAG == 'true' && '\\n\\nNOTE: This PR might need to be cherry-picked to trunk.' || '' }}
