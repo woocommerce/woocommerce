@@ -84,7 +84,7 @@ jobs:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
       - name: Setup - pnpm
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Setup - spawn linting and testing jobs
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -357,7 +357,7 @@ jobs:
               .github/workflows
 
       - name: 'Setup PNPM'
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: 'Send messages for failed jobs'
         env:
