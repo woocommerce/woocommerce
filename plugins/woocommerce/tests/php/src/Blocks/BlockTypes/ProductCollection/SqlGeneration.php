@@ -29,25 +29,6 @@ class SqlGeneration extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Build the merged_query for testing
-	 *
-	 * @param array $parsed_block Parsed block data.
-	 * @param array $query        Query data.
-	 */
-	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
-		if ( empty( $parsed_block ) ) {
-			$parsed_block = Utils::get_base_parsed_block();
-		}
-
-		$this->block_instance->set_parsed_block( $parsed_block );
-
-		$block          = new \stdClass();
-		$block->context = $parsed_block['attrs'];
-
-		return $this->block_instance->build_frontend_query( $query, $block, 1 );
-	}
-
-	/**
 	 * Tests that empty price range clauses are not added to the query.
 	 */
 	public function test_price_range_clauses_empty() {
@@ -57,7 +38,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'max' => 0,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -82,7 +63,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'min' => 1,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -105,7 +86,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'max' => 1,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -129,7 +110,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'max' => 2,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -158,7 +139,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'max' => 2,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -195,7 +176,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 			'max' => 2,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -224,13 +205,13 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['orderBy'] = 'price';
 
 		$parsed_block['attrs']['query']['order'] = 'asc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price ASC', $query->request );
 
 		$parsed_block['attrs']['query']['order'] = 'desc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price DESC', $query->request );
@@ -244,13 +225,13 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['orderBy'] = 'sales';
 
 		$parsed_block['attrs']['query']['order'] = 'asc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales ASC', $query->request );
 
 		$parsed_block['attrs']['query']['order'] = 'desc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.total_sales DESC', $query->request );
@@ -280,7 +261,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['order']   = 'asc';
 		$parsed_block['attrs']['query']['perPage'] = 10;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query        = new WP_Query( $merged_query );
 
 		$this->assertGreaterThanOrEqual( 3, $query->post_count );
@@ -300,7 +281,7 @@ class SqlGeneration extends \WP_UnitTestCase {
 
 		// Test descending order.
 		$parsed_block['attrs']['query']['order'] = 'desc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$ordered_product_ids_desc = wp_list_pluck( $query->posts, 'ID' );
@@ -466,14 +447,14 @@ class SqlGeneration extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		unset( $parsed_block['attrs']['query']['order'] );
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query        = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'menu_order ASC, post_title ASC', $query->request );
 
 		// Test descending order SQL clause.
 		$parsed_block['attrs']['query']['order'] = 'desc';
-		$merged_query                            = $this->initialize_merged_query( $parsed_block );
+		$merged_query                            = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'menu_order DESC, post_title DESC', $query->request );

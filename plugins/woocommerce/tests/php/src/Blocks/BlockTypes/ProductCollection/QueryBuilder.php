@@ -27,32 +27,13 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Build the merged_query for testing
-	 *
-	 * @param array $parsed_block Parsed block data.
-	 * @param array $query        Query data.
-	 */
-	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
-		if ( empty( $parsed_block ) ) {
-			$parsed_block = Utils::get_base_parsed_block();
-		}
-
-		$this->block_instance->set_parsed_block( $parsed_block );
-
-		$block          = new \stdClass();
-		$block->context = $parsed_block['attrs'];
-
-		return $this->block_instance->build_frontend_query( $query, $block, 1 );
-	}
-
-	/**
 	 * Test merging featured queries.
 	 */
 	public function test_merging_featured_queries() {
 		$parsed_block                               = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['featured'] = true;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -76,7 +57,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block                                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		foreach ( $on_sale_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
@@ -97,7 +78,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			ProductStockStatus::ON_BACKORDER,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -121,7 +102,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			ProductStockStatus::ON_BACKORDER,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEmpty( $merged_query['meta_query'] );
 
@@ -132,7 +113,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			ProductStockStatus::ON_BACKORDER,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEmpty( $merged_query['meta_query'] );
 	}
@@ -157,7 +138,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			),
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -187,7 +168,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'rating';
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals( 'meta_value_num', $merged_query['orderby'] );
 		$this->assertEquals( '_wc_average_rating', $merged_query['meta_key'] );
@@ -202,7 +183,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$parsed_block = Utils::get_base_parsed_block();
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -236,7 +217,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			),
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals( 'meta_value_num', $merged_query['orderby'] );
 		$this->assertEquals( '_wc_average_rating', $merged_query['meta_key'] );
@@ -265,7 +246,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_merging_filter_by_max_price_queries() {
 		set_query_var( 'max_price', 100 );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
 		$this->assertContainsEquals(
 			array(
@@ -289,7 +270,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_merging_filter_by_min_price_queries() {
 		set_query_var( 'min_price', 20 );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
 		$this->assertContainsEquals(
 			array(
@@ -314,7 +295,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		set_query_var( 'max_price', 100 );
 		set_query_var( 'min_price', 20 );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
 		$this->assertContainsEquals(
 			array(
@@ -345,7 +326,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_merging_filter_by_stock_status_queries() {
 		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
 		$this->assertContainsEquals(
 			array(
@@ -371,7 +352,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			'value'    => $time_frame_date,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -395,7 +376,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			'value'    => $time_frame_date,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertContainsEquals(
 			array(
@@ -430,7 +411,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		set_query_var( 'filter_size', 'xl,xxl' );
 		set_query_var( 'query_type_size', 'and' );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 		$tax_queries  = $merged_query['tax_query'];
 
 		$and_query = array();
@@ -484,7 +465,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		set_query_var( 'min_price', 20 );
 		set_query_var( 'filter_stock_status', ProductStockStatus::IN_STOCK );
 
-		$merged_query = $this->initialize_merged_query();
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
 		$this->assertContainsEquals(
 			array(
@@ -525,7 +506,8 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * - Product tags
 	 */
 	public function test_merging_taxonomies_query() {
-		$merged_query = $this->initialize_merged_query(
+		$merged_query = Utils::initialize_merged_query(
+			$this->block_instance,
 			null,
 			// Since we aren't calling the Query Loop build function, we need to provide
 			// a tax_query rather than relying on it generating one from the input.
@@ -575,7 +557,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			'max' => 100,
 		);
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals(
 			array(
@@ -595,7 +577,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		foreach ( $handpicked_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
@@ -617,7 +599,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		foreach ( $expected_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
@@ -637,7 +619,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals( array( -1 ), $merged_query['post__in'] );
 	}
@@ -649,7 +631,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'menu_order';
 		$parsed_block['attrs']['query']['order']   = 'asc';
-		$merged_query                              = $this->initialize_merged_query( $parsed_block );
+		$merged_query                              = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals( 'menu_order', $merged_query['orderby'] );
 		$this->assertEquals( 'asc', $merged_query['order'] );
@@ -661,7 +643,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_random_sorting() {
 		$parsed_block                              = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'random';
-		$merged_query                              = $this->initialize_merged_query( $parsed_block );
+		$merged_query                              = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->assertEquals( 'rand', $merged_query['orderby'] );
 	}

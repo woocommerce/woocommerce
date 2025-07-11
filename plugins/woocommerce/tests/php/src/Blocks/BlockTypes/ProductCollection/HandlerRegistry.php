@@ -27,25 +27,6 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Build the merged_query for testing
-	 *
-	 * @param array $parsed_block Parsed block data.
-	 * @param array $query        Query data.
-	 */
-	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
-		if ( empty( $parsed_block ) ) {
-			$parsed_block = Utils::get_base_parsed_block();
-		}
-
-		$this->block_instance->set_parsed_block( $parsed_block );
-
-		$block          = new \stdClass();
-		$block->context = $parsed_block['attrs'];
-
-		return $this->block_instance->build_frontend_query( $query, $block, 1 );
-	}
-
-	/**
 	 * Test for frontend collection handlers.
 	 */
 	public function test_frontend_collection_handlers() {
@@ -80,7 +61,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'test-collection';
 
-		$merged_query = $this->initialize_merged_query( $parsed_block );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		$this->block_instance->unregister_collection_handlers( 'test-collection' );
 
@@ -204,7 +185,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/related';
 		$parsed_block['attrs']['query']['productReference'] = 1;
-		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+		$result_frontend                                    = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(
@@ -238,7 +219,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/upsells';
 		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
-		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+		$result_frontend                                    = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(
@@ -269,7 +250,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                                       = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/cross-sells';
 		$parsed_block['attrs']['query']['productReference'] = $test_product->get_id();
-		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
+		$result_frontend                                    = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(
@@ -295,7 +276,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array();
-		$result_frontend = $this->initialize_merged_query( $parsed_block );
+		$result_frontend = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(
@@ -323,7 +304,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$parsed_block                        = Utils::get_base_parsed_block();
 		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/hand-picked';
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $product_ids;
-		$result_frontend = $this->initialize_merged_query( $parsed_block );
+		$result_frontend = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
 		// Editor.
 		$request = Utils::build_request(

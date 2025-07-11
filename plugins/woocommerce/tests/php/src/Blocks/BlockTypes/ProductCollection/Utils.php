@@ -69,4 +69,24 @@ class Utils {
 
 		return $request;
 	}
+
+	/**
+	 * Build the merged_query for testing
+	 *
+	 * @param object $block_instance The block instance.
+	 * @param array  $parsed_block Parsed block data.
+	 * @param array  $query        Query data.
+	 */
+	public static function initialize_merged_query( $block_instance, $parsed_block = array(), $query = array() ) {
+		if ( empty( $parsed_block ) ) {
+			$parsed_block = self::get_base_parsed_block();
+		}
+
+		$block_instance->set_parsed_block( $parsed_block );
+
+		$block          = new \stdClass();
+		$block->context = $parsed_block['attrs'];
+
+		return $block_instance->build_frontend_query( $query, $block, 1 );
+	}
 }
