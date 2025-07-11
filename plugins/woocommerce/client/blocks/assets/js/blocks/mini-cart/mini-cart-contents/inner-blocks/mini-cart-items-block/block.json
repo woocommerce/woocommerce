@@ -11,7 +11,9 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false,
-		"interactivity": true
+		"interactivity": {
+			"clientNavigation": true
+		}
 	},
 	"attributes": {
 		"lock": {
