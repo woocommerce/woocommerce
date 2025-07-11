@@ -9,7 +9,7 @@ After the release, the release lead should continue to monitor the following for
 
 ## WordPress.org Forums
 
-Direct Link: https://wordpress.org/support/plugin/woocommerce/
+Direct Link: [https://wordpress.org/support/plugin/woocommerce/](https://wordpress.org/support/plugin/woocommerce/)
 
 The forum entries are also fed into the [#woo-forums-woocommerce Slack Channel](https://a8c.slack.com/archives/C01FJ7M9XK5) for easier monitoring.
 
