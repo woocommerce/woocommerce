@@ -168,6 +168,29 @@ class ProductCollectionData extends AbstractRoute {
 			}
 		}
 
+		if ( ! empty( $request['calculate_taxonomy_counts'] ) ) {
+			$taxonomies = [];
+
+			foreach ( $request['calculate_taxonomy_counts'] as $taxonomy_to_count ) {
+				if ( ! empty( $taxonomy_to_count['taxonomy'] ) ) {
+					$taxonomies[] = $taxonomy_to_count['taxonomy'];
+				}
+			}
+
+			$data['taxonomy_counts'] = [];
+
+			if ( $taxonomies ) {
+				$counts = $filters->get_taxonomy_counts( $request, $taxonomies );
+
+				foreach ( $counts as $key => $value ) {
+					$data['taxonomy_counts'][] = (object) [
+						'term'  => $key,
+						'count' => $value,
+					];
+				}
+			}
+		}
+
 		return rest_ensure_response( $this->schema->get_item_response( $data ) );
 	}
 
