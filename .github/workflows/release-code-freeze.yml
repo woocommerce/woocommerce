@@ -263,6 +263,11 @@ jobs:
             });
             
             if (!response.ok) {
+              if (response.status === 409) {
+                console.log('Webhook request failed: Duplicate post detected (409)');
+              } else if (response.status === 403) {
+                console.log('Webhook request failed: Invalid secret (403)');
+              }
               core.setFailed(`Webhook request failed with status ${response.status}`);
             } else {
               console.log('Webhook triggered successfully');
