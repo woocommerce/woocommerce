@@ -13,9 +13,7 @@ final class QueryFilters {
 	 *
 	 * @internal
 	 */
-	public function init() {
-		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
-	}
+	public function init() {}
 
 	/**
 	 * Filter the posts clauses of the main query to support global filters.
