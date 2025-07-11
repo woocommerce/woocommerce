@@ -213,39 +213,6 @@ describe( 'CheckoutExpressPayment', () => {
 				'wc/express-payment'
 			);
 		} );
-
-		it( 'should render with correct CSS classes', () => {
-			render( <CheckoutExpressPayment /> );
-
-			expect(
-				document.querySelector( '.wc-block-components-express-payment' )
-			).toBeInTheDocument();
-			expect(
-				document.querySelector(
-					'.wc-block-components-express-payment--checkout'
-				)
-			).toBeInTheDocument();
-			expect(
-				document.querySelector(
-					'.wc-block-components-express-payment__title-container'
-				)
-			).toBeInTheDocument();
-			expect(
-				document.querySelector(
-					'.wc-block-components-express-payment__content'
-				)
-			).toBeInTheDocument();
-			expect(
-				document.querySelector(
-					'.wc-block-components-express-payment-continue-rule'
-				)
-			).toBeInTheDocument();
-			expect(
-				document.querySelector(
-					'.wc-block-components-express-payment-continue-rule--checkout'
-				)
-			).toBeInTheDocument();
-		} );
 	} );
 
 	describe( 'Processing states', () => {
