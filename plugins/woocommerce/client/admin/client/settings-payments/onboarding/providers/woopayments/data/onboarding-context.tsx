@@ -23,6 +23,7 @@ import {
 	WooPaymentsProviderOnboardingStep,
 	OnboardingContextType,
 } from '~/settings-payments/onboarding/types';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
  * URL Strategy interface for handling navigation in different contexts
@@ -87,7 +88,7 @@ export const OnboardingProvider: React.FC< {
 	closeModal,
 	onFinish,
 	urlStrategy,
-	sessionEntryPoint = 'settings_payments', // This should match the value of WooPaymentsService::SESSION_ENTRY_DEFAULT.
+	sessionEntryPoint = wooPaymentsOnboardingSessionEntrySettings,
 } ) => {
 	const history = getHistory();
 

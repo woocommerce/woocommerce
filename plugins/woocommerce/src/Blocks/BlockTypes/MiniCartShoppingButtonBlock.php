@@ -43,12 +43,13 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 		$shop_url                     = get_permalink( wc_get_page_id( 'shop' ) );
 		$default_start_shopping_label = __( 'Start shopping', 'woocommerce' );
 		$start_shopping_label         = $attributes['startShoppingButtonLabel'] ? $attributes['startShoppingButtonLabel'] : $default_start_shopping_label;
+		$wrapper_attributes           = get_block_wrapper_attributes( array( 'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__shopping-button' ) );
 		?>
 		<div class="wp-block-button has-text-align-center">
 			<a
 				data-wp-interactive="woocommerce/mini-cart-shopping-button-block"
 				href="<?php echo esc_attr( $shop_url ); ?>"
-				class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-shopping-button-block wc-block-mini-cart__shopping-button contained"
+				<?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 				<div class="wc-block-components-button__text">
 					<?php echo esc_html( $start_shopping_label ); ?>

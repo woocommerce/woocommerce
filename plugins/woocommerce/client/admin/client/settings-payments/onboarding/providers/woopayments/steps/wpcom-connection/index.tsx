@@ -5,6 +5,7 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -40,6 +41,22 @@ export const JetpackStep: React.FC = () => {
 						isBusy={ isConnectButtonLoading }
 						disabled={ isConnectButtonLoading }
 						onClick={ () => {
+							setIsConnectButtonLoading( true );
+
+							// Mark the step as started.
+							const startUrl = currentStep?.actions?.start?.href;
+							if ( startUrl ) {
+								// No need to wait for the response.
+								apiFetch( {
+									url: startUrl,
+									method: 'POST',
+									data: {
+										source: sessionEntryPoint,
+									},
+								} );
+							}
+
+							// Track the connection button click event.
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_click',
 								{
@@ -49,7 +66,7 @@ export const JetpackStep: React.FC = () => {
 								}
 							);
 
-							setIsConnectButtonLoading( true );
+							// Redirect to the WordPress.com connection authorization URL.
 							window.location.href =
 								currentStep?.actions?.auth?.href ?? '';
 						} }

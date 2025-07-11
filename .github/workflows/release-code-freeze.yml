@@ -126,7 +126,7 @@ jobs:
         with:
           ref: trunk
       - name: Setup PNPM
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -179,7 +179,7 @@ jobs:
 
   modify-zip-version:
     name: 'Update version to Dev'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [build-zip, prepare-for-code-freeze]
     env:
       DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev
@@ -212,7 +212,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [modify-zip-version, prepare-for-code-freeze]
     steps:
       - name: Notify Slack on success
