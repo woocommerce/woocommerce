@@ -3,7 +3,7 @@
  */
 import { useRef, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
@@ -21,7 +21,7 @@ import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
  *
  * @param {string} clientId - The client ID of the product collection block.
  * @param {ProductCollectionAttributes} attributes - The attributes of the product collection block.
- * @returns {void}
+ * @return {void}
  */
 const useLayoutAdjustments = (
 	clientId: string,
@@ -37,7 +37,7 @@ const useLayoutAdjustments = (
 	);
 
 	const productTemplateBlocks = innerBlocks.filter(
-		( block: any ) => block.name === productTemplateBlockName
+		( block: BlockInstance ) => block.name === productTemplateBlockName
 	);
 	const productTemplateBlock = productTemplateBlocks[ 0 ];
 	const productTemplateBlockClientId = productTemplateBlock?.clientId;
@@ -66,7 +66,8 @@ const useLayoutAdjustments = (
 			previousLayoutType.current !== LayoutOptions.CAROUSEL
 		) {
 			const paginationBlocks = innerBlocks.filter(
-				( block: any ) => block.name === coreQueryPaginationBlockName
+				( block: BlockInstance ) =>
+					block.name === coreQueryPaginationBlockName
 			);
 
 			const paginationBlockClientId = paginationBlocks[ 0 ]?.clientId;
@@ -102,17 +103,18 @@ const useLayoutAdjustments = (
 			previousLayoutType.current === LayoutOptions.CAROUSEL
 		) {
 			const nextPrevArrowsBlocks = innerBlocks.filter(
-				( block: any ) => block.name === nextPreviousArrowsBlockName
+				( block: BlockInstance ) =>
+					block.name === nextPreviousArrowsBlockName
 			);
 			const nextPrevArrowsBlockClientId =
 				nextPrevArrowsBlocks[ 0 ]?.clientId;
 
 			// Find the group block containing the product template
 			const groupBlock = innerBlocks.find(
-				( block: any ) =>
+				( block: BlockInstance ) =>
 					block.name === 'core/group' &&
 					block.innerBlocks.some(
-						( innerBlock: any ) =>
+						( innerBlock: BlockInstance ) =>
 							innerBlock.name === productTemplateBlockName
 					)
 			);
@@ -120,7 +122,8 @@ const useLayoutAdjustments = (
 			if ( groupBlock ) {
 				// Extract the product template block from the group
 				const productTemplate = groupBlock.innerBlocks.find(
-					( block: any ) => block.name === productTemplateBlockName
+					( block: BlockInstance ) =>
+						block.name === productTemplateBlockName
 				);
 
 				// Replace the group block with just the product template
@@ -152,6 +155,7 @@ const useLayoutAdjustments = (
 		collection,
 		productTemplateBlockIndex,
 		productTemplateBlock,
+		productTemplateBlockClientId,
 	] );
 };
 

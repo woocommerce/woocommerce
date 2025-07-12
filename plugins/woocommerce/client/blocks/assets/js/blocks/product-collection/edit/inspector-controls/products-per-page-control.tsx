@@ -39,7 +39,8 @@ const ProductsPerPageControl = ( {
 
 	const label = getLabel( carouselVariant );
 	const perPage = query.perPage || DEFAULT_QUERY.perPage;
-	const showPerformanceWarning = carouselVariant && perPage > CAROUSEL_PERFORMANCE_WARNING_THRESHOLD;
+	const showPerformanceWarning =
+		carouselVariant && perPage > CAROUSEL_PERFORMANCE_WARNING_THRESHOLD;
 
 	return (
 		<ToolsPanelItem

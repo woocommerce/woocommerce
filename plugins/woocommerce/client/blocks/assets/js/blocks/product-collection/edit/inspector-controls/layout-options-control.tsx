@@ -31,7 +31,10 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 		case LayoutOptions.STACK:
 			return __( 'Display products in a single column.', 'woocommerce' );
 		case LayoutOptions.CAROUSEL:
-			return __( 'Display products in a carousel. It displays a single row of products.', 'woocommerce' );
+			return __(
+				'Display products in a carousel. It displays a single row of products.',
+				'woocommerce'
+			);
 		default:
 			return '';
 	}
