@@ -291,6 +291,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_REST_Response The fulfillment for the order, or an error if the request fails.
+	 *
+	 * @throws \Exception If the fulfillment is not found or is deleted.
 	 */
 	public function get_fulfillment( WP_REST_Request $request ): WP_REST_Response {
 		$order_id       = (int) $request->get_param( 'order_id' );
@@ -300,6 +302,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
+			if ( $fulfillment->get_date_deleted() ) {
+				throw new \Exception(
+					esc_html__( 'Fulfillment not found.', 'woocommerce' ),
+					WP_Http::NOT_FOUND
+				);
+			}
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),

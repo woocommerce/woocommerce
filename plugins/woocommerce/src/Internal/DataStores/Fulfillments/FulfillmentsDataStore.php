@@ -148,7 +148,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data_id          = $data->get_id();
 		$fulfillment_data = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE fulfillment_id = %d AND date_deleted IS NULL",
+				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE fulfillment_id = %d",
 				$data_id
 			),
 			ARRAY_A
@@ -173,6 +173,11 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @throws \Exception If the fulfillment can't be updated.
 	 */
 	public function update( &$data ): void {
+		// If the fulfillment is deleted, do nothing.
+		if ( $data->get_date_deleted() ) {
+			return;
+		}
+
 		// Update the fulfillment in the database.
 		$data_id = $data->get_id();
 
@@ -280,6 +285,10 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @throws \Exception If the fulfillment can't be deleted.
 	 */
 	public function delete( &$data, $args = array() ): void {
+		// If the record is already deleted, do nothing.
+		if ( $data->get_date_deleted() ) {
+			return;
+		}
 
 		/**
 		 * Filter to modify the fulfillment data before it is updated.
@@ -339,10 +348,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			throw new \Exception( esc_html__( 'Invalid fulfillment.', 'woocommerce' ) );
 		}
 
-		if ( $data->get_date_deleted() ) {
-			throw new \Exception( esc_html__( 'Cannot read meta from a deleted fulfillment.', 'woocommerce' ) );
-		}
-
 		// Read the metadata for the fulfillment.
 		global $wpdb;
 
@@ -378,6 +383,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Check if the fulfillment and meta are saved.
 		$data_id = $data->get_id();
 
+		// Prevent deletion of metadata from a deleted fulfillment.
 		if ( $data->get_date_deleted() ) {
 			throw new \Exception( esc_html__( 'Cannot delete meta from a deleted fulfillment.', 'woocommerce' ) );
 		}
@@ -416,6 +422,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		// Add the metadata for the fulfillment.
 		global $wpdb;
 
+		// Prevent adding metadata to a deleted fulfillment.
 		if ( $data->get_date_deleted() ) {
 			throw new \Exception( esc_html__( 'Cannot add meta to a deleted fulfillment.', 'woocommerce' ) );
 		}
@@ -463,6 +470,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$data_id = $data->get_id();
 
+		// Prevent updating metadata for a deleted fulfillment.
 		if ( $data->get_date_deleted() ) {
 			throw new \Exception( esc_html__( 'Cannot update meta for a deleted fulfillment.', 'woocommerce' ) );
 		}
@@ -500,23 +508,35 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 *
 	 * @param string $entity_type The entity type.
 	 * @param string $entity_id The entity ID.
+	 * @param bool   $with_deleted Whether to include deleted fulfillments in the results.
 	 *
 	 * @return Fulfillment[] Fulfillment object.
 	 *
 	 * @throws \Exception If the fulfillment data can't be read.
 	 */
-	public function read_fulfillments( string $entity_type, string $entity_id ): array {
+	public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
 		// Read the fulfillment data from the database.
 		global $wpdb;
 
-		$fulfillment_data = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s AND date_deleted IS NULL",
-				$entity_type,
-				$entity_id
-			),
-			ARRAY_A
-		);
+		if ( ! $with_deleted ) {
+			$fulfillment_data = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s AND date_deleted IS NULL",
+					$entity_type,
+					$entity_id
+				),
+				ARRAY_A
+			);
+		} else {
+			$fulfillment_data = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+					$entity_type,
+					$entity_id
+				),
+				ARRAY_A
+			);
+		}
 
 		if ( is_wp_error( $fulfillment_data ) ) {
 			throw new \Exception( esc_html__( 'Failed to read fulfillment data.', 'woocommerce' ) );
