@@ -46,9 +46,9 @@ class WooEmailTemplate {
 	public function get_content(): string {
 		return '
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--20)"><!-- wp:image {"width":"130px","sizeSlug":"large"} -->
-<figure class="wp-block-image size-large is-resized"><img src="https://woocommerce.com/wp-content/uploads/2025/01/Logo-Primary.png" alt="Your Logo" style="width:130px"/></figure>
-<!-- /wp:image --></div>
+<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--20)">
+<!-- wp:site-logo {"width":130} /-->
+</div>
 <!-- /wp:group -->
 
 <!-- wp:post-content {"lock":{"move":true,"remove":false},"layout":{"type":"default"}} /-->
