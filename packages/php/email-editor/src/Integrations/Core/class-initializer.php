@@ -47,6 +47,8 @@ class Initializer {
 		'core/spacer',
 		'core/social-link',
 		'core/social-links',
+		'core/site-logo',
+		'core/site-title',
 	);
 
 	/**
