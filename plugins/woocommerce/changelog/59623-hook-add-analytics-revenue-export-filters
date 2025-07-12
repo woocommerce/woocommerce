@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add: Filter hooks to extend columns and row data in the Analytics > Revenue export, allowing developers to customize exported CSV content from server-side batch exports.
