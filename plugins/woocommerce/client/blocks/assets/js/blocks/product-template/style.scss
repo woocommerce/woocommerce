@@ -93,7 +93,9 @@ $min-product-width: 150px;
 	flex-wrap: nowrap;
 	gap: $grid-gap;
 	overflow-x: auto;
-	scrollbar-width: none;
+	// TODO: Ultimately we'll hide the scrollbar as there will be arrows to navigate.
+	// For now we keep the scrollbar visible for testing purposes.
+	// scrollbar-width: none;
 	scroll-snap-type: x mandatory;
 	scroll-padding: 0 30%;
 	position: relative; // Create new stacking context
