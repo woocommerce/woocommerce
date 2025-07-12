@@ -270,7 +270,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'date'         => __( 'Date', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 			'gross_sales'  => __( 'Gross sales', 'woocommerce' ),
@@ -280,6 +280,23 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'taxes'        => __( 'Taxes', 'woocommerce' ),
 			'shipping'     => __( 'Shipping', 'woocommerce' ),
 			'total_sales'  => __( 'Total sales', 'woocommerce' ),
+		);
+
+		/**
+		 * Filter to allow developers to add or modify column headers for the
+		 * Analytics > Revenue export.
+		 *
+		 * Developers can use this filter to add custom columns to the exported CSV
+		 * and data grid for the revenue report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_columns Export columns as an associative array (column_id => label).
+		 * @return array Modified export columns.
+		 */
+		return apply_filters(
+			'woocommerce_report_revenue_export_columns',
+			$export_columns
 		);
 	}
 
@@ -291,8 +308,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$subtotals = (array) $item['subtotals'];
-
-		return array(
+		$export_item = array(
 			'date'         => $item['date_start'],
 			'orders_count' => $subtotals['orders_count'],
 			'gross_sales'  => self::csv_number_format( $subtotals['gross_sales'] ),
@@ -303,5 +319,25 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			'shipping'     => self::csv_number_format( $subtotals['shipping'] ),
 			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
 		);
+
+		/**
+		 * Filter to allow developers to add or modify row data for the
+		 * Analytics > Revenue export.
+		 *
+		 * Developers can use this filter to add data for custom columns to the exported CSV
+		 * and data grid for the revenue report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $export_item Export item data as an associative array (column_id => value).
+		 * @param array $item        Raw item data from report query.
+		 * @return array Modified export item data.
+		 */
+		return apply_filters(
+			'woocommerce_report_revenue_prepare_export_item',
+			$export_item,
+			$item
+		);
 	}
+
 }
