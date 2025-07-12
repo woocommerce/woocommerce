@@ -499,6 +499,173 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that deleted fulfillments can be read by ID.
+	 */
+	public function test_read_deleted_fulfillment_by_id() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		self::$order_fulfillment_data_store->create( $fulfillment );
+
+		$fulfillment_id = $fulfillment->get_id();
+		$this->assertNotNull( $fulfillment_id );
+
+		// Delete the fulfillment.
+		self::$order_fulfillment_data_store->delete( $fulfillment );
+
+		// Create a new fulfillment object and try to read the deleted one.
+		$deleted_fulfillment = new Fulfillment();
+		$deleted_fulfillment->set_id( $fulfillment_id );
+
+		// Should be able to read deleted fulfillment by ID.
+		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+
+		$this->assertEquals( $fulfillment_id, $deleted_fulfillment->get_id() );
+		$this->assertEquals( 'order-fulfillment', $deleted_fulfillment->get_entity_type() );
+		$this->assertEquals( '123', $deleted_fulfillment->get_entity_id() );
+		$this->assertNotNull( $deleted_fulfillment->get_date_deleted() );
+	}
+
+	/**
+	 * Tests that deleted fulfillments cannot be updated.
+	 */
+	public function test_update_deleted_fulfillment_fails() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		self::$order_fulfillment_data_store->create( $fulfillment );
+
+		$fulfillment_id = $fulfillment->get_id();
+		$this->assertNotNull( $fulfillment_id );
+
+		// Delete the fulfillment.
+		self::$order_fulfillment_data_store->delete( $fulfillment );
+
+		// Create a new fulfillment object and read the deleted one.
+		$deleted_fulfillment = new Fulfillment();
+		$deleted_fulfillment->set_id( $fulfillment_id );
+		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+
+		// Try to update the deleted fulfillment - should not affect any rows.
+		$deleted_fulfillment->set_entity_id( '456' );
+		$deleted_fulfillment->set_status( 'fulfilled' );
+
+		// Update should not throw an error but should not affect any rows.
+		self::$order_fulfillment_data_store->update( $deleted_fulfillment );
+
+		// Verify the database record was not updated.
+		global $wpdb;
+		$record = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE fulfillment_id = %d",
+				$fulfillment_id
+			)
+		);
+
+		$this->assertNotNull( $record );
+		$this->assertEquals( '123', $record->entity_id ); // Should still be original value.
+		$this->assertEquals( 'unfulfilled', $record->status ); // Should still be original value.
+		$this->assertNotNull( $record->date_deleted ); // Should still be deleted.
+	}
+
+	/**
+	 * Tests that deleting an already deleted fulfillment returns early without side effects.
+	 */
+	public function test_delete_already_deleted_fulfillment_returns_early() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		self::$order_fulfillment_data_store->create( $fulfillment );
+
+		$fulfillment_id = $fulfillment->get_id();
+		$this->assertNotNull( $fulfillment_id );
+
+		// Delete the fulfillment the first time.
+		self::$order_fulfillment_data_store->delete( $fulfillment );
+
+		// At this point, the fulfillment object should be reset.
+		$this->assertEquals( 0, $fulfillment->get_id() );
+
+		// Read the deleted fulfillment back.
+		$deleted_fulfillment = new Fulfillment();
+		$deleted_fulfillment->set_id( $fulfillment_id );
+		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+
+		$first_deletion_time = $deleted_fulfillment->get_date_deleted();
+		$this->assertNotNull( $first_deletion_time );
+
+		// Track action calls to verify hooks are not called on second delete.
+		$before_delete_called = false;
+		$after_delete_called  = false;
+
+		add_action(
+			'wc_fulfillment_before_delete',
+			function () use ( &$before_delete_called ) {
+				$before_delete_called = true;
+			}
+		);
+
+		add_action(
+			'wc_fulfillment_after_delete',
+			function () use ( &$after_delete_called ) {
+				$after_delete_called = true;
+			}
+		);
+
+		// Try to delete the already deleted fulfillment - should return early.
+		self::$order_fulfillment_data_store->delete( $deleted_fulfillment );
+
+		// Verify hooks were not called.
+		$this->assertFalse( $before_delete_called );
+		$this->assertFalse( $after_delete_called );
+
+		// Verify the fulfillment object was not reset again.
+		$this->assertEquals( $fulfillment_id, $deleted_fulfillment->get_id() );
+		$this->assertEquals( 'order-fulfillment', $deleted_fulfillment->get_entity_type() );
+		$this->assertEquals( '123', $deleted_fulfillment->get_entity_id() );
+		$this->assertEquals( $first_deletion_time, $deleted_fulfillment->get_date_deleted() );
+
+		// Verify the database record was not modified.
+		global $wpdb;
+		$record = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}wc_order_fulfillments WHERE fulfillment_id = %d",
+				$fulfillment_id
+			)
+		);
+
+		$this->assertNotNull( $record );
+		$this->assertEquals( $first_deletion_time, $record->date_deleted );
+	}
+
+	/**
 	 * Create a test fulfillment and save it to the database.
 	 *
 	 * @param string $entity_type The entity type.

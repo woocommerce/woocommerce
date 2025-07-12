@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Internal\Fulfillments\Providers as ShippingProviders;
 
@@ -15,6 +16,8 @@ class ShippingProvidersTest extends \WP_UnitTestCase {
 	 * Test that the shipping providers configuration returns the correct classes.
 	 */
 	public function test_shipping_providers_configuration(): void {
+		new FulfillmentsManager(); // Ensure the FulfillmentsManager is initialized to load the shipping providers.
+
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 
 		foreach ( $shipping_providers as $key => $provider_class ) {
