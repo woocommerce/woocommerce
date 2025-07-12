@@ -42,6 +42,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Payments Providers class.
+ *
+ * @internal
  */
 class PaymentsProviders {
 
