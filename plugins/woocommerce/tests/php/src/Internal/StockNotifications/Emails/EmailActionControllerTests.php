@@ -38,7 +38,8 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$_GET['notification_id'] = $id;
 		$_GET['email_link_action_key'] = 'test';
 
-		new EmailActionController();
+		$controller = new EmailActionController();
+		$controller->process_verification_action();
 		$notification = Factory::get_notification( $id );
 		$this->assertEquals(NotificationStatus::ACTIVE, $notification->get_status());
 	}
@@ -58,7 +59,8 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$_GET['notification_id'] = $id;
 		$_GET['email_link_action_key'] = 'test';
 
-		new EmailActionController();
+		$controller = new EmailActionController();
+		$controller->process_unsubscribe_action();
 		$notification = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $notification->get_status() );
 	}

@@ -23,18 +23,12 @@ class EmailActionController {
 	 */
 	public function __construct() {
 		if (
-			isset( $_GET['notification_id'] ) &&
-			isset( $_GET['email_link_action_key'] )
+			! isset( $_GET['notification_id'] ) ||
+			! isset( $_GET['email_link_action_key'] )
 		) {
-			$this->maybe_process_email_action();
+			return;
 		}
-	}
 
-	/**
-	 * Checks the request for valid notification ID. If found, processes the email action based on
-	 * the shape of the action key.
-	 */
-	private function maybe_process_email_action(): void {
 		$this->notification = Factory::get_notification( $_GET['notification_id'] );
 
 		if ( ! $this->notification ) {
@@ -45,18 +39,15 @@ class EmailActionController {
 			return;
 		}
 
-		if ( str_contains( $this->notification->get_meta('email_link_action_key'), ':' ) ) {
-			$this->process_verification_action();
-		} else {
-			$this->process_unsubscribe_action();
-		}
+		add_action( 'template_redirect', array( $this, 'process_verification_action' ) );
+		add_action( 'template_redirect', array( $this, 'process_unsubscribe_action' ) );
 	}
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.
 	 * TODO: redirect the request, notify the user of successful verification.
 	 */
-	private function process_verification_action(): void {
+	public function process_verification_action(): void {
 		if ( $this->notification->check_verification_key( $_GET['email_link_action_key'] ) ) {
 			$this->notification->set_status( NotificationStatus::ACTIVE );
 			$this->notification->set_date_confirmed( time() );
@@ -68,7 +59,7 @@ class EmailActionController {
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
 	 * TODO: redirect the request, notify the user of successful unsubscription.
 	 */
-	private function process_unsubscribe_action(): void {
+	public function process_unsubscribe_action(): void {
 		if ( $this->notification->check_unsubscribe_key( $_GET['email_link_action_key'] ) ) {
 			$this->notification->set_status( NotificationStatus::CANCELLED );
 			$this->notification->save();
