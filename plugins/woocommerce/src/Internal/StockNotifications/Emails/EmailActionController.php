@@ -25,7 +25,7 @@ class EmailActionController {
 	public function __construct() {
 		if (
 			isset( $_GET['notification_id'] ) &&
-			isset( $_GET['key'] )
+			isset( $_GET['email_link_action_key'] )
 		) {
 			$this->maybe_process_email_action();
 		}
@@ -42,13 +42,13 @@ class EmailActionController {
 			return;
 		}
 
-		if ( empty( $this->notification->get_meta( 'email_action_key' ) ) ) {
+		if ( empty( $this->notification->get_meta( 'email_link_action_key' ) ) ) {
 			return;
 		}
 
-		if ( str_contains( $this->notification->get_meta('email_action_key'), ':' ) ) {
+		if ( str_contains( $this->notification->get_meta('email_link_action_key'), ':' ) ) {
 			$this->process_verification_action();
-		} elseif ( 'unsubscribe' === $_GET['action'] ) {
+		} else {
 			$this->process_unsubscribe_action();
 		}
 	}
@@ -58,7 +58,7 @@ class EmailActionController {
 	 * TODO: set a notification and redirect the request.
 	 */
 	private function process_verification_action(): void {
-		if ( $this->notification->check_verification_key( $_GET['key'] ) ) {
+		if ( $this->notification->check_verification_key( $_GET['email_link_action_key'] ) ) {
 			$this->notification->set_status( NotificationStatus::ACTIVE );
 			$this->notification->set_date_confirmed( time() );
 			$this->notification->save();
@@ -70,7 +70,7 @@ class EmailActionController {
 	 * TODO: set a notification and redirect the request.
 	 */
 	private function process_unsubscribe_action(): void {
-		if ( $this->notification->check_unsubscribe_key( $_GET['key'] ) ) {
+		if ( $this->notification->check_unsubscribe_key( $_GET['email_link_action_key'] ) ) {
 			$this->notification->set_status( NotificationStatus::CANCELLED );
 			$this->notification->save();
 		}
