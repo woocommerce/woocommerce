@@ -460,6 +460,7 @@ class Notification extends \WC_Data {
 	 */
 	public function check_verification_key( string $key ): bool {
 		$action_key = $this->get_meta( 'email_link_action_key' );
+
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
