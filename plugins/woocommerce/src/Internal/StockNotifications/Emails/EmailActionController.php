@@ -5,14 +5,22 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 
+/**
+ * Class EmailActionController
+ *
+ * Handles email actions such as verification and unsubscribe.
+ *
+ * @package Automattic\WooCommerce\Internal\StockNotifications\Emails
+ */
 class EmailActionController {
 
 	public $notification;
 
 	/**
-	 * Constructor to set up hooks for managing data retention tasks.
+	 * Checks for email actions in the request and processes them.
 	 */
 	public function __construct() {
 		if (
@@ -23,14 +31,14 @@ class EmailActionController {
 		}
 	}
 
-	private function maybe_process_email_action() {
+	/**
+	 * Checks the request for valid notification ID. If found, processes the email action based on
+	 * the shape of the action key.
+	 */
+	private function maybe_process_email_action(): void {
 		$this->notification = Factory::get_notification( $_GET['notification_id'] );
 
 		if ( ! $this->notification ) {
-			return;
-		}
-
-		if ( ! $this->notification->is_valid_key( $_GET['key'] ) ) {
 			return;
 		}
 
@@ -45,17 +53,26 @@ class EmailActionController {
 		}
 	}
 
-	private function process_verification_action() {
-
+	/**
+	 * If the verification key matches, it updates the notification status to active.
+	 * TODO: set a notification and redirect the request.
+	 */
+	private function process_verification_action(): void {
+		if ( $this->notification->check_verification_key( $_GET['key'] ) ) {
+			$this->notification->set_status( NotificationStatus::ACTIVE );
+			$this->notification->set_date_confirmed( time() );
+			$this->notification->save();
+		}
 	}
 
-	private function process_unsubscribe_action() {
-		if ( ! $this->notification ) {
-			return;
+	/**
+	 * If the unsubscribe key matches, it updates the notification status to cancelled.
+	 * TODO: set a notification and redirect the request.
+	 */
+	private function process_unsubscribe_action(): void {
+		if ( $this->notification->check_unsubscribe_key( $_GET['key'] ) ) {
+			$this->notification->set_status( NotificationStatus::CANCELLED );
+			$this->notification->save();
 		}
-
-		$this->notification->delete();
-		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
-		exit;
 	}
 }
