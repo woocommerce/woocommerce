@@ -1,6 +1,5 @@
 <?php
 
-
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
@@ -55,7 +54,7 @@ class EmailActionController {
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.
-	 * TODO: set a notification and redirect the request.
+	 * TODO: redirect the request, notify the user of successful verification.
 	 */
 	private function process_verification_action(): void {
 		if ( $this->notification->check_verification_key( $_GET['email_link_action_key'] ) ) {
@@ -67,7 +66,7 @@ class EmailActionController {
 
 	/**
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
-	 * TODO: set a notification and redirect the request.
+	 * TODO: redirect the request, notify the user of successful unsubscription.
 	 */
 	private function process_unsubscribe_action(): void {
 		if ( $this->notification->check_unsubscribe_key( $_GET['email_link_action_key'] ) ) {
