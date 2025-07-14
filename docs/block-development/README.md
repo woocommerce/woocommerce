@@ -12,23 +12,19 @@ Whether you’re new to block development or looking to deepen your expertise, t
 1. **Getting Started**
    - [Introduction & Setup](./getting-started.md)
    - Prerequisites and environment setup
+   - FAQs
 
-2. **Core Concepts**
-   - Learn the fundamentals of block development
-   - Block anatomy, registration, attributes, and more
-
-3. **Step-by-Step Tutorials**
+2. **Step-by-Step Tutorials**
    - Hands-on guides to build your first block and add features
    - Progress from beginner to advanced topics
 
-4. **Reference**
+3. **Reference**
    - Detailed API and block reference documentation
 
-5. **Extending Blocks**
+4. **Extensible Blocks**
    - Learn how to extend and customize existing blocks
-
-6. **Specialized Blocks**
    - Deep dives into Cart, Checkout, and Product Collection blocks
+
 
 ---
 
@@ -37,7 +33,6 @@ Whether you’re new to block development or looking to deepen your expertise, t
 | Section/Folders                | Description                                      |
 |-------------------------------|--------------------------------------------------|
 | `getting-started.md`           | Quickstart, prerequisites, and setup instructions|
-| `core-concepts/`               | Fundamental concepts and block anatomy           |
 | `tutorials/`                   | Step-by-step guides for building blocks          |
 | `reference/`                   | API and block reference material                 |
 | `extensibility-in-blocks/`     | Guides for extending and customizing blocks      |
@@ -49,7 +44,6 @@ Whether you’re new to block development or looking to deepen your expertise, t
 ## 🚀 Start Here
 
 - **[Getting Started](./getting-started.md)**: Set up your environment and create your first block.
-- **[Core Concepts](./core-concepts/)**: Understand the building blocks of WooCommerce blocks.
 - **[Tutorials](./tutorials/)**: Follow hands-on guides to build and enhance your blocks.
 - **[Reference](./reference/)**: Look up APIs, filters, and block details as you build.
 - **[Extensibility](./extensibility-in-blocks/)**: Learn to extend and customize blocks for advanced use cases.
