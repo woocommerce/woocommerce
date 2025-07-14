@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the “Product Brands” template not falling back correctly to the “Product Catalog”
