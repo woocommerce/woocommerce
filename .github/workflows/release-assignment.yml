@@ -11,6 +11,10 @@ jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
     runs-on: ubuntu-latest
+    outputs:
+      should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
+      version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
+      feature-freeze-date: ${{ steps.check-code-freeze-8-weeks.outputs.feature-freeze-date }}
     steps:
       - name: Install node-ical
         run: npm install node-ical
@@ -21,23 +25,14 @@ jobs:
           script: |
             const ical = require('node-ical');
 
-            const isManualTrigger = github.event_name === 'workflow_dispatch';
-            console.log(`Workflow triggered by: ${github.event_name}`);
+            const isManualTrigger = context.eventName === 'workflow_dispatch';
+            console.log(`Workflow triggered by: ${context.eventName}`);
 
             try {
               const today = new Date();
               let targetDate = new Date(today);
+              targetDate.setDate(today.getDate() + (8 * 7)); // 8 weeks = 56 days
               
-              if (isManualTrigger) {
-                // For manual triggers, look for events in the next 12 weeks (3 months)
-                targetDate.setDate(today.getDate() + (12 * 7)); // 12 weeks = 84 days
-                console.log('Manual trigger detected - checking for events in the next 12 weeks...');
-              } else {
-                // For scheduled triggers, look for events 8 weeks away
-                targetDate.setDate(today.getDate() + (8 * 7)); // 8 weeks = 56 days
-                console.log('Scheduled trigger detected - checking for events 8 weeks away...');
-              }
-
               const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
               const codeFreezeEvents = Object.values(events)
                 .filter(event => event.type === 'VEVENT')
@@ -81,6 +76,11 @@ jobs:
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Debug outputs
+        run: |
+          echo "should-trigger-webhook: '${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook }}'"
+          echo "version: '${{ needs.check-upcoming-release-events.outputs.version }}'"
+          echo "feature-freeze-date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}'"
       - uses: actions/github-script@v7
         with:
           script: |
