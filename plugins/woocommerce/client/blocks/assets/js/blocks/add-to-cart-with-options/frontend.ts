@@ -346,14 +346,14 @@ const addToCartWithOptionsStore = store(
 					const addedItems: GroupedCartItem[] = [];
 
 					for ( const childProductId of groupedProductIds ) {
+						if ( quantity[ childProductId ] === 0 ) {
+							continue;
+						}
+
 						const newQuantity = getNewQuantity(
 							childProductId,
 							quantity[ childProductId ]
 						);
-
-						if ( newQuantity === 0 ) {
-							continue;
-						}
 
 						addedItems.push( {
 							id: childProductId,
