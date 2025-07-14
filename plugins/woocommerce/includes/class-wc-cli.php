@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
+use Automattic\WooCommerce\Internal\Integrations\WPPostsImporter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -33,6 +34,12 @@ class WC_CLI {
 		 * @see https://github.com/woocommerce/woocommerce/issues/56305
 		 */
 		add_action( 'init', array( $this, 'add_blueprint_cli_hook' ) );
+
+		/**
+		 * Register the WP Posts importer.
+		 */
+		$wp_posts_importer = wc_get_container()->get( WPPostsImporter::class );
+		$wp_posts_importer->register();
 	}
 
 	/**

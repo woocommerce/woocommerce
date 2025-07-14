@@ -35,7 +35,7 @@ const {
 	quantityDescriptionLabel,
 	removeFromCartLabel,
 	lowInStockLabel,
-} = getConfig( 'woocommerce/mini-cart-items-block' );
+} = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
@@ -193,7 +193,7 @@ store< MiniCart >(
 );
 
 const { state: cartItemState } = store(
-	'woocommerce/mini-cart-items-block',
+	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to
