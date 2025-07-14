@@ -7322,7 +7322,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Arrange the REST API requests.
 		$requests_made     = array();
 		$expected_payload  = array(
-			'source' => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+			'source' => WooPaymentsService::SESSION_ENTRY_DEFAULT,
 			'from'   => WooPaymentsService::FROM_NOX_IN_CONTEXT,
 		);
 		$expected_response = array(
@@ -7704,7 +7704,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$requests_made     = array();
 		$expected_payload  = array(
 			'from'   => WooPaymentsService::FROM_PAYMENT_SETTINGS,
-			'source' => WooPaymentsService::FROM_PAYMENT_SETTINGS,
+			'source' => WooPaymentsService::SESSION_ENTRY_DEFAULT,
 		);
 		$expected_response = array(
 			'success' => true,

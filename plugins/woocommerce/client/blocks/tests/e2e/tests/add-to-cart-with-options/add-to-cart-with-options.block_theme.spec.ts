@@ -253,9 +253,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// We need to make sure the block updated before saving.
 		// @see https://github.com/woocommerce/woocommerce/issues/57718
-		await expect( async () => {
-			await page.getByRole( 'radio', { name: 'Dropdown' } ).isChecked();
-		} ).toPass();
+		// Verify that `.editor-post-publish-button__button` has an attribute
+		// `aria-haspopup="dialog"`. When https://github.com/woocommerce/woocommerce/issues/48936
+		// is fixed, we can simply check that the Save button becomes enabled.
+		await expect(
+			page.getByRole( 'button', { name: 'Save', exact: true } )
+		).toHaveAttribute( 'aria-haspopup', 'dialog' );
 
 		await editor.saveSiteEditorEntities();
 
