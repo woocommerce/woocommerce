@@ -838,4 +838,56 @@ class BlockTemplateUtils {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		return file_get_contents( self::get_templates_directory( 'wp_template_part' ) . DIRECTORY_SEPARATOR . $slug . '.html' );
 	}
+
+	/**
+	 * Save template as customization in database
+	 *
+	 * @param string $slug Template slug
+	 * @param string $content Template content
+	 * @return int|WP_Error Post ID on success, WP_Error on failure
+	 */
+	public static function save_template_as_customization( $slug, $content ) {
+		if ( empty( $content ) ) {
+			return new \WP_Error( 'empty_content', __( 'Template content cannot be empty.', 'woocommerce' ) );
+		}
+
+		$existing_template = get_block_template( self::PLUGIN_SLUG . '//' . $slug, 'wp_template' );
+
+		if ( $existing_template && 'custom' === $existing_template->source ) {
+			return new \WP_Error( 'already_customized', __( 'Template is already customized.', 'woocommerce' ) );
+		}
+
+		$template_post = array(
+			'post_content' => $content,
+			'post_title'   => $slug, 
+			'post_status'  => 'publish',
+			'post_type'    => 'wp_template',
+			'post_name'    => $slug,
+			'post_author'  => 0,
+		);
+
+		$template_id = wp_insert_post( $template_post, true );
+
+		if ( is_wp_error( $template_id ) ) {
+			return $template_id;
+		}
+
+		update_post_meta( $template_id, 'theme', self::PLUGIN_SLUG );		
+
+		return $template_id;
+	}
+
+	/**
+	 * Compare two template contents to check if they are different
+	 *
+	 * @param string $content1 First template content
+	 * @param string $content2 Second template content
+	 * @return bool True if templates are different, false otherwise
+	 */
+	public static function templates_are_different( $content1, $content2 ) {
+		$content1 = trim( $content1 );
+		$content2 = trim( $content2 );
+		
+		return $content1 !== $content2;
+	}
 }

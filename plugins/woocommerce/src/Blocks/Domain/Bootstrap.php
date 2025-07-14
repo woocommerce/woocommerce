@@ -36,6 +36,7 @@ use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+use Automattic\WooCommerce\Blocks\TemplateMigrationHandler;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
 
 
@@ -163,6 +164,7 @@ class Bootstrap {
 		}
 
 		$this->container->get( QueryFilters::class )->init();
+		$this->container->get( TemplateMigrationHandler::class )->init();
 	}
 
 	/**
@@ -401,6 +403,12 @@ class Bootstrap {
 			BlockTemplatesController::class,
 			function () {
 				return new BlockTemplatesController();
+			}
+		);
+		$this->container->register(
+			TemplateMigrationHandler::class,
+			function () {
+				return new TemplateMigrationHandler();
 			}
 		);
 	}
