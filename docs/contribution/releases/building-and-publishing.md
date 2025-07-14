@@ -19,7 +19,7 @@ sidebar_label: Building and Publishing
 
 ## Building WooCommerce
 
-1. Run the [“Release: Compile changelog” workflow”](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml) to generate the changelog.
+1. Run the [“Release: Compile changelog” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml) to generate the changelog.
    1. Run from the workflow from trunk and enter the major version number.
    2. Once the workflow finishes, it should’ve created 2 new PRs:
       * One against trunk removing processed entries.
@@ -44,8 +44,6 @@ sidebar_label: Building and Publishing
 4. If this is not an `RC` release, [Deploy the release to our staging environments](https://wp.me/PCYsg-18BQ) and monitor for any issues.
 5. Run the ["Release: Update stable tag" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) to mark this release as latest stable.
    * Run the flow from `trunk` and set the version and be sure to confirm that you want to update the stable tag when running the flow.
-   * This will create a pull request for the release branch and trunk.  Review both and merge.
+   * This will create a pull request for the release branch and trunk updating the stable tag.  Review both and merge.
 6. Publish the previously created GitHub [draft release tag](https://github.com/woocommerce/woocommerce/releases).
    * Check off Set as a pre-release if you’re releasing an RC. Otherwise, check off Set as the latest release.
-7. Ping Dev Advocacy in the #woo-core-releases channel in Slack notifying them of the release and asking them to update or publish the release post. Provide links to both the GitHub tag as well as the ZIP from WordPress.org as part of your message.
-8. Ping #woo-announcements in Slack with a link to the release post ([example](https://a8c.slack.com/archives/C0741730R/p1750099929478409)).
