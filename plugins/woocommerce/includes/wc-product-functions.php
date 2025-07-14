@@ -456,12 +456,10 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 				} else {
 					$variation_list[] = '<dt>' . wc_attribute_label( $name, $product ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
 				}
-			} else {
-				if ( $flat ) {
+			} elseif ( $flat ) {
 					$variation_list[] = rawurldecode( $value );
-				} else {
-					$variation_list[] = '<li>' . rawurldecode( $value ) . '</li>';
-				}
+			} else {
+				$variation_list[] = '<li>' . rawurldecode( $value ) . '</li>';
 			}
 		}
 
