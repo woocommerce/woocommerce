@@ -37,7 +37,7 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 	protected function render_experimental_iapi_title_label_block() {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
-		
+
 		// The following text is a temporary workaround that will be revert to
 		// the previous form `(%d items)` as soon as the `@wordpress/i18n`
 		// package is available as a script module.
