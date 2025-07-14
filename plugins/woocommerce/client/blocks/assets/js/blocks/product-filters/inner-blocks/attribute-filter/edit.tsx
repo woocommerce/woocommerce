@@ -109,12 +109,12 @@ const Edit = ( props: EditProps ) => {
 						}
 					} )
 					.map( ( term, index ) => ( {
-						label: showCounts
-							? `${ term.name } (${ term.count })`
-							: term.name,
+						label: term.name,
+						ariaLabel: term.name,
 						value: term.id.toString(),
 						selected: index === 0,
-						rawData: term,
+						count: term.count,
+						type: `attribute/${ attributeObject?.taxonomy }`,
 					} ) )
 			);
 		}
@@ -217,6 +217,7 @@ const Edit = ( props: EditProps ) => {
 									? attributeOptionsPreview
 									: attributeOptions,
 							isLoading,
+							showCounts,
 						},
 					} }
 				>

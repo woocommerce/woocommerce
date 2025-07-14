@@ -10,16 +10,32 @@ import {
 	ErrorBoundary,
 } from '@wordpress/editor';
 
+/**
+ * Internal dependencies
+ */
+import {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+} from '../../events';
+
 interface TemplatePanelSection {
 	id: string;
 	render: () => JSX.Element | null;
 }
 
+const tracking = {
+	recordEvent,
+	recordEventOnce,
+	debouncedRecordEvent,
+};
+
 export function TemplateSettingsPanel() {
 	// Allow plugins to add custom template sections
 	const templateSections = applyFilters(
 		'woocommerce_email_editor_template_sections',
-		[]
+		[],
+		tracking
 	) as TemplatePanelSection[];
 
 	if ( templateSections.length === 0 ) {

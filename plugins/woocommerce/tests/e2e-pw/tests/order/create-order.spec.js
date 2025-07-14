@@ -1,10 +1,14 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { random } from '../../utils/helpers';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const taxClasses = [
 	{
@@ -410,7 +414,7 @@ test.describe(
 				)
 			).toBeVisible();
 			await expect(
-				page.locator( 'table' ).filter( { hasText: 'Paid: $200.00' } )
+				page.locator( 'table' ).filter( { hasText: 'Paid: $220.00' } )
 			).toBeVisible();
 		} );
 
@@ -424,7 +428,7 @@ test.describe(
 			order.id = await getOrderIdFromPage( page );
 
 			// Select customer
-			await page.getByText( 'Guest' ).click();
+			await page.locator( '#select2-customer_user-container' ).click();
 			await page
 				.locator( 'input[aria-owns="select2-customer_user-results"]' )
 				.fill( customer.username );

@@ -49,7 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know once their POS order is complete.', 'woocommerce' )
+				? __( 'Let customers know once their POS order is complete.', 'woocommerce' )
 				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
 
 			$this->manual = true;
@@ -115,6 +115,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			$this->add_pos_customizations();
+			add_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
+			add_action( 'woocommerce_pos_email_footer', array( $this, 'email_footer' ) );
 			$content = wc_get_template_html(
 				$this->template_html,
 				array(
@@ -132,6 +134,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				)
 			);
 			$this->remove_pos_customizations();
+			remove_action( 'woocommerce_pos_email_header', array( $this, 'email_header' ) );
+			remove_action( 'woocommerce_pos_email_footer', array( $this, 'email_footer' ) );
 			return $content;
 		}
 
@@ -245,6 +249,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
 			// Add filter to include additional details in the order item totals table.
 			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
+			// Add filter for custom footer text with highest priority to run before the default footer text filtering in `WC_Emails`.
+			add_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1, 2 );
 		}
 
 		/**
@@ -254,6 +260,40 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			// Remove actions and filters after generating content to avoid affecting other emails.
 			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
+			remove_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1 );
+		}
+
+		/**
+		 * Get the email header.
+		 *
+		 * @param mixed $email_heading Heading for the email.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function email_header( $email_heading ) {
+			wc_get_template(
+				'emails/email-header.php',
+				array(
+					'email_heading' => $email_heading,
+					'store_name'    => $this->get_pos_store_name(),
+				)
+			);
+		}
+
+		/**
+		 * Get the email footer.
+		 *
+		 * @param mixed $email Email object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function email_footer( $email ) {
+			wc_get_template(
+				'emails/email-footer.php',
+				array(
+					'email' => $email,
+				)
+			);
 		}
 
 		/**
@@ -335,8 +375,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		private function get_pos_store_name() {
+			$store_name = get_option( 'woocommerce_pos_store_name' );
 			return $this->format_string(
-				get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() )
+				empty( $store_name ) ? PointOfSaleDefaultSettings::get_default_store_name() : $store_name
 			);
 		}
 
@@ -381,6 +422,36 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		private function get_pos_refund_returns_policy() {
 			return $this->format_string(
 				get_option( 'woocommerce_pos_refund_returns_policy' )
+			);
+		}
+
+		/**
+		 * Replace footer text placeholders with POS-specific values.
+		 *
+		 * @param string $footer_text The footer text to be filtered.
+		 * @param mixed  $email       Email object.
+		 * @return string Modified footer text.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function replace_footer_placeholders( $footer_text, $email ) {
+			// Only replace placeholders if we're in the context of a POS email.
+			if ( $email->id !== $this->id ) {
+				return $footer_text;
+			}
+
+			return str_replace(
+				array(
+					'{site_title}',
+					'{store_address}',
+					'{store_email}',
+				),
+				array(
+					$this->get_pos_store_name(),
+					$this->get_pos_store_address(),
+					$this->get_pos_store_email(),
+				),
+				$footer_text
 			);
 		}
 	}

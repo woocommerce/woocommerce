@@ -123,6 +123,103 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set items from cart/order and sorting them by price.
+	 */
+	public function test_set_items_and_sort_by_price() {
+		// Create dummy product - price will be 10.
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$this->store_product( $product_1 );
+
+		// Create a more expensive product.
+		$product_2 = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$this->store_product( $product_2 );
+
+		// Add products to the cart.
+		WC()->cart->add_to_cart( $product_1->get_id(), 1 );
+		WC()->cart->add_to_cart( $product_2->get_id(), 1 );
+
+		$discounts = new WC_Discounts();
+
+		// 'sort_by_price' is called when setting items from the cart.
+		$discounts->set_items_from_cart( WC()->cart );
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		WC()->cart->empty_cart();
+
+		// Add products to the cart.
+		// This time add the cheaper product 5 times to the cart, so that
+		// the subtotal of product 1 > product 2.
+		WC()->cart->add_to_cart( $product_1->get_id(), 5 );
+		WC()->cart->add_to_cart( $product_2->get_id(), 1 );
+
+		// 'sort_by_price' is called when setting items from the cart.
+		$discounts->set_items_from_cart( WC()->cart );
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is still sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		// Add products to a dummy order.
+		$order = new WC_Order();
+		$order->add_product( $product_1, 1 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$this->store_order( $order );
+
+		// 'sort_by_price' is called when setting items from the order.
+		$discounts->set_items_from_order( $order );
+
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+
+		// Add products to a dummy order.
+		$order = new WC_Order();
+		$order->add_product( $product_1, 5 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$this->store_order( $order );
+
+		// 'sort_by_price' is called when setting items from the order.
+		$discounts->set_items_from_order( $order );
+
+		$items = $discounts->get_items();
+		$this->assertEquals( 2, count( $items ) );
+
+		// Get sorted items.
+		$first_item  = array_values( $items )[0];
+		$second_item = array_values( $items )[1];
+
+		// Ensure that the most expensive product is still sorted first.
+		$this->assertEquals( $first_item->product->get_id(), $product_2->get_id() );
+		$this->assertEquals( $second_item->product->get_id(), $product_1->get_id() );
+	}
+
+	/**
 	 * Test applying a coupon (make sure it changes prices).
 	 */
 	public function test_apply_coupon() {
@@ -1590,5 +1687,64 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$discounts->apply_coupon( $coupon_product_no_sale );
 		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
 		$this->assertEquals( 5.0, $coupon_discounts ); // $5 discount for 1 product.
+	}
+
+	/**
+	 * Test that fixed cart discount coupons maintain their total amount when quantities change in admin orders.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/XXXXX
+	 */
+	public function test_fixed_cart_discount_quantity_change_admin_order() {
+		$price = 20;
+		// Create a product with a price of $20.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $price );
+		$product->save();
+
+		// Create a fixed cart discount coupon of $10.
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// Create an order with our specific product and 1 item quantity.
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$order_item_id = $order->add_product( $product, 1 );
+
+		// Apply the coupon to the order.
+		$order->apply_coupon( $coupon->get_code() );
+		$order->calculate_totals();
+
+		// Verify initial discount amount is $10.
+		$coupons     = $order->get_items( 'coupon' );
+		$coupon_item = reset( $coupons );
+		$this->assertEquals( 10.0, $coupon_item->get_discount(), 'Initial discount should be $10' );
+
+		// Verify order total is $10 (original $20 - $10 discount).
+		$this->assertEquals( 10.0, $order->get_total(), 'Order total should be $10 after $10 discount' );
+
+		// Now change the quantity to 2 and save the order items.
+		$items = array(
+			'order_item_id'  => array( $order_item_id ),
+			'order_item_qty' => array( $order_item_id => 2 ),
+			'line_total'     => array( $order_item_id => 2 * $price ),
+			'line_subtotal'  => array( $order_item_id => 2 * $price ),
+		);
+
+		// Save the order items - this should trigger the coupon recalculation.
+		wc_save_order_items( $order->get_id(), $items );
+
+		// Reload the order to get updated data.
+		$order = wc_get_order( $order->get_id() );
+
+		// Verify the discount is still $10 (fixed cart discount should not increase with quantity).
+		$coupons     = $order->get_items( 'coupon' );
+		$coupon_item = reset( $coupons );
+		$this->assertEquals( 10.0, $coupon_item->get_discount(), 'Discount should remain $10 after quantity change' );
+
+		// Verify order total is $30 (original $40 - $10 discount).
+		$this->assertEquals( 30.0, $order->get_total(), 'Order total should be $30 after quantity change' );
 	}
 }

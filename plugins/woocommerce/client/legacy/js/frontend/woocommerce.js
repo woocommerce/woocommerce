@@ -14,6 +14,19 @@ jQuery( function ( $ ) {
 		}
 	} );
 
+	// Global accessibility handler for all links with role="button"
+	// This ensures both spacebar and enter keypresses trigger click events, as per ARIA specification
+	document.body.addEventListener( 'keydown', function ( event ) {
+		if ( ! event.target.matches( 'a[role="button"]' ) ) {
+			return;
+		}
+
+		if ( event.key === ' ' || event.key === 'Enter' ) {
+			event.preventDefault();
+			event.target.click();
+		}
+	} );
+
 	var noticeID = $( '.woocommerce-store-notice' ).data( 'noticeId' ) || '',
 		cookieName = 'store_notice' + noticeID;
 
@@ -22,31 +35,22 @@ jQuery( function ( $ ) {
 		$( '.woocommerce-store-notice' ).hide();
 	} else {
 		$( '.woocommerce-store-notice' ).show();
-		/**
-		 * After adding the role="button" attribute to the 
-		 * .woocommerce-store-notice__dismiss-link element, 
-		 * we need to add the keydown event listener to it.
-		 */
-		function store_notice_keydown_handler( event ) {
-			if ( ['Enter', ' '].includes( event.key ) ) {
-				event.preventDefault();
-				$( '.woocommerce-store-notice__dismiss-link' ).click();
-			}
-		}
 
 		// Set a cookie and hide the store notice when the dismiss button is clicked
 		function store_notice_click_handler( event ) {
 			Cookies.set( cookieName, 'hidden', { path: '/' } );
 			$( '.woocommerce-store-notice' ).hide();
 			event.preventDefault();
-			$( '.woocommerce-store-notice__dismiss-link' )
-				.off( 'click', store_notice_click_handler )
-				.off( 'keydown', store_notice_keydown_handler );
+			$( '.woocommerce-store-notice__dismiss-link' ).off(
+				'click',
+				store_notice_click_handler
+			);
 		}
-		
-		$( '.woocommerce-store-notice__dismiss-link' )
-			.on( 'click', store_notice_click_handler )
-			.on( 'keydown', store_notice_keydown_handler );
+
+		$( '.woocommerce-store-notice__dismiss-link' ).on(
+			'click',
+			store_notice_click_handler
+		);
 	}
 
 	// Make form field descriptions toggle on focus.
@@ -182,7 +186,10 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
-	$( document.body ).on( 'item_removed_from_classic_cart', focus_populate_live_region );
+	$( document.body ).on(
+		'item_removed_from_classic_cart updated_wc_div',
+		focus_populate_live_region
+	);
 } );
 
 /**
@@ -230,10 +237,10 @@ function refresh_sorted_by_live_region() {
 
 	if ( sorted_by_live_region ) {
 		var text = sorted_by_live_region.innerHTML;
-		sorted_by_live_region.setAttribute('aria-hidden', 'true');
-		
+		sorted_by_live_region.setAttribute( 'aria-hidden', 'true' );
+
 		var sorted_by_live_region_id = setTimeout( function () {
-			sorted_by_live_region.setAttribute('aria-hidden', 'false');
+			sorted_by_live_region.setAttribute( 'aria-hidden', 'false' );
 			sorted_by_live_region.innerHTML = '';
 			sorted_by_live_region.innerHTML = text;
 			clearTimeout( sorted_by_live_region_id );

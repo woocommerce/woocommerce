@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update MailPoet and Klaviyo variant assignment to 50/50 split. This change updates the visibility configuration for MailPoet and Klaviyo plugins to create an equal 50/50 split in visibility, replacing the previous 70/30 split configuration.

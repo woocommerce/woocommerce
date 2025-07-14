@@ -24,10 +24,10 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 /**
  * Hook for the woocommerce_email_header.
  *
- * @hooked WC_Emails::email_header() Output the email header
- * @since 3.7.0
+ * @hooked WC_Email_Customer_POS_*::email_header() Output the email header
+ * @since 10.0.0
  */
-do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
+do_action( 'woocommerce_pos_email_header', $email_heading, $email ); ?>
 
 <div class="email-introduction">
 <p>
@@ -127,7 +127,7 @@ if ( ! empty( $pos_refund_returns_policy ) ) {
 /**
  * Hook for the woocommerce_email_footer.
  *
- * @hooked WC_Emails::email_footer() Output the email footer
- * @since 4.0.0
- */
-do_action( 'woocommerce_email_footer', $email );
+ * @hooked WC_Email_Customer_POS_*::email_footer() Output the email footer
+ * @since 10.0.0
+*/
+do_action( 'woocommerce_pos_email_footer', $email );

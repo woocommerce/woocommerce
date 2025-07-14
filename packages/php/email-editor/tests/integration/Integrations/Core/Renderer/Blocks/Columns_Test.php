@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Columns class
@@ -59,11 +60,11 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 		),
 	);
 	/**
-	 * Settings controller instance
+	 * Rendering context instance.
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -71,15 +72,16 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->columns_renderer    = new Columns();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->columns_renderer  = new Columns();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders inner column
 	 */
 	public function testItRendersInnerColumn(): void {
-		$rendered = $this->columns_renderer->render( '', $this->parsed_columns, $this->settings_controller );
+		$rendered = $this->columns_renderer->render( '', $this->parsed_columns, $this->rendering_context );
 		$this->assertStringContainsString( 'Column 1', $rendered );
 	}
 
@@ -108,7 +110,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 		);
-		$rendered                = $this->columns_renderer->render( '', $parsed_columns, $this->settings_controller );
+		$rendered                = $this->columns_renderer->render( '', $parsed_columns, $this->rendering_context );
 		$this->assertStringContainsString( 'background-color:#abcdef;', $rendered );
 		$this->assertStringContainsString( 'border-color:#123456;', $rendered );
 		$this->assertStringContainsString( 'border-radius:10px;', $rendered );
@@ -127,7 +129,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_columns                                    = $this->parsed_columns;
 		$parsed_columns['attrs']['style']['color']['text'] = '#123456';
 		$parsed_columns['attrs']['style']['color']['background'] = '#654321';
-		$rendered = $this->columns_renderer->render( '', $parsed_columns, $this->settings_controller );
+		$rendered = $this->columns_renderer->render( '', $parsed_columns, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'color:#123456;', $rendered );
 		$this->assertStringContainsString( 'background-color:#654321;', $rendered );
@@ -140,7 +142,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_columns = $this->parsed_columns;
 		$content        = '<div class="wp-block-columns editor-class-1 another-class"></div>';
 		$parsed_columns['attrs']['style']['color']['background'] = '#654321';
-		$rendered = $this->columns_renderer->render( $content, $parsed_columns, $this->settings_controller );
+		$rendered = $this->columns_renderer->render( $content, $parsed_columns, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'wp-block-columns editor-class-1 another-class', $rendered );
 	}

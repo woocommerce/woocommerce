@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolved add to cart button count for variations where attribute type is any

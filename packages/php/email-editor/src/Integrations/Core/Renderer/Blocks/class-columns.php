@@ -8,8 +8,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -20,11 +21,12 @@ class Columns extends Abstract_Block_Renderer {
 	 * Override this method to disable spacing (block gap) for columns.
 	 * Spacing is applied on wrapping columns block. Columns are rendered side by side so no spacer is needed.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content = '';
 		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
 			$content .= render_block( $block );
@@ -33,24 +35,24 @@ class Columns extends Abstract_Block_Renderer {
 		return str_replace(
 			'{columns_content}',
 			$content,
-			$this->getBlockWrapper( $block_content, $parsed_block, $settings_controller )
+			$this->getBlockWrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Based on MJML <mj-section>
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function getBlockWrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function getBlockWrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 		$block_attributes           = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'align' => null,
-				'width' => $settings_controller->get_layout_width_without_padding(),
+				'width' => $rendering_context->get_layout_width_without_padding(),
 				'style' => array(),
 			)
 		);
@@ -73,11 +75,13 @@ class Columns extends Abstract_Block_Renderer {
 			$columns_styles['background-size'] = 'cover';
 		}
 
-		$rendered_columns = '<table class="' . esc_attr( 'email-block-columns ' . $original_wrapper_classname ) . '" style="width:100%;border-collapse:separate;text-align:left;' . esc_attr( WP_Style_Engine::compile_css( $columns_styles, '' ) ) . '" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
-      <tbody>
-        <tr>{columns_content}</tr>
-      </tbody>
-    </table>';
+		$columns_table_attrs = array(
+			'class' => 'email-block-columns ' . $original_wrapper_classname,
+			'style' => 'width:100%;border-collapse:separate;text-align:left;' . WP_Style_Engine::compile_css( $columns_styles, '' ),
+			'align' => 'center',
+		);
+
+		$columns_content = Table_Wrapper_Helper::render_table_wrapper( '{columns_content}', $columns_table_attrs, array(), array(), false );
 
 		// Margins are not supported well in outlook for tables, so wrap in another table.
 		$margins = $block_attributes['style']['spacing']['margin'] ?? array();
@@ -88,15 +92,18 @@ class Columns extends Abstract_Block_Renderer {
 					'spacing' => array( 'margin' => $margins ),
 				)
 			)['css'];
-			$rendered_columns         = '<table class="email-block-columns-wrapper" style="width:100%;border-collapse:separate;text-align:left;' . esc_attr( $margin_to_padding_styles ) . '" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tbody>
-          <tr>
-            <td>' . $rendered_columns . '</td>
-          </tr>
-        </tbody>
-      </table>';
+
+			$wrapper_table_attrs = array(
+				'class' => 'email-block-columns-wrapper',
+				'style' => 'width:100%;border-collapse:separate;text-align:left;' . $margin_to_padding_styles,
+				'align' => 'center',
+			);
+
+			$wrapper_cell_attrs = array();
+
+			return Table_Wrapper_Helper::render_table_wrapper( $columns_content, $wrapper_table_attrs, $wrapper_cell_attrs );
 		}
 
-		return $rendered_columns;
+		return $columns_content;
 	}
 }

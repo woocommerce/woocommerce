@@ -1,10 +1,17 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_API_PATH,
+	WC_ADMIN_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test, expect } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH, WC_ADMIN_API_PATH } from '../../utils/api-client';
 
 // a representation of the menu structure for WC
 const wcPages = [
@@ -173,8 +180,7 @@ const wcPages = [
 				name: 'Coupons',
 				heading: 'Coupons',
 				element: '.page-title-action',
-				// WP6.6: "Add coupon", WP6.7: "Add new coupon"
-				text: /Add coupon|Add new coupon/,
+				text: /Add new coupon/,
 			},
 		],
 	},
@@ -193,7 +199,8 @@ test.beforeAll( async ( { restApi } ) => {
 			skipped: true,
 		}
 	);
-	expect( response.statusCode ).toEqual( 200 );
+
+	expect( response.status ).toEqual( 200 );
 
 	// create a simple product
 	await restApi

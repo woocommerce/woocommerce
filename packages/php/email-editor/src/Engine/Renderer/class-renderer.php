@@ -8,8 +8,6 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
-// require_once __DIR__ . '/../../../vendor/autoload.php'; // wrong vendor path. TODO: need to fix this.
-
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
@@ -77,13 +75,16 @@ class Renderer {
 	 *
 	 * @param \WP_Post $post Post object.
 	 * @param string   $subject Email subject.
-	 * @param string   $pre_header Email preheader.
+	 * @param string   $pre_header An email preheader or preview text is the short snippet of text that follows the subject line in an inbox. See https://kb.mailpoet.com/article/418-preview-text.
 	 * @param string   $language Email language.
-	 * @param string   $meta_robots Email meta robots.
+	 * @param string   $meta_robots Optional string. Can be left empty for sending, but you can provide a value (e.g. noindex, nofollow) when you want to display email html in a browser.
+	 * @param string   $template_slug Optional block template slug used for cases when email doesn't have associated template.
 	 * @return array
 	 */
-	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, $meta_robots = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
+	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( ! $template_slug ) {
+			$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
+		}
 		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
 
@@ -145,7 +146,7 @@ class Renderer {
 	 */
 	private function render_text_version( $template ) {
 		$template = ( mb_detect_encoding( $template, 'UTF-8', true ) ) ? $template : mb_convert_encoding( $template, 'UTF-8', mb_list_encodings() );
-		$result   = Html2Text::convert( $template );
+		$result   = Html2Text::convert( (string) $template );
 		if ( ! $result ) {
 			return '';
 		}

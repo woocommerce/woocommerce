@@ -171,6 +171,7 @@ export type EmailEditorLayout = {
 };
 
 export type EmailEditorUrls = {
+	back: string;
 	send?: string;
 	listings: string;
 };
@@ -185,6 +186,7 @@ export type PersonalizationTag = {
 
 export type State = {
 	postId: number | string; // Template use strings
+	postType: string;
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {
@@ -259,4 +261,13 @@ export type EmailContentValidationRule = {
 	testContent: ( emailContent: string ) => boolean;
 	message: string;
 	actions: EmailContentValidationAction[];
+};
+
+export type CoreDataError = { message?: string; code?: string };
+
+export type PostWithPermissions = Post & {
+	permissions: {
+		delete: boolean;
+		update: boolean;
+	};
 };

@@ -49,6 +49,10 @@ jest.mock( '../use-create-product-by-type', () => ( {
 		.mockReturnValue( { createProductByType: jest.fn() } ),
 } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
 		json: () => Promise.resolve( {} ),
@@ -277,10 +281,10 @@ describe( 'Products', () => {
 		).toBeGreaterThanOrEqual( 1 );
 	} );
 
-	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the Official WooCommerce Marketplace link', () => {
+	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_add_product_visit_marketplace_click',
@@ -288,7 +292,10 @@ describe( 'Products', () => {
 		);
 	} );
 
-	it( 'should navigate to the marketplace when clicking the Official WooCommerce Marketplace link', async () => {
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
@@ -296,7 +303,7 @@ describe( 'Products', () => {
 
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'Official WooCommerce Marketplace' ) );
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 		);

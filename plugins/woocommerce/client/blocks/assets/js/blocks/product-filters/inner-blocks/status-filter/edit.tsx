@@ -64,16 +64,16 @@ const Edit = ( props: EditProps ) => {
 					)?.count ?? 0;
 
 				return {
+					label: value,
+					ariaLabel: value,
 					value: key,
-					label: showCounts
-						? `${ value } (${ count.toString() })`
-						: value,
-					count,
 					selected: index === 0,
+					count,
+					type: 'status',
 				};
 			} )
 			.filter( ( item ) => ! hideEmpty || item.count > 0 );
-	}, [ stockStatusOptions, filteredCounts, showCounts, hideEmpty ] );
+	}, [ stockStatusOptions, filteredCounts, hideEmpty ] );
 
 	return (
 		<div { ...innerBlocksProps }>
@@ -84,6 +84,7 @@ const Edit = ( props: EditProps ) => {
 						filterData: {
 							items,
 							isLoading,
+							showCounts,
 						},
 					} }
 				>

@@ -41,7 +41,7 @@ function payment_gateway_suggestions_add_suggestions( $specs ) {
 		'id'         => 'my-simple-gateway',
 		'title'      => __( 'Simple Gateway', 'woocommerce-admin' ),
 		'content'    => __( "This is a simple gateway that pulls its configuration fields from the gateway's class.", 'woocommerce-admin' ),
-		'image'      => WC()->plugin_url() . '/assets/images/placeholder.png',
+		'image'      => WC()->plugin_url() . '/assets/images/placeholder.webp',
 		'plugins'    => array( 'my-simple-gateway-wporg-slug' ),
 		'is_visible' => array(
 			(object) array(
@@ -56,7 +56,7 @@ function payment_gateway_suggestions_add_suggestions( $specs ) {
 		'id'      => 'my-slot-filled-gateway',
 		'title'   => __( 'Slot Filled Gateway', 'woocommerce-admin' ),
 		'content' => __( 'This gateway makes use of registered SlotFill scripts to show its content.', 'woocommerce-admin' ),
-		'image'   => WC()->plugin_url() . '/assets/images/placeholder.png',
+		'image'   => WC()->plugin_url() . '/assets/images/placeholder.webp',
 		'plugins' => array( 'my-slot-filled-gateway-wporg-slug' ),
 	);
 

@@ -94,7 +94,7 @@ const EMPTY_OBJECT: FormErrors = {};
  */
 export const useFormValidation = (
 	formFields: KeyedFormFields,
-	// Form type, can be billing, shipping, contact, order, or calculator.
+	// Form type, can be billing, shipping, contact, order.
 	formType: FormType,
 	// Allows certain fields to be overridden for forms that don't auto update data store.
 	overrideValues?: AddressFormValues
