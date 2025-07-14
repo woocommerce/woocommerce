@@ -36,10 +36,24 @@ const handleTransitionToCarouselLayout = (
 	);
 	const paginationBlockClientId = paginationBlock?.clientId;
 
+	const productTemplateUpdatedBlock = createBlock(
+		productTemplateBlockName,
+		{
+			...productTemplateBlock.attributes,
+			layout: {
+				type: 'flex',
+				justifyContent: 'left',
+				flexWrap: 'nowrap',
+				orientation: 'horizontal',
+			},
+		},
+		productTemplateBlock.innerBlocks
+	);
+
 	const nextPrevArrowsBlock = createBlock( nextPreviousArrowsBlockName );
 	const groupBlock = createBlock( 'core/group', {}, [
 		nextPrevArrowsBlock,
-		productTemplateBlock,
+		productTemplateUpdatedBlock,
 	] );
 
 	// We cannot use replaceBlock directly because it crashes the editor
@@ -73,12 +87,25 @@ const handleTransitionFromCarouselLayout = (
 
 	if ( groupBlock ) {
 		// Extract the product template block from the group.
-		const productTemplate = groupBlock.innerBlocks.find(
-			( block: BlockInstance ) => block.name === productTemplateBlockName
+		const productTemplate = findInnerBlock(
+			groupBlock.innerBlocks,
+			productTemplateBlockName
 		);
 
-		// Replace the group block with the product template block.
-		replaceBlock( groupBlock.clientId, productTemplate );
+		if ( productTemplate ) {
+			const productTemplateUpdatedBlock = createBlock(
+				productTemplateBlockName,
+				{
+					...productTemplate.attributes,
+					// Grid and List layouts are handled manually for now.
+					layout: {},
+				},
+				productTemplate.innerBlocks
+			);
+
+			// Replace the group block with the product template block.
+			replaceBlock( groupBlock.clientId, productTemplateUpdatedBlock );
+		}
 	}
 
 	const nextPrevArrowsBlock = findInnerBlock(
