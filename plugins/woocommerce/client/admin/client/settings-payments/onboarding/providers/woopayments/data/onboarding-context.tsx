@@ -229,52 +229,113 @@ export const OnboardingProvider: React.FC< {
 		[ getStepByKey, history, urlStrategy ]
 	);
 
-	// Find the first incomplete step with completed dependencies
-	const currentStep = allSteps.find(
-		( step ) =>
-			step.status !== 'completed' &&
-			areStepDependenciesCompleted( step, allSteps )
+	const findFirstIncompleteStep = useCallback(
+		(
+			steps: WooPaymentsProviderOnboardingStep[],
+			allStepsCollection: WooPaymentsProviderOnboardingStep[]
+		): WooPaymentsProviderOnboardingStep | undefined => {
+			for ( const step of steps ) {
+				if (
+					step.status !== 'completed' &&
+					areStepDependenciesCompleted( step, allStepsCollection )
+				) {
+					// If the step has sub-steps, check them first.
+					if ( step.subSteps && step.subSteps.length > 0 ) {
+						const incompleteSubStep = findFirstIncompleteStep(
+							step.subSteps,
+							allStepsCollection
+						);
+						if ( incompleteSubStep ) {
+							return incompleteSubStep;
+						}
+					}
+					// If no incomplete sub-step, this is the one.
+					return step;
+				}
+			}
+			return undefined;
+		},
+		[ areStepDependenciesCompleted ]
 	);
 
+	// Find the first incomplete step with completed dependencies
+	const currentStep = findFirstIncompleteStep( allSteps, allSteps );
+
+	const findTopLevelParent = (
+		active: WooPaymentsProviderOnboardingStep | undefined
+	): WooPaymentsProviderOnboardingStep | undefined => {
+		if ( ! active ) {
+			return undefined;
+		}
+
+		for ( const topStep of allSteps ) {
+			if ( topStep.id === active.id ) {
+				return topStep; // It's a top-level step
+			}
+			if ( topStep.subSteps?.some( ( sub ) => sub.id === active.id ) ) {
+				return topStep; // It's a direct sub-step of a top-level step
+			}
+		}
+		// This case shouldn't be reached with a well-formed step tree,
+		// but as a fallback, return the active step itself.
+		return active;
+	};
+
+	const currentTopLevelStep = findTopLevelParent( currentStep );
+
 	const navigateToNextStep = useCallback( () => {
-		const currentStepIndex = allSteps.findIndex(
-			( step ) => step.id === currentStep?.id
-		);
-		if ( currentStepIndex !== -1 ) {
-			// Mark current step as completed
-			if ( currentStep?.status !== 'completed' ) {
-				// Change step completion status in allSteps
-				setAllSteps(
-					allSteps.map( ( step ) =>
-						step.id === currentStep?.id
-							? { ...step, status: 'completed' as const }
-							: step
-					)
-				);
-			}
+		if ( ! currentStep ) {
+			onFinish?.();
+			return;
+		}
 
-			// If the current step is the last one, then we should call onFinish if provided.
-			if ( currentStepIndex === allSteps.length - 1 ) {
-				onFinish?.();
-				return;
-			}
+		const markStepCompleted = (
+			steps: WooPaymentsProviderOnboardingStep[],
+			stepId: string
+		): WooPaymentsProviderOnboardingStep[] => {
+			return steps.map( ( step ) => {
+				if ( step.id === stepId ) {
+					return { ...step, status: 'completed' as const };
+				}
+				if ( step.subSteps ) {
+					const newSubSteps = markStepCompleted(
+						step.subSteps,
+						stepId
+					);
+					if ( newSubSteps !== step.subSteps ) {
+						const allSubstepsCompleted = newSubSteps.every(
+							( s ) => s.status === 'completed'
+						);
+						return {
+							...step,
+							subSteps: newSubSteps,
+							status: allSubstepsCompleted
+								? ( 'completed' as const )
+								: step.status,
+						};
+					}
+				}
+				return step;
+			} );
+		};
 
-			// Find the next step that is not completed and has completed dependencies
-			const nextStep = allSteps.find(
-				( step ) =>
-					step.status !== 'completed' &&
-					areStepDependenciesCompleted( step, allSteps )
-			);
+		const newSteps = markStepCompleted( allSteps, currentStep.id );
 
-			if ( nextStep ) {
-				navigateToStep( nextStep.id );
-			}
+		const nextStep = findFirstIncompleteStep( newSteps, newSteps );
+
+		setAllSteps( newSteps as WooPaymentsProviderOnboardingStep[] );
+
+		if ( nextStep ) {
+			navigateToStep( nextStep.id );
+		} else {
+			onFinish?.();
 		}
 	}, [
 		currentStep,
 		allSteps,
 		navigateToStep,
-		areStepDependenciesCompleted,
+		findFirstIncompleteStep,
+		onFinish,
 	] );
 
 	const resetLocalState = () => {
@@ -307,62 +368,100 @@ export const OnboardingProvider: React.FC< {
 
 	// Update all steps when stateStoreSteps changes
 	useEffect( () => {
-		const mapWooPaymentsSteps = onboardingSteps
-			// First, filter out steps that are not returned from the API.
-			// This is to avoid showing steps that are not useful to the user.
-			.filter( ( step ) => {
-				if ( step.type === 'backend' ) {
-					return (
-						stateStoreSteps.findIndex(
-							( s ) => s.id === step.id
-						) !== -1
-					);
-				}
-				return true;
-			} )
-			.map( ( step ) => {
-				// If step type is backend, add the status, path and dependencies from the store
-				if ( step.type === 'backend' ) {
-					const backendStep = stateStoreSteps.find(
-						( s ) => s.id === step.id
-					) as WooPaymentsProviderOnboardingStep;
+		const mapWooPaymentsSteps = (
+			stepsToMap: WooPaymentsProviderOnboardingStep[]
+		): WooPaymentsProviderOnboardingStep[] => {
+			return stepsToMap
+				.map( ( step ) => {
+					let mappedStep = { ...step };
 
-					return Object.assign( {}, step, {
-						status: backendStep?.status || 'not_started',
-						dependencies: backendStep?.dependencies || [],
-						path: backendStep?.path,
-						context: backendStep?.context,
-						actions: backendStep?.actions,
-						errors: backendStep?.errors,
-					} );
-				}
+					// If step type is backend, add the status, path and dependencies from the store
+					if ( mappedStep.type === 'backend' ) {
+						const backendStep = stateStoreSteps.find(
+							( s ) => s.id === mappedStep.id
+						);
 
-				// For frontend steps, create a base step object first
-				return Object.assign( {}, step );
-			} );
+						if ( ! backendStep ) {
+							return null;
+						}
+
+						const backendStepWithErrors =
+							backendStep as WooPaymentsOnboardingStepContent & {
+								errors: [];
+							};
+
+						mappedStep = {
+							...mappedStep,
+							status:
+								( backendStepWithErrors.status === 'started'
+									? 'in_progress'
+									: backendStepWithErrors.status ) ||
+								'not_started',
+							dependencies:
+								backendStepWithErrors.dependencies || [],
+							path: backendStepWithErrors.path,
+							context: {
+								...( mappedStep.context || {} ),
+								...( backendStepWithErrors.context || {} ),
+							} as WooPaymentsProviderOnboardingStep[ 'context' ],
+							actions: backendStepWithErrors.actions,
+							errors: backendStepWithErrors.errors,
+						};
+					}
+
+					// Recursively map sub-steps
+					if ( mappedStep.subSteps ) {
+						mappedStep.subSteps = mapWooPaymentsSteps(
+							mappedStep.subSteps
+						);
+					}
+
+					return mappedStep;
+				} )
+				.filter(
+					( step ): step is WooPaymentsProviderOnboardingStep =>
+						step !== null
+				);
+		};
+
+		const mappedSteps = mapWooPaymentsSteps( onboardingSteps );
 
 		// Now determine dependencies status in a second pass to avoid stale data
-		const stepsWithDependenciesResolved = mapWooPaymentsSteps.map(
-			( step ) => {
-				if ( step.type === 'frontend' ) {
-					return {
-						...step,
-						status: areStepDependenciesCompleted(
-							step,
-							mapWooPaymentsSteps
-						)
-							? ( 'completed' as const )
-							: ( 'not_started' as const ),
-					};
+		const resolveFrontendDependencies = (
+			stepsToResolve: WooPaymentsProviderOnboardingStep[],
+			allMappedSteps: WooPaymentsProviderOnboardingStep[]
+		): WooPaymentsProviderOnboardingStep[] => {
+			return stepsToResolve.map( ( step ) => {
+				const resolvedStep = { ...step };
+
+				if ( resolvedStep.type === 'frontend' ) {
+					resolvedStep.status = areStepDependenciesCompleted(
+						resolvedStep,
+						allMappedSteps
+					)
+						? ( 'completed' as const )
+						: ( 'not_started' as const );
 				}
-				return step;
-			}
+
+				if ( resolvedStep.subSteps ) {
+					resolvedStep.subSteps = resolveFrontendDependencies(
+						resolvedStep.subSteps,
+						allMappedSteps
+					);
+				}
+				return resolvedStep;
+			} );
+		};
+
+		const stepsWithDependenciesResolved = resolveFrontendDependencies(
+			mappedSteps,
+			mappedSteps
 		);
 
 		setAllSteps(
 			stepsWithDependenciesResolved as WooPaymentsProviderOnboardingStep[]
 		);
-	}, [ stateStoreSteps, areStepDependenciesCompleted ] );
+	}, [ stateStoreSteps, areStepDependenciesCompleted, onboardingSteps ] );
 
 	useEffect( () => {
 		// Invalidate the getOnboardingData store selector to ensure the latest data is fetched.
