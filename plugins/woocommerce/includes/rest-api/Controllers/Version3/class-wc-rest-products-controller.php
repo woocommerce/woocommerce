@@ -584,9 +584,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				$db_column             = $column_map[ $field ];
-				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $db_column is from a hardcoded whitelist.
-				$field_token_clauses[] = $wpdb->prepare( "({$db_column} LIKE %s)", $like_search );
-				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$field_token_clauses[] = $wpdb->prepare( "({$db_column} LIKE %s)", $like_search ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			}
 
 			if ( $field_token_clauses ) {
