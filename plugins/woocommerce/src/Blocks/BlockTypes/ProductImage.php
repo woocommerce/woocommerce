@@ -135,7 +135,8 @@ class ProductImage extends AbstractBlock {
 	private function render_image( $product, $attributes, $image_id = null ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
-		$image_style = 'max-width:none;';
+		$image_style = '';
+
 		if ( ! empty( $attributes['height'] ) ) {
 			$image_style .= sprintf( 'height:%s;', $attributes['height'] );
 		}

@@ -2409,7 +2409,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'manage_stock' => array(
 								'description' => __( 'Stock management at variation level.', 'woocommerce' ),
-								'type'        => 'boolean',
+								'type'        => array( 'boolean', 'string' ),
 								'default'     => false,
 								'context'     => array( 'view', 'edit' ),
 							),
