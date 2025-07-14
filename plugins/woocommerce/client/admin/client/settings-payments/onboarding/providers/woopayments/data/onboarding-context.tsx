@@ -166,8 +166,11 @@ export const OnboardingProvider: React.FC< {
 	 * Helper functions
 	 */
 	const getStepByKey = useCallback(
-		( stepKey: string ) => {
-			return allSteps.find( ( step ) => step.id === stepKey );
+		(
+			stepKey: string,
+			steps: WooPaymentsProviderOnboardingStep[] = allSteps
+		): WooPaymentsProviderOnboardingStep | undefined => {
+			return getStepByKeyRecursively( stepKey, steps );
 		},
 		[ allSteps ]
 	);
@@ -183,8 +186,9 @@ export const OnboardingProvider: React.FC< {
 			}
 
 			return step.dependencies.every( ( dependencyId ) => {
-				const dependencyStep = steps.find(
-					( s ) => s.id === dependencyId
+				const dependencyStep = getStepByKeyRecursively(
+					dependencyId,
+					steps
 				);
 				return dependencyStep?.status === 'completed';
 			} );
