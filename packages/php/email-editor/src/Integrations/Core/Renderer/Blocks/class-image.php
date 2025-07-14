@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders an image block.
@@ -224,53 +225,47 @@ class Image extends Abstract_Block_Renderer {
 			$caption_wrapper_styles          = $styles;
 			$caption_wrapper_styles['width'] = $caption_width;
 			$caption_styles                  = $this->get_caption_styles( $rendering_context, $parsed_block );
-			$caption_html                    = '
-      <table
-        role="presentation"
-        class="email-table-with-width"
-        border="0"
-        cellpadding="0"
-        cellspacing="0"
-        style="' . esc_attr( \WP_Style_Engine::compile_css( $caption_wrapper_styles, '' ) ) . '"
-        width="' . esc_attr( $caption_width ) . '"
-          >
-        <tr>
-            <td style="' . esc_attr( $caption_styles ) . '">{caption_content}</td>
-         </tr>
-      </table>';
+
+			$caption_table_attrs = array(
+				'class' => 'email-table-with-width',
+				'style' => \WP_Style_Engine::compile_css( $caption_wrapper_styles, '' ),
+				'width' => $caption_width,
+			);
+
+			$caption_cell_attrs = array(
+				'style' => $caption_styles,
+			);
+
+			$caption_html = Table_Wrapper_Helper::render_table_wrapper( '{caption_content}', $caption_table_attrs, $caption_cell_attrs );
 		}
 
 		$styles['width'] = '100%';
 		$align           = $parsed_block['attrs']['align'] ?? 'left';
 
-		return '
-      <table
-        role="presentation"
-        border="0"
-        cellpadding="0"
-        cellspacing="0"
-        style="' . esc_attr( \WP_Style_Engine::compile_css( $styles, '' ) ) . '"
-        width="100%"
-      >
-        <tr>
-          <td align="' . esc_attr( $align ) . '">
-            <table
-              role="presentation"
-              class="email-table-with-width"
-              border="0"
-              cellpadding="0"
-              cellspacing="0"
-              style="' . esc_attr( \WP_Style_Engine::compile_css( $wrapper_styles, '' ) ) . '"
-              width="' . esc_attr( $wrapper_width ) . '"
-            >
-              <tr>
-                <td class="email-image-cell" style="overflow: hidden;">{image_content}</td>
-              </tr>
-            </table>' . $caption_html . '
-          </td>
-        </tr>
-      </table>
-    ';
+		$table_attrs = array(
+			'style' => \WP_Style_Engine::compile_css( $styles, '' ),
+			'width' => '100%',
+		);
+
+		$cell_attrs = array(
+			'align' => $align,
+		);
+
+		$image_table_attrs = array(
+			'class' => 'email-table-with-width',
+			'style' => \WP_Style_Engine::compile_css( $wrapper_styles, '' ),
+			'width' => $wrapper_width,
+		);
+
+		$image_cell_attrs = array(
+			'class' => 'email-image-cell',
+			'style' => 'overflow: hidden;',
+		);
+
+		$image_html    = Table_Wrapper_Helper::render_table_wrapper( '{image_content}', $image_table_attrs, $image_cell_attrs );
+		$inner_content = $image_html . $caption_html;
+
+		return Table_Wrapper_Helper::render_table_wrapper( $inner_content, $table_attrs, $cell_attrs );
 	}
 
 	/**

@@ -17,39 +17,6 @@ defined( 'ABSPATH' ) || exit;
 class MercadoPago extends PaymentGateway {
 
 	/**
-	 * Get the provider title of the payment gateway.
-	 *
-	 * This is the intended gateway title to use throughout the WC admin. It should be short.
-	 *
-	 * Note: We don't allow HTML tags in the title. All HTML tags will be stripped, including their contents.
-	 *
-	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
-	 *
-	 * @return string The provider title of the payment gateway.
-	 */
-	public function get_title( WC_Payment_Gateway $payment_gateway ): string {
-		$title = $payment_gateway->get_method_title();
-		switch ( $payment_gateway->id ) {
-			case 'woo-mercado-pago-basic':
-				$title = $title . ' (' . esc_html__( 'Installments without cards', 'woocommerce' ) . ')';
-				break;
-			case 'woo-mercado-pago-custom':
-				$title = $title . ' (' . esc_html__( 'Credit and debit cards', 'woocommerce' ) . ')';
-				break;
-			case 'woo-mercado-pago-ticket':
-				$title = $title . ' (' . esc_html__( 'Invoice', 'woocommerce' ) . ')';
-				break;
-			default:
-				break;
-		}
-
-		$title = wp_strip_all_tags( html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE ), true );
-
-		// Truncate the title.
-		return Utils::truncate_with_words( $title, 75 );
-	}
-
-	/**
 	 * Check if the payment gateway needs setup.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.

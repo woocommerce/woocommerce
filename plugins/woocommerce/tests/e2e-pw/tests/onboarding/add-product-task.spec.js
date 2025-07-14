@@ -1,32 +1,39 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const hide_task_list = async ( restApi, task_list_name ) => {
 	const {
-		statusCode,
+		status,
 		data: { isHidden },
 	} = await restApi.post(
 		`${ WC_ADMIN_API_PATH }/onboarding/tasks/${ task_list_name }/hide`
 	);
 
-	expect( statusCode ).toEqual( 200 );
+	expect( status ).toEqual( 200 );
 
 	return isHidden === true;
 };
 
 const show_task_list = async ( restApi, task_list_name ) => {
 	const {
-		statusCode,
+		status,
 		data: { isHidden },
 	} = await restApi.post(
 		`${ WC_ADMIN_API_PATH }/onboarding/tasks/${ task_list_name }/unhide`
 	);
 
-	expect( statusCode ).toEqual( 200 );
+	expect( status ).toEqual( 200 );
 
 	return isHidden === false;
 };

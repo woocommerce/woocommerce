@@ -6,7 +6,6 @@ import { BlockControls } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import DisplayLayoutToolbar from './display-layout-toolbar';
 import CollectionChooserToolbar from './collection-chooser-toolbar';
 import type { ProductCollectionContentProps } from '../../types';
 import { getCollectionByName } from '../../collections';
@@ -14,8 +13,7 @@ import { getCollectionByName } from '../../collections';
 export default function ToolbarControls(
 	props: ProductCollectionContentProps
 ) {
-	const { attributes, openCollectionSelectionModal, setAttributes } = props;
-	const { query, displayLayout } = attributes;
+	const { openCollectionSelectionModal } = props;
 
 	const collection = getCollectionByName( props.attributes.collection );
 	const showCollectionChooserToolbar =
@@ -29,12 +27,6 @@ export default function ToolbarControls(
 					openCollectionSelectionModal={
 						openCollectionSelectionModal
 					}
-				/>
-			) }
-			{ ! query.inherit && (
-				<DisplayLayoutToolbar
-					displayLayout={ displayLayout }
-					setAttributes={ setAttributes }
 				/>
 			) }
 		</BlockControls>

@@ -22,6 +22,10 @@
 				"remove": false,
 				"move": false
 			}
+		},
+		"cartButtonLabel": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"styles": [

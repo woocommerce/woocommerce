@@ -10,12 +10,29 @@ on:
         description: 'Skip verification steps.'
         type: boolean
         required: true
-        default: false
       create_github_release:
         description: 'Create a draft GitHub release.'
         type: boolean
         required: true
-        default: false
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        type: string
+        required: false
+        default: ''
+      skip_verify:
+        description: 'Skip verification steps.'
+        type: boolean
+        required: true
+      create_github_release:
+        description: 'Create a draft GitHub release.'
+        type: boolean
+        required: true
+    outputs:
+      artifact_url:
+        description: 'URL of the built release artifact'
+        value: ${{ jobs.build.outputs.artifact-url }}
 
 permissions: {}
 
@@ -24,18 +41,18 @@ jobs:
     name: 'Verify if any PR is left open by author:app/github-actions'
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
         - name: Verify if any PR is left open by author:app/github-actions
           id: verify-prs
-          uses: actions/github-script@v6
+          uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
           with:
               github-token: ${{ secrets.GITHUB_TOKEN }}
               script: |
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify === 'true') {
+                  if ('${{ inputs.skip_verify }}' === 'true') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
@@ -99,7 +116,7 @@ jobs:
 
   verify-release-versions:
     name: 'Verify release and stable tag versions'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -148,8 +165,10 @@ jobs:
 
   build:
     name: Build release zip file
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-4vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [ verify-prs, verify-release-versions ]
+    outputs:
+      artifact-url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     permissions:
       contents: read
     steps:
@@ -179,6 +198,7 @@ jobs:
         run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
 
       - name: Upload the zip file as an artifact
+        id: artifact-upload
         uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -187,9 +207,15 @@ jobs:
           path: zipfile
           retention-days: 1
 
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
   create-release:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: build
     if: ${{ inputs.create_github_release }}
     permissions:
