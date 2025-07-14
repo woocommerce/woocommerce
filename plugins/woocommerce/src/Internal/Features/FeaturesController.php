@@ -60,6 +60,8 @@ class FeaturesController {
 
 	/**
 	 * Pending compatibility declarations. Format is [feature_id, plugin_file, positive_compatibility].
+	 *
+	 * @var array
 	 */
 	private $pending_declarations = array();
 
@@ -676,7 +678,7 @@ class FeaturesController {
 	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
-	 * @param bool $internal_call Optional. If true, skips the 'before_woocommerce_init' hook check for internal calls after init. Default false.
+	 * @param bool   $internal_call Optional. If true, skips the 'before_woocommerce_init' hook check for internal calls after init. Default false.
 	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
 	public function declare_compatibility( string $feature_id, string $plugin_name, bool $positive_compatibility = true, bool $internal_call = false ): bool {
@@ -747,7 +749,7 @@ class FeaturesController {
 			return false;
 		}
 
-		$this->pending_declarations[] = [ $feature_id, $plugin_file, $positive_compatibility ];
+		$this->pending_declarations[] = array( $feature_id, $plugin_file, $positive_compatibility );
 		return true;
 	}
 
@@ -769,7 +771,7 @@ class FeaturesController {
 		}
 
 		$plugin_util = $this->plugin_util;
-		$logger = $this->proxy->call_function( 'wc_get_logger' );
+		$logger      = $this->proxy->call_function( 'wc_get_logger' );
 
 		foreach ( $this->pending_declarations as $declaration ) {
 			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
@@ -785,7 +787,7 @@ class FeaturesController {
 			$this->declare_compatibility( $feature_id, $plugin_id, $positive_compatibility, true );
 		}
 
-		$this->pending_declarations = [];
+		$this->pending_declarations = array();
 	}
 
 	/**
