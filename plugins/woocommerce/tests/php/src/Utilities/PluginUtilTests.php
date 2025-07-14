@@ -352,6 +352,10 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		// Second query should not call again (since we already processed, we don't call get_wp_plugin_id again).
 		$features_controller->get_compatible_features_for_plugin( 'test-plugin/test-plugin.php' );
 		$this->assertEquals( 1, $get_plugins_call_count, 'get_plugins should not be called again on subsequent queries.' );
+
+		// Test-plugin should be compatible with test_feature.
+		$result = $features_controller->get_compatible_features_for_plugin( 'test-plugin/test-plugin.php' );
+		$this->assertContains( 'test_feature', $result['compatible'] );
 	}
 
 	/**
