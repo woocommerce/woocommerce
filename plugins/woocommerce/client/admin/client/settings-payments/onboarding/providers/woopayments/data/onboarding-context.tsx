@@ -26,6 +26,27 @@ import {
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
+ * Recursively search for a step by key in a nested structure.
+ */
+const getStepByKeyRecursively = (
+	key: string,
+	steps: WooPaymentsProviderOnboardingStep[]
+): WooPaymentsProviderOnboardingStep | undefined => {
+	for ( const step of steps ) {
+		if ( step.id === key ) {
+			return step;
+		}
+		if ( step.subSteps ) {
+			const found = getStepByKeyRecursively( key, step.subSteps );
+			if ( found ) {
+				return found;
+			}
+		}
+	}
+	return undefined;
+};
+
+/**
  * URL Strategy interface for handling navigation in different contexts
  */
 interface URLStrategy {
