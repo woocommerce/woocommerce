@@ -3,7 +3,11 @@
  */
 import { useRef, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createBlock, BlockInstance } from '@wordpress/blocks';
+import {
+	createBlock,
+	createBlocksFromInnerBlocksTemplate,
+	type BlockInstance,
+} from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
@@ -13,8 +17,17 @@ import {
 	coreQueryPaginationBlockName,
 	productTemplateBlockName,
 	nextPreviousArrowsBlockName,
+	paginationDefaultAttributes,
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
+
+const findInnerBlock = ( innerBlocks: BlockInstance[], blockName: string ) => {
+	const blocks = innerBlocks.find(
+		( block: BlockInstance ) => block.name === blockName
+	);
+
+	return blocks;
+};
 
 /**
  * Custom hook to adjust the pagination block when switching between layouts.
@@ -28,20 +41,17 @@ const useLayoutAdjustments = (
 	attributes: ProductCollectionAttributes
 ) => {
 	const { displayLayout, collection } = attributes;
-
 	const previousLayoutType = useRef< LayoutOptions >( displayLayout.type );
 	const innerBlocks = useSelect(
 		( select ) =>
 			clientId ? select( blockEditorStore ).getBlocks( clientId ) : [],
 		[ clientId ]
 	);
-
-	const productTemplateBlocks = innerBlocks.filter(
-		( block: BlockInstance ) => block.name === productTemplateBlockName
+	const productTemplateBlock = findInnerBlock(
+		innerBlocks,
+		productTemplateBlockName
 	);
-	const productTemplateBlock = productTemplateBlocks[ 0 ];
 	const productTemplateBlockClientId = productTemplateBlock?.clientId;
-
 	const productTemplateBlockIndex = useSelect(
 		( select ) =>
 			productTemplateBlockClientId
@@ -63,19 +73,18 @@ const useLayoutAdjustments = (
 		// When switching TO carousel layout, add arrows block and remove pagination block (if exists).
 		if (
 			displayLayout?.type === LayoutOptions.CAROUSEL &&
-			previousLayoutType.current !== LayoutOptions.CAROUSEL
+			previousLayoutType.current !== LayoutOptions.CAROUSEL &&
+			productTemplateBlock
 		) {
-			const paginationBlocks = innerBlocks.filter(
-				( block: BlockInstance ) =>
-					block.name === coreQueryPaginationBlockName
+			const paginationBlock = findInnerBlock(
+				innerBlocks,
+				coreQueryPaginationBlockName
 			);
-
-			const paginationBlockClientId = paginationBlocks[ 0 ]?.clientId;
+			const paginationBlockClientId = paginationBlock?.clientId;
 
 			const nextPrevArrowsBlock = createBlock(
 				nextPreviousArrowsBlockName
 			);
-
 			const groupBlock = createBlock( 'core/group', {}, [
 				nextPrevArrowsBlock,
 				productTemplateBlock,
@@ -102,12 +111,11 @@ const useLayoutAdjustments = (
 			displayLayout?.type !== LayoutOptions.CAROUSEL &&
 			previousLayoutType.current === LayoutOptions.CAROUSEL
 		) {
-			const nextPrevArrowsBlocks = innerBlocks.filter(
-				( block: BlockInstance ) =>
-					block.name === nextPreviousArrowsBlockName
+			const nextPrevArrowsBlock = findInnerBlock(
+				innerBlocks,
+				nextPreviousArrowsBlockName
 			);
-			const nextPrevArrowsBlockClientId =
-				nextPrevArrowsBlocks[ 0 ]?.clientId;
+			const nextPrevArrowsBlockClientId = nextPrevArrowsBlock?.clientId;
 
 			// Find the group block containing the product template
 			const groupBlock = innerBlocks.find(
