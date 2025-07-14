@@ -80,4 +80,58 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( '+12345678' ), '12345678' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '123.4e-5' ), '12345' );
 	}
+
+	public function test_generate_product_data_for_variable_product_on_sale() {
+		$size_attribute = new WC_Product_Attribute();
+		$size_attribute->set_name( 'Size' );
+		$size_attribute->set_options( array( 'Small', 'Large' ) );
+		$size_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Sample T-Shirt' );
+		$product->set_status( 'publish' );
+		$product->set_attributes( array( $size_attribute ) );
+		$product_id = $product->save();
+
+		$variation1 = new WC_Product_Variation();
+		$variation1->set_parent_id( $product_id );
+		$variation1->set_attributes( array( 'size' => 'Small' ) );
+		$variation1->set_regular_price( 25.00 );
+		$variation1->set_sale_price( 20.00 );
+		$variation1->set_status( 'publish' );
+		$variation1->save();
+
+		$variation2 = new WC_Product_Variation();
+		$variation2->set_parent_id( $product_id );
+		$variation2->set_attributes( array( 'size' => 'Large' ) );
+		$variation2->set_regular_price( 35.00 );
+		$variation2->set_sale_price( 30.00 );
+		$variation2->set_status( 'publish' );
+		$variation2->save();
+
+		$variation2 = new WC_Product_Variation();
+		$variation2->set_parent_id( $product_id );
+		$variation2->set_attributes( array( 'size' => 'Large' ) );
+		$variation2->set_regular_price( 15.00 );
+		$variation2->set_sale_price( 10.00 );
+		$variation2->set_status( 'publish' );
+		$variation2->save();
+
+		$product = wc_get_product( $product_id );
+		$product->set_price( 10 );
+		$product->save();
+
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data();
+		// var_dump( $data );
+		// die;
+		$this->assertEquals(
+			'UnitPriceSpecification',
+			$data[0]['offers'][0]['priceSpecification'][0]['@type']
+		);
+		$this->assertEquals(
+			'10.00',
+			$data[0]['offers'][0]['priceSpecification'][0]['price']
+		);
+	}
 }

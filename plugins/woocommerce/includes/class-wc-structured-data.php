@@ -259,6 +259,7 @@ class WC_Structured_Data {
 					);
 
 					if ( $product->is_on_sale() ) {
+						var_dump( 123 );
 						$children                = array_map( 'wc_get_product', $product->get_children() );
 						$lowest_child_sale_price = $highest;
 
