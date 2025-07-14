@@ -36,7 +36,7 @@ const {
 	removeFromCartLabel,
 	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
-const { singularItemsText, pluralItemsText } = getConfig(
+const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
@@ -470,10 +470,10 @@ store(
 			get itemsInCartText() {
 				const cartItemsCount = miniCartState.totalItemsInCart;
 
-				const template =
-					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
-
-				return template.replace( '%d', cartItemsCount.toString() );
+				return itemsInCartTextTemplate.replace(
+					'%d',
+					cartItemsCount.toString()
+				);
 			},
 		},
 	},

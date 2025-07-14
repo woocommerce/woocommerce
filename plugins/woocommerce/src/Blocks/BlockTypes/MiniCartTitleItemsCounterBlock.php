@@ -38,18 +38,12 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
 		// translators: %d number of items in the cart.
-		$cart_item_text = _n( '(%d item)', '(%d items)', $cart_item_count, 'woocommerce' );
-
-		// translators: item is an item in cart.
-		$singular = __( '(%d item)', 'woocommerce' );
-		// translators: items is items in a cart.
-		$plural = __( '(%d items)', 'woocommerce' );
+		$cart_item_text = __( '(items: %d)', 'woocommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
 			array(
-				'singularItemsText' => $singular,
-				'pluralItemsText'   => $plural,
+				'itemsInCartTextTemplate' => $cart_item_text,
 			)
 		);
 
