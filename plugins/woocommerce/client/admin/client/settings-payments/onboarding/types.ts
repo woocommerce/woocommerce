@@ -53,6 +53,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
+	subSteps?: WooPaymentsProviderOnboardingStep[];
 	actions?: {
 		save?: {
 			type?: string;
