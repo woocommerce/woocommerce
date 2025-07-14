@@ -165,12 +165,17 @@ function wc_delete_product_transients( $post_id = 0 ) {
 			$queue            = WC()->queue();
 
 			if ( ! isset( $scheduled[ $cache_key ] ) ) {
-				$existing                = $queue->get_next(
-					'wc_delete_related_product_transients_async',
-					array( 'post_id' => $post_id ),
-					'wc_delete_related_product_transients_group'
+				$queue                   = WC()->queue();
+				$existing                = $queue->search(
+					array(
+						'hook'     => 'wc_delete_related_product_transients_async',
+						'args'     => array( 'post_id' => $post_id ),
+						'status'   => 'pending',
+						'group'    => 'wc_delete_related_product_transients_group',
+						'per_page' => 1,
+					)
 				);
-				$scheduled[ $cache_key ] = null !== $existing;
+				$scheduled[ $cache_key ] = ! empty( $existing );
 			}
 
 			if ( ! $scheduled[ $cache_key ] ) {
