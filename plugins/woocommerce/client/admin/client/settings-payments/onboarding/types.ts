@@ -135,6 +135,7 @@ export interface OnboardingContextType {
 	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
+	currentTopLevelStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
 	navigateToNextStep: () => void;
 	getStepByKey: (
