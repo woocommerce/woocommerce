@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix edge case when selecting shipping/pickup location on slow network

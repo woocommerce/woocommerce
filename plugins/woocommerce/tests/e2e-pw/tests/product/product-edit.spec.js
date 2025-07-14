@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-const { faker } = require( '@faker-js/faker' );
+import { faker } from '@faker-js/faker';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 import { getFakeProduct } from '../../utils/data';
 
 async function saveProductChanges( page ) {

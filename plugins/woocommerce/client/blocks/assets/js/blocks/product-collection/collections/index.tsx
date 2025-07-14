@@ -24,6 +24,8 @@ import productCollection from './product-collection';
 import related from './related';
 import topRated from './top-rated';
 import upsells from './upsells';
+import byCategory from './by-category';
+import byTag from './by-tag';
 
 // Order in here is reflected in the Collection Chooser in Editor.
 const collections: BlockVariation[] = [
@@ -34,6 +36,8 @@ const collections: BlockVariation[] = [
 	bestSellers,
 	topRated,
 	handPicked,
+	byCategory,
+	byTag,
 	related,
 	upsells,
 	crossSells,

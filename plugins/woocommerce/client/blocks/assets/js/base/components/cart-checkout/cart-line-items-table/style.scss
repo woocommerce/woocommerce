@@ -62,6 +62,9 @@ table.wc-block-cart-items {
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
+			&[hidden] {
+				display: none;
+			}
 		}
 		.wc-block-cart-item__total {
 			@include font-size(regular);
