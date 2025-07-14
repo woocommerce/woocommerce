@@ -5,7 +5,6 @@ sidebar_label: Order summary items
 ---
 
 # Order summary items
-<!-- markdownlint-disable MD024 -->
 
 The following Order Summary Items filters are available:
 
@@ -25,11 +24,11 @@ The following screenshot shows which parts the individual filters affect:
 
 ## `cartItemClass`
 
-### Description <!-- omit in toc -->
+### Description
 
 The `cartItemClass` filter allows to change the order summary item class.
 
-### Parameters <!-- omit in toc -->
+### Parameters
 
 -   _defaultValue_ `string` (default: `''`) - The default order summary item class.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -38,13 +37,13 @@ The `cartItemClass` filter allows to change the order summary item class.
     -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns
 
 -   `string` - The modified order summary item class, or an empty string.
 
-### Code examples <!-- omit in toc -->
+### Code examples
 
-#### Basic example <!-- omit in toc -->
+#### Basic example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -64,7 +63,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -92,9 +91,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -102,11 +101,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `cartItemPrice`
 
-### Description <!-- omit in toc -->
+### Description
 
 The `cartItemPrice` filter allows to format the order summary item price.
 
-### Parameters <!-- omit in toc -->
+### Parameters
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default order summary item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -116,13 +115,13 @@ The `cartItemPrice` filter allows to format the order summary item price.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns
 
 -   `string` - The modified format of the order summary item price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples
 
-#### Basic example <!-- omit in toc -->
+#### Basic example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -142,7 +141,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -170,9 +169,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -180,11 +179,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `itemName`
 
-### Description <!-- omit in toc -->
+### Description
 
 The `itemName` filter allows to change the order summary item name.
 
-### Parameters <!-- omit in toc -->
+### Parameters
 
 -   _defaultValue_ `string` - The default order summary item name.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -193,13 +192,13 @@ The `itemName` filter allows to change the order summary item name.
     -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns
 
 -   `string` - The original or modified order summary item name.
 
-### Code examples <!-- omit in toc -->
+### Code examples
 
-#### Basic example <!-- omit in toc -->
+#### Basic example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -219,7 +218,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -247,9 +246,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -257,11 +256,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `subtotalPriceFormat`
 
-### Description <!-- omit in toc -->
+### Description
 
 The `subtotalPriceFormat` filter allows to format the order summary item subtotal price.
 
-### Parameters <!-- omit in toc -->
+### Parameters
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default order summary item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -271,13 +270,13 @@ The `subtotalPriceFormat` filter allows to format the order summary item subtota
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns
 
 -   `string` - The modified format of the order summary item subtotal price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples
 
-#### Basic example <!-- omit in toc -->
+#### Basic example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -302,7 +301,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -335,9 +334,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|

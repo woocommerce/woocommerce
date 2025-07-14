@@ -24,7 +24,7 @@ There are two ways to do this, depending on how your code is running.
 
 #### If your code is running in a React component
 
-If your component is an inner block of the Cart/Checkout, or rendered in a [Slot/Fill](./slot-fills.md), you can directly select the data you need from the relevant data store and perform any necessary actions when the data changes. For more information on available selectors, refer to the [documentation for the relevant data store](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store).
+If your component is an inner block of the Cart/Checkout, or rendered in a [Slot/Fill](/docs/block-development/tutorials/slot-fills/), you can directly select the data you need from the relevant data store and perform any necessary actions when the data changes. For more information on available selectors, refer to the [documentation for the relevant data store](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store).
 
 ```js
 /**
@@ -198,7 +198,7 @@ This is currently **not** officially supported, however we have heard of develop
 
 ### How do I remove checkout fields?
 
-We don't encourage this due to the wide array of plugins WordPress and Woo support. Some of these may rely on certain checkout fields to function, but if you're certain the fields are safe to remove, please see [Removing Checkout Fields](./removing-checkout-fields.md).
+We don't encourage this due to the wide array of plugins WordPress and Woo support. Some of these may rely on certain checkout fields to function, but if you're certain the fields are safe to remove, please see [Removing Checkout Fields](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/checkout-block-extensible-features/removing-checkout-fields/).
 
 ### How do I modify the order or customer data during checkout?
 

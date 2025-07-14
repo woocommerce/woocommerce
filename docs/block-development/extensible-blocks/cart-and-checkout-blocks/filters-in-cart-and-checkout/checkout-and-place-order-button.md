@@ -5,7 +5,6 @@ sidebar_label: Checkout and place order button
 ---
 
 # Checkout and place order button
-<!-- markdownlint-disable MD024 -->
 
 The following Checkout and place order button filters are available:
 
@@ -20,24 +19,24 @@ The following objects are shared between the filters:
 
 ## `proceedToCheckoutButtonLabel`
 
-### Description <!-- omit in toc -->
+### Description 
 
 The `proceedToCheckoutButtonLabel` filter allows change the label of the "Proceed to checkout" button.
 
-### Parameters <!-- omit in toc -->
+### Parameters 
 
 -   _defaultValue_ `string` (default: `Proceed to Checkout`) - The label of the "Proceed to checkout" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
 
-### Returns <!-- omit in toc -->
+### Returns 
 
 -   `string` - The label of the "Proceed to checkout" button.
 
-### Code examples <!-- omit in toc -->
+### Code examples 
 
-#### Basic example <!-- omit in toc -->
+#### Basic example 
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -59,7 +58,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example 
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -89,9 +88,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots 
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -99,24 +98,24 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `proceedToCheckoutButtonLink`
 
-### Description <!-- omit in toc -->
+### Description 
 
 The `proceedToCheckoutButtonLink` filter allows change the link of the "Proceed to checkout" button.
 
-### Parameters <!-- omit in toc -->
+### Parameters 
 
 -   _defaultValue_ `string` (default: `/checkout`) - The link of the "Proceed to checkout" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](../available-filters/README.md).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/).
 
-### Returns <!-- omit in toc -->
+### Returns 
 
 -   `string` - The link of the "Proceed to checkout" button.
 
-### Code examples <!-- omit in toc -->
+### Code examples 
 
-#### Basic example <!-- omit in toc -->
+#### Basic example 
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -138,7 +137,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example 
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -168,9 +167,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots 
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -178,20 +177,20 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `placeOrderButtonLabel`
 
-### Description <!-- omit in toc -->
+### Description 
 
 The `placeOrderButtonLabel` filter allows change the label of the "Place order" button.
 
-### Parameters <!-- omit in toc -->
+### Parameters 
 
 -   _defaultValue_ (type: `string`, default: `Place order`) - The label of the "Place order" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 
-### Returns <!-- omit in toc -->
+### Returns 
 
 -   `string` - The label of the "Place order" button.
 
-### Code example <!-- omit in toc -->
+### Code example 
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -205,9 +204,9 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots 
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|

@@ -10,7 +10,7 @@ Whether you’re new to block development or looking to deepen your expertise, t
 ## 📚 Recommended Learning Path
 
 1. **Getting Started**
-   - [Introduction & Setup](./getting-started.md)
+   - [Introduction & Setup](/docs/block-development/getting-started/extensibility-overview/)
    - Prerequisites and environment setup
    - FAQs
 
@@ -43,11 +43,11 @@ Whether you’re new to block development or looking to deepen your expertise, t
 
 ## 🚀 Start Here
 
-- **[Getting Started](./getting-started.md)**: Set up your environment and create your first block.
-- **[Tutorials](./tutorials/)**: Follow hands-on guides to build and enhance your blocks.
-- **[Reference](./reference/)**: Look up APIs, filters, and block details as you build.
-- **[Extensibility](./extensibility-in-blocks/)**: Learn to extend and customize blocks for advanced use cases.
-- **[Cart & Checkout](./cart-and-checkout-blocks/)** and **[Product Collection](./product-collection-block/)**: Explore specialized block documentation.
+- **[Getting Started](/docs/block-development/getting-started/extensibility-overview/)**: Set up your environment and create your first block.
+- **[Tutorials](/docs/category/tutorials/)**: Follow hands-on guides to build and enhance your blocks.
+- **[Reference](/docs/category/reference/)**: Look up APIs, filters, and block details as you build.
+- **[Extensibility](/docs/category/extensible-blocks/)**: Learn to extend and customize blocks for advanced use cases.
+- **[Cart & Checkout](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/)** and **[Product Collection](/docs/block-development/extensible-blocks/product-collection-block/)**: Explore specialized block documentation.
 
 ---
 

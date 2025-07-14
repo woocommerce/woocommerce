@@ -6,8 +6,6 @@ sidebar_label: Filtering payment methods
 
 # Filtering payment methods in the Checkout block
 
-<!-- markdownlint-disable MD024 -->
-
 ## The problem
 
 You're an extension developer, and your extension is conditionally hiding payment gateways on the checkout step. You need to be able to hide payment gateways on the Checkout block using a front-end extensibility point.
@@ -64,7 +62,7 @@ Extensions can register only one callback per payment method:
 payment_method_name: ( arg ) => {...}
 ```
 
-`payment_method_name` is the value of the [name property](/docs/block-development/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration) used when the payment method was registered with WooCommerce Blocks.
+`payment_method_name` is the value of the [name property](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/checkout-block-extensible-features/checkout-payment-methods/payment-method-integration) used when the payment method was registered with WooCommerce Blocks.
 
 The registered callbacks are used to determine whether the corresponding payment method should be available as an option for the shopper. The function will be passed an object containing data about the current order.
 

@@ -12,7 +12,7 @@ The following Additional Cart and Checkout inner block types filter is available
 
 ## `additionalCartCheckoutInnerBlockTypes`
 
-### Description <!-- omit in toc -->
+### Description
 
 The Cart and Checkout blocks are made up of inner blocks. These inner blocks areas allow certain block types to be added as children. By default, only `core/paragraph`, `core/image`, and `core/separator` are available to add.
 
@@ -20,7 +20,7 @@ By using the `additionalCartCheckoutInnerBlockTypes` filter it is possible to ad
 
 This filter is called once for each inner block area, so it is possible to be very granular when determining what blocks can be added where.
 
-### Parameters <!-- omit in toc -->
+### Parameters
 
 -   _defaultValue_ `array` (default: `[]`) - The default value of the filter.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -28,11 +28,11 @@ This filter is called once for each inner block area, so it is possible to be ve
     -   _block_ `string` - The block name of the inner block area, e.g. `woocommerce/checkout-shipping-address-block`.
 -   _validation_ `boolean` or `Error` - Checks if the returned value is an array of strings. If an error occurs, it will be thrown.
 
-### Returns <!-- omit in toc -->
+### Returns
 
 -   `array` - The modified array with allowed block types for the corresponding inner block area.
 
-### Code example <!-- omit in toc -->
+### Code example
 
 Let's suppose we want to allow the editor to add some blocks in specific places in the Cart and Checkout blocks.
 
@@ -68,9 +68,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 To call this filter within the editor, wrap the filter registration in a `DOMContentLoaded` event listener and ensure the code runs in the admin panel.
 
-> Filters can be also combined. See [Combined filters](../available-filters/README.md) for an example.
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|

@@ -8,7 +8,7 @@ sidebar_label: Slot and fill
 
 ## The problem
 
-You added custom data to the [Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters/README.md). Now you want to render your own components in specific places in the Cart and Checkout.
+You added custom data to the [Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
 
