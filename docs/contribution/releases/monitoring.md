@@ -16,7 +16,3 @@ The forum entries are also fed into the [#woo-forums-woocommerce Slack Channel](
 ## WooCommerce GitHub Repository Issues
 
 Watch the [Newest Created Issues](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc) and verify that none are critical.
-
-## Internal Staging
-
-Continue to [monitor our internal staging](https://wp.me/PCYsg-18BQ) for any new issues that may not have initially appeared during the pre-stable staging phase.
