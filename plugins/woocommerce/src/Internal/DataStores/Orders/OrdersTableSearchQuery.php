@@ -160,6 +160,7 @@ class OrdersTableSearchQuery {
 	/**
 	 * Returns a prepared JOIN fragment for products when FTS is enabled.
 	 *
+	 * @since 10.1.0
 	 * @return string JOIN clause or empty string if FTS disabled.
 	 */
 	private function maybe_get_join_for_products(): string {
@@ -195,6 +196,7 @@ class OrdersTableSearchQuery {
 	/**
 	 * Returns a prepared JOIN fragment for customers/addresses when FTS is enabled.
 	 *
+	 * @since 10.1.0
 	 * @return string JOIN clause or empty string if FTS disabled.
 	 */
 	private function maybe_get_join_for_customers(): string {
