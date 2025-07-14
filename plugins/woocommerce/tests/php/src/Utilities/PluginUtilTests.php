@@ -324,14 +324,14 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		$get_plugins_call_count = 0;
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins' => function () use ( &$get_plugins_call_count ) {
+				'get_plugins'     => function () use ( &$get_plugins_call_count ) {
 					$get_plugins_call_count++;
 					return array(
 						'test-plugin/test-plugin.php' => array( 'Name' => 'Test Plugin' ),
 					);
 				},
 				'plugin_basename' => function ( $file ) {
-					return basename($file);
+					return basename( $file );
 				},
 			)
 		);
