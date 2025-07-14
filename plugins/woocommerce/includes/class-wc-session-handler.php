@@ -698,7 +698,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return int|string
 	 */
 	public function maybe_update_nonce_user_logged_out( $uid, $action ) {
-		if ( $action && StringUtil::starts_with( (string) $action, 'woocommerce' ) ) {
+		if ( is_string( $action ) && StringUtil::starts_with( $action, 'woocommerce' ) ) {
 			return $this->has_session() && $this->get_customer_id() ? $this->get_customer_id() : $uid;
 		}
 		return $uid;
