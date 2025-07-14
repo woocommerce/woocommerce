@@ -87,7 +87,7 @@ export const CheckoutEventsProvider = ( {
 	children,
 	redirectUrl,
 }: {
-	children: React.ReactChildren;
+	children: React.ReactNode;
 	redirectUrl: string;
 } ): JSX.Element => {
 	const paymentMethods = getPaymentMethods();
