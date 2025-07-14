@@ -180,14 +180,16 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 	],
 ];
 
+export const paginationDefaultAttributes = {
+	layout: {
+		type: 'flex',
+		justifyContent: 'center',
+	},
+};
+
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
 	coreQueryPaginationBlockName,
-	{
-		layout: {
-			type: 'flex',
-			justifyContent: 'center',
-		},
-	},
+	paginationDefaultAttributes,
 ];
 
 export const INNER_BLOCKS_NO_RESULTS_TEMPLATE: InnerBlockTemplate = [

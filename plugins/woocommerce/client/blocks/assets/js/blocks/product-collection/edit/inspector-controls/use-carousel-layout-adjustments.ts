@@ -136,7 +136,10 @@ const useLayoutAdjustments = (
 
 			if ( ! collection ) {
 				insertBlock(
-					createBlock( coreQueryPaginationBlockName, {}, [] ),
+					createBlock(
+						coreQueryPaginationBlockName,
+						paginationDefaultAttributes
+					),
 					innerBlocks.length,
 					clientId,
 					false
