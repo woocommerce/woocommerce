@@ -7,12 +7,6 @@ on:
 permissions:
   contents: write
 
-env:
-    GIT_COMMITTER_NAME: 'WooCommerce Bot'
-    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
-    GIT_AUTHOR_NAME: 'WooCommerce Bot'
-    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
-
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
@@ -71,8 +65,8 @@ jobs:
               if (eventsInRange.length > 0) {
                 console.log(`Found Code Freeze event: ${eventsInRange[0].summary}`);
                 core.setOutput('should-trigger-webhook', 'true');
-                core.setOutput('release-version', eventsInRange[0].summary.match(/\d+\.\d+/)[0]);
-                core.setOutput('release-date', eventsInRange[0].start.toISOString());
+                core.setOutput('version', eventsInRange[0].summary.match(/\d+\.\d+/)[0]);
+                core.setOutput('feature-freeze-date', eventsInRange[0].start.toISOString());
               } else {
                 console.log(`No Code Freeze events found in the specified range.`);
                 core.setOutput('should-trigger-webhook', 'false');
@@ -94,8 +88,8 @@ jobs:
             
             const payload = {
               action: 'release-assignment',
-              release_version: '${{ needs.check-upcoming-release-events.outputs.release-version }}',
-              release_date: '${{ needs.check-upcoming-release-events.outputs.release-date }}',
+              version: '${{ needs.check-upcoming-release-events.outputs.version }}',
+              feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
 
@@ -117,7 +111,22 @@ jobs:
             });
             
             if (!response.ok) {
-              core.setFailed(`Request failed with status ${response.status}`);
+              const status = response.status;
+              let errorMessage = `Request failed with status ${status}`;
+              
+              switch (status) {
+                case 409:
+                  errorMessage = `Post already exists for this release (${status})`;
+                  console.log(errorMessage);
+                  break;
+                case 403:
+                  errorMessage = `Invalid webhook secret or unauthorized access (${status})`;
+                  core.setFailed(errorMessage);
+                  break;
+                default:
+                  core.setFailed(errorMessage);
+                  break;
+              }
             } else {
               console.log('Successfully triggered upcoming release notification webhook');
             }
