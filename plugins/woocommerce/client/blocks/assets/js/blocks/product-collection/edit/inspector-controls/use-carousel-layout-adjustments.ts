@@ -3,11 +3,7 @@
  */
 import { useRef, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	createBlock,
-	createBlocksFromInnerBlocksTemplate,
-	type BlockInstance,
-} from '@wordpress/blocks';
+import { createBlock, type BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
@@ -21,12 +17,91 @@ import {
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
 
-const findInnerBlock = ( innerBlocks: BlockInstance[], blockName: string ) => {
-	const blocks = innerBlocks.find(
-		( block: BlockInstance ) => block.name === blockName
+const findInnerBlock = ( innerBlocks: BlockInstance[], blockName: string ) =>
+	innerBlocks.find( ( block: BlockInstance ) => block.name === blockName );
+
+const handleTransitionToCarouselLayout = (
+	innerBlocks: BlockInstance[],
+	actions: ReturnType< typeof useDispatch >,
+	clientId: string,
+	productTemplateBlock: BlockInstance,
+	productTemplateClientId: string,
+	productTemplateIndex: number
+) => {
+	const { removeBlock, insertBlock } = actions;
+
+	const paginationBlock = findInnerBlock(
+		innerBlocks,
+		coreQueryPaginationBlockName
+	);
+	const paginationBlockClientId = paginationBlock?.clientId;
+
+	const nextPrevArrowsBlock = createBlock( nextPreviousArrowsBlockName );
+	const groupBlock = createBlock( 'core/group', {}, [
+		nextPrevArrowsBlock,
+		productTemplateBlock,
+	] );
+
+	// We cannot use replaceBlock directly because it crashes the editor
+	// when replacing the product template block with the group block that
+	// contains the same product template block.
+	removeBlock( productTemplateClientId, false );
+	insertBlock( groupBlock, productTemplateIndex, clientId, false );
+
+	if ( paginationBlockClientId ) {
+		removeBlock( paginationBlockClientId, false );
+	}
+};
+
+const handleTransitionFromCarouselLayout = (
+	innerBlocks: BlockInstance[],
+	actions: ReturnType< typeof useDispatch >,
+	clientId: string,
+	collection?: string
+) => {
+	const { removeBlock, insertBlock, replaceBlock } = actions;
+
+	// Find the group block containing the product template
+	const groupBlock = innerBlocks.find(
+		( block: BlockInstance ) =>
+			block.name === 'core/group' &&
+			block.innerBlocks.some(
+				( innerBlock: BlockInstance ) =>
+					innerBlock.name === productTemplateBlockName
+			)
 	);
 
-	return blocks;
+	if ( groupBlock ) {
+		// Extract the product template block from the group.
+		const productTemplate = groupBlock.innerBlocks.find(
+			( block: BlockInstance ) => block.name === productTemplateBlockName
+		);
+
+		// Replace the group block with the product template block.
+		replaceBlock( groupBlock.clientId, productTemplate );
+	}
+
+	const nextPrevArrowsBlock = findInnerBlock(
+		innerBlocks,
+		nextPreviousArrowsBlockName
+	);
+	const nextPrevArrowsBlockClientId = nextPrevArrowsBlock?.clientId;
+
+	if ( nextPrevArrowsBlockClientId ) {
+		removeBlock( nextPrevArrowsBlockClientId, false );
+	}
+
+	if ( ! collection ) {
+		insertBlock(
+			createBlock(
+				coreQueryPaginationBlockName,
+				paginationDefaultAttributes
+			),
+			innerBlocks.length,
+			clientId,
+			false
+		);
+	}
 };
 
 /**
@@ -42,28 +117,39 @@ const useLayoutAdjustments = (
 ) => {
 	const { displayLayout, collection } = attributes;
 	const previousLayoutType = useRef< LayoutOptions >( displayLayout.type );
-	const innerBlocks = useSelect(
-		( select ) =>
-			clientId ? select( blockEditorStore ).getBlocks( clientId ) : [],
+	const actions = useDispatch( blockEditorStore );
+
+	const {
+		innerBlocks,
+		productTemplateBlock,
+		productTemplateClientId,
+		productTemplateIndex,
+	} = useSelect(
+		( select ) => {
+			const innerBlocks = clientId
+				? select( blockEditorStore ).getBlocks( clientId )
+				: [];
+
+			const productTemplateBlock = findInnerBlock(
+				innerBlocks,
+				productTemplateBlockName
+			);
+			const productTemplateClientId = productTemplateBlock?.clientId;
+			const productTemplateIndex = productTemplateClientId
+				? select( blockEditorStore ).getBlockIndex(
+						productTemplateClientId
+				  )
+				: 0;
+
+			return {
+				innerBlocks,
+				productTemplateBlock,
+				productTemplateClientId,
+				productTemplateIndex,
+			};
+		},
 		[ clientId ]
 	);
-	const productTemplateBlock = findInnerBlock(
-		innerBlocks,
-		productTemplateBlockName
-	);
-	const productTemplateBlockClientId = productTemplateBlock?.clientId;
-	const productTemplateBlockIndex = useSelect(
-		( select ) =>
-			productTemplateBlockClientId
-				? select( blockEditorStore ).getBlockIndex(
-						productTemplateBlockClientId
-				  )
-				: 0,
-		[ productTemplateBlockClientId ]
-	);
-
-	const { insertBlock, removeBlock, replaceBlock } =
-		useDispatch( blockEditorStore );
 
 	useEffect( () => {
 		if ( ! clientId ) {
@@ -74,36 +160,17 @@ const useLayoutAdjustments = (
 		if (
 			displayLayout?.type === LayoutOptions.CAROUSEL &&
 			previousLayoutType.current !== LayoutOptions.CAROUSEL &&
-			productTemplateBlock
+			productTemplateBlock &&
+			productTemplateClientId
 		) {
-			const paginationBlock = findInnerBlock(
+			handleTransitionToCarouselLayout(
 				innerBlocks,
-				coreQueryPaginationBlockName
-			);
-			const paginationBlockClientId = paginationBlock?.clientId;
-
-			const nextPrevArrowsBlock = createBlock(
-				nextPreviousArrowsBlockName
-			);
-			const groupBlock = createBlock( 'core/group', {}, [
-				nextPrevArrowsBlock,
-				productTemplateBlock,
-			] );
-
-			// We cannot use replaceBlock directly because it crashes the editor
-			// when replacing the product template block with the group block that
-			// contains the same product template block.
-			removeBlock( productTemplateBlockClientId, false );
-			insertBlock(
-				groupBlock,
-				productTemplateBlockIndex,
+				actions,
 				clientId,
-				false
+				productTemplateBlock,
+				productTemplateClientId,
+				productTemplateIndex
 			);
-
-			if ( paginationBlockClientId ) {
-				removeBlock( paginationBlockClientId, false );
-			}
 		}
 
 		// When switching FROM carousel layout, remove arrows block and add pagination block (if needed).
@@ -111,48 +178,12 @@ const useLayoutAdjustments = (
 			displayLayout?.type !== LayoutOptions.CAROUSEL &&
 			previousLayoutType.current === LayoutOptions.CAROUSEL
 		) {
-			const nextPrevArrowsBlock = findInnerBlock(
+			handleTransitionFromCarouselLayout(
 				innerBlocks,
-				nextPreviousArrowsBlockName
+				actions,
+				clientId,
+				collection
 			);
-			const nextPrevArrowsBlockClientId = nextPrevArrowsBlock?.clientId;
-
-			// Find the group block containing the product template
-			const groupBlock = innerBlocks.find(
-				( block: BlockInstance ) =>
-					block.name === 'core/group' &&
-					block.innerBlocks.some(
-						( innerBlock: BlockInstance ) =>
-							innerBlock.name === productTemplateBlockName
-					)
-			);
-
-			if ( groupBlock ) {
-				// Extract the product template block from the group
-				const productTemplate = groupBlock.innerBlocks.find(
-					( block: BlockInstance ) =>
-						block.name === productTemplateBlockName
-				);
-
-				// Replace the group block with just the product template
-				replaceBlock( groupBlock.clientId, productTemplate );
-			}
-
-			if ( nextPrevArrowsBlockClientId ) {
-				removeBlock( nextPrevArrowsBlockClientId, false );
-			}
-
-			if ( ! collection ) {
-				insertBlock(
-					createBlock(
-						coreQueryPaginationBlockName,
-						paginationDefaultAttributes
-					),
-					innerBlocks.length,
-					clientId,
-					false
-				);
-			}
 		}
 
 		previousLayoutType.current = displayLayout.type;
@@ -160,13 +191,11 @@ const useLayoutAdjustments = (
 		displayLayout.type,
 		innerBlocks,
 		clientId,
-		insertBlock,
-		removeBlock,
-		replaceBlock,
+		actions,
 		collection,
-		productTemplateBlockIndex,
 		productTemplateBlock,
-		productTemplateBlockClientId,
+		productTemplateClientId,
+		productTemplateIndex,
 	] );
 };
 
