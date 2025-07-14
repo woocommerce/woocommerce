@@ -113,6 +113,9 @@ const TestAccountStep = () => {
 	const [ loaderTitle, setLoaderTitle ] = useState< string | undefined >(
 		PHASE_MESSAGES[ 0 ]
 	);
+	const [ userSelection, setUserSelection ] = useState<
+		string | undefined
+	>();
 
 	const [ isResetAccountModalOpen, setIsResetAccountModalOpen ] =
 		useState( false );
@@ -123,9 +126,12 @@ const TestAccountStep = () => {
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
 	const titlePhaseRef = useRef< number >( 0 );
-
 	// Update loader title based on time intervals
 	useEffect( () => {
+		if ( ! userSelection || userSelection === 'activate_payments' ) {
+			return;
+		}
+
 		if ( status === 'success' ) {
 			// This is a pseudo-sub-step so we need to record the event manually.
 			recordPaymentsOnboardingEvent(
@@ -159,7 +165,7 @@ const TestAccountStep = () => {
 		return () => {
 			clearTimeout( timer );
 		};
-	}, [ status ] );
+	}, [ status, userSelection ] );
 
 	// Helper to clear timers.
 	const clearTimers = () => {
@@ -213,6 +219,10 @@ const TestAccountStep = () => {
 
 	// Main effect for handling initialization and polling loop.
 	useEffect( () => {
+		if ( ! userSelection || userSelection === 'activate_payments' ) {
+			return;
+		}
+
 		// -- Initialization Phase --
 		if ( status === 'idle' ) {
 			if ( currentStep?.status === 'completed' ) {
@@ -444,6 +454,7 @@ const TestAccountStep = () => {
 		retryCounter,
 		pollingPhase,
 		setJustCompletedStepId,
+		userSelection,
 	] );
 
 	const getPhaseMessage = ( phase: number ) => {
@@ -461,6 +472,156 @@ const TestAccountStep = () => {
 		}
 		return undefined;
 	};
+
+	const UserInitialSelection = () => {
+		return (
+			<>
+				<WooPaymentsStepHeader onClose={ closeModal } />
+				<div className="settings-payments-onboarding-modal__step--content">
+					<div className="woocommerce-payments-test-account-step__success_content_container">
+						<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-account-step__success_content">
+							<h1 className="woocommerce-payments-test-account-step__success_content_title">
+								{ __( "You're almost there!", 'woocommerce' ) }
+							</h1>
+							<div className="woocommerce-woopayments-modal__content__item">
+								<div className="woocommerce-woopayments-modal__content__item__description">
+									<p>
+										{ __(
+											'Activate payments to start accepting real orders and processing transactions.',
+											'woocommerce'
+										) }
+									</p>
+								</div>
+							</div>
+							<div className="woocommerce-payments-test-account-step__success-whats-next">
+								<div className="woocommerce-woopayments-modal__content__item-flex">
+								<img
+										src={
+											WC_ASSET_URL +
+											'images/icons/dollar.svg'
+										}
+										alt="dollar icon"
+									/>
+									<div className="woocommerce-woopayments-modal__content__item-flex__description">
+										<h3>
+											{ __(
+												'Activate real payments',
+												'woocommerce'
+											) }
+										</h3>
+										<div>
+											{ interpolateComponents( {
+												mixedString: __(
+													'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
+													'woocommerce'
+												),
+												components: {
+													link: (
+														<Link
+															href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
+															target="_blank"
+															rel="noreferrer"
+															type="external"
+														/>
+													),
+												},
+											} ) }
+										</div>
+									</div>
+								</div>
+								<Button
+									variant="primary"
+									onClick={ () => {
+										setUserSelection( 'activate_payments' );
+										recordPaymentsOnboardingEvent(
+											'woopayments_onboarding_modal_click',
+											{
+												step:
+													currentStep?.id ||
+													'unknown',
+												action: 'continue_store_setup',
+												source: sessionEntryPoint,
+											}
+										);
+
+										// Navigate to wc-admin page
+										navigateTo( {
+											url: getNewPath( {}, '', {
+												page: 'wc-admin',
+											} ),
+										} );
+									} }
+								>
+									{ __( 'Activate payments', 'woocommerce' ) }
+								</Button>
+
+								<div className="woocommerce-payments-test-account-step__success_content_or-divider">
+									<hr />
+									{ __( 'OR', 'woocommerce' ) }
+									<hr />
+								</div>
+
+								<div className="woocommerce-woopayments-modal__content__item-flex">
+									<img
+										src={
+											WC_ASSET_URL +
+											'images/icons/post-list.svg'
+										}
+										alt="list icon"
+									/>
+									<div className="woocommerce-woopayments-modal__content__item-flex__description">
+										<h3>
+											{ __(
+												'Create a test account',
+												'woocommerce'
+											) }
+										</h3>
+										<div>
+											<p>
+												{ interpolateComponents( {
+													mixedString: __(
+														"We'll create a test account for you so that you can begin {{link}}testing payments{{/link}} on your store. You'll need to complete setup later to accept real payments.",
+														'woocommerce'
+													),
+													components: {
+														link: (
+															<Link
+																href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
+																target="_blank"
+																rel="noreferrer"
+																type="external"
+															/>
+														),
+													},
+												} ) }
+											</p>
+										</div>
+									</div>
+								</div>
+								<Button
+									variant="secondary"
+									isBusy={ isContinueButtonLoading }
+									disabled={ isContinueButtonLoading }
+									onClick={ () =>
+										setUserSelection( 'test_account' )
+									}
+								>
+									{ __(
+										'Create a test account',
+										'woocommerce'
+									) }
+								</Button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</>
+		);
+	};
+
+	if ( ! userSelection ) {
+		return <UserInitialSelection />;
+	}
 
 	if ( status === 'success' ) {
 		// Render success state.
