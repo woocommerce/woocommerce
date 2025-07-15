@@ -52,21 +52,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
-		admin,
 		requestUtils,
 	} ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
-
+		await pageObject.updateSingleProductTemplate();
 		await pageObject.switchProductType( 'Custom Product Type' );
 
 		const block = editor.canvas.getByLabel(

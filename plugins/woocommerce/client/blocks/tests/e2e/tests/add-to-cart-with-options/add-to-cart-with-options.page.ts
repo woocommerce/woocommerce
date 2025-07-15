@@ -31,12 +31,6 @@ class AddToCartWithOptionsPage {
 		);
 		await this.editor.selectBlocks( addToCartWithOptionsBlock );
 
-		await addToCartWithOptionsBlock
-			.locator( '.components-spinner' )
-			.waitFor( {
-				state: 'hidden',
-			} );
-
 		const productTypeSwitcher = this.page.getByRole( 'button', {
 			name: 'Switch product type',
 		} );
@@ -44,9 +38,6 @@ class AddToCartWithOptionsPage {
 
 		const customProductTypeButton = this.page.getByRole( 'menuitem', {
 			name: productType,
-		} );
-		await customProductTypeButton.waitFor( {
-			state: 'visible',
 		} );
 		await customProductTypeButton.click();
 
