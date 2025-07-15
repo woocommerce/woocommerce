@@ -7,7 +7,7 @@ import {
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
-import { CartLineItemsSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 /**
  * Internal dependencies
  */
@@ -27,7 +27,7 @@ const OrderSummary = ( {
 	const { cartIsLoading } = useStoreCart();
 
 	if ( cartIsLoading ) {
-		return <CartLineItemsSkeleton />;
+		return <CartLineItemsCheckoutSkeleton />;
 	}
 	return (
 		<div

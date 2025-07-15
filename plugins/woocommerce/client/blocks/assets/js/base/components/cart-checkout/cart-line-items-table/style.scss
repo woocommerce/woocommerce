@@ -80,7 +80,7 @@ table.wc-block-cart-items {
 	}
 }
 
-@include cart-checkout-below-large-container {
+@mixin cart-items-table-styles {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -132,39 +132,54 @@ table.wc-block-cart-items {
 		}
 	}
 }
+// For the cart and checkout blocks
+@include cart-checkout-below-large-container {
+	@include cart-items-table-styles;
+}
 
-.is-large.wc-block-cart {
-	margin-bottom: 3em;
-
-	.wc-block-cart-items {
-		border-spacing: 0;
-		border-bottom: 1px solid $universal-border-light;
-
-		th {
-			padding: $gap-smaller $gap $gap-smaller 0;
-			white-space: nowrap;
-		}
-		td {
-			border-top: 1px solid $universal-border-light;
-			padding: $gap-large 0 $gap-large $gap;
-			vertical-align: top;
-		}
-		th:last-child {
-			padding-right: $gap;
-		}
-		td:last-child {
-			padding-right: $gap;
-		}
+// For the mini cart block which is not a container and still uses the `is-` classes
+.is-medium,
+.is-small,
+.is-mobile {
+	.wp-block-woocommerce-mini-cart-contents {
+		@include cart-items-table-styles;
 	}
+}
 
-	&.has-dark-controls {
+@include cart-checkout-large-container {
+	.wc-block-cart {
+		margin-bottom: 3em;
+
 		.wc-block-cart-items {
-			border-color: $input-border-dark;
+			border-spacing: 0;
+			border-bottom: 1px solid $universal-border-light;
+
 			th {
-				color: $input-text-dark;
+				padding: $gap-smaller $gap $gap-smaller 0;
+				white-space: nowrap;
 			}
 			td {
+				border-top: 1px solid $universal-border-light;
+				padding: $gap-large 0 $gap-large $gap;
+				vertical-align: top;
+			}
+			th:last-child {
+				padding-right: $gap;
+			}
+			td:last-child {
+				padding-right: $gap;
+			}
+		}
+
+		&.has-dark-controls {
+			.wc-block-cart-items {
 				border-color: $input-border-dark;
+				th {
+					color: $input-text-dark;
+				}
+				td {
+					border-color: $input-border-dark;
+				}
 			}
 		}
 	}

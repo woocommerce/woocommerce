@@ -6,16 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
+import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 
 /**
  * Internal dependencies
  */
 import CartLineItemRow from './cart-line-item-row';
 import './style.scss';
-
-const placeholderRows = [ ...Array( 3 ) ].map( ( _x, i ) => (
-	<CartLineItemRow lineItem={ {} } key={ i } />
-) );
 
 interface CartLineItemsTableProps {
 	lineItems: CartResponseItem[];
@@ -54,21 +51,23 @@ const CartLineItemsTable = ( {
 		}
 	};
 
-	const products = isLoading
-		? placeholderRows
-		: lineItems.map( ( lineItem, i ) => {
-				const nextItemKey =
-					lineItems.length > i + 1 ? lineItems[ i + 1 ].key : null;
-				return (
-					<CartLineItemRow
-						key={ lineItem.key }
-						lineItem={ lineItem }
-						onRemove={ onRemoveRow( nextItemKey ) }
-						ref={ rowRefs.current[ lineItem.key ] }
-						tabIndex={ -1 }
-					/>
-				);
-		  } );
+	const products = isLoading ? (
+		<CartLineItemsCartSkeleton />
+	) : (
+		lineItems.map( ( lineItem, i ) => {
+			const nextItemKey =
+				lineItems.length > i + 1 ? lineItems[ i + 1 ].key : null;
+			return (
+				<CartLineItemRow
+					key={ lineItem.key }
+					lineItem={ lineItem }
+					onRemove={ onRemoveRow( nextItemKey ) }
+					ref={ rowRefs.current[ lineItem.key ] }
+					tabIndex={ -1 }
+				/>
+			);
+		} )
+	);
 
 	return (
 		<table
