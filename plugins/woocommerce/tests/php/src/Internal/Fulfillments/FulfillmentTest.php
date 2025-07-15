@@ -93,9 +93,9 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 
 		$fulfillment->delete();
 
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'Fulfillment not found.' );
-		new Fulfillment( $fulfillment_id );
+		// Verify the fulfillment can still be read but is marked as deleted.
+		$deleted_fulfillment = new Fulfillment( $fulfillment_id );
+		$this->assertNotNull( $deleted_fulfillment->get_date_deleted(), 'Fulfillment should be marked as deleted.' );
 	}
 
 	/**

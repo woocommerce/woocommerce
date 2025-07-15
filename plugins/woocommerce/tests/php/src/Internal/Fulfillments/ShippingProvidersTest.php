@@ -16,8 +16,7 @@ class ShippingProvidersTest extends \WP_UnitTestCase {
 	 * Test that the shipping providers configuration returns the correct classes.
 	 */
 	public function test_shipping_providers_configuration(): void {
-		// Ensure the FulfillmentsManager is initialized.
-		new FulfillmentsManager();
+		new FulfillmentsManager(); // Ensure the FulfillmentsManager is initialized to load the shipping providers.
 
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 
