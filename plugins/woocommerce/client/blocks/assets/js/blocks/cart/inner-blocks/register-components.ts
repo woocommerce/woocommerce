@@ -8,8 +8,6 @@ import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
  * Internal dependencies
  */
 import metadata from './component-metadata';
-
-// Import components directly instead of using lazy()
 import FilledCartFrontend from './filled-cart-block/frontend';
 import EmptyCartFrontend from './empty-cart-block/frontend';
 import CartItemsFrontend from './cart-items-block/frontend';
