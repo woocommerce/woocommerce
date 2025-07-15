@@ -137,7 +137,6 @@ table.wc-block-cart-items {
 // and we want to prevent content jumping before the is- classes are applied
 @include cart-checkout-below-large-container {
 	.wc-block-cart {
-		background-color: red;
 		@include cart-items-table-styles;
 	}
 }
