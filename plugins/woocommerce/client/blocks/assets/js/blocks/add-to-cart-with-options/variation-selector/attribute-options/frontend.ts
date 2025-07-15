@@ -21,7 +21,7 @@ type Option = {
 	isSelected: boolean;
 };
 
-type Context = {
+type Context = AddToCartWithOptionsStoreContext & {
 	name: string;
 	selectedValue: string | null;
 	option: Option;
@@ -34,28 +34,6 @@ setStyles();
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { actions: wooAddToCartWithOptions } = store< AddToCartWithOptionsStore >(
-	'woocommerce/add-to-cart-with-options',
-	{},
-	{ lock: universalLock }
-);
-
-function setAttribute( name: string, value: string | null ) {
-	if ( value ) {
-		wooAddToCartWithOptions.setAttribute( name, value );
-	} else {
-		wooAddToCartWithOptions.removeAttribute( name );
-	}
-}
-
-function setDefaultSelectedAttribute() {
-	const context = getContext< Context >();
-
-	if ( context.selectedValue ) {
-		setAttribute( context.name, context.selectedValue );
-	}
-}
 
 /**
  * Check if the attribute value is valid given the other selected attributes and
@@ -133,60 +111,32 @@ const isAttributeValueValid = ( {
 	} );
 };
 
-const { state } = store(
-	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__pills',
+export type VariableProductAddToCartWithOptionsStore =
+	AddToCartWithOptionsStore & {
+		state: {
+			isOptionSelected: boolean;
+			isOptionDisabled: boolean;
+			index: number;
+		};
+		actions: {
+			handlePillClick: () => void;
+			handleDropdownChange: (
+				event: ChangeEvent< HTMLSelectElement >
+			) => void;
+		};
+		callbacks: {
+			setDefaultSelectedAttribute: () => void;
+		};
+	};
+
+const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
+	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get isPillSelected() {
+			get isOptionSelected() {
 				const { selectedValue, option } = getContext< Context >();
 				return selectedValue === option.value;
 			},
-			get isPillDisabled() {
-				const { name, option } = getContext< Context >();
-				const { selectedAttributes, availableVariations } =
-					getContext< AddToCartWithOptionsStoreContext >(
-						'woocommerce/add-to-cart-with-options'
-					);
-
-				return ! isAttributeValueValid( {
-					attributeName: name,
-					attributeValue: option.value,
-					selectedAttributes,
-					availableVariations,
-				} );
-			},
-			get index() {
-				const context = getContext< Context >();
-				return context.options.findIndex(
-					( option ) => option.value === context.option.value
-				);
-			},
-		},
-		actions: {
-			toggleSelected() {
-				if ( state.isPillDisabled ) {
-					return;
-				}
-				const context = getContext< Context >();
-				if ( context.selectedValue === context.option.value ) {
-					context.selectedValue = '';
-				} else {
-					context.selectedValue = context.option.value;
-				}
-				setAttribute( context.name, context.selectedValue );
-			},
-		},
-		callbacks: {
-			setDefaultSelectedAttribute,
-		},
-	},
-	{ lock: true }
-);
-
-store(
-	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options__dropdown',
-	{
-		state: {
 			get isOptionDisabled() {
 				const { name, option } = getContext< Context >();
 
@@ -195,9 +145,7 @@ store(
 				}
 
 				const { selectedAttributes, availableVariations } =
-					getContext< AddToCartWithOptionsStoreContext >(
-						'woocommerce/add-to-cart-with-options'
-					);
+					getContext< Context >();
 
 				return ! isAttributeValueValid( {
 					attributeName: name,
@@ -208,15 +156,33 @@ store(
 			},
 		},
 		actions: {
-			handleChange( event: ChangeEvent< HTMLSelectElement > ) {
+			handlePillClick() {
+				if ( state.isOptionDisabled ) {
+					return;
+				}
+				const context = getContext< Context >();
+				if ( context.selectedValue === context.option.value ) {
+					context.selectedValue = '';
+				} else {
+					context.selectedValue = context.option.value;
+				}
+				actions.setAttribute( context.name, context.selectedValue );
+			},
+			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
-				setAttribute( context.name, context.selectedValue );
+				actions.setAttribute( context.name, context.selectedValue );
 			},
 		},
 		callbacks: {
-			setDefaultSelectedAttribute,
+			setDefaultSelectedAttribute() {
+				const context = getContext< Context >();
+
+				if ( context.selectedValue ) {
+					actions.setAttribute( context.name, context.selectedValue );
+				}
+			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
