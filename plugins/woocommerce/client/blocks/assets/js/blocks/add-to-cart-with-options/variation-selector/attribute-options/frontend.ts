@@ -116,7 +116,6 @@ export type VariableProductAddToCartWithOptionsStore =
 		state: {
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
-			index: number;
 		};
 		actions: {
 			handlePillClick: () => void;
