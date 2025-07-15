@@ -435,12 +435,7 @@ export const OnboardingProvider: React.FC< {
 				const resolvedStep = { ...step };
 
 				if ( resolvedStep.type === 'frontend' ) {
-					resolvedStep.status = areStepDependenciesCompleted(
-						resolvedStep,
-						allMappedSteps
-					)
-						? ( 'completed' as const )
-						: ( 'not_started' as const );
+					resolvedStep.status = 'not_started';
 				}
 
 				if ( resolvedStep.subSteps ) {
