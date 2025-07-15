@@ -232,9 +232,34 @@ export const OnboardingProvider: React.FC< {
 	const findFirstIncompleteStep = useCallback(
 		(
 			steps: WooPaymentsProviderOnboardingStep[],
-			allStepsCollection: WooPaymentsProviderOnboardingStep[]
+			allStepsCollection: WooPaymentsProviderOnboardingStep[],
+			parentStep?: WooPaymentsProviderOnboardingStep
 		): WooPaymentsProviderOnboardingStep | undefined => {
-			for ( const step of steps ) {
+			for ( const [ index, step ] of steps.entries() ) {
+				// Special completion check for frontend steps.
+				if ( step.type === 'frontend' ) {
+					let isCompleted = false;
+					if ( parentStep ) {
+						// Rule 2: A frontend sub-step is completed if its parent is, or if the next backend sibling is active/done.
+						const nextSubStep = steps[ index + 1 ];
+						isCompleted =
+							parentStep.status === 'completed' ||
+							( nextSubStep &&
+								nextSubStep.type === 'backend' &&
+								( nextSubStep.status === 'in_progress' ||
+									nextSubStep.status === 'completed' ) );
+					} else if ( step.subSteps?.length ) {
+						// Rule 1: A frontend top-level step is completed if all its sub-steps are.
+						isCompleted = step.subSteps.every(
+							( s ) => s.status === 'completed'
+						);
+					}
+
+					if ( isCompleted ) {
+						continue; // Skip this step, it's considered done for navigation.
+					}
+				}
+
 				if (
 					step.status !== 'completed' &&
 					areStepDependenciesCompleted( step, allStepsCollection )
@@ -243,7 +268,8 @@ export const OnboardingProvider: React.FC< {
 					if ( step.subSteps && step.subSteps.length > 0 ) {
 						const incompleteSubStep = findFirstIncompleteStep(
 							step.subSteps,
-							allStepsCollection
+							allStepsCollection,
+							step
 						);
 						if ( incompleteSubStep ) {
 							return incompleteSubStep;
