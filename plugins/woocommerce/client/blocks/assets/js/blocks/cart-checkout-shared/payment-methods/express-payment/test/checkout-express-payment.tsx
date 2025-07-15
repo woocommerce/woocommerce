@@ -22,22 +22,16 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	},
 } ) );
 
-jest.mock( '@woocommerce/blocks-components', () => ( {
-	Title: jest.fn( ( { children, className, headingLevel } ) => (
-		<div
-			data-testid="title"
-			className={ className }
-			data-heading-level={ headingLevel }
-		>
-			{ children }
-		</div>
-	) ),
-	StoreNoticesContainer: jest.fn( ( { context } ) => (
-		<div data-testid="notices" data-context={ context }>
-			Store Notices
-		</div>
-	) ),
-} ) );
+jest.mock( '@woocommerce/blocks-components', () => {
+	return {
+		...jest.requireActual( '@woocommerce/blocks-components' ),
+		StoreNoticesContainer: jest.fn( ( { context } ) => (
+			<div data-testid="notices" data-context={ context }>
+				Store Notices
+			</div>
+		) ),
+	};
+} );
 
 jest.mock( '@woocommerce/base-components/skeleton', () => ( {
 	Skeleton: jest.fn( ( { width, height } ) => (
@@ -54,13 +48,17 @@ jest.mock( '../../express-payment-methods', () =>
 );
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 	dispatch: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/settings', () => ( {
-	CURRENT_USER_IS_ADMIN: false,
-} ) );
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		...jest.requireActual( '@woocommerce/settings' ),
+		CURRENT_USER_IS_ADMIN: false,
+	};
+} );
 
 const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
 
@@ -316,13 +314,12 @@ describe( 'CheckoutExpressPayment', () => {
 
 			render( <CheckoutExpressPayment /> );
 
-			const titleContainer = screen.getByTestId( 'title' );
 			const skeletons = screen.getAllByTestId( 'skeleton' );
 			const titleSkeleton = skeletons.find(
 				( el ) => el.getAttribute( 'data-width' ) === '127px'
 			);
 
-			expect( titleContainer ).toBeInTheDocument();
+			expect( screen.getByRole( 'heading' ) ).toBeInTheDocument();
 			expect( titleSkeleton ).toHaveAttribute( 'data-width', '127px' );
 			expect( titleSkeleton ).toHaveAttribute( 'data-height', '18px' );
 		} );
