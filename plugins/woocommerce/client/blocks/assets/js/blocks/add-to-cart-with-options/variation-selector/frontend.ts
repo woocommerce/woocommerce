@@ -46,11 +46,22 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 function attributesAutoselect( $variation_selectors ) {
+	const { selectedAttributes, availableVariations } =
+		getContext< AddToCartWithOptionsStoreContext >(
+			'woocommerce/add-to-cart-with-options'
+		);
 	$variation_selectors.each( function () {
 		const $current_variation_selector = $( this );
-		// Options that HAVE a value and are NOT disabled
-		// OR pill inputs
-		const $valid_choices = $current_variation_selector.find( 'option:not([value=""], [disabled], [class*="disabled"]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input' );
+		// Dropdown options or Pill inputs that HAVE a value and are NOT disabled, and are compatible with the possible variations
+		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], [disabled], [class*="disabled"])' ).filter( ( i, e ) => {
+			const $el = $( e );
+			return isAttributeValueValid( {
+				attributeName: $el.attr( 'name' ),
+				attributeValue: $el.val(),
+				selectedAttributes,
+				availableVariations,
+			} );
+		} );
 		if ( $valid_choices.length === 1 ) {
 			// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
 			const $selected = $current_variation_selector.find(':checked');
