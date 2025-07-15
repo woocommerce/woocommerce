@@ -36,4 +36,6 @@ const blockConfig = {
 	],
 };
 // @ts-expect-error blockConfig is not typed.
-registerProductBlockType( blockConfig );
+registerProductBlockType( blockConfig, {
+	isAvailableOnPostEditor: true,
+} );

@@ -583,7 +583,6 @@ final class BlockTypesController {
 					'CatalogSorting',
 					'ClassicTemplate',
 					'ProductResultsCount',
-					'ProductDetails',
 					'ProductReviews',
 					'OrderConfirmation\Status',
 					'OrderConfirmation\Summary',
