@@ -126,26 +126,27 @@ const useLayoutAdjustments = (
 		productTemplateIndex,
 	} = useSelect(
 		( select ) => {
-			const innerBlocks = clientId
+			const selectInnerBlocks = clientId
 				? select( blockEditorStore ).getBlocks( clientId )
 				: [];
 
-			const productTemplateBlock = findInnerBlock(
+			const selectProductTemplateBlock = findInnerBlock(
 				innerBlocks,
 				productTemplateBlockName
 			);
-			const productTemplateClientId = productTemplateBlock?.clientId;
-			const productTemplateIndex = productTemplateClientId
-				? select( blockEditorStore ).getBlockIndex(
-						productTemplateClientId
-				  )
-				: 0;
+
+			const selectProductTemplateBlockClientId =
+				selectProductTemplateBlock?.clientId;
 
 			return {
-				innerBlocks,
-				productTemplateBlock,
-				productTemplateClientId,
-				productTemplateIndex,
+				innerBlocks: selectInnerBlocks,
+				productTemplateBlock: selectProductTemplateBlock,
+				productTemplateClientId: selectProductTemplateBlockClientId,
+				productTemplateIndex: selectProductTemplateBlock?.clientId
+					? select( blockEditorStore ).getBlockIndex(
+							selectProductTemplateBlockClientId
+					  )
+					: 0,
 			};
 		},
 		[ clientId ]
