@@ -27,6 +27,7 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
+      target-branches: ${{ steps.get-branches.outputs.branches }}
     steps:
       - name: Check confirmation
         run: |
@@ -50,9 +51,11 @@ jobs:
             if (versionMatch) {
               const major = versionMatch[1];
               const minor = versionMatch[2];
-              const branch = `release/${major}.${minor}`;
+              const majorMinor = `${major}.${minor}`;
+              const branch = `release/${majorMinor}`;
 
               console.log(`Input version: ${versionInput}`);
+              console.log(`Major.minor version: ${majorMinor}`);
               console.log(`Release branch: ${branch}`);
               core.setOutput('version', versionInput);
               core.setOutput('branch', branch);
@@ -65,6 +68,50 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Get trunk version
+        id: get-trunk-version
+        run: |
+          TRUNK_VERSION=$(awk '/Version:/ {print $3}' plugins/woocommerce/woocommerce.php | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*/\1/' | sed 's/-.*//')
+          echo "Trunk version is $TRUNK_VERSION"
+          echo "trunk-version=$TRUNK_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get target branches for stable tag update
+        id: get-branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            function getNextVersion(version) {
+              const [major, minor] = version.split('.').map(Number);
+              return minor < 9
+                ? `${major}.${minor + 1}`
+                : `${major + 1}.0`;
+            }
+
+            const targetVersion = '${{ steps.extract-version.outputs.version }}';
+            const trunkVersion = '${{ steps.get-trunk-version.outputs.trunk-version }}';
+
+            console.log(`Target version: ${targetVersion}`);
+            console.log(`Trunk version: ${trunkVersion}`);
+
+            const [targetMajor, targetMinor] = targetVersion.split('.').map(Number);
+            const [trunkMajor, trunkMinor] = trunkVersion.split('.').map(Number);
+
+            if (targetMajor > trunkMajor || (targetMajor === trunkMajor && targetMinor > trunkMinor)) {
+              core.setFailed(`Target version ${targetVersion} is greater than trunk version ${trunkVersion}.`);
+              return;
+            }
+
+            const branches = ['trunk'];
+
+            let version = targetVersion;
+            while ( version !== trunkVersion ) {
+              branches.push( `release/${ version }` );
+              version = getNextVersion( version );
+            }
+
+            console.log('Target branches:', branches);
+            core.setOutput('branches', JSON.stringify(branches));
 
       - name: Verify release branch exists
         run: |
@@ -173,10 +220,9 @@ jobs:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
+      fail-fast: false
       matrix:
-        branch:
-          - trunk
-          - ${{ needs.validate-release.outputs.branch }}
+        branch: ${{ fromJSON(needs.validate-release.outputs.target-branches) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -199,7 +245,10 @@ jobs:
         run: |
           echo "🔄 Processing branch: $BRANCH_NAME..."
 
-          git checkout "$BRANCH_NAME"
+          if ! git checkout "$BRANCH_NAME" 2>/dev/null; then
+            echo "Branch $BRANCH_NAME does not exist - skipping"
+            exit 0
+          fi
 
           README_PATH="plugins/woocommerce/readme.txt"
 
@@ -244,4 +293,4 @@ jobs:
           slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
           slack-optional-unfurl_links: false
           slack-text: |
-            :woo-bounce: *<${{ github.event.release.html_url }}|WooCommerce ${{ github.event.release.name }}>* has been released! :rocket:
+            :woo-bounce: *<https://github.com/woocommerce/woocommerce/releases/tag/${{ github.event.inputs.version }}|WooCommerce ${{ github.event.inputs.version }}>* has been released! :rocket:
