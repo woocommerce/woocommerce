@@ -107,9 +107,8 @@ const handleTransitionFromCarouselLayout = (
 /**
  * Custom hook to adjust the pagination block when switching between layouts.
  *
- * @param {string} clientId - The client ID of the product collection block.
+ * @param {string}                      clientId   - The client ID of the product collection block.
  * @param {ProductCollectionAttributes} attributes - The attributes of the product collection block.
- * @return {void}
  */
 const useLayoutAdjustments = (
 	clientId: string,
