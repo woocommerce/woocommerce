@@ -13,6 +13,7 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { isErrorResponse } from '@woocommerce/types';
 import { useCartEventsContext } from '@woocommerce/base-context/providers';
 import { Spinner } from '@woocommerce/blocks-components';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -32,6 +33,7 @@ const Block = ( {
 	buttonLabel: string;
 } ): JSX.Element => {
 	const link = getSetting< string >( 'page-' + checkoutPageId, false );
+	const { cartIsLoading } = useStoreCart();
 	const isCalculating = useSelect(
 		( select ) => select( checkoutStore ).isCalculating(),
 		[]
@@ -86,7 +88,7 @@ const Block = ( {
 				'wc-block-cart__submit-button--loading': showSpinner,
 			} ) }
 			href={ filteredLink }
-			disabled={ isCalculating }
+			disabled={ isCalculating || cartIsLoading }
 			onClick={ ( e ) => {
 				dispatchOnProceedToCheckout().then( ( observerResponses ) => {
 					if ( observerResponses.some( isErrorResponse ) ) {
