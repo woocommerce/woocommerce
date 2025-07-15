@@ -46,14 +46,16 @@ const buildCollectionDataQuery = (
 };
 
 interface UseCollectionDataProps {
-	queryAttribute?: {
-		taxonomy: string;
-		queryType: string;
-	};
-	queryTaxonomy?: string;
-	queryPrices?: boolean;
-	queryStock?: boolean;
-	queryRating?: boolean;
+	queryAttribute?:
+		| {
+				taxonomy: string;
+				queryType: string;
+		  }
+		| undefined;
+	queryTaxonomy?: string | undefined;
+	queryPrices?: boolean | undefined;
+	queryStock?: boolean | undefined;
+	queryRating?: boolean | undefined;
 	queryState: Record< string, unknown >;
 	isEditor?: boolean;
 }
