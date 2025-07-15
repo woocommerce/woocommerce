@@ -79,15 +79,28 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
+		// Add interactive attributes for variable products.
+		$wrapper_attributes = array();
+		$watch_attribute = '';
+		
+		if ( $product->is_type( 'variable' ) ) {
+			wp_enqueue_script_module( 'woocommerce/product-sku' );
+			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-sku';
+			$watch_attribute = 'data-wp-watch="callbacks.updateSku"';
+		}
+
 		return sprintf(
-			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
-				%3$s
-				<span class="sku">%4$s</span>
+			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s" %3$s %4$s>
 				%5$s
+				<span class="sku" %6$s>%7$s</span>
+				%8$s
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$watch_attribute,
 			$prefix,
+			$watch_attribute,
 			$product_sku,
 			$suffix
 		);

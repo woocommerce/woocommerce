@@ -15,6 +15,7 @@ export type AvailableVariation = {
 	variation_id: number;
 	price_html: string;
 	is_in_stock: boolean;
+	sku: string;
 };
 
 export type Context = {
@@ -426,8 +427,13 @@ const addToCartWithOptionsStore = store(
 						'price_html',
 						matchedVariation.price_html
 					);
+					actions.setProductData(
+						'sku',
+						matchedVariation.sku || null
+					);
 				} else {
 					actions.setProductData( 'price_html', null );
+					actions.setProductData( 'sku', null );
 				}
 			},
 		},

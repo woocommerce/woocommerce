@@ -5,6 +5,7 @@ import { getContext, store } from '@wordpress/interactivity';
 
 type ProductData = {
 	price_html: string | null;
+	sku: string | null;
 };
 
 export type Context = {

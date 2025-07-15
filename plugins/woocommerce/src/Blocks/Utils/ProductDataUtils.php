@@ -17,6 +17,7 @@ class ProductDataUtils {
 	public static function get_product_data( \WC_Product $product ) {
 		return array(
 			'price_html' => $product->get_price_html(),
+			'sku'        => $product->get_sku(),
 		);
 	}
 }

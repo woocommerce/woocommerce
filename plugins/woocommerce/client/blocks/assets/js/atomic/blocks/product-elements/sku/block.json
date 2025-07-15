@@ -35,9 +35,7 @@
 	],
 	"supports": {
 		"html": false,
-		"interactivity": {
-			"clientNavigation": true
-		},
+		"interactivity": true,
 		"color": {
 			"text": true,
 			"background": true
