@@ -109,15 +109,23 @@ const useIsInvalidQueryLoopContext = ( clientId: string, postType: string ) => {
 const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 	const blockProps = useBlockProps();
 
-	const innerBlocksProps = useInnerBlocksProps( blockProps );
-
-	const hasInnerBlocks = useSelect(
+	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
 		( select ) => {
 			const blocks = select( blockEditorStore ).getBlocks( clientId );
-			return blocks.length > 0;
+			return {
+				hasInnerBlocks: blocks.length > 0,
+				wasBlockJustInserted:
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore method exists but not typed
+					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+			};
 		},
 		[ clientId ]
 	);
+
+	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+		template: wasBlockJustInserted ? TEMPLATE : undefined,
+	} );
 
 	const isInvalidQueryLoopContext = useIsInvalidQueryLoopContext(
 		clientId,
@@ -136,7 +144,8 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 		);
 	}
 
-	if ( hasInnerBlocks ) {
+	console.log( hasInnerBlocks, wasBlockJustInserted );
+	if ( hasInnerBlocks || wasBlockJustInserted ) {
 		return <div { ...innerBlocksProps } />;
 	}
 

@@ -12,10 +12,6 @@
 		},
 		"align": [ "wide", "full" ]
 	},
-	"attributes": {
-		"blockVersion": {
-			"type": "string"
-		}
-	},
+	"attributes": {},
 	"usesContext": [ "query", "queryId", "postId", "postType" ]
 }

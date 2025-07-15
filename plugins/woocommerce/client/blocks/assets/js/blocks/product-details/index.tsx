@@ -28,11 +28,6 @@ const blockConfig = {
 			save() {
 				return null;
 			},
-			migrate() {
-				return {
-					blockVersion: 'v1',
-				};
-			},
 		},
 	],
 };
