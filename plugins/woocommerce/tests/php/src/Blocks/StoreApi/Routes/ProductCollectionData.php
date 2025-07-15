@@ -180,8 +180,6 @@ class ProductCollectionData extends ControllerTestCase {
 	 * Test taxonomy calculation method.
 	 */
 	public function test_calculate_taxonomy_counts() {
-		$fixtures = new FixtureData();
-
 		// Create test categories.
 		$category1 = wp_insert_term( 'Test Category 1', 'product_cat' );
 		$category2 = wp_insert_term( 'Test Category 2', 'product_cat' );
