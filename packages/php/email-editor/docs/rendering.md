@@ -357,7 +357,7 @@ $outlook_cell = Table_Wrapper_Helper::render_outlook_table_cell(
 
 ## Styles Helper
 
-The `Styles_Helper` class provides utility methods for generating email-compatible inline styles from WordPress block attributes.
+The `Styles_Helper` class provides utility methods to assist with handling email-compatible inline styles derived from WordPress block attributes.
 
 ### Available Methods
 

@@ -128,20 +128,22 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		 */
 		$rendering_context = $this->createMock( Rendering_Context::class );
 		$rendering_context->method( 'translate_slug_to_color' )
-			->willReturnMap( array(
-				array( 'primary', '#ff0000' ),
-				array( 'secondary', '#00ff00' ),
-				array( 'accent', '#0000ff' ),
-			) );
+			->willReturnMap(
+				array(
+					array( 'primary', '#ff0000' ),
+					array( 'secondary', '#00ff00' ),
+					array( 'accent', '#0000ff' ),
+				)
+			);
 
 		$result = Styles_Helper::get_normalized_block_styles( $block_attributes, $rendering_context );
 
 		$expected = array(
-			'color'  => array(
+			'color'   => array(
 				'background' => '#ff0000',
 				'text'       => '#00ff00',
 			),
-			'border' => array(
+			'border'  => array(
 				'color' => '#0000ff',
 			),
 			'spacing' => array(
@@ -255,8 +257,8 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		);
 
 		$css_declarations = array(
-			'margin'  => '20px',
-			'color'   => 'red',
+			'margin' => '20px',
+			'color'  => 'red',
 		);
 
 		$result = Styles_Helper::extend_block_styles( $block_styles, $css_declarations );

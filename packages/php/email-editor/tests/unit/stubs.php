@@ -7,6 +7,8 @@
 
 declare(strict_types = 1);
 
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed, Generic.Files.OneObjectStructurePerFile.MultipleFound
+
 // Dummy WP functions.
 if ( ! function_exists( 'wp_parse_args' ) ) {
 	/**
@@ -38,11 +40,10 @@ if ( ! function_exists( 'wp_style_engine_get_styles' ) ) {
 	 * Mock wp_style_engine_get_styles function.
 	 *
 	 * @param array $block_styles Array of block styles.
-	 * @param array $options      Optional. An array of options.
 	 * @return array
 	 */
-	function wp_style_engine_get_styles( $block_styles, $options = array() ) {
-		// Return empty structure for empty input
+	function wp_style_engine_get_styles( $block_styles ) {
+		// Return empty structure for empty input.
 		if ( empty( $block_styles ) ) {
 			return array(
 				'css'          => '',
@@ -51,7 +52,7 @@ if ( ! function_exists( 'wp_style_engine_get_styles' ) ) {
 			);
 		}
 
-		// Return basic structure for non-empty input
+		// Return basic structure for non-empty input.
 		return array(
 			'css'          => 'padding: 10px;',
 			'declarations' => array( 'padding' => '10px' ),
@@ -61,7 +62,6 @@ if ( ! function_exists( 'wp_style_engine_get_styles' ) ) {
 }
 
 // Dummy WP classes.
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
 if ( ! class_exists( \WP_Theme_JSON::class ) ) {
 	/**
