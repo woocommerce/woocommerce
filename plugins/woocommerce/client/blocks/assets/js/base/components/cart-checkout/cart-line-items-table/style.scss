@@ -80,7 +80,9 @@ table.wc-block-cart-items {
 	}
 }
 
-@mixin cart-items-table-styles {
+.is-medium,
+.is-small,
+.is-mobile {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -132,24 +134,9 @@ table.wc-block-cart-items {
 		}
 	}
 }
-// For the cart and checkout blocks
-@include cart-checkout-below-large-container {
-	@include cart-items-table-styles;
-}
-
-// For the mini cart block which is not a container and still uses the `is-` classes
-.is-medium,
-.is-small,
-.is-mobile {
-	.wp-block-woocommerce-mini-cart-contents {
-		@include cart-items-table-styles;
-	}
-}
 
 @include cart-checkout-large-container {
-	.wc-block-cart {
-		margin-bottom: 3em;
-
+	.wc-block-cart__main {
 		.wc-block-cart-items {
 			border-spacing: 0;
 			border-bottom: 1px solid $universal-border-light;
@@ -170,6 +157,12 @@ table.wc-block-cart-items {
 				padding-right: $gap;
 			}
 		}
+	}
+}
+
+@include cart-checkout-large-container {
+	.wc-block-cart {
+		margin-bottom: 3em;
 
 		&.has-dark-controls {
 			.wc-block-cart-items {
