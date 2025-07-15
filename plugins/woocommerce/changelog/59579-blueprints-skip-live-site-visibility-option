@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Skip steps that change the Site Visibility to Live when importing a Blueprint.
