@@ -498,10 +498,11 @@ public static function get_block_styles( array $block_attributes, Rendering_Cont
 ```
 
 **Supported Properties:**
-- `spacing`, `padding`, `margin`
-- `border`, `border-width`, `border-style`, `border-radius`, `border-color`
-- `background`, `background-color`, `color`
-- `typography`, `font-size`, `font-family`, `font-weight`
+
+-   `spacing`, `padding`, `margin`
+-   `border`, `border-width`, `border-style`, `border-radius`, `border-color`
+-   `background`, `background-color`, `color`
+-   `typography`, `font-size`, `font-family`, `font-weight`
 
 **Example Usage:**
 
