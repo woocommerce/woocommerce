@@ -36,6 +36,7 @@ describe( 'useOrderSummaryLoadingState', () => {
 		useStoreCart.mockReturnValue( {
 			cartIsLoading: false,
 			isLoadingRates: false,
+			hasPendingItemsOperations: false,
 		} );
 
 		useStoreCartCoupons.mockReturnValue( {
@@ -59,6 +60,7 @@ describe( 'useOrderSummaryLoadingState', () => {
 		useStoreCart.mockReturnValue( {
 			cartIsLoading: true,
 			isLoadingRates: false,
+			hasPendingItemsOperations: false,
 		} );
 
 		const { result } = renderHook( () => useOrderSummaryLoadingState() );
@@ -69,6 +71,18 @@ describe( 'useOrderSummaryLoadingState', () => {
 		useStoreCart.mockReturnValue( {
 			cartIsLoading: false,
 			isLoadingRates: true,
+			hasPendingItemsOperations: false,
+		} );
+
+		const { result } = renderHook( () => useOrderSummaryLoadingState() );
+		expect( result.current.isLoading ).toBe( true );
+	} );
+
+	it( 'should return isLoading: true when hasPendingItemsOperations is true', () => {
+		useStoreCart.mockReturnValue( {
+			cartIsLoading: false,
+			isLoadingRates: false,
+			hasPendingItemsOperations: true,
 		} );
 
 		const { result } = renderHook( () => useOrderSummaryLoadingState() );
@@ -106,6 +120,7 @@ describe( 'useOrderSummaryLoadingState', () => {
 		useStoreCart.mockReturnValue( {
 			cartIsLoading: true,
 			isLoadingRates: true,
+			hasPendingItemsOperations: false,
 		} );
 
 		useStoreCartCoupons.mockReturnValue( {

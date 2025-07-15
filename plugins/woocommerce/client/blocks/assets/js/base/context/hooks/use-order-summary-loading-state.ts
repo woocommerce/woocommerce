@@ -15,7 +15,8 @@ import { useStoreCartCoupons } from './cart/use-store-cart-coupons';
  * This hook combines various loading states that can affect order totals and pricing.
  */
 export const useOrderSummaryLoadingState = () => {
-	const { cartIsLoading, isLoadingRates } = useStoreCart();
+	const { cartIsLoading, isLoadingRates, hasPendingItemsOperations } =
+		useStoreCart();
 	const { isApplyingCoupon, isRemovingCoupon } = useStoreCartCoupons();
 
 	const isCalculating = useSelect(
@@ -29,7 +30,8 @@ export const useOrderSummaryLoadingState = () => {
 		isLoadingRates ||
 		isApplyingCoupon ||
 		isRemovingCoupon ||
-		isCalculating;
+		isCalculating ||
+		hasPendingItemsOperations;
 
 	return {
 		// Combined loading state - true if any operation is in progress
