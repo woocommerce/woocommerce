@@ -203,12 +203,12 @@ const Edit = ( props: EditProps ) => {
 				<Notice>
 					<p>
 						{ sprintf(
-							// translators: %s: Taxonomy name.
+							// translators: %s: Taxonomy label.
 							__(
 								'There are no products associated with %s.',
 								'woocommerce'
 							),
-							taxonomy
+							getTaxonomyLabel( taxonomy )
 						) }
 					</p>
 				</Notice>
