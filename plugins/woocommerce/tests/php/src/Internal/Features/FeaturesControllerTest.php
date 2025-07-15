@@ -1033,12 +1033,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
 		// been set, and crash.
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
 
 		// Inject the mock into $sut's $plugin_util via reflection.
-		$sut_reflection = new \ReflectionClass( $this->sut );
+		$sut_reflection   = new \ReflectionClass( $this->sut );
 		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
 		$plugin_util_prop->setAccessible( true );
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
@@ -1061,9 +1061,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$compat = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
 		$this->assertEquals(
 			array(
-				'compatible' => array( 'plugin1/plugin1.php' ),
+				'compatible'   => array( 'plugin1/plugin1.php' ),
 				'incompatible' => array(),
-				'uncertain' => array()
+				'uncertain'    => array(),
 			),
 			$compat
 		);
@@ -1099,12 +1099,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
 		// been set, and crash.
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
 
 		// Inject mock into $sut.
-		$sut_reflection = new \ReflectionClass( $this->sut );
+		$sut_reflection   = new \ReflectionClass( $this->sut );
 		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
 		$plugin_util_prop->setAccessible( true );
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
@@ -1136,42 +1136,42 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			->onlyMethods( array( 'get_wp_plugin_id', 'get_woocommerce_aware_plugins' ) )
 			->getMock();
 
-		$plugin_util_mock->expects($this->atLeastOnce())
+		$plugin_util_mock->expects( $this->atLeastOnce() )
 			->method( 'get_wp_plugin_id' )
 			->willReturn( 'plugin/plugin.php' );
 
 		// Control get_woocommerce_aware_plugins to simulate before/after deactivation.
-		$deactivated = false; // Flag to toggle in callback.
+		$deactivated   = false; // Flag to toggle in callback.
 		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' ); // Controlled list.
 		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
 					->will(
 						$this->returnCallback(
 							function ( $active_only ) use ( &$deactivated, $aware_plugins ) {
-									if ( $deactivated && $active_only ) {
-										// After deactivation, exclude from active-only list.
-										return array_filter(
-											$aware_plugins,
-											function($p) {
-												return $p !== 'plugin/plugin.php';
-											}
-										);
-									}
-									// Otherwise, return full list (includes inactive if !active_only).
-									return $aware_plugins;
+								if ( $deactivated && $active_only ) {
+									// After deactivation, exclude from active-only list.
+									return array_filter(
+										$aware_plugins,
+										function( $p ) {
+											return $p !== 'plugin/plugin.php';
+										}
+									);
+								}
+								// Otherwise, return full list (includes inactive if !active_only).
+								return $aware_plugins;
 							}
-					)
+						)
 		);
 
 		// Set private $proxy on mock via parent reflection.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
 		// been set, and crash.
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
 
 		// Inject mock into sut.
-		$sut_reflection = new \ReflectionClass( $this->sut );
+		$sut_reflection   = new \ReflectionClass( $this->sut );
 		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
 		$plugin_util_prop->setAccessible( true );
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
@@ -1183,8 +1183,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Trigger processing and check before deactivation.
 		$compat_before = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
-		$this->assertContains( 'plugin/plugin.php', $compat_before[ 'compatible' ] );
-		$this->assertNotContains( 'plugin/plugin.php', $compat_before[ 'uncertain' ] );
+		$this->assertContains( 'plugin/plugin.php', $compat_before['compatible'] );
+		$this->assertNotContains( 'plugin/plugin.php', $compat_before['uncertain'] );
 
 		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
 		$deactivated = true;
