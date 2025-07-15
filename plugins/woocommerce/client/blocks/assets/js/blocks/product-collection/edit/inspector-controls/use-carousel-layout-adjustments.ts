@@ -43,6 +43,7 @@ const handleTransitionToCarouselLayout = (
 			layout: {
 				type: 'flex',
 				justifyContent: 'left',
+				verticalAlignment: 'top',
 				flexWrap: 'nowrap',
 				orientation: 'horizontal',
 			},
@@ -97,7 +98,8 @@ const handleTransitionFromCarouselLayout = (
 				productTemplateBlockName,
 				{
 					...productTemplate.attributes,
-					// Grid and List layouts are handled manually for now.
+					// Grid and List layouts are handled manually for now so
+					// we need to reset it to an empty object.
 					layout: {},
 				},
 				productTemplate.innerBlocks
