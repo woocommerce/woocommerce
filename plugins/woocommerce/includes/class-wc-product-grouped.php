@@ -166,14 +166,14 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string Minimum price or empty string if no children
 	 */
 	public function get_min_price() {
-		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
-		$min_price = array_map( 'wc_get_price_to_display', $children );
+		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$prices   = array_map( 'wc_get_price_to_display', $children );
 
-		if ( empty( $min_price ) ) {
+		if ( empty( $prices ) ) {
 			return '';
 		}
 
-		return wc_format_decimal( min( $min_price ) );
+		return wc_format_decimal( min( $prices ) );
 	}
 
 	/**
@@ -183,14 +183,14 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string Maximum price or empty string if no children
 	 */
 	public function get_max_price() {
-		$children  = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
-		$max_price = array_map( 'wc_get_price_to_display', $children );
+		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$prices   = array_map( 'wc_get_price_to_display', $children );
 
-		if ( empty( $max_price ) ) {
+		if ( empty( $prices ) ) {
 			return '';
 		}
 
-		return wc_format_decimal( max( $max_price ) );
+		return wc_format_decimal( max( $prices ) );
 	}
 
 	/*
