@@ -34,6 +34,9 @@ jest.mock( '@woocommerce/settings', () => ( {
 		}
 		return defaultValue;
 	} ),
+	getSettingWithCoercion: jest.fn( ( key: string, defaultValue: unknown ) => {
+		return defaultValue;
+	} ),
 } ) );
 
 async function setup( attributes: BlockAttributes ) {
