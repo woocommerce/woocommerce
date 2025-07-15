@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the issue where blockified Add to Cart + Options doesn't update Product SKU block after a variation has been selected.
