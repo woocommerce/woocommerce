@@ -91,6 +91,12 @@ const CheckoutExpressPayment = () => {
 		isBeforeProcessing ||
 		( isComplete && ! hasError );
 
+	const availableMethodsCount =
+		availableExpressPaymentMethods &&
+		Object.keys( availableExpressPaymentMethods ).length > 0
+			? Object.keys( availableExpressPaymentMethods ).length
+			: 2;
+
 	return (
 		<>
 			<div
@@ -131,12 +137,13 @@ const CheckoutExpressPayment = () => {
 					{ isCalculating ||
 					hasRegisteredNotInitializedExpressPayments ? (
 						<ul className="wc-block-components-express-payment__event-buttons">
-							<li>
-								<Skeleton height="48px" />
-							</li>
-							<li>
-								<Skeleton height="48px" />
-							</li>
+							{ Array.from( {
+								length: availableMethodsCount,
+							} ).map( ( _, index ) => (
+								<li key={ index }>
+									<Skeleton height="48px" />
+								</li>
+							) ) }
 						</ul>
 					) : (
 						<ExpressPaymentMethods />

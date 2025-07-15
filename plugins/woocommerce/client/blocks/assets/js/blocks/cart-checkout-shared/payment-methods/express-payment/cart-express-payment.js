@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
-import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { useSelect } from '@wordpress/data';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -16,61 +16,95 @@ import ExpressPaymentMethods from '../express-payment-methods';
 import './style.scss';
 
 const CartExpressPayment = () => {
-	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
-	const {
-		isCalculating,
-		isProcessing,
-		isAfterProcessing,
-		isBeforeProcessing,
-		isComplete,
-		hasError,
-	} = useSelect( ( select ) => {
+	const { isCalculating } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
 			isCalculating: store.isCalculating(),
-			isProcessing: store.isProcessing(),
-			isAfterProcessing: store.isAfterProcessing(),
-			isBeforeProcessing: store.isBeforeProcessing(),
-			isComplete: store.isComplete(),
-			hasError: store.hasError(),
 		};
 	} );
-	const isExpressPaymentMethodActive = useSelect( ( select ) =>
-		select( paymentStore ).isExpressPaymentMethodActive()
-	);
+	const {
+		availableExpressPaymentMethods,
+		expressPaymentMethodsInitialized,
+		isExpressPaymentMethodActive,
+		registeredExpressPaymentMethods,
+	} = useSelect( ( select ) => {
+		const store = select( paymentStore );
+		return {
+			availableExpressPaymentMethods:
+				store.getAvailableExpressPaymentMethods(),
+			expressPaymentMethodsInitialized:
+				store.expressPaymentMethodsInitialized(),
+			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
+			registeredExpressPaymentMethods:
+				store.getRegisteredExpressPaymentMethods(),
+		};
+	}, [] );
+
+	const hasRegisteredExpressPaymentMethods =
+		Object.keys( registeredExpressPaymentMethods ).length > 0;
+
+	// The store has registered express payment methods but they are not initialized.
+	// We don't know if the methods pass the canMakePayment check.
+	const hasRegisteredNotInitializedExpressPayments =
+		! expressPaymentMethodsInitialized &&
+		hasRegisteredExpressPaymentMethods;
+
+	// The store has available express payment methods but they are not initialized.
+	const hasNoValidRegisteredExpressPayments =
+		expressPaymentMethodsInitialized &&
+		Object.keys( availableExpressPaymentMethods ).length === 0;
 
 	if (
-		! isInitialized ||
-		( isInitialized && Object.keys( paymentMethods ).length === 0 )
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPayments
 	) {
 		return null;
 	}
 
-	// Set loading state for express payment methods when payment or checkout is in progress.
-	const checkoutProcessing =
-		isProcessing ||
-		isAfterProcessing ||
-		isBeforeProcessing ||
-		( isComplete && ! hasError );
+	const availableMethodsCount =
+		availableExpressPaymentMethods &&
+		Object.keys( availableExpressPaymentMethods ).length > 0
+			? Object.keys( availableExpressPaymentMethods ).length
+			: 2;
 
 	return (
 		<>
-			<LoadingMask
-				isLoading={
-					isCalculating ||
-					checkoutProcessing ||
-					isExpressPaymentMethodActive
-				}
+			<div
+				className={ clsx(
+					'wc-block-components-express-payment',
+					'wc-block-components-express-payment--cart',
+					{
+						'wc-block-components-express-payment--disabled':
+							isExpressPaymentMethodActive,
+					}
+				) }
+				aria-disabled={ isExpressPaymentMethodActive }
+				aria-live="polite"
+				aria-label={ __(
+					'Processing express checkout',
+					'woocommerce'
+				) }
 			>
-				<div className="wc-block-components-express-payment wc-block-components-express-payment--cart">
-					<div className="wc-block-components-express-payment__content">
-						<StoreNoticesContainer
-							context={ noticeContexts.EXPRESS_PAYMENTS }
-						/>
+				<div className="wc-block-components-express-payment__content">
+					<StoreNoticesContainer
+						context={ noticeContexts.EXPRESS_PAYMENTS }
+					/>
+					{ isCalculating ||
+					hasRegisteredNotInitializedExpressPayments ? (
+						<ul className="wc-block-components-express-payment__event-buttons">
+							{ Array.from( {
+								length: availableMethodsCount,
+							} ).map( ( _, index ) => (
+								<li key={ index }>
+									<Skeleton height="48px" />
+								</li>
+							) ) }
+						</ul>
+					) : (
 						<ExpressPaymentMethods />
-					</div>
+					) }
 				</div>
-			</LoadingMask>
+			</div>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--cart">
 				{ /* translators: Shown in the Cart block between the express payment methods and the Proceed to Checkout button */ }
 				{ __( 'Or', 'woocommerce' ) }
