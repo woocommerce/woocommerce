@@ -46,7 +46,7 @@
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.9.2",
+		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*"
 	},
