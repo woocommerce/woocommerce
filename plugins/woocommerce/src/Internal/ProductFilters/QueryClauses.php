@@ -328,6 +328,13 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		);
 
 		if ( is_wp_error( $all_terms ) ) {
+			$logger = wc_get_logger();
+			$logger->error(
+				$all_terms->get_error_message(),
+				array(
+					'taxonomies' => $chosen_taxonomies,
+				)
+			);
 			return $args;
 		}
 
