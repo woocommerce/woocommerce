@@ -265,7 +265,7 @@ const renderInnerBlocks = ( {
 			</BlockErrorBoundary>
 		);
 
-		// Temporary return until the Cart block is also updated
+		// The cart and checkout blocks have progressive loading enabled, so we need to render the block immediately.
 		return isCheckoutBlockChild || isCartBlockChild ? (
 			blockContent
 		) : (

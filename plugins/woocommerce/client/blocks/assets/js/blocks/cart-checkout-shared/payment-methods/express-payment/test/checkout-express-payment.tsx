@@ -327,7 +327,7 @@ describe( 'CheckoutExpressPayment', () => {
 			expect( titleSkeleton ).toHaveAttribute( 'data-height', '18px' );
 		} );
 
-		it( 'should render skeleton buttons when calculating', () => {
+		it( 'should render 1 skeleton buttons when calculating a partial update', () => {
 			mockUseSelect
 				.mockReturnValueOnce( {
 					isCalculating: true,
@@ -355,7 +355,7 @@ describe( 'CheckoutExpressPayment', () => {
 				( el ) => el.getAttribute( 'data-height' ) === '48px'
 			);
 
-			expect( buttonSkeletons ).toHaveLength( 2 ); // Two skeleton buttons
+			expect( buttonSkeletons ).toHaveLength( 1 ); // 1 skeleton buttons
 			expect(
 				screen.queryByTestId( 'express-payment-methods' )
 			).not.toBeInTheDocument();

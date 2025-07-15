@@ -12,6 +12,13 @@ import userEvent from '@testing-library/user-event';
 import { CartEventsProvider } from '../index';
 import Block from '../../../../../../blocks/cart/inner-blocks/proceed-to-checkout-block/block';
 
+jest.mock( '@woocommerce/base-context/hooks', () => ( {
+	useStoreCart: jest.fn( () => ( {
+		cartIsLoading: false,
+		isLoadingRates: false,
+	} ) ),
+} ) );
+
 describe( 'CartEventsProvider', () => {
 	it( 'allows observers to unsubscribe', async () => {
 		const user = userEvent.setup();
