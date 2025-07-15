@@ -43,10 +43,7 @@ export type Store = {
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
-		updateNotices: (
-			errors: ( Error | ApiErrorResponse )[],
-			removeOthers?: boolean
-		) => void;
+		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
 	};
 };
 
@@ -129,7 +126,10 @@ const { state, actions } = store< Store >(
 						throw generateError( json );
 					}
 
-					yield actions.updateNotices( json.errors, true );
+					yield actions.updateNotices(
+						json.errors.map( generateErrorNotice ),
+						true
+					);
 
 					state.cart = json;
 					emitSyncEvent( {
@@ -182,7 +182,10 @@ const { state, actions } = store< Store >(
 						throw generateError( json );
 
 					// Checks if the response was successful, but still contains some errors.
-					yield actions.updateNotices( json.errors, true );
+					yield actions.updateNotices(
+						json.errors.map( generateErrorNotice ),
+						true
+					);
 
 					// Updates the local cart.
 					state.cart = json;
@@ -303,7 +306,9 @@ const { state, actions } = store< Store >(
 
 					// Checks if the last successful response contains any errors.
 					yield actions.updateNotices(
-						lastSuccessfulCartResponse.errors,
+						lastSuccessfulCartResponse.errors.map(
+							generateErrorNotice
+						),
 						true
 					);
 
@@ -347,7 +352,10 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					yield actions.updateNotices( json.errors, true );
+					yield actions.updateNotices(
+						json.errors.map( generateErrorNotice ),
+						true
+					);
 
 					// Updates the local cart.
 					state.cart = json;
