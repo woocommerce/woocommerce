@@ -732,6 +732,7 @@ class FeaturesController {
 	 * This method MUST be called from inside 'before_woocommerce_init'.
 	 *
 	 * @internal For usage by WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 10.2.0
 	 * @param string $feature_id Unique feature id.
 	 * @param string $plugin_file The full plugin file path (not normalized).
 	 * @param bool   $positive_compatibility True if compatible, false if incompatible.
@@ -763,6 +764,7 @@ class FeaturesController {
 	 * Pending declarations are cleared after processing to avoid redundant work.
 	 *
 	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
+	 * @since 10.2.0
 	 * @return void
 	 */
 	private function process_pending_declarations(): void {
