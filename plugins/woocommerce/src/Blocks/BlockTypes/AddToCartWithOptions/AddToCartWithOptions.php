@@ -181,7 +181,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			/**
 			 * Filter the default quantity to add to cart.
 			 *
-			 * @since 10.9.0
+			 * @since 10.0.0
 			 * @param number $default_quantity The default quantity.
 			 * @param number $product_id The product id.
 			 */

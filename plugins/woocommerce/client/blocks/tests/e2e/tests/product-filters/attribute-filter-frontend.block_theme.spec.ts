@@ -66,6 +66,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 					name: 'Attribute',
 				} )
 				.locator( '..' )
+				.locator( '..' )
 				.locator( 'label' );
 
 			await expect( listItems ).toHaveCount( 5 );
@@ -177,6 +178,7 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 				.getByRole( 'heading', {
 					name: 'Attribute',
 				} )
+				.locator( '..' )
 				.locator( '..' )
 				.locator( 'label' );
 
