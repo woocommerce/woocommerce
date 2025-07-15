@@ -403,7 +403,7 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test it gets empty string for block styles with unknown return type.
+	 * Test it gets return type for block styles falls back to full with unknown return type.
 	 */
 	public function testItGetsBlockStylesWithUnknownReturnType(): void {
 		$block_attributes = array(
@@ -423,9 +423,10 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 
 		$properties = array( 'spacing' );
 
-		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'unknown' );
+		$result      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'unknown' );
+		$result_full = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'full' );
 
-		$this->assertSame( '', $result );
+		$this->assertSame( $result, $result_full );
 	}
 
 	/**

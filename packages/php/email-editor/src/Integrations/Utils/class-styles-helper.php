@@ -115,11 +115,15 @@ class Styles_Helper {
 	 * Extend block styles with CSS declarations.
 	 *
 	 * @param array $block_styles WP_Style_Engine styles array (must contain 'declarations' and 'css' keys).
-	 * @param array $css_declaractions Array of CSS declarations.
+	 * @param array $css_declarations Array of CSS declarations.
 	 * @return array
 	 */
-	public static function extend_block_styles( array $block_styles, $css_declaractions ) {
-		$block_styles['declarations'] = array_merge( $block_styles['declarations'], $css_declaractions );
+	public static function extend_block_styles( array $block_styles, $css_declarations ) {
+		if ( ! is_array( $css_declarations ) ) {
+			return $block_styles;
+		}
+
+		$block_styles['declarations'] = array_merge( $block_styles['declarations'], $css_declarations );
 		$block_styles['css']          = WP_Style_Engine::compile_css( $block_styles['declarations'], '' );
 
 		return $block_styles;
@@ -135,10 +139,13 @@ class Styles_Helper {
 	 * @return array
 	 */
 	public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties, string $return_type = 'full' ) {
+		if ( ! in_array( $return_type, array( 'full', 'css', 'declarations', 'classnames' ), true ) ) {
+			$return_type = 'full';
+		}
+
 		$styles          = self::get_normalized_block_styles( $block_attributes, $rendering_context );
 		$filtered_styles = array();
-
-		$style_mappings = array(
+		$style_mappings  = array(
 			'spacing'          => array( 'spacing' ),
 			'padding'          => array( 'spacing', 'padding' ),
 			'margin'           => array( 'spacing', 'margin' ),

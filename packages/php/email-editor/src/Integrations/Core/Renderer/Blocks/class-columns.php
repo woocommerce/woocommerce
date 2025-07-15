@@ -64,7 +64,7 @@ class Columns extends Abstract_Block_Renderer {
 				'width'           => '100%',
 				'border-collapse' => 'separate',
 				'text-align'      => 'left',
-				'background-size' => $columns_styles['background-size'] ?? 'cover',
+				'background-size' => $columns_styles['declarations']['background-size'] ?? 'cover',
 			)
 		);
 
