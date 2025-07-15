@@ -80,7 +80,7 @@ table.wc-block-cart-items {
 	}
 }
 
-@include cart-checkout-below-large-container {
+@mixin cart-items-table-styles {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -130,6 +130,19 @@ table.wc-block-cart-items {
 				}
 			}
 		}
+	}
+}
+// For the cart and checkout blocks
+@include cart-checkout-below-large-container {
+	@include cart-items-table-styles;
+}
+
+// For the mini cart block which is not a container and still uses the `is-` classes
+.is-medium,
+.is-small,
+.is-mobile {
+	.wp-block-woocommerce-mini-cart-contents {
+		@include cart-items-table-styles;
 	}
 }
 
