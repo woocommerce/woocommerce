@@ -4,8 +4,8 @@ on:
     inputs:
       version:
         type: string
-        required: false
-        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+        required: true
+        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors.'
 
   release:
     types: [prereleased]
@@ -56,7 +56,7 @@ jobs:
 
       - name: Extract version from the provided input version
         id: version-from-input
-        if: ${{ github.event.inputs.version != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
@@ -76,31 +76,6 @@ jobs:
             core.setOutput('major', major);
             core.setOutput('minor', minor);
 
-      - name: Extract version from the branch name
-        id: version-from-branch
-        if: ${{ github.event.inputs.version == '' && github.event_name != 'release' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const branchName = '${{ github.ref_name }}';
-            console.log(`Branch name: ${branchName}`);
-
-            const branchMatch = branchName.match(/^release\/(\d+)\.(\d+)$/);
-            if (!branchMatch) {
-              core.setFailed(`Branch name must be in format 'release/x.y', got: ${branchName}`);
-              process.exit(1);
-            }
-
-            const major = parseInt(branchMatch[1]);
-            const minor = parseInt(branchMatch[2]);
-            const currentVersion = `${major}.${minor}`;
-
-            console.log(`Extracted current version: ${currentVersion}`);
-            console.log(`Parsed version: major=${major}, minor=${minor}`);
-
-            core.setOutput('major', major);
-            core.setOutput('minor', minor);
-
       - name: Calculate current and previous version
         id: calculate-versions
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -113,16 +88,11 @@ jobs:
               major = parseInt('${{ steps.version-from-prerelease.outputs.major }}');
               minor = parseInt('${{ steps.version-from-prerelease.outputs.minor }}');
               console.log(`Using version from RC pre-release: ${major}.${minor}`);
-            } else if ('${{ github.event.inputs.version }}' !== '') {
+            } else {
               // Manual trigger with input version
               major = parseInt('${{ steps.version-from-input.outputs.major }}');
               minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
               console.log(`Using version from input: ${major}.${minor}`);
-            } else {
-              // Manual trigger from branch name
-              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
-              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
-              console.log(`Using version from branch: ${major}.${minor}`);
             }
 
             let previousVersion;
@@ -369,6 +339,7 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
           slack-text: |
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
 
