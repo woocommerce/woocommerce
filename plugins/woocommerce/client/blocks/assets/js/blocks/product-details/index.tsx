@@ -28,10 +28,6 @@ const blockConfig = {
 			save() {
 				return null;
 			},
-			migrate( attributes ) {
-				const { hideTabTitle, ...restAttributes } = attributes;
-				return restAttributes;
-			},
 		},
 	],
 };
