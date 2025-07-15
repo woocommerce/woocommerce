@@ -1151,8 +1151,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 									// After deactivation, exclude from active-only list.
 									return array_filter(
 										$aware_plugins,
-										function( $p ) {
-											return $p !== 'plugin/plugin.php';
+										function ( $p ) {
+											return 'plugin/plugin.php' !== $p;
 										}
 									);
 								}
@@ -1160,7 +1160,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 								return $aware_plugins;
 							}
 						)
-		);
+					);
 
 		// Set private $proxy on mock via parent reflection.
 		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
@@ -1188,7 +1188,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
 		$deactivated = true;
-		do_action( 'deactivated_plugin', 'plugin/plugin.php' );
+		do_action( 'deactivated_plugin', 'plugin/plugin.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		// Check after: compatibility unset, so moves to 'uncertain' (still in aware list when ! active_only).
 		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
