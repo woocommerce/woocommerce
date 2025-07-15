@@ -364,6 +364,7 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
           slack-text: |
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
 
