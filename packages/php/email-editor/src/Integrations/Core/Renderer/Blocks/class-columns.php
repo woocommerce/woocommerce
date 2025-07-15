@@ -57,7 +57,7 @@ class Columns extends Abstract_Block_Renderer {
 			)
 		);
 
-		$columns_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding', 'border', 'background', 'color' ) );
+		$columns_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding', 'border', 'background', 'background-color', 'color' ) );
 		$columns_styles = Styles_Helper::extend_block_styles(
 			$columns_styles,
 			array(

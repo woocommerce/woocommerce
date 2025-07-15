@@ -60,7 +60,7 @@ class Group extends Abstract_Block_Renderer {
 			)
 		);
 
-		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'color', 'text-align' ) );
+		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
 		$table_styles = Styles_Helper::extend_block_styles(
 			$table_styles,
 			array_filter(

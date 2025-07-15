@@ -74,13 +74,7 @@ class Column extends Abstract_Block_Renderer {
 		$padding_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
 		$padding_styles = Styles_Helper::extend_block_styles( $padding_styles, array( 'text-align' => 'left' ) );
 
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'color'      => $block_attributes['style']['color'] ?? array(),
-				'background' => $block_attributes['style']['background'] ?? array(),
-			)
-		)['declarations'];
-		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'color' ) );
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color' ) );
 		$cell_styles = Styles_Helper::extend_block_styles(
 			$cell_styles,
 			array_filter(

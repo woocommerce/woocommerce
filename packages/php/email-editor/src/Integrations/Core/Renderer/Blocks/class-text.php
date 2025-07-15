@@ -53,7 +53,7 @@ class Text extends Abstract_Block_Renderer {
 			$block_content = $html->get_updated_html();
 		}
 
-		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'typography' ) );
+		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
 		$additional_styles = array(
 			'min-width' => '100%', // prevent Gmail App from shrinking the table on mobile devices.
 		);

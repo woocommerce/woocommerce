@@ -161,7 +161,6 @@ class Styles_Helper {
 				continue;
 			}
 
-
 			$style_pointer = $styles;
 			foreach ( $style_mappings[ $property ] as $path_segment ) {
 				if ( ! isset( $style_pointer[ $path_segment ] ) ) {
