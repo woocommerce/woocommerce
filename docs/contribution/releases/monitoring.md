@@ -5,13 +5,13 @@ sidebar_label: Release Monitoring
 
 # WooCommerce Release Monitoring
 
-After the release, the release lead should continue to monitor the following for any bugs directly related to the latest version.  If there are questions whether a specific issue is critical enough to warrant creating a Point Release Fix, please reach out within the [#woo-core-releases Slack channel](https://a8c.slack.com/archives/C01DT6U03HC).
+After the release, the release lead should continue to monitor the following for any bugs directly related to the latest version.  Monitoring should continue for 3 days after a major release and 1 day for a point release.
+
+If there are questions whether a specific issue is critical enough to warrant creating a new Point Release Fix, please start a discussion WooCommerce Slack [#core-development](https://woocommercecommunity.slack.com/archives/C4TNYTR28).
 
 ## WordPress.org Forums
 
-Direct Link: [https://wordpress.org/support/plugin/woocommerce/](https://wordpress.org/support/plugin/woocommerce/)
-
-The forum entries are also fed into the [#woo-forums-woocommerce Slack Channel](https://a8c.slack.com/archives/C01FJ7M9XK5) for easier monitoring.
+Check newly threads created on the [WordPress.org Forums](https://wordpress.org/support/plugin/woocommerce/) for any issues that appear to be caused by the latest update.
 
 ## WooCommerce GitHub Repository Issues
 
