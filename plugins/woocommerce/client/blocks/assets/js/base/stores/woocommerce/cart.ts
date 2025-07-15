@@ -33,6 +33,9 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 
 export type Store = {
 	state: {
+		errorMessages?: {
+			[ key: string ]: string;
+		};
 		restUrl: string;
 		nonce: string;
 		cart: Omit< Cart, 'items' > & {
@@ -89,19 +92,6 @@ function emitSyncEvent( {
 			},
 		} )
 	);
-}
-
-function getUserFriendlyErrorMessage(
-	error: Error | ApiErrorResponse
-): string {
-	const code = ( error as ApiErrorResponse )?.code;
-
-	switch ( code ) {
-		case 'woocommerce_rest_missing_attributes':
-			return 'Please select product attributes before adding to cart.';
-		default:
-			return error.message;
-	}
 }
 
 // Todo: export this store once the store is public.
@@ -388,9 +378,14 @@ const { state, actions } = store< Store >(
 					}
 				);
 
+				const { code, message } = error as ApiErrorResponse;
+
+				const userFriendlyMessage =
+					state.errorMessages?.[ code ] || message;
+
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: getUserFriendlyErrorMessage( error ),
+					notice: userFriendlyMessage,
 					type: 'error',
 					dismissible: true,
 				} );
