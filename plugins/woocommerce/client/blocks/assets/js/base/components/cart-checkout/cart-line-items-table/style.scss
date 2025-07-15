@@ -80,9 +80,7 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-medium,
-.is-small,
-.is-mobile {
+@mixin cart-items-table-styles {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -133,6 +131,22 @@ table.wc-block-cart-items {
 			}
 		}
 	}
+}
+
+// Styles for the cart block; we are targeting the cart block because it has a progressive loading enabled
+// and we want to prevent content jumping before the is- classes are applied
+@include cart-checkout-below-large-container {
+	.wc-block-cart {
+		background-color: red;
+		@include cart-items-table-styles;
+	}
+}
+
+// Styles for the mini cart block which is not a container and still uses the `is-` classes
+.is-medium,
+.is-small,
+.is-mobile {
+	@include cart-items-table-styles;
 }
 
 @include cart-checkout-large-container {
