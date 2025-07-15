@@ -217,8 +217,8 @@ const renderInnerBlocks = ( {
 			? blockWrapper
 			: Fragment;
 
-		const isCheckoutBlockChild = /^woocommerce\/checkout/.test( block );
-		const isCartBlockChild = /^woocommerce\/cart/.test( block );
+		const isCheckoutBlockChild = block === 'woocommerce/checkout';
+		const isCartBlockChild = block === 'woocommerce/cart';
 
 		const blockContent = (
 			<BlockErrorBoundary
