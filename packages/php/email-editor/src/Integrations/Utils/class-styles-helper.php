@@ -170,14 +170,20 @@ class Styles_Helper {
 				$style_pointer = $style_pointer[ $path_segment ];
 			}
 
+			/**
+			 * Pointer to filtered styles.
+			 *
+			 * @var array<string, mixed> $filtered_styles_pointer
+			 */
 			$filtered_styles_pointer = & $filtered_styles;
+
 			foreach ( $style_mappings[ $property ] as $path_index => $path_segment ) {
 				if ( count( $style_mappings[ $property ] ) - 1 === $path_index ) {
 					$filtered_styles_pointer[ $path_segment ] = $style_pointer;
 					break;
 				}
 
-				if ( ! isset( $filtered_styles_pointer[ $path_segment ] ) ) {
+				if ( ! isset( $filtered_styles_pointer[ $path_segment ] ) || ! is_array( $filtered_styles_pointer[ $path_segment ] ) ) {
 					$filtered_styles_pointer[ $path_segment ] = array();
 				}
 
@@ -194,7 +200,7 @@ class Styles_Helper {
 			)
 		);
 
-		$output_styles = ! empty( $filtered_styles ) ? self::get_styles_from_block( $filtered_styles ) : self::$empty_block_styles;
+		$output_styles = count( $filtered_styles ) > 0 ? self::get_styles_from_block( $filtered_styles ) : self::$empty_block_styles;
 		$output_styles = self::extend_block_styles( $output_styles, $additional_css_declarations );
 
 		if ( 'full' === $return_type ) {

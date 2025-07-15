@@ -25,12 +25,12 @@ class Button extends Abstract_Block_Renderer {
 	 *
 	 * @param array             $block_attributes Block attributes.
 	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return object{css: string, declarations: array, classnames: string}
+	 * @return array
 	 */
 	private function get_wrapper_styles( array $block_attributes, Rendering_Context $rendering_context ) {
 		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
 
-		return (object) Styles_Helper::extend_block_styles(
+		return Styles_Helper::extend_block_styles(
 			$block_styles,
 			array(
 				'word-break' => 'break-word',
@@ -44,12 +44,12 @@ class Button extends Abstract_Block_Renderer {
 	 *
 	 * @param array             $block_attributes Block attributes.
 	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return object{css: string, declarations: array, classnames: string}
+	 * @return array
 	 */
 	private function get_link_styles( array $block_attributes, Rendering_Context $rendering_context ) {
 		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'color', 'typography' ) );
 
-		return (object) Styles_Helper::extend_block_styles(
+		return Styles_Helper::extend_block_styles(
 			$block_styles,
 			array( 'display' => 'block' )
 		);
@@ -110,8 +110,8 @@ class Button extends Abstract_Block_Renderer {
 		);
 
 		$cell_attrs = array(
-			'class'  => $wrapper_styles->classnames . ' ' . $block_classname,
-			'style'  => $wrapper_styles->css,
+			'class'  => $wrapper_styles['classnames'] . ' ' . $block_classname,
+			'style'  => $wrapper_styles['css'],
 			'align'  => $block_attributes['textAlign'],
 			'valign' => 'middle',
 			'role'   => 'presentation',
@@ -119,8 +119,8 @@ class Button extends Abstract_Block_Renderer {
 
 		$button_content = sprintf(
 			'<a class="button-link %1$s" style="%2$s" href="%3$s" target="_blank">%4$s</a>',
-			esc_attr( $link_styles->classnames ),
-			esc_attr( $link_styles->css ),
+			esc_attr( $link_styles['classnames'] ),
+			esc_attr( $link_styles['css'] ),
 			esc_url( $button_url ),
 			$button_text
 		);
