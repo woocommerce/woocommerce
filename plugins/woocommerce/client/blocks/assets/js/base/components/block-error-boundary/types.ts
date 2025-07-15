@@ -48,6 +48,10 @@ export interface BlockErrorBoundaryProps extends BlockErrorBase {
 	 */
 	renderError?: ( props: RenderErrorProps ) => React.ReactNode;
 	showErrorMessage?: boolean | undefined;
+	/**
+	 * Children to be rendered inside the error boundary.
+	 */
+	children?: React.ReactNode;
 }
 
 export interface DerivedStateReturn {
