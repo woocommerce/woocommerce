@@ -1974,11 +1974,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			if ( in_array( '__experimental_min_price', $fields, true ) ) {
-				$data['__experimental_min_price'] = $product->get_type() === ProductType::GROUPED ? $product->get_min_price() : '';
+				$data['__experimental_min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
 			}
 
 			if ( in_array( '__experimental_max_price', $fields, true ) ) {
-				$data['__experimental_max_price'] = $product->get_type() === ProductType::GROUPED ? $product->get_max_price() : '';
+				$data['__experimental_max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );
