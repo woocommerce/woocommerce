@@ -10,7 +10,10 @@ import type {
 	ApiResponse,
 	CartResponseTotals,
 } from '@woocommerce/types';
-import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type {
+	Store as StoreNotices,
+	Notice,
+} from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
@@ -69,6 +72,12 @@ function generateError( error: ApiErrorResponse ): Error {
 		code: error.code || 'unknown_error',
 	} );
 }
+
+const generateErrorNotice = ( error: Error | ApiErrorResponse ): Notice => ( {
+	notice: error.message,
+	type: 'error',
+	dismissible: true,
+} );
 
 let pendingRefresh = false;
 let refreshTimeout = 3000;
@@ -397,13 +406,9 @@ const { state, actions } = store< Store >(
 					);
 
 				// Todo: Check what should happen if the notice is already displayed.
-				const noticeIds = errors.map( ( error ) =>
-					noticeActions.addNotice( {
-						notice: error.message,
-						type: 'error',
-						dismissible: true,
-					} )
-				);
+				const noticeIds = errors
+					.map( generateErrorNotice )
+					.map( ( notice ) => noticeActions.addNotice( notice ) );
 
 				const { notices } = noticeState;
 				if ( removeOthers ) {
