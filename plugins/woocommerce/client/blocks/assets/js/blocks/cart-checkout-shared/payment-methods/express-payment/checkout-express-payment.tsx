@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
-import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
