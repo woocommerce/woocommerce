@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
 	useStoreCart,
+	usePay,
 } from '@woocommerce/base-context/hooks';
 import { check } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
@@ -36,7 +37,7 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
-	const { cartTotals } = useStoreCart();
+	const { cartTotals, cartIsLoading } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	const buttonLabel = (
@@ -87,7 +88,8 @@ const PlaceOrderButton = ( {
 				isCalculating ||
 				isDisabled ||
 				waitingForProcessing ||
-				waitingForRedirect
+				waitingForRedirect ||
+				cartIsLoading
 			}
 		>
 			{ waitingForProcessing && <Spinner /> }
