@@ -148,7 +148,6 @@ class WC_Product_Grouped extends WC_Product {
 		return $this->get_prop( 'children', $context );
 	}
 
-
 	/**
 	 * Return the product's children - visible only.
 	 *
@@ -174,7 +173,7 @@ class WC_Product_Grouped extends WC_Product {
 			return '';
 		}
 
-		return (string) min( $min_price );
+		return wc_format_decimal( min( $min_price ) );
 	}
 
 	/**
@@ -191,7 +190,7 @@ class WC_Product_Grouped extends WC_Product {
 			return '';
 		}
 
-		return (string) max( $max_price );
+		return wc_format_decimal( max( $max_price ) );
 	}
 
 	/*
