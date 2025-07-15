@@ -4,6 +4,7 @@
 import { getElement, store } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -21,17 +22,17 @@ const productSkuStore = store(
 		callbacks: {
 			updateSku: () => {
 				const element = getElement();
-				if ( ! element.ref ) return;
 
-				const skuElement = element.ref.querySelector( '.sku' );
-				if ( ! skuElement ) return;
+				if ( ! element.ref ) {
+					return;
+				}
 
 				const newSku =
 					productDataState?.productData?.sku ??
 					productDataState?.originalProductData?.sku;
 
 				if ( newSku !== null ) {
-					skuElement.textContent = newSku;
+					element.ref.textContent = sanitize( newSku );
 				}
 			},
 		},
