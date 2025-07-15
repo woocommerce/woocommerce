@@ -25,6 +25,7 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
+	name: string;
 };
 
 export type Store = {
@@ -76,6 +77,56 @@ const generateErrorNotice = ( error: Error | ApiErrorResponse ): Notice => ( {
 	dismissible: true,
 } );
 
+const generateInfoNotice = ( message: string ): Notice => ( {
+	notice: message,
+	type: 'notice',
+	dismissible: true,
+} );
+
+const getInfoNoticesFromCartUpdates = (
+	oldCart: Store[ 'state' ][ 'cart' ],
+	newCart: Cart,
+	quantityChanges: QuantityChanges
+): Notice[] => {
+	const oldItems = oldCart.items;
+	const newItems = newCart.items;
+
+	const {
+		productsPendingAdd: pendingAdd = [],
+		cartItemsPendingQuantity: pendingQuantity = [],
+		cartItemsPendingDelete: pendingDelete = [],
+	} = quantityChanges;
+
+	const autoDeletedToNotify = oldItems.filter(
+		( o ) =>
+			! newItems.some( ( n ) => o.key === n.key ) &&
+			! ( o.key && pendingDelete.includes( o.key ) )
+	);
+
+	const autoUpdatedToNotify = newItems.filter(
+		( o ) =>
+			newItems.some( ( n ) => o.key === n.key ) &&
+			! pendingAdd.includes( o.id ) &&
+			! ( o.key && pendingQuantity.includes( o.key ) )
+	);
+	return [
+		...autoDeletedToNotify.map( ( item ) =>
+			// TODO: move the message template to iAPI config.
+			generateInfoNotice(
+				'"%s" was removed from your cart.'.replace( '%s', item.name )
+			)
+		),
+		...autoUpdatedToNotify.map( ( item ) =>
+			// TODO: move the message template to iAPI config.
+			generateInfoNotice(
+				'The quantity of "%1$s" was changed to %2$d.'
+					.replace( '%1$s', item.name )
+					.replace( '%2$d', item.quantity.toString() )
+			)
+		),
+	];
+};
+
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 
@@ -125,16 +176,20 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) ) {
 						throw generateError( json );
 					}
-
+					const quantityChanges = { cartItemsPendingDelete: [ key ] };
+					const infoNotices = getInfoNoticesFromCartUpdates(
+						state.cart,
+						json,
+						quantityChanges
+					);
+					const errorNotices = json.errors.map( generateErrorNotice );
 					yield actions.updateNotices(
-						json.errors.map( generateErrorNotice ),
+						[ ...infoNotices, ...errorNotices ],
 						true
 					);
 
 					state.cart = json;
-					emitSyncEvent( {
-						quantityChanges: { cartItemsPendingDelete: [ key ] },
-					} );
+					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
 					state.cart = JSON.parse( previousCart );
 
@@ -181,9 +236,14 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					// Checks if the response was successful, but still contains some errors.
+					const infoNotices = getInfoNoticesFromCartUpdates(
+						state.cart,
+						json,
+						quantityChanges
+					);
+					const errorNotices = json.errors.map( generateErrorNotice );
 					yield actions.updateNotices(
-						json.errors.map( generateErrorNotice ),
+						[ ...infoNotices, ...errorNotices ],
 						true
 					);
 
@@ -304,11 +364,17 @@ const { state, actions } = store< Store >(
 						);
 					}
 
-					// Checks if the last successful response contains any errors.
-					yield actions.updateNotices(
+					const infoNotices = getInfoNoticesFromCartUpdates(
+						state.cart,
+						lastSuccessfulCartResponse,
+						quantityChanges
+					);
+					const errorNotices =
 						lastSuccessfulCartResponse.errors.map(
 							generateErrorNotice
-						),
+						);
+					yield actions.updateNotices(
+						[ ...infoNotices, ...errorNotices ],
 						true
 					);
 
@@ -397,10 +463,7 @@ const { state, actions } = store< Store >(
 				console.error( error );
 			},
 
-			*updateNotices(
-				errors: ( Error | ApiErrorResponse )[] = [],
-				removeOthers = false
-			) {
+			*updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -414,9 +477,9 @@ const { state, actions } = store< Store >(
 					);
 
 				// Todo: Check what should happen if the notice is already displayed.
-				const noticeIds = errors
-					.map( generateErrorNotice )
-					.map( ( notice ) => noticeActions.addNotice( notice ) );
+				const noticeIds = newNotices.map( ( notice ) =>
+					noticeActions.addNotice( notice )
+				);
 
 				const { notices } = noticeState;
 				if ( removeOthers ) {
@@ -428,7 +491,9 @@ const { state, actions } = store< Store >(
 
 				// Emmits console.error for troubleshooting.
 				// eslint-disable-next-line no-console
-				console.error( errors );
+				console.error(
+					newNotices.filter( ( { type } ) => type === 'error' )
+				);
 			},
 		},
 	},
