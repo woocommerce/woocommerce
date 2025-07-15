@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
 	useStoreCart,
-	usePay,
 } from '@woocommerce/base-context/hooks';
 import { check } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
