@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent lazy loading in product images in transactional emails to ensure proper display in email clients

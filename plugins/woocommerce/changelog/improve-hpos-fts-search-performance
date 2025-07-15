@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve HPOS order search performance by optimizing full-text search queries.

@@ -101,9 +101,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
+		await page.getByLabel( 'Product quantity' ).fill( '1' );
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '6 in cart' );
+		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
 	test( 'allows adding variable products to cart', async ( {
@@ -133,7 +134,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await addToCartButton.click();
 
 			await expect(
-				page.getByText( ' No matching variation found.' )
+				page.getByText(
+					'Please select product attributes before adding to cart.'
+				)
 			).toBeVisible();
 		} );
 
@@ -142,12 +145,20 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await logoNoOption.click();
 			await colorGreenOption.click();
-			await addToCartButton.click();
+
+			// Wait until the variation is found and the button becomes visually
+			// enabled.
+			// Note: The button is always enabled for accessibility reasons.
+			// Instead, we check directly for the "disabled" class, which grays
+			// out the button.
+			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await addToCartButton.click();
+
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
@@ -179,6 +190,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			'Increase quantity of Beanie'
 		);
 		await increaseQuantityButton.click();
+		await increaseQuantityButton.click();
 
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
@@ -186,7 +198,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-		await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -223,6 +235,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await pageObject.switchProductType( 'Variable Product' );
 
+		// Verify inner blocks have loaded.
+		await expect(
+			editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
+
 		const attributeOptionsBlock = await editor.getBlockByName(
 			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
 		);
@@ -232,9 +253,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// We need to make sure the block updated before saving.
 		// @see https://github.com/woocommerce/woocommerce/issues/57718
+		// Verify that `.editor-post-publish-button__button` has an attribute
+		// `aria-haspopup="dialog"`. When https://github.com/woocommerce/woocommerce/issues/48936
+		// is fixed, we can simply check that the Save button becomes enabled.
 		await expect(
-			editor.canvas.getByLabel( 'Color', { exact: true } )
-		).toBeVisible();
+			page.getByRole( 'button', { name: 'Save', exact: true } )
+		).toHaveAttribute( 'aria-haspopup', 'dialog' );
 
 		await editor.saveSiteEditorEntities();
 

@@ -25,14 +25,17 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { currency } = getConfig( 'woocommerce' );
-const { addToCartBehaviour } = getConfig( 'woocommerce/mini-cart' );
+const { addToCartBehaviour, onCartClickBehaviour, checkoutUrl } = getConfig(
+	'woocommerce/mini-cart'
+);
 const { displayCartPriceIncludingTax } = getConfig( 'woocommerce/mini-cart' );
 const {
 	reduceQuantityLabel,
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-} = getConfig( 'woocommerce/mini-cart-items-block' );
+	lowInStockLabel,
+} = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { singularItemsText, pluralItemsText } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
@@ -52,6 +55,8 @@ type MiniCart = {
 		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
+		drawerRole: string | null;
+		drawerTabIndex: string | null;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -105,6 +110,18 @@ store< MiniCart >(
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 
+			get drawerRole() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? 'dialog' : null;
+			},
+
+			get drawerTabIndex() {
+				const { isOpen } = getContext< MiniCartContext >();
+
+				return isOpen ? '-1' : null;
+			},
+
 			get drawerOverlayClass() {
 				const { isOpen } = getContext< MiniCartContext >();
 				const baseClasses =
@@ -150,6 +167,10 @@ store< MiniCart >(
 			},
 
 			openDrawer() {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+					window.location.href = checkoutUrl;
+					return;
+				}
 				const ctx = getContext< MiniCartContext >();
 				ctx.isOpen = true;
 			},
@@ -172,7 +193,7 @@ store< MiniCart >(
 );
 
 const { state: cartItemState } = store(
-	'woocommerce/mini-cart-items-block',
+	'woocommerce/mini-cart-products-table-block',
 	{
 		state: {
 			// As a workaround for a bug in context of wp-each we use state to
@@ -258,18 +279,18 @@ const { state: cartItemState } = store(
 			get minimumReached(): boolean {
 				const {
 					quantity,
-					quantity_limits: { minimum },
+					quantity_limits: { minimum, multiple_of: multipleOf = 1 },
 				} = cartItemState.cartItem;
 
-				return quantity - 1 < minimum;
+				return quantity - multipleOf < minimum;
 			},
 
 			get maximumReached(): boolean {
 				const {
 					quantity,
-					quantity_limits: { maximum },
+					quantity_limits: { maximum, multiple_of: multipleOf = 1 },
 				} = cartItemState.cartItem;
-				return quantity + 1 > maximum;
+				return quantity + multipleOf > maximum;
 			},
 
 			get reduceQuantityLabel(): string {
@@ -328,20 +349,14 @@ const { state: cartItemState } = store(
 
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.regular_price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
 					cartItemState.currency
 				);
 			},
 
 			get itemPrice(): string {
 				return formatPriceWithCurrency(
-					parseInt(
-						cartItemState.cartItem.prices.raw_prices.price,
-						10
-					),
+					parseInt( cartItemState.cartItem.prices.price, 10 ),
 					cartItemState.currency
 				);
 			},
@@ -356,6 +371,36 @@ const { state: cartItemState } = store(
 					: parseInt( totals.line_subtotal, 10 );
 
 				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
+			},
+
+			get isLineItemTotalDiscountVisible(): boolean {
+				return (
+					cartItemState.cartItemHasDiscount &&
+					cartItemState.cartItem.quantity > 1
+				);
+			},
+
+			get isProductHiddenFromCatalog(): boolean {
+				const { catalog_visibility: catalogVisibility } =
+					cartItemState.cartItem;
+				return (
+					catalogVisibility === 'hidden' ||
+					catalogVisibility === 'search'
+				);
+			},
+
+			get isLowInStockVisible(): boolean {
+				return (
+					! cartItemState.cartItem.show_backorder_badge &&
+					!! cartItemState.cartItem.low_stock_remaining
+				);
+			},
+
+			get lowInStockLabel(): string {
+				return lowInStockLabel.replace(
+					'%d',
+					cartItemState.cartItem.low_stock_remaining
+				);
 			},
 		},
 
@@ -397,16 +442,20 @@ const { state: cartItemState } = store(
 			},
 
 			*incrementQuantity(): Generator< unknown, void > {
+				const { multiple_of: multipleOf = 1 } =
+					cartItemState.cartItem.quantity_limits;
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
-					quantity: cartItemState.cartItem.quantity + 1,
+					quantity: cartItemState.cartItem.quantity + multipleOf,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
+				const { multiple_of: multipleOf = 1 } =
+					cartItemState.cartItem.quantity_limits;
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
-					quantity: cartItemState.cartItem.quantity - 1,
+					quantity: cartItemState.cartItem.quantity - multipleOf,
 				} );
 			},
 		},

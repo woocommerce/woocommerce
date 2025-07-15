@@ -60,9 +60,16 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 			)
 		);
 
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-text'        => 'state.itemsInCartText',
+				'data-wp-interactive' => 'woocommerce/mini-cart-title-items-counter-block',
+			)
+		);
+
 		ob_start();
 		?>
-		<span data-wp-text="state.itemsInCartText" data-wp-interactive="woocommerce/mini-cart-title-items-counter-block" class="wp-block-woocommerce-mini-cart-title-items-counter-block">
+		<span <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		</span>
 		<?php
 		return ob_get_clean();

@@ -11,6 +11,9 @@ use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
+use WC_Gateway_BACS;
+use WC_Gateway_COD;
+use WC_Gateway_Cheque;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -542,6 +545,17 @@ class PaymentGateway {
 			);
 		}
 
+		// Special handling for offline payment gateways to use the front-end navigation.
+		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
+			return Utils::wc_payments_settings_url(
+				null,
+				array(
+					'path' => '/offline/' . strtolower( $payment_gateway->id ),
+					'from' => Payments::FROM_PAYMENTS_SETTINGS,
+				)
+			);
+		}
+
 		return Utils::wc_payments_settings_url(
 			null,
 			array(
@@ -881,7 +895,15 @@ class PaymentGateway {
 				$reflector      = new \ReflectionClass( get_class( $payment_gateway ) );
 				$class_filename = $reflector->getFileName();
 			} catch ( Throwable $e ) {
-				// Bail if we couldn't get the gateway class filename.
+				// Bail but log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->debug(
+					'Failed to get gateway class filename: ' . $e->getMessage(),
+					array(
+						'gateway'   => $payment_gateway->id,
+						'source'    => 'settings-payments',
+						'exception' => $e,
+					)
+				);
 				return null;
 			}
 		}

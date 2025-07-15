@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -134,7 +135,8 @@ class ProductImage extends AbstractBlock {
 	private function render_image( $product, $attributes, $image_id = null ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
-		$image_style = 'max-width:none;';
+		$image_style = '';
+
 		if ( ! empty( $attributes['height'] ) ) {
 			$image_style .= sprintf( 'height:%s;', $attributes['height'] );
 		}
@@ -159,7 +161,7 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$featured_image_id          = (int) $product->get_image_id();
-		$gallery_image_ids          = $product->get_gallery_image_ids();
+		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
 		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
 		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
 
