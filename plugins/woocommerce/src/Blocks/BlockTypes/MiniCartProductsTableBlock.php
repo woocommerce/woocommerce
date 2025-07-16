@@ -200,7 +200,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 												＋
 											</button>
 										</div>
-										<button data-wp-on--click="actions.removeItemFromCart" data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
+										<button
+											data-wp-bind--hidden="!state.itemShowRemoveItemLink"
+											data-wp-on--click="actions.removeItemFromCart"
+											data-wp-bind--aria-label="state.removeFromCartLabel"
+											class="wc-block-cart-item__remove-link"
+										>
 											<?php echo esc_html( $remove_item_label ); ?>
 										</button>
 									</div>

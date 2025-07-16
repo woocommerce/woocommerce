@@ -483,6 +483,21 @@ const { state: cartItemState } = store(
 					cartItemState.cartItem.low_stock_remaining
 				);
 			},
+
+			get itemShowRemoveItemLink(): boolean {
+				return ( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					? ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
+							filterName: 'showRemoveItemLink',
+							defaultValue: true,
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+					  } )
+					: true;
+			},
 		},
 
 		actions: {
