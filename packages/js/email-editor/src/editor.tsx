@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { StrictMode, createRoot, useEffect, useState } from '@wordpress/element';
+import {
+	StrictMode,
+	createRoot,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
@@ -22,7 +27,7 @@ import {
 } from './events';
 import { useContentValidation } from './hooks/use-content-validation';
 
-function Editor() {
+function Editor( { isPreview = false }: { isPreview?: boolean } ) {
 	const { postId, postType, settings } = useSelect(
 		( select ) => ( {
 			postId: select( storeName ).getEmailPostId(),
@@ -35,6 +40,7 @@ function Editor() {
 
 	// Set allowed blockTypes to the editor settings.
 	settings.allowedBlockTypes = getAllowedBlockNames();
+	settings.isPreviewMode = isPreview;
 
 	return (
 		<StrictMode>
@@ -68,29 +74,37 @@ export function initialize( elementId: string ) {
 	root.render( <WrappedEditor /> );
 }
 
-export function EmailEditor() {
-	const [isInitialized, setIsInitialized] = useState(false);
+export function EmailEditor( {
+	postId,
+	postType,
+	isPreview = false,
+}: {
+	postId: string;
+	postType: string;
+	isPreview?: boolean;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useEffect(() => {
+	useEffect( () => {
 		initEventCollector();
 		initStoreTracking();
 		initDomTracking();
-		createStore();
+		createStore( postId, postType );
 		initializeLayout();
 		initBlocks();
 		initHooks();
 		initTextHooks();
-		setIsInitialized(true);
-	}, []);
+		setIsInitialized( true );
+	}, [] );
 
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
 
-	if (!isInitialized) {
+	if ( ! isInitialized ) {
 		return null;
 	}
 
-	return <WrappedEditor />;
+	return <WrappedEditor isPreview={ isPreview } />;
 }

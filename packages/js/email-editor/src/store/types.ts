@@ -29,7 +29,10 @@ export type ExperimentalSettings = {
 	};
 };
 
-export type EmailEditorSettings = EditorSettings & ExperimentalSettings;
+export type EmailEditorSettings = EditorSettings &
+	ExperimentalSettings & {
+		isPreviewMode: boolean;
+	};
 
 export type EmailTheme = {
 	version?: number;
