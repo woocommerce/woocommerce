@@ -724,7 +724,7 @@ class FeaturesController {
 	 * This is an internal helper method and should not be called directly.
 	 *
 	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
-	 * @since 10.2.0
+	 * @since 10.1.0
 	 *
 	 * @param string $feature_id Unique feature ID.
 	 * @param string $plugin_id Normalized plugin ID (e.g., 'directory/file.php').
@@ -775,7 +775,7 @@ class FeaturesController {
 	 * Pending declarations are cleared after processing to avoid redundant work.
 	 *
 	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
-	 * @since 10.2.0
+	 * @since 10.1.0
 	 * @return void
 	 */
 	private function process_pending_declarations(): void {
