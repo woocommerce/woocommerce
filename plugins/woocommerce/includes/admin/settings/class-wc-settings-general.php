@@ -165,7 +165,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				array(
 					'title' => __( 'General options', 'woocommerce' ),
 					'type'  => 'title',
-					'desc'  => __( 'Control store-wide options such as allowed billing and shipping countries, default customer location, and whether to enable taxes and coupons.' ),
+					'desc'  => __( 'Control store-wide options such as allowed billing and shipping countries, default customer location, and whether to enable taxes and coupons.', 'woocommerce' ),
 					'id'    => 'general_options',
 					'order' => 20,
 				),
