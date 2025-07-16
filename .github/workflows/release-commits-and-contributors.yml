@@ -6,6 +6,12 @@ on:
         type: string
         required: true
         description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
 
 jobs:
   extract-versions:
@@ -17,7 +23,7 @@ jobs:
     steps:
       - name: Ensure running from trunk branch
         run: |
-          if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
+          if [ "${{ github.ref }}" != "refs/heads/trunk" ] && [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "::error::This workflow should only run from trunk branch, currently running from ${{ github.ref }}."
             exit 1
           fi

@@ -5,30 +5,10 @@ on:
     types: [prereleased]
 
 jobs:
-  dispatch-to-trunk:
-    name: 'Dispatch to trunk workflow'
-    runs-on: ubuntu-latest
+  call-release-workflow:
+    name: 'Call release commits and contributors workflow'
     if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
-    steps:
-      - name: 'Trigger pre-release workflow from trunk'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'release-commits-and-contributors.yml',
-                ref: 'trunk',
-                inputs: {
-                  version: '${{ github.event.release.tag_name }}',
-                }
-              });
-
-              console.log('✅ Workflow dispatched successfully for release version:', '${{ github.event.release.tag_name }}');
-
-            } catch (error) {
-              console.error('❌ Failed to dispatch workflow:', error);
-              throw error;
-            }
+    uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
+    with:
+      version: ${{ github.event.release.tag_name }}
+    secrets: inherit
