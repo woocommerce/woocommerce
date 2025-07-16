@@ -288,10 +288,33 @@ const { state: cartItemState } = store(
 					.convertPrecision( cartItemState.currency.minorUnit )
 					.getAmount();
 
-				return formatPriceWithCurrency(
+				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
 					cartItemState.currency
 				);
+
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText = (
+						window.wc as any
+					 ).blocksCheckout.applyCheckoutFilter( {
+						filterName: 'saleBadgePriceFormat',
+						defaultValue: '<price/>',
+						extensions: cartItemState.cartItem.extensions,
+						arg: {
+							context: 'cart',
+							cartItem: cartItemState.cartItem,
+							cart: woocommerceState.cart,
+						},
+					} );
+
+					return priceText.replace( '<price/>', price );
+				}
+
+				return price;
 			},
 
 			get cartItemHasDiscount(): boolean {
