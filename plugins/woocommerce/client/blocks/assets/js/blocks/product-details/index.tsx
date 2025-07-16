@@ -17,6 +17,19 @@ const blockConfig = {
 	icon,
 	edit,
 	save,
+	deprecated: [
+		{
+			attributes: {
+				hideTabTitle: {
+					type: 'boolean',
+					default: false,
+				},
+			},
+			save() {
+				return null;
+			},
+		},
+	],
 };
 // @ts-expect-error blockConfig is not typed.
 registerProductBlockType( blockConfig );
