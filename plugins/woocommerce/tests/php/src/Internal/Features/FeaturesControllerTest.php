@@ -124,8 +124,19 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 				return $plugins;
 			}
+
+			public function get_wp_plugin_id( $plugin_file ) {
+				// For test fakes like 'the_plugin', return as-is (assume normalized).
+				return $plugin_file;
+			}
 		};
 		// phpcs:enable Squiz.Commenting
+
+		// Set private $proxy via reflection (fixes null error).
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $this->fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->fake_plugin_util->set_active_plugins(
 			array(
@@ -358,6 +369,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->declare_compatibility( 'experimental2', 'the_plugin', false );
 		$this->assertTrue( $result );
 
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
+
 		$compatibility_info_prop = new \ReflectionProperty( $this->sut, 'compatibility_info_by_plugin' );
 		$compatibility_info_prop->setAccessible( true );
 		$compatibility_info = $compatibility_info_prop->getValue( $this->sut );
@@ -393,6 +407,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		$result = $this->sut->declare_compatibility( 'experimental2', 'the_plugin_2', true );
 		$this->assertTrue( $result );
+
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
 
 		$compatibility_info_prop = new \ReflectionProperty( $this->sut, 'compatibility_info_by_feature' );
 		$compatibility_info_prop->setAccessible( true );
@@ -440,6 +457,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
 	}
 
 	/**
@@ -851,6 +870,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			}
 		};
 
+		// Set private $proxy via reflection (fixes null error).
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'is_plugin_active' => function ( $plugin ) {
@@ -937,7 +962,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_plugins_excluded_from_compatibility_ui() {
 				return array();
 			}
+			public function get_wp_plugin_id( $plugin_file ) {
+				// For test fakes like 'the_plugin', return as-is (assume normalized).
+				return $plugin_file;
+			}
 		};
+
+		// Set private $proxy via reflection.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -980,6 +1015,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );
 		$local_sut->declare_compatibility( 'cart_checkout_blocks', 'compatible_plugin' );
 		$local_sut->declare_compatibility( 'custom_order_tables', 'incompatible_plugin', false );
+
 
 		$cot_controller   = new CustomOrdersTableController();
 		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
@@ -1044,8 +1080,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
 
 		// Queue declarations without processing.
-		$result1 = $this->sut->declare_compatibility_by_file( 'mature1', '/path/to/plugin1.php', true );
-		$result2 = $this->sut->declare_compatibility_by_file( 'experimental1', '/path/to/plugin2.php', false );
+		$result1 = $this->sut->declare_compatibility( 'mature1', '/path/to/plugin1.php', true );
+		$result2 = $this->sut->declare_compatibility( 'experimental1', '/path/to/plugin2.php', false );
 		$this->assertTrue( $result1 );
 		$this->assertTrue( $result2 );
 
@@ -1110,8 +1146,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
 
 		// Queue conflicting declarations (same file/path).
-		$this->sut->declare_compatibility_by_file( 'mature1', '/path/to/plugin.php', true );
-		$this->sut->declare_compatibility_by_file( 'mature1', '/path/to/plugin.php', false );
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', true );
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', false );
 
 		$this->simulate_after_woocommerce_init_hook();
 
@@ -1177,7 +1213,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
 
 		// Queue declaration.
-		$this->sut->declare_compatibility_by_file( 'mature1', '/path/to/plugin.php', true );
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', true );
 
 		$this->simulate_after_woocommerce_init_hook();
 

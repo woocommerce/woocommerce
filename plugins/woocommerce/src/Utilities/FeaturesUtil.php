@@ -55,7 +55,7 @@ class FeaturesUtil {
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 */
 	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
-		return wc_get_container()->get( FeaturesController::class )->declare_compatibility_by_file(
+		return wc_get_container()->get( FeaturesController::class )->declare_compatibility(
 			$feature_id,
 			$plugin_file,
 			$positive_compatibility
