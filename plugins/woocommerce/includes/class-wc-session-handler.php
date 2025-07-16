@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class.
@@ -7,9 +7,8 @@
  *
  * @class    WC_Session_Handler
  * @package  WooCommerce\Classes
+ * @internal "Missing required strict_types declaration" rule has been ignored to prevent errors with `StringUtil::starts_with` when used on a nonce action which could be -1 rather than a string.
  */
-
-declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -90,7 +89,7 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+		add_action( 'wp_logout', array( $this, 'forget_session' ) );
 
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'maybe_update_nonce_user_logged_out' ), 10, 2 );
@@ -98,12 +97,11 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from either the request or the cookie. If neither are present, generate a new customer ID.
+	 * Initialize the session from either the request or the cookie.
 	 */
 	private function init_session() {
-		if ( ! $this->init_session_from_request() && ! $this->init_session_from_cookie() ) {
-			$this->_customer_id = $this->generate_customer_id();
-			$this->_data        = $this->get_session_data();
+		if ( ! $this->init_session_from_request() ) {
+			$this->init_session_cookie();
 		}
 	}
 
@@ -156,16 +154,6 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from the cookie.
-	 *
-	 * @return bool
-	 */
-	private function init_session_from_cookie() {
-		$this->init_session_cookie();
-		return null !== $this->_customer_id;
-	}
-
-	/**
 	 * Setup cookie and customer ID.
 	 *
 	 * @since 3.6.0
@@ -174,6 +162,9 @@ class WC_Session_Handler extends WC_Session {
 		$cookie = $this->get_session_cookie();
 
 		if ( ! $cookie ) {
+			// If there is no cookie, generate a new session/customer ID.
+			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 			return;
 		}
 
@@ -185,16 +176,16 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->restore_session_data();
 
+		/**
+		 * This clears the session if the cookie is invalid.
+		 *
+		 * Previously this also cleared the session when $this->_data was empty, and the cart was not yet initialised,
+		 * however this caused a conflict with WooCommerce Payments session handler which overrides this class.
+		 *
+		 * Ref: https://github.com/woocommerce/woocommerce/pull/57652
+		 * See also: https://github.com/woocommerce/woocommerce/pull/59530
+		 */
 		if ( ! $this->is_session_cookie_valid() ) {
-			$this->destroy_session();
-		} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
-			/**
-			 * Only destroy an empty session if the cart has not been previously initialized.
-			 * We cannot always safely remove the session cookie and destroy the session if the cart is already
-			 * initialized as $this->forget_session() calls `wc_empty_cart()` and can't be removed without potentially
-			 * breaking backward compatibility in cases where another extension already loaded and modified the cart
-			 * before the session.
-			 */
 			$this->destroy_session();
 		}
 
@@ -231,12 +222,31 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	private function migrate_guest_session_to_user_session( int $user_id ) {
 		$guest_session_id   = $this->_customer_id;
-		$this->_customer_id = strval( $user_id );
-		$this->set_customer_session_cookie( true );
+		$user_session_id    = strval( $user_id );
+		$guest_session_data = (array) $this->_data;
+		$user_session_data  = (array) $this->get_session( $user_session_id, array() );
 
-		$this->_data  = $this->get_session( $guest_session_id, array() );
-		$this->_dirty = true;
+		/**
+		 * Filters the data to be merged into the user session.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $data The updated session data.
+		 * @param array $guest_session_data The guest session data.
+		 * @param array $user_session_data The user session data.
+		 */
+		$this->_data        = (array) apply_filters(
+			'woocommerce_migrate_guest_session_to_user_session',
+			$this->migrate_cart_data( $guest_session_data, $user_session_data ),
+			$guest_session_data,
+			$user_session_data
+		);
+		$this->_customer_id = $user_session_id;
+		$this->_dirty       = true;
+
+		// Save current data and delete guest session.
 		$this->save_data( $guest_session_id );
+		$this->set_customer_session_cookie( true );
 
 		/**
 		 * Fires after a customer has logged in, and their guest session id has been
@@ -250,7 +260,7 @@ class WC_Session_Handler extends WC_Session {
 		 * @param string $guest_session_id The former session ID, as generated by `::generate_customer_id()`.
 		 * @param string $user_session_id The Customer ID that the former session was converted to.
 		 */
-		do_action( 'woocommerce_guest_session_to_user_id', $guest_session_id, $this->_customer_id );
+		do_action( 'woocommerce_guest_session_to_user_id', $guest_session_id, $user_session_id );
 	}
 
 	/**
@@ -278,6 +288,41 @@ class WC_Session_Handler extends WC_Session {
 		 * @return array Modified session data to be used for initialization.
 		 */
 		$this->_data = apply_filters( 'woocommerce_restored_session_data', $session_data );
+	}
+
+	/**
+	 * Merges the cart data from the guest session to the user session.
+	 *
+	 * When merging, if the same item exists in both carts (same cart item ID), the guest cart data for that item is preserved.
+	 *
+	 * @param array $data The updated session data.
+	 * @param array $user_session_data The user session data that will be overridden.
+	 * @return array The updated session data.
+	 */
+	private function migrate_cart_data( array $data, array $user_session_data ) {
+		$user_cart_is_empty = empty( $user_session_data['cart'] );
+
+		// Nothing to migrate!
+		if ( $user_cart_is_empty ) {
+			return $data;
+		}
+
+		$guest_cart_is_empty = empty( $data['cart'] );
+
+		if ( $guest_cart_is_empty ) {
+			// Replace the guest cart with the user cart.
+			$data['cart'] = $user_session_data['cart'];
+		} else {
+			// Merge carts.
+			$data['cart'] = array_filter(
+				array_merge(
+					(array) maybe_unserialize( $user_session_data['cart'] ),
+					(array) maybe_unserialize( $data['cart'] )
+				)
+			);
+		}
+
+		return $data;
 	}
 
 	/**
@@ -361,11 +406,42 @@ class WC_Session_Handler extends WC_Session {
 			$cookie_hash  = $this->hash( $this->_customer_id . '|' . $this->_session_expiration );
 			$cookie_value = $this->_customer_id . '|' . $this->_session_expiration . '|' . $this->_session_expiring . '|' . $cookie_hash;
 
-			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
-				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
+			if ( $this->get_cookie_value() !== $cookie_value ) {
+				$this->set_cookie_value( $cookie_value );
 			}
 
 			$this->_has_cookie = true;
+		}
+	}
+
+	/**
+	 * Check if the cookie exists in the $_COOKIE superglobal.
+	 *
+	 * @return bool Whether the cookie exists.
+	 */
+	protected function cookie_exists() {
+		return isset( $_COOKIE[ $this->_cookie ] );
+	}
+
+	/**
+	 * Get the cookie value.
+	 *
+	 * @return string The cookie value.
+	 */
+	protected function get_cookie_value() {
+		return $this->cookie_exists() ? wc_clean( wp_unslash( (string) $_COOKIE[ $this->_cookie ] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+	}
+
+	/**
+	 * Set the cookie value if not empty. Unset the cookie if empty. Wrapper for wc_setcookie.
+	 *
+	 * @param string $cookie_value The cookie value to set.
+	 */
+	protected function set_cookie_value( $cookie_value ) {
+		if ( ! empty( $cookie_value ) ) {
+			wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
+		} else {
+			wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 		}
 	}
 
@@ -392,7 +468,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	public function has_session() {
-		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
+		return $this->cookie_exists() || $this->_has_cookie || is_user_logged_in();
 	}
 
 	/**
@@ -406,10 +482,16 @@ class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Set session expiration.
+	 *
+	 * For logged in users sessions renew daily and expire in a week. This is to keep carts persistent for logged in users.
+	 * For guests, sessions expire in 48 hours.
 	 */
 	public function set_session_expiration() {
-		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = 2 * DAY_IN_SECONDS;
+		$default_expiring_seconds   = DAY_IN_SECONDS;
+		$default_expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
+		$max_expiration_seconds     = MONTH_IN_SECONDS;
+		$max_expiring_seconds       = $max_expiration_seconds - DAY_IN_SECONDS;
+		$session_limit_exceeded     = false;
 
 		/**
 		 * Filters the session expiration.
@@ -417,15 +499,42 @@ class WC_Session_Handler extends WC_Session {
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiring = time() + intval( apply_filters( 'wc_session_expiring', $expiring_seconds ) );
+		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
+		if ( $expiring_seconds > $max_expiring_seconds ) {
+			$expiring_seconds       = $max_expiring_seconds;
+			$session_limit_exceeded = true;
+		}
 		/**
 		 * Filters the session expiration.
 		 *
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', $expiration_seconds ) );
+		$expiration_seconds = intval( apply_filters( 'wc_session_expiration', $default_expiration_seconds ) ) ?: $default_expiration_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
+
+		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
+		if ( $expiration_seconds > $max_expiration_seconds ) {
+			$expiration_seconds     = $max_expiration_seconds;
+			$session_limit_exceeded = true;
+		}
+
+		if ( $session_limit_exceeded ) {
+			$transient_key = 'wc_session_handler_warning';
+			if ( false === get_transient( $transient_key ) ) {
+				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in performance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
+				set_transient( $transient_key, true, $max_expiration_seconds );
+			}
+		}
+
+		// If the expiring time is greater than the expiration time, set the expiring time to 90% of the expiration time.
+		if ( $expiring_seconds > $expiration_seconds ) {
+			$expiring_seconds = $expiration_seconds * 0.9;
+		}
+
+		$this->_session_expiring = time() + $expiring_seconds;
+
+		$this->_session_expiration = time() + $expiration_seconds;
 	}
 
 	/**
@@ -474,18 +583,13 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool|array
 	 */
 	public function get_session_cookie() {
-		$cookie_value = isset( $_COOKIE[ $this->_cookie ] ) ? wc_clean( wp_unslash( (string) $_COOKIE[ $this->_cookie ] ) ) : '';
+		$cookie_value = $this->get_cookie_value();
 
 		if ( empty( $cookie_value ) ) {
 			return false;
 		}
 
-		// Check if the cookie value contains '||' instead of '|' to support older versions of the cookie. This can be removed in WC 11.0.0.
-		if ( strpos( $cookie_value, '||' ) !== false ) {
-			$parsed_cookie = explode( '||', $cookie_value );
-		} else {
-			$parsed_cookie = explode( '|', $cookie_value );
-		}
+		$parsed_cookie = explode( '|', $cookie_value );
 
 		if ( count( $parsed_cookie ) !== 4 ) {
 			return false;
@@ -573,7 +677,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Forget all session data without destroying it.
 	 */
 	public function forget_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
+		$this->set_cookie_value( '' );
 
 		if ( ! is_admin() ) {
 			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';

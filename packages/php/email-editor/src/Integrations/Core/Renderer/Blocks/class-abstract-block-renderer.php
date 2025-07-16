@@ -9,7 +9,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -60,27 +61,37 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 			return $content;
 		}
 
-		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%2$s"><tr><td style="%3$s"><![endif]-->
-      <div class="email-block-layout" style="%2$s %3$s">%1$s</div>
-      <!--[if mso | IE]></td></tr></table><![endif]-->',
-			$content,
-			esc_attr( $gap_style ),
-			esc_attr( $padding_style )
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+			'style' => $gap_style,
 		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			esc_attr( $gap_style ),
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**
 	 * Render the block.
 	 *
-	 * @param string              $block_content The block content.
-	 * @param array               $parsed_block The parsed block.
-	 * @param Settings_Controller $settings_controller The settings controller.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
 	 * @return string
 	 */
-	public function render( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		return $this->add_spacer(
-			$this->render_content( $block_content, $parsed_block, $settings_controller ),
+			$this->render_content( $block_content, $parsed_block, $rendering_context ),
 			$parsed_block['email_attrs'] ?? array()
 		);
 	}
@@ -88,10 +99,10 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	/**
 	 * Render the block content.
 	 *
-	 * @param string              $block_content The block content.
-	 * @param array               $parsed_block The parsed block.
-	 * @param Settings_Controller $settings_controller The settings controller.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
 	 * @return string
 	 */
-	abstract protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string;
+	abstract protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string;
 }

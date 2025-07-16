@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Update Jetpack Connection to 6.11.6 to prevent transient DB errors.

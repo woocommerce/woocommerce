@@ -1,0 +1,13 @@
+.wc-block-product-gallery-large-image__inner-blocks {
+	> * {
+		z-index: 10;
+	}
+	.wp-block-woocommerce-product-image {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		bottom: -5px;
+		left: -5px;
+		z-index: 5;
+	}
+}

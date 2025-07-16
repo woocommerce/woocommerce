@@ -27,9 +27,9 @@ const Block = ( { className }: { className: string } ) => {
 	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } = useStoreCartCoupons( 'wc/cart' );
 
-	// Hide if there are no coupons to show.
+	// Hide all but the slot/fill if there are no coupons to show.
 	if ( ! cartCoupons.length ) {
-		return null;
+		return <DiscountSlotFill />;
 	}
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );

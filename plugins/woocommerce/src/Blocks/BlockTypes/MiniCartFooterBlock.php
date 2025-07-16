@@ -32,6 +32,12 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
 		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
+		$wrapper_attributes               = get_block_wrapper_attributes(
+			array(
+				'data-wp-interactive' => 'woocommerce/mini-cart-footer-block',
+				'class'               => 'wc-block-mini-cart__footer',
+			)
+		);
 
 		if ( $html->next_tag( 'bdi' ) ) {
 			while ( $html->next_token() ) {
@@ -41,13 +47,6 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			}
 		}
 
-		wp_interactivity_config(
-			$this->get_full_block_name(),
-			array(
-				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-			)
-		);
-
 		wp_interactivity_state(
 			$this->get_full_block_name(),
 			array(
@@ -56,13 +55,12 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		);
 
 		?>
-		<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<div data-wp-interactive="woocommerce/mini-cart-footer-block" class="wp-block-woocommerce-mini-cart-footer-block wc-block-mini-cart__footer">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-totals-item wc-block-mini-cart__footer-subtotal">
 				<span class="wc-block-components-totals-item__label">
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
-				<span data-wp-text="state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
+				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value">
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>

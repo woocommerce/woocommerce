@@ -321,6 +321,9 @@ class WC_Email extends WC_Settings_API {
 		}
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		// Use priority 1 to ensure our skip classes are added before lazy loading plugins process the images.
+		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'prevent_lazy_loading_on_attachment' ), 1, 1 );
 	}
 
 	/**
@@ -1186,6 +1189,7 @@ class WC_Email extends WC_Settings_API {
 				 */
 				do_action( 'woocommerce_copy_email_template', $template_type, $this );
 
+				wc_clear_template_cache();
 				?>
 				<div class="updated">
 					<p><?php echo esc_html__( 'Template file copied to theme.', 'woocommerce' ); ?></p>
@@ -1217,6 +1221,8 @@ class WC_Email extends WC_Settings_API {
 					 * @param string $email The email object
 					 */
 					do_action( 'woocommerce_delete_email_template', $template_type, $this );
+
+					wc_clear_template_cache();
 					?>
 					<div class="updated">
 						<p><?php echo esc_html__( 'Template file deleted from theme.', 'woocommerce' ); ?></p>
@@ -1463,8 +1469,9 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$is_email_preview = apply_filters( 'woocommerce_is_email_preview', false );
 		if ( $is_email_preview ) {
+			$plugin_id = $this->plugin_id;
 			$email_id  = $this->id;
-			$transient = get_transient( "woocommerce_{$email_id}_{$key}" );
+			$transient = get_transient( "{$plugin_id}{$email_id}_{$key}" );
 			if ( false !== $transient ) {
 				$option = $transient ? $transient : $empty_value;
 			}
@@ -1487,5 +1494,38 @@ class WC_Email extends WC_Settings_API {
 		/** Service for rendering emails from block content @var BlockEmailRenderer $renderer */
 		$renderer = wc_get_container()->get( BlockEmailRenderer::class );
 		return $renderer->maybe_render_block_email( $this );
+	}
+
+	/**
+	 * Prevent lazy loading on attachment images in email context by adding skip classes.
+	 * This is hooked into the wp_get_attachment_image_attributes filter.
+	 *
+	 * @param array $attributes The image attributes array.
+	 * @return array The modified image attributes array.
+	 */
+	public function prevent_lazy_loading_on_attachment( $attributes ) {
+		// Only process if we're currently sending an email.
+		if ( ! $this->sending ) {
+			return $attributes;
+		}
+
+		// Skip classes to prevent lazy loading plugins from applying lazy loading.
+		// These are the most common skip classes used by popular lazy loading plugins.
+		$skip_classes = array( 'skip-lazy', 'no-lazyload', 'lazyload-disabled', 'no-lazy', 'skip-lazyload' );
+
+		// Add skip classes to prevent lazy loading plugins from applying lazy loading.
+		if ( isset( $attributes['class'] ) ) {
+			$classes             = array_filter( array_map( 'trim', explode( ' ', $attributes['class'] ) ) );
+			$classes             = array_unique( array_merge( $classes, $skip_classes ) );
+			$attributes['class'] = implode( ' ', $classes );
+		} else {
+			// No class attribute exists, add one with skip classes.
+			$attributes['class'] = implode( ' ', $skip_classes );
+		}
+
+		// Add data-skip-lazy attribute as an additional safeguard.
+		$attributes['data-skip-lazy'] = 'true';
+
+		return $attributes;
 	}
 }

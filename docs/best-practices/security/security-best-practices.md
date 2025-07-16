@@ -81,7 +81,7 @@ Hardening your WordPress installation can help protect your WooCommerce store fr
 
 1. Use strong, unique passwords for all user accounts.
 2. Limit login attempts and enable two-factor authentication (2FA) to protect against brute-force attacks.
-3. Change the default "wp\_" table prefix in your WordPress database.
+3. Change the default `wp_` table prefix in your WordPress database.
 4. Disable XML-RPC and REST API access when not needed.
 5. Keep file permissions secure and restrict access to sensitive files and directories.
 

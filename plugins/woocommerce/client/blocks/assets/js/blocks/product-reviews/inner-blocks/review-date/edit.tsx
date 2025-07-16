@@ -29,12 +29,10 @@ export default function Edit( {
 	context: { commentId: number };
 } ) {
 	const blockProps = useBlockProps();
-	let [ date ] = useEntityProp(
-		'root',
-		'comment',
-		'date',
-		String( commentId )
-	);
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-expect-error - the type of useEntityProp is not correct
+	let [ date ] = useEntityProp( 'root', 'comment', 'date', commentId );
 	const [ siteFormat = getDateSettings().formats.date ] = useEntityProp(
 		'root',
 		'site',

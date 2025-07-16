@@ -1602,7 +1602,10 @@ class WC_AJAX {
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
-					<?php echo wp_kses_post( wpautop( wptexturize( make_clickable( $note->content ) ) ) ); ?>
+					<?php
+					$content = wc_wptexturize_order_note( $note->content );
+					echo wp_kses_post( wpautop( make_clickable( $content ) ) );
+					?>
 				</div>
 				<p class="meta">
 					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">

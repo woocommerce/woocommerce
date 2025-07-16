@@ -887,7 +887,7 @@ function wc_get_product_id_by_global_unique_id( $global_unique_id ) {
 }
 
 /**
- * Get attributes/data for an individual variation from the database and maintain it's integrity.
+ * Get attributes/data for an individual variation from the database and maintain its integrity.
  *
  * @since  2.4.0
  * @param  int $variation_id Variation ID.

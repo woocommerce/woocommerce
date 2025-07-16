@@ -375,12 +375,19 @@ function wc_format_coupon_code( $value ) {
  *
  * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
  *
+ * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
+ * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
+ * during application, causing legitimate coupons to be rejected.
+ *
+ * @see WC_Cart_Test::test_coupon_codes_with_special_characters
+ *
  * @since  3.6.0
+ * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
+	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
 	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
 }
 
@@ -478,7 +485,24 @@ function wc_array_overlay( $a1, $a2 ) {
  * @return int|float
  */
 function wc_stock_amount( $amount ) {
-	return apply_filters( 'woocommerce_stock_amount', $amount );
+	/**
+	 * Filter the stock amount. If an invalid value is returned by hooks, falls back to intval( $amount ).
+	 *
+	 * @since  2.3
+	 * @param int|float $amount Stock amount.
+	 * @return int|float
+	 */
+	return NumberUtil::normalize( apply_filters( 'woocommerce_stock_amount', $amount ), intval( $amount ) );
+}
+
+/**
+ * Check if the stock amount is an integer.
+ *
+ * @since 10.1.0
+ * @return bool
+ */
+function wc_is_stock_amount_integer() {
+	return wc_stock_amount( 1 ) === 1;
 }
 
 /**

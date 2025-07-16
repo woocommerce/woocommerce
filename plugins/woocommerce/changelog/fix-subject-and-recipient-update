@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix updating subject, preheader and other WC email data via EmailControllerAPI.

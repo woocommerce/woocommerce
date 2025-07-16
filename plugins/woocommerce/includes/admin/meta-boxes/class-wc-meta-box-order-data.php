@@ -587,7 +587,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
+									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( wc_wptexturize_order_note( $order->get_customer_note() ) ) ), array( 'br' => array() ) ) . '</p>';
 								}
 							}
 							?>

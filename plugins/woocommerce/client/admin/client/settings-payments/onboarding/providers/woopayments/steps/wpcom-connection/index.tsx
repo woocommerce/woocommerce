@@ -5,6 +5,7 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -15,7 +16,8 @@ import './style.scss';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const JetpackStep: React.FC = () => {
-	const { currentStep, closeModal } = useOnboardingContext();
+	const { currentStep, closeModal, sessionEntryPoint } =
+		useOnboardingContext();
 	const [ isConnectButtonLoading, setIsConnectButtonLoading ] =
 		useState( false );
 
@@ -39,15 +41,32 @@ export const JetpackStep: React.FC = () => {
 						isBusy={ isConnectButtonLoading }
 						disabled={ isConnectButtonLoading }
 						onClick={ () => {
+							setIsConnectButtonLoading( true );
+
+							// Mark the step as started.
+							const startUrl = currentStep?.actions?.start?.href;
+							if ( startUrl ) {
+								// No need to wait for the response.
+								apiFetch( {
+									url: startUrl,
+									method: 'POST',
+									data: {
+										source: sessionEntryPoint,
+									},
+								} );
+							}
+
+							// Track the connection button click event.
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_click',
 								{
 									step: currentStep?.id || 'unknown',
 									action: 'connect_to_wpcom',
+									source: sessionEntryPoint,
 								}
 							);
 
-							setIsConnectButtonLoading( true );
+							// Redirect to the WordPress.com connection authorization URL.
 							window.location.href =
 								currentStep?.actions?.auth?.href ?? '';
 						} }

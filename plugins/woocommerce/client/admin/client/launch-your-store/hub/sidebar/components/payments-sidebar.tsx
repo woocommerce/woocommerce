@@ -16,6 +16,7 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -27,6 +28,8 @@ import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -72,6 +75,17 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const sidebarTitle = (
 		<Button
 			onClick={ () => {
+				recordEvent( 'launch_your_store_payments_back_to_hub_click' );
+
+				// Record the "modal" being closed to keep consistency with the Payments Settings flow.
+				recordPaymentsOnboardingEvent(
+					'woopayments_onboarding_modal_closed',
+					{
+						from: 'lys_sidebar_back_to_hub',
+						source: wooPaymentsOnboardingSessionEntryLYS,
+					}
+				);
+
 				// Clear session flag to prevent redirect back to payments setup
 				// after exiting the flow and returning to the WC Admin home.
 				window.sessionStorage.setItem( 'lysWaiting', 'no' );

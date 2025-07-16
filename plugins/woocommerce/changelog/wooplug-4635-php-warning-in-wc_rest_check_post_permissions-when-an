@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent warnings when accessing invalid post types via REST api
