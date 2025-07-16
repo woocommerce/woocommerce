@@ -507,12 +507,18 @@ class MiniCart extends AbstractBlock {
 				}
 			}
 
-			wp_interactivity_state(
+			/* translators: %d is the number of products in the cart. */
+			$button_aria_label_template = __( 'Number of items in the cart: %d', 'woocommerce' );
+
+			$state = wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
 					'totalItemsInCart'  => $cart_item_count,
 					'badgeIsVisible'    => $badge_is_visible,
 					'formattedSubtotal' => $formatted_subtotal,
+					'buttonAriaLabel'   => function () {
+						return sprintf( $button_aria_label_template, $state['totalItemsInCart'] );
+					}
 				)
 			);
 
@@ -525,9 +531,10 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'   => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour' => $on_cart_click_behaviour,
-					'checkoutUrl'          => wc_get_checkout_url(),
+					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'    => $on_cart_click_behaviour,
+					'checkoutUrl'             => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate' => $button_aria_label_template,
 				)
 			);
 
@@ -551,9 +558,9 @@ class MiniCart extends AbstractBlock {
 			>
 				<button 
 					data-wp-on--click="callbacks.openDrawer"
+					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
 					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
 				>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
