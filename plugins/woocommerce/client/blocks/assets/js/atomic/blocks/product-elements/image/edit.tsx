@@ -108,22 +108,20 @@ const Edit = ( {
 		setAttributes,
 	] );
 
-	const showAllControls =
+	const showControls =
 		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
 
 	return (
 		<div { ...blockProps }>
-			<InspectorControls>
-				{ showAllControls && (
+			{ showControls && (
+				<InspectorControls>
 					<ImageSizeSettings
 						scale={ scale }
 						width={ width }
 						height={ height }
 						setAttributes={ setAttributes }
 					/>
-				) }
-				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					{ showAllControls && (
+					<PanelBody title={ __( 'Content', 'woocommerce' ) }>
 						<ToggleControl
 							label={ __(
 								'Link to Product Page',
@@ -140,50 +138,50 @@ const Edit = ( {
 								} )
 							}
 						/>
-					) }
-					<ToggleGroupControl
-						label={ __( 'Resolution', 'woocommerce' ) }
-						isBlock
-						help={
-							! isBlockTheme
-								? createInterpolateElement(
-										__(
-											'Product image cropping can be modified in the <a>Customizer</a>.',
-											'woocommerce'
-										),
-										{
-											a: (
-												// eslint-disable-next-line jsx-a11y/anchor-has-content
-												<a
-													href={ `${ getAdminLink(
-														'customize.php'
-													) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-													target="_blank"
-													rel="noopener noreferrer"
-												/>
+						<ToggleGroupControl
+							label={ __( 'Resolution', 'woocommerce' ) }
+							isBlock
+							help={
+								! isBlockTheme
+									? createInterpolateElement(
+											__(
+												'Product image cropping can be modified in the <a>Customizer</a>.',
+												'woocommerce'
 											),
-										}
-								  )
-								: null
-						}
-						value={ imageSizing }
-						onChange={ ( value: ImageSizing ) =>
-							setAttributes( { imageSizing: value } )
-						}
-					>
-						<ToggleGroupControlOption
-							value={ ImageSizing.SINGLE }
-							label={ __( 'Full Size', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value={ ImageSizing.THUMBNAIL }
-							label={ __( 'Thumbnail', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-				</PanelBody>
-			</InspectorControls>
+											{
+												a: (
+													// eslint-disable-next-line jsx-a11y/anchor-has-content
+													<a
+														href={ `${ getAdminLink(
+															'customize.php'
+														) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
+														target="_blank"
+														rel="noopener noreferrer"
+													/>
+												),
+											}
+									  )
+									: null
+							}
+							value={ imageSizing }
+							onChange={ ( value: ImageSizing ) =>
+								setAttributes( { imageSizing: value } )
+							}
+						>
+							<ToggleGroupControlOption
+								value={ ImageSizing.SINGLE }
+								label={ __( 'Full Size', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value={ ImageSizing.THUMBNAIL }
+								label={ __( 'Thumbnail', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</PanelBody>
+				</InspectorControls>
+			) }
 			<Block { ...{ ...attributes, ...context } }>
-				{ showAllControls && <div { ...innerBlockProps } /> }
+				{ showControls && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>
 	);
