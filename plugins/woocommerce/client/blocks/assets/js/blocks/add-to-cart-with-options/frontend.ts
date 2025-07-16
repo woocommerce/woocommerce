@@ -3,8 +3,10 @@
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { CartVariationItem } from '@woocommerce/types';
+import type {
+	Store as WooCommerce,
+	SelectedAttributes,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -18,7 +20,7 @@ export type AvailableVariation = {
 export type Context = {
 	productId: number;
 	productType: string;
-	selectedAttributes: CartVariationItem[];
+	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -28,7 +30,8 @@ export type Context = {
 interface GroupedCartItem {
 	id: number;
 	quantity: number;
-	variation: CartVariationItem[];
+	variation: SelectedAttributes[];
+	type: string;
 }
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -47,9 +50,7 @@ const getInputElementFromEvent = (
 	let inputElement = null;
 
 	if ( event.target instanceof HTMLButtonElement ) {
-		inputElement = event.target.parentElement?.querySelector(
-			'.input-text.qty.text'
-		);
+		inputElement = event.target.parentElement?.querySelector( '.qty' );
 	}
 
 	if ( event.target instanceof HTMLInputElement ) {
@@ -94,7 +95,7 @@ const getInputData = (
 
 const getMatchedVariation = (
 	availableVariations: AvailableVariation[],
-	selectedAttributes: CartVariationItem[]
+	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
 		! Array.isArray( availableVariations ) ||
@@ -175,6 +176,13 @@ const addToCartWithOptionsStore = store(
 				);
 				return matchedVariation?.variation_id || null;
 			},
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
+			},
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
@@ -195,6 +203,7 @@ const addToCartWithOptionsStore = store(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
 				);
+
 				if ( index >= 0 ) {
 					selectedAttributes[ index ] = {
 						attribute,
@@ -227,6 +236,7 @@ const addToCartWithOptionsStore = store(
 				const {
 					currentValue,
 					maxValue,
+					minValue,
 					step,
 					childProductId,
 					inputElement,
@@ -234,11 +244,12 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue + step;
 
 				if ( maxValue === undefined || newValue <= maxValue ) {
+					const updatedValue = Math.max( minValue, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
+						updatedValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
+					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -251,6 +262,7 @@ const addToCartWithOptionsStore = store(
 				}
 				const {
 					currentValue,
+					maxValue,
 					minValue,
 					step,
 					childProductId,
@@ -259,15 +271,19 @@ const addToCartWithOptionsStore = store(
 				const newValue = currentValue - step;
 
 				if ( newValue >= minValue ) {
+					const updatedValue = Math.min(
+						maxValue ?? Infinity,
+						newValue
+					);
 					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
+						updatedValue,
 						childProductId
 					);
-					inputElement.value = newValue.toString();
+					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
-			handleQuantityInputChange: (
+			handleQuantityInput: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const inputData = getInputData( event );
@@ -280,6 +296,30 @@ const addToCartWithOptionsStore = store(
 					currentValue,
 					childProductId
 				);
+			},
+			handleQuantityChange: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { childProductId, maxValue, minValue, currentValue } =
+					inputData;
+
+				const newValue = Math.min(
+					maxValue ?? Infinity,
+					Math.max( minValue, currentValue )
+				);
+
+				if ( event.target.value !== newValue.toString() ) {
+					addToCartWithOptionsStore.actions.setQuantity(
+						newValue,
+						childProductId
+					);
+					event.target.value = newValue.toString();
+					dispatchChangeEvent( event.target );
+				}
 			},
 			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >
@@ -317,19 +357,20 @@ const addToCartWithOptionsStore = store(
 					const addedItems: GroupedCartItem[] = [];
 
 					for ( const childProductId of groupedProductIds ) {
+						if ( quantity[ childProductId ] === 0 ) {
+							continue;
+						}
+
 						const newQuantity = getNewQuantity(
 							childProductId,
 							quantity[ childProductId ]
 						);
 
-						if ( newQuantity === 0 ) {
-							continue;
-						}
-
 						addedItems.push( {
 							id: childProductId,
 							quantity: newQuantity,
 							variation: selectedAttributes,
+							type: productType,
 						} );
 					}
 
@@ -360,6 +401,7 @@ const addToCartWithOptionsStore = store(
 						id: productId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
+						type: productType,
 					} );
 				}
 			},

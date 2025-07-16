@@ -50,14 +50,17 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 				| JSON_HEX_AMP
 		);
 
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-interactive'  => 'woocommerce/mini-cart',
+				'data-wp-context'      => 'woocommerce/store-notices::' . $context,
+				'data-wp-bind--hidden' => 'state.cartIsEmpty',
+			)
+		);
+
 		ob_start();
 		?>
-		<div
-			class="wp-block-woocommerce-filled-mini-cart-contents-block"
-			data-wp-interactive="woocommerce/mini-cart"
-			data-wp-context='woocommerce/store-notices::<?php echo $context ?>'
-			data-wp-bind--hidden="state.cartIsEmpty"
-		>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div
 				class="wc-block-components-notices"
 				data-wp-interactive="woocommerce/store-notices"

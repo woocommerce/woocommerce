@@ -10,11 +10,14 @@ import {
 	store as blockEditorStore,
 	Warning,
 } from '@wordpress/block-editor';
+import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ProductDetailsEditProps } from './types';
+import { LegacyProductDetailsPreview } from './legacy-preview';
+import './editor.scss';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -106,8 +109,22 @@ const useIsInvalidQueryLoopContext = ( clientId: string, postType: string ) => {
 const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 	const blockProps = useBlockProps();
 
+	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
+		( select ) => {
+			const blocks = select( blockEditorStore ).getBlocks( clientId );
+			return {
+				hasInnerBlocks: blocks.length > 0,
+				wasBlockJustInserted:
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore method exists but not typed
+					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+			};
+		},
+		[ clientId ]
+	);
+
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		template: TEMPLATE,
+		template: wasBlockJustInserted ? TEMPLATE : undefined,
 	} );
 
 	const isInvalidQueryLoopContext = useIsInvalidQueryLoopContext(
@@ -126,7 +143,18 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 			</div>
 		);
 	}
-	return <div { ...innerBlocksProps } />;
+
+	if ( hasInnerBlocks || wasBlockJustInserted ) {
+		return <div { ...innerBlocksProps } />;
+	}
+
+	return (
+		<div { ...blockProps }>
+			<Disabled>
+				<LegacyProductDetailsPreview hideTabTitle={ true } />
+			</Disabled>
+		</div>
+	);
 };
 
 export default Edit;

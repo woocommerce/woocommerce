@@ -20,12 +20,19 @@ import type {
  */
 import { triggerAddedToCartEvent } from './legacy-events';
 
+export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
+
 export type OptimisticCartItem = {
 	key?: string;
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
 	name: string;
+	type: string;
+};
+
+export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
+	variation?: SelectedAttributes[];
 };
 
 export type Store = {
@@ -39,8 +46,8 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: OptimisticCartItem ) => void;
-		batchAddCartItems: ( items: OptimisticCartItem[] ) => void;
+		addCartItem: ( args: ClientCartItem ) => void;
+		batchAddCartItems: ( items: ClientCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -143,6 +150,19 @@ function emitSyncEvent( {
 			},
 		} )
 	);
+}
+
+function getUserFriendlyErrorMessage(
+	error: Error | ApiErrorResponse
+): string {
+	const code = ( error as ApiErrorResponse )?.code;
+
+	switch ( code ) {
+		case 'woocommerce_rest_missing_attributes':
+			return 'Please select product attributes before adding to cart.';
+		default:
+			return error.message;
+	}
 }
 
 // Todo: export this store once the store is public.
@@ -345,7 +365,6 @@ const { state, actions } = store< Store >(
 							throw generateError( response );
 					} );
 
-					// Gets the last successful cart response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -353,44 +372,66 @@ const { state, actions } = store< Store >(
 									response.status < 300
 						  )
 						: [];
-					const lastSuccessfulCartResponse = successfulResponses[
-						successfulResponses.length - 1
-					]?.body as Cart;
 
-					// Checks if the last successful cart response is valid.
-					if ( ! lastSuccessfulCartResponse ) {
-						throw new Error(
-							'No successful cart response received.'
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					// Only update the cart and trigger events if there is at least one successful response.
+					if ( successfulResponses.length > 0 ) {
+						const lastSuccessfulCartResponse = successfulResponses[
+							successfulResponses.length - 1
+						]?.body as Cart;
+
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							state.cart,
+							lastSuccessfulCartResponse,
+							quantityChanges
 						);
+
+						// Generate notices for any error that successful
+						// responses may contain.
+						const errorNotices = successfulResponses.flatMap(
+							( response ) => {
+								const errors = ( response.body.errors ??
+									[] ) as ApiErrorResponse[];
+								return errors.map( generateErrorNotice );
+							}
+						);
+
+						yield actions.updateNotices(
+							[ ...infoNotices, ...errorNotices ],
+							true
+						);
+
+						// Use the last successful response to update the local cart.
+						state.cart = lastSuccessfulCartResponse;
+
+						// Dispatches a legacy event.
+						triggerAddedToCartEvent( {
+							preserveCartData: true,
+						} );
+
+						// Dispatches the event to sync the @wordpress/data store.
+						emitSyncEvent( { quantityChanges } );
 					}
 
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						lastSuccessfulCartResponse,
-						quantityChanges
-					);
-					const errorNotices =
-						lastSuccessfulCartResponse.errors.map(
-							generateErrorNotice
-						);
+					// Show error notices for all failed responses.
 					yield actions.updateNotices(
-						[ ...infoNotices, ...errorNotices ],
-						true
+						errorResponses
+							.filter(
+								( response ) =>
+									response.body &&
+									typeof response.body === 'object'
+							)
+							.map( ( { body } ) =>
+								generateErrorNotice( body as ApiErrorResponse )
+							)
 					);
-
-					// Use the last successful response to update the local cart.
-					const cartResponse = lastSuccessfulCartResponse;
-
-					// Updates the local cart.
-					state.cart = cartResponse;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
-					} );
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
@@ -453,7 +494,7 @@ const { state, actions } = store< Store >(
 
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: error.message,
+					notice: getUserFriendlyErrorMessage( error ),
 					type: 'error',
 					dismissible: true,
 				} );
@@ -488,12 +529,6 @@ const { state, actions } = store< Store >(
 						.filter( ( id ) => ! noticeIds.includes( id ) )
 						.forEach( ( id ) => noticeActions.removeNotice( id ) );
 				}
-
-				// Emmits console.error for troubleshooting.
-				// eslint-disable-next-line no-console
-				console.error(
-					newNotices.filter( ( { type } ) => type === 'error' )
-				);
 			},
 		},
 	},

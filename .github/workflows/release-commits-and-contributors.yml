@@ -4,8 +4,8 @@ on:
     inputs:
       version:
         type: string
-        required: false
-        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors. If not provided, it will be derived from the branch name.'
+        required: true
+        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors.'
 
   release:
     types: [prereleased]
@@ -13,7 +13,7 @@ on:
 jobs:
   extract-versions:
     name: Extract release current and previous versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Extract version from the provided input version
         id: version-from-input
-        if: ${{ github.event.inputs.version != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
@@ -76,31 +76,6 @@ jobs:
             core.setOutput('major', major);
             core.setOutput('minor', minor);
 
-      - name: Extract version from the branch name
-        id: version-from-branch
-        if: ${{ github.event.inputs.version == '' && github.event_name != 'release' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const branchName = '${{ github.ref_name }}';
-            console.log(`Branch name: ${branchName}`);
-
-            const branchMatch = branchName.match(/^release\/(\d+)\.(\d+)$/);
-            if (!branchMatch) {
-              core.setFailed(`Branch name must be in format 'release/x.y', got: ${branchName}`);
-              process.exit(1);
-            }
-
-            const major = parseInt(branchMatch[1]);
-            const minor = parseInt(branchMatch[2]);
-            const currentVersion = `${major}.${minor}`;
-
-            console.log(`Extracted current version: ${currentVersion}`);
-            console.log(`Parsed version: major=${major}, minor=${minor}`);
-
-            core.setOutput('major', major);
-            core.setOutput('minor', minor);
-
       - name: Calculate current and previous version
         id: calculate-versions
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -113,16 +88,11 @@ jobs:
               major = parseInt('${{ steps.version-from-prerelease.outputs.major }}');
               minor = parseInt('${{ steps.version-from-prerelease.outputs.minor }}');
               console.log(`Using version from RC pre-release: ${major}.${minor}`);
-            } else if ('${{ github.event.inputs.version }}' !== '') {
+            } else {
               // Manual trigger with input version
               major = parseInt('${{ steps.version-from-input.outputs.major }}');
               minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
               console.log(`Using version from input: ${major}.${minor}`);
-            } else {
-              // Manual trigger from branch name
-              major = parseInt('${{ steps.version-from-branch.outputs.major }}');
-              minor = parseInt('${{ steps.version-from-branch.outputs.minor }}');
-              console.log(`Using version from branch: ${major}.${minor}`);
             }
 
             let previousVersion;
@@ -141,7 +111,7 @@ jobs:
   count-commits-and-contributors:
     name: Count commits and contributors between releases
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       commit_count: ${{ steps.count-commits.outputs.commit_count }}
       contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
@@ -177,7 +147,7 @@ jobs:
   generate-contributors-list:
     name: Generate contributors list
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
       artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
@@ -188,7 +158,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Setup Node
         uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -238,7 +208,7 @@ jobs:
   db-updates:
     name: Check for database updates
     needs: extract-versions
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
       updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
@@ -362,13 +332,14 @@ jobs:
   send-slack-notification:
     name: Send Slack Notification
     needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - name: Send Slack message
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
           slack-text: |
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
 

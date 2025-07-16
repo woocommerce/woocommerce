@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Details: prevent the default template to be auto applied for existing blocks.
