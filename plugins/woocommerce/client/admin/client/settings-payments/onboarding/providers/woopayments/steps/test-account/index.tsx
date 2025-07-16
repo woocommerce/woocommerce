@@ -513,7 +513,10 @@ const TestAccountStep = () => {
 			) }
 
 			{ /* Loader - shown during initializing and polling */ }
-			{ ( status === 'initializing' || status === 'polling' ) && (
+			{ /* The success state is added just to keep the current loader state while we redirect to the admin page */ }
+			{ ( status === 'initializing' ||
+				status === 'polling' ||
+				status === 'success' ) && (
 				<TestDriveLoader
 					progress={ progress }
 					title={ loaderTitle }
