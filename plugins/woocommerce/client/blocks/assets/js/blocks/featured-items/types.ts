@@ -31,36 +31,3 @@ export function isImageObject( obj: unknown ): obj is ImageObject {
 		typeof ( obj as ImageObject ).src === 'string'
 	);
 }
-
-export interface ProductPostType {
-	id: number;
-	date: string;
-	modified: string;
-	modified_gmt: string;
-	password: string;
-	slug: string;
-	status: string;
-	type: string;
-	link: string;
-	title: {
-		raw: string;
-		rendered: string;
-	};
-	content: {
-		raw: string;
-		rendered: string;
-		protected: boolean;
-		block_version: number;
-	};
-	excerpt: {
-		raw: string;
-		rendered: string;
-		protected: boolean;
-	};
-	featured_media: number;
-	comment_status: string;
-	ping_status: string;
-	template: string;
-	permalink_template: string;
-	generated_slug: string;
-}

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -15,6 +15,7 @@ import {
 	Placeholder,
 	Icon,
 	Button,
+	Spinner,
 	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
 	// @ts-expect-error Using experimental features
@@ -67,19 +68,6 @@ export const withEditMode =
 		} = props;
 
 		const className = getClassPrefixFromName( name );
-		const [ selectedItem, setSelectedItem ] = useState(
-			name === BLOCK_NAMES.featuredProduct
-				? {
-						productId: 0,
-						mediaId: 0,
-						mediaSrc: '',
-				  }
-				: {
-						categoryId: 0,
-						mediaId: 0,
-						mediaSrc: '',
-				  }
-		);
 
 		const onDone = () => {
 			setAttributes( { editMode: false } );
@@ -108,6 +96,18 @@ export const withEditMode =
 				}
 			}
 		}, [ status, isDeleted, name, setAttributes ] );
+
+		if ( isLoading ) {
+			return (
+				<Placeholder
+					icon={ <Icon icon={ icon } /> }
+					label={ label }
+					className={ className }
+				>
+					<Spinner />
+				</Placeholder>
+			);
+		}
 
 		if ( attributes.editMode ) {
 			return (

@@ -3,12 +3,12 @@
  */
 import { useSelect } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
+import { productsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { BLOCK_NAMES } from './constants';
-import { ProductPostType } from './types';
 
 interface UseFeaturedItemProps {
 	itemId: number | undefined;
@@ -35,46 +35,30 @@ export const useFeaturedItemStatus = ( {
 				};
 			}
 
-			const {
-				getEntityRecord,
-				getEntityRecords,
-				hasFinishedResolution,
-				getLastEntitySaveError,
-			} = selectFunc( coreDataStore );
-
 			if ( itemType === BLOCK_NAMES.featuredProduct ) {
-				const productArgs: [ string, string, number ] = [
-					'postType',
-					'product',
+				const { getProduct, hasFinishedResolution } =
+					selectFunc( productsStore );
+
+				const product = getProduct( itemId );
+				const isLoading = ! hasFinishedResolution( 'getProduct', [
 					itemId,
-				];
-				const product: ProductPostType | undefined = getEntityRecord(
-					...productArgs
-				);
+				] );
 
-				const saveError = getLastEntitySaveError( ...productArgs );
-				const isResolved = hasFinishedResolution(
-					'getEntityRecord',
-					productArgs
-				);
-
-				if ( saveError && isResolved ) {
-					return {
-						status: 'deleted',
-						isDeleted: true,
-						isLoading: false,
-					};
-				}
+				// An item is considered deleted if its status is 'trash' or if the
+				// API request has finished and returned no product.
+				const isDeleted =
+					product?.status === 'trash' || ( ! isLoading && ! product );
 
 				return {
-					status:
-						product?.status ?? ( isResolved ? 'deleted' : null ),
-					isDeleted: ! product,
-					isLoading: ! isResolved,
+					status: product?.status ?? null,
+					isDeleted,
+					isLoading,
 				};
 			}
 
 			if ( itemType === BLOCK_NAMES.featuredCategory ) {
+				const { getEntityRecords, hasFinishedResolution } =
+					selectFunc( coreDataStore );
 				const categoryArgs: [ string, string, { include: number[] } ] =
 					[ 'taxonomy', 'product_cat', { include: [ itemId ] } ];
 				const categories = getEntityRecords( ...categoryArgs );
