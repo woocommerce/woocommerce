@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Order;
@@ -22,12 +23,21 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	private $data_store;
 
 	/**
+	 * FulfillmentsManager instance.
+	 *
+	 * @var FulfillmentsManager
+	 */
+	private FulfillmentsManager $manager;
+
+	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container               = wc_get_container();
+		$fulfillments_controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$fulfillments_controller->register();
 	}
 
 	/**
@@ -44,6 +54,7 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$this->manager    = new FulfillmentsManager();
 	}
 
 	/**

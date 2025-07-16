@@ -28,10 +28,9 @@ class FulfillmentsManager {
 		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'wc_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
-		add_action( 'woocommerce_refund_created', array( $this, 'update_fulfillments_after_refund' ), 10, 1 );
-		add_action( 'woocommerce_delete_order_refund', array( $this, 'update_fulfillment_status_after_refund_deleted' ), 10, 1 );
 
 		$this->init_fulfillment_status_hooks();
+		$this->init_refund_hooks();
 	}
 
 	/**
@@ -45,6 +44,16 @@ class FulfillmentsManager {
 		add_action( 'wc_fulfillment_after_create', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
 		add_action( 'wc_fulfillment_after_update', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
 		add_action( 'wc_fulfillment_after_delete', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
+	}
+
+	/**
+	 * Initialize refund-related hooks.
+	 *
+	 * This method initializes the hooks related to refunds, such as updating fulfillments after a refund is created
+	 */
+	private function init_refund_hooks() {
+		add_action( 'woocommerce_refund_created', array( $this, 'update_fulfillments_after_refund' ), 10, 1 );
+		add_action( 'woocommerce_delete_order_refund', array( $this, 'update_fulfillment_status_after_refund_deleted' ), 10, 1 );
 	}
 
 	/**
