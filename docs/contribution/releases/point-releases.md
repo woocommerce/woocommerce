@@ -14,7 +14,7 @@ Point releases are patch releases that address specific issues without adding su
 
 ## The Point Release Requests (PRR) flow
 
-The **Point Release Request (PRR) flow** is a structured process for requesting and managing critical fixes that need to be included in WooCommerce point releases. This process ensures that urgent bug fixes can be safely incorporated into current stable release and automatically forward-port them to trunk and any frozen branches, preserving code quality, enforcing thorough reviews, and preventing regressions
+The **Point Release Request (PRR) flow** is a structured process for requesting and managing critical fixes that need to be included in WooCommerce point releases. This process ensures that urgent bug fixes can be safely incorporated into current stable release and automatically forward-port them to trunk and any frozen branches, preserving code quality, enforcing thorough reviews, and preventing regressions.
 
 **⚠️ Important:** Security Vulnerability reports must not go through the PRR flow. All potential security issues should be reported privately via Automattic’s HackerOne program: [https://hackerone.com/automattic/](https://hackerone.com/automattic/).
 
