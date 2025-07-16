@@ -518,7 +518,7 @@ class MiniCart extends AbstractBlock {
 					'formattedSubtotal' => $formatted_subtotal,
 					'buttonAriaLabel'   => function () {
 						return sprintf( $button_aria_label_template, $state['totalItemsInCart'] );
-					}
+					},
 				)
 			);
 
