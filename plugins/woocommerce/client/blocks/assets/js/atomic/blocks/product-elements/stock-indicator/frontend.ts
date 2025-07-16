@@ -46,26 +46,25 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-const productPriceStore = store(
-	'woocommerce/product-price',
+const productStockIndicatorStore = store(
+	'woocommerce/product-stock-indicator',
 	{
 		callbacks: {
-			updatePrice: () => {
+			updateStockQuantity: () => {
 				const element = getElement();
 
 				if ( ! element.ref || ! productDataState?.productId ) {
 					return;
 				}
-
-				const priceHtml =
+				const availabilityHtml =
 					wooState?.products?.[ productDataState?.productId ]
 						?.variations?.[ productDataState?.variationId || 0 ]
-						?.price_html ||
+						?.availability_html ||
 					wooState?.products?.[ productDataState?.productId ]
-						?.price_html;
+						?.availability_html;
 
-				if ( typeof priceHtml === 'string' ) {
-					element.ref.innerHTML = sanitize( priceHtml, {
+				if ( typeof availabilityHtml === 'string' ) {
+					element.ref.innerHTML = sanitize( availabilityHtml, {
 						ALLOWED_TAGS,
 						ALLOWED_ATTR,
 					} );
@@ -76,4 +75,4 @@ const productPriceStore = store(
 	{ lock: true }
 );
 
-export type ProductPriceStore = typeof productPriceStore;
+export type ProductStockIndicatorStore = typeof productStockIndicatorStore;

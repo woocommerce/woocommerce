@@ -83,6 +83,26 @@ class ProductPrice extends AbstractBlock {
 			$watch_attribute    = '';
 
 			if ( $is_interactive ) {
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				foreach ( $variations_data as $variation ) {
+					$formatted_variations_data[ $variation['variation_id'] ] = array(
+						'price_html' => $variation['price_html'],
+					);
+				}
+
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'price_html' => $product->get_price_html(),
+								'variations' => $formatted_variations_data,
+							),
+						),
+					)
+				);
+
 				wp_enqueue_script_module( 'woocommerce/product-price' );
 				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
 				$watch_attribute                           = 'data-wp-watch="callbacks.updatePrice"';
