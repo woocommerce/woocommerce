@@ -321,34 +321,51 @@ const { state: cartItemState } = store(
 			get reduceQuantityLabel(): string {
 				return reduceQuantityLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get increaseQuantityLabel(): string {
 				return increaseQuantityLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get quantityDescriptionLabel(): string {
 				return quantityDescriptionLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get removeFromCartLabel(): string {
 				return removeFromCartLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
-			get cartItemName() {
+			get cartItemName(): string {
 				const txt = document.createElement( 'textarea' );
-				txt.innerHTML = cartItemState.cartItem.name;
+				let { name } = cartItemState.cartItem;
+				if (
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					name = (
+						window.wc as any
+					 ).blocksCheckout.applyCheckoutFilter( {
+						filterName: 'itemName',
+						defaultValue: name,
+						extensions: cartItemState.cartItem.extensions,
+						arg: {
+							context: 'cart',
+							cartItem: cartItemState.cartItem,
+							cart: woocommerceState.cart,
+						},
+					} );
+				}
+				txt.innerHTML = name;
 				return txt.value;
 			},
 
