@@ -15,6 +15,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { TESTING_ACCOUNT_STEP_ID } from '~/settings-payments/onboarding/providers/woopayments/steps';
 import './style.scss';
 
 const TestOrLiveAccountStep = () => {
@@ -97,8 +98,9 @@ const TestOrLiveAccountStep = () => {
 										}
 									);
 
-									const testAccountStep =
-										getStepByKey( 'test_account' );
+									const testAccountStep = getStepByKey(
+										TESTING_ACCOUNT_STEP_ID
+									);
 
 									const actionUrl =
 										testAccountStep?.actions?.finish?.href;

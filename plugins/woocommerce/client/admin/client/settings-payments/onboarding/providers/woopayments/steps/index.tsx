@@ -14,6 +14,8 @@ import TestAccountStep from './test-account';
 import TestOrLiveAccountStep from './test-or-live-account';
 import FinishStep from './finish';
 
+export const TESTING_ACCOUNT_STEP_ID = 'test_account';
+
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
 		id: 'payment_methods',
@@ -45,7 +47,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 				content: <TestOrLiveAccountStep />,
 			},
 			{
-				id: 'test_account',
+				id: TESTING_ACCOUNT_STEP_ID,
 				order: 2,
 				type: 'backend',
 				label: 'Ready to test payments',
