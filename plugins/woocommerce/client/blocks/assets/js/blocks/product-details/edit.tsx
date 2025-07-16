@@ -144,7 +144,6 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 		);
 	}
 
-	console.log( hasInnerBlocks, wasBlockJustInserted );
 	if ( hasInnerBlocks || wasBlockJustInserted ) {
 		return <div { ...innerBlocksProps } />;
 	}
