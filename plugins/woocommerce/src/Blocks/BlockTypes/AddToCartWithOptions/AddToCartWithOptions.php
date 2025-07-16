@@ -232,7 +232,11 @@ class AddToCartWithOptions extends AbstractBlock {
 						$context['groupedProductIds'][] = $child_product_id;
 
 						$args = Utils::get_quantity_input_args( $child_product );
-						$min  = 0;
+						$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 0;
+						// For grouped children, if min is 1 (the default), set to 0 unless a filter sets otherwise.
+						if ( 1 === $min ) {
+							$min = 0;
+						}
 						$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
 							? (int) $args['max_value']
 							: null;
