@@ -801,7 +801,7 @@ class FeaturesController {
 		}
 
 		$this->pending_declarations = array();
-		$this->lazy = false;
+		$this->lazy                 = false;
 	}
 
 	/**

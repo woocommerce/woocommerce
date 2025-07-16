@@ -134,7 +134,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Set private $proxy via reflection (fixes null error).
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $this->fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
@@ -872,7 +872,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Set private $proxy via reflection (fixes null error).
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
@@ -970,7 +970,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		// Set private $proxy via reflection.
 		$parent_reflection = new \ReflectionClass( PluginUtil::class );
-		$proxy_prop = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
 		$proxy_prop->setAccessible( true );
 		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
@@ -1015,7 +1015,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );
 		$local_sut->declare_compatibility( 'cart_checkout_blocks', 'compatible_plugin' );
 		$local_sut->declare_compatibility( 'custom_order_tables', 'incompatible_plugin', false );
-
 
 		$cot_controller   = new CustomOrdersTableController();
 		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
