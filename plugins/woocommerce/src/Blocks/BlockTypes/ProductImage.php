@@ -217,7 +217,7 @@ class ProductImage extends AbstractBlock {
 			array_filter(
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
-					'wc-block-components-product-image--aspect-ratio-' . $aspect_ratio,
+					'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio ),
 					esc_attr( $classes_and_styles['classes'] ),
 				)
 			)
