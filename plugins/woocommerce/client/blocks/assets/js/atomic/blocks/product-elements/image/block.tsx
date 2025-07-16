@@ -177,6 +177,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
+	const finalAspectRatio =
+		objectHasProp( style, 'dimensions' ) &&
+		objectHasProp( style.dimensions, 'aspectRatio' ) &&
+		isString( style.dimensions.aspectRatio )
+			? style.dimensions.aspectRatio
+			: aspectRatio;
 
 	if ( ! product?.id ) {
 		return (
@@ -193,7 +199,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					) }
 					style={ styleProps.style }
 				>
-					<ImagePlaceholder showFullSize={ showFullSize } />
+					<ImagePlaceholder
+						style={ { aspectRatio: finalAspectRatio } }
+						showFullSize={ showFullSize }
+					/>
 				</div>
 				{ children }
 			</>
@@ -253,13 +262,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						width={ width }
 						height={ height }
 						scale={ scale }
-						aspectRatio={
-							objectHasProp( style, 'dimensions' ) &&
-							objectHasProp( style.dimensions, 'aspectRatio' ) &&
-							isString( style.dimensions.aspectRatio )
-								? style.dimensions.aspectRatio
-								: aspectRatio
-						}
+						aspectRatio={ finalAspectRatio }
 					/>
 				</ParentComponent>
 			</div>
