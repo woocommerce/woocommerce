@@ -31,12 +31,10 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		dependencies: [ 'payment_methods' ],
 	},
 	{
-		id: 'business_verification',
+		id: 'activate_payments',
 		order: 3,
-		type: 'backend',
+		type: 'frontend',
 		label: 'Activate Payments',
-		dependencies: [ 'wpcom_connection' ],
-		content: <BusinessVerificationStep />,
 		subSteps: [
 			{
 				id: 'test_or_live_account',
@@ -51,8 +49,16 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 				order: 2,
 				type: 'backend',
 				label: 'Ready to test payments',
-				dependencies: [ 'wpcom_connection' ],
+				dependencies: [ 'test_or_live_account' ],
 				content: <TestAccountStep />,
+			},
+			{
+				id: 'business_verification',
+				order: 3,
+				type: 'backend',
+				label: 'Activate Payments',
+				dependencies: [ 'test_or_live_account' ],
+				content: <BusinessVerificationStep />,
 			},
 		],
 	},
