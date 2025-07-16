@@ -105,17 +105,19 @@ const getInfoNoticesFromCartUpdates = (
 	} = quantityChanges;
 
 	const autoDeletedToNotify = oldItems.filter(
-		( o ) =>
-			! newItems.some( ( n ) => o.key === n.key ) &&
-			! ( o.key && pendingDelete.includes( o.key ) )
+		( old ) =>
+			old.key &&
+			! newItems.some( ( item ) => old.key === item.key ) &&
+			! pendingDelete.includes( old.key )
 	);
 
-	const autoUpdatedToNotify = newItems.filter(
-		( o ) =>
-			newItems.some( ( n ) => o.key === n.key ) &&
-			! pendingAdd.includes( o.id ) &&
-			! ( o.key && pendingQuantity.includes( o.key ) )
-	);
+	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		const old = oldItems.find( ( o ) => o.key === item.key );
+		return old
+			? ! pendingQuantity.includes( item.key ) &&
+					item.quantity !== old.quantity
+			: ! pendingAdd.includes( item.id );
+	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
