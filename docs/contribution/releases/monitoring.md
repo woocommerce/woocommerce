@@ -11,7 +11,7 @@ If there are questions whether a specific issue is critical enough to warrant cr
 
 ## WordPress.org Forums
 
-Check newly threads created on the [WordPress.org Forums](https://wordpress.org/support/plugin/woocommerce/) for any issues that appear to be caused by the latest update.
+Check newly created threads on the [WordPress.org Forums](https://wordpress.org/support/plugin/woocommerce/) for any issues that appear to be caused by the latest update.
 
 ## WooCommerce GitHub Repository Issues
 
