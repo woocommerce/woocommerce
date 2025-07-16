@@ -3,8 +3,10 @@
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { CartVariationItem } from '@woocommerce/types';
+import type {
+	Store as WooCommerce,
+	SelectedAttributes,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -18,7 +20,7 @@ export type AvailableVariation = {
 export type Context = {
 	productId: number;
 	productType: string;
-	selectedAttributes: CartVariationItem[];
+	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -28,7 +30,8 @@ export type Context = {
 interface GroupedCartItem {
 	id: number;
 	quantity: number;
-	variation: CartVariationItem[];
+	variation: SelectedAttributes[];
+	type: string;
 }
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -92,7 +95,7 @@ const getInputData = (
 
 const getMatchedVariation = (
 	availableVariations: AvailableVariation[],
-	selectedAttributes: CartVariationItem[]
+	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
 		! Array.isArray( availableVariations ) ||
@@ -145,8 +148,12 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return true;
+				}
 				const { availableVariations, selectedAttributes, productType } =
-					getContext< Context >();
+					context;
 				if ( productType !== 'variable' ) {
 					return true;
 				}
@@ -173,6 +180,13 @@ const addToCartWithOptionsStore = store(
 				);
 				return matchedVariation?.variation_id || null;
 			},
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
+			},
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
@@ -193,6 +207,7 @@ const addToCartWithOptionsStore = store(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
 				);
+
 				if ( index >= 0 ) {
 					selectedAttributes[ index ] = {
 						attribute,
@@ -359,6 +374,7 @@ const addToCartWithOptionsStore = store(
 							id: childProductId,
 							quantity: newQuantity,
 							variation: selectedAttributes,
+							type: productType,
 						} );
 					}
 
@@ -389,6 +405,7 @@ const addToCartWithOptionsStore = store(
 						id: productId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
+						type: productType,
 					} );
 				}
 			},
