@@ -1284,8 +1284,9 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_order_total_column( WC_Order $order ): void {
 		if ( $order->get_payment_method_title() ) {
+			$tip = wp_kses_post( htmlspecialchars_decode( $order->get_payment_method_title() ) );
 			/* translators: %s: method */
-			echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $order->get_payment_method_title() ) ) . '">' . wp_kses_post( $order->get_formatted_order_total() ) . '</span>';
+			echo '<span class="tips" data-tip="' . esc_attr( sprintf( __( 'via %s', 'woocommerce' ), $tip ) ) . '">' . wp_kses_post( $order->get_formatted_order_total() ) . '</span>';
 		} else {
 			echo wp_kses_post( $order->get_formatted_order_total() );
 		}
