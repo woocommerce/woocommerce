@@ -152,10 +152,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									<div 
 										data-wp-bind--hidden="!state.cartItemHasDiscount" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
-										hidden
 									>
-										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $save_label; ?>
+										<?php echo $save_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										<span
 											data-wp-text="state.cartItemDiscount" 
 											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
