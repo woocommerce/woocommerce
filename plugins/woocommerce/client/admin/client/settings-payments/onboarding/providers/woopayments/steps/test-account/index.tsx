@@ -426,23 +426,11 @@ const TestAccountStep = () => {
 	};
 
 	if ( status === 'success' ) {
-		// Display a snackbar to the user before redirecting to the admin page.
-		setSnackbar( {
-			show: true,
-			message: __(
-				"Your test account was successfully created. You'll be redirected to continue your store setup.",
-				'woocommerce'
-			),
+		navigateTo( {
+			url: getNewPath( { nox: 'test_account_created' }, '', {
+				page: 'wc-admin',
+			} ),
 		} );
-
-		setTimeout( () => {
-			// Navigate to wc-admin page
-			navigateTo( {
-				url: getNewPath( {}, '', {
-					page: 'wc-admin',
-				} ),
-			} );
-		}, 3000 );
 	}
 
 	const isAccountAlreadyExistsError =
