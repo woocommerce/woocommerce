@@ -61,18 +61,17 @@ jobs:
 
         composer update woocommerce/action-scheduler --no-scripts
 
-        branch_name="update-action-scheduler-${{ steps.get-as-version.outputs.version }}"
+        branch_name="update/action-scheduler-${{ steps.get-as-version.outputs.version }}"
         git checkout -b ${branch_name}
 
         composer exec -- changelogger add \
           --significance minor \
           --type update \
           --entry "Update the Action Scheduler package to version ${{ steps.get-as-version.outputs.version }}." \
-          --filename ${branch_name} \
           --no-interaction
 
         # Push changes.
-        git add composer.lock composer.json changelog/${branch_name}
+        git add composer.lock composer.json changelog/
         git commit \
           --message "Update Action Scheduler to '${{ steps.get-as-version.outputs.version }}'."
         git push origin ${branch_name}
