@@ -13,6 +13,9 @@
 		"align": [ "wide", "full" ]
 	},
 	"attributes": {
+		"align": {
+			"type": "string"
+		},
 		"hideTabTitle": {
 			"type": "boolean",
 			"default": false

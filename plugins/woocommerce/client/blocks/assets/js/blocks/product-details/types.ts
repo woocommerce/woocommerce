@@ -7,7 +7,7 @@ type Context = {
 	context: { postId: string; postType: string };
 };
 
-type Attributes = {
+export type Attributes = {
 	hideTabTitle: boolean;
 };
 
