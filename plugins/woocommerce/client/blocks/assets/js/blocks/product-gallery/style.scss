@@ -168,15 +168,59 @@ $dialog-padding: 20px;
 	cursor: not-allowed;
 }
 
-@mixin vertical-thumbnails {
-	:where(.wc-block-product-gallery-thumbnails__scrollable) {
-		flex-direction: column;
+// Vertical thumbnails
+.wc-block-product-gallery {
+	&:not(.is-vertical) {
+		:where(.wc-block-product-gallery-thumbnails__scrollable) {
+			flex-direction: column;
+		}
 	}
 
 	@for $i from 10 through 50 {
-		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-			flex-basis: calc($i * 1%);
-			aspect-ratio: 1 / calc(100 / $i);
+		&:not(.is-vertical) {
+			&:has(.wc-block-components-product-image--aspect-ratio-auto),
+			&:has(.wc-block-components-product-image--aspect-ratio-1) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 1 / calc(100 / $i);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 4 / calc(100 / $i * 3);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 3 / calc(100 / $i * 4);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 3 / calc(100 / $i * 2);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 2 / calc(100 / $i * 3);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 16 / calc(100 / $i * 9);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 9 / calc(100 / $i * 16);
+				}
+			}
 		}
 	}
 }
@@ -202,10 +246,6 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails) {
 	position: relative;
-
-	// Use the vertical thumbnails as a default. The default layout attributes from block.json are not set
-	// until manipulated hence the need for the mixin.
-	@include vertical-thumbnails;
 
 	$gradient-size: 14%;
 	$gradient-mid-step-size: 6%;
@@ -267,11 +307,6 @@ $dialog-padding: 20px;
 	pointer-events: none;
 	cursor: default;
 	filter: brightness(0.8);
-}
-
-// Percentage width
-:where(.is-horizontal .wc-block-product-gallery-thumbnails) {
-	@include vertical-thumbnails;
 }
 
 :where(.is-vertical .wc-block-product-gallery-thumbnails) {
