@@ -786,9 +786,6 @@ class FeaturesController {
 			return;
 		}
 
-		$plugin_util = $this->plugin_util;
-		$logger      = $this->proxy->call_function( 'wc_get_logger' );
-
 		foreach ( $this->pending_declarations as $declaration ) {
 			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
 
