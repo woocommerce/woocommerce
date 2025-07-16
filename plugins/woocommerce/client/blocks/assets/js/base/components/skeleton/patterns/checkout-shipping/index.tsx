@@ -17,9 +17,9 @@ export const CheckoutShippingSkeleton = () => {
 				{ __( 'Loading shipping options…', 'woocommerce' ) }
 			</VisuallyHidden>
 			<div className="wc-block-components-skeleton wc-block-components-skeleton--checkout-shipping">
-				<Skeleton height="22px" width="22px" borderRadius="100%" />
-				<Skeleton height="22px" maxWidth="148px" />
-				<Skeleton height="22px" width="50px" />
+				<Skeleton height="20px" width="20px" borderRadius="100%" />
+				<Skeleton height="20px" maxWidth="148px" />
+				<Skeleton height="20px" width="50px" />
 			</div>
 		</>
 	);
