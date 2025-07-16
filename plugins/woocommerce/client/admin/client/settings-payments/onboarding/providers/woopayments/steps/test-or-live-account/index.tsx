@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -13,10 +14,7 @@ import { Link } from '@woocommerce/components';
 import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
-import {
-	disableWooPaymentsTestAccount,
-	recordPaymentsOnboardingEvent,
-} from '~/settings-payments/utils';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import './style.scss';
 
 const TestOrLiveAccountStep = () => {
@@ -26,6 +24,7 @@ const TestOrLiveAccountStep = () => {
 		sessionEntryPoint,
 		navigateToNextStep,
 		refreshStoreData,
+		getStepByKey,
 	} = useOnboardingContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
@@ -98,20 +97,31 @@ const TestOrLiveAccountStep = () => {
 										}
 									);
 
-									disableWooPaymentsTestAccount()
-										.then( () => {
-											setIsContinueButtonLoading( false );
+									const testAccountStep =
+										getStepByKey( 'test_account' );
 
-											// This will refresh the steps and move the modal to the next step.
-											navigateToNextStep();
+									const actionUrl =
+										testAccountStep?.actions?.finish?.href;
 
-											return refreshStoreData();
+									if ( actionUrl ) {
+										apiFetch( {
+											url: actionUrl,
+											method: 'POST',
 										} )
-										.catch( () => {
-											// Handle any errors that occur during the process.
-											setIsContinueButtonLoading( false );
-											// Error tracking is handled on the backend, so we don't need to do anything here.
-										} );
+											.then( () => {
+												setIsContinueButtonLoading(
+													false
+												);
+
+												refreshStoreData();
+											} )
+											.catch( () => {
+												// Handle any errors that occur during the process.
+												setIsContinueButtonLoading(
+													false
+												);
+											} );
+									}
 								} }
 								isBusy={ isContinueButtonLoading }
 								disabled={ isContinueButtonLoading }
