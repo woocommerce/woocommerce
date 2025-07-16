@@ -111,7 +111,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 						data-wp-each--cart-item="woocommerce::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
-						<tr class="wc-block-cart-items__row" tabindex="-1">
+						<tr class="wc-block-cart-items__row" data-wp-run="callbacks.filterCartItemClass" tabindex="-1">
 							<td class="wc-block-cart-item__image" aria-hidden="true">
 								<img data-wp-bind--hidden="!state.isProductHiddenFromCatalog" data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">
 								<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
@@ -161,7 +161,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										</span>
 									</div>
 									<div class="wc-block-components-product-metadata">
-										<div data-wp-watch="state.itemShortDescription" >
+										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
 									</div>

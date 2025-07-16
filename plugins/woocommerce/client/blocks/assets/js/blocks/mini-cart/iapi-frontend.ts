@@ -6,6 +6,8 @@ import {
 	getContext,
 	getConfig,
 	getElement,
+	useLayoutEffect,
+	useRef,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
@@ -331,22 +333,6 @@ const { state: cartItemState } = store(
 				return cartItemState.cartItem.images[ 0 ]?.thumbnail || '';
 			},
 
-			itemShortDescription() {
-				const el = getElement();
-
-				if ( el.ref ) {
-					const innerEl = el.ref.querySelector(
-						'.wc-block-components-product-metadata__description'
-					);
-
-					// A workaround for the lack of dangerous set HTML directive in interactivity API
-					if ( innerEl ) {
-						innerEl.innerHTML =
-							cartItemState.cartItem.short_description;
-					}
-				}
-			},
-
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
 					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
@@ -456,6 +442,61 @@ const { state: cartItemState } = store(
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+				} );
+			},
+		},
+
+		callbacks: {
+			itemShortDescription() {
+				const el = getElement();
+
+				if ( el.ref ) {
+					const innerEl = el.ref.querySelector(
+						'.wc-block-components-product-metadata__description'
+					);
+
+					// A workaround for the lack of dangerous set HTML directive in interactivity API
+					if ( innerEl ) {
+						innerEl.innerHTML =
+							cartItemState.cartItem.short_description;
+					}
+				}
+			},
+			filterCartItemClass() {
+				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
+				const applyCheckoutFilter = ( window.wc as any )?.blocksCheckout
+					?.applyCheckoutFilter;
+				const previouslyAppliedClasses = useRef< string[] >( [] );
+
+				// @ts-ignore -- It must run on every render.
+				useLayoutEffect( () => {
+					if ( applyCheckoutFilter ) {
+						const { ref } = getElement();
+
+						// Remove previously applied classes.
+						ref!.classList.remove(
+							...previouslyAppliedClasses.current
+						);
+
+						const newClassesString = applyCheckoutFilter( {
+							filterName: 'cartItemClass',
+							defaultValue: '',
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						} );
+
+						// Apply new classes.
+						previouslyAppliedClasses.current = newClassesString
+							.split( ' ' )
+							.filter( Boolean );
+						ref!.classList.add(
+							...previouslyAppliedClasses.current
+						);
+					}
 				} );
 			},
 		},
