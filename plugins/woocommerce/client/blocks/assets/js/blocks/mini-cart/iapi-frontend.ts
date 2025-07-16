@@ -340,6 +340,52 @@ const { state: cartItemState } = store(
 				);
 			},
 
+			get beforeItemPrice(): string | null {
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText = (
+						window.wc as any
+					 ).blocksCheckout.applyCheckoutFilter( {
+						filterName: 'subtotalPriceFormat',
+						defaultValue: '<price/>',
+						extensions: cartItemState.cartItem.extensions,
+						arg: {
+							context: 'cart',
+							cartItem: cartItemState.cartItem,
+							cart: woocommerceState.cart,
+						},
+					} );
+					return priceText.split( '<price/>' )[ 0 ];
+				}
+				return null;
+			},
+
+			get afterItemPrice(): string | null {
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText = (
+						window.wc as any
+					 ).blocksCheckout.applyCheckoutFilter( {
+						filterName: 'subtotalPriceFormat',
+						defaultValue: '<price/>',
+						extensions: cartItemState.cartItem.extensions,
+						arg: {
+							context: 'cart',
+							cartItem: cartItemState.cartItem,
+							cart: woocommerceState.cart,
+						},
+					} );
+					return priceText.split( '<price/>' )[ 1 ];
+				}
+				return null;
+			},
+
 			get itemPrice(): string {
 				return formatPriceWithCurrency(
 					parseInt( cartItemState.cartItem.prices.price, 10 ),
