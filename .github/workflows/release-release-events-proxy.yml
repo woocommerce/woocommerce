@@ -1,5 +1,4 @@
 name: 'Release: Release events proxy workflow'
-description: 'Proxy workflow to dispatch workflows from trunk branch for release events (published and pre-release).'
 on:
   release:
     types: [prereleased]
