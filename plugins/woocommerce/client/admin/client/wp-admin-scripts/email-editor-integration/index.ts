@@ -6,7 +6,6 @@
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { initializeEditor } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
@@ -16,6 +15,7 @@ import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
+import { initializeEditor } from './initialize_editor';
 
 import './style.scss';
 
@@ -42,4 +42,6 @@ registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
-initializeEditor( 'woocommerce-email-editor' );
+initializeEditor();
+
+
