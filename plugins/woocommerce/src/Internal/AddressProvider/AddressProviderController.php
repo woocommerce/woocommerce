@@ -51,7 +51,9 @@ class AddressProviderController {
 		 * Filter the registered address providers.
 		 *
 		 * @since 9.9.0
-		 * @param WC_Address_Provider[] $providers Array of fully qualified class names or instances that extend WC_Address_Provider.
+		 * @param array $providers Array of fully qualified class names (strings) or WC_Address_Provider instances.
+		 *                         Class names will be instantiated automatically.
+		 *                         Example: array( 'My_Provider_Class', new My_Other_Provider() )
 		 */
 		$provider_items = apply_filters( 'woocommerce_address_providers', array() );
 
