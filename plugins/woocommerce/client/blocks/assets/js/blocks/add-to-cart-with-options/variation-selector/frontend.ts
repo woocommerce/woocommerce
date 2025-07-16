@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import type { ChangeEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { ChangeEvent } from 'react';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -12,7 +13,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 	AvailableVariation,
-} from '../../frontend';
+} from '../frontend';
 import setStyles from './set-styles';
 
 type Option = {
@@ -111,13 +112,55 @@ const isAttributeValueValid = ( {
 	} );
 };
 
+const getMatchedVariation = (
+	availableVariations: AvailableVariation[],
+	selectedAttributes: SelectedAttributes[]
+) => {
+	if (
+		! Array.isArray( availableVariations ) ||
+		! Array.isArray( selectedAttributes ) ||
+		availableVariations.length === 0 ||
+		selectedAttributes.length === 0
+	) {
+		return null;
+	}
+	return availableVariations.find( ( availableVariation ) => {
+		return Object.entries( availableVariation.attributes ).every(
+			( [ attributeName, attributeValue ] ) => {
+				const attributeMatched = selectedAttributes.some(
+					( variationAttribute ) => {
+						const isSameAttribute =
+							variationAttribute.attribute === attributeName;
+						if ( ! isSameAttribute ) {
+							return false;
+						}
+
+						return (
+							variationAttribute.value === attributeValue ||
+							( variationAttribute.value &&
+								attributeValue === '' )
+						);
+					}
+				);
+
+				return attributeMatched;
+			}
+		);
+	} );
+};
+
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
+			isVariableProductFormValid: boolean;
+			variationId: number | null;
+			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
 		};
 		actions: {
+			setAttribute: ( attribute: string, value: string ) => void;
+			removeAttribute: ( attribute: string ) => void;
 			handlePillClick: () => void;
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
@@ -125,6 +168,7 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
+			setSelectedVariationId: () => void;
 		};
 	};
 
@@ -132,6 +176,43 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
+			get isVariableProductFormValid(): boolean {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return true;
+				}
+				const { availableVariations, selectedAttributes } = context;
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				// Variable products must be in stock and have a selected variation
+				return Boolean(
+					matchedVariation?.is_in_stock &&
+						matchedVariation?.variation_id
+				);
+			},
+			get variationId(): number | null {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return null;
+				}
+				const { availableVariations, selectedAttributes } = context;
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+				return matchedVariation?.variation_id || null;
+			},
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
+			},
 			get isOptionSelected() {
 				const { selectedValue, option } = getContext< Context >();
 				return selectedValue === option.value;
@@ -155,6 +236,35 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		actions: {
+			setAttribute( attribute: string, value: string ) {
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+
+				if ( index >= 0 ) {
+					selectedAttributes[ index ] = {
+						attribute,
+						value,
+					};
+				} else {
+					selectedAttributes.push( {
+						attribute,
+						value,
+					} );
+				}
+			},
+			removeAttribute( attribute: string ) {
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+				if ( index >= 0 ) {
+					selectedAttributes.splice( index, 1 );
+				}
+			},
 			handlePillClick() {
 				if ( state.isOptionDisabled ) {
 					return;
@@ -180,6 +290,22 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
+			},
+			setSelectedVariationId: () => {
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const { actions } = store< ProductDataStore >(
+					'woocommerce/product-data',
+					{},
+					{ lock: universalLock }
+				);
+				const matchedVariationId = matchedVariation?.variation_id;
+				actions.setVariationId( matchedVariationId ?? null );
 			},
 		},
 	},

@@ -8,7 +8,6 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 export type AvailableVariation = {
@@ -111,43 +110,6 @@ const getInputData = (
 	};
 };
 
-const getMatchedVariation = (
-	availableVariations: AvailableVariation[],
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( availableVariations ) ||
-		! Array.isArray( selectedAttributes ) ||
-		availableVariations.length === 0 ||
-		selectedAttributes.length === 0
-	) {
-		return null;
-	}
-	return availableVariations.find( ( availableVariation ) => {
-		return Object.entries( availableVariation.attributes ).every(
-			( [ attributeName, attributeValue ] ) => {
-				const attributeMatched = selectedAttributes.some(
-					( variationAttribute ) => {
-						const isSameAttribute =
-							variationAttribute.attribute === attributeName;
-						if ( ! isSameAttribute ) {
-							return false;
-						}
-
-						return (
-							variationAttribute.value === attributeValue ||
-							( variationAttribute.value &&
-								attributeValue === '' )
-						);
-					}
-				);
-
-				return attributeMatched;
-			}
-		);
-	} );
-};
-
 const getNewQuantity = ( productId: number, quantity: number ) => {
 	const product = wooState.cart?.items.find(
 		( item ) => item.id === productId
@@ -170,47 +132,23 @@ const addToCartWithOptionsStore = store(
 				if ( ! context ) {
 					return true;
 				}
-				const {
-					availableVariations,
-					selectedAttributes,
-					productType,
-					quantity,
-				} = context;
+				const { productType, quantity } = context;
 				if ( productType === 'variable' ) {
-					const matchedVariation = getMatchedVariation(
-						availableVariations,
-						selectedAttributes
-					);
-
-					// Variable products must be in stock and have a selected variation
-					return Boolean(
-						matchedVariation?.is_in_stock &&
-							matchedVariation?.variation_id
-					);
+					// `isVariableProductFormValid` is defined in
+					// `variation-selector/frontend.ts`, only for variable
+					// products.
+					const { isVariableProductFormValid } =
+						( addToCartWithOptionsStore?.state as {
+							isVariableProductFormValid?: boolean;
+						} ) ?? {};
+					return isVariableProductFormValid ?? true;
 				}
+
 				if ( productType === 'grouped' ) {
 					return Object.values( quantity ).some( ( qty ) => qty > 0 );
 				}
+
 				return true;
-			},
-			get variationId(): number | null {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return null;
-				}
-				const { availableVariations, selectedAttributes } = context;
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				return matchedVariation?.variation_id || null;
-			},
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return [];
-				}
-				return context.selectedAttributes;
 			},
 			get allowsDecrease() {
 				const {
@@ -256,35 +194,6 @@ const addToCartWithOptionsStore = store(
 					...context.quantity,
 					[ productId ]: value,
 				};
-			},
-			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
-				const index = selectedAttributes.findIndex(
-					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
-				);
-
-				if ( index >= 0 ) {
-					selectedAttributes[ index ] = {
-						attribute,
-						value,
-					};
-				} else {
-					selectedAttributes.push( {
-						attribute,
-						value,
-					} );
-				}
-			},
-			removeAttribute( attribute: string ) {
-				const { selectedAttributes } = getContext< Context >();
-				const index = selectedAttributes.findIndex(
-					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
-				);
-				if ( index >= 0 ) {
-					selectedAttributes.splice( index, 1 );
-				}
 			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -488,24 +397,6 @@ const addToCartWithOptionsStore = store(
 						type: productType,
 					} );
 				}
-			},
-		},
-		callbacks: {
-			setSelectedVariationId: () => {
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-
-				const { actions } = store< ProductDataStore >(
-					'woocommerce/product-data',
-					{},
-					{ lock: universalLock }
-				);
-				const matchedVariationId = matchedVariation?.variation_id;
-				actions.setVariationId( matchedVariationId ?? null );
 			},
 		},
 	},
