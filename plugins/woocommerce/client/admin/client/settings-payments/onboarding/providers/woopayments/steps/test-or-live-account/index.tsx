@@ -144,13 +144,13 @@ const TestOrLiveAccountStep = () => {
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
-													"We'll create a test account for you so that you can begin {{link}}testing payments{{/link}} on your store. You'll need to complete setup later to accept real payments.",
+													"We'll create a test account for you so that you can begin {{link}}testing payments on your store{{/link}}. You'll need to complete setup later to accept real payments.",
 													'woocommerce'
 												),
 												components: {
 													link: (
 														<Link
-															href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
+															href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
 															target="_blank"
 															rel="noreferrer"
 															type="external"
