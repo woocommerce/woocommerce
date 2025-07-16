@@ -285,16 +285,18 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_taxonomies() {
-		$taxonomies    = get_taxonomies(
-			array(
-				'public'      => true,
-				'object_type' => array( 'product' ),
-			),
-			'objects'
-		);
-		$taxonomy_data = array();
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+		$taxonomy_data   = array();
 
-		foreach ( $taxonomies as $taxonomy ) {
+		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
+			$taxonomy = get_taxonomy( $taxonomy_slug );
+
+			if ( ! $taxonomy ) {
+				continue;
+			}
+
 			$taxonomy_data[] = array(
 				'label'  => $taxonomy->label,
 				'name'   => $taxonomy->name,
