@@ -26,45 +26,39 @@ class ImageAttachmentSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'id'                => [
+			'id'        => [
 				'description' => __( 'Image ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'src'               => [
+			'src'       => [
 				'description' => __( 'Full size image URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'thumbnail'         => [
+			'thumbnail' => [
 				'description' => __( 'Thumbnail URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'gallery_thumbnail' => [
-				'description' => __( 'Gallery thumbnail URL.', 'woocommerce' ),
-				'type'        => 'string',
-				'format'      => 'uri',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'srcset'            => [
+			'srcset'    => [
 				'description' => __( 'Thumbnail srcset for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'sizes'             => [
+			'sizes'     => [
 				'description' => __( 'Thumbnail sizes for responsive images.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'name'              => [
+			'name'      => [
 				'description' => __( 'Image name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
-			'alt'               => [
+			'alt'       => [
 				'description' => __( 'Image alternative text.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
@@ -89,19 +83,16 @@ class ImageAttachmentSchema extends AbstractSchema {
 			return null;
 		}
 
-		$thumbnail         = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
-		$gallery_thumbnail = wp_get_attachment_image_src( $attachment_id, 'woocommerce_gallery_thumbnail' );
+		$thumbnail = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
 
 		return (object) [
-			'id'                => (int) $attachment_id,
-			'src'               => current( $attachment ),
-			'thumbnail'         => current( $thumbnail ),
-			'gallery_thumbnail' => current( $gallery_thumbnail ),
-			'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-			'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
-			'name'              => get_the_title( $attachment_id ),
-			'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			'id'        => (int) $attachment_id,
+			'src'       => current( $attachment ),
+			'thumbnail' => current( $thumbnail ),
+			'srcset'    => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
+			'sizes'     => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+			'name'      => get_the_title( $attachment_id ),
+			'alt'       => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 		];
 	}
-
 }
