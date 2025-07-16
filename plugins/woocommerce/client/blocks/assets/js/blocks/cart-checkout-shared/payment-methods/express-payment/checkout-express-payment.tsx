@@ -115,7 +115,7 @@ const CheckoutExpressPayment = () => {
 				<div className="wc-block-components-express-payment__title-container">
 					<h2 className="wc-block-components-express-payment__title">
 						{ hasRegisteredNotInitializedExpressPayments ? (
-							<Skeleton width="127px" height="18px" />
+							<Skeleton width="127px" height="20px" />
 						) : (
 							__( ' Express Checkout', 'woocommerce' )
 						) }
