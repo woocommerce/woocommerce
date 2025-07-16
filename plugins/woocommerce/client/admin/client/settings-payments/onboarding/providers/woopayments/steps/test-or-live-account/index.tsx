@@ -34,9 +34,9 @@ const TestOrLiveAccountStep = () => {
 		<>
 			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step--content">
-				<div className="woocommerce-payments-test-account-step__success_content_container">
-					<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-account-step__success_content">
-						<h1 className="woocommerce-payments-test-account-step__success_content_title">
+				<div className="woocommerce-payments-test-or-live-account-step__success_content_container">
+					<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-or-live-account-step__success_content">
+						<h1 className="woocommerce-payments-test-or-live-account-step__success_content_title">
 							{ __( "You're almost there!", 'woocommerce' ) }
 						</h1>
 						<div className="woocommerce-woopayments-modal__content__item">
@@ -49,7 +49,7 @@ const TestOrLiveAccountStep = () => {
 								</p>
 							</div>
 						</div>
-						<div className="woocommerce-payments-test-account-step__success-whats-next">
+						<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
 							<div className="woocommerce-woopayments-modal__content__item-flex">
 								<img
 									src={
@@ -131,7 +131,7 @@ const TestOrLiveAccountStep = () => {
 								{ __( 'Activate payments', 'woocommerce' ) }
 							</Button>
 
-							<div className="woocommerce-payments-test-account-step__success_content_or-divider">
+							<div className="woocommerce-payments-test-or-live-account-step__success_content_or-divider">
 								<hr />
 								{ __( 'OR', 'woocommerce' ) }
 								<hr />
