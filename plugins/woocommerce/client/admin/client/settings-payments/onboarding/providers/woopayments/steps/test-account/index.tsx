@@ -269,6 +269,9 @@ const TestAccountStep = () => {
 						} >( {
 							url: currentStep?.actions?.init?.href,
 							method: 'POST',
+							data: {
+								source: sessionEntryPoint,
+							},
 						} );
 					} )
 					.then( ( response ) => {

@@ -1,10 +1,14 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test } from '../../../fixtures/block-editor-fixtures';
 import { tags, expect } from '../../../fixtures/fixtures';
 import { clickOnTab } from '../../../utils/simple-products';
-import { WC_API_PATH } from '../../../utils/api-client';
 import { getFakeProduct } from '../../../utils/data';
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
