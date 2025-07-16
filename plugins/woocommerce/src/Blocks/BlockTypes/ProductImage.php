@@ -210,12 +210,14 @@ class ProductImage extends AbstractBlock {
 		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product            = wc_get_product( $post_id );
+		$aspect_ratio       = $parsed_attributes['aspectRatio'] ?? $parsed_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
 
 		$classes = implode(
 			' ',
 			array_filter(
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
+					'wc-block-components-product-image--aspect-ratio-' . $aspect_ratio,
 					esc_attr( $classes_and_styles['classes'] ),
 				)
 			)
