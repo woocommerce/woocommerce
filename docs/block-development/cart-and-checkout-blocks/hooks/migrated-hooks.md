@@ -6,7 +6,7 @@ sidebar_label: Legacy hooks
 
 # Legacy hooks
 
-Below are the hooks that exist in WooCommerce core and that were brough over to WooCommerce Blocks.
+Below are the hooks that exist in WooCommerce core and that were brought over to WooCommerce Blocks.
 
 Please note that the actions and filters here run on the server side. The client-side blocks won't necessarily change based on a callback added to a server side hook. [Please see our documentation relating to APIs for manipulating the blocks on the client-side](../../extensibility-in-blocks/README.md).
 
