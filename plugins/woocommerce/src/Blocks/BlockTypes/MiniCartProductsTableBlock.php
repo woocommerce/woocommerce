@@ -132,7 +132,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									>
 									</div>
 									<div class="wc-block-cart-item__prices">
-										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
 											</span>
@@ -142,7 +142,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											</span>
 											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
 										</span>
-										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 											</span>
 										</span>
@@ -213,7 +213,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									<div 
 										data-wp-bind--hidden="!state.isLineItemTotalDiscountVisible" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
-										hidden
 									>
 										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										<?php echo $save_label; ?>
