@@ -4,15 +4,15 @@
 import { State } from './types';
 import { getEditorSettings, getEditorTheme, getUrls } from './settings';
 
-export function getInitialState(): State {
+export function getInitialState(postId?: string, postType?: string): State {
 	if ( ! window.WooCommerceEmailEditor ) {
 		throw new Error(
 			'WooCommerceEmailEditor global object is not available. This is required for the email editor to work.'
 		);
 	}
 
-	const { current_post_id, current_post_type } =
-		window.WooCommerceEmailEditor;
+	const current_post_id = postId || window.WooCommerceEmailEditor.current_post_id;
+	const current_post_type = postType || window.WooCommerceEmailEditor.current_post_type;
 
 	if ( current_post_id === undefined || current_post_id === null ) {
 		throw new Error( 'current_post_id is required but not provided.' );
