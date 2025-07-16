@@ -705,18 +705,14 @@ class FeaturesController {
 		}
 
 		// Late call: Normalize and register immediately.
-		$plugin_id = $this->plugin_util->get_wp_plugin_id( $plugin_file );
-		if ( ! $plugin_id ) {
-			$this->proxy->call_function( 'wc_get_logger' )->error( "Invalid plugin file: {$plugin_file}" );
-			return false;
-		}
-		return $this->register_compatibility_internal( $feature_id, $plugin_id, $positive_compatibility );
+		return $this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
 	}
 
 	/**
-	 * Registers compatibility information internally for a given feature and plugin.
+	 * Registers compatibility information internally for a given feature and plugin file.
 	 *
-	 * This method handles the actual registration of compatibility data after plugin ID normalization.
+	 * This method normalizes the plugin file path to a plugin ID, handles validation and logging for invalid plugins,
+	 * and registers the compatibility data if valid.
 	 * It updates the internal compatibility arrays, checks for conflicts (e.g., a plugin declaring both
 	 * compatible and incompatible with the same feature), and throws an exception if a conflict is detected.
 	 * Duplicate declarations (same compatibility type) are ignored.
@@ -727,18 +723,25 @@ class FeaturesController {
 	 * @since 10.1.0
 	 *
 	 * @param string $feature_id Unique feature ID.
-	 * @param string $plugin_id Normalized plugin ID (e.g., 'directory/file.php').
+	 * @param string $plugin_file Raw plugin file path (full or 'directory/file.php').
 	 * @param bool   $positive_compatibility True if declaring compatibility, false if declaring incompatibility.
 	 * @return bool True on successful registration, false if the feature does not exist.
 	 * @throws \Exception If the plugin attempts to declare both compatibility and incompatibility for the same feature.
 	 */
-	private function register_compatibility_internal( string $feature_id, string $plugin_id, bool $positive_compatibility ): bool {
+	private function register_compatibility_internal( string $feature_id, string $plugin_file, bool $positive_compatibility ): bool {
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return false;
 		}
 
-		// Register compatibility by plugin.
+		// Normalize and validate plugin file.
+		$plugin_id = $this->plugin_util->get_wp_plugin_id( $plugin_file );
+		if ( ! $plugin_id ) {
+			$logger = $this->proxy->call_function( 'wc_get_logger' );
+			$logger->error( "FeaturesController: Invalid plugin file '{$plugin_file}' for feature '{$feature_id}'." );
+			return false;
+		}
 
+		// Register compatibility by plugin.
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_id );
 
 		$key          = $positive_compatibility ? 'compatible' : 'incompatible';
@@ -789,15 +792,8 @@ class FeaturesController {
 		foreach ( $this->pending_declarations as $declaration ) {
 			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
 
-			$plugin_id = $plugin_util->get_wp_plugin_id( $plugin_file );
-
-			if ( ! $plugin_id ) {
-				$logger->error( "FeaturesController::process_pending_declarations: {$plugin_file} is not a known WordPress plugin." );
-				continue;
-			}
-
 			// Register internally.
-			$this->register_compatibility_internal( $feature_id, $plugin_id, $positive_compatibility );
+			$this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
 		}
 
 		$this->pending_declarations = array();
