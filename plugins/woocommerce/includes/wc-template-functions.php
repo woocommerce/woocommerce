@@ -1442,6 +1442,22 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
+		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
+		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
+
+		// The template is using an anchor instead of a button. For AJAX
+		// add-to-cart, it needs to be a button for accessibility reasons.
+		// See https://github.com/woocommerce/woocommerce/issues/59382.
+		if (
+			! $cart_redirect_after_add &&
+			$ajax_add_to_cart_enabled &&
+			$product->supports( 'ajax_add_to_cart' ) &&
+			$product->is_purchasable() &&
+			$product->is_in_stock()
+		) {
+			$args['attributes']['role'] = 'button';
+		}
+
 		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }

@@ -18,11 +18,11 @@
 	},
 	"require": {
 		"php": ">=7.4",
+		"pelago/emogrifier": "^7.3",
 		"soundasleep/html2text": "^2.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
-		"pelago/emogrifier": "^7.3",
 		"phpunit/phpunit": "^9.6",
 		"woocommerce/woocommerce-sniffs": "1.0.0",
 		"yoast/phpunit-polyfills": "^4.0"

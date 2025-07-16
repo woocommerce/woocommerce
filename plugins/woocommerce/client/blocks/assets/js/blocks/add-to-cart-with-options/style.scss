@@ -68,7 +68,9 @@
 	}
 }
 
-:where(.wc-block-add-to-cart-with-options.is-invalid .wp-block-woocommerce-product-button .add_to_cart_button) {
+// `cursor` needs to override some styles from WordPress core, that's why we
+// need extra specificity.
+:where(.wc-block-add-to-cart-with-options.is-invalid) .wp-block-woocommerce-product-button .add_to_cart_button {
 	cursor: not-allowed;
 	opacity: 0.5;
 }
