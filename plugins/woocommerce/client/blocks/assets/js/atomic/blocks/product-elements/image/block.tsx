@@ -45,11 +45,24 @@ const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	return product.images[ 0 ];
 };
 
+const getFullSizePlaceholderImageSrc = () => {
+	return PLACEHOLDER_IMG_SRC.replace( /-\d+x\d+(?=\.[^.]+$)/, '' );
+};
+
 const ImagePlaceholder = ( props ): JSX.Element => {
+	const { showFullSize, ...restProps } = props;
+
+	// PLACEHOLDER_IMG_SRC is in thumbnail size which may have aspect-ratio
+	// set in Customizer and it may not reflect the aspect-ratio of the full size image.
+	// So we're "creating" a full size placeholder URL.
+	const src = showFullSize
+		? getFullSizePlaceholderImageSrc()
+		: PLACEHOLDER_IMG_SRC;
+
 	return (
 		<img
-			{ ...props }
-			src={ PLACEHOLDER_IMG_SRC }
+			{ ...restProps }
+			src={ src }
 			// Decorative image with no value, so alt should be empty.
 			alt=""
 			width={ undefined }
@@ -112,7 +125,12 @@ const Image = ( {
 					{ ...imageProps }
 				/>
 			) }
-			{ ! image && <ImagePlaceholder style={ imageStyles } /> }
+			{ ! image && (
+				<ImagePlaceholder
+					style={ imageStyles }
+					showFullSize={ showFullSize }
+				/>
+			) }
 		</>
 	);
 };
@@ -158,6 +176,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
+	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
 
 	if ( ! product?.id ) {
 		return (
@@ -174,7 +193,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					) }
 					style={ styleProps.style }
 				>
-					<ImagePlaceholder />
+					<ImagePlaceholder showFullSize={ showFullSize } />
 				</div>
 				{ children }
 			</>
@@ -230,7 +249,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
 						loaded={ ! isLoading }
-						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
+						showFullSize={ showFullSize }
 						width={ width }
 						height={ height }
 						scale={ scale }
