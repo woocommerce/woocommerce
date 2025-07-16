@@ -450,10 +450,6 @@ const { state, actions } = store< Store >(
 						.filter( ( id ) => ! noticeIds.includes( id ) )
 						.forEach( ( id ) => noticeActions.removeNotice( id ) );
 				}
-
-				// Emmits console.error for troubleshooting.
-				// eslint-disable-next-line no-console
-				console.error( errors );
 			},
 		},
 	},
