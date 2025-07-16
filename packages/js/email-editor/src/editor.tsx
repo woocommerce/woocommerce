@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { StrictMode, createRoot } from '@wordpress/element';
+import { StrictMode, createRoot, useEffect, useState } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
@@ -66,4 +66,31 @@ export function initialize( elementId: string ) {
 	initTextHooks();
 	const root = createRoot( container );
 	root.render( <WrappedEditor /> );
+}
+
+export function EmailEditor() {
+	const [isInitialized, setIsInitialized] = useState(false);
+
+	useEffect(() => {
+		initEventCollector();
+		initStoreTracking();
+		initDomTracking();
+		createStore();
+		initializeLayout();
+		initBlocks();
+		initHooks();
+		initTextHooks();
+		setIsInitialized(true);
+	}, []);
+
+	const WrappedEditor = applyFilters(
+		'woocommerce_email_editor_wrap_editor_component',
+		Editor
+	) as typeof Editor;
+
+	if (!isInitialized) {
+		return null;
+	}
+
+	return <WrappedEditor />;
 }
