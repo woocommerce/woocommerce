@@ -25,8 +25,11 @@ const EmbeddedKyc: React.FC< Props > = ( {
 	collectPayoutRequirements = false,
 } ) => {
 	const { data } = useBusinessVerificationContext();
-	const { currentStep, navigateToNextStep, sessionEntryPoint } =
-		useOnboardingContext();
+	const {
+		currentStep,
+		navigateToNextStep,
+		sessionEntryPoint: onboardingSource,
+	} = useOnboardingContext();
 	const [ finalizingSession, setFinalizingSession ] = useState( false );
 	const [ loading, setLoading ] = useState( true );
 	const [ loadError, setLoadError ] = useState< LoadError | null >( null );
@@ -38,7 +41,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			{
 				kyc_step_id: step, // This is the Stripe Embedded KYC step ID.
 				collect_payout_requirements: collectPayoutRequirements,
-				source: sessionEntryPoint,
+				source: onboardingSource,
 			}
 		);
 	};
@@ -48,7 +51,8 @@ const EmbeddedKyc: React.FC< Props > = ( {
 
 		try {
 			const response = await finalizeEmbeddedKycSession(
-				currentStep?.actions?.kyc_session_finish?.href ?? ''
+				currentStep?.actions?.kyc_session_finish?.href ?? '',
+				onboardingSource
 			);
 
 			if ( response.success ) {
@@ -66,7 +70,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 			'woopayments_onboarding_modal_kyc_started_loading',
 			{
 				collect_payout_requirements: collectPayoutRequirements,
-				source: sessionEntryPoint,
+				source: onboardingSource,
 			}
 		);
 
@@ -80,7 +84,7 @@ const EmbeddedKyc: React.FC< Props > = ( {
 				error_type: err.error.type,
 				error_message: err.error.message || 'no_message',
 				collect_payout_requirements: collectPayoutRequirements,
-				source: sessionEntryPoint,
+				source: onboardingSource,
 			}
 		);
 
