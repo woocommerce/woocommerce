@@ -122,15 +122,35 @@ class HposOrderExportHandler {
 	 */
 	protected function export_order_to_xml( $order ) {
 		$order_id       = $order->get_id();
-		$date_created   = $order->get_date_created();
-		$date_modified  = $order->get_date_modified();
+		$date_created   = $order->get_date_created() ? $order->get_date_created()->format( 'Y-m-d H:i:s' ) : '';
+		$date_modified  = $order->get_date_modified() ? $order->get_date_modified()->format( 'Y-m-d H:i:s' ) : '';
 		$post_author_id = $order->get_customer_id();
+
+		$title = sprintf( 'Order – %s', $date_created );
+
 		?>
-
 		<item>
-			
+			<title><?php echo esc_html( $title ); ?></title>
+			<link><?php echo esc_url( get_site_url( null, "/?post_type=shop_order&p={$order_id}" ) ); ?></link>
+			<pubDate><?php echo esc_html( mysql2date( 'D, d M Y H:i:s +0000', $date_created, false ) ); ?></pubDate>
+			<dc:creator><?php echo esc_html( 'admin' ); ?></dc:creator>
+			<guid isPermaLink="false"><?php echo esc_html( get_site_url( null, "?post_type=shop_order&p={$order_id}" ) ); ?></guid>
+			<description></description>
+			<content:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></content:encoded>
+			<excerpt:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></excerpt:encoded>
+			<wp:post_id><?php echo (int) $order_id; ?></wp:post_id>
+			<wp:post_date><?php echo esc_html( $date_created ); ?></wp:post_date>
+			<wp:post_date_gmt><?php echo esc_html( $date_created ); ?></wp:post_date_gmt>
+			<wp:comment_status>closed</wp:comment_status>
+			<wp:ping_status>closed</wp:ping_status>
+			<wp:post_name>order-<?php echo (int) $order_id; ?></wp:post_name>
+			<wp:status>publish</wp:status>
+			<wp:post_parent>0</wp:post_parent>
+			<wp:menu_order>0</wp:menu_order>
+			<wp:post_type>shop_order</wp:post_type>
+			<wp:post_password></wp:post_password>
+			<wp:is_sticky>0</wp:is_sticky>
 		</item>
-
 		<?php
 	}
 }
