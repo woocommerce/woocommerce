@@ -7,7 +7,7 @@ on:
 jobs:
   call-new-release-published-workflow:
     name: 'Call the release new release published workflow'
-    if: ${{ github.event.action == 'published' && !contains(github.event.release.tag_name, 'wc-beta-tester') }}
+    if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
     uses: woocommerce/woocommerce/.github/workflows/release-new-release-published.yml@trunk
     with:
       release_tag_name: ${{ github.event.release.tag_name }}

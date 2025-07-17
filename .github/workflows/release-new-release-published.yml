@@ -19,7 +19,7 @@ jobs:
   # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:
     name: 'Call release commits and contributors workflow'
-    if: ${{ github.event.action == 'prereleased' && !contains(github.event.release.tag_name, 'wc-beta-tester') }}
+    if: ${{ github.event.action == 'prereleased' }}
     uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
     with:
       version: ${{ github.event.release.tag_name }}
@@ -44,7 +44,7 @@ jobs:
   update-global-changelog:
     name: 'Update changelog.txt after any stable release'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    if: ${{ github.event.action == 'publish' && !contains( inputs.release_tag_name, 'wc-beta-tester' ) && ! contains( inputs.release_tag_name, '-rc' ) }}
+    if: ${{ github.event.action == 'publish' && ! contains( inputs.release_tag_name, '-rc' ) }}
     steps:
       - name: 'Fetch release readme.txt'
         env:
@@ -54,6 +54,7 @@ jobs:
         run: |
           gh release download "$RELEASE_TAG" --pattern 'woocommerce.zip'
           unzip -qq woocommerce.zip
+
           if [[ ! -e woocommerce/readme.txt ]]; then
             echo "::error::Could not find readme.txt in asset for release '$RELEASE_TAG'."
             exit 1
