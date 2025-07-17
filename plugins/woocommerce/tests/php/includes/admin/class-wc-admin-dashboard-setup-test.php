@@ -194,4 +194,96 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			$this->assertMatchesRegularExpression( "/Step {$step_number} of {$tasks_count}/", $this->get_widget_output() );
 		}
 	}
+
+	/**
+	 * Tests get_button_link redirects to core profiler when it needs completion.
+	 */
+	public function test_get_button_link_redirects_to_core_profiler_when_needed() {
+		// Set up onboarding profile data to indicate profiler is not completed.
+		update_option( 'woocommerce_onboarding_profile', array( 'completed' => false ) );
+
+		$widget    = $this->get_widget();
+		$task_list = $widget->get_task_list();
+		$tasks     = $task_list->get_viewable_tasks();
+
+		if ( ! empty( $tasks ) ) {
+			$first_task  = $tasks[0];
+			$button_link = $widget->get_button_link( $first_task );
+
+			// Should redirect to setup wizard when profiler is not completed.
+			$this->assertStringContainsString( 'path=/setup-wizard', $button_link );
+		}
+
+		delete_option( 'woocommerce_onboarding_profile' );
+	}
+
+	/**
+	 * Tests get_button_link redirects to core profiler when option does not exist.
+	 */
+	public function test_get_button_link_redirects_to_core_profiler_when_option_does_not_exist() {
+		// Set up onboarding profile data to indicate profiler is not completed.
+		delete_option( 'woocommerce_onboarding_profile' );
+
+		$widget    = $this->get_widget();
+		$task_list = $widget->get_task_list();
+		$tasks     = $task_list->get_viewable_tasks();
+
+		if ( ! empty( $tasks ) ) {
+			$first_task  = $tasks[0];
+			$button_link = $widget->get_button_link( $first_task );
+
+			// Should redirect to setup wizard when profiler is not completed.
+			$this->assertStringContainsString( 'path=/setup-wizard', $button_link );
+		}
+
+		delete_option( 'woocommerce_onboarding_profile' );
+	}
+
+	/**
+	 * Tests get_button_link returns normal task URL when core profiler is completed.
+	 */
+	public function test_get_button_link_returns_normal_url_when_profiler_completed() {
+		// Set up onboarding profile data to indicate profiler is completed.
+		update_option( 'woocommerce_onboarding_profile', array( 'completed' => true ) );
+
+		$widget    = $this->get_widget();
+		$task_list = $widget->get_task_list();
+		$tasks     = $task_list->get_viewable_tasks();
+
+		if ( ! empty( $tasks ) ) {
+			$first_task  = $tasks[0];
+			$button_link = $widget->get_button_link( $first_task );
+
+			// Should NOT redirect to setup wizard when profiler is completed.
+			$this->assertStringNotContainsString( 'path=/setup-wizard', $button_link );
+			// Should contain the task ID or actionUrl.
+			$this->assertMatchesRegularExpression( '/(task=|path=)/', $button_link );
+		}
+
+		delete_option( 'woocommerce_onboarding_profile' );
+	}
+
+	/**
+	 * Tests get_button_link returns normal task URL when core profiler is skipped.
+	 */
+	public function test_get_button_link_returns_normal_url_when_profiler_skipped() {
+		// Set up onboarding profile data to indicate profiler is skipped.
+		update_option( 'woocommerce_onboarding_profile', array( 'skipped' => true ) );
+
+		$widget    = $this->get_widget();
+		$task_list = $widget->get_task_list();
+		$tasks     = $task_list->get_viewable_tasks();
+
+		if ( ! empty( $tasks ) ) {
+			$first_task  = $tasks[0];
+			$button_link = $widget->get_button_link( $first_task );
+
+			// Should NOT redirect to setup wizard when profiler is skipped.
+			$this->assertStringNotContainsString( 'path=/setup-wizard', $button_link );
+			// Should contain the task ID or actionUrl.
+			$this->assertMatchesRegularExpression( '/(task=|path=)/', $button_link );
+		}
+
+		delete_option( 'woocommerce_onboarding_profile' );
+	}
 }
