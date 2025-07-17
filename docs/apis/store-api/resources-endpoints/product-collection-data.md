@@ -7,7 +7,7 @@ GET /products/collection-data
 GET /products/collection-data?calculate_price_range=true
 GET /products/collection-data?calculate_attribute_counts[0][query_type]=or&calculate_attribute_counts[0][taxonomy]=pa_color
 GET /products/collection-data?calculate_rating_counts=true
-GET /products/collection-data?calculate_taxonomy_counts[0]=product_cat
+GET /products/collection-data?calculate_taxonomy_counts=product_cat
 ```
 
 | Attribute                       | Type   | Required | Description                                                                                                                                                                                                |
@@ -22,7 +22,7 @@ GET /products/collection-data?calculate_taxonomy_counts[0]=product_cat
 **In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](/docs/apis/store-api/resources-endpoints/products#list-products) for the full list.
 
 ```sh
-curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true&calculate_taxonomy_counts[0]=product_cat"
+curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true&calculate_taxonomy_counts=product_cat,product_tag"
 ```
 
 **Example response:**
