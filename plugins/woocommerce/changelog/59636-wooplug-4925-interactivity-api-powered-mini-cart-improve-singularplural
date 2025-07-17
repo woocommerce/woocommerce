@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Avoid the use of `_n()` in the frontend in the MiniCart until `@wordpress/i18n` is available as a module. 
+Use only the plural form in the MiniCart Title Items Counter block.
