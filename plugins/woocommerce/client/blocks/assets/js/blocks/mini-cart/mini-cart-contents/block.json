@@ -19,7 +19,8 @@
 		"__experimentalBorder": {
 			"color": true,
 			"width": true
-		}
+		},
+		"interactivity": true
 	},
 	"attributes": {
 		"isPreview": {
