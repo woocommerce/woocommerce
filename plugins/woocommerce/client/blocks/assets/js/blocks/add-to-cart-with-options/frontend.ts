@@ -132,7 +132,9 @@ const addToCartWithOptionsStore = store(
 				if ( ! context ) {
 					return true;
 				}
+
 				const { productType, quantity } = context;
+
 				if ( productType === 'variable' ) {
 					// `isVariableProductFormValid` is defined in
 					// `variation-selector/frontend.ts`, only for variable
