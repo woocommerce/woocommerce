@@ -165,7 +165,7 @@ class MiniCart extends \WP_UnitTestCase {
 					'tag_name'   => 'span',
 					'class_name' => 'wc-block-mini-cart__badge',
 				)
-			),
+			) && ! $p->get_attribute( 'hidden' ),
 			'The span with class wc-block-mini-cart__badge should be rendered when "always" is selected.'
 		);
 
@@ -215,7 +215,7 @@ class MiniCart extends \WP_UnitTestCase {
 					'tag_name'   => 'span',
 					'class_name' => 'wc-block-mini-cart__badge',
 				)
-			),
+			) && ! $p->get_attribute( 'hidden' ),
 			'The span with class wc-block-mini-cart__badge should be rendered when "always" is selected.'
 		);
 
