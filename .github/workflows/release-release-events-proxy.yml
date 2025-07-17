@@ -1,13 +1,16 @@
+# This is a proxy workflow to dispatch workflows from trunk branch for release events (published and pre-release).
 name: 'Release: Release events proxy workflow'
 on:
   release:
-    types: [prereleased]
+    types: [prereleased, published]
 
 jobs:
-  call-release-workflow:
-    name: 'Call release commits and contributors workflow'
-    if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
-    uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
+  call-new-release-published-workflow:
+    name: 'Call the release new release published workflow'
+    if: ${{ github.event.action == 'published' && !contains(github.event.release.tag_name, 'wc-beta-tester') }}
+    uses: woocommerce/woocommerce/.github/workflows/release-new-release-published.yml@trunk
     with:
-      version: ${{ github.event.release.tag_name }}
+      release_tag_name: ${{ github.event.release.tag_name }}
+      release_name: ${{ github.event.release.name }}
+      release_html_url: ${{ github.event.release.html_url }}
     secrets: inherit
