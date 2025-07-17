@@ -101,7 +101,7 @@ class ProductStockIndicator extends AbstractBlock {
 
 		$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
+		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product_to_render->is_type( 'variable' );
 
 		if ( empty( $availability['availability'] ) && ! $is_interactive ) {
 			return '';
@@ -127,9 +127,12 @@ class ProductStockIndicator extends AbstractBlock {
 		$watch_attribute    = '';
 
 		if ( $is_interactive ) {
-			$variations_data           = $product->get_available_variations();
+			$variations_data           = $product_to_render->get_available_variations();
 			$formatted_variations_data = array();
 			foreach ( $variations_data as $variation ) {
+				if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['availability_html'] ) ) {
+					continue;
+				}
 				$formatted_variations_data[ $variation['variation_id'] ] = array(
 					'availability_html' => $variation['availability_html'],
 				);
@@ -139,7 +142,7 @@ class ProductStockIndicator extends AbstractBlock {
 				'woocommerce',
 				array(
 					'products' => array(
-						$product->get_id() => array(
+						$product_to_render->get_id() => array(
 							'availability_html' => '',
 							'variations'        => $formatted_variations_data,
 						),
@@ -152,7 +155,7 @@ class ProductStockIndicator extends AbstractBlock {
 			$context                                   = array(
 				'productElementKey' => 'availability_html',
 			);
-			$context_attribute                         = 'data-wp-context=' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+			$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 			$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
 		}
 
@@ -163,7 +166,6 @@ class ProductStockIndicator extends AbstractBlock {
 		$output .= isset( $classes_and_styles['styles'] ) ? ' style="' . esc_attr( $classes_and_styles['styles'] ) . '"' : '';
 		if ( $is_interactive ) {
 			$output .= ' ' . get_block_wrapper_attributes( $wrapper_attributes );
-			$output .= ' ' . $context_attribute;
 			$output .= ' ' . $watch_attribute;
 		}
 		$output .= '>';

@@ -86,6 +86,9 @@ class ProductPrice extends AbstractBlock {
 				$variations_data           = $product->get_available_variations();
 				$formatted_variations_data = array();
 				foreach ( $variations_data as $variation ) {
+					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) ) {
+							continue;
+					}
 					$formatted_variations_data[ $variation['variation_id'] ] = array(
 						'price_html' => $variation['price_html'],
 					);
