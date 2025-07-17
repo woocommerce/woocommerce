@@ -191,17 +191,16 @@ store< MiniCart >(
 
 			disableScrollingOnBody() {
 				const { isOpen } = getContext< MiniCartContext >();
-				const { body } = document;
-				const scrollBarWidth =
-					window.innerWidth - document.documentElement.clientWidth;
-
 				if ( isOpen ) {
-					Object.assign( body.style, {
+					Object.assign( document.body.style, {
 						overflow: 'hidden',
-						paddingRight: scrollBarWidth + 'px',
+						paddingRight:
+							window.innerWidth -
+							document.documentElement.clientWidth +
+							'px',
 					} );
 				} else {
-					Object.assign( body.style, {
+					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
