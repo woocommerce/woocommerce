@@ -50,9 +50,9 @@ class Theme_Controller {
 	 * Theme_Controller constructor.
 	 */
 	public function __construct() {
-		$this->core_theme = WP_Theme_JSON_Resolver::get_core_data();
-		$this->base_theme = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
-		$this->user_theme = new User_Theme();
+		$this->core_theme                 = WP_Theme_JSON_Resolver::get_core_data();
+		$this->base_theme                 = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
+		$this->user_theme                 = new User_Theme();
 		$this->site_style_sync_controller = new Site_Style_Sync_Controller();
 	}
 
@@ -80,7 +80,9 @@ class Theme_Controller {
 
 		// Merge synced styles from current active theme.
 		if ( $this->site_style_sync_controller->is_sync_enabled() ) {
-			$theme->merge( $this->site_style_sync_controller->get_theme() );
+			/** @var WP_Theme_JSON $site_theme */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$site_theme = $this->site_style_sync_controller->get_theme();
+			$theme->merge( $site_theme );
 		}
 
 		return apply_filters( 'woocommerce_email_editor_theme_json', $theme );
