@@ -49,7 +49,7 @@ final class ProductFilterRating extends AbstractBlock {
 			return $items;
 		}
 
-		$valid_ratings = array( '1', '2', '3', '4', '5' );
+		$valid_ratings  = array( '1', '2', '3', '4', '5' );
 		$active_ratings = explode( ',', $params[ self::RATING_FILTER_QUERY_VAR ] );
 		$active_ratings = array_filter(
 			$active_ratings,
