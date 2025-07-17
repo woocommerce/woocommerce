@@ -247,9 +247,9 @@ export const SettingsPaymentsBacs = () => {
 					</Settings.Section>
 
 					<Settings.Section
-						title={ __( 'Accounts details', 'woocommerce' ) }
+						title={ __( 'Account details', 'woocommerce' ) }
 						description={ __(
-							'Configure your bank accounts details.',
+							'Configure your bank account details.',
 							'woocommerce'
 						) }
 					>
