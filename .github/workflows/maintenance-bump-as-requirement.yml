@@ -1,0 +1,85 @@
+name: 'Maintenance: Bump Action Scheduler version'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Action Scheduler version (defaults to latest in repository)'
+        required: false
+        default: ''
+
+jobs:
+  bump-version:
+    name: Bump Action Scheduler version
+    runs-on: ubuntu-latest
+    steps:
+    - name: Fetch Action Scheduler version
+      id: get-as-version
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        if [ -z "$INPUT_VERSION" ]; then
+          VERSION=$(gh release view --repo "woocommerce/action-scheduler" --json tagName -q .tagName)
+        else
+          if gh release view "$INPUT_VERSION" --repo "woocommerce/action-scheduler" > /dev/null 2>&1; then
+            VERSION="$INPUT_VERSION"
+          else
+            echo "::error::Action Scheduler version '$INPUT_VERSION' is not valid."
+            exit 1
+          fi
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    - name: Check out trunk
+      uses: actions/checkout@v4
+      with:
+        ref: trunk
+    - name: Set up dev environment
+      run: |
+        cd plugins/woocommerce
+
+        # Install dev packages. Required for changelogger use.
+        composer install --quiet
+
+        # Configure Git.
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    - name: Bump Action Scheduler requirement
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd plugins/woocommerce
+
+        # Update A-S version.
+        jq --tab -r ".require[\"woocommerce/action-scheduler\"] |= \"${{ steps.get-as-version.outputs.version }}\"" composer.json > composer.json.new
+        mv composer.json.new composer.json
+
+        if git diff --quiet; then
+          echo "::error::No changes to commit."
+          exit 1
+        fi
+
+        composer update woocommerce/action-scheduler --no-scripts
+
+        branch_name="update/action-scheduler-${{ steps.get-as-version.outputs.version }}"
+        git checkout -b ${branch_name}
+
+        composer exec -- changelogger add \
+          --significance minor \
+          --type update \
+          --entry "Update the Action Scheduler package to version ${{ steps.get-as-version.outputs.version }}." \
+          --no-interaction
+
+        # Push changes.
+        git add composer.lock composer.json changelog/
+        git commit \
+          --message "Update Action Scheduler to '${{ steps.get-as-version.outputs.version }}'."
+        git push origin ${branch_name}
+
+        # Open PR.
+        gh pr create \
+          --title 'Bump Action Scheduler version to ${{ steps.get-as-version.outputs.version }}' \
+          --body 'This PR updates the Action Scheduler package requirement for WooCommerce core.' \
+          --base trunk \
+          --head ${branch_name} \
+          --reviewer "${{ github.actor }}"
