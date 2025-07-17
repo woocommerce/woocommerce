@@ -79,7 +79,10 @@ export function Preview( {
 		[]
 	);
 	const paletteColors = useMemo(
-		() => ( colors?.theme || EMPTY_ARRAY ).concat( colors.default ),
+		() =>
+			( colors?.theme || EMPTY_ARRAY ).concat(
+				colors?.default || EMPTY_ARRAY
+			),
 		[ colors ]
 	);
 	const { styles } = useEmailStyles();
