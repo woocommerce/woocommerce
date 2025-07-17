@@ -507,12 +507,27 @@ class MiniCart extends AbstractBlock {
 				}
 			}
 
+			// The following translation is a temporary workaround. It will be
+			// reverted to the previous form (`%1$d item in cart`) as soon as the
+			// `@wordpress/i18n` package is available as a script module.
+			$button_aria_label_template = isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+				/* translators: %d is the number of products in the cart. */
+				? __( 'Number of items in the cart: %d', 'woocommerce' )
+				/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+				: __( 'Number of items in the cart: %1$d. Total price of %2$s', 'woocommerce' );
+
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
 					'totalItemsInCart'  => $cart_item_count,
 					'badgeIsVisible'    => $badge_is_visible,
 					'formattedSubtotal' => $formatted_subtotal,
+					'buttonAriaLabel'   => function () {
+						$state = wp_interactivity_state();
+						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
+							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
+					},
 				)
 			);
 
@@ -525,9 +540,10 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'   => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour' => $on_cart_click_behaviour,
-					'checkoutUrl'          => wc_get_checkout_url(),
+					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'    => $on_cart_click_behaviour,
+					'checkoutUrl'             => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate' => $button_aria_label_template,
 				)
 			);
 
@@ -551,9 +567,9 @@ class MiniCart extends AbstractBlock {
 			>
 				<button 
 					data-wp-on--click="callbacks.openDrawer"
+					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
 					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
 				>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
