@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartTitleItemsCounterBlock class.
  */
@@ -15,7 +13,7 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 	protected $block_name = 'mini-cart-title-items-counter-block';
 
 	/**
-	 * Render the block.
+	 * Render the markup for the Mini-Cart Title Items Counter block.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content    Block content.
@@ -23,18 +21,6 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_title_label_block();
-		}
-		return $content;
-	}
-
-	/**
-	 * Render the interactivity API powered experimental title block.
-	 *
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_title_label_block() {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
 

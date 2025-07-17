@@ -25,6 +25,8 @@ class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
 	use BlocksSharedState;
 
+	// TODO: Check if we can use the `BlockJsonAssetsTrait`.
+
 	/**
 	 * Block name.
 	 *
@@ -152,6 +154,7 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
+		// The frontend script module is enqueued in the render method.
 		return null;
 	}
 
@@ -327,62 +330,52 @@ class MiniCart extends AbstractBlock {
 
 			ob_start();
 		?>
-		
-			<div
-				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupOpenDrawerListener"
-				data-wp-watch="callbacks.disableScrollingOnBody"
-				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php echo wp_interactivity_data_wp_context( $context ); ?>
-				class="<?php echo esc_attr( $wrapper_classes ); ?>"
-				style="<?php echo esc_attr( $wrapper_styles ); ?>"
+		<div
+			data-wp-interactive="woocommerce/mini-cart"
+			data-wp-init="callbacks.setupOpenDrawerListener"
+			data-wp-watch="callbacks.disableScrollingOnBody"
+			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			class="<?php echo esc_attr( $wrapper_classes ); ?>"
+			style="<?php echo esc_attr( $wrapper_styles ); ?>"
+		>
+			<button 
+				data-wp-on--click="callbacks.openDrawer"
+				data-wp-bind--aria-label="state.buttonAriaLabel"
+				class="wc-block-mini-cart__button"
+				<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
 			>
-				<button 
-					data-wp-on--click="callbacks.openDrawer"
-					data-wp-bind--aria-label="state.buttonAriaLabel"
-					class="wc-block-mini-cart__button"
-					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				>
-					<span class="wc-block-mini-cart__quantity-badge">
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $icon;
-						?>
-						<?php if ( 'never' !== $product_count_visibility ) : ?>
-							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
-							</span>
-						<?php endif; ?>
-					</span>
-					<?php if ( $cart_always_shows_price ) : ?>
-						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+				<span class="wc-block-mini-cart__quantity-badge">
+					<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php if ( 'never' !== $product_count_visibility ) : ?>
+						<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
 						</span>
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
-						?>
 					<?php endif; ?>
-				</button>
-				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
-					<div 
-						data-wp-bind--role="state.drawerRole"
-						data-wp-bind--aria-modal="context.isOpen"
-						data-wp-bind--aria-hidden="!context.isOpen"
-						data-wp-bind--tabindex="state.drawerTabIndex"
-						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
-					>
-						<div class="wc-block-components-drawer__content">
-							<div class="wc-block-mini-cart__template-part">
-								<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-									echo $template_part_contents;
-								?>
-							</div>
+				</span>
+				<?php if ( $cart_always_shows_price ) : ?>
+					<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
+					</span>
+					<?php echo $this->get_include_tax_label_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endif; ?>
+			</button>
+			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
+				<div 
+					data-wp-bind--role="state.drawerRole"
+					data-wp-bind--aria-modal="context.isOpen"
+					data-wp-bind--aria-hidden="!context.isOpen"
+					data-wp-bind--tabindex="state.drawerTabIndex"
+					class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
+				>
+					<div class="wc-block-components-drawer__content">
+						<div class="wc-block-mini-cart__template-part">
+							<?php echo $template_part_contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</div>
 					</div>
 				</div>
 			</div>
-			<?php
-			return ob_get_clean();
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 

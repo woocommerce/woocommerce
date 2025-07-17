@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartProductsTableBlock class.
  */
@@ -24,22 +22,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-		}
-
-		return $content;
-	}
-
-	/**
-	 * Render experimental iAPI block markup.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
 		$remove_item_label  = __( 'Remove item', 'woocommerce' );
 		$head_product_label = __( 'Product', 'woocommerce' );

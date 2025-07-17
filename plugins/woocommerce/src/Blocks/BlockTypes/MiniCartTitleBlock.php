@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartTitleBlock class.
  */
@@ -15,7 +13,7 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 	protected $block_name = 'mini-cart-title-block';
 
 	/**
-	 * Render the block.
+	 * Render the markup for the Mini-Cart Title block.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content    Block content.
@@ -23,21 +21,6 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_title_block( $attributes, $content, $block );
-		}
-		return $content;
-	}
-
-	/**
-	 * Render the interactivity API powered experimental title block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_title_block( $attributes, $content, $block ) {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => 'wc-block-mini-cart__title',

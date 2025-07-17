@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartCartButtonBlock class.
  */
@@ -15,14 +13,14 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	protected $block_name = 'mini-cart-cart-button-block';
 
 	/**
-	 * Render experimental iAPI block markup.
+	 * Render the markup for the Mini-Cart Cart Button block.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content    Block content.
 	 * @param WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, $block ) {
 		$default_view_cart_text = __( 'View my cart', 'woocommerce' );
 		$view_cart_text         = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_view_cart_text;
 		$cart_page_id           = wc_get_page_id( 'cart' );
@@ -55,21 +53,5 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 		</a>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Render the markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-		}
-
-		return $content;
 	}
 }

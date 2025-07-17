@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -25,11 +24,11 @@ class MiniCartContents extends AbstractBlock {
 	 * @return array|string;
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
+		$script = array(
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
+			'dependencies' => array( 'wc-blocks' ),
+		);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -41,8 +40,7 @@ class MiniCartContents extends AbstractBlock {
 	 * @return null
 	 */
 	protected function get_block_type_script( $key = null ) {
-		// The frontend script is a dependency of the Mini-Cart block so it's
-		// already lazy-loaded.
+		// The frontend script module is already loaded by the Mini-Cart block.
 		return null;
 	}
 
@@ -52,41 +50,7 @@ class MiniCartContents extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
-	}
-
-	/**
-	 * Render experimental iAPI powered Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'data-wp-interactive' => 'woocommerce/mini-cart-contents',
-			)
-		);
-
-		ob_start();
-		?>
-		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-components-drawer__close-wrapper">
-				<button data-wp-on--click="woocommerce/mini-cart::callbacks.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="Close" type="button">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-						<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
-					</svg>
-				</button>
-			</div>
-			<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo $content;
-			?>
-		</div>
-		<?php
-		return ob_get_clean();
+		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
 	}
 
 	/**
@@ -104,11 +68,25 @@ class MiniCartContents extends AbstractBlock {
 			return '';
 		}
 
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_mini_cart_contents( $attributes, $content, $block );
-		}
-
-		return $content;
+		ob_start();
+		?>
+		<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<div class="wc-block-components-drawer__close-wrapper">
+				<button
+					data-wp-on--click="woocommerce/mini-cart::callbacks.closeDrawer" 
+					class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained"
+					aria-label="<?php echo esc_attr( __( 'Close', 'woocommerce' ) ); ?>"
+					type="button"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+						<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+					</svg>
+				</button>
+			</div>
+			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -187,7 +165,7 @@ class MiniCartContents extends AbstractBlock {
 	 * @return array;
 	 */
 	public static function get_mini_cart_block_types() {
-		$block_types = [];
+		$block_types = array();
 
 		$block_types[] = 'MiniCartContents';
 		$block_types[] = 'EmptyMiniCartContentsBlock';
