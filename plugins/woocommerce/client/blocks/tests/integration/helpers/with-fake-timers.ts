@@ -8,8 +8,6 @@
 export async function withFakeTimers< T >( fn: () => T ) {
 	const usingFakeTimers = jest.isMockFunction( setTimeout );
 
-	jest.setTimeout( 20000 );
-
 	// Portions of the React Native Animation API rely upon these APIs. However,
 	// Jest's 'legacy' fake timers mutate these globals, which breaks the Animated
 	// API. We preserve the original implementations to restore them later.
