@@ -183,6 +183,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isString( style.dimensions.aspectRatio )
 			? style.dimensions.aspectRatio
 			: aspectRatio;
+	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
+		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
+	}`;
 
 	if ( ! product?.id ) {
 		return (
@@ -191,6 +194,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					className={ clsx(
 						className,
 						'wc-block-components-product-image',
+						aspectRatioClass,
 						{
 							[ `${ parentClassName }__product-image` ]:
 								parentClassName,
@@ -200,7 +204,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					style={ styleProps.style }
 				>
 					<ImagePlaceholder
-						style={ { aspectRatio: finalAspectRatio } }
+						style={ {
+							aspectRatio: finalAspectRatio,
+							objectFit: scale,
+						} }
 						showFullSize={ showFullSize }
 					/>
 				</div>
@@ -238,6 +245,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					'wc-block-components-product-image',
+					aspectRatioClass,
 					{
 						[ `${ parentClassName }__product-image` ]:
 							parentClassName,
