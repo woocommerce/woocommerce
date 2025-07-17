@@ -321,7 +321,7 @@ describe( 'CheckoutExpressPayment', () => {
 
 			expect( screen.getByRole( 'heading' ) ).toBeInTheDocument();
 			expect( titleSkeleton ).toHaveAttribute( 'data-width', '127px' );
-			expect( titleSkeleton ).toHaveAttribute( 'data-height', '18px' );
+			expect( titleSkeleton ).toHaveAttribute( 'data-height', '20px' );
 		} );
 
 		it( 'should render skeleton buttons when calculating', () => {
