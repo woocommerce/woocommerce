@@ -5,6 +5,8 @@ import { productsStore } from '@woocommerce/data';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { Disabled } from '@wordpress/components';
+
 import {
 	store as blockEditorStore,
 	useBlockProps,
@@ -18,6 +20,8 @@ import {
  */
 import { ProductDetailsEditProps } from './types';
 import { getTemplate } from './utils';
+import { LegacyProductDetailsPreview } from './legacy-preview';
+import './editor.scss';
 
 /**
  * Check if block is inside a Query Loop with non-product post type
@@ -60,8 +64,22 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 		return getTemplate( product );
 	}, [ product ] );
 
+	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
+		( select ) => {
+			const blocks = select( blockEditorStore ).getBlocks( clientId );
+			return {
+				hasInnerBlocks: blocks.length > 0,
+				wasBlockJustInserted:
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore method exists but not typed
+					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+			};
+		},
+		[ clientId ]
+	);
+
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		template,
+		template: wasBlockJustInserted ? template : undefined,
 	} );
 
 	const isInvalidQueryLoopContext = useIsInvalidQueryLoopContext(
@@ -80,7 +98,18 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 			</div>
 		);
 	}
-	return <div { ...innerBlocksProps } />;
+
+	if ( hasInnerBlocks || wasBlockJustInserted ) {
+		return <div { ...innerBlocksProps } />;
+	}
+
+	return (
+		<div { ...blockProps }>
+			<Disabled>
+				<LegacyProductDetailsPreview hideTabTitle={ true } />
+			</Disabled>
+		</div>
+	);
 };
 
 export default Edit;
