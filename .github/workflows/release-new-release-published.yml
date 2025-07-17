@@ -19,7 +19,7 @@ jobs:
 
   # Jobs to run after a final release is published (triggered by the "published" GH event).
   notify-release-published:
-    name: 'Notify in Slack when a new release is published'
+    name: 'Notify in Slack when a new (pre)release is published'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     if: ${{ github.event.action == 'published' }}
     steps:
