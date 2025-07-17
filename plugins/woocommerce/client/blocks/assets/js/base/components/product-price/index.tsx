@@ -120,9 +120,9 @@ interface SalePriceProps {
 	 */
 	price: number | string | undefined;
 	/**
-	 * Custom style to be applied to the sale price container for LTR currency symbols
+	 * Custom style to be applied to both regular and sale price containers for RTL currency symbol handling
 	 *
-	 * i.e. `<del>` element
+	 * Applied to both `<del>` and `<ins>` elements
 	 */
 	rtlPrefixStyles?: React.CSSProperties | undefined;
 }
