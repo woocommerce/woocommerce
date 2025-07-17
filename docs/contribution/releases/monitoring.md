@@ -22,7 +22,7 @@ Watch the [Newest Created Issues](https://github.com/woocommerce/woocommerce/iss
 If monitoring uncovers a bug that **cannot wait** for the next scheduled release, initiate a **Point Release Request (PRR)**.  
 The PRR workflow lets the release lead fast-track a fix into the current maintenance branch and, when necessary, automatically cherry-pick it to trunk and the next frozen branch.
 
-[Read the full Point Release Request guide](/docs/contribution/releases/point-release-request).
+[Read the full Point Release guide](/docs/contribution/releases/point-releases).
 
 Before opening a PRR, confirm that the issue:
 
