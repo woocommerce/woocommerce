@@ -140,7 +140,7 @@ const getNewQuantity = ( productId: number, quantity: number ) => {
 };
 
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change' );
+	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );
 };
 

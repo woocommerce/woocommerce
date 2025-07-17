@@ -6,6 +6,8 @@ import {
 	getContext,
 	getConfig,
 	getElement,
+	useLayoutEffect,
+	useRef,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
@@ -274,10 +276,36 @@ const { state: cartItemState } = store(
 					.convertPrecision( cartItemState.currency.minorUnit )
 					.getAmount();
 
-				return formatPriceWithCurrency(
+				const price = formatPriceWithCurrency(
 					discountPrice,
 					cartItemState.currency
 				);
+
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'saleBadgePriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+
+					return priceText.replace( '<price/>', price );
+				}
+
+				return price;
 			},
 
 			get lineItemDiscount(): string {
@@ -301,10 +329,36 @@ const { state: cartItemState } = store(
 					.convertPrecision( cartItemState.currency.minorUnit )
 					.getAmount();
 
-				return formatPriceWithCurrency(
+				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
 					cartItemState.currency
 				);
+
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'saleBadgePriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+
+					return priceText.replace( '<price/>', price );
+				}
+
+				return price;
 			},
 
 			get cartItemHasDiscount(): boolean {
@@ -334,34 +388,54 @@ const { state: cartItemState } = store(
 			get reduceQuantityLabel(): string {
 				return reduceQuantityLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get increaseQuantityLabel(): string {
 				return increaseQuantityLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get quantityDescriptionLabel(): string {
 				return quantityDescriptionLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
 			get removeFromCartLabel(): string {
 				return removeFromCartLabel.replace(
 					'%s',
-					cartItemState.cartItem.name
+					cartItemState.cartItemName
 				);
 			},
 
-			get cartItemName() {
+			get cartItemName(): string {
 				const txt = document.createElement( 'textarea' );
-				txt.innerHTML = cartItemState.cartItem.name;
+				let { name } = cartItemState.cartItem;
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					name =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'itemName',
+								defaultValue: name,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+				}
+				txt.innerHTML = name;
 				return txt.value;
 			},
 
@@ -369,27 +443,63 @@ const { state: cartItemState } = store(
 				return cartItemState.cartItem.images[ 0 ]?.thumbnail || '';
 			},
 
-			itemShortDescription() {
-				const el = getElement();
-
-				if ( el.ref ) {
-					const innerEl = el.ref.querySelector(
-						'.wc-block-components-product-metadata__description'
-					);
-
-					// A workaround for the lack of dangerous set HTML directive in interactivity API
-					if ( innerEl ) {
-						innerEl.innerHTML =
-							cartItemState.cartItem.short_description;
-					}
-				}
-			},
-
 			get priceWithoutDiscount(): string {
 				return formatPriceWithCurrency(
 					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
 					cartItemState.currency
 				);
+			},
+
+			get beforeItemPrice(): string | null {
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'subtotalPriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+					return priceText.split( '<price/>' )[ 0 ];
+				}
+				return null;
+			},
+
+			get afterItemPrice(): string | null {
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'subtotalPriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+					return priceText.split( '<price/>' )[ 1 ];
+				}
+				return null;
 			},
 
 			get itemPrice(): string {
@@ -408,7 +518,36 @@ const { state: cartItemState } = store(
 					  parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
-				return formatPriceWithCurrency( totalLinePrice, itemCurrency );
+				const price = formatPriceWithCurrency(
+					totalLinePrice,
+					itemCurrency
+				);
+
+				// TODO: Add deprecation notice urging to replace with a
+				// `data-wp-text` directive or an alternative solution.
+				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				) {
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'cartItemPrice',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
+
+					return priceText.replace( '<price/>', price );
+				}
+
+				return price;
 			},
 
 			get isLineItemTotalDiscountVisible(): boolean {
@@ -439,6 +578,23 @@ const { state: cartItemState } = store(
 					'%d',
 					cartItemState.cartItem.low_stock_remaining
 				);
+			},
+
+			get itemShowRemoveItemLink(): boolean {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				return ( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
+							filterName: 'showRemoveItemLink',
+							defaultValue: true,
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+					  } )
+					: true;
 			},
 		},
 
@@ -494,6 +650,65 @@ const { state: cartItemState } = store(
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+				} );
+			},
+		},
+
+		callbacks: {
+			itemShortDescription() {
+				const el = getElement();
+
+				if ( el.ref ) {
+					const innerEl = el.ref.querySelector(
+						'.wc-block-components-product-metadata__description'
+					);
+
+					// A workaround for the lack of dangerous set HTML directive in interactivity API
+					if ( innerEl ) {
+						innerEl.innerHTML =
+							cartItemState.cartItem.short_description;
+					}
+				}
+			},
+			filterCartItemClass() {
+				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const applyCheckoutFilter = ( window.wc as any )?.blocksCheckout
+					?.applyCheckoutFilter;
+				// eslint-disable-next-line react-hooks/rules-of-hooks
+				const previouslyAppliedClasses = useRef< string[] >( [] );
+
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore -- It must run on every render.
+				// eslint-disable-next-line react-hooks/rules-of-hooks
+				useLayoutEffect( () => {
+					if ( applyCheckoutFilter ) {
+						const { ref } = getElement();
+
+						// Remove previously applied classes.
+						ref!.classList.remove(
+							...previouslyAppliedClasses.current
+						);
+
+						const newClassesString = applyCheckoutFilter( {
+							filterName: 'cartItemClass',
+							defaultValue: '',
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						} );
+
+						// Apply new classes.
+						previouslyAppliedClasses.current = newClassesString
+							.split( ' ' )
+							.filter( Boolean );
+						ref!.classList.add(
+							...previouslyAppliedClasses.current
+						);
+					}
 				} );
 			},
 		},
