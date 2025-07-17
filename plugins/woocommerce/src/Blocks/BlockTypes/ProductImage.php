@@ -156,6 +156,11 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['style']['dimensions']['aspectRatio'] );
 		}
 
+		if ( empty( $attributes['aspectRatio'] ) && empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			// This is the default aspect ratio for the image.
+			$image_style .= sprintf( 'aspect-ratio: auto;');
+		}
+
 		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
 			$image_style .= sprintf( 'min-height:%s;', $attributes['style']['dimensions']['minHeight'] );
 		}
