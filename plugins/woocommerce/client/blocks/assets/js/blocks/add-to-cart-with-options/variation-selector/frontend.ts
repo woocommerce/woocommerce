@@ -55,6 +55,15 @@ const isAttributeValueValid = ( {
 	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 } ) => {
+	if (
+		! attributeName ||
+		! attributeValue ||
+		! Array.isArray( selectedAttributes ) ||
+		! Array.isArray( availableVariations )
+	) {
+		return false;
+	}
+
 	// If the current attribute is selected, we require one less attribute to
 	// match, this allows shoppers to switch between attributes. For example,
 	// if "Blue" and "Small" are selected, we want "Blue" and "Medium" to be
@@ -218,14 +227,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return selectedValue === option.value;
 			},
 			get isOptionDisabled() {
-				const { name, option } = getContext< Context >();
+				const {
+					name,
+					option,
+					selectedAttributes,
+					availableVariations,
+				} = getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
 				}
-
-				const { selectedAttributes, availableVariations } =
-					getContext< Context >();
 
 				return ! isAttributeValueValid( {
 					attributeName: name,
