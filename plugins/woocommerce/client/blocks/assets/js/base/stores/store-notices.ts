@@ -7,7 +7,7 @@ import {
 	store,
 } from '@wordpress/interactivity';
 
-type Notice = {
+export type Notice = {
 	notice: string;
 	type: 'error' | 'success' | 'notice';
 	dismissible: boolean;

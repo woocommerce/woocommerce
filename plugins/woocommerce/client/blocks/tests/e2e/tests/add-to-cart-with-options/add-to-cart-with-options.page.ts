@@ -26,20 +26,17 @@ class AddToCartWithOptionsPage {
 	}
 
 	async switchProductType( productType: string ) {
+		await this.page.getByRole( 'tab', { name: 'Template' } ).click();
+		await this.page
+			.getByRole( 'button', { name: 'Product Type', exact: true } )
+			.click();
+		await this.page
+			.getByLabel( 'Type switcher' )
+			.selectOption( { label: productType } );
+
 		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
 			this.BLOCK_SLUG
 		);
-		await this.editor.selectBlocks( addToCartWithOptionsBlock );
-
-		const productTypeSwitcher = this.page.getByRole( 'button', {
-			name: 'Switch product type',
-		} );
-		await productTypeSwitcher.click();
-
-		const customProductTypeButton = this.page.getByRole( 'menuitem', {
-			name: productType,
-		} );
-		await customProductTypeButton.click();
 
 		await addToCartWithOptionsBlock
 			.locator( '.components-spinner' )

@@ -67,6 +67,7 @@ type MiniCart = {
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
 		setupOpenDrawerListener: () => void;
+		disableScrollingOnBody: () => void;
 	};
 };
 
@@ -204,6 +205,24 @@ store< MiniCart >(
 				if ( e.target === e.currentTarget ) {
 					const ctx = getContext< MiniCartContext >();
 					ctx.isOpen = false;
+				}
+			},
+
+			disableScrollingOnBody() {
+				const { isOpen } = getContext< MiniCartContext >();
+				if ( isOpen ) {
+					Object.assign( document.body.style, {
+						overflow: 'hidden',
+						paddingRight:
+							window.innerWidth -
+							document.documentElement.clientWidth +
+							'px',
+					} );
+				} else {
+					Object.assign( document.body.style, {
+						overflow: '',
+						paddingRight: 0,
+					} );
 				}
 			},
 		},

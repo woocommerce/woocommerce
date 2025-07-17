@@ -560,6 +560,7 @@ class MiniCart extends AbstractBlock {
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupOpenDrawerListener"
+				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
