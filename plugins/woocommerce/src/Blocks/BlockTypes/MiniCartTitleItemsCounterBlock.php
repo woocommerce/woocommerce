@@ -38,10 +38,10 @@ class MiniCartTitleItemsCounterBlock extends AbstractInnerBlock {
 		$cart            = $this->get_cart_instance();
 		$cart_item_count = $cart ? $cart->get_cart_contents_count() : 0;
 
-		// The following text is a temporary workaround that will be revert to
-		// the previous form `(%d items)` as soon as the `@wordpress/i18n`
-		// package is available as a script module.
-		//
+		// The following translation is a temporary workaround. It will be
+		// reverted to the previous form `(%d items)` as soon as the
+		// `@wordpress/i18n` package is available as a script module.
+
 		// translators: %d number of items in the cart.
 		$cart_item_text = __( '(items: %d)', 'woocommerce' );
 
