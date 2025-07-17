@@ -32,6 +32,7 @@ export interface Order {
 	meta_data: OrderMetaDatum[];
 	line_items: LineItem[];
 	shipping_lines: ShippingLine[];
+	refunds: OrderRefund[];
 	payment_url: string;
 	is_editable: boolean;
 	needs_payment: boolean;
@@ -41,6 +42,29 @@ export interface Order {
 	date_completed_gmt: null;
 	date_paid_gmt: Date;
 	currency_symbol: string;
+	_links: Links;
+}
+
+export interface OrderRefund {
+	id: number;
+	reason: string;
+	total: string;
+}
+
+export interface Refund {
+	id: number;
+	parent_id: number;
+	date_created: Date;
+	date_created_gmt: Date;
+	amount: string;
+	reason: string;
+	refunded_by: number;
+	refunded_payment: boolean;
+	meta_data: OrderMetaDatum[];
+	line_items: LineItem[];
+	shipping_lines: ShippingLine[];
+	tax_lines: OrderMetaDatum[];
+	fee_lines: OrderMetaDatum[];
 	_links: Links;
 }
 

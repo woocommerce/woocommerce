@@ -17,18 +17,19 @@ class FulfillmentUtils {
 	 *
 	 * @param WC_Order $order The order object.
 	 * @param array    $fulfillments An array of fulfillments to check.
+	 * @param bool     $without_refunds Whether to exclude refunded items from the pending items.
 	 *
 	 * @return array An array of pending items.
 	 */
-	public static function get_pending_items( WC_Order $order, $fulfillments ): array {
-
+	public static function get_pending_items( WC_Order $order, $fulfillments, $without_refunds = true ): array {
 		$items_in_fulfillments = self::get_all_items_of_fulfillments( $fulfillments );
 		$order_items           = array_map(
-			function ( $item ) use ( $order ) {
+			function ( $item ) use ( $order, $without_refunds ) {
+				// Refunded item quantities are saved as negative values in the order.
 				return array(
 					'item_id' => $item->get_id(),
 					'item'    => $item,
-					'qty'     => $item->get_quantity() - $order->get_qty_refunded_for_item( $item ),
+					'qty'     => $item->get_quantity() + ( $without_refunds ? $order->get_qty_refunded_for_item( $item->get_id() ) : 0 ),
 				);
 			},
 			$order->get_items() ?? array()
@@ -47,6 +48,26 @@ class FulfillmentUtils {
 			$order_items,
 			function ( $item ) {
 				return $item['qty'] > 0; // Only return items with a positive quantity.
+			}
+		);
+	}
+
+	/**
+	 * Get refunded items for an order.
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return array An array of refunded items with their IDs and quantities.
+	 */
+	public static function get_refunded_items( WC_Order $order ): array {
+		$items_refunded = array();
+		foreach ( $order->get_items() as $item ) {
+			$items_refunded[ $item->get_id() ] = -1 * $order->get_qty_refunded_for_item( $item->get_id() );
+		}
+		return array_filter(
+			$items_refunded,
+			function ( $qty ) {
+				return $qty > 0; // Only include items that have been refunded.
 			}
 		);
 	}
@@ -116,7 +137,8 @@ class FulfillmentUtils {
 	public static function calculate_order_fulfillment_status( WC_Order $order, $fulfillments = array() ): string {
 		$has_fulfillments = ! empty( $fulfillments );
 		if ( $has_fulfillments ) {
-			$pending_items  = self::get_pending_items( $order, $fulfillments );
+			$pending_items = self::get_pending_items( $order, $fulfillments );
+
 			$all_fulfilled  = true;
 			$some_fulfilled = false;
 
