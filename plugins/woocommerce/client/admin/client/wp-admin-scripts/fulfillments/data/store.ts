@@ -7,7 +7,7 @@ import { createReduxStore, register } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { Order, Fulfillment } from './types';
+import { Order, Fulfillment, Refund } from './types';
 
 export const STORE_NAME = 'order/fulfillments';
 
@@ -31,6 +31,7 @@ const getFulfillmentErrorMessage = (
 
 const actionTypes = {
 	SET_ORDER: 'SET_ORDER',
+	SET_REFUNDS: 'SET_REFUNDS',
 	SET_LOADING: 'SET_LOADING',
 	SET_ERROR: 'SET_ERROR',
 	SET_FULFILLMENTS: 'SET_FULFILLMENTS',
@@ -47,6 +48,7 @@ interface ResponseWithFulfillments {
 
 interface OrderState {
 	order: Order | null;
+	refunds: Refund[];
 	fulfillments: Fulfillment[];
 	loading: boolean;
 	error: string | null;
@@ -58,6 +60,7 @@ const DEFAULT_STATE: { orderMap: Record< string, OrderState > } = {
 
 const getInitialOrderState = (): OrderState => ( {
 	order: null,
+	refunds: [],
 	fulfillments: [],
 	loading: false,
 	error: null,
@@ -67,6 +70,9 @@ const getInitialOrderState = (): OrderState => ( {
 const internalActions = {
 	setOrder( orderId: number, order: Order ) {
 		return { type: actionTypes.SET_ORDER, orderId, order };
+	},
+	setRefunds( orderId: number, refunds: Refund[] ) {
+		return { type: actionTypes.SET_REFUNDS, orderId, refunds };
 	},
 	setLoading( orderId: number, isLoading: boolean ) {
 		return { type: actionTypes.SET_LOADING, orderId, isLoading };
@@ -209,6 +215,17 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 					[ action.orderId ]: { ...prev, order: action.order },
 				},
 			};
+		case actionTypes.SET_REFUNDS:
+			return {
+				...state,
+				orderMap: {
+					...state.orderMap,
+					[ action.orderId ]: {
+						...prev,
+						refunds: action.refunds,
+					},
+				},
+			};
 		case actionTypes.SET_LOADING:
 			return {
 				...state,
@@ -278,6 +295,9 @@ const selectors = {
 	getOrder( state: typeof DEFAULT_STATE, orderId: number ) {
 		return state.orderMap[ orderId ]?.order;
 	},
+	getRefunds( state: typeof DEFAULT_STATE, orderId: number ) {
+		return state.orderMap[ orderId ]?.refunds || [];
+	},
 	isLoading( state: typeof DEFAULT_STATE, orderId: number ) {
 		return !! state.orderMap[ orderId ]?.loading;
 	},
@@ -313,6 +333,13 @@ const resolvers = {
 					method: 'GET',
 				} );
 				dispatch.setOrder( orderId, order );
+				if ( order.refunds.length > 0 ) {
+					const refunds: Refund[] = await apiFetch( {
+						path: `/wc/v3/orders/${ orderId }/refunds`,
+						method: 'GET',
+					} );
+					dispatch.setRefunds( orderId, refunds );
+				}
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,

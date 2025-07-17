@@ -21,7 +21,7 @@ import {
 } from '../data/constants';
 
 interface FulfillmentContextProps {
-	order?: Order;
+	order: Order | null;
 	fulfillment: Fulfillment | null;
 	setFulfillment: ( fulfillment: Fulfillment | null ) => void;
 	selectedItems: ItemSelection[];
@@ -31,7 +31,7 @@ interface FulfillmentContextProps {
 }
 
 const defaultContextProps: FulfillmentContextProps = {
-	order: undefined,
+	order: null,
 	fulfillment: null,
 	setFulfillment: () => {},
 	selectedItems: [],
@@ -59,7 +59,7 @@ export const FulfillmentProvider = ( {
 	items,
 	children,
 }: {
-	order: Order;
+	order: Order | null;
 	fulfillment?: Fulfillment | null;
 	items?: ItemSelection[];
 	children: React.ReactNode;

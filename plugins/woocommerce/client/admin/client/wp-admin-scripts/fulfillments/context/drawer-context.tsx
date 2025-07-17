@@ -8,7 +8,7 @@ import { isEqual } from 'lodash';
 /**
  * Internal dependencies
  */
-import { Fulfillment, Order } from '../data/types';
+import { Fulfillment, Order, Refund } from '../data/types';
 import { store as FulfillmentsStore } from '../data/store';
 import { getItemsNotInAnyFulfillment } from '../utils/order-utils';
 
@@ -17,6 +17,8 @@ interface FulfillmentDrawerContextProps {
 	setFulfillments: ( fulfillments: Fulfillment[] ) => void;
 	order: Order | null;
 	setOrder: ( order: Order | null ) => void;
+	refunds: Refund[];
+	setRefunds: ( refunds: Refund[] ) => void;
 	openSection: string;
 	setOpenSection: ( section: string ) => void;
 	isEditing: boolean;
@@ -28,6 +30,8 @@ const defaultContextProps: FulfillmentDrawerContextProps = {
 	setFulfillments: () => {},
 	order: null,
 	setOrder: () => {},
+	refunds: [],
+	setRefunds: () => {},
 	openSection: '',
 	setOpenSection: () => {},
 	isEditing: false,
@@ -57,6 +61,7 @@ export const FulfillmentDrawerProvider = ( {
 	const [ openSection, setOpenSection ] = useState( 'order' );
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ fulfillments, setFulfillments ] = useState< Fulfillment[] >();
+	const [ refunds, setRefunds ] = useState< Refund[] >();
 	const [ order, setOrder ] = useState< Order | null >();
 
 	useSelect(
@@ -67,8 +72,13 @@ export const FulfillmentDrawerProvider = ( {
 			const store = select( FulfillmentsStore );
 			const orderData = store.getOrder( orderId );
 			const fulfillmentsData = store.readFulfillments( orderId );
+			const refundsData = store.getRefunds( orderId );
 			if ( ! isEqual( orderData, order ) ) {
 				setOrder( orderData );
+				setIsEditing( false );
+			}
+			if ( ! isEqual( refundsData, refunds ) ) {
+				setRefunds( refundsData ?? [] );
 				setIsEditing( false );
 			}
 			if ( ! isEqual( fulfillmentsData, fulfillments ) ) {
@@ -76,14 +86,15 @@ export const FulfillmentDrawerProvider = ( {
 				setIsEditing( false );
 			}
 		},
-		[ orderId, fulfillments, order ]
+		[ orderId, fulfillments, order, refunds ]
 	);
 
 	useLayoutEffect( () => {
 		const hasPendingItemsInOrder =
 			order &&
 			fulfillments &&
-			getItemsNotInAnyFulfillment( fulfillments, order ).length > 0;
+			getItemsNotInAnyFulfillment( fulfillments, order, refunds ).length >
+				0;
 
 		if ( hasPendingItemsInOrder ) {
 			// If there are pending items in the order and multiple fulfillments,
@@ -98,7 +109,7 @@ export const FulfillmentDrawerProvider = ( {
 			// collapse all.
 			setOpenSection( '' );
 		}
-	}, [ orderId, fulfillments, order ] );
+	}, [ orderId, fulfillments, order, refunds ] );
 
 	if ( orderId === null ) {
 		return null;
@@ -111,6 +122,8 @@ export const FulfillmentDrawerProvider = ( {
 				setFulfillments,
 				order: order ?? null,
 				setOrder,
+				refunds: refunds ?? [],
+				setRefunds,
 				openSection,
 				setOpenSection,
 				isEditing,

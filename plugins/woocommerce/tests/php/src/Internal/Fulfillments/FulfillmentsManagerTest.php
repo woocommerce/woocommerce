@@ -15,6 +15,11 @@ use WC_Order;
 class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * @var FulfillmentsManager
+	 */
+	private FulfillmentsManager $manager;
+
+	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
@@ -32,25 +37,30 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Set up the test case.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->manager = new FulfillmentsManager();
+	}
+
+	/**
 	 * Test hooks.
 	 */
 	public function test_hooks() {
-		$manager = new FulfillmentsManager();
-		$this->assertNotFalse( has_filter( 'wc_fulfillment_translate_meta_key', array( $manager, 'translate_fulfillment_meta_key' ) ) );
+		$this->assertNotFalse( has_filter( 'wc_fulfillment_translate_meta_key', array( $this->manager, 'translate_fulfillment_meta_key' ) ) );
 	}
 
 	/**
 	 * Test the translate_fulfillment_meta_key method.
 	 */
 	public function test_translate_fulfillment_meta_key() {
-		$manager = new FulfillmentsManager();
-
 		// Test with a known meta key.
-		$translated_key = $manager->translate_fulfillment_meta_key( 'fulfillment_status' );
+		$translated_key = $this->manager->translate_fulfillment_meta_key( 'fulfillment_status' );
 		$this->assertEquals( __( 'Fulfillment Status', 'woocommerce' ), $translated_key );
 
 		// Test with an unknown meta key.
-		$translated_key = $manager->translate_fulfillment_meta_key( 'unknown_meta_key' );
+		$translated_key = $this->manager->translate_fulfillment_meta_key( 'unknown_meta_key' );
 		$this->assertEquals( 'unknown_meta_key', $translated_key );
 	}
 
@@ -58,8 +68,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test extending the translation of a fulfillment meta key.
 	 */
 	public function test_extend_translate_fulfillment_meta_key() {
-		$manager = new FulfillmentsManager();
-
 		// Extend the translations.
 		add_filter(
 			'wc_fulfillment_meta_key_translations',
@@ -70,7 +78,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		);
 
 		// Test the extended translation.
-		$translated_key = $manager->translate_fulfillment_meta_key( 'custom_meta_key' );
+		$translated_key = $this->manager->translate_fulfillment_meta_key( 'custom_meta_key' );
 		$this->assertEquals( __( 'Custom Meta Key', 'woocommerce' ), $translated_key );
 	}
 
@@ -78,7 +86,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the filter for translating fulfillment meta keys works correctly.
 	 */
 	public function test_translate_fulfillment_meta_key_with_filter() {
-		new FulfillmentsManager();
 
 		// Add a filter to modify the translations.
 		add_filter(
@@ -102,9 +109,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the initial shipping providers are loaded correctly.
 	 */
 	public function test_get_initial_shipping_providers() {
-		// Ensure the FulfillmentsManager is instantiated to load shipping providers filter.
-		new FulfillmentsManager();
-
 		/**
 		 * Filter to get initial shipping providers
 		 *
@@ -151,17 +155,15 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the fulfillment status hooks are initialized correctly.
 	 */
 	public function test_init_fulfillment_status_hooks() {
-		$manager = new FulfillmentsManager();
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_create', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_update', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_delete', array( $manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_create', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_update', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'wc_fulfillment_after_delete', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
 	}
 
 	/**
 	 * Test that the fulfillment status is updated on fulfillment creation.
 	 */
 	public function test_update_order_fulfillment_status_on_fulfillment_updates() {
-		$manager      = new FulfillmentsManager();
 		$fulfillments = array();
 		$product      = \WC_Helper_Product::create_simple_product();
 		$order        = OrderHelper::create_order( get_current_user_id(), $product );
@@ -204,7 +206,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the tracking number can be parsed correctly.
 	 */
 	public function test_try_parse_tracking_number_nominal() {
-		$manager         = new FulfillmentsManager();
 		$tracking_number = '1234567890';
 
 		/**
@@ -234,7 +235,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			);
 
 		// Test with a valid tracking number.
-		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( $tracking_number, $parsed_number['tracking_number'] );
 		$this->assertEquals( 'mock_shipping_provider', $parsed_number['shipping_provider'] );
 		$this->assertEquals( 'https://example.com/track?number=' . $tracking_number, $parsed_number['tracking_url'] );
@@ -244,7 +245,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test tracking number parsing without any matches.
 	 */
 	public function test_try_parse_tracking_number_no_match() {
-		$manager         = new FulfillmentsManager();
 		$tracking_number = '1234567890';
 
 		/**
@@ -270,7 +270,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			->willReturn( null );
 
 		// Test with a valid tracking number.
-		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
 	}
 
@@ -278,7 +278,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test tracking number parsing without any shipping providers.
 	 */
 	public function test_try_parse_tracking_number_no_providers() {
-		$manager         = new FulfillmentsManager();
 		$tracking_number = '1234567890';
 
 		add_filter(
@@ -290,7 +289,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		);
 
 		// Test with a valid tracking number.
-		$parsed_number = $manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
+		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
 	}
 }

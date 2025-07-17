@@ -21,8 +21,14 @@ import ShipmentForm from '../shipment-form';
 import CustomerNotificationBox from '../customer-notification-form';
 
 const NewFulfillmentForm: React.FC = () => {
-	const { order, fulfillments, openSection, setOpenSection, isEditing } =
-		useFulfillmentDrawerContext();
+	const {
+		order,
+		fulfillments,
+		refunds,
+		openSection,
+		setOpenSection,
+		isEditing,
+	} = useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
 
 	// Reset error when order changes
@@ -34,7 +40,8 @@ const NewFulfillmentForm: React.FC = () => {
 		() =>
 			getItemsNotInAnyFulfillment(
 				fulfillments,
-				order ?? ( { line_items: [] as LineItem[] } as Order )
+				order ?? ( { line_items: [] as LineItem[] } as Order ),
+				refunds ?? []
 			).map( ( item ) => ( {
 				...item,
 				selection: item.selection.map( ( selection ) => ( {
@@ -42,7 +49,7 @@ const NewFulfillmentForm: React.FC = () => {
 					checked: true,
 				} ) ),
 			} ) ),
-		[ fulfillments, order ]
+		[ fulfillments, order, refunds ]
 	);
 
 	if ( ! order ) {

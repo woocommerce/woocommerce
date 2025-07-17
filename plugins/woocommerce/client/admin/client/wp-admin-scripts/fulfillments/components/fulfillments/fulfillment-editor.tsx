@@ -8,7 +8,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Fulfillment, Order } from '../../data/types';
+import { Fulfillment } from '../../data/types';
 import {
 	combineItems,
 	getItemsFromFulfillment,
@@ -38,8 +38,6 @@ interface FulfillmentEditorProps {
 	onExpand: () => void;
 	onCollapse: () => void;
 	fulfillment: Fulfillment;
-	fulfillments: Fulfillment[];
-	order: Order;
 	disabled?: boolean;
 }
 export default function FulfillmentEditor( {
@@ -48,17 +46,17 @@ export default function FulfillmentEditor( {
 	onExpand,
 	onCollapse,
 	fulfillment,
-	fulfillments,
-	order,
 	disabled = false,
 }: FulfillmentEditorProps ) {
+	const { order, fulfillments, refunds } = useFulfillmentDrawerContext();
 	const { isEditing, setIsEditing } = useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
-	const itemsInFulfillment = getItemsFromFulfillment( order, fulfillment );
-	const itemsNotInAnyFulfillment = getItemsNotInAnyFulfillment(
-		fulfillments,
-		order
-	);
+	const itemsInFulfillment = order
+		? getItemsFromFulfillment( order, fulfillment )
+		: [];
+	const itemsNotInAnyFulfillment = order
+		? getItemsNotInAnyFulfillment( fulfillments, order, refunds )
+		: [];
 	const selectableItems = combineItems(
 		[ ...itemsInFulfillment ],
 		[ ...itemsNotInAnyFulfillment ]
@@ -69,7 +67,7 @@ export default function FulfillmentEditor( {
 	// Reset error when order changes
 	useEffect( () => {
 		setError( null );
-	}, [ order.id ] );
+	}, [ order?.id ] );
 
 	const handleChevronClick = () => {
 		if ( isEditing ) return;
