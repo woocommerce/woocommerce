@@ -144,7 +144,7 @@ export const BankAccountsList = ( {
 						<div className="bank-accounts__list-item-before" />
 						<div className="bank-accounts__list-item-text">
 							<div>Account Name</div>
-							<div>Account Number</div>
+							<div>Account Details</div>
 							<div>Bank Name</div>
 						</div>
 						<div className="bank-accounts__list-item-after" />
