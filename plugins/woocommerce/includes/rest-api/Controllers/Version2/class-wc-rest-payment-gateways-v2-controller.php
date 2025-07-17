@@ -201,13 +201,13 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 
 		// Update title.
 		if ( isset( $request['title'] ) ) {
-			$settings['title'] = $this->validate_setting_text_field( $request['title'], $gateway->form_fields['title'] );
+			$settings['title'] = $this->validate_setting_text_field( $request['title'], $gateway->form_fields['title'] ?? array() );
 			$gateway->title    = $settings['title'];
 		}
 
 		// Update description.
 		if ( isset( $request['description'] ) ) {
-			$settings['description'] = $this->validate_setting_text_field( $request['description'], $gateway->form_fields['description'] );
+			$settings['description'] = $this->validate_setting_text_field( $request['description'], $gateway->form_fields['description'] ?? array() );
 			$gateway->description    = $settings['description'];
 		}
 
