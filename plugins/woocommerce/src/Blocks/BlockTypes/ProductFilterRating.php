@@ -49,12 +49,12 @@ final class ProductFilterRating extends AbstractBlock {
 			return $items;
 		}
 
+		$valid_ratings = array( '1', '2', '3', '4', '5' );
 		$active_ratings = explode( ',', $params[ self::RATING_FILTER_QUERY_VAR ] );
-		$active_ratings = array_map( 'intval', $active_ratings );
 		$active_ratings = array_filter(
 			$active_ratings,
-			function ( $rating ) {
-				return $rating >= 1 && $rating <= 5;
+			function ( $rating ) use ( $valid_ratings ) {
+				return in_array( $rating, $valid_ratings, true );
 			}
 		);
 		$active_ratings = array_unique( $active_ratings );
