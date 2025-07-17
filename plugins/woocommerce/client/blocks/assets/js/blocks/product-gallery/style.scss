@@ -169,57 +169,53 @@ $dialog-padding: 20px;
 }
 
 // Vertical thumbnails
-.wc-block-product-gallery {
-	&:not(.is-vertical) {
-		:where(.wc-block-product-gallery-thumbnails__scrollable) {
-			flex-direction: column;
-		}
+.wc-block-product-gallery:not(.is-vertical):not(:has(.is-vertical)) {
+	:where(.wc-block-product-gallery-thumbnails__scrollable) {
+		flex-direction: column;
 	}
 
 	@for $i from 10 through 50 {
-		&:not(.is-vertical) {
-			&:has(.wc-block-components-product-image--aspect-ratio-auto),
-			&:has(.wc-block-components-product-image--aspect-ratio-1) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 1 / calc(100 / $i);
-				}
+		&:has(.wc-block-components-product-image--aspect-ratio-auto),
+		&:has(.wc-block-components-product-image--aspect-ratio-1) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 1 / calc(100 / $i);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 4 / calc(100 / $i * 3);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 4 / calc(100 / $i * 3);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 3 / calc(100 / $i * 4);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 3 / calc(100 / $i * 4);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 3 / calc(100 / $i * 2);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 3 / calc(100 / $i * 2);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 2 / calc(100 / $i * 3);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 2 / calc(100 / $i * 3);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 16 / calc(100 / $i * 9);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 16 / calc(100 / $i * 9);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 9 / calc(100 / $i * 16);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+			:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+				flex-basis: calc($i * 1%);
+				aspect-ratio: 9 / calc(100 / $i * 16);
 			}
 		}
 	}
