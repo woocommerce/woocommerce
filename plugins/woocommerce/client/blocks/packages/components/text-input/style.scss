@@ -1,25 +1,28 @@
 .wc-block-components-form .wc-block-components-text-input,
 .wc-block-components-text-input {
 	position: relative;
-	margin-top: $gap;
+	margin-top: $gap-small;
 	white-space: nowrap;
+	// Resetting line-height to avoid any unnecessary space around the input
+	line-height: 0;
 
 	label {
 		@include reset-color();
 		@include reset-typography();
-		@include font-size(regular);
+		@include font-regular-locked;
 		position: absolute;
 		transform: translateY(-50%);
-		line-height: 1.5;
-		left: em($gap-smaller + 1px);
-		top: 1.562em;
+		// Not sure why, but looks better alinged when off by 1px
+		left: calc($gap-small + 1px);
+		// 1px (border) + padding of the input + half the height of the label itself
+		top: calc(1px + $gap + 10px);
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
 		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: calc(100% - #{2 * $gap});
+		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
 
 		.has-dark-controls & {
@@ -31,7 +34,9 @@
 	}
 
 	input[type="number"] {
+		appearance: textfield;
 		-moz-appearance: textfield;
+
 		&::-webkit-outer-spin-button,
 		&::-webkit-inner-spin-button {
 			appearance: none;
@@ -45,18 +50,16 @@
 	input[type="number"],
 	input[type="password"],
 	input[type="email"] {
-		@include font-size(regular);
-		padding: em($gap) em($gap-smaller);
-		line-height: em($gap);
+		@include reset-typography();
+		@include font-regular-locked;
+		padding: $gap $gap-small;
 		width: 100%;
 		border-radius: $universal-border-radius;
 		border: 1px solid $universal-border-strong;
 
-		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		height: 3.125em;
 		background-color: $input-background-light;
 		color: $input-text-light;
 
@@ -86,13 +89,17 @@
 	&.is-active input[type="number"],
 	&.is-active input[type="password"],
 	&.is-active input[type="email"] {
-		padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
+		// Top padding = $gap-smaller + line-height of the label
+		padding: calc($gap-smaller + 16px) $gap-small $gap-smaller;
 	}
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		transform: translateY(#{$gap-smallest}) scale(0.75);
-		top: 0;
+		// Base font-size is 14px; 0.8571 * 14px = 12px (regular size font changes
+		// to small one). We use scale transform as we can animate it.
+		transform: scale(0.8571);
+		// 1px (border) + padding of the input when label + value displayed
+		top: 1px + $gap-smaller;
 	}
 
 	&.has-error input {
@@ -124,9 +131,5 @@
 		.has-dark-controls & {
 			color: color.adjust($alert-red, $lightness: 30%);
 		}
-	}
-
-	&:only-child {
-		margin-top: 1.5em;
 	}
 }
