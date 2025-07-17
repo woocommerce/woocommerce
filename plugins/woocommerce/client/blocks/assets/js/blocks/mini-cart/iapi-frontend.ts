@@ -25,10 +25,13 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { currency } = getConfig( 'woocommerce' );
-const { addToCartBehaviour, onCartClickBehaviour, checkoutUrl } = getConfig(
-	'woocommerce/mini-cart'
-);
-const { displayCartPriceIncludingTax } = getConfig( 'woocommerce/mini-cart' );
+const {
+	addToCartBehaviour,
+	onCartClickBehaviour,
+	checkoutUrl,
+	displayCartPriceIncludingTax,
+	buttonAriaLabelTemplate,
+} = getConfig( 'woocommerce/mini-cart' );
 const {
 	reduceQuantityLabel,
 	increaseQuantityLabel,
@@ -36,7 +39,7 @@ const {
 	removeFromCartLabel,
 	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
-const { singularItemsText, pluralItemsText } = getConfig(
+const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
@@ -57,6 +60,7 @@ type MiniCart = {
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
 		drawerTabIndex: string | null;
+		buttonAriaLabel: string;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -80,6 +84,14 @@ const { state: miniCartState, callbacks } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
+);
+
+// Getters cannot access `state` during hydration if it is not declared
+// beforehand. This will be removed once the iAPI allows this case.
+const { state } = store< MiniCart >(
+	'woocommerce/mini-cart',
+	{},
+	{ lock: universalLock }
 );
 
 store< MiniCart >(
@@ -146,6 +158,13 @@ store< MiniCart >(
 
 			get cartIsEmpty(): boolean {
 				return miniCartState.totalItemsInCart === 0;
+			},
+
+			get buttonAriaLabel(): string {
+				return buttonAriaLabelTemplate
+					.replace( '%d', state.totalItemsInCart )
+					.replace( '%1$d', state.totalItemsInCart )
+					.replace( '%2$s', state.formattedSubtotal );
 			},
 		},
 
@@ -470,10 +489,10 @@ store(
 			get itemsInCartText() {
 				const cartItemsCount = miniCartState.totalItemsInCart;
 
-				const template =
-					cartItemsCount === 1 ? singularItemsText : pluralItemsText;
-
-				return template.replace( '%d', cartItemsCount.toString() );
+				return itemsInCartTextTemplate.replace(
+					'%d',
+					cartItemsCount.toString()
+				);
 			},
 		},
 	},

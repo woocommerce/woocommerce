@@ -115,15 +115,23 @@ const { state } = store< Store >(
 			},
 		},
 		actions: {
-			addNotice: ( notice: Notice ) => {
+			addNotice: ( notice: Notice ): string => {
 				const { notices } = state;
 
-				const noticeId = generateNoticeId();
-				const noticeWithId = {
-					...notice,
-					id: noticeId,
-				};
-				notices.push( noticeWithId );
+				// Prevent adding an extra notice with the same message.
+				const existingNotice = notices.find(
+					( n ) => n.notice === notice.notice
+				);
+				const noticeId = existingNotice
+					? existingNotice.id
+					: generateNoticeId();
+
+				if ( ! existingNotice ) {
+					notices.push( {
+						...notice,
+						id: noticeId,
+					} );
+				}
 
 				return noticeId;
 			},
