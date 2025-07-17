@@ -68,19 +68,17 @@ When deciding whether to approve a PRR, the release lead should consider the fol
 #### 5. Merge to Release Branch (Release Lead / Core Contributor)
 
 - **Verify cherry-pick requirements**
-  - Check whether the fix is already included in `trunk` and/or the next frozen branch.
-  - If the fix *should not* be forward-ported, remove the labels  
+   - Check whether the fix is already included in `trunk` and/or the next frozen branch.
+   - If the fix *should not* be forward-ported, remove the labels  
     `cherry pick to trunk` and `cherry pick to frozen release`.
 
 - **Merge the PR**
-  - After reviewing the labels, merge the PR into the current `release/x.y` branch.
-  - Confirm that the changelog entry and milestone are correct.
+   - After reviewing the labels, merge the PR into the current `release/x.y` branch.
+   - Confirm that the changelog entry and milestone are correct.
 
 - **Resulting automation**
-  - If either cherry-pick label remains, GitHub Actions opens follow-up PRs to `trunk`
-    and/or the frozen release branch.
-  - If both labels were removed, no cherry-pick workflows run.
-
+   - If either cherry-pick label remains, GitHub Actions opens follow-up PRs to `trunk` and/or the frozen release branch.
+   - If both labels were removed, no cherry-pick workflows run.
 
 #### 6. Review & Merge Follow-up PRs (Release Lead)
 
