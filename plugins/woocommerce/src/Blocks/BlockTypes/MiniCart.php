@@ -296,7 +296,7 @@ class MiniCart extends AbstractBlock {
 					'totalItemsInCart'   => $cart_item_count,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
-					'buttonAriaLabel'    => function () {
+					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
 						$state = wp_interactivity_state();
 						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
 							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
