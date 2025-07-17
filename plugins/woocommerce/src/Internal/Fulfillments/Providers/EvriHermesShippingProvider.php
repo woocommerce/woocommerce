@@ -13,9 +13,10 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 	 * Main Evri/Hermes tracking number patterns.
 	 */
 	private const MAIN_PATTERNS = array(
-		'/^\d{16}$/',                 // 16-digit numeric (official Evri/Hermes format).
-		'/^[A-Z]{1,2}\d{14,15}$/',    // H, E, HM, EV, HH, MH + 14-15 digits (legacy/retail).
-		'/^MH\d{16}$/',               // MH + 16 digits (Hermes Germany legacy)[3].
+		'/^\d{16}$/',                              // 16-digit numeric (official Evri/Hermes format).
+		'/^[A-Z]{1,2}\d{14,15}$/',                 // H, E, HM, EV, HH, MH + 14-15 digits (legacy/retail).
+		'/^MH\d{16}$/',                            // MH + 16 digits (Hermes Germany legacy)[3].
+		'/^(?:[A-Z]\d{2}[A-Z0-9]{13}|\d{16})$/',   // Newer Evri format.
 	);
 
 	/**

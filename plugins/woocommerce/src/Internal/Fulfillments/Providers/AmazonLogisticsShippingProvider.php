@@ -13,7 +13,7 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 	 *
 	 * @var array<string>
 	 */
-	private array $operating_countries = array( 'US', 'CA', 'GB', 'DE', 'FR', 'BE', 'NL', 'IT', 'IN', 'MX', 'JP', 'AU', 'ES', 'CN', 'HK', 'SG' );
+	private array $operating_countries = array( 'US', 'CA', 'GB', 'DE', 'FR', 'BE', 'NL', 'IT', 'IN', 'MX', 'JP', 'AU', 'ES', 'CN', 'HK', 'SG', 'GG', 'JE', 'IM', 'GI', 'AT', 'CH', 'PL', 'SE', 'DK', 'NO', 'FI', 'IE', 'PT', 'CZ', 'HU', 'RO', 'BG', 'HR', 'SK', 'SI', 'EE', 'LV', 'LT', 'CY', 'MT', 'LU', 'GR', 'BR', 'TR', 'AE', 'SA', 'EG', 'KW', 'IL', 'ZA', 'KR', 'TW', 'TH', 'MY', 'ID', 'PH', 'VN', 'NZ' );
 
 	/**
 	 * Gets the unique provider key.
@@ -112,6 +112,9 @@ class AmazonLogisticsShippingProvider extends AbstractShippingProvider {
 			// European patterns.
 			'/^CC\d{12}$/'        => fn() => in_array( $shipping_from, array( 'FR', 'BE', 'NL', 'DE' ), true ) ? 95 : 80, // Continental Europe.
 			'/^GBA\d{12}$/'       => fn() => 'GB' === $shipping_from ? 100 : 85, // United Kingdom.
+			'/^UK\d{10}$/'        => fn() => 'GB' === $shipping_from ? 100 : 85, // United Kingdom.
+			'/^W[A-Z]\d{9}GB$/'   => fn() => 'GB' === $shipping_from ? 99 : 85, // Amazon UK specific pattern.
+			'/^[A-Z]{2}\d{9}GB$/' => fn() => 'GB' === $shipping_from ? 92 : 75, // United Kingdom.
 			'/^AM\d{12}$/'        => fn() => in_array( $shipping_from, array( 'DE', 'FR', 'IT', 'ES' ), true ) ? 95 : 80, // Amazon Europe.
 			'/^D\d{13}$/'         => fn() => 'DE' === $shipping_from ? 95 : 75, // Germany specific.
 

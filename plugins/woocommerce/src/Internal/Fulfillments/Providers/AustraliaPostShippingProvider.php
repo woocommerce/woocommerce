@@ -50,6 +50,7 @@ class AustraliaPostShippingProvider extends AbstractShippingProvider {
 
 				// eParcel formats.
 				'/^[A-Z]{3}\d{8,12}$/',      // Three-letter prefix.
+				'/^33\d?[A-Z]{2}\d{18,20}$/',// StarTrack eParcel.
 				'/^AP\d{10,13}$/',           // Australia Post eParcel.
 
 				// Legacy and alternative formats.
