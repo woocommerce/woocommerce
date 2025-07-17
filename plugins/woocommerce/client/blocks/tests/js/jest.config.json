@@ -12,6 +12,7 @@
 		"@wordpress/core-data/build/(.*)$": "<rootDir>/node_modules/@wordpress/core-data/build/$1",
 		"@wordpress/core-data": "<rootDir>/node_modules/@wordpress/core-data",
 		"@wordpress/components": "<rootDir>/node_modules/@wordpress/components",
+		"@woocommerce/data": "<rootDir>/node_modules/@woocommerce/data/build/index.js",
 		"@woocommerce/atomic-blocks": "assets/js/atomic/blocks",
 		"@woocommerce/atomic-utils": "assets/js/atomic/utils",
 		"@woocommerce/icons": "assets/js/icons",
@@ -52,14 +53,12 @@
 		"<rootDir>/vendor/",
 		"<rootDir>/tests/"
 	],
-	"roots": [
-		"<rootDir>",
-		"<rootDir>/../legacy/js"
-	],
+	"roots": [ "<rootDir>", "<rootDir>/../legacy/js" ],
 	"resolver": "<rootDir>/tests/js/scripts/resolver.js",
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/scripts/babel-transformer.js"
 	},
 	"verbose": true,
-	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest"
+	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest",
+	"testEnvironment": "jest-fixed-jsdom"
 }
