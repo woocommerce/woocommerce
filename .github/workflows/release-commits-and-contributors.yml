@@ -5,10 +5,13 @@ on:
       version:
         type: string
         required: true
-        description: 'The release version (X.Y format) to be used to calculate the number of commits and contributors.'
-
-  release:
-    types: [prereleased]
+        description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
 
 jobs:
   extract-versions:
@@ -18,82 +21,45 @@ jobs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
     steps:
-      - name: Check pre-release and extract RC version
-        id: version-from-prerelease
-        if: ${{ github.event_name == 'release' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const tagName = '${{ github.event.release.tag_name }}';
-            const isPrerelease = ${{ github.event.release.prerelease }};
-
-            console.log(`Release tag: ${tagName}, prerelease: ${isPrerelease}`);
-
-            if (!isPrerelease) {
-              core.setFailed(`This workflow only runs for pre-releases`);
-              process.exit(1);
-            }
-
-            // Check if it's an RC format: x.y.z-rc.N
-            const rcPattern = /^v?(\d+)\.(\d+)\.(\d+)-rc\.(\d+)$/;
-            const rcMatch = tagName.match(rcPattern);
-
-            if (!rcMatch) {
-              console.log(`⛔ Not an RC pre-release format: ${tagName}`);
-              console.log(`Expected format: x.y.z-rc.N (e.g., 9.8.0-rc.1)`);
-              core.setFailed(`This workflow only runs for RC pre-releases with format x.y.z-rc.N`);
-              process.exit(1);
-            }
-
-            const major = parseInt(rcMatch[1]);
-            const minor = parseInt(rcMatch[2]);
-
-            console.log(`✅ Valid RC pre-release: ${tagName}`);
-            console.log(`Extracted version: major=${major}, minor=${minor}`);
-
-            core.setOutput('major', major);
-            core.setOutput('minor', minor);
+      - name: Ensure running from trunk branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/trunk" ] && [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "::error::This workflow should only run from trunk branch, currently running from ${{ github.ref }}."
+            exit 1
+          fi
 
       - name: Extract version from the provided input version
         id: version-from-input
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
-            const currentVersion = '${{ github.event.inputs.version }}';
+            const currentVersion = '${{ inputs.version }}';
             console.log(`Current version from input: ${currentVersion}`);
 
-            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)$/);
+            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)(?:\.\d+)?(?:-(rc)\.(\d+))?$/);
             if (!versionMatch) {
-              core.setFailed(`Version format must be 'x.y', got: ${currentVersion}`);
+              core.setFailed(`Version format must be 'x.y' or 'x.y.z-rc.N'. Provided: ${currentVersion}`);
               process.exit(1);
             }
 
             const major = parseInt(versionMatch[1]);
             const minor = parseInt(versionMatch[2]);
-            console.log(`Parsed version: major=${major}, minor=${minor}`);
+            const prereleaseType = versionMatch[3] || '';
+            const prereleaseVersion = versionMatch[4] || '';
+
+            console.log(`Parsed version: major=${major}, minor=${minor}, prerelease_type=${prereleaseType}, prerelease_version=${prereleaseVersion}`);
 
             core.setOutput('major', major);
             core.setOutput('minor', minor);
+            core.setOutput('is_prerelease', prereleaseType !== '');
 
       - name: Calculate current and previous version
         id: calculate-versions
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
-            let major, minor;
-
-            if ('${{ github.event_name }}' === 'release') {
-              // Pre-release trigger - use RC tag version
-              major = parseInt('${{ steps.version-from-prerelease.outputs.major }}');
-              minor = parseInt('${{ steps.version-from-prerelease.outputs.minor }}');
-              console.log(`Using version from RC pre-release: ${major}.${minor}`);
-            } else {
-              // Manual trigger with input version
-              major = parseInt('${{ steps.version-from-input.outputs.major }}');
-              minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
-              console.log(`Using version from input: ${major}.${minor}`);
-            }
+            const major = parseInt('${{ steps.version-from-input.outputs.major }}');
+            const minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
 
             let previousVersion;
             if (minor > 0) {
