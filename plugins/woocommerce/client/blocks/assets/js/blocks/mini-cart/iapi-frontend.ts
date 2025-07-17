@@ -246,20 +246,23 @@ const { state: cartItemState } = store(
 				// TODO: Add deprecation notice urging to replace with a
 				// `data-wp-text` directive or an alternative solution.
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					const priceText = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'saleBadgePriceFormat',
-						defaultValue: '<price/>',
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'saleBadgePriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 
 					return priceText.replace( '<price/>', price );
 				}
@@ -296,20 +299,23 @@ const { state: cartItemState } = store(
 				// TODO: Add deprecation notice urging to replace with a
 				// `data-wp-text` directive or an alternative solution.
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					const priceText = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'saleBadgePriceFormat',
-						defaultValue: '<price/>',
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'saleBadgePriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 
 					return priceText.replace( '<price/>', price );
 				}
@@ -373,20 +379,23 @@ const { state: cartItemState } = store(
 				const txt = document.createElement( 'textarea' );
 				let { name } = cartItemState.cartItem;
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					name = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'itemName',
-						defaultValue: name,
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					name =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'itemName',
+								defaultValue: name,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 				}
 				txt.innerHTML = name;
 				return txt.value;
@@ -407,20 +416,23 @@ const { state: cartItemState } = store(
 				// TODO: Add deprecation notice urging to replace with a
 				// `data-wp-text` directive or an alternative solution.
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					const priceText = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'subtotalPriceFormat',
-						defaultValue: '<price/>',
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'subtotalPriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 					return priceText.split( '<price/>' )[ 0 ];
 				}
 				return null;
@@ -430,20 +442,23 @@ const { state: cartItemState } = store(
 				// TODO: Add deprecation notice urging to replace with a
 				// `data-wp-text` directive or an alternative solution.
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					const priceText = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'subtotalPriceFormat',
-						defaultValue: '<price/>',
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'subtotalPriceFormat',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 					return priceText.split( '<price/>' )[ 1 ];
 				}
 				return null;
@@ -473,20 +488,23 @@ const { state: cartItemState } = store(
 				// TODO: Add deprecation notice urging to replace with a
 				// `data-wp-text` directive or an alternative solution.
 				if (
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
 				) {
-					const priceText = (
-						window.wc as any
-					 ).blocksCheckout.applyCheckoutFilter( {
-						filterName: 'cartItemPrice',
-						defaultValue: '<price/>',
-						extensions: cartItemState.cartItem.extensions,
-						arg: {
-							context: 'cart',
-							cartItem: cartItemState.cartItem,
-							cart: woocommerceState.cart,
-						},
-					} );
+					const priceText =
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'cartItemPrice',
+								defaultValue: '<price/>',
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						);
 
 					return priceText.replace( '<price/>', price );
 				}
@@ -525,8 +543,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemShowRemoveItemLink(): boolean {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout.applyCheckoutFilter
-					? ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
+					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
 							filterName: 'showRemoveItemLink',
 							defaultValue: true,
 							extensions: cartItemState.cartItem.extensions,
@@ -614,11 +634,15 @@ const { state: cartItemState } = store(
 			},
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const applyCheckoutFilter = ( window.wc as any )?.blocksCheckout
 					?.applyCheckoutFilter;
+				// eslint-disable-next-line react-hooks/rules-of-hooks
 				const previouslyAppliedClasses = useRef< string[] >( [] );
 
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore -- It must run on every render.
+				// eslint-disable-next-line react-hooks/rules-of-hooks
 				useLayoutEffect( () => {
 					if ( applyCheckoutFilter ) {
 						const { ref } = getElement();
