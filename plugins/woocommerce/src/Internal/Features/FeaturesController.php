@@ -59,6 +59,13 @@ class FeaturesController {
 	private $compatibility_info_by_feature = array();
 
 	/**
+	 * Pending compatibility declarations. Format is [feature_id, plugin_file, positive_compatibility].
+	 *
+	 * @var array
+	 */
+	private $pending_declarations = array();
+
+	/**
 	 * The LegacyProxy instance to use.
 	 *
 	 * @var LegacyProxy
@@ -110,6 +117,13 @@ class FeaturesController {
 	 * @var bool
 	 */
 	private bool $registered_additional_features_via_class_calls = false;
+
+	/**
+	 * Flag indicating if we are currently delaying plugin normalization.
+	 *
+	 * @var bool
+	 */
+	private bool $lazy = true;
 
 	/**
 	 * Creates a new instance of the class.
@@ -668,51 +682,119 @@ class FeaturesController {
 	 * FeaturesUtil::declare_compatibility instead, passing the full plugin file path instead of the plugin name.
 	 *
 	 * @param string $feature_id Unique feature id.
-	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
+	 * @param string $plugin_file Plugin file path, either full or in the form 'directory/file.php'.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
-	public function declare_compatibility( string $feature_id, string $plugin_name, bool $positive_compatibility = true ): bool {
+	public function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
 		if ( ! $this->proxy->call_function( 'doing_action', 'before_woocommerce_init' ) ) {
 			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
 			/* translators: 1: class::method 2: before_woocommerce_init */
 			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should be called inside the %2$s action.', 'woocommerce' ), $class_and_method, 'before_woocommerce_init' ), '7.0' );
 			return false;
 		}
-
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return false;
 		}
 
-		$plugin_name = str_replace( '\\', '/', $plugin_name );
+		if ( $this->lazy ) {
+			// Lazy mode: Queue to be normalized later.
+			$this->pending_declarations[] = array( $feature_id, $plugin_file, $positive_compatibility );
+			return true;
+		}
+
+		// Late call: Normalize and register immediately.
+		return $this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
+	}
+
+	/**
+	 * Registers compatibility information internally for a given feature and plugin file.
+	 *
+	 * This method normalizes the plugin file path to a plugin ID, handles validation and logging for invalid plugins,
+	 * and registers the compatibility data if valid.
+	 * It updates the internal compatibility arrays, checks for conflicts (e.g., a plugin declaring both
+	 * compatible and incompatible with the same feature), and throws an exception if a conflict is detected.
+	 * Duplicate declarations (same compatibility type) are ignored.
+	 *
+	 * This is an internal helper method and should not be called directly.
+	 *
+	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
+	 * @since 10.1.0
+	 *
+	 * @param string $feature_id Unique feature ID.
+	 * @param string $plugin_file Raw plugin file path (full or 'directory/file.php').
+	 * @param bool   $positive_compatibility True if declaring compatibility, false if declaring incompatibility.
+	 * @return bool True on successful registration, false if the feature does not exist.
+	 * @throws \Exception If the plugin attempts to declare both compatibility and incompatibility for the same feature.
+	 */
+	private function register_compatibility_internal( string $feature_id, string $plugin_file, bool $positive_compatibility ): bool {
+		if ( ! $this->feature_exists( $feature_id ) ) {
+			return false;
+		}
+
+		// Normalize and validate plugin file.
+		$plugin_id = $this->plugin_util->get_wp_plugin_id( $plugin_file );
+		if ( ! $plugin_id ) {
+			$logger = $this->proxy->call_function( 'wc_get_logger' );
+			$logger->error( "FeaturesController: Invalid plugin file '{$plugin_file}' for feature '{$feature_id}'." );
+			return false;
+		}
 
 		// Register compatibility by plugin.
-
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_name );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_id );
 
 		$key          = $positive_compatibility ? 'compatible' : 'incompatible';
 		$opposite_key = $positive_compatibility ? 'incompatible' : 'compatible';
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $key );
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $opposite_key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $opposite_key );
 
-		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $opposite_key ], true ) ) {
-			throw new \Exception( esc_html( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
+		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_id ][ $opposite_key ], true ) ) {
+			throw new \Exception( esc_html( "Plugin $plugin_id is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
 		}
 
-		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $key ], true ) ) {
-			$this->compatibility_info_by_plugin[ $plugin_name ][ $key ][] = $feature_id;
+		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_id ][ $key ], true ) ) {
+			$this->compatibility_info_by_plugin[ $plugin_id ][ $key ][] = $feature_id;
 		}
 
 		// Register compatibility by feature.
 
 		$key = $positive_compatibility ? 'compatible' : 'incompatible';
 
-		if ( ! in_array( $plugin_name, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
-			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_name;
+		if ( ! in_array( $plugin_id, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
+			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_id;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Processes any pending compatibility declarations by normalizing plugin file paths
+	 * and registering them internally.
+	 *
+	 * This method is called lazily when compatibility information is queried (via
+	 * get_compatible_features_for_plugin() or get_compatible_plugins_for_feature()).
+	 * It resolves plugin IDs using PluginUtil and logs errors for unrecognized plugins.
+	 * Pending declarations are cleared after processing to avoid redundant work.
+	 *
+	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
+	 * @since 10.1.0
+	 * @return void
+	 */
+	private function process_pending_declarations(): void {
+		if ( empty( $this->pending_declarations ) ) {
+			return;
+		}
+
+		foreach ( $this->pending_declarations as $declaration ) {
+			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
+
+			// Register internally.
+			$this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
+		}
+
+		$this->pending_declarations = array();
+		$this->lazy                 = false;
 	}
 
 	/**
@@ -737,6 +819,7 @@ class FeaturesController {
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
 	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
+		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
@@ -772,6 +855,7 @@ class FeaturesController {
 	 * @return array An array having a 'compatible', an 'incompatible' and an 'uncertain' key, each holding an array of plugin names.
 	 */
 	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ): array {
+		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( $active_only );

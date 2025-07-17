@@ -15,32 +15,48 @@ import {
 import '../';
 import '../../checkbox-list';
 
-// Mock the getSetting function to return mock taxonomy data
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( ( key: string, defaultValue: unknown ) => {
-		if ( key === 'filterableProductTaxonomies' ) {
-			return [
-				{
-					name: 'product_cat',
-					label: 'Product Categories',
-					labels: { singular_name: 'Category' },
-				},
-				{
-					name: 'product_tag',
-					label: 'Product Tags',
-					labels: { singular_name: 'Tag' },
-				},
-			];
-		}
-		return defaultValue;
-	} ),
+// Mock getSetting to return the taxonomy data we need
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...originalModule,
+		getSetting: jest.fn( ( key, defaultValue ) => {
+			if ( key === 'filterableProductTaxonomies' ) {
+				return [
+					{
+						name: 'product_cat',
+						label: 'Product Categories',
+						labels: { singular_name: 'Category' },
+					},
+					{
+						name: 'product_tag',
+						label: 'Product Tags',
+						labels: { singular_name: 'Tag' },
+					},
+				];
+			}
+			// Use the original getSetting for other keys
+			return originalModule.getSetting( key, defaultValue );
+		} ),
+	};
+} );
+
+// Mock WooCommerce schema selectors to prevent namespace errors
+jest.mock( '../../../../../data/schema/selectors', () => ( {
+	getRoute: jest.fn( () => null ),
+	getRoutes: jest.fn( () => ( {
+		'/wc/store/v1': {},
+	} ) ),
 } ) );
 
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [
 		{
 			name: 'woocommerce/product-filter-taxonomy',
-			attributes,
+			attributes: {
+				...attributes,
+				isPreview: true,
+			},
 		},
 	];
 	return initializeEditor( testBlock );
@@ -80,7 +96,7 @@ describe( 'Taxonomy Filter block', () => {
 			).toBeInTheDocument();
 		} );
 
-		test( 'should display taxonomy filter with preview data when taxonomy is selected', async () => {
+		test( 'should display taxonomy filter when taxonomy is selected', async () => {
 			await setup( { taxonomy: 'product_cat' } );
 			await selectBlock( /Block: Product Categories Filter/i );
 
@@ -124,7 +140,49 @@ describe( 'Taxonomy Filter block', () => {
 			expect( taxonomySelect ).toHaveValue( 'product_tag' );
 		} );
 
-		test( 'should show sort order control with default value when enabled', () => {
+		test( 'should show product counts toggle', () => {
+			const productCountsToggle = screen.getByRole( 'checkbox', {
+				name: /Product counts/i,
+			} );
+
+			expect( productCountsToggle ).toBeInTheDocument();
+			expect( productCountsToggle ).not.toBeChecked();
+		} );
+
+		test( 'should allow toggling product counts', async () => {
+			await selectBlock( /Block: Product Categories Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Categories Filter/i )
+			);
+
+			// expect the list doesn't have count indicators initially
+			expect( block.queryAllByText( /\(\d+\)/ ) ).toHaveLength( 0 );
+
+			const productCountsToggle = screen.getByRole( 'checkbox', {
+				name: /Product counts/i,
+			} );
+
+			await act( async () => {
+				fireEvent.click( productCountsToggle );
+			} );
+
+			expect( productCountsToggle ).toBeChecked();
+
+			// expect the list has count indicators after toggling
+			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
+				0
+			);
+		} );
+	} );
+
+	describe( 'Advanced controls', () => {
+		beforeEach( async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Product Categories Filter/i );
+		} );
+
+		test( 'should show sort order control when enabled', () => {
 			enableControl( 'Sort Order' );
 
 			const sortOrderSelect = screen.getByRole( 'combobox', {
@@ -147,41 +205,6 @@ describe( 'Taxonomy Filter block', () => {
 			} );
 
 			expect( sortOrderSelect ).toHaveValue( 'name-asc' );
-		} );
-
-		test( 'should show product counts toggle', () => {
-			const productCountsToggle = screen.getByRole( 'checkbox', {
-				name: /Product counts/i,
-			} );
-
-			expect( productCountsToggle ).toBeInTheDocument();
-			expect( productCountsToggle ).not.toBeChecked();
-		} );
-
-		test( 'should allow toggling product counts', async () => {
-			await selectBlock( /Block: Product Categories Filter/i );
-
-			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
-			);
-
-			// expect the list doesn't have count indicators
-			expect( block.queryAllByText( /\(\d+\)/ ) ).toHaveLength( 0 );
-
-			const productCountsToggle = screen.getByRole( 'checkbox', {
-				name: /Product counts/i,
-			} );
-
-			await act( async () => {
-				fireEvent.click( productCountsToggle );
-			} );
-
-			expect( productCountsToggle ).toBeChecked();
-
-			// expect the list has count indicators
-			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
-				0
-			);
 		} );
 
 		test( 'should show hide empty items toggle when enabled', () => {
@@ -208,15 +231,14 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 	} );
 
-	describe( 'Different attribute combinations', () => {
-		test( 'should handle all attributes set', async () => {
+	describe( 'Attribute combinations', () => {
+		test( 'should handle all attributes set correctly', async () => {
 			await setup( {
 				taxonomy: 'product_cat',
 				showCounts: true,
 				displayStyle: 'dropdown',
 				sortOrder: 'name-asc',
 				hideEmpty: false,
-				isPreview: false,
 			} );
 			await selectBlock( /Block: Product Categories Filter/i );
 
@@ -246,6 +268,26 @@ describe( 'Taxonomy Filter block', () => {
 					name: /Hide items with no products/i,
 				} )
 			).not.toBeChecked();
+		} );
+
+		test( 'should handle product tags taxonomy', async () => {
+			await setup( {
+				taxonomy: 'product_tag',
+				showCounts: true,
+			} );
+			await selectBlock( /Block: Product Tags Filter/i );
+
+			const block = within(
+				screen.getByLabelText( /Block: Product Tags Filter/i )
+			);
+
+			// Should display the taxonomy label as heading
+			expect( block.getByText( /Product Tags/i ) ).toBeInTheDocument();
+
+			// Should show count indicators since showCounts is true
+			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
+				0
+			);
 		} );
 	} );
 } );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Adds backward compatibility for `registerCheckoutFilters` in the new iAPI-powered Mini-Cart.

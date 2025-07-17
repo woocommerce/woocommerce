@@ -69,7 +69,11 @@ module.exports = {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
-				if ( request.startsWith( '@woocommerce/stores/' ) ) {
+				if (
+					request.startsWith( '@woocommerce/stores/woocommerce/' )
+				) {
+					return `module ${ request }`;
+				} else if ( request.startsWith( '@woocommerce/stores/' ) ) {
 					return `import ${ request }`;
 				}
 			},
