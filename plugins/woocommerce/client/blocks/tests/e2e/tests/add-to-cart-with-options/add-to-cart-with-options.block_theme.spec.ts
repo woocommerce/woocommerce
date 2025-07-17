@@ -52,21 +52,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
-		admin,
 		requestUtils,
 	} ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
-
+		await pageObject.updateSingleProductTemplate();
 		await pageObject.switchProductType( 'Custom Product Type' );
 
 		const block = editor.canvas.getByLabel(
@@ -186,19 +178,31 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/logo-collection' );
 
-		const increaseQuantityButton = page.getByLabel(
-			'Increase quantity of Beanie'
-		);
-		await increaseQuantityButton.click();
-		await increaseQuantityButton.click();
-
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
-		await addToCartButton.click();
+		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
+			await addToCartButton.click();
 
-		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+			await expect(
+				page.getByText(
+					'Please select some products to add to the cart.'
+				)
+			).toBeVisible();
+		} );
 
-		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+		await test.step( 'successfully adds to cart when child products are selected', async () => {
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of Beanie'
+			);
+			await increaseQuantityButton.click();
+			await increaseQuantityButton.click();
+
+			await addToCartButton.click();
+
+			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+
+			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
