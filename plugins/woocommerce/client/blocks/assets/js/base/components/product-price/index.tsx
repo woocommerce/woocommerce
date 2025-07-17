@@ -304,7 +304,7 @@ const ProductPrice = ( {
 		// If we have rtl character in the prefix, we need to set the direction to ltr
 		// to avoid the price being displayed in the wrong direction.
 		const rtlPrefixStyles =
-			currency?.prefix !== ''
+			currency?.prefix && currency.prefix !== ''
 				? {
 						unicodeBidi: 'bidi-override' as const,
 						direction: 'ltr' as const,
