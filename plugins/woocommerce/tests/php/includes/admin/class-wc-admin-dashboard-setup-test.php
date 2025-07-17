@@ -72,7 +72,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Force the "payments" task to be considered incomplete.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			function () {
 				return array();
 			}
 		);
@@ -98,7 +98,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			}
 		};
 		// phpcs:enable Squiz.Commenting
-		$widget    = $this->get_widget();
+		$widget = $this->get_widget();
 		$widget->set_task_list( $task_list );
 
 		$this->assertFalse( $widget->should_display_widget() );
@@ -118,8 +118,8 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * Tests widget does not display when user cannot manage woocommerce.
 	 */
 	public function test_widget_does_not_display_when_missing_capabilities() {
-		$password  = wp_generate_password( 8, false, false );
-		$author    = wp_insert_user(
+		$password = wp_generate_password( 8, false, false );
+		$author   = wp_insert_user(
 			array(
 				'user_login' => "test_author$password",
 				'user_pass'  => $password,
@@ -151,7 +151,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Force the "payments" task to be considered incomplete.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			function () {
 				return array();
 			}
 		);
@@ -177,7 +177,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// by faking a valid payment gateway.
 		add_filter(
 			'woocommerce_available_payment_gateways',
-			function() {
+			function () {
 				return array(
 					new class() extends WC_Payment_Gateway {
 					},
