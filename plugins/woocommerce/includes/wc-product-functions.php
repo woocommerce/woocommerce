@@ -159,6 +159,57 @@ function wc_delete_product_transients( $post_id = 0 ) {
 }
 
 /**
+ * Delete all related products transients when a product is updated/created.
+ * This is necessary because changing one product affects all related products too.
+ *
+ * @since 9.8.0
+ * @deprecated 10.1.0 This function is deprecated and will be removed in a future version.
+ * @param int $post_id The product ID updated/created.
+ */
+function wc_delete_related_product_transients( $post_id ) {
+	wc_deprecated_function( 'wc_delete_related_product_transients', '10.1.0', 'This function is deprecated and will be removed in a future version.' );
+
+	if ( ! is_numeric( $post_id ) ) {
+		return;
+	}
+
+	$transient_name          = 'wc_related_' . $post_id;
+	$old_transient           = get_transient( $transient_name );
+	$old_related_product_ids = array();
+
+	if ( is_array( $old_transient ) && ! empty( $old_transient ) ) {
+		$old_related_product_ids = $old_transient[ array_key_first( $old_transient ) ];
+	}
+
+	// Delete current product transient so that it can be refreshed below.
+	delete_transient( $transient_name );
+
+	// Gets new related products and sets current product transient.
+	$new_related_product_ids = wc_get_related_products( $post_id, 1000 );
+
+	// Combine all product IDs that need their transients cleared.
+	$related_product_ids = array_unique(
+		array_merge(
+			$old_related_product_ids,
+			$new_related_product_ids
+		)
+	);
+
+	if ( empty( $related_product_ids ) ) {
+		return;
+	}
+
+	// Create the list of transient names to delete.
+	$related_product_transients = array_map(
+		function ( $id ) {
+			return 'wc_related_' . $id;
+		},
+		$related_product_ids
+	);
+	_wc_delete_transients( $related_product_transients );
+}
+
+/**
  * Function that returns an array containing the IDs of the products that are on sale.
  *
  * @since 2.0
