@@ -275,7 +275,6 @@
           "fontSize": "13px"
         }
       },
-	  "elements": {
 		"button": {
 			"color": {
 				"background": "#32373c",
@@ -290,7 +289,6 @@
 				}
 			}
 		}
-	}
     }
   }
 }
