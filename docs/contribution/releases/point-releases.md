@@ -8,6 +8,7 @@ sidebar_label: Point Releases
 ## What Are Point Releases?
 
 Point releases are patch releases that address specific issues without adding substantial new functionality. Point releases typically contain:
+
 - **Critical bug fixes** affecting store functionality or checkout processes
 - **Security patches** for urgent vulnerabilities
 - **Compatibility fixes** for WordPress, theme, or plugin conflicts
@@ -35,6 +36,7 @@ The **Point Release Request (PRR) flow** is a structured process for requesting 
 Provide the required PRR template information:
 
 **Required Fields:**
+
 - **PR URL**: The pull request URL against the release branch
 - **Justification**: Why this PR needs a point release
 - **Impact Assessment**: Consequences if the fix is not included (number of users affected and how)
@@ -65,13 +67,20 @@ When deciding whether to approve a PRR, the release lead should consider the fol
 
 #### 5. Merge to Release Branch (Release Lead / Core Contributor)
 
-Because most community contributors do **not** have merge rights on the WooCommerce repository, the actual merge must be handled by someone who does—typically the **release lead** or another core contributor.
+- **Verify cherry-pick requirements**
+  - Check whether the fix is already included in `trunk` and/or the next frozen branch.
+  - If the fix *should not* be forward-ported, remove the labels  
+    `cherry pick to trunk` and `cherry pick to frozen release`.
 
-| Action | Details                                                                                                                                                                                                                                                                       |
-|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Verify cherry-pick requirements** | -  Check whether the fix is already included in trunk and/or the next frozen branch.<br>-  If the fix **should not** be forward-ported, **remove** the automatically-added labels:<br>&nbsp;&nbsp;-  `cherry pick to trunk`<br>&nbsp;&nbsp;-  `cherry pick to frozen release` |
-| **Merge the PR** | -  Once label review is complete, merge the PR into the current `release/x.y` branch.<br>-  Confirm that the changelog entry and milestone are correct.                                                                                                                       |
-| **Resulting automation** | -  If either cherry-pick label remains, GitHub Actions will open follow-up PRs to trunk and/or the frozen release branch.<br>-  If both labels were removed, no cherry-pick workflows will run.                                                                               |
+- **Merge the PR**
+  - After reviewing the labels, merge the PR into the current `release/x.y` branch.
+  - Confirm that the changelog entry and milestone are correct.
+
+- **Resulting automation**
+  - If either cherry-pick label remains, GitHub Actions opens follow-up PRs to `trunk`
+    and/or the frozen release branch.
+  - If both labels were removed, no cherry-pick workflows run.
+
 
 #### 6. Review & Merge Follow-up PRs (Release Lead)
 
