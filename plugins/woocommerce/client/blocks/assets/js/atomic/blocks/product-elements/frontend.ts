@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getElement, store } from '@wordpress/interactivity';
+import { getElement, store, getContext } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
@@ -46,26 +46,34 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-const productPriceStore = store(
-	'woocommerce/product-price',
+export type Context = {
+	productElementKey: 'price_html' | 'availability_html';
+};
+
+const productElementStore = store(
+	'woocommerce/product-element',
 	{
 		callbacks: {
-			updatePrice: () => {
+			updateValue: () => {
 				const element = getElement();
 
 				if ( ! element.ref || ! productDataState?.productId ) {
 					return;
 				}
 
-				const priceHtml =
-					wooState?.products?.[ productDataState?.productId ]
-						?.variations?.[ productDataState?.variationId || 0 ]
-						?.price_html ||
-					wooState?.products?.[ productDataState?.productId ]
-						?.price_html;
+				const { productElementKey } = getContext< Context >();
 
-				if ( typeof priceHtml === 'string' ) {
-					element.ref.innerHTML = sanitize( priceHtml, {
+				const productElementHtml =
+					wooState?.products?.[ productDataState?.productId ]
+						?.variations?.[ productDataState?.variationId || 0 ]?.[
+						productElementKey
+					] ||
+					wooState?.products?.[ productDataState?.productId ]?.[
+						productElementKey
+					];
+
+				if ( typeof productElementHtml === 'string' ) {
+					element.ref.innerHTML = sanitize( productElementHtml, {
 						ALLOWED_TAGS,
 						ALLOWED_ATTR,
 					} );
@@ -76,4 +84,4 @@ const productPriceStore = store(
 	{ lock: true }
 );
 
-export type ProductPriceStore = typeof productPriceStore;
+export type ProductElementStore = typeof productElementStore;

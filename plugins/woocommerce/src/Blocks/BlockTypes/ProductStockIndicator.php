@@ -147,9 +147,13 @@ class ProductStockIndicator extends AbstractBlock {
 				)
 			);
 
-			wp_enqueue_script_module( 'woocommerce/product-stock-indicator' );
-			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-stock-indicator';
-			$watch_attribute                           = 'data-wp-watch="callbacks.updateStockQuantity"';
+			wp_enqueue_script_module( 'woocommerce/product-element' );
+			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-element';
+			$context                                   = array(
+				'productElementKey' => 'availability_html',
+			);
+			$context_attribute                         = 'data-wp-context=' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+			$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
 		}
 
 		$output_text = $low_stock_text ?? $availability['availability'];
@@ -159,6 +163,7 @@ class ProductStockIndicator extends AbstractBlock {
 		$output .= isset( $classes_and_styles['styles'] ) ? ' style="' . esc_attr( $classes_and_styles['styles'] ) . '"' : '';
 		if ( $is_interactive ) {
 			$output .= ' ' . get_block_wrapper_attributes( $wrapper_attributes );
+			$output .= ' ' . $context_attribute;
 			$output .= ' ' . $watch_attribute;
 		}
 		$output .= '>';
