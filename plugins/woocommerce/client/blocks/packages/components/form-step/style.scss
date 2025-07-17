@@ -9,10 +9,6 @@
 	background: none;
 	margin: 0 0 $gap-larger 0;
 
-	display: flex;
-	flex-direction: column;
-	gap: $gap;
-
 	.wc-block-components-text-input:first-of-type,
 	.wc-block-components-country-input {
 		margin-top: 0;
@@ -106,6 +102,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: $gap-smaller;
+	margin-bottom: $gap;
 }
 
 .wc-block-components-checkout-step__title {
