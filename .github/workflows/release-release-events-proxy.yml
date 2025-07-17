@@ -11,6 +11,4 @@ jobs:
     uses: woocommerce/woocommerce/.github/workflows/release-new-release-published.yml@trunk
     with:
       release_tag_name: ${{ github.event.release.tag_name }}
-      release_name: ${{ github.event.release.name }}
-      release_html_url: ${{ github.event.release.html_url }}
     secrets: inherit
