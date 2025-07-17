@@ -16,7 +16,7 @@ on:
         type: string
 
 jobs:
-  # Jobs to run after a pre-release is published ("prereleased" GH event).
+  # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:
     name: 'Call release commits and contributors workflow'
     if: ${{ github.event.action == 'prereleased' && !contains(github.event.release.tag_name, 'wc-beta-tester') }}
@@ -25,7 +25,7 @@ jobs:
       version: ${{ github.event.release.tag_name }}
     secrets: inherit
 
-  # Jobs to run after a final release is published ("published" GH event).
+  # Jobs to run after a final release is published (triggered by the "published" GH event).
   notify-release-published:
     name: 'Notify in Slack when a new release is published'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}

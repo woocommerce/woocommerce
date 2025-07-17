@@ -1,4 +1,4 @@
-# This is a proxy workflow to dispatch workflows from trunk branch for release events (published and pre-release).'
+# This is a proxy workflow to dispatch workflows from trunk branch for release events (published and pre-release).
 name: 'Release: Release events proxy workflow'
 on:
   release:
