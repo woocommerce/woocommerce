@@ -106,8 +106,8 @@ class Params implements FilterUrlParam {
 	private function get_taxonomy_params(): array {
 		$public_product_taxonomies = get_taxonomies(
 			array(
-				'public'      => true,
-				'object_type' => array( 'product' ),
+				'public'  => true,
+				'show_ui' => true,
 			),
 			'objects'
 		);
@@ -119,11 +119,14 @@ class Params implements FilterUrlParam {
 			'product_brand' => 'brands',
 		);
 
-		return array_map(
-			function ( $taxonomy ) use ( $map ) {
-				return $map[ $taxonomy->name ] ?? "filter_$taxonomy->name";
-			},
-			$public_product_taxonomies
-		);
+		$params = array();
+
+		foreach ( $public_product_taxonomies as $taxonomy ) {
+			if ( is_array( $taxonomy->object_type ) && in_array( 'product', $taxonomy->object_type, true ) ) {
+				$params[ $taxonomy->name ] = $map[ $taxonomy->name ] ?? "filter_$taxonomy->name";
+			}
+		}
+
+		return $params;
 	}
 }
