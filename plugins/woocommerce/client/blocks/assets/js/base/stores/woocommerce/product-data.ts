@@ -3,10 +3,6 @@
  */
 import { getContext, store } from '@wordpress/interactivity';
 
-type ProductData = {
-	price_html: string | null;
-};
-
 export type Context = {
 	productId: number | null;
 	variationId: number | null;
@@ -26,10 +22,6 @@ const productDataStore = store< {
 	} & ServerState;
 	actions: {
 		setVariationId: ( variationId: number | null ) => void;
-		setProductData: (
-			key: keyof ProductData,
-			value: string | null
-		) => void;
 	};
 } >(
 	'woocommerce/product-data',
