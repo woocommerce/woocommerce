@@ -21,7 +21,7 @@ jobs:
   notify-release-published:
     name: 'Notify in Slack when a new release is published'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    if: ${{ github.event.action == 'published' && !contains(inputs.release_tag_name, 'wc-beta-tester') }}
+    if: ${{ github.event.action == 'published' }}
     steps:
       - name: 'Notify to release channel'
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
