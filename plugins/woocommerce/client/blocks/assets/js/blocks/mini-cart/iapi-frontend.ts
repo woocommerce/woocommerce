@@ -161,10 +161,10 @@ store< MiniCart >(
 			},
 
 			get buttonAriaLabel(): string {
-				return buttonAriaLabelTemplate.replace(
-					'%d',
-					state.totalItemsInCart
-				);
+				return buttonAriaLabelTemplate
+					.replace( '%d', state.totalItemsInCart )
+					.replace( '%1$d', state.totalItemsInCart )
+					.replace( '%2$s', state.formattedSubtotal );
 			},
 		},
 

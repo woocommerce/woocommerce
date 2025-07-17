@@ -507,17 +507,26 @@ class MiniCart extends AbstractBlock {
 				}
 			}
 
-			/* translators: %d is the number of products in the cart. */
-			$button_aria_label_template = __( 'Number of items in the cart: %d', 'woocommerce' );
+			// The following translation is a temporary workaround. It will be
+			// reverted to the previous form (`%1$d item in cart`) as soon as the
+			// `@wordpress/i18n` package is available as a script module.
+			$button_aria_label_template = isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+				/* translators: %d is the number of products in the cart. */
+				? __( 'Number of items in the cart: %d', 'woocommerce' )
+				/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+				: __( 'Number of items in the cart: %1$d. Total price of %2$s', 'woocommerce' );
 
-			$state = wp_interactivity_state(
+			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
 					'totalItemsInCart'  => $cart_item_count,
 					'badgeIsVisible'    => $badge_is_visible,
 					'formattedSubtotal' => $formatted_subtotal,
 					'buttonAriaLabel'   => function () {
-						return sprintf( $button_aria_label_template, $state['totalItemsInCart'] );
+						$state = wp_interactivity_state();
+						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
+							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
 					},
 				)
 			);
