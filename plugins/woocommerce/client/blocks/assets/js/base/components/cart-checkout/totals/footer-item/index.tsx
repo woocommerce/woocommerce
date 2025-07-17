@@ -140,20 +140,22 @@ const TotalsFooterItem = ( {
 			value={ value }
 			description={
 				<>
-					{ SHOW_TAXES &&
-						parsedTaxValue !== 0 &&
-						( isLoading ? (
-							<Skeleton
-								width="45px"
-								height="1.55em"
-								ariaMessage={ __(
-									'Loading price… ',
-									'woocommerce'
-								) }
-							/>
-						) : (
-							<p className="wc-block-components-totals-footer-item-tax">
-								{ createInterpolateElement( description, {
+					{ SHOW_TAXES && parsedTaxValue !== 0 && (
+						<p className="wc-block-components-totals-footer-item-tax">
+							{ isLoading ? (
+								<>
+									<span>Including </span>
+									<Skeleton
+										height="1em"
+										width="45px"
+										ariaMessage={ __(
+											'Loading price… ',
+											'woocommerce'
+										) }
+									/>
+								</>
+							) : (
+								createInterpolateElement( description, {
 									TaxAmount: (
 										<FormattedMonetaryAmount
 											className="wc-block-components-totals-footer-item-tax-value"
@@ -161,9 +163,10 @@ const TotalsFooterItem = ( {
 											value={ parsedTaxValue }
 										/>
 									),
-								} ) }
-							</p>
-						) ) }
+								} )
+							) }
+						</p>
+					) }
 					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (
 						<p className="wc-block-components-totals-footer-item-shipping">
 							{ __(
