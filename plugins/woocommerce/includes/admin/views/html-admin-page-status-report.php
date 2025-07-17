@@ -903,8 +903,13 @@ if ( 0 < $mu_plugins_count ) :
 					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
 						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
 					} elseif ( $_page['shortcode_present'] ) {
-						/* Translators: %1$s: shortcode text. */
-						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
+						// Always display the shortcode with square brackets for consistency.
+						$shortcode_display = $_page['shortcode'];
+						if ( $shortcode_display && '[' !== $shortcode_display[0] ) {
+							$shortcode_display = '[' . $shortcode_display . ']';
+						}
+						/* translators: %1$s: shortcode text. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $shortcode_display ) );
 					} elseif ( $_page['block_present'] ) {
 						/* Translators: %1$s: block slug. */
 						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
