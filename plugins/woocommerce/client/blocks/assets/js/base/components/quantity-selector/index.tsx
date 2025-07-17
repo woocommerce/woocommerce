@@ -115,6 +115,8 @@ const QuantitySelector = ( {
 	 */
 	useLayoutEffect( () => {
 		if ( quantity === expectedQuantityRef.current ) {
+			// Reset expected quantity type to 'input' if the prop matches the current state.
+			expectedQuantityTypeRef.current = 'input';
 			return;
 		}
 		if (

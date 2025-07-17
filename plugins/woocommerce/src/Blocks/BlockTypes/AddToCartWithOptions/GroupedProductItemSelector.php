@@ -107,7 +107,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$quantity_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $quantity_html );
 
 		// Add interactive data attribute for the stepper functionality.
-		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html );
+		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, '', $product->get_id() );
 
 		return $quantity_html;
 	}

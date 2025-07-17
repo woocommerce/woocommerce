@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	OptimisticCartItem,
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -52,14 +56,60 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
+const isCartItemMatched = (
+	cartItem: OptimisticCartItem,
+	selectedItem: SelectedAttributes[]
+) => {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedItem )
+	) {
+		return false;
+	}
+
+	// In case the attributes list length is different in both the objects.
+	if ( cartItem.variation.length !== selectedItem.length ) {
+		return false;
+	}
+
+	return cartItem.variation.every(
+		( {
+			// eslint-disable-next-line
+			raw_attribute,
+			value,
+		}: {
+			raw_attribute: string;
+			value: string;
+		} ) =>
+			selectedItem.some( ( item: SelectedAttributes ) => {
+				return (
+					item.attribute === raw_attribute &&
+					( item.value.toLowerCase() === value.toLowerCase() ||
+						( item.value && value === '' ) ) // Handle "any" attribute type
+				);
+			} )
+	);
+};
+
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = wooState.cart?.items.find(
+			const products = wooState.cart?.items.filter(
 				( item ) => item.id === state.productId
 			);
 
-			return product?.quantity || 0;
+			// Return the product quantity when the item is a non-variable product.
+			if ( products[ 0 ]?.type !== 'variation' ) {
+				return products[ 0 ]?.quantity || 0;
+			}
+
+			const selectedAttributes =
+				addToCartWithOptionsState?.selectedAttributes;
+			const selectedVariableProduct = products.find( ( item ) =>
+				isCartItemMatched( item, selectedAttributes )
+			);
+
+			return selectedVariableProduct?.quantity || 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -142,6 +192,7 @@ const productButtonStore = {
 			yield actions.addCartItem( {
 				id: state.productId,
 				quantity: state.quantity + context.quantityToAdd,
+				type: context.productType,
 			} );
 
 			context.displayViewCart = true;
@@ -173,7 +224,14 @@ const productButtonStore = {
 		},
 		handlePressedState() {
 			const context = getContext< Context >();
-			context.hasPressedButton = true;
+
+			// Only handle the pressed state if the form is valid.
+			if (
+				addToCartWithOptionsState?.isFormValid === undefined ||
+				addToCartWithOptionsState?.isFormValid
+			) {
+				context.hasPressedButton = true;
+			}
 		},
 	},
 	callbacks: {
@@ -194,8 +252,7 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
-			// We skip the animation altogether if the single product page Add to Cart + Options form is invalid.
-
+			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE &&

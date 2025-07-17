@@ -108,4 +108,21 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->heading_renderer->render( '<h1 style="font-size:clamp(10px, 20px, 24px)">This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'font-size:24px', $rendered );
 	}
+
+	/**
+	 * Test it uses inherited color from email_attrs when no color is specified
+	 */
+	public function testItUsesInheritedColorFromEmailAttrs(): void {
+		$parsed_heading = $this->parsed_heading;
+
+		unset( $parsed_heading['attrs']['style']['color'] );
+		unset( $parsed_heading['attrs']['textColor'] );
+
+		$parsed_heading['email_attrs'] = array(
+			'color' => '#ff0000',
+		);
+
+		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
 }
