@@ -147,6 +147,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await colorGreenOption.click();
 
+			// Note: The button is always enabled for accessibility reasons.
+			// Instead, we check directly for the "disabled" class, which grays
+			// out the button.
+			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+
 			await addToCartButton.click();
 
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
