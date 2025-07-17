@@ -165,7 +165,7 @@ export const BankAccountsList = ( {
 							<div className="bank-accounts__list-item-text">
 								<div>{ account.account_name }</div>
 								<div>
-									{ account.account_number ?? account.iban }
+									{ account.account_number || account.iban }
 								</div>
 								<div>{ account.bank_name }</div>
 							</div>
