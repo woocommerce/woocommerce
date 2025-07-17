@@ -15,15 +15,15 @@ Filter the synced site style data before applying to email theme.
  * @since 1.1.0
  * @param array $synced_data The converted email-compatible theme data
  * @param array $site_data The original site theme data
- * @param array $sync_settings Current sync settings
  * @return array Modified synced data
  */
-apply_filters( 'woocommerce_email_editor_synced_site_styles', $synced_data, $site_data, $sync_settings );
+apply_filters( 'woocommerce_email_editor_synced_site_styles', $synced_data, $site_data );
 ```
 
 **Example Usage:**
+
 ```php
-add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data, $sync_settings ) {
+add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data ) {
     // Override specific colors for emails
     if ( isset( $synced_data['styles']['color'] ) ) {
         $synced_data['styles']['color']['background'] = '#ffffff'; // Force white background
@@ -32,7 +32,7 @@ add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_dat
     
     // Add custom email-specific font family
     if ( isset( $synced_data['settings']['typography']['fontFamilies'] ) ) {
-        $synced_data['settings']['typography']['fontFamilies']['default'][] = array(
+        $synced_data['settings']['typography']['fontFamilies'] = array(
             'slug' => 'email-custom',
             'name' => 'Email Custom Font',
             'fontFamily' => 'Arial, sans-serif'
@@ -40,7 +40,8 @@ add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_dat
     }
     
     return $synced_data;
-}, 10, 3 );
+}, 10, 2
+ );
 ```
 
 ### `woocommerce_email_editor_site_style_sync_enabled`
@@ -59,6 +60,7 @@ apply_filters( 'woocommerce_email_editor_site_style_sync_enabled', true );
 ```
 
 **Example Usage:**
+
 ```php
 // Disable site style sync for specific themes
 add_filter( 'woocommerce_email_editor_site_style_sync_enabled', function( $enabled ) {
@@ -73,42 +75,12 @@ add_filter( 'woocommerce_email_editor_site_style_sync_enabled', function( $enabl
 });
 ```
 
-### `woocommerce_email_editor_email_safe_fonts`
-
-Customize the list of email-safe fonts used during sync.
-
-```php
-/**
- * Filter the list of email-safe fonts
- *
- * @since 1.1.0
- * @param array $fonts List of email-safe font stacks
- * @return array
- */
-apply_filters( 'woocommerce_email_editor_email_safe_fonts', $fonts );
-```
-
-**Example Usage:**
-```php
-add_filter( 'woocommerce_email_editor_email_safe_fonts', function( $fonts ) {
-    // Add custom email-safe font
-    $fonts[] = '"Custom Font", Arial, sans-serif';
-    
-    // Remove a font that doesn't work well with your email provider
-    $fonts = array_filter( $fonts, function( $font ) {
-        return strpos( $font, 'Courier' ) === false;
-    });
-    
-    return $fonts;
-});
-```
-
 ## Advanced Customization Examples
 
 ### Custom Font Mapping
 
 ```php
-add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data, $sync_settings ) {
+add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data ) {
     // Map specific site fonts to preferred email fonts
     $font_mappings = array(
         'Inter' => 'Arial, sans-serif',
@@ -128,13 +100,13 @@ add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_dat
     }
     
     return $synced_data;
-}, 10, 3 );
+}, 10, 2 );
 ```
 
 ### Conditional Sync Based on Email Type
 
 ```php
-add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data, $sync_settings ) {
+add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_data, $site_data ) {
     global $post;
     
     // Different styling for different email types
@@ -149,5 +121,5 @@ add_filter( 'woocommerce_email_editor_synced_site_styles', function( $synced_dat
     }
     
     return $synced_data;
-}, 10, 3 );
+}, 10, 2 );
 ```
