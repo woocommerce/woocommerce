@@ -62,13 +62,25 @@ const Edit = ( {
 	const ref = useRef< HTMLDivElement >( null );
 
 	const blockProps = useBlockProps();
-	const wasBlockJustInserted = useSelect(
-		( select ) =>
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore method exists but not typed
-			select( blockEditorStore ).wasBlockJustInserted( clientId ),
+	const { wasBlockJustInserted, isInProductGallery } = useSelect(
+		( select ) => {
+			return {
+				wasBlockJustInserted:
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore method exists but not typed
+					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+				isInProductGallery:
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore method exists but not typed
+					select( blockEditorStore ).getBlockParentsByBlockName(
+						clientId,
+						'woocommerce/product-gallery'
+					).length > 0,
+			};
+		},
 		[ clientId ]
 	);
+
 	const innerBlockProps = useInnerBlocksProps(
 		{
 			className: 'wc-block-components-product-image__inner-container',
@@ -78,42 +90,18 @@ const Edit = ( {
 			template: wasBlockJustInserted ? TEMPLATE : undefined,
 		}
 	);
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( {
-			blockClientId: blockProps?.id,
-		} );
+
 	const isBlockTheme = getSettingWithCoercion(
 		'isBlockTheme',
 		false,
 		isBoolean
 	);
 
-	useEffect( () => {
-		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-				showSaleBadge: false,
-			} );
-		} else {
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductBlock,
-			} );
-		}
-	}, [
-		isDescendentOfQueryLoop,
-		isDescendentOfSingleProductBlock,
-		setAttributes,
-	] );
-
-	const showControls =
-		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
-
 	return (
 		<div { ...blockProps }>
-			{ showControls && (
+			{ /* Don't show controls in product gallery as we rely on
+			core supports API (aspect ratio setting) */ }
+			{ ! isInProductGallery && (
 				<InspectorControls>
 					<ImageSizeSettings
 						scale={ scale }
@@ -181,7 +169,7 @@ const Edit = ( {
 				</InspectorControls>
 			) }
 			<Block { ...{ ...attributes, ...context } }>
-				{ showControls && <div { ...innerBlockProps } /> }
+				{ ! isInProductGallery && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>
 	);
