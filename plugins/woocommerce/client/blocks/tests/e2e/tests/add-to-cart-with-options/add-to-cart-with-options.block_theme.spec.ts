@@ -237,7 +237,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 	} ) => {
 		await pageObject.updateSingleProductTemplate();
 
-		await pageObject.switchProductType( 'Variable Product' );
+		await pageObject.switchProductType( 'Variable product' );
+
+		await page.getByRole( 'tab', { name: 'Block' } ).click();
 
 		// Verify inner blocks have loaded.
 		await expect(
@@ -268,10 +270,19 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/hoodie' );
 
-		const colorGreenOption = page.getByRole( 'option', {
+		let colorGreenOption = page.getByRole( 'option', {
 			name: 'Green',
 			exact: true,
 		} );
+
+		// Workaround for the template not being updated on the first load.
+		if ( ! ( await colorGreenOption.isVisible() ) ) {
+			await page.reload();
+			colorGreenOption = page.getByRole( 'option', {
+				name: 'Green',
+				exact: true,
+			} );
+		}
 
 		await expect( colorGreenOption ).toBeEnabled();
 
