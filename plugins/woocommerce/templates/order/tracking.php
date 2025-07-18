@@ -23,6 +23,13 @@ $notes = $order->get_customer_order_notes();
 <p class="order-info">
 	<?php
 	echo wp_kses_post(
+		/**
+		 * Filter to modify order tracking status text.
+		 *
+		 * @param string $order_status The order status text.
+		 *
+		 * @since 10.1.0
+		 */
 		apply_filters(
 			'woocommerce_order_tracking_status',
 			sprintf(

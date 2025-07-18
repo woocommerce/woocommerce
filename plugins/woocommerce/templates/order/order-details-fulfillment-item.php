@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 5.2.0
+ * @version 10.1.0
  *
  * phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
  */

@@ -29,7 +29,7 @@ echo wp_kses_post(
 	 *
 	 * @param string $order_status The order status text.
 	 *
-	 * @since 9.9.0
+	 * @since 10.1.0
 	 */
 	apply_filters(
 		'woocommerce_order_details_status',
