@@ -59,7 +59,7 @@
 			} else {
 				var org_title = DOMPurify.sanitize( org_elem.attr(opts.attribute), {
 					ALLOWED_TAGS: [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br', 'pre', 'span', 'img' ],
-					ALLOWED_ATTR: [ 'target', 'href', 'rel', 'name', 'download', 'title' ],
+					ALLOWED_ATTR: [ 'target', 'href', 'rel', 'name', 'download', 'title', 'src', 'alt', 'class', 'style' ],
 				} );
 			}
 			if(org_title != ""){
