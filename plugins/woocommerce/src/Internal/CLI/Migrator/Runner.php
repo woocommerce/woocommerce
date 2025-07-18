@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\CLI\Migrator;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ProductsCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ResetCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\SetupCommand;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ListCommand;
 use WP_CLI;
 use WC_Product_Factory;
 
@@ -45,6 +46,14 @@ final class Runner {
 			$container->get( SetupCommand::class ),
 			array(
 				'shortdesc' => 'Interactively sets up the credentials for a given platform.',
+			)
+		);
+
+		WP_CLI::add_command(
+			'wc migrator list',
+			$container->get( ListCommand::class ),
+			array(
+				'shortdesc' => 'Lists all registered migration platforms.',
 			)
 		);
 	}
