@@ -314,23 +314,6 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test it extends block styles with invalid CSS declarations parameter.
-	 */
-	public function testItExtendsBlockStylesWithInvalidCssDeclarations(): void {
-		$block_styles = array(
-			'declarations' => array(
-				'padding' => '10px',
-			),
-			'css'          => 'padding: 10px;',
-			'classnames'   => 'test-class',
-		);
-
-		$result = Styles_Helper::extend_block_styles( $block_styles, 'invalid-declarations' );
-
-		$this->assertSame( $block_styles, $result );
-	}
-
-	/**
 	 * Test it gets block styles.
 	 */
 	public function testItGetsBlockStyles(): void {

@@ -132,10 +132,6 @@ class Styles_Helper {
 	 * }
 	 */
 	public static function extend_block_styles( array $block_styles, array $css_declarations ) {
-		if ( ! is_array( $css_declarations ) ) {
-			return $block_styles;
-		}
-
 		// Ensure block_styles has the required WP_Style_Engine structure.
 		if ( ! isset( $block_styles['declarations'] ) || ! is_array( $block_styles['declarations'] ) ) {
 			$block_styles = self::$empty_block_styles;
