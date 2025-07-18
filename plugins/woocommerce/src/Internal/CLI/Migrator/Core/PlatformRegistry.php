@@ -45,7 +45,7 @@ class PlatformRegistry {
 		 *                         is another array containing 'name', 'fetcher', and 'mapper' class names.
 		 * @since 1.0.0
 		 */
-		$platforms = apply_filters( 'wc_migrator_register_platform', array() );
+		$platforms = apply_filters( 'woocommerce_migrator_platforms', array() );
 
 		if ( ! is_array( $platforms ) ) {
 			return;

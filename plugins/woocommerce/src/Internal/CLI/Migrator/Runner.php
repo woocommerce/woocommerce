@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ProductsCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ResetCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\SetupCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ListCommand;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify\ShopifyPlatform;
 use WP_CLI;
 use WC_Product_Factory;
 
@@ -22,6 +23,9 @@ final class Runner {
 	 * @return void
 	 */
 	public static function register_commands(): void {
+		// Initialize built-in platforms.
+		self::init_platforms();
+
 		$container = wc_get_container();
 
 		WP_CLI::add_command(
@@ -56,5 +60,14 @@ final class Runner {
 				'shortdesc' => 'Lists all registered migration platforms.',
 			)
 		);
+	}
+
+	/**
+	 * Initialize built-in migration platforms.
+	 *
+	 * @return void
+	 */
+	private static function init_platforms(): void {
+		ShopifyPlatform::init();
 	}
 }
