@@ -14,6 +14,10 @@ namespace Automattic\WooCommerce\Internal;
  */
 class RestApiParameterUtil {
 
+	public function test_is_hpos_on() {
+		$this->assertTrue( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() );
+	}	
+
 	/**
 	 * Converts a create refund request from the public API format:
 	 *
