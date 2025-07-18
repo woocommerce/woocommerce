@@ -99,7 +99,7 @@ const handleTransitionFromCarouselLayout = (
 	actions: ReturnType< typeof useDispatch >,
 	collection?: string
 ) => {
-	const { removeBlock, insertBlock } = actions;
+	const { removeBlock, insertBlock, replaceBlock } = actions;
 
 	const nextPrevArrowsBlock = getInnerBlockByName(
 		productCollectionBlock,
@@ -121,27 +121,28 @@ const handleTransitionFromCarouselLayout = (
 		);
 	} );
 
+	// Extract the product template block.
+	const productTemplate = getInnerBlockByName(
+		productCollectionBlock,
+		productTemplateBlockName
+	);
+
+	const productTemplateUpdatedBlock = productTemplate
+		? createBlock(
+				productTemplateBlockName,
+				{
+					...productTemplate.attributes,
+					// Grid and List layouts are handled manually for now so
+					// we need to reset it to an empty object.
+					layout: {},
+				},
+				productTemplate.innerBlocks
+		  )
+		: null;
+
 	// If Product Template is not in the group block, we should not do anything.
 	if ( groupBlock ) {
-		// Extract the product template block.
-		const productTemplate = getInnerBlockByName(
-			groupBlock,
-			productTemplateBlockName
-		);
-
-		const productTemplateUpdatedBlock = productTemplate
-			? createBlock(
-					productTemplateBlockName,
-					{
-						...productTemplate.attributes,
-						// Grid and List layouts are handled manually for now so
-						// we need to reset it to an empty object.
-						layout: {},
-					},
-					productTemplate.innerBlocks
-			  )
-			: null;
-
+		// @ts-expect-error getBlockIndex is not typed.
 		const groupBlockIndex = select( blockEditorStore ).getBlockIndex(
 			groupBlock.clientId
 		);
@@ -160,11 +161,14 @@ const handleTransitionFromCarouselLayout = (
 		// immediately after the blocks are removed.
 		const isGroupBlockEmpty = ! select(
 			blockEditorStore
+			// @ts-expect-error getClientIdsOfDescendants is not typed.
 		).getClientIdsOfDescendants( groupBlock.clientId ).length;
 
 		if ( isGroupBlockEmpty ) {
 			removeBlock( groupBlock.clientId, false );
 		}
+	} else if ( productTemplate ) {
+		replaceBlock( productTemplate?.clientId, productTemplateUpdatedBlock );
 	}
 
 	// Add the pagination block for default collection (it has collection attribute undefined).
