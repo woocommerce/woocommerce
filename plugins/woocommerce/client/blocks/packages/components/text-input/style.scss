@@ -12,7 +12,7 @@
 		@include font-regular-locked;
 		position: absolute;
 		transform: translateY(-50%);
-		// Not sure why, but looks better alinged when off by 1px
+		// 1px (border) + padding of the input
 		left: calc($gap-small + 1px);
 		// 1px (border) + padding of the input + half the height of the label itself
 		top: calc(1px + $gap + 10px);
