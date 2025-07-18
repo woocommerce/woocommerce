@@ -89,28 +89,37 @@ describe( 'Product Details block', () => {
 
 		beforeAll( () => server.listen() );
 
+		beforeEach( () => {
+			( useSelect as jest.Mock ).mockImplementation(
+				( callback, deps ) => {
+					const originalUseSelect =
+						jest.requireActual( '@wordpress/data' ).useSelect;
+					const originalResult = originalUseSelect( callback, deps );
+
+					if (
+						originalResult &&
+						typeof originalResult === 'object' &&
+						! Array.isArray( originalResult )
+					) {
+						const result = {
+							...originalResult,
+							wasBlockJustInserted: true,
+						};
+
+						return result;
+					}
+					return originalResult;
+				}
+			);
+		} );
+
+		afterEach( () => {
+			( useSelect as jest.Mock ).mockClear();
+		} );
+
 		afterAll( () => server.close() );
 
 		test( 'should render product specifications when product is selected', async () => {
-			useSelect.mockImplementation( ( callback, deps ) => {
-				const originalUseSelect =
-					jest.requireActual( '@wordpress/data' ).useSelect;
-				const originalResult = originalUseSelect( callback, deps );
-
-				if (
-					originalResult &&
-					typeof originalResult === 'object' &&
-					! Array.isArray( originalResult )
-				) {
-					const result = {
-						...originalResult,
-						wasBlockJustInserted: true,
-					};
-
-					return result;
-				}
-				return originalResult;
-			} );
 			await setupWithSingleProduct( {}, 2 );
 
 			await waitFor( () => {
