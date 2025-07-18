@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 
 /**
  * Class EmailActionController
@@ -15,54 +16,89 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
  * @package Automattic\WooCommerce\Internal\StockNotifications\Emails
  */
 class EmailActionController {
+    public function __construct() {
+        add_action( 'template_redirect', array( $this, 'maybe_process_verification_action_from_request' ) );
+        add_action( 'template_redirect', array( $this, 'maybe_process_unsubscribe_action_from_request' ) );
+    }
 
-	public $notification;
+    public function maybe_process_verification_action_from_request(): void {
+        $this->maybe_process_verification_action(
+            $_GET['notification_id'] ?? null,
+            $_GET['email_link_action_key'] ?? null
+        );
+    }
 
-	/**
-	 * Checks for email actions in the request and processes them.
-	 */
-	public function __construct() {
-		if (
-			! isset( $_GET['notification_id'] ) ||
-			! isset( $_GET['email_link_action_key'] )
-		) {
-			return;
-		}
-
-		$this->notification = Factory::get_notification( $_GET['notification_id'] );
-
-		if ( ! $this->notification ) {
-			return;
-		}
-
-		if ( empty( $this->notification->get_meta( 'email_link_action_key' ) ) ) {
-			return;
-		}
-
-		add_action( 'template_redirect', array( $this, 'process_verification_action' ) );
-		add_action( 'template_redirect', array( $this, 'process_unsubscribe_action' ) );
-	}
+    // Wrapper for production use
+    public function maybe_process_unsubscribe_action_from_request(): void {
+        $this->maybe_process_unsubscribe_action(
+            $_GET['notification_id'] ?? null,
+            $_GET['email_link_action_key'] ?? null
+        );
+    }
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.
 	 * TODO: redirect the request, notify the user of successful verification.
+     *
+     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $action_key The action key to verify.
 	 */
-	public function process_verification_action(): void {
-		if ( $this->notification->check_verification_key( $_GET['email_link_action_key'] ) ) {
-			$this->notification->set_status( NotificationStatus::ACTIVE );
-			$this->notification->set_date_confirmed( time() );
-			$this->notification->save();
+    public function maybe_process_verification_action( $notification_id, $action_key ): void  {
+        $notification = $this->get_notification_to_be_processed();
+
+        if ( ! $notification ) {
+            return;
+        }
+
+		if ( $notification->check_verification_key( $_GET['email_link_action_key'] ) ) {
+			$notification->set_status( NotificationStatus::ACTIVE );
+			$notification->set_date_confirmed( time() );
+			$notification->save();
 		}
 	}
 
 	/**
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
 	 * TODO: redirect the request, notify the user of successful unsubscription.
+     *
+     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $action_key The action key to verify.
 	 */
-	public function process_unsubscribe_action(): void {
-		if ( $this->notification->check_unsubscribe_key( $_GET['email_link_action_key'] ) ) {
+    public function maybe_process_unsubscribe_action( $notification_id, $action_key ): void {
+        $notification = $this->get_notification_to_be_processed();
+
+        if ( ! $notification ) {
+            return;
+        }
+
+        if ( $notification->check_unsubscribe_key( $_GET['email_link_action_key'] ) ) {
 			$this->notification->set_status( NotificationStatus::CANCELLED );
 			$this->notification->save();
 		}
 	}
+
+    /**
+     * Retrieves the notification to be processed based on the provided notification ID and action key.
+     *
+     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $action_key The action key to verify.
+     * @return Notification|null The notification object if found, otherwise null.
+     */
+    public function get_notification_to_be_processed( $notification_id, $action_key ): Notification | null {
+        if ( ! isset( $notification_id ) || ! isset( $action_key ) ) {
+            return null;
+        }
+
+        $notification = Factory::get_notification( $_GET['notification_id'] );
+
+        if ( ! $notification ) {
+            return null;
+        }
+
+        if ( empty( $notification->get_meta( 'email_link_action_key' ) ) ) {
+            return null;
+        }
+
+        return $notification;
+    }
 }
