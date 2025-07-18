@@ -141,7 +141,6 @@ export function Preview( {
 			return {
 				backgroundColor: backgroundCol,
 				headingColor: headingCol,
-				buttonBackgroundColor: buttonBackgroundCol,
 				highlightedColors: highlightedColorsObj,
 			};
 		}, [ styles, paletteColors ] );

@@ -310,7 +310,7 @@ class Site_Style_Sync_Controller {
 	 */
 	private function convert_to_px_size( string $size ): string {
 		// Replace clamp() with its average value.
-		if ( strpos( $size, 'clamp(' ) !== false ) {
+		if ( stripos( $size, 'clamp(' ) !== false ) {
 			return Styles_Helper::clamp_to_static_px( $size, 'avg' ) ?? $size;
 		}
 		return Styles_Helper::convert_to_px( $size, $size ) ?? $size; // Fallback to original value if conversion fails.
