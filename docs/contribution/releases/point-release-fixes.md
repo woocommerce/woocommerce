@@ -44,7 +44,7 @@ Changes qualify for point releases only if they are:
 2. **Create a point release request issue** using the [point release template](https://github.com/woocommerce/woocommerce/issues/new?template=new-prr-template.yml) in the main repository
 
 3. **Provide detailed justification** in the issue including:
-4. 
+ 
   - Impact assessment (how many customers affected)
   - Business impact (revenue, compliance, security implications)
   - Risk assessment of the proposed fix
@@ -53,7 +53,7 @@ Changes qualify for point releases only if they are:
 4. **Wait for release lead approval** - the release lead will approve the request, which automatically adds cherry-pick labels to your PR
 
 5. **Adjust branch targeting** by modifying the automatically-added labels to specify which additional branches need the fix:
-6. 
+
   - Keep `cherry pick to trunk` if the fix should go to trunk
   - Keep `cherry pick to frozen release` if the fix should go to the current frozen release
   - Remove labels for branches that don't need the fix

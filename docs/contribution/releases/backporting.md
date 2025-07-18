@@ -10,6 +10,7 @@ Backporting is the process of applying changes from `trunk` to a release branch.
 ## Release Branch Lifecycle
 
 When a release branch is created, it's copied from `trunk` at the time of code freeze. After creation:
+
 - The release branch no longer receives new feature updates
 - Only critical changes are allowed
 - Because we do not merge the release branches back into `trunk`, any fixes in a release branch must also be applied to `trunk`.
