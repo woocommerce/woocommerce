@@ -6,6 +6,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { createBlock, type BlockAttributes } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,16 +16,16 @@ import '../../accordion/accordion-group';
 import '../../accordion/inner-blocks/accordion-header';
 import '../../accordion/inner-blocks/accordion-item';
 import '../../accordion/inner-blocks/accordion-panel';
+import '../../product-description';
+import '../../product-reviews';
 import '../../product-specifications';
 import '../../single-product';
-import '../../product-reviews';
-import '../../product-description';
 
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import {
 	productWithoutSpecifications,
 	productWithSpecifications,
-} from './fixture';
+} from '../fixture';
 
 async function setupWithSingleProduct(
 	attributes: BlockAttributes,
@@ -47,6 +48,11 @@ async function setupWithSingleProduct(
 
 	return initializeEditor( singleProductBlock );
 }
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useSelect: jest.fn(),
+} ) );
 
 describe( 'Product Details block', () => {
 	describe( 'Single Product block', () => {
@@ -83,7 +89,28 @@ describe( 'Product Details block', () => {
 
 		beforeAll( () => server.listen() );
 
+		afterAll( () => server.close() );
+
 		test( 'should render product specifications when product is selected', async () => {
+			useSelect.mockImplementation( ( callback, deps ) => {
+				const originalUseSelect =
+					jest.requireActual( '@wordpress/data' ).useSelect;
+				const originalResult = originalUseSelect( callback, deps );
+
+				if (
+					originalResult &&
+					typeof originalResult === 'object' &&
+					! Array.isArray( originalResult )
+				) {
+					const result = {
+						...originalResult,
+						wasBlockJustInserted: true,
+					};
+
+					return result;
+				}
+				return originalResult;
+			} );
 			await setupWithSingleProduct( {}, 2 );
 
 			await waitFor( () => {
