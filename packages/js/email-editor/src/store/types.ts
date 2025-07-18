@@ -188,8 +188,8 @@ export type PersonalizationTag = {
 };
 
 export type State = {
-	postId: number | string; // Template use strings
-	postType: string;
+	postId?: number | string; // Template use strings
+	postType?: string;
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {

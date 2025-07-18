@@ -18,20 +18,20 @@ import { reducer } from './reducer';
 import * as selectors from './selectors';
 import * as resolvers from './resolvers';
 
-const getConfig = (postId?: string, postType?: string) =>
+const getConfig = () =>
 	( {
 		actions,
 		controls,
 		selectors,
 		resolvers,
 		reducer,
-		initialState: getInitialState(postId, postType),
+		initialState: getInitialState(),
 	} as const );
 
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 
-export const createStore = (postId?: string, postType?: string) => {
-	const store = createReduxStore( storeName, getConfig(postId, postType) );
+export const createStore = () => {
+	const store = createReduxStore( storeName, getConfig() );
 	register( store );
 	return store;
 };

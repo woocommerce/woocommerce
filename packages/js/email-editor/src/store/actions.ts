@@ -26,6 +26,13 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
+export function setEmailPost( postId: string, postType: string ) {
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postId, postType } as Partial< State >,
+	} as const;
+}
+
 export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {
