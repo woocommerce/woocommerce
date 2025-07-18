@@ -24,9 +24,9 @@ class ListCommand extends BaseCommand {
 	 * @return void
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		// TODO: This will be implemented once we migrate the PlatformRegistry
-		// For now, we show the currently supported platforms
-		
+		// This will be implemented once we migrate the PlatformRegistry.
+		// For now, we show the currently supported platforms.
+
 		$platforms = array(
 			array(
 				'id'      => 'shopify',
