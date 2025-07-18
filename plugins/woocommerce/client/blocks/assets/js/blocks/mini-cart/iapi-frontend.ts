@@ -12,6 +12,7 @@ import {
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -440,7 +441,7 @@ const { state: cartItemState } = store(
 			},
 
 			get itemThumbnail(): string {
-				return cartItemState.cartItem.images[ 0 ]?.thumbnail || '';
+				return cartItemState.cartItem.images[ 0 ]?.thumbnail || PLACEHOLDER_IMG_SRC;
 			},
 
 			get priceWithoutDiscount(): string {
