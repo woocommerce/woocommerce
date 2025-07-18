@@ -25,7 +25,7 @@
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: space-between;
-			gap: 0 calc(#{$gap-smaller} * 2); // Required for spacing especially when using flex-grow
+			gap: 0 $gap-small; // Required for spacing especially when using flex-grow
 
 			.wc-block-components-text-input,
 			.wc-block-components-state-input,
