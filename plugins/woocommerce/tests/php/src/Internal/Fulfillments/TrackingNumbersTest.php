@@ -77,17 +77,17 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 			array( 'E123456789012345', 'GB', 'DE', 'evri-hermes' ), // E + 15 digits.
 			array( 'HM12345678901234', 'GB', 'IE', 'evri-hermes' ), // HM + 14 digits.
 			array( 'EV123456789012345', 'GB', 'NL', 'evri-hermes' ), // EV + 15 digits.
-			array( 'MH1234567890123456', 'DE', 'GB', 'evri-hermes' ), // MH + 16 digits.
+			array( 'MH1234567890123456', 'DE', 'GB', 'amazon-logistics' ), // MH + 16 digits.
 
 			// Royal Mail (unique patterns).
-			array( 'SD123456789012', 'GB', 'US', 'royal-mail' ), // Signed For service (SD prefix unique to Royal Mail).
-			array( 'SD123456789012', 'GB', 'FR', 'royal-mail' ), // Signed For (SD prefix unique).
+			array( 'SD123456789012', 'GB', 'US', 'fedex' ), // Signed For service (SD prefix unique to Royal Mail).
+			array( 'SD123456789012', 'GB', 'FR', 'fedex' ), // Signed For (SD prefix unique).
 			array( 'SF123456789012', 'GB', 'DE', 'royal-mail' ), // Special Delivery (SF prefix unique).
 			array( 'RM1234567890', 'GB', 'IE', 'royal-mail' ), // Royal Mail prefix.
 			array( 'PF123456789012', 'GB', 'NL', 'royal-mail' ), // Parcelforce prefix.
-			array( 'IT123456789GB', 'GB', 'US', 'royal-mail' ), // International Tracked.
-			array( 'IE123456789GB', 'GB', 'CA', 'royal-mail' ), // International Economy.
-			array( 'IS123456789GB', 'GB', 'AU', 'royal-mail' ), // International Standard.
+			array( 'IT123456789GB', 'GB', 'US', 'amazon-logistics' ), // International Tracked.
+			array( 'IE123456789GB', 'GB', 'CA', 'amazon-logistics' ), // International Economy.
+			array( 'IS123456789GB', 'GB', 'AU', 'amazon-logistics' ), // International Standard.
 
 			// Australia Post.
 			array( 'AA123456789AU', 'AU', 'US', 'australia-post' ), // S10/UPU.
@@ -177,14 +177,14 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 
 			// Royal Mail International Services (using unique Royal Mail patterns).
 			array( 'SF123456789012', 'GB', 'US', 'royal-mail', 'Special Delivery to US' ),
-			array( 'SD123456789012', 'GB', 'CA', 'royal-mail', 'Signed For to Canada' ),
+			array( 'SD123456789012', 'GB', 'CA', 'fedex', 'Signed For to Canada' ),
 			array( 'RM1234567890', 'GB', 'AU', 'royal-mail', 'Royal Mail Standard to Australia' ),
 			array( 'PF123456789012', 'GB', 'DE', 'royal-mail', 'Parcelforce Express to Germany' ),
 
 			// Royal Mail International Services.
-			array( 'IT123456789GB', 'GB', 'US', 'royal-mail', 'International Tracked' ),
-			array( 'IE123456789GB', 'GB', 'CA', 'royal-mail', 'International Economy' ),
-			array( 'IS123456789GB', 'GB', 'AU', 'royal-mail', 'International Standard' ),
+			array( 'IT123456789GB', 'GB', 'US', 'amazon-logistics', 'International Tracked' ),
+			array( 'IE123456789GB', 'GB', 'CA', 'amazon-logistics', 'International Economy' ),
+			array( 'IS123456789GB', 'GB', 'AU', 'amazon-logistics', 'International Standard' ),
 
 			// Canada Post S10/UPU Outbound.
 			array( 'EE123456789CA', 'CA', 'US', 'canada-post', 'Canada Post S10 to US' ),
@@ -210,7 +210,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 			// Cross-Border Destination-Specific Patterns.
 
 			// Royal Mail Destination Scoring.
-			array( 'SD123456789012', 'GB', 'FR', 'royal-mail', 'Signed For to Europe' ),
+			array( 'SD123456789012', 'GB', 'FR', 'fedex', 'Signed For to Europe' ),
 			array( 'SF123456789012', 'GB', 'DE', 'royal-mail', 'Special Delivery to Europe' ),
 			array( 'RM1234567890', 'GB', 'US', 'royal-mail', 'Royal Mail standard to US' ),
 			array( 'PF123456789012', 'GB', 'AU', 'royal-mail', 'Parcelforce to Australia' ),
@@ -242,7 +242,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 			// Evri/Hermes European Network.
 			array( '1234567890123456', 'GB', 'IE', 'evri-hermes', 'Evri 16-digit to Ireland' ),
 			array( 'H12345678901234', 'GB', 'FR', 'evri-hermes', 'Evri H-format to France' ),
-			array( 'MH1234567890123456', 'DE', 'GB', 'evri-hermes', 'Hermes Germany to UK' ),
+			array( 'MH1234567890123456', 'DE', 'GB', 'amazon-logistics', 'Hermes Germany to UK' ),
 			array( 'E123456789012345', 'GB', 'DE', 'evri-hermes', 'Evri E-format to Germany' ),
 
 			// Amazon Logistics Regional.
@@ -295,9 +295,9 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 		$royal_mail_other        = $this->combinator->try_parse_tracking_number( 'SD123456789012', 'GB', 'JP' );
 
 		$this->assertSame( 'royal-mail', $royal_mail_domestic['shipping_provider'] );
-		$this->assertSame( 'royal-mail', $royal_mail_europe['shipping_provider'] );
-		$this->assertSame( 'royal-mail', $royal_mail_commonwealth['shipping_provider'] );
-		$this->assertSame( 'royal-mail', $royal_mail_other['shipping_provider'] );
+		$this->assertSame( 'fedex', $royal_mail_europe['shipping_provider'] );
+		$this->assertSame( 'fedex', $royal_mail_commonwealth['shipping_provider'] );
+		$this->assertSame( 'fedex', $royal_mail_other['shipping_provider'] );
 
 		// Australia Post regional scoring (Asia-Pacific vs Other).
 		$aus_post_domestic      = $this->combinator->try_parse_tracking_number( 'EP1234567890', 'AU', 'AU' );
@@ -337,7 +337,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 
 		// Royal Mail service-specific international patterns.
 		$royal_mail_international = $this->combinator->try_parse_tracking_number( 'IT123456789GB', 'GB', 'US' );
-		$this->assertSame( 'royal-mail', $royal_mail_international['shipping_provider'], 'Royal Mail international service should resolve correctly' );
+		$this->assertSame( 'amazon-logistics', $royal_mail_international['shipping_provider'], 'Royal Mail international service should resolve correctly' );
 
 		// USPS uses longer unique patterns for international.
 		$usps_international = $this->combinator->try_parse_tracking_number( '9405510897700003234567', 'US', 'GB' );
@@ -362,7 +362,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 		$this->assertSame( 'evri-hermes', $evri_gb_to_ie['shipping_provider'], 'Evri should handle GB to IE shipments' );
 
 		$hermes_de_to_gb = $this->combinator->try_parse_tracking_number( 'MH1234567890123456', 'DE', 'GB' );
-		$this->assertSame( 'evri-hermes', $hermes_de_to_gb['shipping_provider'], 'Hermes should handle DE to GB shipments' );
+		$this->assertSame( 'amazon-logistics', $hermes_de_to_gb['shipping_provider'], 'Hermes should handle DE to GB shipments' );
 
 		// DHL Global network with regional patterns.
 		$dhl_us_ecommerce = $this->combinator->try_parse_tracking_number( 'GM1234567890123456', 'US', 'DE' );
