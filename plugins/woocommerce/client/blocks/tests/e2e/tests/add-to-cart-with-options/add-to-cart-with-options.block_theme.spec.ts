@@ -198,7 +198,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 				'Increase quantity of Beanie'
 			);
 			await increaseQuantityButton.click();
-
 			await increaseQuantityButton.click();
 
 			await addToCartButton.click();
