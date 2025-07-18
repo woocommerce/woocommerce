@@ -1,6 +1,7 @@
 .wc-block-components-checkbox {
 	@include reset-color();
 	@include reset-typography();
+	line-height: 0;
 	margin-top: $gap;
 
 	// Validated checkbox is set to grid because we need to display the validation error below the checkbox, the flex
