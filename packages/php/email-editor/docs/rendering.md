@@ -422,6 +422,10 @@ Normalize block attributes by translating color slugs to actual color values.
 /**
  * Get normalized block styles by translating color slugs to actual color values.
  *
+ * This method handles the normalization of color-related attributes like backgroundColor,
+ * textColor, borderColor, and linkColor by translating them from slugs to actual color values
+ * using the rendering context.
+ *
  * @param array             $block_attributes Block attributes containing color slugs.
  * @param Rendering_Context $rendering_context Rendering context for color translation.
  * @return array Normalized block styles with translated color values.
@@ -451,6 +455,7 @@ array(
     ),
 )
 */
+```
 
 #### `get_styles_from_block()`
 
@@ -462,7 +467,13 @@ Wrapper for WordPress Style Engine with guaranteed return structure.
  *
  * @param array $block_styles Array of block styles.
  * @param bool  $skip_convert_vars If true, --wp_preset--spacing--x type values will be left in the original var:preset:spacing:x format.
- * @return array
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
  */
 public static function get_styles_from_block( array $block_styles, $skip_convert_vars = false )
 ```
@@ -493,8 +504,15 @@ Extend existing block styles with additional CSS declarations.
  * Extend block styles with CSS declarations.
  *
  * @param array $block_styles WP_Style_Engine styles array (must contain 'declarations' and 'css' keys).
- * @param array $css_declarations Array of CSS declarations.
- * @return array
+ * @param array $css_declarations An associative array of CSS definitions,
+ *                                e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
  */
 public static function extend_block_styles( array $block_styles, $css_declarations )
 ```
@@ -529,10 +547,20 @@ Comprehensive method to get processed block styles with filtering and return typ
 /**
  * Get block styles.
  *
- * @param array             $block_attributes Block attributes.
- * @param Rendering_Context $rendering_context Rendering context.
- * @param array             $properties Properties to include.
- * @return array
+ * @param array             $block_attributes   Block attributes.
+ * @param Rendering_Context $rendering_context  Rendering context.
+ * @param array             $properties         List of style properties to include. Supported values:
+ *                                              'spacing', 'padding', 'margin',
+ *                                              'border', 'border-width', 'border-style', 'border-radius', 'border-color',
+ *                                              'background', 'background-color', 'color',
+ *                                              'typography', 'font-size', 'font-family', 'font-weight', 'text-align'.
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
  */
 public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties )
 ```

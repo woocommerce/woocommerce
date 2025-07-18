@@ -102,7 +102,13 @@ class Styles_Helper {
 	 *
 	 * @param array $block_styles Array of block styles.
 	 * @param bool  $skip_convert_vars If true, --wp_preset--spacing--x type values will be left in the original var:preset:spacing:x format.
-	 * @return array
+	 * @return array {
+	 *     @type string   $css          A CSS ruleset or declarations block
+	 *                                  formatted to be placed in an HTML `style` attribute or tag.
+	 *     @type string[] $declarations An associative array of CSS definitions,
+	 *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+	 *     @type string   $classnames   Classnames separated by a space.
+	 * }
 	 */
 	public static function get_styles_from_block( array $block_styles, $skip_convert_vars = false ) {
 		return wp_parse_args(
@@ -116,7 +122,13 @@ class Styles_Helper {
 	 *
 	 * @param array $block_styles WP_Style_Engine styles array (must contain 'declarations' and 'css' keys).
 	 * @param array $css_declarations Array of CSS declarations.
-	 * @return array
+	 * @return array {
+	 *     @type string   $css          A CSS ruleset or declarations block
+	 *                                  formatted to be placed in an HTML `style` attribute or tag.
+	 *     @type string[] $declarations An associative array of CSS definitions,
+	 *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+	 *     @type string   $classnames   Classnames separated by a space.
+	 * }
 	 */
 	public static function extend_block_styles( array $block_styles, $css_declarations ) {
 		if ( ! is_array( $css_declarations ) ) {
@@ -132,10 +144,20 @@ class Styles_Helper {
 	/**
 	 * Get block styles.
 	 *
-	 * @param array             $block_attributes Block attributes.
-	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @param array             $properties Properties.
-	 * @return array
+	 * @param array             $block_attributes   Block attributes.
+	 * @param Rendering_Context $rendering_context  Rendering context.
+	 * @param array             $properties         List of style properties to include. Supported values:
+	 *                                              'spacing', 'padding', 'margin',
+	 *                                              'border', 'border-width', 'border-style', 'border-radius', 'border-color',
+	 *                                              'background', 'background-color', 'color',
+	 *                                              'typography', 'font-size', 'font-family', 'font-weight', 'text-align'.
+	 * @return array {
+	 *     @type string   $css          A CSS ruleset or declarations block
+	 *                                  formatted to be placed in an HTML `style` attribute or tag.
+	 *     @type string[] $declarations An associative array of CSS definitions,
+	 *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+	 *     @type string   $classnames   Classnames separated by a space.
+	 * }
 	 */
 	public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties ) {
 		$styles          = self::get_normalized_block_styles( $block_attributes, $rendering_context );
