@@ -7,8 +7,13 @@ $dialog-padding: 20px;
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
-	aspect-ratio: 1 / 1;
 	overflow: hidden;
+
+	//When Product Image aspect ratio is auto, we are setting constraints
+	//on the large image container and display full images in square container.
+	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+		aspect-ratio: 1/1;
+	}
 
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
@@ -19,14 +24,15 @@ $dialog-padding: 20px;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
-		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
-		width: 100%;
 		display: flex;
-		overflow: hidden;
 		align-items: center;
 		justify-content: center;
+
+		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+			aspect-ratio: 1/1;
+		}
 	}
 
 	// These rules are overriding styles from WooCommerce core, that's why we
@@ -41,9 +47,12 @@ $dialog-padding: 20px;
 
 		img {
 			height: 100%;
-			// There's inline style object-fit: cover; that we need to override.
+		}
+
+		&.wc-block-components-product-image--aspect-ratio-auto img {
 			object-fit: contain !important;
 		}
+
 	}
 
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
