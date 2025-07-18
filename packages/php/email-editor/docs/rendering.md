@@ -404,7 +404,14 @@ public static function parse_styles_to_array( string $styles ): array
 ```php
 $styles = 'margin: 10px; padding: 5px; color: red;';
 $parsed = Styles_Helper::parse_styles_to_array( $styles );
-// Returns: array( 'margin' => '10px', 'padding' => '5px', 'color' => 'red' )
+/*
+Example return value:
+array(
+    'margin' => '10px',
+    'padding' => '5px',
+    'color'   => 'red',
+)
+*/
 ```
 
 #### `get_normalized_block_styles()`
@@ -432,7 +439,18 @@ $block_attributes = array(
 );
 
 $normalized = Styles_Helper::get_normalized_block_styles( $block_attributes, $rendering_context );
-```
+/*
+Example return value:
+array(
+    'spacing' => array(
+        'padding' => '10px',
+    ),
+    'color' => array(
+        'background' => '#ff0000', // assuming 'primary' translates to '#ff0000'
+        'text'       => '#00ff00', // assuming 'secondary' translates to '#00ff00'
+    ),
+)
+*/
 
 #### `get_styles_from_block()`
 
@@ -453,7 +471,17 @@ public static function get_styles_from_block( array $block_styles, $skip_convert
 
 ```php
 $result = Styles_Helper::get_styles_from_block( $block_styles );
-// Returns: array( 'css' => '...', 'declarations' => array(), 'classnames' => '' )
+/*
+Example return value:
+array(
+    'css' => 'padding: 10px; color: red;',
+    'declarations' => array(
+        'padding' => '10px',
+        'color'   => 'red',
+    ),
+    'classnames' => 'has-padding has-color-red',
+)
+*/
 ```
 
 #### `extend_block_styles()`
@@ -478,6 +506,19 @@ $extended = Styles_Helper::extend_block_styles( $block_styles, array(
     'margin' => '20px',
     'color' => 'red'
 ) );
+
+/*
+Example return value:
+array(
+    'declarations' => array(
+        'padding' => '10px',
+        'margin'  => '20px',
+        'color'   => 'red',
+    ),
+    'css' => 'padding: 10px; margin: 20px; color: red;',
+    'classnames' => 'test-class',
+)
+*/
 ```
 
 #### `get_block_styles()`
@@ -491,10 +532,9 @@ Comprehensive method to get processed block styles with filtering and return typ
  * @param array             $block_attributes Block attributes.
  * @param Rendering_Context $rendering_context Rendering context.
  * @param array             $properties Properties to include.
- * @param string            $return_type Return type. Can be 'full' (default, includes all three), 'css', 'declarations', or 'classnames'.
  * @return array
  */
-public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties, string $return_type = 'full' )
+public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties )
 ```
 
 **Supported Properties:**
@@ -502,13 +542,24 @@ public static function get_block_styles( array $block_attributes, Rendering_Cont
 -   `spacing`, `padding`, `margin`
 -   `border`, `border-width`, `border-style`, `border-radius`, `border-color`
 -   `background`, `background-color`, `color`
--   `typography`, `font-size`, `font-family`, `font-weight`
+-   `typography`, `font-size`, `font-family`, `font-weight`, `text-align`
 
 **Example Usage:**
 
 ```php
 $styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'color' ) );
-$css_only = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'css' );
+
+/*
+Example return value:
+array(
+    'declarations' => array(
+        'padding' => '10px',
+        'color'   => '#ff0000',
+    ),
+    'css' => 'padding: 10px; color: #ff0000;',
+    'classnames' => 'has-text-color',
+)
+*/
 ```
 
 ## Integration Example
