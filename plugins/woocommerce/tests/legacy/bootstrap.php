@@ -105,6 +105,8 @@ class WC_Unit_Tests_Bootstrap {
 			$this->initialize_hpos();
 		}
 
+		var_dump( get_option( 'woocommerce_custom_orders_table_enabled' ) );
+
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
 	}
