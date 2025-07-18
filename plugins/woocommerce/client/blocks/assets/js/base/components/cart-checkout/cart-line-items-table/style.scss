@@ -83,7 +83,9 @@ table.wc-block-cart-items {
 	}
 }
 
-@include cart-checkout-below-large-container {
+.is-medium,
+.is-small,
+.is-mobile {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -136,29 +138,33 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-large.wc-block-cart {
-	margin-bottom: 3em;
+@include cart-checkout-large-container {
+	.wc-block-cart__main {
+		.wc-block-cart-items {
+			border-spacing: 0;
+			border-bottom: 1px solid $universal-border-light;
 
-	.wc-block-cart-items {
-		border-spacing: 0;
-		border-bottom: 1px solid $universal-border-light;
-
-		th {
-			padding: $gap-smaller $gap $gap-smaller 0;
-			white-space: nowrap;
-		}
-		td {
-			border-top: 1px solid $universal-border-light;
-			padding: $gap-large 0 $gap-large $gap;
-			vertical-align: top;
-		}
-		th:last-child {
-			padding-right: $gap;
-		}
-		td:last-child {
-			padding-right: $gap;
+			th {
+				padding: $gap-smaller $gap $gap-smaller 0;
+				white-space: nowrap;
+			}
+			td {
+				border-top: 1px solid $universal-border-light;
+				padding: $gap-large 0 $gap-large $gap;
+				vertical-align: top;
+			}
+			th:last-child {
+				padding-right: $gap;
+			}
+			td:last-child {
+				padding-right: $gap;
+			}
 		}
 	}
+}
+
+.is-large.wc-block-cart {
+	margin-bottom: 3em;
 
 	&.has-dark-controls {
 		.wc-block-cart-items {
