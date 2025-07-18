@@ -78,10 +78,9 @@ type CartItemContext = {
 };
 
 const trimWords = ( html: string, maxWords = 15 ): string => {
-	const stripped = html.replace( /<[^>]+>/g, '' );
-	const words = stripped.trim().split( /\s+/ );
+	const words = html.trim().split( /\s+/ );
 	if ( words.length <= maxWords ) {
-		return stripped;
+		return html;
 	}
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
@@ -665,6 +664,7 @@ const { state: cartItemState } = store(
 
 		callbacks: {
 			itemShortDescription() {
+				debugger;
 				const el = getElement();
 
 				if ( el.ref ) {
