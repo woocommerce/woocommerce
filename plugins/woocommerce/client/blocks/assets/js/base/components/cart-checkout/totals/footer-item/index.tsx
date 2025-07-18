@@ -144,7 +144,9 @@ const TotalsFooterItem = ( {
 						<p className="wc-block-components-totals-footer-item-tax">
 							{ isLoading ? (
 								<>
-									<span>Including </span>
+									<span>
+										{ __( 'Including', 'woocommerce' ) }
+									</span>
 									<Skeleton
 										height="1em"
 										width="45px"
