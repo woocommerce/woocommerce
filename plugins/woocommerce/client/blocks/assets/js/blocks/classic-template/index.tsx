@@ -250,11 +250,13 @@ const Edit = ( {
 							) }
 						</span>
 					</div>
-					<p
-						dangerouslySetInnerHTML={ {
-							__html: placeholderDescription,
-						} }
-					/>
+					{ canConvert && (
+						<p
+							dangerouslySetInnerHTML={ {
+								__html: placeholderDescription,
+							} }
+						/>
+					) }
 					<p>
 						{ __(
 							'You cannot edit the content of this block. However, you can move it and place other blocks around it.',

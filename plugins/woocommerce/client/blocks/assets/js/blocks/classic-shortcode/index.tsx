@@ -220,7 +220,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 						<h1>{ __( 'WooCommerce', 'woocommerce' ) }</h1>
 						<span>{ placeholderTitle }</span>
 					</div>
-					<p>{ placeholderDescription }</p>
+					{ canConvert && <p>{ placeholderDescription }</p> }
 					<p>{ learnMoreContent }</p>
 					{ canConvert && blockifyConfig && (
 						<ConvertTemplate

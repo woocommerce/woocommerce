@@ -92,7 +92,7 @@ const getBlockifiedTemplate = () =>
 		),
 	].filter( Boolean ) as BlockInstance[];
 
-const getDescriptionAllowingConversion = ( templateTitle: string ) =>
+const getDescription = ( templateTitle: string ) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -101,9 +101,6 @@ const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 		),
 		templateTitle
 	);
-
-const getDescription = ( templateTitle: string ) =>
-	getDescriptionAllowingConversion( templateTitle );
 
 const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
