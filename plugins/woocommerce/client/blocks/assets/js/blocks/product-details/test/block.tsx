@@ -49,12 +49,12 @@ async function setupWithSingleProduct(
 	return initializeEditor( singleProductBlock );
 }
 
-describe( 'Product Details block', () => {
-	jest.mock( '@wordpress/data', () => ( {
-		...jest.requireActual( '@wordpress/data' ),
-		useSelect: jest.fn(),
-	} ) );
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useSelect: jest.fn(),
+} ) );
 
+describe( 'Product Details block', () => {
 	describe( 'Single Product block', () => {
 		const server = setupServer(
 			http.get( '/wc-admin/options', ( { request } ) => {
@@ -189,3 +189,5 @@ describe( 'Product Details block', () => {
 		} );
 	} );
 } );
+
+jest.restoreAllMocks();
