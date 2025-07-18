@@ -77,6 +77,15 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
+const trimWords = ( html: string, maxWords = 15 ): string => {
+	const stripped = html.replace( /<[^>]+>/g, '' );
+	const words = stripped.trim().split( /\s+/ );
+	if ( words.length <= maxWords ) {
+		return stripped;
+	}
+	return words.slice( 0, maxWords ).join( ' ' ) + '…';
+};
+
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
 	{},
@@ -665,8 +674,9 @@ const { state: cartItemState } = store(
 
 					// A workaround for the lack of dangerous set HTML directive in interactivity API
 					if ( innerEl ) {
-						innerEl.innerHTML =
-							cartItemState.cartItem.short_description;
+						innerEl.innerHTML = trimWords(
+							cartItemState.cartItem.short_description
+						);
 					}
 				}
 			},
