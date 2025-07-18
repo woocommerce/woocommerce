@@ -16,3 +16,18 @@ Check newly created threads on the [WordPress.org Forums](https://wordpress.org/
 ## WooCommerce GitHub Repository Issues
 
 Watch the [Newest Created Issues](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc) and verify that none are critical.
+
+## Handling Critical Issues: Point Release Requests
+
+If monitoring uncovers a bug that **cannot wait** for the next scheduled release, initiate a **Point Release Request (PRR)**.  
+The PRR workflow lets the release lead fast-track a fix into the current maintenance branch and, when necessary, automatically cherry-pick it to trunk and the next frozen branch.
+
+[Read the full Point Release guide](/docs/contribution/releases/point-releases).
+
+Before opening a PRR, confirm that the issue:
+
+1. **Impacts core store functionality** (e.g., checkout, orders, taxes).
+2. **Affects a significant number of sites** or stems from a widely-used extension or theme.
+3. **Lacks a reasonable workaround** that merchants can apply themselves.
+
+If these conditions are met, follow the PRR guide to create the request, provide the required justification, and notify the release lead for approval and merge.
