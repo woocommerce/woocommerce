@@ -2,7 +2,7 @@
 	"name": "woocommerce/order-confirmation-status",
 	"version": "1.0.0",
 	"title": "Order Status",
-	"description": "Display order status message that changes based on order state (received, completed, failed, etc.). Content is dynamically generated and cannot be modified through the editor.",
+	"description": "Display an order status message that changes based on order state (received, completed, failed, etc.). Content is dynamically generated and cannot be modified through the editor.",
 	"category": "woocommerce",
 	"keywords": [
 		"WooCommerce"
