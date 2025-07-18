@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fix performance issues with structured data and products with lots of variations
