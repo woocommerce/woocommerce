@@ -1,4 +1,5 @@
 <?php
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces;
@@ -18,4 +19,4 @@ interface PlatformMapperInterface {
 	 *               The specific structure of this array needs to be defined and adhered to.
 	 */
 	public function map_product_data( object $platform_data ): array;
-} 
+}

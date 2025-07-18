@@ -1,4 +1,5 @@
 <?php
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces;
@@ -34,4 +35,4 @@ interface PlatformFetcherInterface {
 	 * @return int The total estimated count.
 	 */
 	public function fetch_total_count( array $args ): int;
-} 
+}

@@ -1,4 +1,5 @@
 <?php
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
@@ -46,4 +47,4 @@ class ListCommand extends BaseCommand {
 			array( 'id', 'name', 'fetcher', 'mapper' )
 		);
 	}
-} 
+}
