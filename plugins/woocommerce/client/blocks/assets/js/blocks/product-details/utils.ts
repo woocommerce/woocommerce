@@ -35,8 +35,15 @@ const isAdditionalProductDataEmpty = ( product: PartialProduct ): boolean => {
 	);
 };
 
-export const getTemplate = ( product: PartialProduct ) => {
-	const additionalProductDataEmpty = isAdditionalProductDataEmpty( product );
+export const getTemplate = (
+	product: PartialProduct,
+	{
+		isInnerBlockOfSingleProductBlock,
+	}: { isInnerBlockOfSingleProductBlock: boolean }
+) => {
+	const additionalProductDataEmpty =
+		isAdditionalProductDataEmpty( product ) &&
+		isInnerBlockOfSingleProductBlock;
 
 	return [
 		[

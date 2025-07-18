@@ -56,13 +56,29 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 		[ context.postId ]
 	);
 
+	const isInnerBlockOfSingleProductBlock = useSelect(
+		( select ) => {
+			const blocks = select(
+				blockEditorStore
+				// @ts-expect-error - getBlockParentsByBlockName is not typed
+			).getBlockParentsByBlockName(
+				clientId,
+				'woocommerce/single-product'
+			);
+			return blocks.length > 0;
+		},
+		[ clientId ]
+	);
+
 	const template = useMemo( () => {
 		if ( ! product ) {
 			return [];
 		}
 
-		return getTemplate( product );
-	}, [ product ] );
+		return getTemplate( product, {
+			isInnerBlockOfSingleProductBlock,
+		} );
+	}, [ product, isInnerBlockOfSingleProductBlock ] );
 
 	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
 		( select ) => {
