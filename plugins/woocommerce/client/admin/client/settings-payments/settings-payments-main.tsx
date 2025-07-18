@@ -43,6 +43,7 @@ import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/com
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import { isFeatureEnabled } from '~/utils/features';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -391,7 +392,11 @@ export const SettingsPaymentsMain = () => {
 						'native_in_context'
 					) {
 						recordPaymentsOnboardingEvent(
-							'woopayments_onboarding_modal_opened'
+							'woopayments_onboarding_modal_opened',
+							{
+								from: context,
+								source: wooPaymentsOnboardingSessionEntrySettings,
+							}
 						);
 						setIsOnboardingModalOpen( true );
 					} else {
@@ -427,7 +432,7 @@ export const SettingsPaymentsMain = () => {
 							paymentsEntity?._suggestion_id ?? 'unknown',
 						provider_extension_slug: paymentsEntity.plugin.slug,
 						from: context,
-						source: context,
+						source: wooPaymentsOnboardingSessionEntrySettings,
 						reason: 'error',
 					} );
 					createNoticesFromResponse( response );

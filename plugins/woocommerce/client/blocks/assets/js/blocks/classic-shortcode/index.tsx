@@ -45,7 +45,6 @@ type Attributes = {
 };
 
 const blockifiedFallbackConfig = {
-	isConversionPossible: () => false,
 	getBlockifiedTemplate: () => [],
 	getDescription: () => '',
 	onClickCallback: () => void 0,
@@ -183,14 +182,14 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const templatePlaceholder = templateDetails?.placeholder ?? 'cart';
 	const templateType = templateDetails?.type ?? 'fallback';
 
-	const { isConversionPossible, getDescription, getTitle, blockifyConfig } =
+	const { getDescription, getTitle, blockifyConfig } =
 		conversionConfig[ templateType ];
 
-	const canConvert = isConversionPossible();
+	const canConvert = !! templateDetails?.type;
 	const placeholderTitle = getTitle
 		? getTitle()
 		: __( 'Classic Shortcode Placeholder', 'woocommerce' );
-	const placeholderDescription = getDescription( templateTitle, canConvert );
+	const placeholderDescription = getDescription( templateTitle );
 
 	const learnMoreContent = createInterpolateElement(
 		__(
@@ -221,7 +220,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 						<h1>{ __( 'WooCommerce', 'woocommerce' ) }</h1>
 						<span>{ placeholderTitle }</span>
 					</div>
-					<p>{ placeholderDescription }</p>
+					{ canConvert && <p>{ placeholderDescription }</p> }
 					<p>{ learnMoreContent }</p>
 					{ canConvert && blockifyConfig && (
 						<ConvertTemplate

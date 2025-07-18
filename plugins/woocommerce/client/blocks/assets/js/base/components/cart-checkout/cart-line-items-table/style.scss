@@ -56,12 +56,18 @@ table.wc-block-cart-items {
 
 				text-transform: none;
 				white-space: nowrap;
+				&[hidden] {
+					display: none;
+				}
 			}
 		}
 		.wc-block-components-product-name {
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
+			&[hidden] {
+				display: none;
+			}
 		}
 		.wc-block-cart-item__total {
 			@include font-size(regular);

@@ -1,0 +1,135 @@
+name: 'Release: Assignment'
+on:
+  schedule:
+    - cron: '0 18 * * *' # Every day at 18h UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-upcoming-release-events:
+    name: Check for upcoming release events
+    runs-on: ubuntu-latest
+    outputs:
+      should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
+      version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
+      feature-freeze-date: ${{ steps.check-code-freeze-8-weeks.outputs.feature-freeze-date }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+      - name: Check for code freeze events
+        id: check-code-freeze-8-weeks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ical = require('node-ical');
+
+            const isManualTrigger = context.eventName === 'workflow_dispatch';
+            console.log(`Workflow triggered by: ${context.eventName}`);
+
+            try {
+              const today = new Date();
+              let targetDate = new Date(today);
+              targetDate.setDate(today.getDate() + (8 * 7)); // 8 weeks = 56 days
+              
+              const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
+              const codeFreezeEvents = Object.values(events)
+                .filter(event => event.type === 'VEVENT')
+                .filter(event => {
+                  if (!event.start) return false;
+                  const eventDate = new Date(event.start);
+                  const pattern = /^WooCommerce \d+\.\d+ Feature Freeze$/i;
+                  return pattern.test(event.summary || '');
+                });
+
+              const eventsInRange = codeFreezeEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                const diffTime = Math.abs(eventDate - targetDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (isManualTrigger) {
+                  // For manual triggers, include events within 2 weeks of the target date
+                  return diffDays <= 14;
+                } else {
+                  // For scheduled triggers, include events within 1 day of 8 weeks
+                  return diffDays <= 1;
+                }
+              });
+
+              if (eventsInRange.length > 0) {
+                const date = eventsInRange[0].start.toISOString();
+                const version = eventsInRange[0].summary.match(/\d+\.\d+/)[0];
+                console.log(`Found Code Freeze event: ${eventsInRange[0].summary}`);
+                console.log(`Date: ${date}`);
+                console.log(`Version: ${version}`);
+                core.setOutput('should-trigger-webhook', 'true');
+                core.setOutput('version', version);
+                core.setOutput('feature-freeze-date', date);
+              } else {
+                console.log(`No Code Freeze events found in the specified range.`);
+                core.setOutput('should-trigger-webhook', 'false');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+  trigger-upcoming-code-freeze-events:
+    name: Assign a release lead
+    needs: check-upcoming-release-events
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const crypto = require('crypto');
+            
+            const payload = {
+              action: 'release-assignment',
+              version: '${{ needs.check-upcoming-release-events.outputs.version }}',
+              feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
+              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+            };
+
+            const requestBody = JSON.stringify({
+              payload
+            });
+
+            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
+            hmac.update(requestBody);
+            const signature = hmac.digest('hex');
+            
+            const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Hub-Signature-256': `sha256=${signature}`
+              },
+              body: requestBody
+            });
+            
+            if (!response.ok) {
+              const status = response.status;
+              let errorMessage = `Request failed with status ${status}`;
+              
+              switch (status) {
+                case 409:
+                  errorMessage = `Post already exists for this release (${status})`;
+                  console.log(errorMessage);
+                  break;
+                case 403:
+                  errorMessage = `Invalid webhook secret or unauthorized access (${status})`;
+                  core.setFailed(errorMessage);
+                  break;
+                default:
+                  core.setFailed(errorMessage);
+                  break;
+              }
+            } else {
+              console.log('Successfully triggered upcoming release notification webhook');
+            }
+        env:
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
+          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}

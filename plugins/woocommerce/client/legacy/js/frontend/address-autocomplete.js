@@ -434,7 +434,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					await window.wc.addressAutocomplete.activeProvider[
 						type
 					].search( sanitizedInput, country, type );
-
 				// Validate suggestions array.
 				if ( ! Array.isArray( filteredSuggestions ) ) {
 					console.error(
@@ -663,7 +662,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						addressData.state
 					);
 				}
-			}, 200 );
+			}, 50 );
 		}
 
 		/**
