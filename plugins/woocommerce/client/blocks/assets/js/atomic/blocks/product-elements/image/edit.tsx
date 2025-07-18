@@ -9,11 +9,7 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import { createInterpolateElement, useRef } from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
@@ -36,7 +32,6 @@ import {
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
