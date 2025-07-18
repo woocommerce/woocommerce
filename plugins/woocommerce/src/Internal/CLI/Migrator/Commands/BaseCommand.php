@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 use WP_CLI;
 
 /**
@@ -20,14 +21,23 @@ abstract class BaseCommand {
 	protected CredentialManager $credential_manager;
 
 	/**
+	 * The platform registry.
+	 *
+	 * @var PlatformRegistry
+	 */
+	protected PlatformRegistry $platform_registry;
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @param CredentialManager $credential_manager The credential manager.
+	 * @param PlatformRegistry  $platform_registry  The platform registry.
 	 *
 	 * @internal
 	 */
-	final public function init( CredentialManager $credential_manager ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
 		$this->credential_manager = $credential_manager;
+		$this->platform_registry  = $platform_registry;
 	}
 
 	/**

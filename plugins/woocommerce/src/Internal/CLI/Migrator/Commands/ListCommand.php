@@ -24,26 +24,26 @@ class ListCommand extends BaseCommand {
 	 * @return void
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		// TODO: This will be implemented once we migrate the PlatformRegistry.
-		// For now, we show the currently supported platforms.
-
-		$platforms = array(
-			array(
-				'id'      => 'shopify',
-				'name'    => 'Shopify',
-				'fetcher' => 'ShopifyFetcher',
-				'mapper'  => 'ShopifyMapper',
-			),
-		);
+		$platforms = $this->platform_registry->get_platforms();
 
 		if ( empty( $platforms ) ) {
 			WP_CLI::line( 'No migration platforms are registered.' );
 			return;
 		}
 
+		$formatted_items = array();
+		foreach ( $platforms as $id => $details ) {
+			$formatted_items[] = array(
+				'id'      => $id,
+				'name'    => $details['name'] ?? '',
+				'fetcher' => $details['fetcher'] ?? '',
+				'mapper'  => $details['mapper'] ?? '',
+			);
+		}
+
 		WP_CLI\Utils\format_items(
 			'table',
-			$platforms,
+			$formatted_items,
 			array( 'id', 'name', 'fetcher', 'mapper' )
 		);
 	}
