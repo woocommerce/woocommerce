@@ -8,7 +8,6 @@
 		box-sizing: border-box;
 		background: $input-background-light;
 		width: 100%;
-		height: 3.125em;
 		position: relative;
 
 		.has-dark-controls & {
@@ -28,15 +27,18 @@
 
 	.wc-blocks-components-select__select {
 		@include reset-typography();
-		@include font-size(regular);
+		@include font-regular-locked;
 		border-radius: $universal-border-radius;
 		width: 100%;
 		height: 100%;
 		appearance: none;
 		background: none;
-		padding: em($gap) em($gap-smaller) 0;
 		color: $input-text-light;
 		border: 1px solid $universal-border-strong;
+		box-sizing: border-box;
+
+		// Top padding = $gap-smaller + line-height of the label
+		padding: calc($gap-smaller + 16px) $gap-small $gap-smaller;
 
 		&:focus {
 			border-color: currentColor;
@@ -58,19 +60,18 @@
 
 	.wc-blocks-components-select__label {
 		@include reset-typography();
-		@include font-size(regular);
+		@include font-small-locked;
 		position: absolute;
-		line-height: 1.25; // =20px when font-size is 16px.
-		left: em($gap-smaller);
-		top: 2px;
-		transform-origin: top left;
-		transition: all 200ms ease;
-		color: $input-text-light;
+		// 1px (border) + padding of the input
+		top: 1px + $gap-smaller;
+		left: 1px + $gap-small;
+
+		color: $universal-body-low-emphasis;
 		z-index: 1;
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: calc(100% - #{2 * $gap});
+		max-width: calc(100% - #{2 * $gap-small});
 		white-space: nowrap;
 
 		.has-dark-controls & {
@@ -80,12 +81,6 @@
 		.has-error & {
 			color: $alert-red;
 		}
-
-		@media screen and (prefers-reduced-motion: reduce) {
-			transition: none;
-		}
-
-		transform: translateY(15%) scale(0.75);
 	}
 
 	.wc-blocks-components-select__expand {
