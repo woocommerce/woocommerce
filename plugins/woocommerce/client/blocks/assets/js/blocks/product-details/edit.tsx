@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { productsStore } from '@woocommerce/data';
-import { useMemo } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useEffect, useMemo } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Disabled } from '@wordpress/components';
 
@@ -19,7 +19,7 @@ import {
  * Internal dependencies
  */
 import { ProductDetailsEditProps } from './types';
-import { getTemplate } from './utils';
+import { getTemplate, isAdditionalProductDataEmpty } from './utils';
 import { LegacyProductDetailsPreview } from './legacy-preview';
 import './editor.scss';
 
@@ -71,10 +71,6 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 	);
 
 	const template = useMemo( () => {
-		if ( ! product ) {
-			return [];
-		}
-
 		return getTemplate( product, {
 			isInnerBlockOfSingleProductBlock,
 		} );
@@ -82,21 +78,81 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 
 	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
 		( select ) => {
+			// @ts-expect-error - getBlocks is not typed
 			const blocks = select( blockEditorStore ).getBlocks( clientId );
+			const innerBlocks = blocks.length > 0;
+			const blockJustInserted =
+				// @ts-expect-error - wasBlockJustInserted is not typed
+				select( blockEditorStore ).wasBlockJustInserted( clientId );
+
 			return {
-				hasInnerBlocks: blocks.length > 0,
-				wasBlockJustInserted:
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore method exists but not typed
-					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+				hasInnerBlocks: innerBlocks,
+				wasBlockJustInserted: blockJustInserted,
 			};
 		},
 		[ clientId ]
 	);
 
+	const { accordionItemClientId } = useSelect(
+		( select ) => {
+			if ( ! wasBlockJustInserted ) {
+				return {
+					accordionItemClientId: null,
+				};
+			}
+
+			const productSpecificationClientIds = select(
+				blockEditorStore
+				// @ts-expect-error - getBlocksByName is not typed
+			).getBlocksByName( 'woocommerce/product-specifications' );
+
+			const productDetailsDescendants =
+				// @ts-expect-error - getClientIdsOfDescendants is not typed
+				select( blockEditorStore ).getClientIdsOfDescendants(
+					clientId
+				);
+
+			const productSpecificationClientId =
+				productSpecificationClientIds.find( ( id: string ) =>
+					productDetailsDescendants.includes( id )
+				);
+
+			const accordionClientId = select(
+				blockEditorStore
+				// @ts-expect-error - getBlockParentsByBlockName is not typed
+			).getBlockParentsByBlockName(
+				productSpecificationClientId ?? '',
+				'woocommerce/accordion-item'
+			)[ 0 ];
+
+			return {
+				accordionItemClientId: accordionClientId,
+			};
+		},
+		[ clientId, wasBlockJustInserted ]
+	);
+
+	const { removeBlock } = useDispatch( blockEditorStore );
+
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		template: wasBlockJustInserted ? template : undefined,
 	} );
+
+	/**
+	 * In some cases, the template variable is calculated before all the props are set.
+	 * This is why we need to do this additional check.
+	 * Check the PR for more details: https://github.com/woocommerce/woocommerce/pull/59686
+	 */
+	useEffect( () => {
+		if (
+			wasBlockJustInserted &&
+			product &&
+			isAdditionalProductDataEmpty( product ) &&
+			accordionItemClientId
+		) {
+			removeBlock( accordionItemClientId );
+		}
+	}, [ wasBlockJustInserted, accordionItemClientId, product, removeBlock ] );
 
 	const isInvalidQueryLoopContext = useIsInvalidQueryLoopContext(
 		clientId,

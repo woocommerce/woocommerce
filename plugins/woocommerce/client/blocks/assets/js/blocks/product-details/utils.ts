@@ -8,7 +8,9 @@ import {
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 
-const isAdditionalProductDataEmpty = ( product: PartialProduct ): boolean => {
+export const isAdditionalProductDataEmpty = (
+	product: PartialProduct
+): boolean => {
 	const isWeightEmpty = ( value: string | undefined ) => {
 		return ! value || value.length === 0;
 	};
@@ -36,12 +38,14 @@ const isAdditionalProductDataEmpty = ( product: PartialProduct ): boolean => {
 };
 
 export const getTemplate = (
-	product: PartialProduct,
+	product: PartialProduct | null,
 	{
 		isInnerBlockOfSingleProductBlock,
 	}: { isInnerBlockOfSingleProductBlock: boolean }
 ) => {
 	const additionalProductDataEmpty =
+		product !== null &&
+		product !== undefined &&
 		isAdditionalProductDataEmpty( product ) &&
 		isInnerBlockOfSingleProductBlock;
 
