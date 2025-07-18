@@ -88,25 +88,25 @@ class CanadaPostShippingProviderTest extends \WP_UnitTestCase {
 	public function validTrackingNumberProvider(): array {
 		return array(
 			// Standard format: XX#########CA.
-			array( 'AB123456789CA', 'CA', 'US', 90 ),   // International shipment.
-			array( 'CD987654321CA', 'CA', 'CA', 95 ),   // Domestic shipment with boost.
-			array( 'EF555666777CA', 'CA', 'GB', 90 ),   // International shipment.
+			array( 'AB123456789CA', 'CA', 'US', 94 ),   // International shipment (92+2 for US).
+			array( 'CD987654321CA', 'CA', 'CA', 95 ),   // Domestic shipment with boost (92+3).
+			array( 'EF555666777CA', 'CA', 'GB', 92 ),   // International shipment (base 92).
 
 			// 16-digit domestic tracking.
-			array( '1234567890123456', 'CA', 'CA', 95 ), // Domestic with boost.
-			array( '9876543210987654', 'CA', 'US', 90 ), // International.
+			array( '1234567890123456', 'CA', 'CA', 95 ), // Domestic with boost (92+3).
+			array( '9876543210987654', 'CA', 'US', 94 ), // US destination (92+2).
 
 			// 12-digit domestic tracking.
-			array( '123456789012', 'CA', 'CA', 95 ),     // Domestic with boost.
-			array( '987654321098', 'CA', 'AU', 90 ),     // International.
+			array( '123456789012', 'CA', 'CA', 95 ),     // Domestic with boost (92+3).
+			array( '987654321098', 'CA', 'AU', 96 ),     // International (92+4 check digit bonus).
 
 			// International format: XX#######XX.
-			array( 'AB1234567CD', 'CA', 'FR', 90 ),      // International.
-			array( 'EF9876543GH', 'CA', 'CA', 95 ),      // Domestic with boost.
+			array( 'AB1234567CD', 'CA', 'FR', 92 ),      // International (base 92).
+			array( 'EF9876543GH', 'CA', 'CA', 95 ),      // Domestic with boost (92+3).
 
 			// Some domestic formats: X#########X.
-			array( 'A123456789B', 'CA', 'CA', 95 ),      // Domestic with boost.
-			array( 'C987654321D', 'CA', 'DE', 90 ),      // International.
+			array( 'A123456789B', 'CA', 'CA', 95 ),      // Domestic with boost (92+3).
+			array( 'C987654321D', 'CA', 'DE', 92 ),      // International (base 92).
 		);
 	}
 
@@ -169,8 +169,8 @@ class CanadaPostShippingProviderTest extends \WP_UnitTestCase {
 		);
 
 		// Check score is within valid range.
-		$this->assertGreaterThanOrEqual( 85, $result['ambiguity_score'], 'Score should be at least 85' );
-		$this->assertLessThanOrEqual( 95, $result['ambiguity_score'], 'Score should not exceed 95' );
+		$this->assertGreaterThanOrEqual( 92, $result['ambiguity_score'], 'Score should be at least 92' );
+		$this->assertLessThanOrEqual( 98, $result['ambiguity_score'], 'Score should not exceed 98' );
 
 		// Check URL format.
 		$normalized_tracking = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
@@ -253,9 +253,9 @@ class CanadaPostShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertIsArray( $result_domestic );
 		$this->assertIsArray( $result_international );
 
-		// Domestic should have higher score (95 vs 90).
+		// Domestic should have higher score (95 vs 94).
 		$this->assertSame( 95, $result_domestic['ambiguity_score'] );
-		$this->assertSame( 90, $result_international['ambiguity_score'] );
+		$this->assertSame( 94, $result_international['ambiguity_score'] ); // US gets +2 boost.
 		$this->assertGreaterThan( $result_international['ambiguity_score'], $result_domestic['ambiguity_score'] );
 	}
 
@@ -266,27 +266,27 @@ class CanadaPostShippingProviderTest extends \WP_UnitTestCase {
 		// Test standard format XX#########CA.
 		$standard_result = $this->provider->try_parse_tracking_number( 'AB123456789CA', 'CA', 'US' );
 		$this->assertIsArray( $standard_result );
-		$this->assertSame( 90, $standard_result['ambiguity_score'] );
+		$this->assertSame( 94, $standard_result['ambiguity_score'] ); // US destination gets +2.
 
 		// Test 16-digit format.
-		$digit16_result = $this->provider->try_parse_tracking_number( '1234567890123456', 'CA', 'US' );
+		$digit16_result = $this->provider->try_parse_tracking_number( '1234567890123456', 'CA', 'FR' );
 		$this->assertIsArray( $digit16_result );
-		$this->assertSame( 90, $digit16_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit16_result['ambiguity_score'] ); // International base.
 
 		// Test 12-digit format.
-		$digit12_result = $this->provider->try_parse_tracking_number( '123456789012', 'CA', 'US' );
+		$digit12_result = $this->provider->try_parse_tracking_number( '123456789012', 'CA', 'MX' );
 		$this->assertIsArray( $digit12_result );
-		$this->assertSame( 90, $digit12_result['ambiguity_score'] );
+		$this->assertSame( 94, $digit12_result['ambiguity_score'] ); // MX destination gets +2.
 
 		// Test international format XX#######XX.
-		$intl_result = $this->provider->try_parse_tracking_number( 'AB1234567CD', 'CA', 'US' );
+		$intl_result = $this->provider->try_parse_tracking_number( 'AB1234567CD', 'CA', 'GB' );
 		$this->assertIsArray( $intl_result );
-		$this->assertSame( 90, $intl_result['ambiguity_score'] );
+		$this->assertSame( 92, $intl_result['ambiguity_score'] ); // International base.
 
 		// Test domestic format X########X.
-		$domestic_result = $this->provider->try_parse_tracking_number( 'A123456789B', 'CA', 'US' );
+		$domestic_result = $this->provider->try_parse_tracking_number( 'A123456789B', 'CA', 'AU' );
 		$this->assertIsArray( $domestic_result );
-		$this->assertSame( 90, $domestic_result['ambiguity_score'] );
+		$this->assertSame( 92, $domestic_result['ambiguity_score'] ); // International base.
 	}
 
 	/**

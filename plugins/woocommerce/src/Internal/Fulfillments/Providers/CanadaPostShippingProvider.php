@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+
 /**
  * Canada Post Shipping Provider class.
  *
@@ -10,20 +12,43 @@ namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 class CanadaPostShippingProvider extends AbstractShippingProvider {
 
 	/**
-	 * Canada Post tracking number patterns.
+	 * Canada Post tracking number patterns with service differentiation.
 	 *
 	 * @var array<string, array{patterns: array<int, string>, confidence: int}>
 	 */
 	private const TRACKING_PATTERNS = array(
 		'CA' => array( // Canada.
 			'patterns'   => array(
-				'/^[A-Z]{2}\d{9}CA$/', // Standard format: XX#########CA.
-				'/^\d{16}$/', // 16-digit domestic tracking.
-				'/^\d{12}$/', // 12-digit domestic tracking.
-				'/^[A-Z]{2}\d{7}[A-Z]{2}$/', // International format: XX#######XX.
-				'/^[A-Z]{1}\d{9}[A-Z]{1}$/', // Some domestic formats: X#########X.
+				// UPU S10 international format (outbound).
+				'/^[A-Z]{2}\d{9}CA$/',         // Standard format: XX#########CA.
+				// UPU S10 international (inbound/other countries, fallback).
+				'/^[A-Z]{2}\d{9}[A-Z]{2}$/',   // Any S10/UPU code.
+				// Domestic numeric formats.
+				'/^\d{16}$/',                  // 16-digit domestic tracking.
+				'/^\d{15}$/',                  // 15-digit legacy/partner/returns.
+				'/^\d{14}$/',                  // 14-digit legacy/partner/returns.
+				'/^\d{13}$/',                  // 13-digit domestic (most common).
+				'/^\d{12}$/',                  // 12-digit domestic.
+				'/^\d{10}$/',                  // 10-digit legacy.
+				'/^\d{9}$/',                   // 9-digit legacy.
+				'/^\d{8}$/',                   // 8-digit calling card/legacy.
+				// Service-specific patterns.
+				'/^XP\d{9}CA$/',               // Xpresspost International.
+				'/^EX\d{9}CA$/',               // Express International.
+				'/^PR\d{9}CA$/',               // Priority.
+				'/^RG\d{9}CA$/',               // Regular (deprecated, legacy).
+				'/^RM\d{9}CA$/',               // Registered Mail.
+				'/^CM\d{9}CA$/',               // Certified Mail.
+				'/^[A-Z]{2}\d{7}[A-Z]{2}$/',   // International format: XX#######XX.
+				'/^[A-Z]{1}\d{9}[A-Z]{1}$/',   // Domestic formats: X#########X.
+				'/^FD\d{10,12}$/',             // FlexDelivery.
+				'/^PO\d{10,12}$/',             // Post Office Box service.
+				'/^CP\d{10,14}$/',             // Canada Post business.
+				'/^SM\d{10,14}$/',             // Small packet.
+				// Legacy and alternative formats.
+				'/^[0-9]{13}[A-Z]{1}$/',       // 13 digits + 1 letter.
 			),
-			'confidence' => 90,
+			'confidence' => 92,
 		),
 	);
 
@@ -121,7 +146,7 @@ class CanadaPostShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
+		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) ); // Normalize input.
 		if ( empty( $normalized ) ) {
 			return null;
 		}
@@ -134,13 +159,46 @@ class CanadaPostShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		// Check country-specific patterns.
+		// Check country-specific patterns with enhanced validation.
 		if ( $this->validate_country_pattern( $normalized, $shipping_from ) ) {
 			$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'];
 
+			// Apply UPU S10 validation for international formats.
+			if ( preg_match( '/^[A-Z]{2}\d{9}CA$/', $normalized ) ) {
+				if ( FulfillmentUtils::check_s10_upu_format( $normalized ) ) {
+					$confidence = min( 98, $confidence + 6 ); // Strong boost for valid UPU.
+				}
+			} elseif ( preg_match( '/^[A-Z]{2}\d{9}[A-Z]{2}$/', $normalized ) ) {
+				// Apply S10/UPU fallback with lower confidence.
+				if ( FulfillmentUtils::check_s10_upu_format( $normalized ) ) {
+					$confidence = min( 94, $confidence + 2 ); // Lower boost for inbound S10.
+				}
+			}
+
+			// Apply check digit validation for numeric formats.
+			if ( preg_match( '/^\d{12,16}$/', $normalized ) ) {
+				if ( FulfillmentUtils::validate_mod10_check_digit( $normalized ) ) {
+					$confidence = min( 96, $confidence + 4 ); // Boost for valid check digit.
+				}
+			}
+
+			// Service-specific confidence boosts.
+			if ( preg_match( '/^(XP|EX|PR)\d+/', $normalized ) ) {
+				$confidence = min( 96, $confidence + 4 ); // Express/Priority services.
+			} elseif ( preg_match( '/^(RM|CM)\d+/', $normalized ) ) {
+				$confidence = min( 95, $confidence + 3 ); // Registered/Certified.
+			} elseif ( preg_match( '/^(FD|PO|CP|SM)\d+/', $normalized ) ) {
+				$confidence = min( 94, $confidence + 2 ); // Special services.
+			}
+
 			// Boost confidence for domestic shipments.
 			if ( 'CA' === $shipping_to ) {
-				$confidence = min( 95, $confidence + 5 );
+				$confidence = min( 98, $confidence + 3 );
+			}
+
+			// Boost for North American destinations.
+			if ( in_array( $shipping_to, array( 'US', 'MX' ), true ) ) {
+				$confidence = min( 95, $confidence + 2 );
 			}
 
 			return array(

@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+
 /**
  * FedEx Shipping Provider implementation.
  *
@@ -79,7 +81,7 @@ class FedExShippingProvider extends AbstractShippingProvider {
 	 */
 	public function can_ship_from_to( string $shipping_from, string $shipping_to ): bool {
 		return in_array( $shipping_from, $this->supported_countries, true ) &&
-				in_array( $shipping_to, $this->supported_countries, true );
+			in_array( $shipping_to, $this->supported_countries, true );
 	}
 
 	/**
@@ -95,46 +97,93 @@ class FedExShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		$tracking_number  = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
-		$is_north_america = in_array( $shipping_from, array( 'US', 'CA' ), true );
+		$tracking_number  = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) ); // Remove spaces and uppercase for consistency.
+		$is_north_america = in_array( $shipping_from, array( 'US', 'CA' ), true ); // North America flag for scoring.
+		$is_us_domestic   = 'US' === $shipping_from && 'US' === $shipping_to; // US domestic flag for scoring.
 
-		// Service-specific patterns with their base scores.
+		// FedEx tracking number patterns with enhanced validation and comments.
 		$patterns = array(
-			// FedEx Custom Critical (highest confidence).
+			// FedEx Door Tag: DT + 12 digits (US/CA only).
+			'/^DT\d{12}$/'       => $is_north_america ? 90 : 0,
+
+			// FedEx Custom Critical: 0 or 1 followed by 13-23 digits (very rare, highest confidence).
 			'/^0[01]\d{13,23}$/' => 98,
 
-			// FedEx SmartPost (very specific).
-			'/^023\d{17}$/'      => 96,
+			// FedEx SmartPost: 023 + 17 digits (US only, SmartPost).
+			'/^023\d{17}$/'      => 97,
+
+			// FedEx SmartPost: 58 + 17-19 digits (older SmartPost).
 			'/^58\d{17,19}$/'    => 96,
 
-			// FedEx Express 3x patterns.
-			'/^3\d{10,14}$/'     => 96,
+			// FedEx Express: 12 digits (most common, with check digit validation).
+			'/^\d{12}$/'         => function () use ( $tracking_number, $is_north_america, $is_us_domestic ) {
+				if ( FulfillmentUtils::validate_fedex_check_digit( $tracking_number ) ) {
+					return $is_north_america || $is_us_domestic ? 98 : 85; // High confidence if check digit valid.
+				}
+				return $is_north_america ? ( $is_us_domestic ? 98 : 85 ) : 70; // Lower if check digit invalid.
+			},
 
-			// FedEx Freight (must come before generic digit patterns).
-			'/^97\d{13,23}$/'    => 93,
+			// FedEx Express: 15 digits (less common, with check digit validation).
+			'/^\d{15}$/'         => function () use ( $tracking_number, $is_north_america ) {
+				if ( FulfillmentUtils::validate_fedex_check_digit( $tracking_number ) ) {
+					return $is_north_america ? 96 : 80; // High confidence if check digit valid.
+				}
+				return $is_north_america ? 80 : 65; // Lower if check digit invalid.
+			},
 
-			// FedEx Ground.
+			// FedEx Express: 14 digits (with check digit validation).
+			'/^\d{14}$/'         => function () use ( $tracking_number, $is_north_america ) {
+				if ( FulfillmentUtils::validate_fedex_check_digit( $tracking_number ) ) {
+					return $is_north_america ? 95 : 78; // High confidence if check digit valid.
+				}
+				return $is_north_america ? 78 : 60; // Lower if check digit invalid.
+			},
+
+			// FedEx Express: 34 digits (rare, international bulk shipments).
+			'/^\d{34}$/'         => 90,
+
+			// FedEx Ground: 96 + 18-20 digits (US/CA only).
 			'/^96\d{18,20}$/'    => $is_north_america ? 95 : 60,
+
+			// FedEx Ground: 7 + 11-20 digits (US/CA only, legacy).
 			'/^7\d{11,20}$/'     => $is_north_america ? 90 : 75,
 
-			// FedEx Express digit patterns (ordered by specificity).
-			'/^\d{12}$/'         => $is_north_america ? 95 : 80,  // Reduced for EU.
-			'/^\d{14}$/'         => $is_north_america ? 95 : 80,  // Reduced for EU.
-			'/^\d{15}$/'         => $is_north_america ? 90 : 75,  // Reduced for EU.
+			// FedEx Freight: 97 + 13-23 digits (Freight/LTL).
+			'/^97\d{13,23}$/'    => 93,
 
-			// Fallback patterns.
+			// FedEx Express International: 3 + 10-14 digits (Europe/Asia).
+			'/^3\d{10,14}$/'     => 92,
+
+			// FedEx International Priority: 8 + 8-14 digits (Europe/Asia).
+			'/^8\d{8,14}$/'      => function () use ( $shipping_from ) {
+				return in_array( $shipping_from, array( 'GB', 'DE', 'FR', 'IT', 'ES', 'NL' ), true ) ? 93 : 75;
+			},
+
+			// FedEx Express Next Flight Out: NFO + 10-15 digits.
+			'/^NFO\d{10,15}$/'   => 92,
+
+			// FedEx SameDay: SD + 10-15 digits.
+			'/^SD\d{10,15}$/'    => 90,
+
+			// Fallback: 20 digit numeric (used by some international and legacy services).
 			'/^\d{20}$/'         => 70,
+
+			// Fallback: 22 digit numeric (rare, legacy).
+			'/^\d{22}$/'         => 65,
 		);
 
 		foreach ( $patterns as $pattern => $base_score ) {
 			if ( preg_match( $pattern, $tracking_number ) ) {
-				return array(
-					'url'             => $this->get_tracking_url( $tracking_number ),
-					'ambiguity_score' => is_callable( $base_score ) ? $base_score() : $base_score,
-				);
+				$score = is_callable( $base_score ) ? $base_score() : $base_score;
+				if ( $score > 0 ) {
+					return array(
+						'url'             => $this->get_tracking_url( $tracking_number ),
+						'ambiguity_score' => $score,
+					);
+				}
 			}
 		}
 
-		return null;
+		return null; // No matching pattern found.
 	}
 }
