@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getByLabelText, getByRole } from '@testing-library/dom';
@@ -49,6 +49,12 @@ describe( 'Checkout block editor integration', () => {
 		expect(
 			screen.getByLabelText( /^Block: Checkout$/i )
 		).toBeInTheDocument();
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeInTheDocument();
+		} );
 
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i

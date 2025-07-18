@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getAllByRole, getByLabelText } from '@testing-library/dom';
@@ -52,6 +52,7 @@ describe( 'Cart block editor integration', () => {
 
 		// Test Order Summary block - should have both Table and Audio options (specific filter applied).
 		await selectBlock( /^Block: Order Summary$/i );
+
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
@@ -130,6 +131,12 @@ describe( 'Cart block editor integration', () => {
 		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /Block: Filled Cart$/i )
+			).toBeInTheDocument();
+		} );
 
 		await selectBlock( /Block: Filled Cart/i );
 
