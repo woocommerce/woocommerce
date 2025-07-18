@@ -12,7 +12,6 @@ import {
 import '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -27,7 +26,7 @@ import { CartItem, Currency } from '../../types';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency } = getConfig( 'woocommerce' );
+const { currency, placeholderImgSrc } = getConfig( 'woocommerce' );
 const {
 	addToCartBehaviour,
 	onCartClickBehaviour,
@@ -441,7 +440,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemThumbnail(): string {
-				return cartItemState.cartItem.images[ 0 ]?.thumbnail || PLACEHOLDER_IMG_SRC;
+				return (
+					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
+					placeholderImgSrc
+				);
 			},
 
 			get priceWithoutDiscount(): string {
