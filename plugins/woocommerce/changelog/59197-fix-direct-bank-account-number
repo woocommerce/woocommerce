@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow non-numeric characters in bank account numbers for the Direct bank transfer payment method to support international banking formats.

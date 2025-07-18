@@ -42,6 +42,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Payments Providers class.
+ *
+ * @internal
  */
 class PaymentsProviders {
 
@@ -87,6 +89,7 @@ class PaymentsProviders {
 		'woocommerce_payments'      => WooPayments::class,
 		'ppcp-gateway'              => PayPal::class,
 		'stripe'                    => Stripe::class,
+		'stripe_*'                  => Stripe::class,
 		'mollie'                    => Mollie::class,
 		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
 		'amazon_payments_advanced*' => AmazonPay::class,
