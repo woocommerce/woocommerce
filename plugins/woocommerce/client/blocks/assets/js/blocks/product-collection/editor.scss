@@ -254,3 +254,11 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		padding: 0;
 	}
 }
+
+.wc-block-editor-product-collection__carousel-warning {
+	margin-bottom: $gap-small;
+
+	.components-notice__content {
+		margin-right: 0;
+	}
+}

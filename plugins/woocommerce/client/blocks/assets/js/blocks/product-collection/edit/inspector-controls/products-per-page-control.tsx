@@ -51,16 +51,18 @@ const ProductsPerPageControl = ( {
 			resetAllFilter={ deselectCallback }
 		>
 			{ showPerformanceWarning && (
-				<Notice
-					status="warning"
-					isDismissible={ false }
-					className="wc-block-editor-product-collection__carousel-performance-warning"
-				>
-					{ __(
-						'High product counts in carousel may impact performance. Consider reducing the number of products for better user experience.',
-						'woocommerce'
-					) }
-				</Notice>
+				<div>
+					<Notice
+						status="warning"
+						isDismissible={ false }
+						className="wc-block-editor-product-collection__carousel-warning"
+					>
+						{ __(
+							'High product counts in carousel may impact performance. Consider reducing the number of products for better user experience.',
+							'woocommerce'
+						) }
+					</Notice>
+				</div>
 			) }
 			<RangeControl
 				__next40pxDefaultSize
