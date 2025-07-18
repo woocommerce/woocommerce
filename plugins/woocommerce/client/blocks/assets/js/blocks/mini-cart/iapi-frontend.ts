@@ -664,7 +664,6 @@ const { state: cartItemState } = store(
 
 		callbacks: {
 			itemShortDescription() {
-				debugger;
 				const el = getElement();
 
 				if ( el.ref ) {
