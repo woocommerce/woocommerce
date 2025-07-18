@@ -139,6 +139,7 @@ const Image = ( {
 	}
 
 	return (
+		/* eslint-disable-next-line jsx-a11y/alt-text */
 		<img
 			style={ imageStyles }
 			data-testid="product-image"
