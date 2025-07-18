@@ -61,7 +61,7 @@ class Text extends Abstract_Block_Renderer {
 		// Add fallback text color when no custom text color or preset text color is set.
 		if ( empty( $block_styles['declarations']['color'] ) ) {
 			$email_styles               = $rendering_context->get_theme_styles();
-			$additional_styles['color'] = $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
 		$additional_styles['text-align'] = 'left';

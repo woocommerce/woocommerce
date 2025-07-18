@@ -80,6 +80,12 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 				return str_replace( 'slug-', '', $slug );
 			}
 		);
+		// This slug translate mock expect slugs in format slug-color and will return color.
+		$settings_mock->method( 'translate_slug_to_color' )->willReturnMap(
+			array(
+				array( 'slug-red', '#ff0000' ),
+			)
+		);
 		$this->preprocessor = new Typography_Preprocessor( $settings_mock );
 		$this->layout       = array( 'contentSize' => '660px' );
 		$this->styles       = array(
@@ -178,6 +184,48 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$expected_email_attrs = array(
 			'color'     => '#000000',
 			'font-size' => '20px',
+		);
+		$result               = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$result               = $result[0];
+		$this->assertCount( 2, $result['innerBlocks'] );
+		$this->assertEquals( $expected_email_attrs, $result['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][1]['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][1]['innerBlocks'][0]['email_attrs'] );
+	}
+
+	/**
+	 * Test it replaces text color slugs with values
+	 */
+	public function testItReplacesTextColorSlugsWithValues(): void {
+		$blocks               = array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'textColor' => 'slug-red',
+					'style'     => array(),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'innerBlocks' => array(),
+					),
+					array(
+						'blockName'   => 'core/column',
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+		$expected_email_attrs = array(
+			'color'     => '#ff0000',
+			'font-size' => '13px',
 		);
 		$result               = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$result               = $result[0];
