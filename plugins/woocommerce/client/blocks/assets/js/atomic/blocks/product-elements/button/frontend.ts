@@ -224,7 +224,14 @@ const productButtonStore = {
 		},
 		handlePressedState() {
 			const context = getContext< Context >();
-			context.hasPressedButton = true;
+
+			// Only handle the pressed state if the form is valid.
+			if (
+				addToCartWithOptionsState?.isFormValid === undefined ||
+				addToCartWithOptionsState?.isFormValid
+			) {
+				context.hasPressedButton = true;
+			}
 		},
 	},
 	callbacks: {
@@ -245,8 +252,7 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
-			// We skip the animation altogether if the single product page Add to Cart + Options form is invalid.
-
+			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE &&

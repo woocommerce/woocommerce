@@ -56,6 +56,9 @@ table.wc-block-cart-items {
 
 				text-transform: none;
 				white-space: nowrap;
+				&[hidden] {
+					display: none;
+				}
 			}
 		}
 		.wc-block-components-product-name {

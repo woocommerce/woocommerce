@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix the "Account Number" column in BACS to display either the account number or the IBAN

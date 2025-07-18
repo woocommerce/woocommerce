@@ -202,6 +202,24 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			wp_interactivity_state(
+				'woocommerce',
+				array(
+					// Use camelCase for error messages generated from the frontend,
+					// and snake_case for error messages generated from the backend.
+					'errorMessages' => array(
+						'groupedProductAddToCartMissingItems' => __(
+							'Please select some products to add to the cart.',
+							'woocommerce'
+						),
+						'woocommerce_rest_missing_attributes' => __(
+							'Please select product attributes before adding to cart.',
+							'woocommerce'
+						),
+					),
+				)
+			);
+
 			$context = array(
 				'productId'   => $product->get_id(),
 				'productType' => $product->get_type(),
