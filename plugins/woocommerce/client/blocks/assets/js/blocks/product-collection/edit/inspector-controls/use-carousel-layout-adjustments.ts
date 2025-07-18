@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useRef, useEffect } from '@wordpress/element';
-import { select, useSelect, useDispatch } from '@wordpress/data';
+import { select as selectData, useSelect, useDispatch } from '@wordpress/data';
 import { createBlock, type BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { getInnerBlockBy, getInnerBlockByName } from '@woocommerce/utils';
@@ -143,7 +143,7 @@ const handleTransitionFromCarouselLayout = (
 	// If Product Template is not in the group block, we should not do anything.
 	if ( groupBlock ) {
 		// @ts-expect-error getBlockIndex is not typed.
-		const groupBlockIndex = select( blockEditorStore ).getBlockIndex(
+		const groupBlockIndex = selectData( blockEditorStore ).getBlockIndex(
 			groupBlock.clientId
 		);
 
@@ -159,7 +159,7 @@ const handleTransitionFromCarouselLayout = (
 
 		// We cannot rely on `groupBlock.innerBlocks.length` because it's not updated
 		// immediately after the blocks are removed.
-		const isGroupBlockEmpty = ! select(
+		const isGroupBlockEmpty = ! selectData(
 			blockEditorStore
 			// @ts-expect-error getClientIdsOfDescendants is not typed.
 		).getClientIdsOfDescendants( groupBlock.clientId ).length;
