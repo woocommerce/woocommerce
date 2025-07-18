@@ -173,7 +173,10 @@ class FeaturesController {
 	 * @return array The modified list of features.
 	 */
 	public function sync_iapi_mini_cart_feature( $features ) {
-		if ( $this->feature_is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		$option_name = 'woocommerce_feature_experimental-iapi-mini-cart_enabled';
+		$is_enabled  = 'yes' === get_option( $option_name, 'no' );
+
+		if ( $is_enabled ) {
 			if ( ! in_array( 'experimental-iapi-mini-cart', $features, true ) ) {
 				$features[] = 'experimental-iapi-mini-cart';
 			}
