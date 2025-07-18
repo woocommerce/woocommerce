@@ -25,8 +25,6 @@ class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
 	use BlocksSharedState;
 
-	// TODO: Check if we can use the `BlockJsonAssetsTrait`.
-
 	/**
 	 * Block name.
 	 *
@@ -220,7 +218,6 @@ class MiniCart extends AbstractBlock {
 			return '';
 		}
 
-		// TODO: Check if we can replace this with `get_block_wrapper_attributes`.
 		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family', 'extra_classes' ) );
 		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 
@@ -357,7 +354,7 @@ class MiniCart extends AbstractBlock {
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
-					<?php echo $this->get_include_tax_label_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo $this->get_include_tax_label_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php endif; ?>
 				</button>
 			<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass">
