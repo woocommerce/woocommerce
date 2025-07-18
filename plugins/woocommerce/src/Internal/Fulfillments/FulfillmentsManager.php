@@ -17,7 +17,7 @@ use WC_Order_Refund;
  *
  * This class is responsible for adding hooks related to fulfillments in WooCommerce.
  *
- * @since 9.9.0
+ * @since 10.1.0
  * @package WooCommerce\Internal\Fulfillments
  */
 class FulfillmentsManager {
@@ -25,9 +25,9 @@ class FulfillmentsManager {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		add_filter( 'wc_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
-		add_filter( 'wc_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
-		add_filter( 'wc_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
+		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
+		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
+		add_filter( 'woocommerce_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
 
 		$this->init_fulfillment_status_hooks();
 		$this->init_refund_hooks();
@@ -41,9 +41,9 @@ class FulfillmentsManager {
 	 */
 	private function init_fulfillment_status_hooks() {
 		// Update order fulfillment status when a fulfillment is created, updated, or deleted.
-		add_action( 'wc_fulfillment_after_create', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
-		add_action( 'wc_fulfillment_after_update', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
-		add_action( 'wc_fulfillment_after_delete', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
+		add_action( 'woocommerce_fulfillment_after_create', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
+		add_action( 'woocommerce_fulfillment_after_update', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
+		add_action( 'woocommerce_fulfillment_after_delete', array( $this, 'update_order_fulfillment_status_on_fulfillment_update' ), 10, 1 );
 	}
 
 	/**
@@ -69,10 +69,10 @@ class FulfillmentsManager {
 		 * This filter allows us to translate fulfillment meta keys
 		 * to make them more user-friendly in the admin interface and emails.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
 		$meta_key_translations = apply_filters(
-			'wc_fulfillment_meta_key_translations',
+			'woocommerce_fulfillment_meta_key_translations',
 			array(
 				'fulfillment_status' => __( 'Fulfillment Status', 'woocommerce' ),
 				'shipment_tracking'  => __( 'Shipment Tracking', 'woocommerce' ),
@@ -85,7 +85,7 @@ class FulfillmentsManager {
 	/**
 	 * Get initial shipping providers.
 	 *
-	 * This method provides the initial shipping providers that feeds the `wc_fulfillment_shipping_providers` filter,
+	 * This method provides the initial shipping providers that feeds the `woocommerce_fulfillment_shipping_providers` filter,
 	 * which is used to populate the list of available shipping providers on the fulfillment UI.
 	 *
 	 * @param array $shipping_providers The current list of shipping providers.

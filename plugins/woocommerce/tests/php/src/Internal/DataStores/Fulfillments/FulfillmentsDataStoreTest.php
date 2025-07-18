@@ -626,14 +626,14 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$after_delete_called  = false;
 
 		add_action(
-			'wc_fulfillment_before_delete',
+			'woocommerce_fulfillment_before_delete',
 			function () use ( &$before_delete_called ) {
 				$before_delete_called = true;
 			}
 		);
 
 		add_action(
-			'wc_fulfillment_after_delete',
+			'woocommerce_fulfillment_after_delete',
 			function () use ( &$after_delete_called ) {
 				$after_delete_called = true;
 			}

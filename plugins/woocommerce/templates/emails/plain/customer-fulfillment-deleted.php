@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 9.9.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,7 +30,7 @@ echo esc_html__( 'We wanted to let you know that one of the previously fulfilled
  * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
  * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
  *
- * @since 9.9.0
+ * @since 10.1.0
  */
 do_action( 'woocommerce_email_fulfillment_details', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
 
@@ -41,7 +41,7 @@ echo "\n----------------------------------------\n\n";
  *
  * @hooked WC_Emails::fulfillment_meta() Shows order meta data.
  *
- * @since 9.9.0
+ * @since 10.1.0
  */
 do_action( 'woocommerce_email_fulfillment_meta', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
 

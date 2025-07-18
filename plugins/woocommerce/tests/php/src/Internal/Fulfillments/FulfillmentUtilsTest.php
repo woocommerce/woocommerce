@@ -30,7 +30,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_fulfillment_statuses_extension() {
 		add_filter(
-			'wc_fulfillment_order_fulfillment_statuses',
+			'woocommerce_fulfillment_order_fulfillment_statuses',
 			function ( $statuses ) {
 				$statuses['custom_status'] = __( 'Custom Status', 'woocommerce' );
 				return $statuses;
@@ -53,7 +53,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_fulfillment_statuses() {
 		add_filter(
-			'wc_fulfillment_fulfillment_statuses',
+			'woocommerce_fulfillment_fulfillment_statuses',
 			function ( $statuses ) {
 				$statuses['custom_status'] = array(
 					'label'            => __( 'Custom Status', 'woocommerce' ),

@@ -162,7 +162,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Deleted', false ) ) :
 		 *
 		 * @param WC_Order $order The order object.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
 		private function maybe_init_fulfillment_for_preview( $order ) {
 			/**

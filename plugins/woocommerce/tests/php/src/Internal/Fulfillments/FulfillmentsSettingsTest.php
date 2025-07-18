@@ -89,7 +89,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	public function test_auto_fulfill_items_on_processing_bails_out_if_order_has_no_items() {
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillments_auto_fulfill_products',
+			'woocommerce_fulfillments_auto_fulfill_products',
 			function ( $products ) use ( &$hook_called ) {
 				$hook_called = true;
 				return $products;
@@ -146,7 +146,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	) {
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillments_auto_fulfill_products',
+			'woocommerce_fulfillments_auto_fulfill_products',
 			function ( $products ) use ( &$hook_called, $auto_fulfill_products ) {
 				$hook_called = true;
 				$products    = array_merge( $products, $auto_fulfill_products );
