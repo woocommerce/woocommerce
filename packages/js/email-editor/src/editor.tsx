@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	StrictMode,
 	createRoot,
 	useEffect,
+	useLayoutEffect,
 	useState,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
@@ -28,17 +29,35 @@ import {
 import { initContentValidationMiddleware } from './middleware/content-validation';
 import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
-function Editor( { isPreview = false }: { isPreview?: boolean } ) {
-	const { postId, postType, settings } = useSelect(
+function Editor( {
+	postId,
+	postType,
+	isPreview = false,
+}: {
+	postId: string;
+	postType: string;
+	isPreview?: boolean;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
+	const { settings } = useSelect(
 		( select ) => ( {
-			postId: select( storeName ).getEmailPostId(),
-			postType: select( storeName ).getEmailPostType(),
 			settings: select( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
+
 	useContentValidation();
 	useRemoveSavingFailedNotices();
+
+	const { setEmailPost } = useDispatch( storeName );
+	useEffect( () => {
+		setEmailPost( postId, postType );
+		setIsInitialized( true );
+	}, [ postId, postType ] );
+
+	if ( ! isInitialized ) {
+		return null;
+	}
 
 	// Set allowed blockTypes to the editor settings.
 	settings.allowedBlockTypes = getAllowedBlockNames();
@@ -60,6 +79,17 @@ export function initialize( elementId: string ) {
 	if ( ! container ) {
 		return;
 	}
+	const { current_post_id, current_post_type } =
+		window.WooCommerceEmailEditor;
+
+	if ( current_post_id === undefined || current_post_id === null ) {
+		throw new Error( 'current_post_id is required but not provided.' );
+	}
+
+	if ( ! current_post_type ) {
+		throw new Error( 'current_post_type is required but not provided.' );
+	}
+
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
@@ -74,7 +104,12 @@ export function initialize( elementId: string ) {
 	initHooks();
 	initTextHooks();
 	const root = createRoot( container );
-	root.render( <WrappedEditor /> );
+	root.render(
+		<WrappedEditor
+			postId={ current_post_id }
+			postType={ current_post_type }
+		/>
+	);
 }
 
 export function EmailEditor( {
@@ -88,11 +123,11 @@ export function EmailEditor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useEffect( () => {
+	useLayoutEffect( () => {
 		initEventCollector();
 		initStoreTracking();
 		initDomTracking();
-		createStore( postId, postType );
+		createStore();
 		initializeLayout();
 		initBlocks();
 		initHooks();
@@ -109,5 +144,11 @@ export function EmailEditor( {
 		return null;
 	}
 
-	return <WrappedEditor isPreview={ isPreview } />;
+	return (
+		<WrappedEditor
+			postId={ postId }
+			postType={ postType }
+			isPreview={ isPreview }
+		/>
+	);
 }
