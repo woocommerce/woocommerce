@@ -34,8 +34,10 @@ import { isTryingToDisplayLegacySaleBadge } from './utils';
 // So we're "creating" a full size placeholder URL from the thumbnail URL.
 // Example input: https://example.com/path/to/placeholder-150x150.png
 // Example output: https://example.com/path/to/placeholder.png
-const getFullSizePlaceholderImageSrc = () => {
-	return PLACEHOLDER_IMG_SRC.replace( /-\d+x\d+(?=\.[^.]+$)/, '' );
+const getPlaceholderSrc = ( showFullSize: boolean ) => {
+	return showFullSize
+		? PLACEHOLDER_IMG_SRC.replace( /-\d+x\d+(?=\.[^.]+$)/, '' )
+		: PLACEHOLDER_IMG_SRC;
 };
 
 const buildStyles = ( props: Partial< ImageProps > ) => {
@@ -69,9 +71,7 @@ const ImagePlaceholder = ( props: {
 	showFullSize: boolean;
 } ): JSX.Element => {
 	const { showFullSize, ...restProps } = props;
-	const src = showFullSize
-		? getFullSizePlaceholderImageSrc()
-		: PLACEHOLDER_IMG_SRC;
+	const src = getPlaceholderSrc( showFullSize );
 
 	return (
 		<img
