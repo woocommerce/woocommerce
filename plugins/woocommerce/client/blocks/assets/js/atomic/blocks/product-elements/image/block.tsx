@@ -197,6 +197,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isString( style.dimensions.aspectRatio )
 			? style.dimensions.aspectRatio
 			: aspectRatio;
+	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${ finalAspectRatio.replace(
+		'/',
+		'-'
+	) }`;
 
 	if ( ! product?.id ) {
 		const imageStyles = buildStyles( {
@@ -212,6 +216,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					className={ clsx(
 						className,
 						'wc-block-components-product-image',
+						aspectRatioClass,
 						{
 							[ `${ parentClassName }__product-image` ]:
 								parentClassName,
@@ -259,6 +264,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					'wc-block-components-product-image',
+					aspectRatioClass,
 					{
 						[ `${ parentClassName }__product-image` ]:
 							parentClassName,
