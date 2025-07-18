@@ -30,6 +30,7 @@ import { storeName } from '../../store';
 import { PersonalizationTagsPopover } from '../../components/personalization-tags/personalization-tags-popover';
 import { PersonalizationTagsLinkPopover } from '../../components/personalization-tags/personalization-tags-link-popover';
 import { recordEvent } from '../../events';
+import { useIsEmailEditor } from '../../hooks/use-is-email-editor';
 
 /**
  * Disable Rich text formats we currently cannot support
@@ -133,6 +134,12 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			updateBlockAttributes,
 		]
 	);
+
+	const isEmailEditor = useIsEmailEditor();
+
+	if ( ! isEmailEditor ) {
+		return null;
+	}
 
 	return (
 		<BlockControls>
