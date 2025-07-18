@@ -6,6 +6,7 @@ import {
 	StrictMode,
 	createRoot,
 	useEffect,
+	useLayoutEffect,
 	useState,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
@@ -119,7 +120,7 @@ export function EmailEditor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useEffect( () => {
+	useLayoutEffect( () => {
 		initEventCollector();
 		initStoreTracking();
 		initDomTracking();
