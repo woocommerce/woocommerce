@@ -22,6 +22,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 
 	/**
+	* Static init to add hooks once per request.
+	*
+	* @since 10.2.0
+	*/
+	public static function init_hooks() {
+		static $hooks_added = false;
+		if ( $hooks_added ) {
+			return;
+		}
+
+		// not needed - update?
+		/* add_action( 'woocommerce_save_product_variation', array( __CLASS__, 'on_save_product_variation' ), 20, 1 ); */
+
+		/* add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 ); */
+		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
+
+		add_action( 'woocommerce_attribute_add', array( __CLASS__, 'on_add_product_attribute' ), 10, 3 );
+		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
+
+		$hooks_added = true;
+	}
+
+	/**
 	 * Callback to remove unwanted meta data.
 	 *
 	 * @param object $meta Meta object.
@@ -104,12 +127,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * This is meant to also cover the case when global attribute name or value is updated, then the attribute summary is updated
 		 * for respective products when they're read.
 		 */
-		$new_attribute_summary = self::generate_attribute_summary( $product );
-
-		if ( $new_attribute_summary !== $post_object->post_excerpt ) {
-			$product->set_attribute_summary( $new_attribute_summary );
-			$updates = array_merge( $updates, array( 'post_excerpt' => $new_attribute_summary ) );
-		}
+		/* $new_attribute_summary = self::generate_attribute_summary( $product ); */
+		/**/
+		/* if ( $new_attribute_summary !== $post_object->post_excerpt ) { */
+		/* 	$product->set_attribute_summary( $new_attribute_summary ); */
+		/* 	$updates = array_merge( $updates, array( 'post_excerpt' => $new_attribute_summary ) ); */
+		/* } */
 
 		if ( ! empty( $updates ) ) {
 			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $updates, array( 'ID' => $product->get_id() ) );
@@ -617,4 +640,79 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		);
 		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
 	}
+
+	public static function regenerate_variation_attribute_summary( $variation_id ) {
+		global $wpdb;
+
+		$product = wc_get_product( $variation_id );
+		if ( ! $product || ! $product->is_type( 'variation' ) ) {
+			return;
+		}
+
+		$new_summary = self::generate_attribute_summary( $product );
+
+		$current_excerpt = get_post_field( 'post_excerpt', $variation_id );
+		if ( $new_summary === $current_excerpt ) {
+			return;
+		}
+
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_excerpt' => $new_summary ),
+			array( 'ID' => $variation_id )
+		);
+
+		clean_post_cache( $variation_id );
+		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
+	}
+
+	protected static function regenerate_variation_summaries( $variation_ids ) {
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		$variation_ids = array_unique( array_filter( $variation_ids ) );
+
+		$limit = apply_filters( 'wc_variation_summary_regen_limit', 0, $variation_ids );
+		if ( $limit > 0 ) {
+			$variation_ids = array_slice( $variation_ids, 0, $limit );
+		}
+
+		foreach ( $variation_ids as $variation_id ) {
+			self::regenerate_variation_attribute_summary( $variation_id );
+		}
+	}
+
+	public static function on_add_product_attribute( $attribute_id, $attribute, $old_slug ) {
+		llp('add');
+	}
+	public static function on_delete_product_attribute( $attribute_id, $attribute, $old_slug ) {
+		llp('delete');
+	}
+
+	public static function on_update_product_attribute( $attribute_id, $attribute, $old_slug ) {
+		$taxonomy = 'pa_' . $old_slug;
+
+		$variation_ids = get_posts(
+			array(
+				'post_type'   => 'product_variation',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'key'     => 'attribute_' . $taxonomy,
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		register_shutdown_function(
+			function () use ( $variation_ids ) {
+				self::regenerate_variation_summaries( $variation_ids );
+			}
+		);
+	}
 }
+
+add_action( 'woocommerce_loaded', array( 'WC_Product_Variation_Data_Store_CPT', 'init_hooks' ) );
