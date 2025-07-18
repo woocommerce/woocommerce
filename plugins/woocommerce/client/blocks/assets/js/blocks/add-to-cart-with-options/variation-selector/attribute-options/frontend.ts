@@ -3,7 +3,7 @@
  */
 import type { ChangeEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
-import type { CartVariationItem } from '@woocommerce/types';
+import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -73,7 +73,7 @@ const isAttributeValueValid = ( {
 }: {
 	attributeName: string;
 	attributeValue: string;
-	selectedAttributes: CartVariationItem[];
+	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 } ) => {
 	// If the current attribute is selected, we require one less attribute to

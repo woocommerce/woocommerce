@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Pass the WCCOM connection status of the store as a paramter in extension serch request

@@ -129,7 +129,7 @@ class ProductButton extends AbstractBlock {
 			/**
 			 * Filters the change the quantity to add to cart.
 			 *
-			 * @since 10.9.0
+			 * @since 8.5.0
 			 * @param number $default_quantity The default quantity.
 			 * @param number $product_id The product id.
 			 */

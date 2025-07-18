@@ -126,7 +126,7 @@ jobs:
         with:
           ref: trunk
       - name: Setup PNPM
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -179,7 +179,7 @@ jobs:
 
   modify-zip-version:
     name: 'Update version to Dev'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [build-zip, prepare-for-code-freeze]
     env:
       DEV_VERSION: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev
@@ -212,7 +212,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [modify-zip-version, prepare-for-code-freeze]
     steps:
       - name: Notify Slack on success
@@ -226,3 +226,59 @@ jobs:
             <${{ needs.modify-zip-version.outputs.artifact_url }}|Download zip>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
+
+  trigger-webhook:
+    name: Trigger Release Webhook
+    runs-on: ubuntu-latest
+    needs: [modify-zip-version, prepare-for-code-freeze]
+    steps:
+      - name: Trigger Code Freeze Webhook
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const crypto = require('crypto');
+            
+            const payload = {
+              action: 'feature-freeze',
+              version: '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}',
+              build_zip: '${{ needs.modify-zip-version.outputs.artifact_url }}',
+              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+            };
+
+            const requestBody = JSON.stringify({
+              payload
+            });
+
+            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
+            hmac.update(requestBody);
+            const signature = hmac.digest('hex');
+            
+            try {
+              const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Hub-Signature-256': `sha256=${signature}`
+                },
+                body: requestBody
+              });
+              
+              if (!response.ok) {
+                if (response.status === 409) {
+                  console.log('Webhook request failed: Duplicate post detected (409)');
+                } else if (response.status === 403) {
+                  console.log('Webhook request failed: Invalid secret (403)');
+                }
+                core.setFailed(`Webhook request failed with status ${response.status}`);
+              } else {
+                console.log('Webhook triggered successfully');
+              }
+            } catch (error) {
+              core.setFailed(`Webhook request failed: ${error.message}`);
+            }
+        env:
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
+          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+
+    

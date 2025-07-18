@@ -9,6 +9,8 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 /**
  * Payments settings utilities class.
+ *
+ * @internal
  */
 class Utils {
 	/**

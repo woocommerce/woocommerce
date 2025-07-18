@@ -3,10 +3,13 @@
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
 import { store, getContext } from '@wordpress/interactivity';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { CartVariationItem } from '@woocommerce/types';
+import type {
+	Store as WooCommerce,
+	SelectedAttributes,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -18,7 +21,7 @@ export type AvailableVariation = {
 export type Context = {
 	productId: number;
 	productType: string;
-	selectedAttributes: CartVariationItem[];
+	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	tempQuantity: number;
@@ -28,7 +31,8 @@ export type Context = {
 interface GroupedCartItem {
 	id: number;
 	quantity: number;
-	variation: CartVariationItem[];
+	variation: SelectedAttributes[];
+	type: string;
 }
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -92,7 +96,7 @@ const getInputData = (
 
 const getMatchedVariation = (
 	availableVariations: AvailableVariation[],
-	selectedAttributes: CartVariationItem[]
+	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
 		! Array.isArray( availableVariations ) ||
@@ -136,7 +140,7 @@ const getNewQuantity = ( productId: number, quantity: number ) => {
 };
 
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change' );
+	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );
 };
 
@@ -145,21 +149,32 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { availableVariations, selectedAttributes, productType } =
-					getContext< Context >();
-				if ( productType !== 'variable' ) {
+				const context = getContext< Context >();
+				if ( ! context ) {
 					return true;
 				}
-				const matchedVariation = getMatchedVariation(
+				const {
 					availableVariations,
-					selectedAttributes
-				);
+					selectedAttributes,
+					productType,
+					quantity,
+				} = context;
+				if ( productType === 'variable' ) {
+					const matchedVariation = getMatchedVariation(
+						availableVariations,
+						selectedAttributes
+					);
 
-				// Variable products must be in stock and have a selected variation
-				return Boolean(
-					matchedVariation?.is_in_stock &&
-						matchedVariation?.variation_id
-				);
+					// Variable products must be in stock and have a selected variation
+					return Boolean(
+						matchedVariation?.is_in_stock &&
+							matchedVariation?.variation_id
+					);
+				}
+				if ( productType === 'grouped' ) {
+					return Object.values( quantity ).some( ( qty ) => qty > 0 );
+				}
+				return true;
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -172,6 +187,13 @@ const addToCartWithOptionsStore = store(
 					selectedAttributes
 				);
 				return matchedVariation?.variation_id || null;
+			},
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
 			},
 		},
 		actions: {
@@ -193,6 +215,7 @@ const addToCartWithOptionsStore = store(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
 				);
+
 				if ( index >= 0 ) {
 					selectedAttributes[ index ] = {
 						attribute,
@@ -346,23 +369,48 @@ const addToCartWithOptionsStore = store(
 					const addedItems: GroupedCartItem[] = [];
 
 					for ( const childProductId of groupedProductIds ) {
+						if ( quantity[ childProductId ] === 0 ) {
+							continue;
+						}
+
 						const newQuantity = getNewQuantity(
 							childProductId,
 							quantity[ childProductId ]
 						);
 
-						if ( newQuantity === 0 ) {
-							continue;
-						}
-
 						addedItems.push( {
 							id: childProductId,
 							quantity: newQuantity,
 							variation: selectedAttributes,
+							type: productType,
 						} );
 					}
 
 					if ( addedItems.length === 0 ) {
+						// Todo: Use the module exports instead of `store()` once the store-notices
+						// store is public.
+						yield import( '@woocommerce/stores/store-notices' );
+						const { actions: noticeActions } =
+							store< StoreNotices >(
+								'woocommerce/store-notices',
+								{},
+								{
+									lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+								}
+							);
+
+						const errorMessage =
+							wooState?.errorMessages
+								?.groupedProductAddToCartMissingItems;
+
+						if ( errorMessage ) {
+							noticeActions.addNotice( {
+								notice: errorMessage,
+								type: 'error',
+								dismissible: true,
+							} );
+						}
+
 						return;
 					}
 
@@ -389,6 +437,7 @@ const addToCartWithOptionsStore = store(
 						id: productId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
+						type: productType,
 					} );
 				}
 			},
