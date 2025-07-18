@@ -46,36 +46,36 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function trackingNumberProvider(): array {
 		return array(
-			// 16-digit numeric patterns (base confidence 95).
-			array( '1234567890123456', 'GB', 'IE', true, 97 ), // GB origin gets +2 boost.
-			array( '9876543210987654', 'GB', 'FR', true, 97 ), // GB origin gets +2 boost.
-			array( '1234567890123456', 'DE', 'FR', true, 95 ), // Non-GB origin, base confidence.
-			array( '9876543210987654', 'IE', 'GB', true, 95 ), // Non-GB origin, base confidence.
+			// 16-digit numeric patterns (base confidence 90).
+			array( '1234567890123456', 'GB', 'IE', true, 92 ), // GB origin gets +2 boost.
+			array( '9876543210987654', 'GB', 'FR', true, 92 ), // GB origin gets +2 boost.
+			array( '1234567890123456', 'GB', 'DE', true, 92 ), // GB origin gets +2 boost.
+			array( '9876543210987654', 'GB', 'US', true, 92 ), // GB origin gets +2 boost.
 
-			// Legacy patterns with prefixes (1-2 letters + 14-15 digits, base confidence 95).
-			array( 'H12345678901234', 'GB', 'FR', true, 97 ),   // H + 14 digits, GB origin.
-			array( 'E123456789012345', 'GB', 'DE', true, 97 ),  // E + 15 digits, GB origin.
-			array( 'HM12345678901234', 'GB', 'US', true, 97 ),  // HM + 14 digits, GB origin.
-			array( 'EV123456789012345', 'GB', 'CA', true, 97 ), // EV + 15 digits, GB origin.
-			array( 'HH12345678901234', 'GB', 'IE', true, 97 ),  // HH + 14 digits, GB origin.
-			array( 'H12345678901234', 'DE', 'FR', true, 95 ),   // H + 14 digits, non-GB origin.
-			array( 'E123456789012345', 'FR', 'DE', true, 95 ),  // E + 15 digits, non-GB origin.
+			// Legacy patterns with prefixes (1-2 letters + 14-15 digits, base confidence 90).
+			array( 'H12345678901234', 'GB', 'FR', true, 92 ),   // H + 14 digits, GB origin.
+			array( 'E123456789012345', 'GB', 'DE', true, 92 ),  // E + 15 digits, GB origin.
+			array( 'HM12345678901234', 'GB', 'US', true, 92 ),  // HM + 14 digits, GB origin.
+			array( 'EV123456789012345', 'GB', 'CA', true, 92 ), // EV + 15 digits, GB origin.
+			array( 'HH12345678901234', 'GB', 'IE', true, 92 ),  // HH + 14 digits, GB origin.
+			array( 'H12345678901234', 'GB', 'IT', true, 92 ),   // H + 14 digits, GB origin.
+			array( 'E123456789012345', 'GB', 'ES', true, 92 ),  // E + 15 digits, GB origin.
 
-			// MH + 16 digits pattern (base confidence 95).
-			array( 'MH1234567890123456', 'GB', 'DE', true, 97 ), // GB origin gets +2 boost.
-			array( 'MH9876543210987654', 'DE', 'FR', true, 95 ), // Non-GB origin.
+			// MH + 16 digits pattern (base confidence 90).
+			array( 'MH1234567890123456', 'GB', 'DE', true, 92 ), // GB origin gets +2 boost.
+			array( 'MH9876543210987654', 'GB', 'FR', true, 92 ), // GB origin gets +2 boost.
 
 			// 8-digit calling card pattern (confidence 80).
 			array( '12345678', 'GB', 'IE', true, 80 ),
-			array( '87654321', 'DE', 'FR', true, 80 ),
-			array( '11223344', 'IE', 'GB', true, 80 ),
+			array( '87654321', 'GB', 'FR', true, 80 ),
+			array( '11223344', 'GB', 'DE', true, 80 ),
 
-			// Legacy 13-15 digit patterns (confidence 65).
-			array( '1234567890123', 'GB', 'FR', true, 65 ),   // 13 digits.
-			array( '12345678901234', 'GB', 'DE', true, 65 ),  // 14 digits.
-			array( '123456789012345', 'GB', 'IE', true, 65 ), // 15 digits.
-			array( '1234567890123', 'DE', 'FR', true, 65 ),   // 13 digits, non-GB.
-			array( '12345678901234', 'FR', 'DE', true, 65 ),  // 14 digits, non-GB.
+			// Legacy 13-15 digit patterns (confidence 75 + 15 boost for GB = 90).
+			array( '1234567890123', 'GB', 'FR', true, 90 ),   // 13 digits, GB origin.
+			array( '12345678901234', 'GB', 'DE', true, 90 ),  // 14 digits, GB origin.
+			array( '123456789012345', 'GB', 'IE', true, 90 ), // 15 digits, GB origin.
+			array( '1234567890123', 'GB', 'ES', true, 90 ),   // 13 digits, GB origin.
+			array( '12345678901234', 'GB', 'IT', true, 90 ),  // 14 digits, GB origin.
 
 			// Invalid formats.
 			array( '123456789012', 'GB', 'FR', false, null ),     // 12 digits (too short).
@@ -84,9 +84,9 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 			array( '1234567', 'GB', 'IE', false, null ),          // 7 digits (too short for calling card).
 			array( '123456789', 'GB', 'FR', false, null ),        // 9 digits (too short for calling card).
 
-			// Valid with unsupported countries should still work.
-			array( '1234567890123456', 'US', 'CA', true, 95 ), // US/CA not in supported list.
-			array( 'H12345678901234', 'JP', 'AU', true, 95 ),  // JP/AU not in supported list.
+			// Invalid with unsupported countries (Evri only ships from GB).
+			array( '1234567890123456', 'US', 'CA', false, null ), // US/CA not supported.
+			array( 'H12345678901234', 'JP', 'AU', false, null ),  // JP/AU not supported.
 		);
 	}
 
@@ -128,15 +128,17 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 		$from_countries = $this->provider->get_shipping_from_countries();
 		$to_countries   = $this->provider->get_shipping_to_countries();
 
-		// Test that main European countries are supported.
+		// Test that Evri only ships from UK.
+		$this->assertEquals( array( 'GB' ), $from_countries );
+
+		// Test that main European countries are supported for shipping to.
 		$expected_countries = array( 'GB', 'IE', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE' );
 		foreach ( $expected_countries as $country ) {
-			$this->assertContains( $country, $from_countries );
 			$this->assertContains( $country, $to_countries );
 		}
 
-		// Test that from/to countries are the same.
-		$this->assertEquals( $from_countries, $to_countries );
+		// Test that more destinations are supported than origins.
+		$this->assertGreaterThan( count( $from_countries ), count( $to_countries ) );
 	}
 
 	/**
@@ -193,17 +195,15 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 	 * Tests GB origin boost scoring.
 	 */
 	public function test_gb_origin_boost(): void {
-		// Same 16-digit number from GB vs other countries.
+		// Same 16-digit number from GB vs invalid non-GB origin.
 		$gb_result = $this->provider->try_parse_tracking_number( '1234567890123456', 'GB', 'FR' );
 		$de_result = $this->provider->try_parse_tracking_number( '1234567890123456', 'DE', 'FR' );
 
 		$this->assertNotNull( $gb_result );
-		$this->assertNotNull( $de_result );
+		$this->assertNull( $de_result ); // Should be null since Evri only ships from GB.
 
-		// GB should get +2 boost (97 vs 95).
-		$this->assertEquals( 97, $gb_result['ambiguity_score'] );
-		$this->assertEquals( 95, $de_result['ambiguity_score'] );
-		$this->assertGreaterThan( $de_result['ambiguity_score'], $gb_result['ambiguity_score'] );
+		// GB should get +2 boost (92).
+		$this->assertEquals( 92, $gb_result['ambiguity_score'] );
 	}
 
 	/**
@@ -213,16 +213,16 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 		// Test 16-digit format.
 		$result = $this->provider->try_parse_tracking_number( '1234567890123456', 'GB', 'FR' );
 		$this->assertNotNull( $result );
-		$this->assertEquals( 97, $result['ambiguity_score'] );
+		$this->assertEquals( 92, $result['ambiguity_score'] );
 
 		// Test letter prefix formats.
 		$h_result = $this->provider->try_parse_tracking_number( 'H12345678901234', 'GB', 'DE' );
 		$this->assertNotNull( $h_result );
-		$this->assertEquals( 97, $h_result['ambiguity_score'] );
+		$this->assertEquals( 92, $h_result['ambiguity_score'] );
 
 		$mh_result = $this->provider->try_parse_tracking_number( 'MH1234567890123456', 'GB', 'IE' );
 		$this->assertNotNull( $mh_result );
-		$this->assertEquals( 97, $mh_result['ambiguity_score'] );
+		$this->assertEquals( 92, $mh_result['ambiguity_score'] );
 
 		// Test calling card format.
 		$card_result = $this->provider->try_parse_tracking_number( '12345678', 'GB', 'FR' );
@@ -232,7 +232,7 @@ class EvriHermesShippingProviderTest extends \WP_UnitTestCase {
 		// Test legacy format.
 		$legacy_result = $this->provider->try_parse_tracking_number( '1234567890123', 'GB', 'DE' );
 		$this->assertNotNull( $legacy_result );
-		$this->assertEquals( 65, $legacy_result['ambiguity_score'] );
+		$this->assertEquals( 90, $legacy_result['ambiguity_score'] );
 	}
 
 	/**

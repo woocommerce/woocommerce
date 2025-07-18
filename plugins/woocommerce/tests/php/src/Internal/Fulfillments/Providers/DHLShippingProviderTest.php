@@ -67,9 +67,9 @@ class DHLShippingProviderTest extends \WP_UnitTestCase {
 			array( '1234567890', 'DE', 'FR', true, 98 ),       // 10-digit with mod11 validation.
 			array( '1234567895', 'DE', 'FR', true, 90 ),       // 10-digit without valid mod11.
 
-			// Invalid country combinations (not supported by DHL).
-			array( '1234567896', 'BG', 'RO', false, null ),    // BG/RO not supported by DHL.
-			array( '1234567890', 'BG', 'RO', false, null ),    // BG/RO not supported by DHL.
+			// Valid country combinations supported by DHL.
+			array( '1234567896', 'BG', 'RO', true, 90 ),    // 10-digit without valid mod11.
+			array( '1234567890', 'BG', 'RO', true, 98 ),    // 10-digit with mod11 validation.
 
 			// DHL eCommerce North America.
 			array( 'GM1234567890123456', 'US', 'CA', true, 95 ),  // US/CA optimized.

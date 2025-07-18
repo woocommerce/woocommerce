@@ -46,49 +46,49 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 	 */
 	public function trackingNumberProvider(): array {
 		return array(
-			// UPU S10 international formats (base confidence 87).
-			array( 'AB123456789GB', 'GB', 'DE', true, 90 ), // S10 format, international + European boost.
-			array( 'CD1234567GB', 'GB', 'FR', true, 90 ),   // Alternative S10 format, international + European boost.
-			array( 'EF123456789GB', 'GB', 'GB', true, 92 ), // S10 format, domestic + domestic boost.
-			array( 'GH1234567GB', 'GB', 'US', true, 89 ),   // S10 format, to US + common destination boost.
+			// UPU S10 international formats (base confidence 80, no UPU boost if validation fails).
+			array( 'AB123456789GB', 'GB', 'DE', true, 83 ), // S10 format, 80 + European boost (+3) = 83.
+			array( 'CD1234567GB', 'GB', 'FR', true, 83 ),   // Alternative S10 format, 80 + European boost (+3) = 83.
+			array( 'EF123456789GB', 'GB', 'GB', true, 88 ), // S10 format, 80 + domestic boost (+8) = 88.
+			array( 'GH1234567GB', 'GB', 'US', true, 82 ),   // S10 format, 80 + common destination boost (+2) = 82.
 
-			// Domestic tracking formats (base confidence 87).
-			array( 'A123456789B', 'GB', 'GB', true, 92 ),   // Domestic format + domestic boost.
-			array( 'CD12345678EF', 'GB', 'FR', true, 90 ),  // Standard format + European boost.
-			array( 'GH123456IJ', 'GB', 'DE', true, 90 ),    // Compact format + European boost.
-			array( 'A123456789B', 'GB', 'US', true, 89 ),   // Domestic format + common destination boost.
+			// Domestic tracking formats (base confidence 80).
+			array( 'A123456789B', 'GB', 'GB', true, 88 ),   // Domestic format, 80 + domestic boost (+8) = 88.
+			array( 'CD12345678EF', 'GB', 'FR', true, 83 ),  // Standard format, 80 + European boost (+3) = 83.
+			array( 'GH123456IJ', 'GB', 'DE', true, 83 ),    // Compact format, 80 + European boost (+3) = 83.
+			array( 'A123456789B', 'GB', 'US', true, 82 ),   // Domestic format, 80 + common destination boost (+2) = 82.
 
 			// Service-specific patterns.
-			array( 'ABCD1234567890', 'GB', 'FR', true, 90 ), // Special delivery format + European boost.
-			array( 'SD12345678', 'GB', 'DE', true, 95 ),     // Signed For service + service boost + European boost (96 fails, actual is 95).
-			array( 'SF123456789012', 'GB', 'GB', true, 98 ), // Special Delivery + service boost + domestic boost.
-			array( 'RM1234567890', 'GB', 'FR', true, 93 ),   // Royal Mail standard + service boost + European boost.
+			array( 'ABCD1234567890', 'GB', 'FR', true, 83 ), // Standard format, 80 + European boost (+3) = 83.
+			array( 'SD12345678', 'GB', 'DE', true, 89 ),     // Signed For service, 80 + service boost (+6) + European boost (+3) = 89.
+			array( 'SF123456789012', 'GB', 'GB', true, 94 ), // Special Delivery, 80 + service boost (+6) + domestic boost (+8) = 94.
+			array( 'RM1234567890', 'GB', 'FR', true, 86 ),   // Royal Mail standard, 80 + service boost (+3) + European boost (+3) = 86.
 
-			// Digital tracking formats (base confidence 87).
-			array( '1234567890123456', 'GB', 'GB', true, 92 ), // 16-digit + domestic boost.
-			array( '1234567890123', 'GB', 'FR', true, 90 ),    // 13-digit + European boost.
-			array( '123456789012', 'GB', 'DE', true, 90 ),     // 12-digit + European boost.
-			array( '12345678901', 'GB', 'US', true, 89 ),      // 11-digit + common destination boost.
-			array( '1234567890', 'GB', 'AU', true, 89 ),       // 10-digit + common destination boost.
-			array( '123456789', 'GB', 'CA', true, 89 ),        // 9-digit + common destination boost.
+			// Digital tracking formats (base confidence 80).
+			array( '1234567890123456', 'GB', 'GB', true, 88 ), // 16-digit, 80 + domestic boost (+8) = 88.
+			array( '1234567890123', 'GB', 'FR', true, 83 ),    // 13-digit, 80 + European boost (+3) = 83.
+			array( '123456789012', 'GB', 'DE', true, 83 ),     // 12-digit, 80 + European boost (+3) = 83.
+			array( '12345678901', 'GB', 'US', true, 82 ),      // 11-digit, 80 + common destination boost (+2) = 82.
+			array( '1234567890', 'GB', 'AU', true, 82 ),       // 10-digit, 80 + common destination boost (+2) = 82.
+			array( '123456789', 'GB', 'CA', true, 82 ),        // 9-digit, 80 + common destination boost (+2) = 82.
 
 			// Parcelforce (Royal Mail Group).
-			array( 'PF123456789012', 'GB', 'FR', true, 94 ),  // Parcelforce Express + service boost + European boost.
-			array( 'AB12345678PF', 'GB', 'DE', true, 90 ),    // Parcelforce International + European boost.
-			array( '1234567890123', 'GB', 'GB', true, 92 ),   // Parcelforce Worldwide numeric + domestic boost.
+			array( 'PF123456789012', 'GB', 'FR', true, 87 ),  // Parcelforce, 80 + service boost (+4) + European boost (+3) = 87.
+			array( 'AB12345678PF', 'GB', 'DE', true, 83 ),    // Parcelforce International, 80 + European boost (+3) = 83.
+			array( '1234567890123', 'GB', 'GB', true, 88 ),   // Parcelforce Worldwide numeric, 80 + domestic boost (+8) = 88.
 
 			// International tracked services.
-			array( 'IT123456789GB', 'GB', 'FR', true, 95 ),   // International Tracked + service boost + European boost.
-			array( 'IE123456789GB', 'GB', 'DE', true, 95 ),   // International Economy + service boost + European boost.
-			array( 'IS123456789GB', 'GB', 'US', true, 93 ),   // International Standard + service boost + common destination boost (94 fails, actual is 93).
+			array( 'IT123456789GB', 'GB', 'FR', true, 88 ),   // International Tracked, 80 + service boost (+5) + European boost (+3) = 88.
+			array( 'IE123456789GB', 'GB', 'DE', true, 88 ),   // International Economy, 80 + service boost (+5) + European boost (+3) = 88.
+			array( 'IS123456789GB', 'GB', 'US', true, 87 ),   // International Standard, 80 + service boost (+5) + common destination boost (+2) = 87.
 
 			// Business services.
-			array( 'BF123456789012', 'GB', 'FR', true, 93 ),  // Business services + service boost + European boost.
-			array( 'ABC1234567890', 'GB', 'DE', true, 90 ),   // Three-letter business codes + European boost.
+			array( 'BF123456789012', 'GB', 'FR', true, 86 ),  // Business services, 80 + service boost (+3) + European boost (+3) = 86.
+			array( 'ABC1234567890', 'GB', 'DE', true, 83 ),   // Three-letter business codes, 80 + European boost (+3) = 83.
 
 			// Legacy formats.
-			array( 'A12345678BC', 'GB', 'FR', true, 90 ),     // Legacy format + European boost.
-			array( '123456789ABC', 'GB', 'DE', true, 90 ),    // 9 digits + 3 letters + European boost.
+			array( 'A12345678BC', 'GB', 'FR', true, 83 ),     // Legacy format, 80 + European boost (+3) = 83.
+			array( '123456789ABC', 'GB', 'DE', true, 83 ),    // 9 digits + 3 letters, 80 + European boost (+3) = 83.
 
 			// Invalid formats (non-GB origin).
 			array( 'AB123456789GB', 'DE', 'GB', false, null ), // Not from GB.
@@ -230,13 +230,13 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertNotNull( $common );
 		$this->assertNotNull( $other );
 
-		// Domestic should have highest score (87 + 5 domestic boost = 92).
-		$this->assertEquals( 92, $domestic['ambiguity_score'] );
+		// Domestic should have highest score (80 + 8 domestic boost = 88).
+		$this->assertEquals( 88, $domestic['ambiguity_score'] );
 
 		// European should have higher score than common destinations.
-		$this->assertEquals( 90, $european['ambiguity_score'] ); // 87 + 3 European boost.
-		$this->assertEquals( 89, $common['ambiguity_score'] );   // 87 + 2 common destination boost.
-		$this->assertEquals( 89, $other['ambiguity_score'] );    // 87 base confidence + common destination boost.
+		$this->assertEquals( 83, $european['ambiguity_score'] ); // 80 + 3 European boost.
+		$this->assertEquals( 82, $common['ambiguity_score'] );   // 80 + 2 common destination boost.
+		$this->assertEquals( 82, $other['ambiguity_score'] );    // 80 base confidence.
 
 		$this->assertGreaterThan( $common['ambiguity_score'], $european['ambiguity_score'] );
 	}
@@ -259,11 +259,11 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertNotNull( $pf_exp );
 
 		// Service-specific patterns should have higher scores.
-		$this->assertEquals( 90, $standard['ambiguity_score'] ); // S10 format + European boost.
-		$this->assertEquals( 95, $signed['ambiguity_score'] );   // SD service boost + European boost.
-		$this->assertEquals( 95, $special['ambiguity_score'] );  // SF service boost + European boost.
-		$this->assertEquals( 93, $rm_std['ambiguity_score'] );   // RM service boost + European boost.
-		$this->assertEquals( 94, $pf_exp['ambiguity_score'] );   // PF service boost + European boost.
+		$this->assertEquals( 83, $standard['ambiguity_score'] ); // S10 format + European boost.
+		$this->assertEquals( 89, $signed['ambiguity_score'] );   // SD service boost + European boost.
+		$this->assertEquals( 89, $special['ambiguity_score'] );  // SF service boost + European boost.
+		$this->assertEquals( 86, $rm_std['ambiguity_score'] );   // RM service boost + European boost.
+		$this->assertEquals( 87, $pf_exp['ambiguity_score'] );   // PF service boost + European boost.
 
 		$this->assertGreaterThan( $standard['ambiguity_score'], $signed['ambiguity_score'] );
 		$this->assertGreaterThan( $standard['ambiguity_score'], $special['ambiguity_score'] );
@@ -285,10 +285,10 @@ class RoyalMailShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertNotNull( $result_11 );
 
 		// All should get European boost.
-		$this->assertEquals( 90, $result_16['ambiguity_score'] ); // 87 + 3 European boost.
-		$this->assertEquals( 90, $result_13['ambiguity_score'] ); // 87 + 3 European boost.
-		$this->assertEquals( 90, $result_12['ambiguity_score'] ); // 87 + 3 European boost.
-		$this->assertEquals( 90, $result_11['ambiguity_score'] ); // 87 + 3 European boost.
+		$this->assertEquals( 83, $result_16['ambiguity_score'] ); // 80 + 3 European boost.
+		$this->assertEquals( 83, $result_13['ambiguity_score'] ); // 80 + 3 European boost.
+		$this->assertEquals( 83, $result_12['ambiguity_score'] ); // 80 + 3 European boost.
+		$this->assertEquals( 83, $result_11['ambiguity_score'] ); // 80 + 3 European boost.
 	}
 
 	/**

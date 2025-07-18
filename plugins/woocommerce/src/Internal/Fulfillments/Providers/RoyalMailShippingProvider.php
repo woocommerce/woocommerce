@@ -36,6 +36,7 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 
 				// Digital tracking formats.
 				'/^\d{16}$/',                 // 16-digit returns label or digital.
+				'/^\d{14}$/',                 // 14-digit returns label.
 				'/^\d{13}$/',                 // 13-digit domestic/international tracking.
 				'/^\d{12}$/',                 // 12-digit domestic tracking.
 				'/^\d{11}$/',                 // 11-digit domestic tracking.
@@ -60,7 +61,7 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 				'/^[A-Z]{1}\d{8}[A-Z]{2}$/',  // Legacy format: X########XX.
 				'/^[0-9]{9}[A-Z]{3}$/',       // 9 digits + 3 letters.
 			),
-			'confidence' => 87,
+			'confidence' => 80,
 		),
 	);
 
@@ -202,7 +203,7 @@ class RoyalMailShippingProvider extends AbstractShippingProvider {
 
 			// Boost confidence for domestic shipments.
 			if ( 'GB' === $shipping_to ) {
-				$confidence = min( 98, $confidence + 5 );
+				$confidence = min( 95, $confidence + 8 );
 			}
 
 			// Boost confidence for common destinations (Europe).

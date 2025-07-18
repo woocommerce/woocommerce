@@ -43,7 +43,7 @@ class DPDShippingProvider extends AbstractShippingProvider {
 				'/^[A-Z]{2}\d{9}[A-Z]{2}$/', // S10/UPU international.
 				'/^\d{24}$/', // 24-digit fallback.
 			),
-			'confidence' => 85,
+			'confidence' => 90,
 			'services'   => array(
 				'next_day' => 88,
 				'express'  => 88,

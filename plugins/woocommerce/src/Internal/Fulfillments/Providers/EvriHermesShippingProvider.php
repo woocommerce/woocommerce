@@ -64,8 +64,8 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 	 * @return array List of country codes.
 	 */
 	public function get_shipping_from_countries(): array {
-		// UK and most of EU, as Evri/Hermes operates across Europe.
-		return array( 'GB', 'IE', 'FR', 'DE', 'IT', 'ES', 'NL', 'BE', 'AT', 'PL', 'GR', 'PT', 'CH', 'CZ', 'HU', 'RO', 'BG', 'SK', 'SI', 'HR', 'NO', 'SE', 'DK', 'FI', 'EE', 'LV', 'LT', 'CY', 'MT', 'LU' );
+		// Evri (formerly Hermes UK) primarily operates from the UK only.
+		return array( 'GB' );
 	}
 
 	/**
@@ -74,7 +74,9 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 	 * @return array List of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
-		return $this->get_shipping_from_countries();
+		// Evri ships from UK to these exact destinations as listed on their website dropdown.
+		// This list is based on the actual options in their destination choice select.
+		return array( 'GB', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'PT', 'BS', 'BH', 'ES', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BA', 'BW', 'BR', 'VG', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'ES', 'CV', 'KY', 'CF', 'TD', 'JE', 'CL', 'CN', 'CO', 'KM', 'CG', 'CK', 'CR', 'GR', 'HR', 'CW', 'CY', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'TL', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'GA', 'GM', 'GE', 'DE', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HN', 'HK', 'HU', 'ES', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MG', 'ES', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'ES', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'AN', 'NC', 'NZ', 'NI', 'NE', 'MK', 'GB', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RW', 'MP', 'WS', 'SM', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'KR', 'ES', 'LK', 'BL', 'BQ', 'KN', 'LC', 'SX', 'VC', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TG', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'GB', 'UA', 'AE', 'UY', 'US', 'UZ', 'VU', 'VA', 'VN', 'VI', 'WF', 'YE', 'ZM', 'ZW' );
 	}
 
 	/**
@@ -104,6 +106,11 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
+		// Check if this provider can handle this shipping route.
+		if ( ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+			return null;
+		}
+
 		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
 		if ( empty( $normalized ) ) {
 			return null;
@@ -112,7 +119,7 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 		// 1. Check for main 16-digit and legacy Evri/Hermes formats.
 		foreach ( self::MAIN_PATTERNS as $pattern ) {
 			if ( preg_match( $pattern, $normalized ) ) {
-				$confidence = 95;
+				$confidence = 90;
 				// Boost for UK shipments.
 				if ( 'GB' === $shipping_from ) {
 					$confidence = min( 98, $confidence + 2 );
@@ -135,9 +142,14 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 		// 3. Check for legacy/fallback patterns (lower confidence).
 		foreach ( self::LEGACY_PATTERNS as $pattern ) {
 			if ( preg_match( $pattern, $normalized ) ) {
+				$confidence = 75;
+				// Boost for UK shipments.
+				if ( 'GB' === $shipping_from ) {
+					$confidence = min( 95, $confidence + 15 );
+				}
 				return array(
 					'url'             => $this->get_tracking_url( $normalized ),
-					'ambiguity_score' => 65,
+					'ambiguity_score' => $confidence,
 				);
 			}
 		}

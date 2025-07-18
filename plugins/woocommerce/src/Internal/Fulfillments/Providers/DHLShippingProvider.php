@@ -15,7 +15,7 @@ class DHLShippingProvider extends AbstractShippingProvider {
 	 *
 	 * @var array<string>
 	 */
-	private array $major_operation_countries = array( 'DE', 'US', 'CA', 'GB', 'SG', 'JP', 'HK', 'NL', 'FR', 'IT', 'AU', 'CN', 'IN', 'ES', 'BE', 'CH', 'AT', 'SE', 'DK', 'NO' );
+	private array $major_operation_countries = array( 'DE', 'US', 'CA', 'GB', 'SG', 'JP', 'HK', 'NL', 'FR', 'IT', 'AU', 'CN', 'IN', 'ES', 'BE', 'CH', 'AT', 'SE', 'DK', 'NO', 'PL', 'CZ', 'FI', 'IE', 'PT', 'GR', 'HU', 'RO', 'BG', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE', 'CY', 'MT', 'LU' );
 
 	/**
 	 * Gets the unique provider key.

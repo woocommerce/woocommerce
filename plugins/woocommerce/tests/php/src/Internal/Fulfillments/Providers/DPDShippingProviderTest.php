@@ -86,8 +86,8 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 			array( '123456789012', 'DE', 'NL', 83 ),   // 12 digits DE->NL, base 80 + intra-DPD boost 3.
 			array( '02123456789012', 'DE', 'US', 80 ),  // Classic service, base confidence 80.
 
-			// UK tracking numbers (base confidence 85).
-			array( '12345678901234', 'GB', 'DE', 88 ),   // 14 digits GB->DE, base 85 + intra-DPD boost 3.
+			// UK tracking numbers (base confidence 90).
+			array( '12345678901234', 'GB', 'DE', 93 ),   // 14 digits GB->DE, base 90 + intra-DPD boost 3.
 			array( 'AB123456789GB', 'GB', 'FR', 90 ),    // S10 service, confidence 90.
 			array( '03123456789012', 'GB', 'US', 90 ),   // Next day service (88) + express boost (2) = 90.
 
@@ -121,8 +121,8 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 			// Service-specific patterns with confidence boosts.
 			array( '05123456789012', 'DE', 'US', 87 ),  // Express service (85) + express boost (2) = 87.
 			array( '09123456789012', 'DE', 'US', 85 ),  // Predict service, confidence 85.
-			array( '06123456789012', 'GB', 'US', 85 ),  // Express service, getting 85 for some reason.
-			array( '15123456789012', 'GB', 'US', 85 ),  // Predict/Return service, confidence 85.
+			array( '06123456789012', 'GB', 'US', 90 ),  // Express service, base confidence 90.
+			array( '15123456789012', 'GB', 'US', 90 ),  // Predict/Return service, base confidence 90.
 
 			// Fallback patterns (12-24 digits get 60 confidence).
 			array( '123456789012', 'US', 'DE', 60 ),     // 12 digits fallback.
@@ -340,8 +340,8 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 		$this->assertIsArray( $result_high );
 		$this->assertIsArray( $result_medium );
 
-		// GB has base confidence 85, US gets fallback 60.
-		$this->assertSame( 85, $result_high['ambiguity_score'] );
+		// GB has base confidence 90, US gets fallback 60.
+		$this->assertSame( 90, $result_high['ambiguity_score'] );
 		$this->assertSame( 60, $result_medium['ambiguity_score'] );
 		$this->assertGreaterThan(
 			$result_medium['ambiguity_score'],
@@ -390,7 +390,7 @@ class DPDShippingProviderTest extends \WP_UnitTestCase {
 
 		$this->assertIsArray( $uk_digits );
 		$this->assertIsArray( $uk_prefix );
-		$this->assertSame( 88, $uk_digits['ambiguity_score'] ); // 85+3=88 (intra-DPD boost)
+		$this->assertSame( 93, $uk_digits['ambiguity_score'] ); // 90+3=93 (intra-DPD boost)
 		$this->assertSame( 90, $uk_prefix['ambiguity_score'] ); // S10 service, confidence 90.
 
 		// Test German patterns.
