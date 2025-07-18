@@ -295,38 +295,73 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( 'test-class', $result['classnames'] );
 	}
 
-    /**
-     * Test it gets block styles.
-     */
-    public function testItGetsBlockStyles(): void {
-        $block_attributes = array(
-            'backgroundColor' => 'primary',
-            'textAlign'       => 'center',
-            'style'           => array(
-                'spacing' => array(
-                    'padding' => '10px',
-                ),
-            ),
-        );
+	/**
+	 * Test it extends block styles with invalid WP_Style_Engine structure.
+	 */
+	public function testItExtendsBlockStylesWithInvalidStructure(): void {
+		$css_declarations = array(
+			'margin' => '20px',
+			'color'  => 'red',
+		);
 
-        /**
-         * Rendering_Context mock for using in test.
-         *
-         * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-         */
-        $rendering_context = $this->createMock( Rendering_Context::class );
-        $rendering_context->method( 'translate_slug_to_color' )
-            ->willReturn( '#ff0000' );
+		$result = Styles_Helper::extend_block_styles( array( 'something' => 'else' ), $css_declarations );
 
-        $result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'text-align' ) );
+		$this->assertSame( $css_declarations, $result['declarations'] );
 
-        $this->assertArrayHasKey( 'css', $result );
-        $this->assertArrayHasKey( 'declarations', $result );
-        $this->assertArrayHasKey( 'classnames', $result );
-        $this->assertIsString( $result['css'] );
-        $this->assertIsArray( $result['declarations'] );
-        $this->assertIsString( $result['classnames'] );
-    }
+		$result = Styles_Helper::extend_block_styles( array( 'declarations' => 'invalid-declarations' ), $css_declarations );
+
+		$this->assertSame( $css_declarations, $result['declarations'] );
+	}
+
+	/**
+	 * Test it extends block styles with invalid CSS declarations parameter.
+	 */
+	public function testItExtendsBlockStylesWithInvalidCssDeclarations(): void {
+		$block_styles = array(
+			'declarations' => array(
+				'padding' => '10px',
+			),
+			'css'          => 'padding: 10px;',
+			'classnames'   => 'test-class',
+		);
+
+		$result = Styles_Helper::extend_block_styles( $block_styles, 'invalid-declarations' );
+
+		$this->assertSame( $block_styles, $result );
+	}
+
+	/**
+	 * Test it gets block styles.
+	 */
+	public function testItGetsBlockStyles(): void {
+		$block_attributes = array(
+			'backgroundColor' => 'primary',
+			'textAlign'       => 'center',
+			'style'           => array(
+				'spacing' => array(
+					'padding' => '10px',
+				),
+			),
+		);
+
+		/**
+		 * Rendering_Context mock for using in test.
+		 *
+		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
+		 */
+		$rendering_context = $this->createMock( Rendering_Context::class );
+		$rendering_context->method( 'translate_slug_to_color' )
+			->willReturn( '#ff0000' );
+
+		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'text-align' ) );
+
+		$this->assertArrayHasKey( 'css', $result );
+		$this->assertArrayHasKey( 'declarations', $result );
+		$this->assertArrayHasKey( 'classnames', $result );
+		$this->assertIsString( $result['css'] );
+		$this->assertIsArray( $result['declarations'] );
+		$this->assertIsString( $result['classnames'] );
+	}
 
 	/**
 	 * Test it gets block styles with empty properties.

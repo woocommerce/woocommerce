@@ -121,7 +121,8 @@ class Styles_Helper {
 	 * Extend block styles with CSS declarations.
 	 *
 	 * @param array $block_styles WP_Style_Engine styles array (must contain 'declarations' and 'css' keys).
-	 * @param array $css_declarations Array of CSS declarations.
+	 * @param array $css_declarations An associative array of CSS definitions,
+	 *                                e.g. `array( "$property" => "$value", "$property" => "$value" )`.
 	 * @return array {
 	 *     @type string   $css          A CSS ruleset or declarations block
 	 *                                  formatted to be placed in an HTML `style` attribute or tag.
@@ -133,6 +134,11 @@ class Styles_Helper {
 	public static function extend_block_styles( array $block_styles, $css_declarations ) {
 		if ( ! is_array( $css_declarations ) ) {
 			return $block_styles;
+		}
+
+		// Ensure block_styles has the required WP_Style_Engine structure.
+		if ( ! isset( $block_styles['declarations'] ) || ! is_array( $block_styles['declarations'] ) ) {
+			$block_styles = self::$empty_block_styles;
 		}
 
 		$block_styles['declarations'] = array_merge( $block_styles['declarations'], $css_declarations );
