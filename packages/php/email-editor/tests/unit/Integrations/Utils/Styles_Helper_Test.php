@@ -295,139 +295,38 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( 'test-class', $result['classnames'] );
 	}
 
-	/**
-	 * Test it gets block styles with full return type.
-	 */
-	public function testItGetsBlockStylesWithFullReturnType(): void {
-		$block_attributes = array(
-			'backgroundColor' => 'primary',
-			'textAlign'       => 'center',
-			'style'           => array(
-				'spacing' => array(
-					'padding' => '10px',
-				),
-			),
-		);
+    /**
+     * Test it gets block styles.
+     */
+    public function testItGetsBlockStyles(): void {
+        $block_attributes = array(
+            'backgroundColor' => 'primary',
+            'textAlign'       => 'center',
+            'style'           => array(
+                'spacing' => array(
+                    'padding' => '10px',
+                ),
+            ),
+        );
 
-		/**
-		 * Rendering_Context mock for using in test.
-		 *
-		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-		 */
-		$rendering_context = $this->createMock( Rendering_Context::class );
-		$rendering_context->method( 'translate_slug_to_color' )
-			->willReturn( '#ff0000' );
+        /**
+         * Rendering_Context mock for using in test.
+         *
+         * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
+         */
+        $rendering_context = $this->createMock( Rendering_Context::class );
+        $rendering_context->method( 'translate_slug_to_color' )
+            ->willReturn( '#ff0000' );
 
-		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'text-align' ) );
+        $result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'text-align' ) );
 
-		$this->assertArrayHasKey( 'css', $result );
-		$this->assertArrayHasKey( 'declarations', $result );
-		$this->assertArrayHasKey( 'classnames', $result );
-		$this->assertIsString( $result['css'] );
-		$this->assertIsArray( $result['declarations'] );
-		$this->assertIsString( $result['classnames'] );
-	}
-
-	/**
-	 * Test it gets block styles with css return type.
-	 */
-	public function testItGetsBlockStylesWithCssReturnType(): void {
-		$block_attributes = array(
-			'style' => array(
-				'spacing' => array(
-					'padding' => '10px',
-				),
-			),
-		);
-
-		/**
-		 * Rendering_Context mock for using in test.
-		 *
-		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-		 */
-		$rendering_context = $this->createMock( Rendering_Context::class );
-
-		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing' ), 'css' );
-
-		$this->assertIsString( $result );
-		$this->assertStringContainsString( 'padding: 10px', $result );
-	}
-
-	/**
-	 * Test it gets block styles with declarations return type.
-	 */
-	public function testItGetsBlockStylesWithDeclarationsReturnType(): void {
-		$block_attributes = array(
-			'style' => array(
-				'spacing' => array(
-					'padding' => '10px',
-				),
-			),
-		);
-
-		/**
-		 * Rendering_Context mock for using in test.
-		 *
-		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-		 */
-		$rendering_context = $this->createMock( Rendering_Context::class );
-
-		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing' ), 'declarations' );
-
-		$this->assertIsArray( $result );
-		$this->assertSame( '10px', $result['padding'] );
-	}
-
-	/**
-	 * Test it gets block styles with classnames return type.
-	 */
-	public function testItGetsBlockStylesWithClassnamesReturnType(): void {
-		$block_attributes = array(
-			'style' => array(
-				'spacing' => array(
-					'padding' => '10px',
-				),
-			),
-		);
-
-		/**
-		 * Rendering_Context mock for using in test.
-		 *
-		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-		 */
-		$rendering_context = $this->createMock( Rendering_Context::class );
-
-		$result = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing' ), 'classnames' );
-
-		$this->assertIsString( $result );
-	}
-
-	/**
-	 * Test it gets return type for block styles falls back to full with unknown return type.
-	 */
-	public function testItGetsBlockStylesWithUnknownReturnType(): void {
-		$block_attributes = array(
-			'style' => array(
-				'spacing' => array(
-					'padding' => '10px',
-				),
-			),
-		);
-
-		/**
-		 * Rendering_Context mock for using in test.
-		 *
-		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
-		 */
-		$rendering_context = $this->createMock( Rendering_Context::class );
-
-		$properties = array( 'spacing' );
-
-		$result      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'unknown' );
-		$result_full = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, $properties, 'full' );
-
-		$this->assertSame( $result, $result_full );
-	}
+        $this->assertArrayHasKey( 'css', $result );
+        $this->assertArrayHasKey( 'declarations', $result );
+        $this->assertArrayHasKey( 'classnames', $result );
+        $this->assertIsString( $result['css'] );
+        $this->assertIsArray( $result['declarations'] );
+        $this->assertIsString( $result['classnames'] );
+    }
 
 	/**
 	 * Test it gets block styles with empty properties.

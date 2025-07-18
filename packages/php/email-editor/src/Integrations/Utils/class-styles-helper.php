@@ -135,14 +135,9 @@ class Styles_Helper {
 	 * @param array             $block_attributes Block attributes.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @param array             $properties Properties.
-	 * @param string            $return_type Return type. Can be 'full' (default, includes all three), 'css', 'declarations', or 'classnames'.
 	 * @return array
 	 */
-	public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties, string $return_type = 'full' ) {
-		if ( ! in_array( $return_type, array( 'full', 'css', 'declarations', 'classnames' ), true ) ) {
-			$return_type = 'full';
-		}
-
+	public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties ) {
 		$styles          = self::get_normalized_block_styles( $block_attributes, $rendering_context );
 		$filtered_styles = array();
 		$style_mappings  = array(
@@ -207,13 +202,8 @@ class Styles_Helper {
 			)
 		);
 
-		$output_styles = count( $filtered_styles ) > 0 ? self::get_styles_from_block( $filtered_styles ) : self::$empty_block_styles;
-		$output_styles = self::extend_block_styles( $output_styles, $additional_css_declarations );
+		$styles = count( $filtered_styles ) > 0 ? self::get_styles_from_block( $filtered_styles ) : self::$empty_block_styles;
 
-		if ( 'full' === $return_type ) {
-			return $output_styles;
-		}
-
-		return $output_styles[ $return_type ] ?? '';
+		return self::extend_block_styles( $styles, $additional_css_declarations );
 	}
 }
