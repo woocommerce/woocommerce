@@ -58,6 +58,7 @@ describe( 'Cart block editor integration', () => {
 
 		// Test Order Summary block - should have both Table and Audio options (specific filter applied).
 		await selectBlock( /^Block: Order Summary$/i );
+
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
