@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,6 +36,9 @@ class HposOrderExportHandler {
 	public function __construct() {
 		add_action( 'export_wp', array( $this, 'maybe_buffer_hpos_orders' ), 10, 1 );
 		add_action( 'rss2_head', array( $this, 'output_buffered_orders_after_posts' ), 999 );
+
+		// Hook into import to backfill HPOS records.
+		add_action( 'wp_import_insert_post', array( $this, 'maybe_backfill_hpos_order' ), 10, 2 );
 	}
 
 	/**
@@ -152,5 +156,22 @@ class HposOrderExportHandler {
 			<wp:is_sticky>0</wp:is_sticky>
 		</item>
 		<?php
+	}
+
+	/**
+	 * When an order is imported via Tools > Import, backfill it into the HPOS table.
+	 *
+	 * @param int   $post_id The imported post ID.
+	 * @param array $original_post_id The original post object.
+	 */
+	public function maybe_backfill_hpos_order( $post_id, $original_post_id ) {
+		if ( get_post_type( $post_id ) === 'shop_order' ) {
+			try {
+				$handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
+				$handler->backfill_order_to_datastore( $post_id, 'posts', 'hpos' );
+			} catch ( \Exception $e ) {
+				error_log( 'HPOS import backfill failed for order ' . $post_id . ': ' . $e->getMessage() );
+			}
+		}
 	}
 }
