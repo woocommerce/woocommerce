@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
 use WP_CLI;

@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
@@ -67,4 +70,4 @@ abstract class BaseCommand {
 		$credentials = $this->credential_manager->prompt_for_credentials( $required_fields );
 		$this->credential_manager->save_credentials( $platform, $credentials );
 	}
-} 
+}
