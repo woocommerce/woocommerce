@@ -104,7 +104,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 * This is meant to also cover the case when global attribute name or value is updated, then the attribute summary is updated
 		 * for respective products when they're read.
 		 */
-		$new_attribute_summary = $this->generate_attribute_summary( $product );
+		$new_attribute_summary = self::generate_attribute_summary( $product );
 
 		if ( $new_attribute_summary !== $post_object->post_excerpt ) {
 			$product->set_attribute_summary( $new_attribute_summary );
@@ -137,7 +137,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_name( $new_title );
 		}
 
-		$attribute_summary = $this->generate_attribute_summary( $product );
+		$attribute_summary = self::generate_attribute_summary( $product );
 		$product->set_attribute_summary( $attribute_summary );
 
 		// The post parent is not a valid variable product so we should prevent this.
@@ -215,7 +215,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$changes = $product->get_changes();
 
 		if ( array_intersect( array( 'attributes' ), array_keys( $changes ) ) ) {
-			$product->set_attribute_summary( $this->generate_attribute_summary( $product ) );
+			$product->set_attribute_summary( self::generate_attribute_summary( $product ) );
 		}
 
 		// Only update the post when the post data changes.
@@ -329,7 +329,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @return string
 	 */
-	protected function generate_attribute_summary( $product ) {
+	protected static function generate_attribute_summary( $product ) {
 		return wc_get_formatted_variation( $product, true, true );
 	}
 
