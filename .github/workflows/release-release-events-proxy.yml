@@ -1,0 +1,13 @@
+name: 'Release: Release events proxy workflow'
+on:
+  release:
+    types: [prereleased]
+
+jobs:
+  call-release-workflow:
+    name: 'Call release commits and contributors workflow'
+    if: ${{ !contains(github.event.release.tag_name, 'wc-beta-tester') }}
+    uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
+    with:
+      version: ${{ github.event.release.tag_name }}
+    secrets: inherit

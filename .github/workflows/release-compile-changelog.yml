@@ -109,6 +109,8 @@ jobs:
           fi
 
           # Normalize the version by removing .0 patch if present, as the changelog command does not support it
-          VERSION=${VERSION%.0}
+          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
+            VERSION=${VERSION%.0}
+          fi
 
           pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION $BRANCH_ARG $APPEND_CHANGELOG $OVERRIDE_DATE

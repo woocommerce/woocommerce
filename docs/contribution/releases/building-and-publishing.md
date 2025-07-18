@@ -47,8 +47,8 @@ sidebar_label: Building and Publishing
 ### Step 3: Verify Release Availability
 
 - Confirm the new release appears at:
-   - [https://plugins.svn.wordpress.org/woocommerce/tags/](https://plugins.svn.wordpress.org/woocommerce/tags/)
-   - The "Previous versions" dropdown on the [Advanced Options screen](https://wordpress.org/plugins/woocommerce/advanced/).
+    - [https://plugins.svn.wordpress.org/woocommerce/tags/](https://plugins.svn.wordpress.org/woocommerce/tags/)
+    - The "Previous versions" dropdown on the [Advanced Options screen](https://wordpress.org/plugins/woocommerce/advanced/).
 
 ### Step 4: Test and Validate the Release
 
@@ -58,18 +58,18 @@ sidebar_label: Building and Publishing
 ### Step 5: Update Stable Tag
 
 - **Condition:** Only perform this step if:
-   - The release is **not** an RC, **and**
-   - No major issues were found during testing and validation (Step 4).
+    - The release is **not** an RC, **and**
+    - No major issues were found during testing and validation (Step 4).
 - **Action:** Run the ["Release: Update stable tag" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) from `trunk`, set the version, and select the option to update the stable tag as part of the workflow input.
-   - Review and merge the pull requests for both the release branch and trunk.
+    - Review and merge the pull requests for both the release branch and trunk.
 
 ### Step 6: Publish GitHub Release Tag
 
 - **Action:** Publish the [previously created GitHub draft release tag](https://github.com/woocommerce/woocommerce/releases).
 - **When setting release status:**
-   - If releasing an RC, check "Set as a pre-release."
-   - If the version was marked as stable in Step 5, check "Set as the latest release."
-   - If the version was **not** marked as stable in Step 5, do **not** set as the latest release.
+    - If releasing an RC, check "Set as a pre-release."
+    - If the version was marked as stable in Step 5, check "Set as the latest release."
+    - If the version was **not** marked as stable in Step 5, do **not** set as the latest release.
 
 ## Decision Table
 
