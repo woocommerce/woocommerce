@@ -185,7 +185,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const { getDescription, getTitle, blockifyConfig } =
 		conversionConfig[ templateType ];
 
-	const canConvert = templateDetails?.type ? true : false;
+	const canConvert = !! templateDetails?.type;
 	const placeholderTitle = getTitle
 		? getTitle()
 		: __( 'Classic Shortcode Placeholder', 'woocommerce' );

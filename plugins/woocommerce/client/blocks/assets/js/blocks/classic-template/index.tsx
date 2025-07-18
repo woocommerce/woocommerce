@@ -231,7 +231,7 @@ const Edit = ( {
 		/>
 	);
 
-	const canConvert = templateDetails?.type ? true : false;
+	const canConvert = !! templateDetails?.type;
 	const placeholderDescription = getDescription( templateTitle );
 
 	return (
