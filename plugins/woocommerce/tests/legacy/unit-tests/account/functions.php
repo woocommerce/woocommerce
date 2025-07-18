@@ -16,6 +16,9 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
+		var_dump( get_option( 'woocommerce_custom_orders_table_enabled' ) );
+		var_dump( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() );
+		
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'login_form_login' ); // Simulate admin login screen.
 
