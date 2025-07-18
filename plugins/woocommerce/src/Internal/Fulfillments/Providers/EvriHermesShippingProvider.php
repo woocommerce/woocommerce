@@ -10,61 +10,25 @@ namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 class EvriHermesShippingProvider extends AbstractShippingProvider {
 
 	/**
-	 * Common tracking number patterns.
+	 * Main Evri/Hermes tracking number patterns.
 	 */
-	private const COMMON_PATTERNS = array(
-		'/^\d{16}$/',                 // 16-digit numeric.
-		'/^\d{15}$/',                 // 15-digit numeric.
+	private const MAIN_PATTERNS = array(
+		'/^\d{16}$/',                              // 16-digit numeric (official Evri/Hermes format).
+		'/^[A-Z]{1,2}\d{14,15}$/',                 // H, E, HM, EV, HH, MH + 14-15 digits (legacy/retail).
+		'/^MH\d{16}$/',                            // MH + 16 digits (Hermes Germany legacy)[3].
+		'/^(?:[A-Z]\d{2}[A-Z0-9]{13}|\d{16})$/',   // Newer Evri format.
 	);
 
 	/**
-	 * Evri tracking number patterns by country.
-	 *
-	 * @var array<string, array{patterns: array<int, string>, confidence: int}>
+	 * Calling card pattern.
 	 */
-	private const TRACKING_PATTERNS = array(
-		'GB' => array( // United Kingdom - Primary market.
-			'patterns'   => array(
-				'/^[A-Z]{2}\d{8}[A-Z]{2}$/', // HH12345678GB format.
-				'/^H\d{8}$/',                // H + 8 digits.
-				'/^E\d{8}$/',                // E + 8 digits.
-			),
-			'confidence' => 90,
-		),
-		'IE' => array( // Ireland - Direct Evri coverage.
-			'patterns'   => array(
-				'/^[A-Z]{2}\d{8}IE$/',       // Similar to GB format with IE suffix.
-			),
-			'confidence' => 85,
-		),
-	);
+	private const CALLING_CARD_PATTERN = '/^\d{8}$/'; // 8-digit calling card number[1][5].
 
 	/**
-	 * Countries with standard patterns and their confidence levels.
-	 *
-	 * @var array<string, int>
+	 * Legacy and fallback patterns.
 	 */
-	private const STANDARD_PATTERN_COUNTRIES = array(
-		'FR' => 80, // France - International delivery.
-		'DE' => 80, // Germany - International delivery.
-		'IT' => 80, // Italy - International delivery.
-		'ES' => 80, // Spain - International delivery.
-		'NL' => 80, // Netherlands - International delivery.
-		'BE' => 80, // Belgium - International delivery.
-		'AT' => 80, // Austria - International delivery.
-		'PL' => 80, // Poland - International delivery.
-		'GR' => 80, // Greece - International delivery.
-		'PT' => 80, // Portugal - International delivery.
-		'CH' => 80, // Switzerland - International delivery.
-		'CZ' => 75, // Czech Republic - International delivery.
-		'HU' => 75, // Hungary - International delivery.
-		'RO' => 75, // Romania - International delivery.
-		'NO' => 75, // Norway - International delivery.
-		'SE' => 75, // Sweden - International delivery.
-		'DK' => 75, // Denmark - International delivery.
-		'FI' => 75, // Finland - International delivery.
-		'EE' => 70, // Estonia - International delivery.
-		'CY' => 70, // Cyprus - International delivery.
+	private const LEGACY_PATTERNS = array(
+		'/^\d{13,15}$/',              // 13-15 digit numeric (rare, legacy).
 	);
 
 	/**
@@ -100,19 +64,19 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 	 * @return array List of country codes.
 	 */
 	public function get_shipping_from_countries(): array {
-		return array_merge( array_keys( self::TRACKING_PATTERNS ), array_keys( self::STANDARD_PATTERN_COUNTRIES ) );
+		// Evri (formerly Hermes UK) primarily operates from the UK only.
+		return array( 'GB' );
 	}
 
 	/**
 	 * Get the countries this shipping provider can ship to.
 	 *
-	 * Evri delivers to 200+ countries worldwide, but tracking patterns are primarily
-	 * for European destinations where they have established networks.
-	 *
 	 * @return array List of country codes.
 	 */
 	public function get_shipping_to_countries(): array {
-		return $this->get_shipping_from_countries();
+		// Evri ships from UK to these exact destinations as listed on their website dropdown.
+		// This list is based on the actual options in their destination choice select.
+		return array( 'GB', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AG', 'AR', 'AM', 'AW', 'AU', 'AT', 'AZ', 'PT', 'BS', 'BH', 'ES', 'BD', 'BB', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BQ', 'BA', 'BA', 'BW', 'BR', 'VG', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'ES', 'CV', 'KY', 'CF', 'TD', 'JE', 'CL', 'CN', 'CO', 'KM', 'CG', 'CK', 'CR', 'GR', 'HR', 'CW', 'CY', 'CZ', 'CD', 'DK', 'DJ', 'DM', 'DO', 'TL', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'SZ', 'ET', 'FK', 'FO', 'FJ', 'FI', 'FR', 'GF', 'PF', 'GA', 'GM', 'GE', 'DE', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GG', 'GN', 'GW', 'GY', 'HT', 'HN', 'HK', 'HU', 'ES', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JM', 'JP', 'JE', 'JO', 'KZ', 'KE', 'KI', 'KW', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MG', 'ES', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'ES', 'MX', 'FM', 'MD', 'MC', 'MN', 'ME', 'MS', 'MA', 'MZ', 'NA', 'NR', 'NP', 'NL', 'AN', 'NC', 'NZ', 'NI', 'NE', 'MK', 'GB', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RW', 'MP', 'WS', 'SM', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'KR', 'ES', 'LK', 'BL', 'BQ', 'KN', 'LC', 'SX', 'VC', 'SR', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TG', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'GB', 'UA', 'AE', 'UY', 'US', 'UZ', 'VU', 'VA', 'VN', 'VI', 'WF', 'YE', 'ZM', 'ZW' );
 	}
 
 	/**
@@ -123,46 +87,6 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 	 */
 	public function get_tracking_url( string $tracking_number ): string {
 		return 'https://www.evri.com/track/' . rawurlencode( $tracking_number );
-	}
-
-	/**
-	 * Validate tracking number against country-specific patterns.
-	 *
-	 * @param string $tracking_number The tracking number to validate.
-	 * @param string $country_code The country code for the shipment.
-	 * @return bool True if valid, false otherwise.
-	 */
-	private function validate_country_pattern( string $tracking_number, string $country_code ): bool {
-		// Check common patterns for countries with standard patterns.
-		if ( isset( self::STANDARD_PATTERN_COUNTRIES[ $country_code ] ) ) {
-			foreach ( self::COMMON_PATTERNS as $pattern ) {
-				if ( preg_match( $pattern, $tracking_number ) ) {
-					return true;
-				}
-			}
-			// Also check country-specific format.
-			$country_pattern = '/^[A-Z]{2}\d{8}' . $country_code . '$/';
-			if ( preg_match( $country_pattern, $tracking_number ) ) {
-				return true;
-			}
-		}
-
-		// Check specific patterns for countries with unique formats.
-		if ( isset( self::TRACKING_PATTERNS[ $country_code ] ) ) {
-			foreach ( self::TRACKING_PATTERNS[ $country_code ]['patterns'] as $pattern ) {
-				if ( preg_match( $pattern, $tracking_number ) ) {
-					return true;
-				}
-			}
-			// Also check common patterns for these countries.
-			foreach ( self::COMMON_PATTERNS as $pattern ) {
-				if ( preg_match( $pattern, $tracking_number ) ) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -182,39 +106,52 @@ class EvriHermesShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
+		// Check if this provider can handle this shipping route.
+		if ( ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+			return null;
+		}
+
 		$normalized = strtoupper( preg_replace( '/\s+/', '', $tracking_number ) );
 		if ( empty( $normalized ) ) {
 			return null;
 		}
 
-		$shipping_from = strtoupper( $shipping_from );
-		$shipping_to   = strtoupper( $shipping_to );
-
-		// Check country-specific patterns.
-		if ( $this->validate_country_pattern( $normalized, $shipping_from ) ) {
-			// Get confidence from either specific patterns or standard patterns.
-			if ( isset( self::TRACKING_PATTERNS[ $shipping_from ] ) ) {
-				$confidence = self::TRACKING_PATTERNS[ $shipping_from ]['confidence'];
-			} elseif ( isset( self::STANDARD_PATTERN_COUNTRIES[ $shipping_from ] ) ) {
-				$confidence = self::STANDARD_PATTERN_COUNTRIES[ $shipping_from ];
-			} else {
-				return null;
+		// 1. Check for main 16-digit and legacy Evri/Hermes formats.
+		foreach ( self::MAIN_PATTERNS as $pattern ) {
+			if ( preg_match( $pattern, $normalized ) ) {
+				$confidence = 90;
+				// Boost for UK shipments.
+				if ( 'GB' === $shipping_from ) {
+					$confidence = min( 98, $confidence + 2 );
+				}
+				return array(
+					'url'             => $this->get_tracking_url( $normalized ),
+					'ambiguity_score' => $confidence,
+				);
 			}
+		}
 
-			// Boost confidence for intra-Evri shipments.
-			if ( in_array( $shipping_to, $this->get_shipping_to_countries(), true ) ) {
-				$confidence = min( 98, $confidence + 5 );
-			}
-
-			// Extra boost for UK shipments (primary market).
-			if ( 'GB' === $shipping_from ) {
-				$confidence = min( 98, $confidence + 3 );
-			}
-
+		// 2. Check for 8-digit calling card number.
+		if ( preg_match( self::CALLING_CARD_PATTERN, $normalized ) ) {
 			return array(
 				'url'             => $this->get_tracking_url( $normalized ),
-				'ambiguity_score' => $confidence,
+				'ambiguity_score' => 80,
 			);
+		}
+
+		// 3. Check for legacy/fallback patterns (lower confidence).
+		foreach ( self::LEGACY_PATTERNS as $pattern ) {
+			if ( preg_match( $pattern, $normalized ) ) {
+				$confidence = 75;
+				// Boost for UK shipments.
+				if ( 'GB' === $shipping_from ) {
+					$confidence = min( 95, $confidence + 15 );
+				}
+				return array(
+					'url'             => $this->get_tracking_url( $normalized ),
+					'ambiguity_score' => $confidence,
+				);
+			}
 		}
 
 		return null;
