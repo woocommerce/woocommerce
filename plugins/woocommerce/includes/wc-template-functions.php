@@ -3726,7 +3726,7 @@ if ( ! function_exists( 'wc_get_email_fulfillment_items' ) ) {
 			/**
 			 * Filter to modify the arguments for the email fulfillment items.
 			 *
-			 * @since 9.9.0
+			 * @since 10.1.0
 			 *
 			 * @param array $args The arguments for the email fulfillment items.
 			 */
@@ -3750,13 +3750,13 @@ if ( ! function_exists( 'wc_get_email_fulfillment_items' ) ) {
 		/**
 		 * Filter to modify the email fulfillment items table HTML.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 *
 		 * @param string   $html The HTML output of the fulfillment items table.
 		 * @param WC_Order $order The order object.
 		 * @param Fulfillment $fulfillment The fulfillment object.
 		 */
-		return apply_filters( 'wc_get_email_fulfillment_items_table', ob_get_clean(), $order, $fulfillment );
+		return apply_filters( 'woocommerce_get_email_fulfillment_items_table', ob_get_clean(), $order, $fulfillment );
 	}
 }
 

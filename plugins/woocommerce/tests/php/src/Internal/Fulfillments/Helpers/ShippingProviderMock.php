@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvi
  *
  * This class is a mock implementation of the AbstractShippingProvider for testing purposes.
  *
- * @since 9.9.0
+ * @since 10.1.0
  * @package WooCommerce\Tests\Internal\Fulfillments
  */
 class ShippingProviderMock extends AbstractShippingProvider {

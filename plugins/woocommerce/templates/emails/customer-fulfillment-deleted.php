@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 9.9.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,7 +37,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 /**
  * Hook for the woocommerce_email_fulfillment_details.
  *
- * @since 9.9.0
+ * @since 10.1.0
  * @param WC_Order $order The order object.
  * @param Fulfillment $fulfillment The fulfillment object.
  * @param bool $sent_to_admin Whether the email is sent to admin.
@@ -56,7 +56,7 @@ do_action( 'woocommerce_email_fulfillment_details', $order, $fulfillment, $sent_
  * @param bool $sent_to_admin Whether the email is sent to admin.
  * @param bool $plain_text Whether the email is plain text.
  * @param WC_Email $email The email object.
- * @since 9.9.0
+ * @since 10.1.0
  *
  * @hooked WC_Emails::order_meta() Shows fulfillment meta data.
  */

@@ -410,11 +410,6 @@ class FulfillmentsRenderer {
 	 */
 	protected function load_fulfillments_js_settings() {
 		$fulfillment_settings = array(
-			/**
-			 * Filter to modify the shipping providers.
-			 *
-			 * @since 9.9.0
-			 */
 			'providers'                  => FulfillmentUtils::get_shipping_providers_object(),
 			'currency_symbols'           => get_woocommerce_currency_symbols(),
 			'fulfillment_statuses'       => FulfillmentUtils::get_fulfillment_statuses(),
@@ -449,8 +444,6 @@ class FulfillmentsRenderer {
 
 	/**
 	 * Render the fulfillment filters in the legacy orders table.
-	 *
-	 * @deprecated 9.9.0 Use render_fulfillment_filters() instead.
 	 */
 	public function render_fulfillment_filters_legacy() {
 		global $typenow;

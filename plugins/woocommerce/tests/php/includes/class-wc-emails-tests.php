@@ -80,7 +80,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		);
 
 		add_filter(
-			'wc_fulfillment_meta_key_translations',
+			'woocommerce_fulfillment_meta_key_translations',
 			function ( $translations ) {
 				$translations['test_meta_key'] = __( 'Test meta key', 'woocommerce' );
 				return $translations;

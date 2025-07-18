@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC Order Fulfillment Class
  *
- * @since 9.9.0
+ * @since 10.1.0
  */
 class Fulfillment extends \WC_Data {
 	/**

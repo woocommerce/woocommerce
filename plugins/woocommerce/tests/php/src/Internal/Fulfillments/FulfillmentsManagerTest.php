@@ -48,7 +48,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test hooks.
 	 */
 	public function test_hooks() {
-		$this->assertNotFalse( has_filter( 'wc_fulfillment_translate_meta_key', array( $this->manager, 'translate_fulfillment_meta_key' ) ) );
+		$this->assertNotFalse( has_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this->manager, 'translate_fulfillment_meta_key' ) ) );
 	}
 
 	/**
@@ -70,7 +70,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	public function test_extend_translate_fulfillment_meta_key() {
 		// Extend the translations.
 		add_filter(
-			'wc_fulfillment_meta_key_translations',
+			'woocommerce_fulfillment_meta_key_translations',
 			function ( $translations ) {
 				$translations['custom_meta_key'] = __( 'Custom Meta Key', 'woocommerce' );
 				return $translations;
@@ -89,7 +89,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 		// Add a filter to modify the translations.
 		add_filter(
-			'wc_fulfillment_meta_key_translations',
+			'woocommerce_fulfillment_meta_key_translations',
 			function ( $translations ) {
 				$translations['custom_meta_key'] = __( 'Custom Meta Key', 'woocommerce' );
 				return $translations;
@@ -99,9 +99,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filter to translate fulfillment meta keys.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
-		$translated_key = apply_filters( 'wc_fulfillment_translate_meta_key', 'custom_meta_key' );
+		$translated_key = apply_filters( 'woocommerce_fulfillment_translate_meta_key', 'custom_meta_key' );
 		$this->assertEquals( __( 'Custom Meta Key', 'woocommerce' ), $translated_key );
 	}
 
@@ -112,9 +112,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filter to get initial shipping providers
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
-		$shipping_providers = apply_filters( 'wc_fulfillment_shipping_providers', array() );
+		$shipping_providers = apply_filters( 'woocommerce_fulfillment_shipping_providers', array() );
 		// Check if the shipping providers are loaded correctly.
 		$this->assertIsArray( $shipping_providers );
 		$this->assertNotEmpty( $shipping_providers );
@@ -126,7 +126,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	public function test_extend_initial_shipping_providers() {
 		// Extend the shipping providers.
 		add_filter(
-			'wc_fulfillment_shipping_providers',
+			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
 				$providers['custom_provider'] = array(
 					'label' => __( 'Custom Provider', 'woocommerce' ),
@@ -140,9 +140,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filter to get initial shipping providers.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
-		$shipping_providers = apply_filters( 'wc_fulfillment_shipping_providers', array() );
+		$shipping_providers = apply_filters( 'woocommerce_fulfillment_shipping_providers', array() );
 
 		// Check if the custom provider is included.
 		$this->assertArrayHasKey( 'custom_provider', $shipping_providers );
@@ -155,9 +155,9 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 * Test that the fulfillment status hooks are initialized correctly.
 	 */
 	public function test_init_fulfillment_status_hooks() {
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_create', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_update', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
-		$this->assertNotFalse( has_action( 'wc_fulfillment_after_delete', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_create', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_update', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_delete', array( $this->manager, 'update_order_fulfillment_status_on_fulfillment_update' ) ) );
 	}
 
 	/**
@@ -185,19 +185,19 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( did_action( 'wc_fulfillment_after_create' ) > 0 );
+		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_create' ) > 0 );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
 
 		$fulfillments[0]->set_status( 'fulfilled' );
 		$fulfillments[0]->save();
 
-		$this->assertTrue( did_action( 'wc_fulfillment_after_update' ) > 0 );
+		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_update' ) > 0 );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'partially_fulfilled', $order->get_meta( '_fulfillment_status' ) );
 
 		$fulfillments[0]->delete();
-		$this->assertTrue( did_action( 'wc_fulfillment_after_delete' ) > 0 );
+		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_delete' ) > 0 );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
 	}
@@ -217,7 +217,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$mock_provider = $this->getMockBuilder( ShippingProviderMock::class )->onlyMethods( array( 'try_parse_tracking_number' ) )->getMock();
 		$container->replace( ShippingProviderMock::class, $mock_provider );
 		add_filter(
-			'wc_fulfillment_shipping_providers',
+			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
 				$providers = array(
 					'custom_provider' => ShippingProviderMock::class,
@@ -256,7 +256,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$mock_provider = $this->getMockBuilder( ShippingProviderMock::class )->onlyMethods( array( 'try_parse_tracking_number' ) )->getMock();
 		$container->replace( ShippingProviderMock::class, $mock_provider );
 		add_filter(
-			'wc_fulfillment_shipping_providers',
+			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
 				$providers = array(
 					'custom_provider' => ShippingProviderMock::class,
@@ -281,7 +281,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$tracking_number = '1234567890';
 
 		add_filter(
-			'wc_fulfillment_shipping_providers',
+			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
 				$providers = array();
 				return $providers;

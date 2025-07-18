@@ -74,7 +74,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	public function test_fulfillment_before_create_hook_is_called() {
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_create',
+			'woocommerce_fulfillment_before_create',
 			function ( $fulfillment ) use ( &$hook_called ) {
 				$hook_called = true;
 				return $fulfillment;
@@ -94,7 +94,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$hook_called = false;
 
 		add_filter(
-			'wc_fulfillment_before_create',
+			'woocommerce_fulfillment_before_create',
 			function () use ( &$hook_called ) {
 				$hook_called = true;
 				throw new \Exception( 'Fulfillment creation prevented by hook.' );
@@ -119,7 +119,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$hook_called = false;
 
 		add_action(
-			'wc_fulfillment_after_create',
+			'woocommerce_fulfillment_after_create',
 			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
 				$received_fulfillment = $fulfillment;
 				$hook_called          = true;
@@ -159,7 +159,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_update',
+			'woocommerce_fulfillment_before_update',
 			function ( $fulfillment ) use ( &$hook_called ) {
 				$hook_called = true;
 				return $fulfillment;
@@ -187,7 +187,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_update',
+			'woocommerce_fulfillment_before_update',
 			function () use ( &$hook_called ) {
 				$hook_called = true;
 				throw new \Exception( 'Fulfillment update prevented by hook.' );
@@ -217,7 +217,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_action(
-			'wc_fulfillment_after_update',
+			'woocommerce_fulfillment_after_update',
 			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
 				$received_fulfillment = $fulfillment;
 				$hook_called          = true;
@@ -271,7 +271,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_fulfill',
+			'woocommerce_fulfillment_before_fulfill',
 			function ( $fulfillment ) use ( &$hook_called ) {
 				$hook_called = true;
 
@@ -291,7 +291,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertFalse( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -311,7 +311,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_fulfill',
+			'woocommerce_fulfillment_before_fulfill',
 			function ( $fulfillment ) use ( &$hook_called ) {
 				$hook_called = true;
 
@@ -334,7 +334,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertTrue( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -354,7 +354,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_fulfill',
+			'woocommerce_fulfillment_before_fulfill',
 			function () use ( &$hook_called ) {
 				$hook_called = true;
 				throw new \Exception( 'Fulfillment fulfill prevented by hook.' );
@@ -386,7 +386,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 			$this->expectExceptionMessage( 'Fulfillment not found.' );
 			new Fulfillment( $fulfillment->get_id() );
 		}
-		remove_all_filters( 'wc_fulfillment_before_fulfill' );
+		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -406,7 +406,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_action(
-			'wc_fulfillment_after_fulfill',
+			'woocommerce_fulfillment_after_fulfill',
 			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
 				$received_fulfillment = $fulfillment;
 				$hook_called          = true;
@@ -438,7 +438,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
 		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
-		remove_all_actions( 'wc_fulfillment_after_fulfill' );
+		remove_all_actions( 'woocommerce_fulfillment_after_fulfill' );
 	}
 
 	/**
@@ -453,7 +453,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_delete',
+			'woocommerce_fulfillment_before_delete',
 			function ( $fulfillment ) use ( &$hook_called ) {
 				$hook_called = true;
 				return $fulfillment;
@@ -480,7 +480,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_filter(
-			'wc_fulfillment_before_delete',
+			'woocommerce_fulfillment_before_delete',
 			function () use ( &$hook_called ) {
 				$hook_called = true;
 				throw new \Exception( 'Fulfillment delete prevented by hook.' );
@@ -509,7 +509,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$hook_called = false;
 		add_action(
-			'wc_fulfillment_after_delete',
+			'woocommerce_fulfillment_after_delete',
 			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
 				$received_fulfillment = $fulfillment;
 				$hook_called          = true;

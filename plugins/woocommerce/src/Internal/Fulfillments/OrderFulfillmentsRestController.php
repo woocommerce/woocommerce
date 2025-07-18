@@ -263,7 +263,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				/**
 				 * Trigger the fulfillment created notification on creating a fulfilled fulfillment.
 				 *
-				 * @since 9.9.0
+				 * @since 10.1.0
 				 */
 				do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 			}
@@ -365,14 +365,14 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					/**
 					 * Trigger the fulfillment created notification on fulfilling a fulfillment.
 					 *
-					 * @since 9.9.0
+					 * @since 10.1.0
 					 */
 					do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 				} elseif ( $next_state ) {
 					/**
 					 * Trigger the fulfillment updated notification on updating a fulfillment.
 					 *
-					 * @since 9.9.0
+					 * @since 10.1.0
 					 */
 					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 				}
@@ -432,7 +432,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			/**
 			 * Trigger the fulfillment deleted notification.
 			 *
-			 * @since 9.9.0
+			 * @since 10.1.0
 			 */
 			do_action( 'woocommerce_fulfillment_deleted_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
 		}
@@ -605,10 +605,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		/**
 		 * Parse the tracking number with additional parameters.
 		 *
-		 * @since 9.9.0
+		 * @since 10.1.0
 		 */
 		$tracking_number_parse_result = apply_filters(
-			'wc_fulfillment_parse_tracking_number',
+			'woocommerce_fulfillment_parse_tracking_number',
 			$tracking_number,
 			WC()->countries->get_base_country(),
 			$order->get_shipping_country(),
