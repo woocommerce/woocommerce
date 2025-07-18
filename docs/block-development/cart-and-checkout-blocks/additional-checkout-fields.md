@@ -498,7 +498,7 @@ The below example shows how to apply custom validation to the `namespace/gov-id`
 
 ```php
 add_action(
-'woocommerce_validate_additional_field',
+	'woocommerce_validate_additional_field',
 	function ( WP_Error $errors, $field_key, $field_value ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
@@ -1145,7 +1145,7 @@ add_action(
 						$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 					}
 				}
-				return $error;
+				return $errors;
 			},
 			10,
 			3
