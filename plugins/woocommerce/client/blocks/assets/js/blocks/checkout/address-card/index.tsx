@@ -13,6 +13,7 @@ import { getSetting } from '@woocommerce/settings';
 import { formatAddress } from '@woocommerce/blocks/checkout/utils';
 import { Button } from '@ariakit/react';
 import { decodeEntities } from '@wordpress/html-entities';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -60,28 +61,30 @@ const AddressCard = ( {
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
-				<span className="wc-block-components-address-card__address-section">
+				<span
+					className={ clsx(
+						'wc-block-components-address-card__address-section',
+						'wc-block-components-address-card__address-section--primary'
+					) }
+				>
 					{ decodeEntities( formattedName ) }
 				</span>
-				<div className="wc-block-components-address-card__address-section">
+				<span
+					className={ clsx(
+						'wc-block-components-address-card__address-section',
+						'wc-block-components-address-card__address-section--secondary'
+					) }
+				>
 					{ formattedAddress
 						.filter( ( field ) => !! field )
-						.map( ( field, index ) => (
-							<span key={ `address-` + index }>
-								{ decodeEntities( field ) }
-							</span>
-						) ) }
-				</div>
+						.map( ( field ) => decodeEntities( field ) )
+						.join( ', ' ) }
+				</span>
 				{ address.phone ? (
-					<div
-						key={ `address-phone` }
-						className="wc-block-components-address-card__address-section"
-					>
+					<span className="wc-block-components-address-card__address-section">
 						{ address.phone }
-					</div>
-				) : (
-					''
-				) }
+					</span>
+				) : null }
 			</address>
 			{ onEdit && (
 				<Button
