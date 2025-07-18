@@ -88,54 +88,54 @@ class AustraliaPostShippingProviderTest extends \WP_UnitTestCase {
 	public function validTrackingNumberProvider(): array {
 		return array(
 			// International UPU S10 format: XX#########AU.
-			array( 'AB123456789AU', 'AU', 'US', 91 ),   // Common destination with boost.
-			array( 'CD987654321AU', 'AU', 'AU', 95 ),   // Domestic shipment with boost.
-			array( 'EF555666777AU', 'AU', 'NZ', 93 ),   // APAC destination with boost.
+			array( 'AB123456789AU', 'AU', 'US', 92 ),   // Common destination with boost (90+2).
+			array( 'CD987654321AU', 'AU', 'AU', 95 ),   // Domestic shipment with boost (90+5).
+			array( 'EF555666777AU', 'AU', 'NZ', 93 ),   // APAC destination with boost (90+3).
 
 			// Alternative international format: XX#######AU.
-			array( 'AB1234567AU', 'AU', 'SG', 93 ),     // APAC destination with boost.
-			array( 'CD9876543AU', 'AU', 'AU', 95 ),     // Domestic with boost.
-			array( 'EF5556667AU', 'AU', 'GB', 91 ),     // Common destination with boost.
+			array( 'AB1234567AU', 'AU', 'SG', 93 ),     // APAC destination with boost (90+3).
+			array( 'CD9876543AU', 'AU', 'AU', 95 ),     // Domestic with boost (90+5).
+			array( 'EF5556667AU', 'AU', 'GB', 92 ),     // Common destination with boost (90+2).
 
 			// 13-digit domestic tracking.
-			array( '1234567890123', 'AU', 'AU', 95 ),   // Domestic with boost.
-			array( '9876543210987', 'AU', 'HK', 93 ),   // APAC destination with boost.
-			array( '5556667778889', 'AU', 'BR', 88 ),   // International base score.
+			array( '1234567890123', 'AU', 'AU', 95 ),   // Domestic with boost (90+5).
+			array( '9876543210987', 'AU', 'HK', 95 ),   // APAC destination with boost, has valid check digit (90+3+8->95).
+			array( '5556667778889', 'AU', 'BR', 90 ),   // International base score.
 
 			// 12-digit domestic tracking.
-			array( '123456789012', 'AU', 'AU', 95 ),    // Domestic with boost.
-			array( '987654321098', 'AU', 'JP', 93 ),    // APAC destination with boost.
-			array( '555666777888', 'AU', 'CA', 91 ),    // Common destination with boost.
+			array( '123456789012', 'AU', 'AU', 95 ),    // Domestic with boost (90+5).
+			array( '987654321098', 'AU', 'JP', 95 ),    // APAC destination with boost, has valid check digit (90+3+8->95).
+			array( '555666777888', 'AU', 'CA', 92 ),    // Common destination with boost (90+2).
 
 			// 11-digit domestic tracking.
-			array( '12345678901', 'AU', 'AU', 95 ),     // Domestic with boost.
-			array( '98765432109', 'AU', 'KR', 93 ),     // APAC destination with boost.
-			array( '55566677788', 'AU', 'DE', 91 ),     // Common destination with boost.
+			array( '12345678901', 'AU', 'AU', 95 ),     // Domestic with boost (90+5).
+			array( '98765432109', 'AU', 'KR', 93 ),     // APAC destination with boost (90+3).
+			array( '55566677788', 'AU', 'DE', 92 ),     // Common destination with boost (90+2).
 
 			// Standard format: XX########XX.
-			array( 'AB12345678CD', 'AU', 'AU', 95 ),    // Domestic with boost.
-			array( 'EF98765432GH', 'AU', 'TH', 93 ),    // APAC destination with boost.
-			array( 'IJ55566677KL', 'AU', 'US', 91 ),    // Common destination with boost.
+			array( 'AB12345678CD', 'AU', 'AU', 95 ),    // Domestic with boost (90+5).
+			array( 'EF98765432GH', 'AU', 'TH', 93 ),    // APAC destination with boost (90+3).
+			array( 'IJ55566677KL', 'AU', 'US', 92 ),    // Common destination with boost (90+2).
 
 			// Domestic format: X##########X.
-			array( 'A1234567890B', 'AU', 'AU', 95 ),    // Domestic with boost.
-			array( 'C9876543210D', 'AU', 'MY', 93 ),    // APAC destination with boost.
-			array( 'E5556667778F', 'AU', 'GB', 91 ),    // Common destination with boost.
+			array( 'A1234567890B', 'AU', 'AU', 95 ),    // Domestic with boost (90+5).
+			array( 'C9876543210D', 'AU', 'MY', 93 ),    // APAC destination with boost (90+3).
+			array( 'E5556667778F', 'AU', 'GB', 92 ),    // Common destination with boost (90+2).
 
 			// Express Post format: XXXX########.
-			array( 'ABCD12345678', 'AU', 'AU', 95 ),    // Domestic with boost.
-			array( 'EFGH98765432', 'AU', 'ID', 93 ),    // APAC destination with boost.
-			array( 'IJKL55566677', 'AU', 'CA', 91 ),    // Common destination with boost.
+			array( 'ABCD12345678', 'AU', 'AU', 95 ),    // Domestic with boost (90+5).
+			array( 'EFGH98765432', 'AU', 'ID', 93 ),    // APAC destination with boost (90+3).
+			array( 'IJKL55566677', 'AU', 'CA', 92 ),    // Common destination with boost (90+2).
 
 			// 16-digit format starting with 7.
-			array( '7123456789012345', 'AU', 'AU', 95 ), // Domestic with boost.
-			array( '7987654321098765', 'AU', 'PH', 93 ), // APAC destination with boost.
-			array( '7555666777888999', 'AU', 'BR', 88 ), // International base score.
+			array( '7123456789012345', 'AU', 'AU', 95 ), // Domestic with boost (90+5).
+			array( '7987654321098765', 'AU', 'PH', 93 ), // APAC destination with boost (90+3).
+			array( '7555666777888999', 'AU', 'BR', 90 ), // International base score.
 
 			// 16-digit format starting with 3.
-			array( '3123456789012345', 'AU', 'AU', 95 ), // Domestic with boost.
-			array( '3987654321098765', 'AU', 'VN', 93 ), // APAC destination with boost.
-			array( '3555666777888999', 'AU', 'US', 91 ), // Common destination with boost.
+			array( '3123456789012345', 'AU', 'AU', 95 ), // Domestic with boost (90+5).
+			array( '3987654321098765', 'AU', 'VN', 93 ), // APAC destination with boost (90+3).
+			array( '3555666777888999', 'AU', 'US', 92 ), // Common destination with boost (90+2).
 		);
 	}
 
@@ -206,7 +206,7 @@ class AustraliaPostShippingProviderTest extends \WP_UnitTestCase {
 		);
 
 		// Check score is within valid range.
-		$this->assertGreaterThanOrEqual( 88, $result['ambiguity_score'], 'Score should be at least 88' );
+		$this->assertGreaterThanOrEqual( 90, $result['ambiguity_score'], 'Score should be at least 90' );
 		$this->assertLessThanOrEqual( 95, $result['ambiguity_score'], 'Score should not exceed 95' );
 
 		// Check URL format.
@@ -296,12 +296,12 @@ class AustraliaPostShippingProviderTest extends \WP_UnitTestCase {
 		// Common destination should get medium boost.
 		$result_common = $this->provider->try_parse_tracking_number( 'AB123456789AU', 'AU', 'US' );
 		$this->assertIsArray( $result_common );
-		$this->assertSame( 91, $result_common['ambiguity_score'] );
+		$this->assertSame( 92, $result_common['ambiguity_score'] );
 
 		// International should get base confidence.
 		$result_international = $this->provider->try_parse_tracking_number( 'AB123456789AU', 'AU', 'BR' );
 		$this->assertIsArray( $result_international );
-		$this->assertSame( 88, $result_international['ambiguity_score'] );
+		$this->assertSame( 90, $result_international['ambiguity_score'] );
 
 		// Verify scoring hierarchy.
 		$this->assertGreaterThan( $result_apac['ambiguity_score'], $result_domestic['ambiguity_score'] );
@@ -316,52 +316,52 @@ class AustraliaPostShippingProviderTest extends \WP_UnitTestCase {
 		// Test international UPU S10 format XX#########AU.
 		$upu_result = $this->provider->try_parse_tracking_number( 'AB123456789AU', 'AU', 'US' );
 		$this->assertIsArray( $upu_result );
-		$this->assertSame( 91, $upu_result['ambiguity_score'] );
+		$this->assertSame( 92, $upu_result['ambiguity_score'] );
 
 		// Test alternative international format XX#######AU.
 		$alt_intl_result = $this->provider->try_parse_tracking_number( 'AB1234567AU', 'AU', 'US' );
 		$this->assertIsArray( $alt_intl_result );
-		$this->assertSame( 91, $alt_intl_result['ambiguity_score'] );
+		$this->assertSame( 92, $alt_intl_result['ambiguity_score'] );
 
 		// Test 13-digit tracking.
 		$digit13_result = $this->provider->try_parse_tracking_number( '1234567890123', 'AU', 'US' );
 		$this->assertIsArray( $digit13_result );
-		$this->assertSame( 91, $digit13_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit13_result['ambiguity_score'] );
 
 		// Test 12-digit tracking.
 		$digit12_result = $this->provider->try_parse_tracking_number( '123456789012', 'AU', 'US' );
 		$this->assertIsArray( $digit12_result );
-		$this->assertSame( 91, $digit12_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit12_result['ambiguity_score'] );
 
 		// Test 11-digit tracking.
 		$digit11_result = $this->provider->try_parse_tracking_number( '12345678901', 'AU', 'US' );
 		$this->assertIsArray( $digit11_result );
-		$this->assertSame( 91, $digit11_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit11_result['ambiguity_score'] );
 
 		// Test standard format XX########XX.
 		$standard_result = $this->provider->try_parse_tracking_number( 'AB12345678CD', 'AU', 'US' );
 		$this->assertIsArray( $standard_result );
-		$this->assertSame( 91, $standard_result['ambiguity_score'] );
+		$this->assertSame( 92, $standard_result['ambiguity_score'] );
 
 		// Test domestic format X##########X.
 		$domestic_result = $this->provider->try_parse_tracking_number( 'A1234567890B', 'AU', 'US' );
 		$this->assertIsArray( $domestic_result );
-		$this->assertSame( 91, $domestic_result['ambiguity_score'] );
+		$this->assertSame( 92, $domestic_result['ambiguity_score'] );
 
 		// Test Express Post format XXXX########.
 		$express_result = $this->provider->try_parse_tracking_number( 'ABCD12345678', 'AU', 'US' );
 		$this->assertIsArray( $express_result );
-		$this->assertSame( 91, $express_result['ambiguity_score'] );
+		$this->assertSame( 92, $express_result['ambiguity_score'] );
 
 		// Test 16-digit format starting with 7.
 		$digit16_7_result = $this->provider->try_parse_tracking_number( '7123456789012345', 'AU', 'US' );
 		$this->assertIsArray( $digit16_7_result );
-		$this->assertSame( 91, $digit16_7_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit16_7_result['ambiguity_score'] );
 
 		// Test 16-digit format starting with 3.
 		$digit16_3_result = $this->provider->try_parse_tracking_number( '3123456789012345', 'AU', 'US' );
 		$this->assertIsArray( $digit16_3_result );
-		$this->assertSame( 91, $digit16_3_result['ambiguity_score'] );
+		$this->assertSame( 92, $digit16_3_result['ambiguity_score'] );
 	}
 
 	/**
@@ -398,12 +398,12 @@ class AustraliaPostShippingProviderTest extends \WP_UnitTestCase {
 		foreach ( $common_destinations as $destination ) {
 			$result = $this->provider->try_parse_tracking_number( 'AB123456789AU', 'AU', $destination );
 			$this->assertIsArray( $result );
-			$this->assertSame( 91, $result['ambiguity_score'], "Common destination {$destination} should get confidence boost" );
+			$this->assertSame( 92, $result['ambiguity_score'], "Common destination {$destination} should get confidence boost" );
 		}
 
 		// Test non-common, non-APAC destination doesn't get boost.
 		$result_other = $this->provider->try_parse_tracking_number( 'AB123456789AU', 'AU', 'BR' );
 		$this->assertIsArray( $result_other );
-		$this->assertSame( 88, $result_other['ambiguity_score'] );
+		$this->assertSame( 90, $result_other['ambiguity_score'] );
 	}
 }

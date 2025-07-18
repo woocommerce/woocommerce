@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Fulfillments\Providers;
 
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+
 /**
  * UPS Shipping Provider class.
  */
@@ -114,49 +116,57 @@ class UPSShippingProvider extends AbstractShippingProvider {
 			return null;
 		}
 
-		$tracking_number = strtoupper( $tracking_number );
-
-		// UPS tracking number formats.
-		$is_1z_format       = preg_match( '/^1Z[0-9A-Z]{15,16}$/', $tracking_number );
-		$is_t_format        = preg_match( '/^T\d{10}$/', $tracking_number );
-		$is_h_format        = preg_match( '/^H\d{10}$/', $tracking_number );
-		$is_9x_format       = preg_match( '/^9\d{21,34}$/', $tracking_number );
-		$is_surepost_format = preg_match( '/^9274\d{18}$/', $tracking_number );
-		$is_9_digit         = preg_match( '/^\d{9}$/', $tracking_number );
-		$is_10_digit        = preg_match( '/^\d{10}$/', $tracking_number );
-		$is_12_digit        = preg_match( '/^\d{12}$/', $tracking_number );
-		$is_info_notice     = preg_match( '/^J\d{10}$/', $tracking_number );
-		$is_22_digit_mail   = preg_match( '/^\d{22}$/', $tracking_number );
-
+		$tracking_number      = strtoupper( $tracking_number );
 		$is_domestic_shipping = $shipping_from === $shipping_to;
+
+		// UPS tracking number patterns (ordered by confidence).
+		$patterns = array(
+			// 1Z format (standard UPS) - 18 chars, check digit validation.
+			'/^1Z[0-9A-Z]{16}$/'        => function () use ( $tracking_number ) {
+				return FulfillmentUtils::validate_ups_1z_check_digit( $tracking_number ) ? 100 : 95;
+			},
+
+			// Numeric only: 12 digits (common for UPS Air/Ground, with mod10 check digit).
+			'/^\d{12}$/'                => function () use ( $tracking_number ) {
+				return FulfillmentUtils::validate_mod10_check_digit( $tracking_number ) ? 90 : 80;
+			},
+
+			// Numeric only: 9 or 10 digits (legacy/freight).
+			'/^\d{10}$/'                => 75,
+			'/^\d{9}$/'                 => 70,
+
+			// T, H, or V prefix + 10 digits (special international/freight).
+			'/^[THV]\d{10}$/'           => 85,
+
+			// UPS InfoNotice (J + 10 digits).
+			'/^J\d{10}$/'               => 80,
+
+			// UPS Mail Innovations Parcel ID (MI + 6 digits + up to 22 alphanum).
+			'/^MI\d{6}[A-Z0-9]{6,22}$/' => 80,
+
+			// USPS Delivery Confirmation (Mail Innovations, 22–34 digits).
+			'/^9\d{21,33}$/'            => function () use ( $shipping_from ) {
+				return in_array( $shipping_from, array( 'US', 'CA' ), true ) ? 85 : 70;
+			},
+
+			// UPU S10 format (international, e.g. 'AA123456789CC').
+			'/^[A-Z]{2}\d{9}[A-Z]{2}$/' => function () use ( $shipping_from ) {
+				return in_array( $shipping_from, $this->domestic_but_international_tracking, true ) ? 80 : 65;
+			},
+
+			// Long mail format (22 digits).
+			'/^\d{22}$/'                => 60,
+		);
 
 		$match           = false;
 		$ambiguity_score = 0;
 
-		if ( $is_1z_format ) {
-			$match           = true;
-			$ambiguity_score = 100; // 1Z format is unique to UPS.
-		} elseif ( $is_surepost_format ) {
-			$match           = true;
-			$ambiguity_score = 95; // SurePost is UPS-specific.
-		} elseif ( $is_t_format || $is_h_format ) {
-			$match           = true;
-			$ambiguity_score = 90; // T/H are valid globally for UPS Express.
-		} elseif ( $is_info_notice ) {
-			$match           = true;
-			$ambiguity_score = 85; // InfoNotice is UPS-only.
-		} elseif ( $is_9x_format ) {
-			$match           = true;
-			$ambiguity_score = 80; // Mail Innovations (common in CA/US).
-		} elseif ( $is_12_digit ) {
-			$match           = true;
-			$ambiguity_score = 75; // Common but not UPS-exclusive.
-		} elseif ( $is_9_digit || $is_10_digit ) {
-			$match           = true;
-			$ambiguity_score = 70; // Generic formats (lower confidence).
-		} elseif ( $is_22_digit_mail ) {
-			$match           = true;
-			$ambiguity_score = 65; // Less specific.
+		foreach ( $patterns as $pattern => $score ) {
+			if ( preg_match( $pattern, $tracking_number ) ) {
+				$match           = true;
+				$ambiguity_score = is_callable( $score ) ? $score() : $score;
+				break;
+			}
 		}
 
 		// Boost score for domestic-but-international-tracking countries.
