@@ -131,7 +131,7 @@ class Styles_Helper {
 	 *     @type string   $classnames   Classnames separated by a space.
 	 * }
 	 */
-	public static function extend_block_styles( array $block_styles, $css_declarations ) {
+	public static function extend_block_styles( array $block_styles, array $css_declarations ) {
 		if ( ! is_array( $css_declarations ) ) {
 			return $block_styles;
 		}
