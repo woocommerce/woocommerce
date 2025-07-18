@@ -16,7 +16,7 @@ export async function withFakeTimers< T >( fn: () => T ) {
 
 	if ( ! usingFakeTimers ) {
 		jest.useFakeTimers( {
-			now: new Date( 2023, 9, 15 ),
+			now: new Date(),
 			doNotFake: [ 'setTimeout' ],
 		} );
 	}
