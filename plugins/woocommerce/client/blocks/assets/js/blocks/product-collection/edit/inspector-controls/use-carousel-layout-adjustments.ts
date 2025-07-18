@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useRef, useEffect } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { createBlock, type BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { getInnerBlockBy, getInnerBlockByName } from '@woocommerce/utils';
@@ -18,6 +18,18 @@ import {
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
 
+/**
+ * Handles the transition to carousel layout:
+ * - Create Group block
+ *   - Move Product Template block to the Group block
+ *   - Add Next/Previous Arrows block
+ * - Remove Pagination block (if exists)
+ *
+ * @param {BlockInstance} productCollectionBlock - The product collection block.
+ * @param {BlockInstance} productTemplateBlock - The product template block.
+ * @param {number} productTemplateIndex - The index of the product template block.
+ * @param {ReturnType<typeof useDispatch>} actions - The actions to use.
+ */
 const handleTransitionToCarouselLayout = (
 	productCollectionBlock: BlockInstance,
 	productTemplateBlock: BlockInstance,
@@ -71,14 +83,24 @@ const handleTransitionToCarouselLayout = (
 	}
 };
 
+/**
+ * Handles the transition from carousel layout:
+ * - Remove Next/Previous Arrows block (if exists)
+ * - Move Product Template block to the product collection block
+ * - Remove Group block (if empty)
+ * - Add Pagination block for default collection (if needed)
+ *
+ * @param {BlockInstance} productCollectionBlock - The product collection block.
+ * @param {ReturnType<typeof useDispatch>} actions - The actions to use.
+ * @param {string} collection - The collection.
+ */
 const handleTransitionFromCarouselLayout = (
 	productCollectionBlock: BlockInstance,
 	actions: ReturnType< typeof useDispatch >,
 	collection?: string
 ) => {
-	const { removeBlock, insertBlock, replaceBlock } = actions;
+	const { removeBlock, insertBlock } = actions;
 
-	// Remove the next/previous arrows block if it exists.
 	const nextPrevArrowsBlock = getInnerBlockByName(
 		productCollectionBlock,
 		nextPreviousArrowsBlockName
@@ -99,35 +121,49 @@ const handleTransitionFromCarouselLayout = (
 		);
 	} );
 
-	// Extract the product template block.
-	const productTemplate = getInnerBlockByName(
-		productCollectionBlock,
-		productTemplateBlockName
-	);
+	// If Product Template is not in the group block, we should not do anything.
+	if ( groupBlock ) {
+		// Extract the product template block.
+		const productTemplate = getInnerBlockByName(
+			groupBlock,
+			productTemplateBlockName
+		);
 
-	const productTemplateUpdatedBlock = productTemplate
-		? createBlock(
-				productTemplateBlockName,
-				{
-					...productTemplate.attributes,
-					// Grid and List layouts are handled manually for now so
-					// we need to reset it to an empty object.
-					layout: {},
-				},
-				productTemplate.innerBlocks
-		  )
-		: null;
+		const productTemplateUpdatedBlock = productTemplate
+			? createBlock(
+					productTemplateBlockName,
+					{
+						...productTemplate.attributes,
+						// Grid and List layouts are handled manually for now so
+						// we need to reset it to an empty object.
+						layout: {},
+					},
+					productTemplate.innerBlocks
+			  )
+			: null;
 
-	if ( productTemplateUpdatedBlock ) {
-		// Replace the group block if it exists (user might have manipulated it).
-		// Otherwise, replace the product template block if it exists.
-		if ( groupBlock ) {
-			replaceBlock( groupBlock.clientId, productTemplateUpdatedBlock );
-		} else if ( productTemplate ) {
-			replaceBlock(
-				productTemplate?.clientId,
-				productTemplateUpdatedBlock
+		const groupBlockIndex = select( blockEditorStore ).getBlockIndex(
+			groupBlock.clientId
+		);
+
+		if ( productTemplateUpdatedBlock ) {
+			removeBlock( productTemplate?.clientId, false );
+			insertBlock(
+				productTemplateUpdatedBlock,
+				groupBlockIndex,
+				productCollectionBlock.clientId,
+				false
 			);
+		}
+
+		// We cannot rely on `groupBlock.innerBlocks.length` because it's not updated
+		// immediately after the blocks are removed.
+		const isGroupBlockEmpty = ! select(
+			blockEditorStore
+		).getClientIdsOfDescendants( groupBlock.clientId ).length;
+
+		if ( isGroupBlockEmpty ) {
+			removeBlock( groupBlock.clientId, false );
 		}
 	}
 
