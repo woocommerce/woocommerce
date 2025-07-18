@@ -1,4 +1,5 @@
 <?php
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Core;
@@ -151,4 +152,4 @@ class PlatformRegistry {
 
 		return new $mapper_class();
 	}
-} 
+}
