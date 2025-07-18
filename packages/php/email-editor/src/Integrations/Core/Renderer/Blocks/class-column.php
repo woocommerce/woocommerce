@@ -12,7 +12,6 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
-use WP_Style_Engine;
 
 /**
  * Renders a column block.
@@ -72,52 +71,45 @@ class Column extends Abstract_Block_Renderer {
 		// to create a feeling of a stretched column. This also needs to apply to CSS classnames which can also apply styles.
 		$is_stretched = empty( $block_attributes['verticalAlignment'] ) || 'stretch' === $block_attributes['verticalAlignment'];
 
-		$padding_css = $this->get_styles_from_block( array( 'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ) ) )['css'];
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'color'      => $block_attributes['style']['color'] ?? array(),
-				'background' => $block_attributes['style']['background'] ?? array(),
+		$padding_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
+		$padding_styles = Styles_Helper::extend_block_styles( $padding_styles, array( 'text-align' => 'left' ) );
+
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color' ) );
+		$cell_styles = Styles_Helper::extend_block_styles(
+			$cell_styles,
+			array_filter(
+				array(
+					'background-size' => ! empty( $cell_styles['background-image'] ) && empty( $cell_styles['background-size'] ) ? 'cover' : null,
+				)
 			)
-		)['declarations'];
-
-		$border_styles = $this->get_styles_from_block( array( 'border' => $block_attributes['style']['border'] ?? array() ) )['declarations'];
-
-		if ( ! empty( $border_styles ) ) {
-			$cell_styles = array_merge( $cell_styles, array( 'border-style' => 'solid' ), $border_styles );
-		}
-
-		if ( ! empty( $cell_styles['background-image'] ) && empty( $cell_styles['background-size'] ) ) {
-			$cell_styles['background-size'] = 'cover';
-		}
+		);
 
 		$wrapper_classname = 'block wp-block-column email-block-column';
 		$content_classname = 'email-block-column-content';
-		$wrapper_css       = WP_Style_Engine::compile_css(
-			array(
-				'vertical-align' => $is_stretched ? 'top' : $block_attributes['verticalAlignment'],
-			),
-			''
+		$wrapper_styles    = Styles_Helper::extend_block_styles(
+			Styles_Helper::$empty_block_styles,
+			array( 'vertical-align' => $is_stretched ? 'top' : $block_attributes['verticalAlignment'] ),
 		);
-		$content_css       = 'vertical-align: top;';
+		$content_styles    = Styles_Helper::extend_block_styles( Styles_Helper::$empty_block_styles, array( 'vertical-align' => 'top' ) );
 
 		if ( $is_stretched ) {
 			$wrapper_classname .= ' ' . $original_wrapper_classname;
-			$wrapper_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
+			$wrapper_styles     = Styles_Helper::extend_block_styles( $wrapper_styles, $cell_styles['declarations'] );
 		} else {
 			$content_classname .= ' ' . $original_wrapper_classname;
-			$content_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
+			$content_styles     = Styles_Helper::extend_block_styles( $content_styles, $cell_styles['declarations'] );
 		}
 
 		// Create the inner table using the helper.
 		$inner_table_attrs = array(
 			'class' => $content_classname,
-			'style' => $content_css,
+			'style' => $content_styles['css'],
 			'width' => '100%',
 		);
 
 		$inner_cell_attrs = array(
 			'align' => 'left',
-			'style' => 'text-align:left;' . $padding_css,
+			'style' => $padding_styles['css'],
 		);
 
 		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
@@ -125,7 +117,7 @@ class Column extends Abstract_Block_Renderer {
 		// Create the outer td element (since this is meant to be used within a columns structure).
 		$wrapper_cell_attrs = array(
 			'class' => $wrapper_classname,
-			'style' => $wrapper_css,
+			'style' => $wrapper_styles['css'],
 			'width' => Styles_Helper::parse_value( $block_attributes['width'] ),
 		);
 

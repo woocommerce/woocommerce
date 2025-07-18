@@ -26,7 +26,7 @@ import { CartItem, Currency } from '../../types';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency } = getConfig( 'woocommerce' );
+const { currency, placeholderImgSrc } = getConfig( 'woocommerce' );
 const {
 	addToCartBehaviour,
 	onCartClickBehaviour,
@@ -440,7 +440,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemThumbnail(): string {
-				return cartItemState.cartItem.images[ 0 ]?.thumbnail || '';
+				return (
+					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
+					placeholderImgSrc
+				);
 			},
 
 			get priceWithoutDiscount(): string {
