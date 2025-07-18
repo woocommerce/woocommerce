@@ -23,7 +23,6 @@ final class Runner {
 	public static function register_commands(): void {
 		$container = wc_get_container();
 
-		// Products Command
 		WP_CLI::add_command(
 			'wc migrator products',
 			$container->get( ProductsCommand::class ),
@@ -33,7 +32,6 @@ final class Runner {
 			)
 		);
 
-		// Reset Command
 		WP_CLI::add_command(
 			'wc migrator reset',
 			$container->get( ResetCommand::class ),
@@ -42,7 +40,6 @@ final class Runner {
 			)
 		);
 
-		// Setup Command
 		WP_CLI::add_command(
 			'wc migrator setup',
 			$container->get( SetupCommand::class ),
@@ -51,4 +48,4 @@ final class Runner {
 			)
 		);
 	}
-} 
+}

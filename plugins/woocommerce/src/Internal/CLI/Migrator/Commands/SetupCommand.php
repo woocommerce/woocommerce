@@ -31,4 +31,4 @@ class SetupCommand extends BaseCommand {
 		$this->handle_credential_setup( $platform );
 		WP_CLI::success( 'Credentials saved successfully.' );
 	}
-} 
+}

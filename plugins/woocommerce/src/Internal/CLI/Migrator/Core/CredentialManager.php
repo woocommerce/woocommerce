@@ -96,4 +96,4 @@ class CredentialManager {
 		WP_CLI::line( $prompt );
 		return trim( fgets( STDIN ) );
 	}
-} 
+}

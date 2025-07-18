@@ -40,4 +40,4 @@ final class ProductsCommand extends BaseCommand {
 		// For now, we just show a success message if credentials exist.
 		WP_CLI::success( 'Credentials found. Proceeding with migration...' );
 	}
-} 
+}

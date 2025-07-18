@@ -38,4 +38,4 @@ class ResetCommand extends BaseCommand {
 
 		WP_CLI::success( "Credentials for the '{$platform}' platform have been cleared." );
 	}
-} 
+}
