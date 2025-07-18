@@ -29,6 +29,15 @@ import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
 
+// PLACEHOLDER_IMG_SRC is in thumbnail size which may have aspect-ratio
+// set in Customizer and it may not reflect the aspect-ratio of the full size image.
+// So we're "creating" a full size placeholder URL from the thumbnail URL.
+// Example input: https://example.com/path/to/placeholder-150x150.png
+// Example output: https://example.com/path/to/placeholder.png
+const getFullSizePlaceholderImageSrc = () => {
+	return PLACEHOLDER_IMG_SRC.replace( /-\d+x\d+(?=\.[^.]+$)/, '' );
+};
+
 const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	// Default to placeholder image if no product images are available.
 	if ( ! product.images.length ) {
@@ -45,11 +54,16 @@ const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	return product.images[ 0 ];
 };
 
-const ImagePlaceholder = ( props ): JSX.Element => {
+const ImagePlaceholder = ( props: { showFullSize: boolean } ): JSX.Element => {
+	const { showFullSize, ...restProps } = props;
+	const src = showFullSize
+		? getFullSizePlaceholderImageSrc()
+		: PLACEHOLDER_IMG_SRC;
+
 	return (
 		<img
-			{ ...props }
-			src={ PLACEHOLDER_IMG_SRC }
+			{ ...restProps }
+			src={ src }
 			// Decorative image with no value, so alt should be empty.
 			alt=""
 			width={ undefined }
