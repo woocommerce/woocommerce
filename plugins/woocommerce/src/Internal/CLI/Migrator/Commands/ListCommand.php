@@ -1,5 +1,4 @@
 <?php
-
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
@@ -24,7 +23,7 @@ class ListCommand extends BaseCommand {
 	 * @return void
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		// This will be implemented once we migrate the PlatformRegistry.
+		// TODO: This will be implemented once we migrate the PlatformRegistry.
 		// For now, we show the currently supported platforms.
 
 		$platforms = array(
