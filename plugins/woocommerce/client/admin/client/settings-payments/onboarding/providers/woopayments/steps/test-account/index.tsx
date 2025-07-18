@@ -425,13 +425,15 @@ const TestAccountStep = () => {
 		return undefined;
 	};
 
-	if ( status === 'success' ) {
-		navigateTo( {
-			url: getNewPath( { nox: 'test_account_created' }, '', {
-				page: 'wc-admin',
-			} ),
-		} );
-	}
+	useEffect( () => {
+		if ( status === 'success' ) {
+			navigateTo( {
+				url: getNewPath( { nox: 'test_account_created' }, '', {
+					page: 'wc-admin',
+				} ),
+			} );
+		}
+	}, [ status ] );
 
 	const isAccountAlreadyExistsError =
 		errorCode === TEST_ACCOUNT_ERROR_CODES.ACCOUNT_ALREADY_EXISTS;
