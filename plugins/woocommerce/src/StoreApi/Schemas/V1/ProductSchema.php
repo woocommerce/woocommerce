@@ -733,10 +733,12 @@ class ProductSchema extends AbstractSchema {
 		        }
 		      }
 		      $variation = wc_get_product($variation_id);
-		
+		      if ( ! $variation || ! $variation instanceof \WC_Product ) {
+      			  continue;
+		      }
 		      $variations[] = (object) [
 		        'id'         => $variation_id,
-		          'description'         => $variation->get_description(),
+		        'description'         => $variation->get_description(),
 		        'images'         => $this->get_images($variation),
 		        'prices'         => (object) $this->prepare_product_price_response($variation),
 		        'is_purchasable'      => $variation->is_purchasable(),
