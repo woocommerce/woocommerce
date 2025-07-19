@@ -725,18 +725,26 @@ class ProductSchema extends AbstractSchema {
 		$variations = [];
 
 		foreach ( $variation_ids as $variation_id ) {
-			$attribute_data = $default_variation_meta_data;
-
-			foreach ( $attributes_by_variation[ $variation_id ] as $meta_key => $meta_value ) {
-				if ( '' !== $meta_value ) {
-					$attribute_data[ $meta_key ]['value'] = $meta_value;
-				}
-			}
-
-			$variations[] = (object) [
-				'id'         => $variation_id,
-				'attributes' => array_values( $attribute_data ),
-			];
+		      $attribute_data = $default_variation_meta_data;
+		
+		      foreach ( $attributes_by_variation[ $variation_id ] as $meta_key => $meta_value ) {
+		        if ( '' !== $meta_value ) {
+		          $attribute_data[ $meta_key ]['value'] = $meta_value;
+		        }
+		      }
+		      $variation = wc_get_product($variation_id);
+		
+		      $variations[] = (object) [
+		        'id'         => $variation_id,
+		          'description'         => $variation->get_description(),
+		        'images'         => $this->get_images($variation),
+		        'prices'         => (object) $this->prepare_product_price_response($variation),
+		        'is_purchasable'      => $variation->is_purchasable(),
+		        'is_in_stock'         => $variation->is_in_stock(),
+		        'is_on_backorder'     => 'onbackorder' === $variation->get_stock_status(),
+		        'low_stock_remaining' => $this->get_low_stock_remaining( $variation ),
+		        'attributes' => array_values( $attribute_data ),
+		      ];
 		}
 
 		return $variations;
