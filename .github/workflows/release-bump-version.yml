@@ -17,6 +17,22 @@ on:
         required: true
         default: ''
 
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        required: true
+      bump_type:
+        type: string
+        required: true
+    outputs:
+      next-version:
+        value: ${{ jobs.bump-version.outputs.next-version }}
+      next-stable:
+        value: ${{ jobs.bump-version.outputs.next-stable }}
+      destination-branch:
+        value: ${{ jobs.bump-version.outputs.destination-branch }}
+
 permissions:
   contents: write
   pull-requests: write
@@ -25,6 +41,10 @@ jobs:
   bump-version:
     name: Bump WooCommerce Version
     runs-on: ubuntu-latest
+    outputs:
+      next-version: ${{ steps.compute-new-version.outputs.nextVersion }}
+      next-stable: ${{ steps.compute-new-version.outputs.nextStable }}
+      destination-branch: ${{ steps.push-changes.outputs.branch }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,8 +63,9 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = context.payload.inputs.branch;
-            const bumpType = context.payload.inputs.bump_type;
+            const branch = `${{ inputs.branch }}`;
+            const bumpType = `${{ inputs.bump_type }}`;
+
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
             const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-rc\.(?<rc>\d+))?/ );
@@ -85,7 +106,7 @@ jobs:
                 break;
 
               default:
-                core.setFailed(`Invalid bump type.`);
+                core.setFailed(`Invalid bump type ${ bumpType }.`);
                 return;
             }
 
@@ -120,10 +141,12 @@ jobs:
           fi
 
       - name: Open PR with changes
+        id: push-changes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           branch_name="bump-wc-version-to-${{ steps.compute-new-version.outputs.nextVersion }}/${{ github.run_id }}"
+          echo "branch=$branch_name" >> $GITHUB_OUTPUT
 
           # Configure Git.
           git config --global user.name "github-actions[bot]"
