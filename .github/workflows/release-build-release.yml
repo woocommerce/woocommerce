@@ -1,0 +1,196 @@
+name: 'Release: Build release'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version you intend to release.
+        required: true
+      release-date:
+        description: Intended release date (YYYY-MM-DD).
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  verify:
+    name: Verify input
+    runs-on: ubuntu-latest
+    outputs:
+      release-branch: ${{ steps.get-release-branch.outputs.release-branch }}
+      release-version-base: ${{ steps.parse-version.outputs.version-base }}
+      release-version-patch: ${{ steps.parse-version.outputs.version-patch }}
+      release-version-rc: ${{ steps.parse-version.outputs.version-rc }}
+      skip-version-bump: ${{ steps.check-if-version-bump.outputs.skip-version-bump }}
+    steps:
+      - name: Validate release date
+        run: |
+          echo ""
+
+      - name: Parse version
+        id: parse-version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ $INPUT_VERSION =~ ^([0-9]+\.[0-9]+)\.([0-9]+)(-rc\.([0-9]+))?$ ]]; then
+              base=${BASH_REMATCH[1]}
+              patch=${BASH_REMATCH[2]}
+              rc=${BASH_REMATCH[4]}
+
+              if [[ ! -z "$rc" && "$patch" != 0 ]]; then
+                  echo "::error::RC for non .0 main versions are not supported ($INPUT_VERSION)."
+                  exit 1
+              fi
+          else
+              echo "::error::Invalid version number ($INPUT_VERSION)."
+              exit 1
+          fi
+
+          echo "version-base=$base" >> $GITHUB_OUTPUT
+          echo "version-patch=$patch" >> $GITHUB_OUTPUT
+          echo "version-rc=$rc" >> $GITHUB_OUTPUT
+      - name: Get release branch
+        id: get-release-branch
+        run: |
+          # Find release branch.
+          for branch in release/${{ steps.parse-version.outputs.version-base }}.${{ steps.parse-version.outputs.version-patch }} release/${{ steps.parse-version.outputs.version-base }}; do
+              if git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${branch} > /dev/null; then
+                  release_branch="$branch"
+                  break
+              fi
+          done
+
+          if [[ -z "$release_branch" ]]; then
+              echo "::error::Release branch for version '${{ inputs.version }}' does not exist."
+              exit 1
+          fi
+
+          echo "Release branch: $release_branch"
+          echo "release-branch=$release_branch" >> $GITHUB_OUTPUT
+      - name: Ensure version has not been released
+        run: |
+          if git ls-remote --exit-code --tags https://github.com/${GITHUB_REPOSITORY} ${{ inputs.version }} > /dev/null; then
+            echo "::error::Version '${{ inputs.version }}' has already been tagged."
+            exit 1
+          fi
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-release-branch.outputs.release-branch }}
+      - name: Compute whether version bump is required
+        id: check-if-version-bump
+        run: |
+          # Version in branch.
+          version_in_branch=$( git show ${{ steps.get-release-branch.outputs.release-branch }}:plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          if [[ "$version_in_branch" == "${{ inputs.version }}" ]]; then
+            echo "skip-version-bump=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "skip-version-bump=false" >> $GITHUB_OUTPUT
+
+          new_version_patch="${{ steps.parse-version.outputs.version-patch }}"
+          new_version_rc="${{ steps.parse-version.outputs.version-rc }}"
+
+          if [[ $version_in_branch =~ ^[0-9]+\.[0-9]+\.([0-9]+)(-rc\.([0-9]+))?$ ]]; then
+              patch=${BASH_REMATCH[1]}; rc=${BASH_REMATCH[3]}
+
+              if [[ -n "$rc" && $((new_version_rc - rc)) -gt 1 ]] || [[ -z "$rc" && $((new_version_patch - patch)) -gt 1 ]]; then
+                  echo "::error::Version '${{ inputs.version }}' is not valid for current release cycle."
+                  exit 1
+              fi
+          fi
+
+  create-working-branch:
+    name: Create working branch
+    runs-on: ubuntu-latest
+    needs: verify
+    outputs:
+      branch: ${{ steps.create-branch.outputs.working-branch }}
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.release-branch }}
+
+      - name: Create branch
+        id: create-branch
+        run: |
+          branch_name="tmp/build-${{ inputs.version }}-$(date +%s)"
+
+          git checkout -b ${branch_name}
+          git push origin ${branch_name}
+
+          echo "Working branch: $branch_name"
+          echo "working-branch=$branch_name" >> $GITHUB_OUTPUT
+
+  bump-version:
+    if: ${{ needs.verify.outputs.skip-version-bump != 'true' }}
+    needs: [verify, create-working-branch]
+    uses: ./.github/workflows/release-bump-version.yml
+    with:
+      branch: ${{ needs.verify.outputs.release-branch }}
+      bump_type: ${{ contains( inputs.version, 'rc' ) && 'rc' || 'stable' }}
+    secrets: inherit
+
+  generate-changelog:
+    needs: [verify, create-working-branch]
+    uses: ./.github/workflows/release-compile-changelog.yml
+    with:
+      version: ${{ format( '{0}.0', needs.verify.outputs.release-version-base ) }}
+      append_changelog: ${{ contains( inputs.version, 'rc' ) && true || false }}
+      release_date: ${{ inputs.release-date }}
+
+  merge-changes:
+    name: Merge changes into working branch
+    needs: [verify, create-working-branch, generate-changelog, bump-version]
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.merge-changes.outputs.branch }}
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-working-branch.outputs.branch }}
+          fetch-depth: 0
+      - name: Merge changes
+        id: merge-changes
+        run: |
+          # Configure Git.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [[ "${{ needs.verify.outputs.skip-version-bump }}" != "true" ]]; then
+            git merge origin/${{ needs.bump-version.outputs.destination-branch }}
+          fi
+
+          git merge origin/update/${{ needs.verify.outputs.release-version-base }}-changelog
+          git push origin ${{ needs.create-working-branch.outputs.branch }}
+
+          echo "branch=${{ needs.create-working-branch.outputs.branch }}" >> $GITHUB_OUTPUT
+
+  build-zip:
+    name: Build ZIP and create release
+    needs: merge-changes
+    uses: ./.github/workflows/release-build-zip-file.yml
+    with:
+      branch: ${{ needs.merge-changes.outputs.branch }}
+      skip_verify: true
+      create_github_release: true
+
+  change-release-target:
+    name: Update release target to release branch
+    runs-on: ubuntu-latest
+    needs: [verify, build-zip]
+    steps:
+      - name: Update GH draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release edit ${{ inputs.version }} --target ${{ needs.verify.outputs.release-branch }}
+
+
