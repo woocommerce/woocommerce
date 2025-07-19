@@ -16,6 +16,19 @@ on:
         required: false
         default: ''
 
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      append_changelog:
+        type: boolean
+        required: false
+        default: false
+      release_date:
+        required: false
+        type: string
+
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
     GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
@@ -31,7 +44,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Get version from the branch name workflow is running on
-        if: ${{ github.event.inputs.version == '' }}
+        if: ${{ inputs.version == '' }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         id: extract-version
         with:
@@ -48,10 +61,10 @@ jobs:
             }
 
       - name: Validate version input override
-        if: ${{ github.event.inputs.version != '' }}
+        if: ${{ inputs.version != '' }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
-          VERSION: ${{ github.event.inputs.version }}
+          VERSION: ${{ inputs.version }}
         with:
           script: |
             const version = process.env.VERSION;
@@ -88,24 +101,24 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [[ -z "${{ github.event.inputs.version }}" ]]; then
+          if [[ -z "${{ inputs.version }}" ]]; then
             # The version is empty, so we need to extract it from the provided branch name
             BRANCH_ARG="-b ${{ github.ref_name }}"
             VERSION="${{ steps.extract-version.outputs.version }}"
           else
             # The version is provided, so we use it directly
             BRANCH_ARG=""
-            VERSION="${{ github.event.inputs.version }}"
+            VERSION="${{ inputs.version }}"
           fi
 
           APPEND_CHANGELOG=""
-          if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
+          if [[ "${{ inputs.append_changelog }}" == "true" ]]; then
             APPEND_CHANGELOG="--append-changelog"
           fi
 
           OVERRIDE_DATE=""
-          if [[ -n "${{ github.event.inputs.release_date }}" ]]; then
-            OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
+          if [[ -n "${{ inputs.release_date }}" ]]; then
+            OVERRIDE_DATE="--override ${{ inputs.release_date }}"
           fi
 
           # Normalize the version by removing .0 patch if present, as the changelog command does not support it
