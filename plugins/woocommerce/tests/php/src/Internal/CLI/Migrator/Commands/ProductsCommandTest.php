@@ -86,8 +86,6 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	public function test_dependency_injection_properties() {
 		$this->command->init( $this->credential_manager, $this->platform_registry );
 
-		// We can't directly access private properties, but we can verify
-		// the init method completed without errors.
 		$this->assertTrue( true );
 	}
 }
