@@ -84,18 +84,15 @@ const getInputData = (
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const context = getContext< Context >();
-	const productType = context.productType;
+	const { productType, productId, quantityConstraints } =
+		getContext< Context >();
 	const childProductId = parseInt(
 		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
 		10
 	);
-	const id =
-		productType === 'grouped' && childProductId
-			? childProductId
-			: context.productId;
+	const id = childProductId || productId;
 	const constraints =
-		context.quantityConstraints?.[ id ] ||
+		quantityConstraints?.[ id ] ||
 		getDefaultConstraints( productType, childProductId );
 	const minValue = constraints.min;
 	const maxValue = constraints.max;
@@ -208,18 +205,14 @@ const addToCartWithOptionsStore = store(
 				return context.selectedAttributes;
 			},
 			get allowsDecrease() {
-				const context = getContext< Context >();
 				const {
 					quantity,
 					childProductId,
 					productType,
 					quantityConstraints,
 					productId,
-				} = context;
-				const id =
-					productType === 'grouped' && childProductId
-						? childProductId
-						: productId;
+				} = getContext< Context >();
+				const id = childProductId || productId;
 				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
@@ -229,18 +222,14 @@ const addToCartWithOptionsStore = store(
 				return currentQuantity - step >= minValue;
 			},
 			get allowsIncrease() {
-				const context = getContext< Context >();
 				const {
 					quantity,
 					childProductId,
 					productType,
 					quantityConstraints,
 					productId,
-				} = context;
-				const id =
-					productType === 'grouped' && childProductId
-						? childProductId
-						: productId;
+				} = getContext< Context >();
+				const id = childProductId || productId;
 				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
@@ -253,10 +242,7 @@ const addToCartWithOptionsStore = store(
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				const productId =
-					childProductId && childProductId > 0
-						? childProductId
-						: context.productId;
+				const productId = childProductId || context.productId;
 
 				context.quantity = {
 					...context.quantity,
