@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\CLI\Migrator\Core;
 use InvalidArgumentException;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformFetcherInterface;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
+use WP_CLI;
 
 /**
  * PlatformRegistry class.
@@ -150,5 +151,66 @@ class PlatformRegistry {
 		}
 
 		return new $mapper_class();
+	}
+
+	/**
+	 * Determines the platform to use from command arguments, with validation and fallback.
+	 *
+	 * @param array  $assoc_args     Associative arguments from the command.
+	 * @param string $default_platform The default platform to use if none specified.
+	 *
+	 * @return string The validated platform slug.
+	 */
+	public function resolve_platform( array $assoc_args, string $default_platform = 'shopify' ): string {
+		$platform = $assoc_args['platform'] ?? null;
+		
+		if ( empty( $platform ) ) {
+			$platform = $default_platform;
+			WP_CLI::log( "Platform not specified, using default: '{$platform}'." );
+		}
+
+		// Validate the platform exists
+		if ( ! $this->get_platform( $platform ) ) {
+			$available_platforms = array_keys( $this->get_platforms() );
+			if ( empty( $available_platforms ) ) {
+				WP_CLI::error( "No platforms are currently registered. Please ensure platform plugins are installed and activated." );
+			} else {
+				WP_CLI::error( 
+					sprintf(
+						"Platform '%s' is not registered. Available platforms: %s",
+						$platform,
+						implode( ', ', $available_platforms )
+					)
+				);
+			}
+		}
+
+		return $platform;
+	}
+
+	/**
+	 * Gets the required credential fields for a given platform.
+	 *
+	 * @param string $platform_slug The platform slug.
+	 *
+	 * @return array An array of field_key => prompt_text for credential collection.
+	 */
+	public function get_platform_credential_fields( string $platform_slug ): array {
+		$platform_config = $this->get_platform( $platform_slug );
+		
+		if ( ! $platform_config ) {
+			return array();
+		}
+
+		// For now, we'll use hardcoded fields but this could be configurable per platform
+		switch ( $platform_slug ) {
+			case 'shopify':
+				return array(
+					'api_key'  => 'Enter your Shopify API Access Token:',
+					'shop_url' => 'Enter your Shopify store URL (e.g., my-store.myshopify.com):',
+				);
+			default:
+				return array();
+		}
 	}
 }
