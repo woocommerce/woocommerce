@@ -690,7 +690,7 @@
 								if ( ! isValidFormattedNumber( value, config ) ) {
 									$(this).addClass( 'wc-shipping-invalid-price' );
 									$('<span class="wc-shipping-zone-method-fields-help-text wc-shipping-invalid-price-message">'
-										+ shippingZoneMethodsLocalizeScript.strings.invalid_price_format
+										+ shippingZoneMethodsLocalizeScript.strings.invalid_number_format
 										+ '</span>').insertAfter( this );
 									modal.find( '#btn-ok' ).attr( 'disabled', 'disabled' );
 									modal.find( '.wc-shipping-method-add-class-costs').hide();
