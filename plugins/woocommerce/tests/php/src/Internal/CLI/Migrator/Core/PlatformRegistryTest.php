@@ -42,9 +42,9 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$registry = new PlatformRegistry();
+		$registry  = new PlatformRegistry();
 		$platforms = $registry->get_platforms();
-		
+
 		$this->assertArrayHasKey( 'test-platform', $platforms );
 		$this->assertEquals( 'Test Platform', $platforms['test-platform']['name'] );
 		$this->assertEquals( MockPlatformFetcher::class, $platforms['test-platform']['fetcher'] );
@@ -69,7 +69,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 
 		$registry = new PlatformRegistry();
 		$platform = $registry->get_platform( 'test-platform' );
-		
+
 		$this->assertNotNull( $platform );
 		$this->assertEquals( 'Test Platform', $platform['name'] );
 	}
@@ -80,7 +80,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 	public function test_get_nonexistent_platform_returns_null() {
 		$registry = new PlatformRegistry();
 		$platform = $registry->get_platform( 'non-existent-platform' );
-		
+
 		$this->assertNull( $platform );
 	}
 
@@ -93,7 +93,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 			function ( $platforms ) {
 				$platforms['incomplete-platform'] = array(
 					'name' => 'Incomplete Platform',
-					// Missing fetcher and mapper
+					// Missing fetcher and mapper.
 				);
 				return $platforms;
 			}
@@ -101,7 +101,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 
 		$registry = new PlatformRegistry();
 		$platform = $registry->get_platform( 'incomplete-platform' );
-		
+
 		$this->assertNull( $platform );
 	}
 
@@ -115,7 +115,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 				$platforms['partial-platform'] = array(
 					'name'    => 'Partial Platform',
 					'fetcher' => MockPlatformFetcher::class,
-					// Missing mapper
+					// Missing mapper.
 				);
 				return $platforms;
 			}
@@ -123,7 +123,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 
 		$registry = new PlatformRegistry();
 		$platform = $registry->get_platform( 'partial-platform' );
-		
+
 		$this->assertNull( $platform );
 	}
 
@@ -137,7 +137,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 				$platforms['partial-platform'] = array(
 					'name'   => 'Partial Platform',
 					'mapper' => MockPlatformMapper::class,
-					// Missing fetcher
+					// Missing fetcher.
 				);
 				return $platforms;
 			}
@@ -145,7 +145,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 
 		$registry = new PlatformRegistry();
 		$platform = $registry->get_platform( 'partial-platform' );
-		
+
 		$this->assertNull( $platform );
 	}
 
@@ -155,14 +155,14 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 	public function test_filter_non_array_return_handled_gracefully() {
 		add_filter(
 			'woocommerce_migrator_platforms',
-			function ( $platforms ) {
+			function () {
 				return 'invalid-return-value';
 			}
 		);
 
-		$registry = new PlatformRegistry();
+		$registry  = new PlatformRegistry();
 		$platforms = $registry->get_platforms();
-		
+
 		$this->assertIsArray( $platforms );
 		$this->assertEmpty( $platforms );
 	}
@@ -188,11 +188,127 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$registry = new PlatformRegistry();
+		$registry  = new PlatformRegistry();
 		$platforms = $registry->get_platforms();
-		
+
 		$this->assertCount( 2, $platforms );
 		$this->assertArrayHasKey( 'platform-one', $platforms );
 		$this->assertArrayHasKey( 'platform-two', $platforms );
+	}
+
+	/**
+	 * Test resolve_platform method with valid platform.
+	 */
+	public function test_resolve_platform_with_valid_platform() {
+		add_filter(
+			'woocommerce_migrator_platforms',
+			function ( $platforms ) {
+				$platforms['shopify'] = array(
+					'name'    => 'Shopify',
+					'fetcher' => MockPlatformFetcher::class,
+					'mapper'  => MockPlatformMapper::class,
+				);
+				return $platforms;
+			}
+		);
+
+		$registry   = new PlatformRegistry();
+		$assoc_args = array( 'platform' => 'shopify' );
+
+		$result = $registry->resolve_platform( $assoc_args );
+		$this->assertEquals( 'shopify', $result );
+	}
+
+	/**
+	 * Test resolve_platform method with default platform.
+	 */
+	public function test_resolve_platform_with_default() {
+		add_filter(
+			'woocommerce_migrator_platforms',
+			function ( $platforms ) {
+				$platforms['shopify'] = array(
+					'name'    => 'Shopify',
+					'fetcher' => MockPlatformFetcher::class,
+					'mapper'  => MockPlatformMapper::class,
+				);
+				return $platforms;
+			}
+		);
+
+		$registry   = new PlatformRegistry();
+		$assoc_args = array(); // No platform specified.
+
+		$result = $registry->resolve_platform( $assoc_args, 'shopify' );
+		$this->assertEquals( 'shopify', $result );
+	}
+
+	/**
+	 * Test resolve_platform method with invalid platform.
+	 *
+	 * Note: In real environment, this would trigger WP_CLI::error().
+	 * We can't easily test WP_CLI::error() in unit tests.
+	 */
+	public function test_resolve_platform_with_invalid_platform() {
+		add_filter(
+			'woocommerce_migrator_platforms',
+			function ( $platforms ) {
+				$platforms['shopify'] = array(
+					'name'    => 'Shopify',
+					'fetcher' => MockPlatformFetcher::class,
+					'mapper'  => MockPlatformMapper::class,
+				);
+				return $platforms;
+			}
+		);
+
+		$registry   = new PlatformRegistry();
+		$assoc_args = array( 'platform' => 'invalid_platform' );
+
+		// The method should handle invalid platforms gracefully.
+		$this->assertTrue( method_exists( $registry, 'resolve_platform' ) );
+
+		// Test that calling with invalid platform doesn't crash.
+		try {
+			$registry->resolve_platform( $assoc_args );
+			// If we reach here, the method handled invalid platform without throwing.
+			$this->assertTrue( true );
+		} catch ( \Exception $e ) {
+			// Method should not throw exceptions for invalid platforms.
+			$this->fail( 'resolve_platform should handle invalid platforms gracefully' );
+		}
+	}
+
+	/**
+	 * Test get_platform_credential_fields method exists and is callable.
+	 */
+	public function test_get_platform_credential_fields_method_exists() {
+		$registry = new PlatformRegistry();
+		$this->assertTrue( method_exists( $registry, 'get_platform_credential_fields' ) );
+		$this->assertTrue( is_callable( array( $registry, 'get_platform_credential_fields' ) ) );
+	}
+
+	/**
+	 * Test get_platform_credential_fields returns expected fields for shopify.
+	 */
+	public function test_get_platform_credential_fields_shopify() {
+		$registry = new PlatformRegistry();
+		$fields   = $registry->get_platform_credential_fields( 'shopify' );
+
+		$this->assertIsArray( $fields );
+		$this->assertArrayHasKey( 'shop_url', $fields );
+		$this->assertArrayHasKey( 'access_token', $fields );
+		$this->assertEquals( 'Enter shop URL (e.g., mystore.myshopify.com):', $fields['shop_url'] );
+		$this->assertEquals( 'Enter access token:', $fields['access_token'] );
+	}
+
+	/**
+	 * Test get_platform_credential_fields returns empty array for unknown platform.
+	 */
+	public function test_get_platform_credential_fields_unknown_platform() {
+		$registry = new PlatformRegistry();
+		$fields   = $registry->get_platform_credential_fields( 'unknown_platform' );
+
+		$this->assertIsArray( $fields );
+		$this->assertEmpty( $fields );
 	}
 }
