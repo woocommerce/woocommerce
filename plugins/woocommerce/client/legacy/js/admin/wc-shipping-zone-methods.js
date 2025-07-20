@@ -720,15 +720,19 @@
 					}
 				},
 				isValidFormattedNumber: function(value, config) {
-					const { decimalSeparator, thousandSeparator } = config;
+					if ( ! value || typeof value !== 'string' || ! config ) {
+						return false;
+					}
 
-					const escapedThousand = thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					const escapedDecimal = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					var decimalSeparator = config.decimalSeparator || '.';
+					var thousandSeparator = config.thousandSeparator || ',';
+					var escapedThousand = thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+					var escapedDecimal = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 					// Accept either:
-					// - digits with optional thousands separator (1.234.567,89)
-					// - OR plain digits without any separators (1234567,89)
-					const regex = new RegExp(
+					// - digits with optional thousands separator (1[ts]234[ts]567[ds]89)
+					// - OR plain digits without any separators (1234567[ds]89)
+					var regex = new RegExp(
 						'^(' +
 						'\\d{1,3}(?:' + escapedThousand + '\\d{3})+' + // with thousand separator
 						'|' +
