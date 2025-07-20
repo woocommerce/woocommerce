@@ -463,7 +463,7 @@
 					});
 				},
 				/**
-				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
+				 * The settings HTML is controlled and built by the settings api, so in order to refactor the
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
@@ -506,7 +506,7 @@
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
-						const value = priceInput.attr( 'value' );
+						const value = parseFloat( priceInput.attr( 'value' ) );
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
@@ -569,8 +569,8 @@
 					// Wrap the html content in a div
 					const htmlContent = $( '<div>' + html + '</div>' );
 
-					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
-					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
+					// `<table class="form-table" />` elements added by the Settings API need to be removed.
+					// Modern browsers won't interpret other table elements like `td` not in a `table`, so
 					// Removing the `table` is sufficient.
 					const innerTables = htmlContent.find( 'table.form-table' );
 					innerTables.each( ( i ) => {
@@ -608,13 +608,13 @@
 
 								// Avoid triggering a rerender here because we don't want to show the method
 								// in the table in case merchant doesn't finish flow.
-								
+
 								shippingMethodView.model.set( 'methods', response.data.methods );
 
 								// Close original modal
 								closeModal();
 							}
-							var instance_id = response.data.instance_id, 
+							var instance_id = response.data.instance_id,
 							    method      = response.data.methods[ instance_id ];
 
 							shippingMethodView.unblock();
@@ -642,7 +642,7 @@
 								shippingMethodView.model.trigger( 'change:methods' );
 								shippingMethodView.model.trigger( 'saved:methods' );
 							}
-		
+
 							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' );
 					}
@@ -650,8 +650,8 @@
 				// Free Shipping has hidden field elements depending on data values.
 				possiblyHideFreeShippingRequirements: function( data ) {
 					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
-						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null || 
-							data.woocommerce_free_shipping_requires === '' || 
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null ||
+							data.woocommerce_free_shipping_requires === '' ||
 							data.woocommerce_free_shipping_requires === 'coupon';
 
 						const select = $( '#woocommerce_free_shipping_requires' );
