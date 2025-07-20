@@ -28,7 +28,7 @@ class SetupCommand {
 	private PlatformRegistry $platform_registry;
 
 	/**
-	 * Class initialization, invoked by the DI container.
+	 * Initialize the command with its dependencies.
 	 *
 	 * @param CredentialManager $credential_manager The credential manager.
 	 * @param PlatformRegistry  $platform_registry  The platform registry.
@@ -56,10 +56,10 @@ class SetupCommand {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
-		// Resolve and validate the platform
+		// Resolve and validate the platform.
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
-		
-		// Get platform-specific credential fields and set them up
+
+		// Get platform-specific credential fields and set them up.
 		$required_fields = $this->platform_registry->get_platform_credential_fields( $platform );
 		if ( empty( $required_fields ) ) {
 			WP_CLI::error( "The platform '{$platform}' does not have configured credential fields." );

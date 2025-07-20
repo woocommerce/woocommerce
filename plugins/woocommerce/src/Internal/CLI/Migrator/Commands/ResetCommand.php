@@ -28,7 +28,7 @@ class ResetCommand {
 	private PlatformRegistry $platform_registry;
 
 	/**
-	 * Class initialization, invoked by the DI container.
+	 * Initialize the command with its dependencies.
 	 *
 	 * @param CredentialManager $credential_manager The credential manager.
 	 * @param PlatformRegistry  $platform_registry  The platform registry.
@@ -56,7 +56,7 @@ class ResetCommand {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
-		// Resolve and validate the platform
+		// Resolve and validate the platform.
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
