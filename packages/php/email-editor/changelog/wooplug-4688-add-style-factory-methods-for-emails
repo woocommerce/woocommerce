@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `Styles_Helper` methods to generate inline styles from block attributes, and refactor blocks to utilize them.

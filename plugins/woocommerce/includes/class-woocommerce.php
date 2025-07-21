@@ -309,6 +309,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
+		add_action( 'action_scheduler_schedule_recurring_actions', array( $this, 'register_recurring_actions' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
@@ -1382,6 +1383,74 @@ final class WooCommerce {
 
 		// Always update the last change.
 		update_option( 'woocommerce_allow_tracking_last_modified', time() );
+	}
+
+	/**
+	 * Register recurring actions.
+	 */
+	public function register_recurring_actions() {
+		// Check if Action Scheduler is available.
+		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
+			return;
+		}
+
+		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
+
+		// Schedule daily sales event at midnight tomorrow.
+		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' );
+
+		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+
+		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		if ( '' !== $held_duration ) {
+			/**
+			 * Determines the interval at which to cancel unpaid orders in minutes.
+			 *
+			 * @since 5.1.0
+			 */
+			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
+
+			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+
+		}
+
+		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
+		// so it doesn't occur in the same request. WooCommerce Admin also schedules
+		// a daily cron that gets lost due to a race condition. WC_Privacy's background
+		// processing instance updates the cron schedule from within a cron job.
+
+		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
+
+		// Schedule daily cleanup logs at 3 AM.
+
+		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+
+		// Schedule twice daily cleanup sessions at 6 AM and 6 PM.
+
+		as_schedule_recurring_action( time() + ( 6 * HOUR_IN_SECONDS ), 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+
+		// Schedule geoip updater every 15 days.
+
+		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+
+		/**
+		 * How frequent to schedule the tracker send event.
+		 *
+		 * @since 2.3.0
+		 */
+		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
+		$core_internals     = wp_get_schedules();
+		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event', array(), 'woocommerce', true );
+
+		// Schedule daily cleanup rate limits at 3 AM.
+
+		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits', array(), 'woocommerce', true );
+
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily', array(), 'woocommerce', true );
+
+		// Note: this is potentially redundant when the core package exists.
+		as_schedule_single_action( time() + 10, 'generate_category_lookup_table', array(), 'woocommerce', true );
 	}
 
 	/**
