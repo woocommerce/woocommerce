@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Exception;
 use WC_Payment_Gateway;
@@ -488,7 +489,7 @@ class PaymentsProviders {
 	/**
 	 * Check if a payment gateway is a shell payment gateway.
 	 *
-	 * A shell payment gateway is one that has no method title or description.
+	 * A shell payment gateway is generally one that has no method title or description.
 	 * This is used to identify gateways that are not intended for display in the admin UI.
 	 *
 	 * @param WC_Payment_Gateway $gateway The payment gateway object.
@@ -496,7 +497,10 @@ class PaymentsProviders {
 	 * @return bool True if the payment gateway is a shell, false otherwise.
 	 */
 	public function is_shell_payment_gateway( WC_Payment_Gateway $gateway ): bool {
-		return empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() );
+		return ( empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() ) ) ||
+			// Special case for WooPayments gateways that are not the main one: their method title is "WooPayments",
+			// but their ID is made up of the main gateway ID and a suffix for the payment method.
+			(  'WooPayments' === $gateway->get_method_title() && str_starts_with( $gateway->id, WooPaymentsService::GATEWAY_ID . '_' ) );
 	}
 
 	/**
