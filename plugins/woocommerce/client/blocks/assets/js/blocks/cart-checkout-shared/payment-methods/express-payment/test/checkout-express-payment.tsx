@@ -40,9 +40,14 @@ jest.mock( '@woocommerce/blocks-components', () => ( {
 } ) );
 
 jest.mock( '@woocommerce/base-components/skeleton', () => ( {
-	Skeleton: jest.fn( ( { width, height } ) => (
-		<div data-testid="skeleton" data-width={ width } data-height={ height }>
-			Loading...
+	Skeleton: jest.fn( ( { width, height, ariaMessage } ) => (
+		<div
+			data-testid="skeleton"
+			data-width={ width }
+			data-height={ height }
+			{ ...( ariaMessage ? { 'aria-label': ariaMessage } : {} ) }
+		>
+			{ ariaMessage || 'Loading...' }
 		</div>
 	) ),
 } ) );
@@ -317,14 +322,12 @@ describe( 'CheckoutExpressPayment', () => {
 			render( <CheckoutExpressPayment /> );
 
 			const titleContainer = screen.getByTestId( 'title' );
-			const skeletons = screen.getAllByTestId( 'skeleton' );
-			const titleSkeleton = skeletons.find(
-				( el ) => el.getAttribute( 'data-width' ) === '127px'
+			const titleSkeleton = screen.getAllByLabelText(
+				'Loading express payment area…'
 			);
 
 			expect( titleContainer ).toBeInTheDocument();
-			expect( titleSkeleton ).toHaveAttribute( 'data-width', '127px' );
-			expect( titleSkeleton ).toHaveAttribute( 'data-height', '18px' );
+			expect( titleSkeleton ).toHaveLength( 1 );
 		} );
 
 		it( 'should render 1 skeleton buttons when calculating a partial update', () => {
@@ -350,15 +353,48 @@ describe( 'CheckoutExpressPayment', () => {
 
 			render( <CheckoutExpressPayment /> );
 
-			const skeletons = screen.getAllByTestId( 'skeleton' );
-			const buttonSkeletons = skeletons.filter(
-				( el ) => el.getAttribute( 'data-height' ) === '48px'
+			const buttonSkeletons = screen.getAllByLabelText(
+				'Loading express payment method…'
 			);
 
 			expect( buttonSkeletons ).toHaveLength( 1 ); // 1 skeleton buttons
 			expect(
 				screen.queryByTestId( 'express-payment-methods' )
 			).not.toBeInTheDocument();
+		} );
+
+		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
+			mockUseSelect
+				.mockReturnValueOnce( {
+					isCalculating: true,
+					isProcessing: false,
+					isAfterProcessing: false,
+					isBeforeProcessing: false,
+					isComplete: false,
+					hasError: false,
+				} )
+				.mockReturnValueOnce( {
+					availableExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+						paypal: { name: 'paypal' },
+						applepay: { name: 'applepay' },
+					},
+					expressPaymentMethodsInitialized: true,
+					isExpressPaymentMethodActive: false,
+					registeredExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+						paypal: { name: 'paypal' },
+						applepay: { name: 'applepay' },
+					},
+				} );
+
+			render( <CheckoutExpressPayment /> );
+
+			const buttonSkeletons = screen.getAllByLabelText(
+				'Loading express payment method…'
+			);
+
+			expect( buttonSkeletons ).toHaveLength( 3 ); // 3 skeleton buttons
 		} );
 	} );
 } );

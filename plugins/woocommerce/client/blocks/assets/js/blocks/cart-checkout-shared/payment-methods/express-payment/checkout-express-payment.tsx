@@ -124,7 +124,14 @@ const CheckoutExpressPayment = () => {
 						headingLevel="2"
 					>
 						{ hasRegisteredNotInitializedExpressPayments ? (
-							<Skeleton width="127px" height="18px" />
+							<Skeleton
+								width="127px"
+								height="18px"
+								ariaMessage={ __(
+									'Loading express payment area…',
+									'woocommerce'
+								) }
+							/>
 						) : (
 							__( ' Express Checkout', 'woocommerce' )
 						) }
@@ -141,7 +148,13 @@ const CheckoutExpressPayment = () => {
 								length: availableMethodsCount,
 							} ).map( ( _, index ) => (
 								<li key={ index }>
-									<Skeleton height="48px" />
+									<Skeleton
+										height="48px"
+										ariaMessage={ __(
+											'Loading express payment method…',
+											'woocommerce'
+										) }
+									/>
 								</li>
 							) ) }
 						</ul>
