@@ -149,8 +149,8 @@ class WC_Marketplace_Suggestions {
 	 * Trigger suggestion fetch for wc-admin dashboard.
 	 */
 	public static function maybe_trigger_suggestions_fetch() {
-		$screen       = get_current_screen();
-		$screen_id    = $screen ? $screen->id : '';
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
 
 		if ( 'woocommerce_page_wc-admin' === $screen_id && self::allow_suggestions() ) {
 			self::get_suggestions_api_data();
