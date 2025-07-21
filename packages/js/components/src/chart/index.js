@@ -333,6 +333,11 @@ class Chart extends Component {
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
+		// TODO: This is a temporary fix to avoid the issue with the itemsLabel being undefined.
+		const totalLabel = itemsLabel
+			? sprintf( itemsLabel, orderedKeys.length )
+			: '';
+
 		const chartHeight = this.getChartHeight();
 		const legend =
 			legendPosition !== 'hidden' && isRequesting ? null : (
@@ -344,7 +349,7 @@ class Chart extends Component {
 					interactive={ interactiveLegend }
 					legendDirection={ legendDirection }
 					legendValueFormat={ tooltipValueFormat }
-					totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
+					totalLabel={ totalLabel }
 				/>
 			);
 		const margin = {
