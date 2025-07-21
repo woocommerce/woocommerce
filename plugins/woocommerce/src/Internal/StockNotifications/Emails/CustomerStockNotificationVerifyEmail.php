@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use WC_Email;
@@ -160,17 +161,24 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 			$product
 		);
 
-		$verification_key = $notification->get_verification_key( true );
+		$verification_key     = $notification->get_verification_key( true );
+        $expiration_threshold = Config::get_verification_expiration_time_threshold();
+        $expiration_threshold_text = sprintf(
+            /* translators: %s is the time duration in minutes */
+            _n( '%s minute', '%s minutes', $expiration_threshold / 60, 'woocommerce' ),
+            floor( $expiration_threshold / 60 )
+        );
 
 		return array(
-			'verification_link'                 => add_query_arg(
+			'verification_button_text'          => $verification_button_text,
+            'verification_expiration_threshold' => $expiration_threshold_text,
+            'verification_link'                 => add_query_arg(
                 array(
                     'email_link_action_key' => $verification_key,
                     'notification_id'       => $notification->get_id(),
                 ),
                 get_option( 'siteurl' )
             ),
-			'verification_button_text'          => $verification_button_text,
 		);
 	}
 
