@@ -319,7 +319,6 @@ describe( 'CheckoutExpressPayment', () => {
 				isBeforeProcessing: false,
 				isComplete: false,
 				hasError: false,
-				availableExpressPaymentMethods: {},
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
