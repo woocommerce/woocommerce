@@ -828,7 +828,7 @@ class FeaturesController {
 		}
 
 		foreach ( $this->pending_declarations as $declaration ) {
-			array( $feature_id, $plugin_file, $positive_compatibility ) = $declaration;
+			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
 
 			// Register internally.
 			$this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
