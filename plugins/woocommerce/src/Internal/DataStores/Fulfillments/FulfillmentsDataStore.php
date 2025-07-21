@@ -237,7 +237,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		// Check for errors.
 		if ( $wpdb->last_error ) {
-			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) . ' ' . esc_html( $wpdb->last_error ) );
+			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) );
 		}
 
 		// If the fulfillment is fulfilled, set the fulfilled date.
@@ -322,7 +322,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->apply_changes();
 		$data->set_object_read( true );
 
-		if ( ! doing_action( 'woocommerce_fulfillment_after_delete', $data ) ) {
+		if ( ! doing_action( 'woocommerce_fulfillment_after_delete' ) ) {
 			/**
 			 * Action to perform after a fulfillment is deleted.
 			 *

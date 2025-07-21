@@ -102,7 +102,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Set the entity ID.
 	 *
-	 * @param class-string|null $entity_id Entity ID.
+	 * @param string|null $entity_id Entity ID.
 	 */
 	public function set_entity_id( ?string $entity_id ): void {
 		$this->data['entity_id'] = $entity_id;
@@ -208,7 +208,7 @@ class Fulfillment extends \WC_Data {
 	 *
 	 * @param string|null $date_updated Date updated.
 	 */
-	public function set_date_updated( ?string $date_updated ) {
+	public function set_date_updated( ?string $date_updated ): void {
 		$this->data['date_updated'] = $date_updated;
 	}
 
@@ -304,7 +304,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Returns the meta data as array for this object.
 	 *
-	 * @return FulfillmentsDataStore
+	 * @return array
 	 */
 	public function get_raw_meta_data() {
 		return array_map( fn( WC_Meta_Data $meta ) => (array) $meta->get_data(), $this->get_meta_data() );

@@ -119,7 +119,7 @@ class FulfillmentsRenderer {
 		// Render the column data based on the column name.
 		switch ( $column_name ) {
 			case 'fulfillment_status':
-				$this->render_order_fulfillment_status_column_row_data( $order, $fulfillments );
+				$this->render_order_fulfillment_status_column_row_data( $order );
 				break;
 			case 'shipment_tracking':
 				$this->render_shipment_tracking_column_row_data( $order, $fulfillments );

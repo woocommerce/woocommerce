@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+
 /**
  * Interface FulfillmentsDataStoreInterface
  *

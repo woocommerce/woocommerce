@@ -192,7 +192,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 				$this->fulfillment->add_meta_data( '_tracking_url', 'https://www.dhl.com/tracking/123456789' );
 				// Some public data to simulate a real fulfillment.
 				$this->fulfillment->add_meta_data( 'service', 'Standard Shipping' );
-				$this->fulfillment->add_meta_data( 'expected_delivery', '2025-06-31' );
+				$this->fulfillment->add_meta_data( 'expected_delivery', '2025-06-30' );
 
 				// Add translations for metadata keys.
 				add_filter(
