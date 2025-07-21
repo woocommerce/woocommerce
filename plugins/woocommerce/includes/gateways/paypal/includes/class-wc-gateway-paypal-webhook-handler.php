@@ -6,36 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-request.php';
 
 class WC_Gateway_Paypal_Webhook_Handler {
-    public function __construct() {
-        add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-    }
-
-    public function register_routes() {
-        register_rest_route( 'wc-paypal-gateway/v1', '/webhook', [
-            'methods'             => 'POST',
-            'callback'            => array( $this, 'process_webhook' ),
-            'permission_callback' => array( $this, 'get_permission' ),
-        ] );
-
-        // TODO: Test only. Remove before merging feature.
-        register_rest_route( 'wc-paypal-gateway/v1', '/test-webhook', [
-            'methods'             => 'GET',
-            'callback'            => array( $this, 'test_webhook' ),
-            'permission_callback' => '__return_true',
-        ] );
-    }
-
-    private function get_permission() {
-        // TODO: Should we check if the webhook is coming from wpcom?
-        return true;
-    }
-
-    public function test_webhook( WP_REST_Request $request ) {
-        $data = $request->get_json_params();
-        error_log( 'PayPal test webhook received: ' . print_r( $data, true ) );
-        return new WP_REST_Response( 'Test webhook processed', 200 );
-    }
-
     public function process_webhook( WP_REST_Request $request ) {
         // TODO: Validate the webhook signature
 

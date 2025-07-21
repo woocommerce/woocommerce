@@ -136,10 +136,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( 'yes' === $this->enabled ) {
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
 		}
-
-		// Load the webhook handler.
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-webhook-handler.php';
-		new WC_Gateway_Paypal_Webhook_Handler();
 	}
 
 	/**

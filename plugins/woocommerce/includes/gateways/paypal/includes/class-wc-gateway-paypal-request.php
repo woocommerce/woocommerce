@@ -100,7 +100,7 @@ class WC_Gateway_Paypal_Request {
 			$request_body = $this->get_create_paypal_order_request_body( $order );
 
 			// TODO: Replace with the wpcom endpoint when it's ready.
-			$request = WP_REST_Request::from_url( get_site_url( null, '/wp-json/wc-paypal-gateway-proxy/v1/create-order' ) );
+			$request = WP_REST_Request::from_url( $this->get_paypal_create_order_request_url() );
 			$request->set_method( 'POST' );
 			$request->set_header( 'Content-Type', 'application/json' );
 			// TODO: Authenticate with wpcom.
@@ -130,6 +130,11 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
+	}
+
+	// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+	private function get_paypal_create_order_request_url() {
+		return get_site_url( null, '/wc/v3/paypal-proxy/create-order' );
 	}
 
 	/**
