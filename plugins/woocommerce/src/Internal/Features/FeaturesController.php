@@ -163,6 +163,32 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
+		add_filter( 'woocommerce_admin_features', array( $this, 'sync_iapi_mini_cart_feature' ) );
+	}
+
+	/**
+	 * Synchronize the 'experimental-iapi-mini-cart' feature flag with the admin Features system.
+	 *
+	 * @param array $features The original list of features.
+	 * @return array The modified list of features.
+	 */
+	public function sync_iapi_mini_cart_feature( $features ) {
+		$option_name = 'woocommerce_feature_experimental-iapi-mini-cart_enabled';
+		$is_enabled  = 'yes' === get_option( $option_name, 'no' );
+
+		if ( $is_enabled ) {
+			if ( ! in_array( 'experimental-iapi-mini-cart', $features, true ) ) {
+				$features[] = 'experimental-iapi-mini-cart';
+			}
+		} else {
+			$features = array_filter(
+				$features,
+				function ( $feature ) {
+					return 'experimental-iapi-mini-cart' !== $feature;
+				}
+			);
+		}
+		return $features;
 	}
 
 	/**
@@ -258,7 +284,7 @@ class FeaturesController {
 		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
-			'analytics'              => array(
+			'analytics'                   => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'option_key'         => Analytics::TOGGLE_OPTION_NAME,
@@ -267,7 +293,7 @@ class FeaturesController {
 				'disable_ui'         => false,
 				'is_legacy'          => true,
 			),
-			'product_block_editor'   => array(
+			'product_block_editor'        => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
@@ -288,13 +314,13 @@ class FeaturesController {
 					return $string;
 				},
 			),
-			'cart_checkout_blocks'   => array(
+			'cart_checkout_blocks'        => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
-			'rate_limit_checkout'    => array(
+			'rate_limit_checkout'         => array(
 				'name'               => __( 'Rate limit Checkout', 'woocommerce' ),
 				'description'        => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
@@ -306,7 +332,7 @@ class FeaturesController {
 				'enabled_by_default' => false,
 				'is_legacy'          => true,
 			),
-			'marketplace'            => array(
+			'marketplace'                 => array(
 				'name'               => __( 'Marketplace', 'woocommerce' ),
 				'description'        => __(
 					'New, faster way to find extensions and themes for your WooCommerce store',
@@ -319,7 +345,7 @@ class FeaturesController {
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-			'order_attribution'      => array(
+			'order_attribution'           => array(
 				'name'               => __( 'Order Attribution', 'woocommerce' ),
 				'description'        => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -330,7 +356,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
-			'site_visibility_badge'  => array(
+			'site_visibility_badge'       => array(
 				'name'               => __( 'Site visibility badge', 'woocommerce' ),
 				'description'        => __(
 					'Enable the site visibility badge in the WordPress admin bar',
@@ -342,7 +368,7 @@ class FeaturesController {
 				'is_experimental'    => false,
 				'disabled'           => false,
 			),
-			'hpos_fts_indexes'       => array(
+			'hpos_fts_indexes'            => array(
 				'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
 				'description'        => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -353,7 +379,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
-			'hpos_datastore_caching' => array(
+			'hpos_datastore_caching'      => array(
 				'name'               => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'        => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
@@ -365,7 +391,7 @@ class FeaturesController {
 				'disable_ui'         => false,
 				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
-			'remote_logging'         => array(
+			'remote_logging'              => array(
 				'name'               => __( 'Remote Logging', 'woocommerce' ),
 				'description'        => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
@@ -398,7 +424,7 @@ class FeaturesController {
 					},
 				),
 			),
-			'email_improvements'     => array(
+			'email_improvements'          => array(
 				'name'            => __( 'Email improvements', 'woocommerce' ),
 				'description'     => __(
 					'Enable modern email design for transactional emails',
@@ -417,7 +443,7 @@ class FeaturesController {
 				'is_legacy'       => true,
 				'is_experimental' => false,
 			),
-			'blueprint'              => array(
+			'blueprint'                   => array(
 				'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
 				'description'        => __(
 					'Enable blueprint to import and export settings in bulk',
@@ -437,7 +463,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
-			'block_email_editor'     => array(
+			'block_email_editor'          => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'        => __(
 					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
@@ -455,7 +481,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'enabled_by_default' => false,
 			),
-			'point_of_sale'          => array(
+			'point_of_sale'               => array(
 				'name'               => __( 'Point of Sale', 'woocommerce' ),
 				'description'        => __(
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
@@ -474,6 +500,11 @@ class FeaturesController {
 				*/
 				'is_legacy'          => true,
 				'is_experimental'    => true,
+			),
+			'experimental-iapi-mini-cart' => array(
+				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
+				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
+				'is_experimental' => true,
 			),
 		);
 

@@ -45,6 +45,13 @@
 			"__experimentalDefaultControls": {
 				"fontSize": true
 			}
+		},
+		"layout": {
+			"allowEditing": false,
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowSizingOnChildren": false,
+			"allowVerticalAlignment": false
 		}
 	},
 	"editorStyle": "file:../woocommerce/product-template-editor.css",

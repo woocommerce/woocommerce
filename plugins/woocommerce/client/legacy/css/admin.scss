@@ -4325,7 +4325,7 @@ table.wc_shipping {
 	}
 
 	.wc-shipping-method-add-class-costs {
-		margin-top: -24px;
+		margin-top: -16px;
 		text-decoration: none;
 		color: #3858E9;
 		font-size: 12px;
@@ -4453,6 +4453,10 @@ table.wc_shipping {
 					&.wc-shipping-currency-position-right_space {
 						padding-left: 12px;
 					}
+					&.wc-shipping-invalid-price {
+						border: 2px solid var( --wc-red, #a00);
+					}
+
 				}
 			}
 		}
@@ -4484,6 +4488,12 @@ table.wc_shipping {
 		font-weight: 400;
 		line-height: 16px;
 		color: #757575;
+		&.wc-shipping-invalid-price-message {
+			color: var( --wc-red, #a00);
+			display: block;
+			margin-top: 6px;
+			margin-bottom: -24px
+		}
 	}
 
 	.wc-backbone-modal-back-inactive {
