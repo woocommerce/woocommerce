@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Block, createBlock, getBlockTypes } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
+import { getInnerBlockByName } from '@woocommerce/utils';
 import {
 	PanelBody,
 	ToggleControl,
@@ -21,7 +22,6 @@ import {
  * Internal dependencies
  */
 import { BlockAttributes, EditProps } from './types';
-import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
 
 let displayStyleOptions: Block[] = [];
 
