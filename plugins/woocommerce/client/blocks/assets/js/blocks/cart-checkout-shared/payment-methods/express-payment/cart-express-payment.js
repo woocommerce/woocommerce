@@ -14,58 +14,48 @@ import clsx from 'clsx';
  */
 import ExpressPaymentMethods from '../express-payment-methods';
 import './style.scss';
+import { getExpressPaymentMethodsState } from './express-payment-methods-helpers';
 
 const CartExpressPayment = () => {
-	const { isCalculating } = useSelect( ( select ) => {
-		const store = select( checkoutStore );
-		return {
-			isCalculating: store.isCalculating(),
-		};
-	} );
 	const {
-		availableExpressPaymentMethods,
+		isCalculating,
+		availableExpressPaymentMethods = {},
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
-		registeredExpressPaymentMethods,
+		registeredExpressPaymentMethods = {},
 	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+		const checkout = select( checkoutStore );
+		const payment = select( paymentStore );
 		return {
+			isCalculating: checkout.isCalculating(),
 			availableExpressPaymentMethods:
-				store.getAvailableExpressPaymentMethods(),
+				payment.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
-				store.expressPaymentMethodsInitialized(),
-			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
+				payment.expressPaymentMethodsInitialized(),
+			isExpressPaymentMethodActive:
+				payment.isExpressPaymentMethodActive(),
 			registeredExpressPaymentMethods:
-				store.getRegisteredExpressPaymentMethods(),
+				payment.getRegisteredExpressPaymentMethods(),
 		};
 	}, [] );
 
-	const hasRegisteredExpressPaymentMethods =
-		Object.keys( registeredExpressPaymentMethods ).length > 0;
-
-	// The store has registered express payment methods but they are not initialized.
-	// We don't know if the methods pass the canMakePayment check.
-	const hasRegisteredNotInitializedExpressPayments =
-		! expressPaymentMethodsInitialized &&
-		hasRegisteredExpressPaymentMethods;
-
-	// The store has available express payment methods but they are not initialized.
-	const hasNoValidRegisteredExpressPayments =
-		expressPaymentMethodsInitialized &&
-		Object.keys( availableExpressPaymentMethods ).length === 0;
+	const {
+		hasRegisteredExpressPayments,
+		hasRegisteredNotInitializedExpressPayments,
+		hasNoValidRegisteredExpressPayments,
+		availableExpressPaymentsCount,
+	} = getExpressPaymentMethodsState( {
+		availableExpressPaymentMethods,
+		expressPaymentMethodsInitialized,
+		registeredExpressPaymentMethods,
+	} );
 
 	if (
-		! hasRegisteredExpressPaymentMethods ||
+		! hasRegisteredExpressPayments ||
 		hasNoValidRegisteredExpressPayments
 	) {
 		return null;
 	}
-
-	const availableMethodsCount =
-		availableExpressPaymentMethods &&
-		Object.keys( availableExpressPaymentMethods ).length > 0
-			? Object.keys( availableExpressPaymentMethods ).length
-			: 2;
 
 	return (
 		<>
@@ -93,7 +83,7 @@ const CartExpressPayment = () => {
 					hasRegisteredNotInitializedExpressPayments ? (
 						<ul className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
-								length: availableMethodsCount,
+								length: availableExpressPaymentsCount,
 							} ).map( ( _, index ) => (
 								<li key={ index }>
 									<Skeleton

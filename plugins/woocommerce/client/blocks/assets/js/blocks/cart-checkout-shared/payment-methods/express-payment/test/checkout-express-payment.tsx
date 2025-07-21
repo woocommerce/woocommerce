@@ -76,21 +76,18 @@ describe( 'CheckoutExpressPayment', () => {
 				isEditor: false,
 			} );
 
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {},
+			} );
 		} );
 
 		it( 'should render null when not in editor and user is not admin', () => {
@@ -120,24 +117,21 @@ describe( 'CheckoutExpressPayment', () => {
 				isEditor: false,
 			} );
 
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {}, // No available methods
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' }, // Has registered methods
-						paypal: { name: 'paypal' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {}, // No available methods
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' }, // Has registered methods
+					paypal: { name: 'paypal' },
+				},
+			} );
 		} );
 
 		it( 'should render null when not in editor and user is not admin', () => {
@@ -162,27 +156,24 @@ describe( 'CheckoutExpressPayment', () => {
 
 	describe( 'Express payment methods available and initialized', () => {
 		beforeEach( () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-						paypal: { name: 'paypal' },
-					},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-						paypal: { name: 'paypal' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+					paypal: { name: 'paypal' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+					paypal: { name: 'paypal' },
+				},
+			} );
 		} );
 
 		it( 'should render Express Checkout title', () => {
@@ -222,26 +213,22 @@ describe( 'CheckoutExpressPayment', () => {
 
 	describe( 'Processing states', () => {
 		it( 'should add accessibility attributes when isProcessing', () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: true,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-				} );
-
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: true,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+			} );
 			render( <CheckoutExpressPayment /> );
 
 			const expressPaymentContainer = document.querySelector(
@@ -267,25 +254,22 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should add disabled class when express payment method is active', () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: true,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: true,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+			} );
 
 			render( <CheckoutExpressPayment /> );
 
@@ -300,24 +284,21 @@ describe( 'CheckoutExpressPayment', () => {
 
 	describe( 'Loading states', () => {
 		it( 'should render skeleton loading state for title when not initialized', () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: false,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {},
-					expressPaymentMethodsInitialized: false,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-						paypal: { name: 'paypal' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {},
+				expressPaymentMethodsInitialized: false,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+					paypal: { name: 'paypal' },
+				},
+			} );
 
 			render( <CheckoutExpressPayment /> );
 
@@ -331,25 +312,23 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render 1 skeleton buttons when calculating a partial update', () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: true,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: true,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {},
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+			} );
 
 			render( <CheckoutExpressPayment /> );
 
@@ -364,29 +343,26 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
-			mockUseSelect
-				.mockReturnValueOnce( {
-					isCalculating: true,
-					isProcessing: false,
-					isAfterProcessing: false,
-					isBeforeProcessing: false,
-					isComplete: false,
-					hasError: false,
-				} )
-				.mockReturnValueOnce( {
-					availableExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-						paypal: { name: 'paypal' },
-						applepay: { name: 'applepay' },
-					},
-					expressPaymentMethodsInitialized: true,
-					isExpressPaymentMethodActive: false,
-					registeredExpressPaymentMethods: {
-						stripe: { name: 'stripe' },
-						paypal: { name: 'paypal' },
-						applepay: { name: 'applepay' },
-					},
-				} );
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: true,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+					paypal: { name: 'paypal' },
+					applepay: { name: 'applepay' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+					paypal: { name: 'paypal' },
+					applepay: { name: 'applepay' },
+				},
+			} );
 
 			render( <CheckoutExpressPayment /> );
 
