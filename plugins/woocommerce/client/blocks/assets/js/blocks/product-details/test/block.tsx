@@ -73,18 +73,14 @@ describe( 'Product Details block', () => {
 				// Default response for other options requests
 				return HttpResponse.json( {}, { status: 200 } );
 			} ),
-			http.get( '/wc/store/v1/products/*', () => {
-				return HttpResponse.json( productWithSpecifications );
-			} ),
-			http.get( '/wc/v3/products/*', () => {
-				return HttpResponse.json( productWithSpecifications );
-			} ),
-			http.get( '*', () => {
-				return HttpResponse.json( {} );
-			} ),
-			http.options( '*', () => {
-				return HttpResponse.json( {} );
-			} )
+			http.get( '/wc/store/v1/products/*', () =>
+				HttpResponse.json( productWithSpecifications )
+			),
+			http.get( '/wc/v3/products/*', () =>
+				HttpResponse.json( productWithSpecifications )
+			),
+			http.get( '*', () => HttpResponse.json( {} ) ),
+			http.options( '*', () => HttpResponse.json( {} ) )
 		);
 
 		beforeAll( () => server.listen() );
@@ -169,12 +165,12 @@ describe( 'Product Details block', () => {
 		test( 'should auto-remove block when product has no specifications', async () => {
 			server.resetHandlers();
 			server.use(
-				http.get( '/wc/store/v1/products/*', () => {
-					return HttpResponse.json( productWithoutSpecifications );
-				} ),
-				http.get( '/wc/v3/products/*', () => {
-					return HttpResponse.json( productWithoutSpecifications );
-				} )
+				http.get( '/wc/store/v1/products/*', () =>
+					HttpResponse.json( productWithoutSpecifications )
+				),
+				http.get( '/wc/v3/products/*', () =>
+					HttpResponse.json( productWithoutSpecifications )
+				)
 			);
 			await setupWithSingleProduct( {}, 1 );
 
