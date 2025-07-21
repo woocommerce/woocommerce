@@ -38,7 +38,11 @@ export default function ShipmentViewer() {
 		if ( savedProvider === 'other' ) {
 			return savedProviderName;
 		}
-		return findShipmentProviderName( savedProvider );
+		return (
+			findShipmentProviderName( savedProvider ) ||
+			savedProviderName ||
+			__( 'Unknown', 'woocommerce' )
+		);
 	};
 
 	return (
@@ -50,8 +54,8 @@ export default function ShipmentViewer() {
 					<>
 						{ shipmentProviderObject ? (
 							<img
-								src={ shipmentProviderObject.icon as string }
-								alt={ shipmentProviderObject.label as string }
+								src={ shipmentProviderObject.icon || '' }
+								alt={ shipmentProviderObject.label || '' }
 							/>
 						) : (
 							<TruckIcon />

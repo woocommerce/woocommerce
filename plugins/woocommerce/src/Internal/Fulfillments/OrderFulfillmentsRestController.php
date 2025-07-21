@@ -1186,7 +1186,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 */
 	private function validate_fulfillment( Fulfillment $fulfillment, int $fulfillment_id, int $order_id ) {
 		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
-			throw new \Exception( esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ), );
+			throw new \Exception( esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ) );
 		}
 	}
 }

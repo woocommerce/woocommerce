@@ -90,7 +90,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Deleted', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'A shipment from {site_title} order {order_number} has been updated', 'woocommerce' );
+			return __( 'A shipment from {site_title} order {order_number} has been cancelled', 'woocommerce' );
 		}
 
 		/**
