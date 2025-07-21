@@ -53,6 +53,7 @@ class Html2Text {
 		foreach ( $options as $key => $value ) {
 			if ( ! in_array( $key, array_keys( static::default_options() ), true ) ) {
 				// Log invalid option for debugging purposes without exposing in exception.
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Security: Logging sensitive data separately from user-facing exception messages.
 				error_log( 'Html2Text: Invalid option provided: ' . htmlspecialchars( (string) $key, ENT_QUOTES, 'UTF-8' ) . '. Valid options are: ' . htmlspecialchars( implode( ',', array_keys( static::default_options() ) ), ENT_QUOTES, 'UTF-8' ) );
 				// Throw generic error message to avoid exposing user input.
 				throw new \InvalidArgumentException( 'Invalid option provided for html2text conversion.' );
@@ -268,6 +269,7 @@ class Html2Text {
 		if ( ! $load_result ) {
 			// Log truncated HTML content for debugging purposes (limit to 500 chars to prevent log bloat).
 			$html_preview = strlen( $html ) > 500 ? substr( $html, 0, 500 ) . '...[truncated]' : $html;
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Security: Logging sensitive data separately from user-facing exception messages.
 			error_log( 'Html2Text: Failed to load HTML content: ' . htmlspecialchars( $html_preview, ENT_QUOTES, 'UTF-8' ) );
 			// Throw a generic error message to avoid exposing sensitive data.
 			throw new Html2Text_Exception( 'Could not load HTML - the content may be malformed.' );
