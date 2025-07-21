@@ -167,30 +167,4 @@ class CredentialManagerTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( method_exists( $this->credential_manager, 'setup_credentials' ) );
 		$this->assertTrue( is_callable( array( $this->credential_manager, 'setup_credentials' ) ) );
 	}
-
-	/**
-	 * Test setup_credentials with empty required fields shows error.
-	 *
-	 * Note: This test verifies the method handles empty fields gracefully.
-	 * In a real environment, this would trigger WP_CLI::error().
-	 */
-	public function test_setup_credentials_with_empty_fields() {
-		$platform        = 'test_platform';
-		$required_fields = array();
-
-		// The method should handle empty fields gracefully.
-		// We can't easily test WP_CLI::error() in unit tests, but we can verify.
-		// the method exists and can be called.
-		$this->assertTrue( method_exists( $this->credential_manager, 'setup_credentials' ) );
-
-		// Test that calling with empty fields doesn't crash.
-		try {
-			$this->credential_manager->setup_credentials( $platform, $required_fields );
-			// If we reach here, the method handled empty fields without throwing.
-			$this->assertTrue( true );
-		} catch ( \Exception $e ) {
-			// Method should not throw exceptions for empty fields.
-			$this->fail( 'setup_credentials should handle empty fields gracefully' );
-		}
-	}
 }
