@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue in Analytics reports where itemsLabel can be undefined and cause an error with Gutenberg 21.2.0
