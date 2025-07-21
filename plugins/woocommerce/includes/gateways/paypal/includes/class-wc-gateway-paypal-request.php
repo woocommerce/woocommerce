@@ -100,22 +100,25 @@ class WC_Gateway_Paypal_Request {
 			$request_body = $this->get_create_paypal_order_request_body( $order );
 
 			// TODO: Replace with the wpcom endpoint when it's ready.
-			$request = WP_REST_Request::from_url( $this->get_paypal_create_order_request_url() );
-			$request->set_method( 'POST' );
-			$request->set_header( 'Content-Type', 'application/json' );
-			// TODO: Authenticate with wpcom.
-			// $request->set_header( 'Authorization', 'Bearer ' . $wpcom_blog_token );
-			$request->set_body( json_encode( $request_body ) );
-			$response = rest_do_request( $request );
+			$response = wp_remote_post( $this->get_paypal_create_order_request_url(), array(
+				'method' => 'POST',
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'body' => json_encode( $request_body ),
+			) );
+			$http_code = wp_remote_retrieve_response_code( $response );
+			$body = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
 
-			$data = $response->get_data();
-			if ( 200 !== $response->get_status() || ! isset( $data['id'] ) || ! isset( $data['links'] ) ) {
-				throw new Exception( 'PayPal order creation failed. Response status:' . $response->get_status() );
+			error_log( 'PayPal create order response: ' . print_r( $response_data, true ) );
+			if ( 200 !== $http_code || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
+				throw new Exception( 'PayPal order creation failed. Response status:' . $http_code );
 			}
 
 			// Find the 'approve' link in the response -- this is where we will redirect the customer to
 			$redirect_url = null;
-			foreach ( $data['links'] as $link ) {
+			foreach ( $response_data['links'] as $link ) {
 				if ( $link['rel'] === 'approve' && $link['method'] === 'GET' ) {
 					$redirect_url = $link['href'];
 					break;
@@ -123,7 +126,7 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			return [
-				'id' => $data['id'],
+				'id' => $response_data['id'],
 				'redirect_url' => $redirect_url,
 			];
 		} catch ( Exception $e ) {
@@ -134,7 +137,7 @@ class WC_Gateway_Paypal_Request {
 
 	// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
 	private function get_paypal_create_order_request_url() {
-		return get_site_url( null, '/wc/v3/paypal-proxy/create-order' );
+		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
 	}
 
 	/**
