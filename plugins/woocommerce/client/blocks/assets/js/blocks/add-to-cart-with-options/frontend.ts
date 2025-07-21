@@ -26,6 +26,11 @@ export type Context = {
 	quantity: Record< number, number >;
 	tempQuantity: number;
 	groupedProductIds: number[];
+	childProductId: number;
+	quantityConstraints: Record<
+		number,
+		{ min: number; max: number | null; step: number }
+	>;
 };
 
 interface GroupedCartItem {
@@ -44,6 +49,15 @@ const { state: wooState } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const getDefaultConstraints = (
+	productType: string,
+	childProductId?: number
+) => ( {
+	min: productType === 'grouped' && childProductId ? 0 : 1,
+	step: 1,
+	max: null,
+} );
 
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
@@ -71,18 +85,21 @@ const getInputData = (
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const parsedMinValue = parseInt( inputElement.min, 10 );
-	const parsedMaxValue = parseInt( inputElement.max, 10 );
-	const parsedStep = parseInt( inputElement.step, 10 );
-
-	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
-	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
-	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
-	const step = isNaN( parsedStep ) ? 1 : parsedStep;
+	const { productType, productId, quantityConstraints } =
+		getContext< Context >();
 	const childProductId = parseInt(
 		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
 		10
 	);
+	const id = childProductId || productId;
+	const constraints =
+		quantityConstraints?.[ id ] ||
+		getDefaultConstraints( productType, childProductId );
+	const minValue = constraints.min;
+	const maxValue = constraints.max;
+	const step = constraints.step;
+
+	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
 		currentValue,
@@ -195,14 +212,45 @@ const addToCartWithOptionsStore = store(
 				}
 				return context.selectedAttributes;
 			},
+			get allowsDecrease() {
+				const {
+					quantity,
+					childProductId,
+					productType,
+					quantityConstraints,
+					productId,
+				} = getContext< Context >();
+				const id = childProductId || productId;
+				const currentQuantity = quantity[ id ] || 0;
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
+				const minValue = constraints.min;
+				const step = constraints.step;
+				return currentQuantity - step >= minValue;
+			},
+			get allowsIncrease() {
+				const {
+					quantity,
+					childProductId,
+					productType,
+					quantityConstraints,
+					productId,
+				} = getContext< Context >();
+				const id = childProductId || productId;
+				const currentQuantity = quantity[ id ] || 0;
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
+				const maxValue = constraints.max;
+				const step = constraints.step;
+				return maxValue === null || currentQuantity + step <= maxValue;
+			},
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				const productId =
-					childProductId && childProductId > 0
-						? childProductId
-						: context.productId;
+				const productId = childProductId || context.productId;
 
 				context.quantity = {
 					...context.quantity,
@@ -255,7 +303,7 @@ const addToCartWithOptionsStore = store(
 				} = inputData;
 				const newValue = currentValue + step;
 
-				if ( maxValue === undefined || newValue <= maxValue ) {
+				if ( maxValue === null || newValue <= maxValue ) {
 					const updatedValue = Math.max( minValue, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
 						updatedValue,

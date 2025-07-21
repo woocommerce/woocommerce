@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix flat rate shipping cost being saved with wrong decimal separator causing incorrect shipping price.
+
