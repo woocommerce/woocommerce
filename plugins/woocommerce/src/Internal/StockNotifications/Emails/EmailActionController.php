@@ -51,11 +51,11 @@ class EmailActionController {
 	 * If the verification key matches, it updates the notification status to active.
 	 * TODO: redirect the request, notify the user of successful verification.
      *
-     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $notification_id The ID of the notification to process.
      * @param string|null $action_key The action key to verify.
      * @return void
 	 */
-    public function maybe_process_verification_action( int|null $notification_id, string|null $action_key ): void  {
+    public function maybe_process_verification_action( string|null $notification_id, string|null $action_key ): void  {
         if ( ! $action_key ) {
             return;
         }
@@ -77,11 +77,11 @@ class EmailActionController {
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
 	 * TODO: redirect the request, notify the user of successful unsubscription.
      *
-     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $notification_id The ID of the notification to process.
      * @param string|null $action_key The action key to verify.
      * @return void
 	 */
-    public function maybe_process_unsubscribe_action( int|null $notification_id, string|null $action_key ): void {
+    public function maybe_process_unsubscribe_action( string|null $notification_id, string|null $action_key ): void {
         if ( ! $action_key ) {
             return;
         }
@@ -103,11 +103,11 @@ class EmailActionController {
     /**
      * Retrieves the notification to be processed based on the provided notification ID and action key.
      *
-     * @param int|null $notification_id The ID of the notification to process.
+     * @param string|null $notification_id The ID of the notification to process.
      * @return Notification|null The notification object if found and has an action key, null otherwise.
      */
-    public function get_notification_to_be_processed( int|null $notification_id ): Notification | null {
-        $notification = Factory::get_notification( $notification_id );
+    public function get_notification_to_be_processed( string|null $notification_id ): Notification | null {
+        $notification = Factory::get_notification( (int) $notification_id );
 
         if ( ! $notification ) {
             return null;
