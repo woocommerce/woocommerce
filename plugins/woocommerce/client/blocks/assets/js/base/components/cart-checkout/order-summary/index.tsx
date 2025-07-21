@@ -24,10 +24,12 @@ const OrderSummary = ( {
 	disableProductDescriptions = false,
 }: OrderSummaryProps ): null | JSX.Element => {
 	const { isLarge } = useContainerWidthContext();
-	const { cartIsLoading } = useStoreCart();
+	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 
-	if ( cartIsLoading ) {
-		return <CartLineItemsCheckoutSkeleton />;
+	if ( cartIsLoading || hasPendingItemsOperations ) {
+		return (
+			<CartLineItemsCheckoutSkeleton rows={ cartItems?.length || 2 } />
+		);
 	}
 	return (
 		<div

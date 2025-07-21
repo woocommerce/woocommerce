@@ -13,14 +13,8 @@
 		.wc-block-components-order-summary-item__description {
 			flex-grow: 1;
 			.wc-block-components-skeleton__element {
-				&:first-child {
-					margin-bottom: 6px;
-				}
+				margin-bottom: $gap-smaller;
 			}
-		}
-
-		.wc-block-components-order-summary-item__image {
-			margin-top: 0;
 		}
 	}
 }
