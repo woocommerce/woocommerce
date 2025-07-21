@@ -18,7 +18,7 @@ type ServerState = {
 const productDataStore = store< {
 	state: ProductRef & ServerState;
 	actions: {
-		setVariationId: ( variationId: number | null ) => void;
+		setVariationId: ( variationId: EntityId ) => void;
 	};
 } >(
 	'woocommerce/product-data',
