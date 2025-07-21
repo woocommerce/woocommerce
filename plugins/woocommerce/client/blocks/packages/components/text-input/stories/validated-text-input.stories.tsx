@@ -236,7 +236,7 @@ const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 
 	useEffect( () => {
 		setInputValue( getFormattedValue( args.value ) );
-	}, [ args.value, args.customFormatter, getFormattedValue ] );
+	}, [ args.value, getFormattedValue ] );
 
 	const onChange = ( newValue: string ) => {
 		const formattedValue = args.customFormatter
