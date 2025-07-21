@@ -264,6 +264,7 @@ class Html2Text {
 		}
 
 		if ( ! $load_result ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Html2Text_Exception( 'Could not load HTML - badly formed?', htmlspecialchars( $html, ENT_QUOTES, 'UTF-8' ) );
 		}
 
@@ -555,18 +556,16 @@ class Html2Text {
 				} elseif ( $href === $output || "mailto:$output" === $href || "http://$output" === $href || "https://$output" === $href ) {
 					// Link to the same address: just use link.
 					$output = "$output";
-				} else {
+				} elseif ( $output ) {
 					// Replace it.
-					if ( $output ) {
-						if ( $options['drop_links'] ) {
-							$output = "$output";
-						} else {
-							$output = "[$output]($href)";
-						}
+					if ( $options['drop_links'] ) {
+						$output = "$output";
 					} else {
-						// Empty string.
-						$output = "$href";
+						$output = "[$output]($href)";
 					}
+				} else {
+					// Empty string.
+					$output = "$href";
 				}
 
 				// Does the next node require additional whitespace?
