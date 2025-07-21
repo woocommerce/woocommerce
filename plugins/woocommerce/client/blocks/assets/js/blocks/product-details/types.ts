@@ -8,6 +8,7 @@ type Context = {
 };
 
 export type Attributes = {
+	align?: 'wide' | 'full';
 	hideTabTitle: boolean;
 };
 
