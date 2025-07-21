@@ -18,7 +18,7 @@ class Html2Text_Exception extends \Exception {
 	 *
 	 * @var string
 	 */
-	public $more_info;
+	private string $more_info;
 
 	/**
 	 * Constructor
@@ -29,5 +29,14 @@ class Html2Text_Exception extends \Exception {
 	public function __construct( string $message = '', string $more_info = '' ) {
 		parent::__construct( $message );
 		$this->more_info = $more_info;
+	}
+
+	/**
+	 * Returns additional error information
+	 *
+	 * @return string Additional error information.
+	 */
+	public function get_more_info(): string {
+		return $this->more_info;
 	}
 }

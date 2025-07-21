@@ -52,8 +52,10 @@ class Html2Text {
 		// Check all options are valid.
 		foreach ( $options as $key => $value ) {
 			if ( ! in_array( $key, array_keys( static::default_options() ), true ) ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				throw new \InvalidArgumentException( 'Unknown html2text option \'' . htmlspecialchars( $key, ENT_QUOTES, 'UTF-8' ) . '\'. Valid options are ' . htmlspecialchars( implode( ',', array_keys( static::default_options() ) ), ENT_QUOTES, 'UTF-8' ) );
+				// Log invalid option for debugging purposes without exposing in exception.
+				error_log( 'Html2Text: Invalid option provided: ' . htmlspecialchars( (string) $key, ENT_QUOTES, 'UTF-8' ) . '. Valid options are: ' . htmlspecialchars( implode( ',', array_keys( static::default_options() ) ), ENT_QUOTES, 'UTF-8' ) );
+				// Throw generic error message to avoid exposing user input.
+				throw new \InvalidArgumentException( 'Invalid option provided for html2text conversion.' );
 			}
 		}
 
@@ -264,8 +266,11 @@ class Html2Text {
 		}
 
 		if ( ! $load_result ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Html2Text_Exception( 'Could not load HTML - badly formed?', htmlspecialchars( $html, ENT_QUOTES, 'UTF-8' ) );
+			// Log truncated HTML content for debugging purposes (limit to 500 chars to prevent log bloat).
+			$html_preview = strlen( $html ) > 500 ? substr( $html, 0, 500 ) . '...[truncated]' : $html;
+			error_log( 'Html2Text: Failed to load HTML content: ' . htmlspecialchars( $html_preview, ENT_QUOTES, 'UTF-8' ) );
+			// Throw a generic error message to avoid exposing sensitive data.
+			throw new Html2Text_Exception( 'Could not load HTML - the content may be malformed.' );
 		}
 
 		return $doc;
