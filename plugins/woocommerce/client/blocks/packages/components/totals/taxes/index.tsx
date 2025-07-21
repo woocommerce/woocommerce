@@ -22,6 +22,7 @@ export interface TotalsTaxesProps {
 	currency: Currency;
 	showRateAfterTaxName: boolean;
 	values: Values | Record< string, never >;
+	showSkeleton?: boolean;
 }
 
 const TotalsTaxes = ( {
@@ -29,6 +30,7 @@ const TotalsTaxes = ( {
 	values,
 	className,
 	showRateAfterTaxName,
+	showSkeleton,
 }: TotalsTaxesProps ): ReactElement | null => {
 	const { total_tax: totalTax, tax_lines: taxLines } = values;
 
@@ -61,6 +63,7 @@ const TotalsTaxes = ( {
 							currency={ currency }
 							label={ label }
 							value={ parseInt( price, 10 ) }
+							showSkeleton={ showSkeleton }
 						/>
 					);
 				} ) }{ ' ' }

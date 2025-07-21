@@ -51,9 +51,6 @@ class OrderCountCacheService {
 		add_action( 'woocommerce_before_delete_order', array( $this, 'update_on_order_deleted' ), 10, 2 );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'refresh_cache' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
-		// This is a temporary fix to ensure the background actions are scheduled.
-		// @todo: Remove this once the Action Scheduler package is updated to >= 3.9.3.
-		add_action( 'admin_init', array( $this, 'schedule_background_actions' ) );
 
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
