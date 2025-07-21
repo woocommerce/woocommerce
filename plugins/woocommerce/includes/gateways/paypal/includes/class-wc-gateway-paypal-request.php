@@ -192,10 +192,10 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_order_custom_id( $order ) {
 		$custom_id = wp_json_encode(
 			array(
-				'order_id' => $order->get_id(),
+				'order_id'  => $order->get_id(),
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
-				'endpoint' => get_site_url( null, '/wp-json/wc-paypal-gateway/v1/webhook' ),
+				'endpoint'  => get_site_url( null, '/wp-json/wc/v3/paypal-webhooks' ),
 			)
 		);
 
