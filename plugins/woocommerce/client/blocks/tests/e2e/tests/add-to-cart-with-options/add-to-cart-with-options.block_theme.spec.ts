@@ -181,13 +181,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
 		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
-			await addToCartButton.click();
-
-			await expect(
-				page.getByText(
-					'Please select some products to add to the cart.'
-				)
-			).toBeVisible();
+			// There is the chance the button might be clicked before the iAPI
+			// stores have been loaded.
+			await expect( async () => {
+				await addToCartButton.click();
+				await expect(
+					page.getByText(
+						'Please select some products to add to the cart.'
+					)
+				).toBeVisible();
+			} ).toPass();
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
