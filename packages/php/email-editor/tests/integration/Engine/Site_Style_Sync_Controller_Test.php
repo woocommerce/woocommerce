@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\EmailEditor\Tests\Integration\Engine;
 use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 use Automattic\WooCommerce\EmailEditor\Tests\Integration\Email_Editor_Integration_Test_Case;
 use WP_Theme_JSON;
-use WP_Theme_JSON_Resolver;
 
 /**
  * Class Site_Style_Sync_Controller_Test

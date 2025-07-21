@@ -234,11 +234,16 @@ class Styles_Helper {
 	/**
 	 * Convert a CSS value to a static px value for email clients.
 	 *
-	 * @param string  $input The CSS value to convert.
-	 * @param ?string $fallback The fallback value to use if the input is not a valid CSS value.
+	 * This is mostly for use in font size, spacing, etc.
+	 *
+	 * @param string $input The CSS value to convert.
+	 * @param bool   $use_fallback Whether to use the fallback value if the input is not a valid CSS value.
+	 * @param ?int   $base_font_size The base font size to use for conversion.
 	 * @return ?string The static pixel value (e.g., 30px).
 	 */
-	public static function convert_to_px( string $input, ?string $fallback = '16px' ): ?string {
+	public static function convert_to_px( string $input, bool $use_fallback = true, ?int $base_font_size = 16 ): ?string {
+		$fallback = $use_fallback ? $base_font_size . 'px' : null;
+
 		if ( ! $input ) {
 			return $fallback;
 		}
@@ -257,12 +262,12 @@ class Styles_Helper {
 		if ( str_ends_with( $input, 'rem' ) || str_ends_with( $input, 'em' ) ) {
 			// Convert rem/em to px (assuming 16px base).
 			$value = (float) str_replace( array( 'rem', 'em' ), '', $input );
-			return round( $value * 16 ) . 'px';
+			return round( $value * $base_font_size ) . 'px';
 		}
 		if ( str_ends_with( $input, '%' ) ) {
 			// Convert percentage to px (assuming 16px base).
 			$value = (float) str_replace( '%', '', $input );
-			return round( ( $value / 100 ) * 16 ) . 'px';
+			return round( ( $value / 100 ) * $base_font_size ) . 'px';
 		}
 		if ( is_numeric( $input ) ) {
 			// If it's just a number, assume px.
@@ -307,17 +312,17 @@ class Styles_Helper {
 		$last_element = $value_array[ count( $value_array ) - 1 ];
 		$max          = trim( rtrim( $last_element, ')' ) );
 
-		$min_px = self::convert_to_px( $min, null );
-		$max_px = self::convert_to_px( $max, null );
+		$min_px = self::convert_to_px( $min, false );
+		$max_px = self::convert_to_px( $max, false );
 
 		// Determine which value to use.
-		if ( 'min' === $strategy ) {
+		if ( 'min' === $strategy && ! is_null( $min_px ) ) {
 			return $min_px;
 		}
-		if ( 'max' === $strategy ) {
+		if ( 'max' === $strategy && ! is_null( $max_px ) ) {
 			return $max_px;
 		}
-		if ( 'avg' === $strategy && ! empty( $min_px ) && ! empty( $max_px ) ) {
+		if ( 'avg' === $strategy && ! is_null( $min_px ) && ! is_null( $max_px ) ) {
 			$avg = ( self::parse_value( $min_px ) + self::parse_value( $max_px ) ) / 2;
 			return $avg . 'px';
 		}

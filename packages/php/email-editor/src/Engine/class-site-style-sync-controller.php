@@ -313,7 +313,7 @@ class Site_Style_Sync_Controller {
 		if ( stripos( $size, 'clamp(' ) !== false ) {
 			return Styles_Helper::clamp_to_static_px( $size, 'avg' ) ?? $size;
 		}
-		return Styles_Helper::convert_to_px( $size, $size ) ?? $size; // Fallback to original value if conversion fails.
+		return Styles_Helper::convert_to_px( $size, false ) ?? $size; // Fallback to original value if conversion fails.
 	}
 
 	/**

@@ -405,15 +405,18 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '16px', Styles_Helper::convert_to_px( '1em' ) );
 		$this->assertSame( '16px', Styles_Helper::convert_to_px( '100%' ) );
 		$this->assertSame( '16px', Styles_Helper::convert_to_px( '100vh' ) );
+		$this->assertSame( '20px', Styles_Helper::convert_to_px( '1rem', true, 20 ) ); // uses a different base font size.
+		$this->assertSame( '25px', Styles_Helper::convert_to_px( '50%', true, 50 ) );
 	}
 
 	/**
 	 * Test it converts to px with fallback.
 	 */
 	public function testItConvertsToPxWithFallback(): void {
-		$this->assertSame( '16px', Styles_Helper::convert_to_px( '16new', '16px' ) );
-		$this->assertSame( null, Styles_Helper::convert_to_px( '1max', null ) );
-		$this->assertSame( '0', Styles_Helper::convert_to_px( '1vmin', '0' ) );
+		$this->assertSame( '16px', Styles_Helper::convert_to_px( '16new' ) );
+		$this->assertSame( null, Styles_Helper::convert_to_px( '16new', false ) );
+		$this->assertSame( '10px', Styles_Helper::convert_to_px( '1max', true, 10 ) );
+		$this->assertSame( null, Styles_Helper::convert_to_px( '1vmin', false, 10 ) );
 	}
 
 	/**
@@ -426,6 +429,14 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '112px', Styles_Helper::clamp_to_static_px( 'clamp(2.15rem, 2.15rem + ((1vw - 0.2rem) * 1.333), max(1rem, 7rem))', 'max' ) );
 		$this->assertSame( '24px', Styles_Helper::clamp_to_static_px( 'clamp(16px, 100%, 32px)', 'avg' ) );
 		$this->assertSame( '22px', Styles_Helper::clamp_to_static_px( 'clamp(min(12px, 100%), 100%, max(24px, 32px))', 'avg' ) );
+	}
+
+	/**
+	 * Test it returns original value if invalid clamp.
+	 */
+	public function testItReturnsOriginalValueIfInvalidClamp(): void {
+		$this->assertSame( 'clamp (16px, 100%, 32px)', Styles_Helper::clamp_to_static_px( 'clamp (16px, 100%, 32px)' ) );
+		$this->assertSame( 'clamp(2.15rem)', Styles_Helper::clamp_to_static_px( 'clamp(2.15rem)' ) );
 	}
 
 	/**
