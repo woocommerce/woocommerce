@@ -59,7 +59,7 @@ const Rating = ( {
 	);
 };
 
-interface RatingProps {
+export interface RatingProps {
 	className?: string;
 	rating: RatingValues;
 	ratedProductsCount?: number | null;
