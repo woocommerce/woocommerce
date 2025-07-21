@@ -12,6 +12,13 @@
 		margin-bottom: 0;
 		margin-top: 0;
 		font-weight: 700;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		.wc-block-components-skeleton__element {
+			margin-left: 0.5em;
+		}
 	}
 
 	.wc-block-components-totals-footer-item-shipping {

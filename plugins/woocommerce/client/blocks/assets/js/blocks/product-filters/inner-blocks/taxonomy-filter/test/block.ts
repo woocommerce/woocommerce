@@ -38,6 +38,11 @@ jest.mock( '@woocommerce/settings', () => {
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
 		} ),
+		getSettingWithCoercion: jest.fn(
+			( key: string, defaultValue: unknown ) => {
+				return defaultValue;
+			}
+		),
 	};
 } );
 

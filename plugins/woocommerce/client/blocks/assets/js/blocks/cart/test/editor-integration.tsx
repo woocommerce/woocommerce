@@ -48,7 +48,7 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor.
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
 
 		await waitFor( () => {
 			expect(
@@ -81,10 +81,10 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeInTheDocument();
+		expect( tableOption ).toBeVisible();
 
 		// Verify Audio option is available (added only for order summary block).
-		expect( audioOption ).toBeInTheDocument();
+		expect( audioOption ).toBeVisible();
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
@@ -114,7 +114,7 @@ describe( 'Cart block editor integration', () => {
 		const filledCartTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( filledCartTableOption ).toBeInTheDocument();
+		expect( filledCartTableOption ).toBeVisible();
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
 		const filledCartAudioOption = screen.queryByRole( 'option', {
@@ -128,12 +128,12 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
 
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
 		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
 
-		expect( filledCartBlock ).toBeInTheDocument();
+		expect( filledCartBlock ).toBeVisible();
 		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
@@ -141,7 +141,7 @@ describe( 'Cart block editor integration', () => {
 		await waitFor( () => {
 			expect(
 				screen.getByLabelText( /Block: Filled Cart$/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 		} );
 
 		await selectBlock( /Block: Filled Cart/i );

@@ -106,6 +106,11 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 		...jest.requireActual( '@woocommerce/base-context/hooks' ),
 		useShippingData: jest.fn(),
 		useStoreCart: jest.fn(),
+		useOrderSummaryLoadingState: jest.fn( () => {
+			return {
+				isLoading: false,
+			};
+		} ),
 	};
 } );
 

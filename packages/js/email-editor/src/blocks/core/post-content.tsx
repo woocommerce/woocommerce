@@ -23,22 +23,14 @@ function Placeholder( { layoutClassNames } ) {
 
 // Curried function to add a custom placeholder to the post content block, or just use the original Edit component.
 function PostContentEdit( OriginalEditComponent ) {
-	return function Edit( {
-		context,
-		__unstableLayoutClassNames: layoutClassNames,
-	} ) {
-		const { postId: contextPostId, postType: contextPostType } = context;
+	return function Edit( params ) {
+		const { postId: contextPostId, postType: contextPostType } =
+			params.context;
+		const { __unstableLayoutClassNames: layoutClassNames } = params;
 		const hasContent = contextPostId && contextPostType;
 
 		if ( hasContent ) {
-			return (
-				<OriginalEditComponent
-					{ ...{
-						context,
-						__unstableLayoutClassNames: layoutClassNames,
-					} }
-				/>
-			);
+			return <OriginalEditComponent { ...params } />;
 		}
 
 		return <Placeholder layoutClassNames={ layoutClassNames } />;

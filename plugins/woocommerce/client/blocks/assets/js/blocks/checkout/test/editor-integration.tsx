@@ -46,14 +46,12 @@ describe( 'Checkout block editor integration', () => {
 		await setup( {} );
 
 		// Verify Checkout block is properly initialized in the editor.
-		expect(
-			screen.getByLabelText( /^Block: Checkout$/i )
-		).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Checkout$/i ) ).toBeVisible();
 
 		await waitFor( () => {
 			expect(
 				screen.getByLabelText( /^Block: Order Summary$/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 		} );
 
 		const orderSummaryBlock = screen.getByLabelText(
@@ -114,7 +112,7 @@ describe( 'Checkout block editor integration', () => {
 		const contactInformationTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( contactInformationTableOption ).toBeInTheDocument();
+		expect( contactInformationTableOption ).toBeVisible();
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Checkout Totals).
 		const ContactInformationAudioOption = screen.queryByRole( 'option', {

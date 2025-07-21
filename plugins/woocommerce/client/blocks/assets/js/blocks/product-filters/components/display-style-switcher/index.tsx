@@ -4,6 +4,7 @@
 import { createBlock, getBlockTypes } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 import { dispatch, select, useDispatch } from '@wordpress/data';
+import { getInnerBlockByName } from '@woocommerce/utils';
 import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -12,11 +13,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
 
 export const DisplayStyleSwitcher = ( {
 	clientId,
