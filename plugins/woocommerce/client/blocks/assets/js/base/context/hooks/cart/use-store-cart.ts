@@ -117,6 +117,7 @@ export const defaultCartData: StoreCart = {
 	receiveCart: () => undefined,
 	receiveCartContents: () => undefined,
 	extensions: EMPTY_EXTENSIONS,
+	hasPendingItemsOperations: false,
 };
 
 /**
@@ -134,19 +135,31 @@ export const useStoreCart = (
 	useStoreCartEventListeners();
 
 	const { receiveCart, receiveCartContents } = useDispatch( cartStore );
-	const { cartData, cartErrors, cartTotals, cartIsLoading, isLoadingRates } =
-		useSelect( ( select ) => {
-			const store = select( cartStore );
-			return {
-				cartData: store.getCartData(),
-				cartErrors: store.getCartErrors(),
-				cartTotals: store.getCartTotals(),
-				cartIsLoading:
-					// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
-					! store.hasFinishedResolution( 'getCartData' ),
-				isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
-			};
-		}, [] );
+	const {
+		cartData,
+		cartErrors,
+		cartTotals,
+		cartIsLoading,
+		isLoadingRates,
+		hasPendingItemsOperations,
+	} = useSelect( ( select ) => {
+		const store = select( cartStore );
+
+		// Base loading state - whether initial cart data resolution has finished
+		const baseCartIsLoading = ! store.hasFinishedResolution(
+			'getCartData',
+			[]
+		);
+
+		return {
+			cartData: store.getCartData(),
+			cartErrors: store.getCartErrors(),
+			cartTotals: store.getCartTotals(),
+			cartIsLoading: baseCartIsLoading,
+			isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
+			hasPendingItemsOperations: store.hasPendingItemsOperations(),
+		};
+	}, [] );
 
 	if ( ! shouldSelect ) {
 		return defaultCartData;
@@ -209,6 +222,7 @@ export const useStoreCart = (
 		paymentMethods: cartData.paymentMethods,
 		receiveCart,
 		receiveCartContents,
+		hasPendingItemsOperations,
 	};
 
 	if (

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
@@ -11,7 +12,6 @@ import {
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControlOption` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -30,6 +30,11 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 			);
 		case LayoutOptions.STACK:
 			return __( 'Display products in a single column.', 'woocommerce' );
+		case LayoutOptions.CAROUSEL:
+			return __(
+				'Display products in a carousel. It displays a single row of products.',
+				'woocommerce'
+			);
 		default:
 			return '';
 	}
@@ -75,6 +80,12 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 					value={ LayoutOptions.GRID }
 					label={ __( 'Grid', 'woocommerce' ) }
 				/>
+				{ isExperimentalBlocksEnabled() && (
+					<ToggleGroupControlOption
+						value={ LayoutOptions.CAROUSEL }
+						label={ __( 'Carousel', 'woocommerce' ) }
+					/>
+				) }
 			</ToggleGroupControl>
 		</ToolsPanelItem>
 	);

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { dispatch, select } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { getInnerBlockByName } from './get-inner-block-by-name';
+import { getInnerBlockByName } from '@woocommerce/utils';
 
 /**
  * Updates the content of a filter heading block within a given filter block.
