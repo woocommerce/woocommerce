@@ -39,6 +39,7 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
+	inProgress: boolean;
 	onClick?: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
@@ -117,6 +118,7 @@ const OptionalExpansionWrapper = ( {
 
 export const TaskItem = ( {
 	completed,
+	inProgress,
 	title,
 	badge,
 	onDelete,
@@ -251,6 +253,11 @@ export const TaskItem = ( {
 					) }
 				</Text>
 			</div>
+			{ inProgress && (
+				<div className="woocommerce-task-list__item-progress">
+					{ __( 'In progress', 'woocommerce' ) }
+				</div>
+			) }
 			{ showEllipsisMenu && (
 				<EllipsisMenu
 					label={ __( 'Task Options', 'woocommerce' ) }
