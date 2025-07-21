@@ -49,14 +49,30 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		$status = $event['resource']['status'] ?? null;
+		$status          = $event['resource']['status'] ?? null;
+		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
-			WC_Gateway_Paypal::log( 'PayPal order approved. Order ID: ' . $order->get_id() );
+			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
+			$order->add_order_note(
+				sprintf(
+					/* translators: %1$s: PayPal order ID */
+					__( 'PayPal payment approved. PayPal Order ID: %1$s', 'woocommerce' ),
+					$paypal_order_id
+				)
+			);
 
 			// TODO: Capture the payment.
 
 		} else {
-			WC_Gateway_Paypal::log( 'PayPal order not approved. Order ID: ' . $order->get_id() . ' Status: ' . $status );
+			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
+			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
+			$order->add_order_note(
+				sprintf(
+					/* translators: %1$s: PayPal order ID */
+					__( 'PayPal payment approval failed. PayPal Order ID: %1$s. Status: %2$s', 'woocommerce' ),
+					$paypal_order_id
+				)
+			);
 		}
 	}
 

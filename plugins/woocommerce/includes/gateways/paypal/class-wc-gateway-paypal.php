@@ -34,7 +34,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @var bool
 	 */
-	public static $log_enabled = false;
+	public static $log_enabled = null;
 
 	/**
 	 * Logger instance
@@ -159,6 +159,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *                      emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public static function log( $message, $level = 'info' ) {
+		if ( is_null( self::$log_enabled ) ) {
+			$settings          = get_option( 'woocommerce_paypal_settings' );
+			self::$log_enabled = 'yes' === ( $settings['debug'] ?? 'no' );
+		}
+
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
