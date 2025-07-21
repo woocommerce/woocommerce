@@ -120,13 +120,13 @@ describe( 'Product Details block', () => {
 
 			await waitFor( () => {
 				expect(
-					screen.queryByRole( 'button', { name: /description/i } )
+					screen.getByRole( 'button', { name: /description/i } )
 				).toBeVisible();
 				expect(
-					screen.queryByRole( 'button', { name: /reviews/i } )
+					screen.getByRole( 'button', { name: /reviews/i } )
 				).toBeVisible();
 				expect(
-					screen.queryByRole( 'button', {
+					screen.getByRole( 'button', {
 						name: /additional information/i,
 					} )
 				).toBeVisible();
@@ -134,23 +134,21 @@ describe( 'Product Details block', () => {
 
 			const table = await screen.findByRole( 'table', { hidden: true } );
 
-			expect( within( table ).queryByText( /Weight/i ) ).toBeVisible();
-			expect( within( table ).queryByText( /150 kg/i ) ).toBeVisible();
+			expect( within( table ).getByText( /Weight/i ) ).toBeVisible();
+			expect( within( table ).getByText( /150 kg/i ) ).toBeVisible();
 
-			expect(
-				within( table ).queryByText( /Dimensions/i )
-			).toBeVisible();
+			expect( within( table ).getByText( /Dimensions/i ) ).toBeVisible();
 			expect(
 				within( table ).getByText( /14 × 5.5 × 3.5 cm/i )
 			).toBeVisible();
 
-			expect( within( table ).queryByText( /Material/i ) ).toBeVisible();
+			expect( within( table ).getByText( /Material/i ) ).toBeVisible();
 			expect(
-				within( table ).queryByText( /Acetate, Metal/i )
+				within( table ).getByText( /Acetate, Metal/i )
 			).toBeVisible();
-			expect( within( table ).queryByText( /Size/i ) ).toBeVisible();
+			expect( within( table ).getByText( /Size/i ) ).toBeVisible();
 			expect(
-				within( table ).queryByText( /Medium, Large/i )
+				within( table ).getByText( /Medium, Large/i )
 			).toBeVisible();
 		} );
 
@@ -168,10 +166,10 @@ describe( 'Product Details block', () => {
 
 			await waitFor( () => {
 				expect(
-					screen.queryByRole( 'button', { name: /description/i } )
+					screen.getByRole( 'button', { name: /description/i } )
 				).toBeVisible();
 				expect(
-					screen.queryByRole( 'button', { name: /reviews/i } )
+					screen.getByRole( 'button', { name: /reviews/i } )
 				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', {
