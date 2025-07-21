@@ -124,6 +124,16 @@ $task-alert-yellow: #f0b849;
 		align-items: center;
 	}
 
+	.woocommerce-task-list__item-progress {
+		background-color: $gray-100;
+		border-radius: 2px;
+		padding: $gap-smallest $gap-smaller;
+		font-size: 11px;
+		font-weight: 400;
+		line-height: 1;
+		white-space: nowrap;
+	}
+
 	.woocommerce-task-list__item-before .woocommerce-task__icon {
 		border-radius: 50%;
 		width: 32px;
