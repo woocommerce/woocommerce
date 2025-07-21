@@ -96,7 +96,13 @@ const CartExpressPayment = () => {
 								length: availableMethodsCount,
 							} ).map( ( _, index ) => (
 								<li key={ index }>
-									<Skeleton height="48px" />
+									<Skeleton
+										height="48px"
+										ariaMessage={ __(
+											'Loading express payment method…',
+											'woocommerce'
+										) }
+									/>
 								</li>
 							) ) }
 						</ul>

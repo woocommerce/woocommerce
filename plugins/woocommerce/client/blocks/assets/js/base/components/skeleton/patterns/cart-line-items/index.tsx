@@ -19,18 +19,33 @@ export const CartLineItemsCartSkeleton = ( {
 	return (
 		<>
 			{ Array.from( { length: rows } ).map( ( _, index ) => (
-				<tr className="wc-block-cart-items__row" key={ index }>
+				<tr
+					className="wc-block-cart-items__row"
+					key={ index }
+					aria-label={ __(
+						'Loading products in cart…',
+						'woocommerce'
+					) }
+				>
 					<td className="wc-block-cart-item__image">
-						<Skeleton />
+						<Skeleton height="0" />
 					</td>
 					<td className="wc-block-cart-item__product">
 						<div className="wc-block-cart-item__wrap">
-							<Skeleton maxWidth="173px" height=".875em" />
-							<Skeleton width="50%" height=".875em" />
+							<Skeleton
+								width="90%"
+								maxWidth="173px"
+								height=".875em"
+							/>
+							<Skeleton
+								width="50%"
+								maxWidth="85px"
+								height=".875em"
+							/>
 						</div>
 					</td>
 					<td className="wc-block-cart-item__total">
-						<Skeleton height=".875em" />
+						<Skeleton height=".875em" maxWidth="45px" />
 					</td>
 				</tr>
 			) ) }
@@ -47,7 +62,7 @@ export const CartLineItemsCheckoutSkeleton = ( {
 		<div
 			className="wc-block-components-order-summary"
 			aria-live="polite"
-			aria-label={ __( 'Loading your cart…', 'woocommerce' ) }
+			aria-label={ __( 'Loading products in cart…', 'woocommerce' ) }
 		>
 			<div className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items-checkout wc-block-components-order-summary__content">
 				{ Array.from( { length: rows } ).map( ( _, index ) => (
@@ -59,11 +74,20 @@ export const CartLineItemsCheckoutSkeleton = ( {
 							<Skeleton width="48px" height="48px" />
 						</div>
 						<div className="wc-block-components-order-summary-item__description">
-							<Skeleton width="100%" />
-							<Skeleton width="50%" />
+							<Skeleton
+								width="90%"
+								maxWidth="173px"
+								height=".875em"
+							/>
+
+							<Skeleton
+								width="50%"
+								maxWidth="85px"
+								height=".875em"
+							/>
 						</div>
 						<div className="wc-block-components-order-summary-item__total-price">
-							<Skeleton maxWidth="45px" />
+							<Skeleton width="45px" height=".875em" />
 						</div>
 					</div>
 				) ) }
