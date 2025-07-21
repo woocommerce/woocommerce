@@ -333,7 +333,7 @@ class Chart extends Component {
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
-		// TODO: This is a temporary fix to avoid the issue with the itemsLabel being undefined.
+		// Items label is not defined for all the reports.
 		const totalLabel = itemsLabel
 			? sprintf( itemsLabel, orderedKeys.length )
 			: '';
