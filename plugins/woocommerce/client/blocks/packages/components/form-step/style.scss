@@ -2,7 +2,7 @@
 	counter-reset: checkout-step;
 }
 
-@mixin step-mobile-styles {
+@mixin step-mobile-styles() {
 	padding-left: 0;
 	margin-bottom: $gap-larger;
 
@@ -45,11 +45,11 @@
 	margin: 0 0 $gap-largest 0;
 
 	@include cart-checkout-mobile-container {
-		@include step-mobile-styles;
+		@include step-mobile-styles();
 	}
 
 	@include cart-checkout-small-container {
-		@include step-mobile-styles;
+		@include step-mobile-styles();
 	}
 }
 
