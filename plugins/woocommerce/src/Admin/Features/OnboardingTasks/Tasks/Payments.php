@@ -296,7 +296,7 @@ class Payments extends Task {
 		$providers = $this->get_payments_providers();
 
 		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not WooPayments.
+			// Check if the provider is enabled and is not an offline payment method.
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
