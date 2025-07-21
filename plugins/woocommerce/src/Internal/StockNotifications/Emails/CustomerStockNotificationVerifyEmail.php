@@ -154,31 +154,30 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 		 * @param Notification $notification The notification object.
 		 * @param WC_Product $product The product object.
 		 */
-		$verification_button_text = apply_filters(
+		$verification_button_text  = apply_filters(
 			'woocommerce_email_stock_notification_verify_button_text',
 			_x( 'Confirm', 'Stock Notification confirm notification', 'woocommerce' ),
 			$notification,
 			$product
 		);
-
-		$verification_key     = $notification->get_verification_key( true );
-        $expiration_threshold = Config::get_verification_expiration_time_threshold();
-        $expiration_threshold_text = sprintf(
-            /* translators: %s is the time duration in minutes */
-            _n( '%s minute', '%s minutes', $expiration_threshold / 60, 'woocommerce' ),
-            floor( $expiration_threshold / 60 )
-        );
+		$verification_key          = $notification->get_verification_key( true );
+		$expiration_threshold      = Config::get_verification_expiration_time_threshold();
+		$expiration_threshold_text = sprintf(
+			/* translators: %s is the time duration in minutes */
+			_n( '%s minute', '%s minutes', $expiration_threshold / 60, 'woocommerce' ),
+			floor( $expiration_threshold / 60 )
+		);
 
 		return array(
 			'verification_button_text'          => $verification_button_text,
-            'verification_expiration_threshold' => $expiration_threshold_text,
-            'verification_link'                 => add_query_arg(
-                array(
-                    'email_link_action_key' => $verification_key,
-                    'notification_id'       => $notification->get_id(),
-                ),
-                get_option( 'siteurl' )
-            ),
+			'verification_expiration_threshold' => $expiration_threshold_text,
+			'verification_link'                 => add_query_arg(
+				array(
+					'email_link_action_key' => $verification_key,
+					'notification_id'       => $notification->get_id(),
+				),
+				get_option( 'siteurl' )
+			),
 		);
 	}
 

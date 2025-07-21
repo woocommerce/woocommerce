@@ -28,9 +28,9 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
         $id = $notification->save();
 
         $controller = new EmailActionController();
-        $controller->maybe_process_verification_action($id, 'test');
+        $controller->maybe_process_verification_action( (string) $id, 'test');
         $notification = Factory::get_notification( $id );
-        $this->assertEquals(NotificationStatus::ACTIVE, $notification->get_status());
+        $this->assertEquals( NotificationStatus::ACTIVE, $notification->get_status() );
     }
 
     /**
@@ -46,7 +46,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
         $id = $notification->save();
 
         $controller = new EmailActionController();
-        $controller->maybe_process_unsubscribe_action($id, 'test');
+        $controller->maybe_process_unsubscribe_action( (string) $id, 'test');
         $notification = Factory::get_notification( $id );
         $this->assertEquals( NotificationStatus::CANCELLED, $notification->get_status() );
         $this->assertEquals( NotificationCancellationSource::USER, $notification->get_cancellation_source() );
