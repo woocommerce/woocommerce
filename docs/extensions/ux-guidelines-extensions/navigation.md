@@ -11,7 +11,7 @@ Place your product navigation elements within the existing WooCommerce menu stru
 
 The two options to extend the WooCommerce menu structure are within the category menu or within the relevant settings areas.
 
-![Category Subnavigation Image](img/doc_images/Category-Subnavigation.png)
+![Category Subnavigation Image](/img/doc_images/Category-Subnavigation.png)
 
 ## Category sub-navigation
 
@@ -19,7 +19,7 @@ If your plugin is extending an area of WooCommerce, it should live directly with
 
 For example, TikTok lives in Marketing and Product Add-Ons lives in Products.
 
-![Category Setting Image](img/doc_images/Category-Settings.png)
+![Category Setting Image](/img/doc_images/Category-Settings.png)
 
 ## Settings
 
