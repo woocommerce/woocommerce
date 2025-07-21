@@ -11,7 +11,7 @@ import metadata from './component-metadata';
 import FilledCartFrontend from './filled-cart-block/frontend';
 import EmptyCartFrontend from './empty-cart-block/frontend';
 import CartItemsFrontend from './cart-items-block/frontend';
-import CartLineItemsBlock from './cart-line-items-block/block';
+import CartLineItemsBlock from './cart-line-items-block/frontend';
 import CartCrossSellsFrontend from './cart-cross-sells-block/frontend';
 import CartCrossSellsProductsFrontend from './cart-cross-sells-products/frontend';
 import CartTotalsFrontend from './cart-totals-block/frontend';
