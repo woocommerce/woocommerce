@@ -20,6 +20,8 @@
 		self.useAjax              = false === self.variationData;
 		self.xhr                  = false;
 		self.loading              = true;
+		// When true, do not handle clicks on attributes, this is to avoid infinite recursion
+		self.in_autoselect_scope  = false;
 
 		// Initial state.
 		self.$singleVariationWrap.show();
@@ -379,7 +381,16 @@
 			form.$form.trigger( 'check_variations' );
 		} else {
 			form.$form.trigger( 'woocommerce_variation_select_change' );
-			form.$form.trigger( 'check_variations' );
+		}
+		form.$form.trigger( 'check_variations' );
+
+		if ( form.in_autoselect_scope ) {
+			// Avoid infinite recursion
+		} else {
+			if ( form.$form.wc_variations_autoselect( form, $( eventTarget ) ) ) {
+				// Check variations again after auto-selecting
+				form.$form.trigger( 'check_variations' );
+			}
 		}
 
 		// Custom event for when variation selection has been changed
@@ -884,8 +895,10 @@
 					if ( $validOptions.length === 1 ) {
 						// Only 1 option (+ the "Choose an option" choice)
 						if ( $selectElement.val() !== $validOptions.val() ) {
+							form.in_autoselect_scope = true;
 							$selectElement.val( $validOptions.val() );
 							$selectElement.trigger( 'change' ).trigger( 'click' );
+							form.in_autoselect_scope = false;
 						}
 					}
 				} );
