@@ -45,7 +45,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const {
 		autoselect,
 		autoselectOnPageLoad,
-		unattachedAction,
+		unattachedAttributesAction,
 	} = attributes;
 
 	return (
@@ -175,13 +175,13 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					<SelectControl
 						label={ __( 'Values in conflict with current selection', 'woocommerce' ) }
 						help={ __( 'This controls what to do with attribute values that conflict with the current selection.', 'woocommerce' ) }
-						value={ unattachedAction }
+						value={ unattachedAttributesAction }
 						options={ [
 							{ label: __( 'Hidden',                                                                  'woocommerce' ), value: 'hide' },
 							{ label: __( 'Grayed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
 							{ label: __( 'Grayed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
 						] }
-						onChange={ ( value ) => setAttributes( { unattachedAction: value } ) }
+						onChange={ ( value ) => setAttributes( { unattachedAttributesAction: value } ) }
 						__nextHasNoMarginBottom
 					/>
 				</PanelBody>

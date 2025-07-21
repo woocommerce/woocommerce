@@ -404,9 +404,9 @@
 		var form                       = event.data.variationForm,
 			attributes                 = form.getChosenAttributes(),
 			currentAttributes          = attributes.data;
-			unattached_action =
-				form.$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'unattachedAction' ) ||
-				'hide';
+		const unattached_attributes_action =
+			form.$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'unattachedAttributesAction' ) ||
+			'hide';
 
 		if ( form.useAjax ) {
 			return;
@@ -555,7 +555,7 @@
 			}
 
 			const $unattached_options = new_attr_select.find( 'option:not([value=""], .attached)' );
-			switch ( unattached_action ) {
+			switch ( unattached_attributes_action ) {
 				case 'hide':
 					// Hide unattached
 					$unattached_options.remove();

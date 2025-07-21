@@ -17,7 +17,7 @@
 			"type": "boolean",
 			"default": false
 		},
-		"unattachedAction": {
+		"unattachedAttributesAction": {
 			"type": "string",
 			"default": "hide"
 		}
