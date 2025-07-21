@@ -287,7 +287,7 @@ class PaymentsProviders {
 					}
 
 					if ( empty( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) ||
-						 count( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) <= 1 ) {
+						count( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) <= 1 ) {
 						// If there are no other gateways from the same extension, we let the shell gateway be displayed.
 						return true;
 					}

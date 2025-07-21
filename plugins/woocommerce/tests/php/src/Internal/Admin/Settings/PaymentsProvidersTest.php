@@ -2086,7 +2086,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	public function test_remove_shell_payment_gateways( array $gateways_to_mock, array $expected_gateway_ids ) {
 		// Arrange.
 		$this->mock_payment_gateways( $gateways_to_mock );
-		$payment_gateways = $this->sut->get_payment_gateways( false ); // Get raw gateways list
+		$payment_gateways = $this->sut->get_payment_gateways( false ); // Get raw gateways list.
 
 		// Act.
 		$result = $this->sut->remove_shell_payment_gateways( $payment_gateways );
@@ -2114,11 +2114,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_remove_shell_payment_gateways(): array {
 		return array(
-			'empty gateways list'                                  => array(
+			'empty gateways list'                         => array(
 				array(),
 				array(),
 			),
-			'non-shell gateway only'                               => array(
+			'non-shell gateway only'                      => array(
 				array(
 					'gateway1' => array(
 						'enabled'            => true,
@@ -2130,7 +2130,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				),
 				array( 'gateway1' ),
 			),
-			'shell gateway only (should be preserved)'             => array(
+			'shell gateway only (should be preserved)'    => array(
 				array(
 					'gateway1' => array(
 						'enabled'            => true,
@@ -2170,7 +2170,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 						'plugin_slug'        => 'plugin1',
 						'plugin_file'        => 'plugin1/plugin1',
 					),
-					'real_gateway1' => array(
+					'real_gateway1'  => array(
 						'enabled'            => true,
 						'method_title'       => 'Real Gateway Title',
 						'method_description' => 'Real Gateway Description',
@@ -2189,14 +2189,14 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			),
 			'multiple extensions with different shell configurations' => array(
 				array(
-					'plugin1_shell' => array(
+					'plugin1_shell'      => array(
 						'enabled'            => true,
 						'method_title'       => '',
 						'method_description' => '',
 						'plugin_slug'        => 'plugin1',
 						'plugin_file'        => 'plugin1/plugin1',
 					),
-					'plugin1_real' => array(
+					'plugin1_real'       => array(
 						'enabled'            => true,
 						'method_title'       => 'Plugin 1 Real',
 						'method_description' => 'Plugin 1 Description',
@@ -2210,7 +2210,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 						'plugin_slug'        => 'plugin2',
 						'plugin_file'        => 'plugin2/plugin2',
 					),
-					'plugin3_real' => array(
+					'plugin3_real'       => array(
 						'enabled'            => true,
 						'method_title'       => 'Plugin 3 Real',
 						'method_description' => 'Plugin 3 Description',
@@ -2232,7 +2232,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				),
 				array( 'gateway_no_plugin' ),
 			),
-			'gateway with title only (not a shell)'               => array(
+			'gateway with title only (not a shell)'       => array(
 				array(
 					'gateway1' => array(
 						'enabled'            => true,
@@ -2244,7 +2244,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				),
 				array( 'gateway1' ),
 			),
-			'gateway with description only (not a shell)'         => array(
+			'gateway with description only (not a shell)' => array(
 				array(
 					'gateway1' => array(
 						'enabled'            => true,
