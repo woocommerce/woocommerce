@@ -465,6 +465,15 @@ abstract class Task {
 	}
 
 	/**
+	 * Check if the task is in progress.
+	 *
+	 * @return bool
+	 */
+	public function is_in_progress() {
+		return false;
+	}
+
+	/**
 	 * If a task is always accessible, relevant for when a task list is hidden but a task can still be viewed.
 	 *
 	 * @return bool
@@ -517,6 +526,7 @@ abstract class Task {
 			'actionLabel'     => $this->get_action_label(),
 			'actionUrl'       => $this->get_action_url(),
 			'isComplete'      => $is_complete,
+			'isInProgress'    => $this->is_in_progress(),
 			'time'            => $this->get_time(),
 			'level'           => 3,
 			'isActioned'      => $this->is_actioned(),
