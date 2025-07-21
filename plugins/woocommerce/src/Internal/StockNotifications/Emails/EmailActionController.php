@@ -70,6 +70,8 @@ class EmailActionController {
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
 			$notification->save();
+            $confirmation_email = new CustomerStockNotificationVerifiedEmail();
+            $confirmation_email->trigger( $notification );
 		}
 	}
 

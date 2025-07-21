@@ -147,14 +147,14 @@ class CustomerStockNotificationVerifiedEmail extends WC_Email {
 		$is_guest         = ! is_a( $user, 'WP_User' );
 
 		return array(
-			'unsubscribe_link' => add_query_arg(
+			'is_guest'         => $is_guest,
+            'unsubscribe_link' => add_query_arg(
                 array(
                     'email_link_action_key' => $unsubscribe_key,
                     'notification_id'       => $notification->get_id(),
                 ),
                 get_option( 'siteurl' )
             ),
-			'is_guest'         => $is_guest,
 		);
 	}
 
