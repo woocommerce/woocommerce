@@ -160,13 +160,17 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 			$product
 		);
 
-		$verification_link    = '';
-		$expiration_threshold = '30m';
+		$verification_key = $notification->get_verification_key( true );
 
 		return array(
-			'verification_link'                 => $verification_link,
+			'verification_link'                 => add_query_arg(
+                array(
+                    'email_link_action_key' => $verification_key,
+                    'notification_id'       => $notification->get_id(),
+                ),
+                get_option( 'siteurl' )
+            ),
 			'verification_button_text'          => $verification_button_text,
-			'verification_expiration_threshold' => $expiration_threshold,
 		);
 	}
 

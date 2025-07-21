@@ -142,12 +142,18 @@ class CustomerStockNotificationVerifiedEmail extends WC_Email {
 	private function get_additional_template_args(): array {
 		$notification = $this->object;
 
-		$unsubscribe_link = '';
+		$unsubscribe_key  = $notification->get_unsubscribe_key( true );
 		$user             = get_user_by( 'email', $notification->get_user_email() );
 		$is_guest         = ! is_a( $user, 'WP_User' );
 
 		return array(
-			'unsubscribe_link' => $unsubscribe_link,
+			'unsubscribe_link' => add_query_arg(
+                array(
+                    'email_link_action_key' => $unsubscribe_key,
+                    'notification_id'       => $notification->get_id(),
+                ),
+                get_option( 'siteurl' )
+            ),
 			'is_guest'         => $is_guest,
 		);
 	}

@@ -177,7 +177,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 			$product
 		);
 
-		$unsubscribe_key = $notification->get_unsubscribe_key( true );
+		$unsubscribe_key  = $notification->get_unsubscribe_key( true );
 		$user             = get_user_by( 'email', $notification->get_user_email() );
 		$is_guest         = ! is_a( $user, 'WP_User' );
 
