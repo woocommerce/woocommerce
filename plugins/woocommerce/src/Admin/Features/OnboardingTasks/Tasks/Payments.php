@@ -110,6 +110,15 @@ class Payments extends Task {
 	}
 
 	/**
+	 * Check if the task is in progress.
+	 *
+	 * @return bool
+	 */
+	public function is_in_progress() {
+		return true;
+	}
+
+	/**
 	 * The task action URL.
 	 *
 	 * Empty string means the JS logic will handle the task linking.
