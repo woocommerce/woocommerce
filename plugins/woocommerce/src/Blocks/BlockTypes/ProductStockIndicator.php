@@ -126,7 +126,7 @@ class ProductStockIndicator extends AbstractBlock {
 		$wrapper_attributes = array();
 		$watch_attribute    = '';
 
-		if ( $is_interactive ) {
+		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
 			$variations_data           = $product_to_render->get_available_variations();
 			$formatted_variations_data = array();
 			foreach ( $variations_data as $variation ) {
@@ -164,7 +164,7 @@ class ProductStockIndicator extends AbstractBlock {
 		$output  = '';
 		$output .= '<div class="wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator ' . esc_attr( $classnames ) . '"';
 		$output .= isset( $classes_and_styles['styles'] ) ? ' style="' . esc_attr( $classes_and_styles['styles'] ) . '"' : '';
-		if ( $is_interactive ) {
+		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
 			$output .= ' ' . get_block_wrapper_attributes( $wrapper_attributes );
 			$output .= ' ' . $watch_attribute;
 		}
