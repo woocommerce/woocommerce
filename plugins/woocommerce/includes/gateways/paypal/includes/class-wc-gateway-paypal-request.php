@@ -89,6 +89,106 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Create a PayPal order using the Orders v2 API.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array|null
+	 * @throws Exception If the PayPal order creation fails.
+	 */
+	public function create_paypal_order( $order ) {
+		try {
+			$request_body = $this->get_create_paypal_order_request_body( $order );
+
+			// TODO: Replace with the wpcom endpoint when it's ready.
+			$request = WP_REST_Request::from_url( get_site_url( null, '/wp-json/wc-paypal-gateway-proxy/v1/create-order' ) );
+			$request->set_method( 'POST' );
+			$request->set_header( 'Content-Type', 'application/json' );
+			// TODO: Authenticate with wpcom.
+			// $request->set_header( 'Authorization', 'Bearer ' . $wpcom_blog_token );
+			$request->set_body( json_encode( $request_body ) );
+			$response = rest_do_request( $request );
+
+			$data = $response->get_data();
+			if ( 200 !== $response->get_status() || ! isset( $data['id'] ) || ! isset( $data['links'] ) ) {
+				throw new Exception( 'PayPal order creation failed. Response status:' . $response->get_status() );
+			}
+
+			// Find the 'approve' link in the response -- this is where we will redirect the customer to
+			$redirect_url = null;
+			foreach ( $data['links'] as $link ) {
+				if ( $link['rel'] === 'approve' && $link['method'] === 'GET' ) {
+					$redirect_url = $link['href'];
+					break;
+				}
+			}
+
+			return [
+				'id' => $data['id'],
+				'redirect_url' => $redirect_url,
+			];
+		} catch ( Exception $e ) {
+			WC_Gateway_Paypal::log( $e->getMessage() );
+			return null;
+		}
+	}
+
+	/**
+	 * Build the request body for the PayPal create-order request.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	private function get_create_paypal_order_request_body( $order ) {
+		return[
+    		'intent' => 'CAPTURE', // TODO:Or 'AUTHORIZE' for capture-later
+			'purchase_units' => [
+				[
+					'custom_id' => $this->get_paypal_order_custom_id( $order ),
+					'amount' => [
+						'currency_code' => get_woocommerce_currency(),
+						'value' => $order->get_total(),
+					],
+					//'items' => $this->get_paypal_order_items( $order ), // TODO: Add line items.
+					// 'description' => '', // TODO: Add description.
+					'payee' => [
+						'email_address' => $this->gateway->get_option( 'email' ),
+					],
+				],
+			],
+			'application_context' => [
+				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ), // Customer redirected here on approval
+				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),  // Customer redirected here on cancellation
+				//'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion
+			],
+		];
+	}
+
+	/**
+	 * Build the custom ID for the PayPal order. The custom ID will be used by the proxy for webhook forwarding,
+	 * and by later steps to identify the order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 * @throws Exception If the custom ID is too long.
+	 */
+	private function get_paypal_order_custom_id( $order ) {
+		$custom_id = wp_json_encode(
+			[
+				'order_id' => $order->get_id(),
+				'order_key' => $order->get_order_key(),
+				// Endpoint for the proxy to forward webhooks to.
+				'endpoint' => get_site_url( null, '/wp-json/wc-paypal-gateway/v1/webhook' ),
+			]
+		);
+
+		if ( strlen( $custom_id ) > 255 ) {
+			throw new Exception( 'PayPal order custom ID is too long. Max length is 255 chars.' );
+		}
+
+		return $custom_id;
+	}
+
+	/**
 	 * Limit length of an arg.
 	 *
 	 * @param  string  $string Argument to limit.

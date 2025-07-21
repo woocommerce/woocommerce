@@ -370,9 +370,24 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
 
+		if ( $this->use_orders_v2() ) {
+			$paypal_order = $paypal_request->create_paypal_order( $order );
+			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
+				throw new Exception( 'PayPal order creation failed' );
+			}
+
+			// Save the PayPal order ID. This is different from the WooCommerce order ID.
+			$order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
+			$order->save();
+
+			$redirect_url = $paypal_order['redirect_url'];
+		} else {
+			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
+		}
+
 		return array(
 			'result'   => 'success',
-			'redirect' => $paypal_request->get_request_url( $order, $this->testmode ),
+			'redirect' => $redirect_url,
 		);
 	}
 
