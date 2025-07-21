@@ -35,7 +35,7 @@ final class ProductsCommand {
 	 *
 	 * @internal
 	 */
-	public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 	}

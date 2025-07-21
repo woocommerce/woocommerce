@@ -35,7 +35,7 @@ class SetupCommand {
 	 *
 	 * @internal
 	 */
-	public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 	}

@@ -21,8 +21,10 @@ class ShopifyPlatform {
 
 	/**
 	 * Initializes the Shopify platform registration.
+	 *
+	 * @internal
 	 */
-	public static function init(): void {
+	final public static function init(): void {
 		add_filter( 'woocommerce_migrator_platforms', array( self::class, 'register_platform' ) );
 	}
 
