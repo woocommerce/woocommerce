@@ -121,45 +121,37 @@ describe( 'Product Details block', () => {
 			await waitFor( () => {
 				expect(
 					screen.queryByRole( 'button', { name: /description/i } )
-				).toBeInTheDocument();
+				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', { name: /reviews/i } )
-				).toBeInTheDocument();
+				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', {
 						name: /additional information/i,
 					} )
-				).toBeInTheDocument();
+				).toBeVisible();
 			} );
 
 			const table = await screen.findByRole( 'table', { hidden: true } );
 
-			expect(
-				within( table ).queryByText( /Weight/i )
-			).toBeInTheDocument();
-			expect(
-				within( table ).queryByText( /150 kg/i )
-			).toBeInTheDocument();
+			expect( within( table ).queryByText( /Weight/i ) ).toBeVisible();
+			expect( within( table ).queryByText( /150 kg/i ) ).toBeVisible();
 
 			expect(
 				within( table ).queryByText( /Dimensions/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 			expect(
 				within( table ).getByText( /14 × 5.5 × 3.5 cm/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 
-			expect(
-				within( table ).queryByText( /Material/i )
-			).toBeInTheDocument();
+			expect( within( table ).queryByText( /Material/i ) ).toBeVisible();
 			expect(
 				within( table ).queryByText( /Acetate, Metal/i )
-			).toBeInTheDocument();
-			expect(
-				within( table ).queryByText( /Size/i )
-			).toBeInTheDocument();
+			).toBeVisible();
+			expect( within( table ).queryByText( /Size/i ) ).toBeVisible();
 			expect(
 				within( table ).queryByText( /Medium, Large/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 		} );
 
 		test( 'should auto-remove block when product has no specifications', async () => {
@@ -177,10 +169,10 @@ describe( 'Product Details block', () => {
 			await waitFor( () => {
 				expect(
 					screen.queryByRole( 'button', { name: /description/i } )
-				).toBeInTheDocument();
+				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', { name: /reviews/i } )
-				).toBeInTheDocument();
+				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', {
 						name: /additional information/i,
