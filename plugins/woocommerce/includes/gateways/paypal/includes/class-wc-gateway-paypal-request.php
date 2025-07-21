@@ -100,42 +100,50 @@ class WC_Gateway_Paypal_Request {
 			$request_body = $this->get_create_paypal_order_request_body( $order );
 
 			// TODO: Replace with the wpcom endpoint when it's ready.
-			$response = wp_remote_post( $this->get_paypal_create_order_request_url(), array(
-				'method' => 'POST',
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
-				'body' => json_encode( $request_body ),
-			) );
-			$http_code = wp_remote_retrieve_response_code( $response );
-			$body = wp_remote_retrieve_body( $response );
+			$response      = wp_remote_post(
+				$this->get_paypal_create_order_request_url(),
+				array(
+					'method'  => 'POST',
+					'headers' => array(
+						'Content-Type' => 'application/json',
+					),
+					'body'    => wp_json_encode( $request_body ),
+				)
+			);
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
-			error_log( 'PayPal create order response: ' . print_r( $response_data, true ) );
+			error_log( 'PayPal create order response: ' . wc_print_r( $response_data, true ) );
 			if ( 200 !== $http_code || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
 				throw new Exception( 'PayPal order creation failed. Response status:' . $http_code );
 			}
 
-			// Find the 'approve' link in the response -- this is where we will redirect the customer to
+			// Find the 'approve' link in the response -- this is where we will redirect the customer to.
 			$redirect_url = null;
 			foreach ( $response_data['links'] as $link ) {
-				if ( $link['rel'] === 'approve' && $link['method'] === 'GET' ) {
+				if ( 'approve' === $link['rel'] && 'GET' === $link['method'] ) {
 					$redirect_url = $link['href'];
 					break;
 				}
 			}
 
-			return [
-				'id' => $response_data['id'],
+			return array(
+				'id'           => $response_data['id'],
 				'redirect_url' => $redirect_url,
-			];
+			);
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
 	}
 
-	// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+	/**
+	 * Get the PayPal create-order request URL.
+	 * TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+	 *
+	 * @return string
+	 */
 	private function get_paypal_create_order_request_url() {
 		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
 	}
@@ -147,28 +155,30 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_create_paypal_order_request_body( $order ) {
-		return[
-    		'intent' => 'CAPTURE', // TODO:Or 'AUTHORIZE' for capture-later
-			'purchase_units' => [
-				[
+		return array(
+			'intent'              => 'CAPTURE', // TODO: Or 'AUTHORIZE' for capture-later.
+			'purchase_units'      => array(
+				array(
 					'custom_id' => $this->get_paypal_order_custom_id( $order ),
-					'amount' => [
+					'amount' => array(
 						'currency_code' => get_woocommerce_currency(),
 						'value' => $order->get_total(),
-					],
-					//'items' => $this->get_paypal_order_items( $order ), // TODO: Add line items.
+					),
+					// 'items' => $this->get_paypal_order_items( $order ), // TODO: Add line items.
 					// 'description' => '', // TODO: Add description.
-					'payee' => [
+					'payee' => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
-					],
-				],
-			],
-			'application_context' => [
-				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ), // Customer redirected here on approval
-				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),  // Customer redirected here on cancellation
-				//'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion
-			],
-		];
+					),
+				),
+			),
+			'application_context' => array(
+				// Customer redirected here on approval.
+				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+				// Customer redirected here on cancellation.
+				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),
+				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
+			),
+		);
 	}
 
 	/**
@@ -181,12 +191,12 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_order_custom_id( $order ) {
 		$custom_id = wp_json_encode(
-			[
+			array(
 				'order_id' => $order->get_id(),
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
 				'endpoint' => get_site_url( null, '/wp-json/wc-paypal-gateway/v1/webhook' ),
-			]
+			)
 		);
 
 		if ( strlen( $custom_id ) > 255 ) {

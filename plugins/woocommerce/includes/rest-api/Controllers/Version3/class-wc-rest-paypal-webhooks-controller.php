@@ -26,7 +26,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 */
 	protected $namespace = 'wc/v3';
 
-    /**
+	/**
 	 * Route base.
 	 *
 	 * @var string
@@ -35,10 +35,12 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 
 	/**
 	 * Register the routes for the PayPal webhook handler.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
-        // TODO: Remove me before merging the feature branch.
-        // GET /v3/paypal-webhooks/test-webhook
+		// TODO: Remove me before merging the feature branch.
+		// GET /v3/paypal-webhooks/test-webhook.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/test-webhook',
@@ -51,33 +53,40 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			)
 		);
 
-        // POST /v3/paypal-webhooks
-        register_rest_route(
-            $this->namespace,
-            '/' . $this->rest_base,
-            array(
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => array( $this, 'handle_paypal_webhook' ),
-                'permission_callback' => array( $this, 'get_permission' ),
-            )
-        );
+		// POST /v3/paypal-webhooks.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'handle_paypal_webhook' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
-    // TODO: Remove me before merging the feature branch.
-    public function test_webhook( WP_REST_Request $request ) {
-        $data = $request->get_json_params();
-        error_log( 'PayPal test webhook received: ' . print_r( $data, true ) );
-        return new WP_REST_Response( 'Test webhook processed', 200 );
-    }
+	/**
+	 * Test the webhook.
+	 * TODO: Remove me before merging the feature branch.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
+	 */
+	public function test_webhook( WP_REST_Request $request ) {
+		$data = $request->get_json_params();
+		error_log( 'PayPal test webhook received: ' . wc_print_r( $data, true ) );
+		return new WP_REST_Response( 'Test webhook processed', 200 );
+	}
 
-    private function get_permission() {
-        // TODO: Should we check if the webhook is coming from wpcom?
-        return true;
-    }
-
-    public function process_webhook( WP_REST_Request $request ) {
-        include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
-        $webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
-        $webhook_handler->process_webhook( $request );
-    }
+	/**
+	 * Process the webhook.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return void
+	 */
+	public function process_webhook( WP_REST_Request $request ) {
+		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
+		$webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
+		$webhook_handler->process_webhook( $request );
+	}
 }
