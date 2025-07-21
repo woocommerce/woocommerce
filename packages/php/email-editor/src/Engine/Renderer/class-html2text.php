@@ -50,7 +50,7 @@ class Html2Text {
 		$options = array_merge( static::default_options(), $options );
 
 		// Check all options are valid.
-		foreach ( $options as $key => $value ) {
+		foreach ( array_keys( $options ) as $key ) {
 			if ( ! in_array( $key, array_keys( static::default_options() ), true ) ) {
 				// Log invalid option for debugging purposes without exposing in exception.
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Security: Logging sensitive data separately from user-facing exception messages.
