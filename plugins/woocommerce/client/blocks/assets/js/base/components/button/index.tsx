@@ -29,10 +29,6 @@ export interface ButtonProps extends WCButtonProps {
 	 * @default false
 	 */
 	removeTextWrap?: boolean;
-	/**
-	 * Legacy prop that gets filtered out - not used by this component
-	 */
-	showSpinner?: boolean;
 }
 
 interface LinkProps extends ButtonProps {
@@ -55,7 +51,6 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			// To maintain backward compat we render a wrapper for button text by default,
 			// but you can opt in to removing it by setting removeTextWrap to true.
 			removeTextWrap = false,
-			showSpinner, // Extract and discard showSpinner prop
 			...rest
 		} = props;
 
