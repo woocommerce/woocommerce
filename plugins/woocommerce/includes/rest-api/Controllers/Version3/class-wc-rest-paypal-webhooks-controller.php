@@ -59,7 +59,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			'/' . $this->rest_base,
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'handle_paypal_webhook' ),
+				'callback'            => array( $this, 'process_webhook' ),
 				'permission_callback' => '__return_true',
 			)
 		);
