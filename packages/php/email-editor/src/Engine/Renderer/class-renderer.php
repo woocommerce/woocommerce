@@ -12,7 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_R
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
-use Soundasleep\Html2Text;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use WP_Style_Engine;
 
 /**
