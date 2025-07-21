@@ -1606,7 +1606,7 @@ class WC_Install {
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
-			$datetime_default = "DEFAULT CURRENT_TIMESTAMP";
+			$datetime_default = 'DEFAULT CURRENT_TIMESTAMP';
 		} else {
 			$datetime_default = "DEFAULT '1970-01-01 00:00:00'";
 		}
