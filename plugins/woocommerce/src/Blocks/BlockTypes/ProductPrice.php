@@ -106,8 +106,8 @@ class ProductPrice extends AbstractBlock {
 					)
 				);
 
-				wp_enqueue_script_module( 'woocommerce/product-element' );
-				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-element';
+				wp_enqueue_script_module( 'woocommerce/product-elements' );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
 				$context                                   = array(
 					'productElementKey' => 'price_html',
 				);

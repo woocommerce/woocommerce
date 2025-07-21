@@ -51,7 +51,7 @@ export type Context = {
 };
 
 const productElementStore = store(
-	'woocommerce/product-element',
+	'woocommerce/product-elements',
 	{
 		callbacks: {
 			updateValue: () => {
