@@ -36,7 +36,8 @@ type Context = AddToCartWithOptionsStoreContext & {
 	options: Option[];
 };
 
-var autoselect_lock = false; // When true, do not handle clicks on attributes
+// When true, do not handle clicks on attributes, this is to avoid infinite recursion
+var in_autoselect_scope = false;
 
 // Set selected pill styles for proper contrast.
 setStyles();
@@ -67,7 +68,7 @@ function attributesAutoselect( $variation_selectors ) {
 			const $selected = $current_variation_selector.find(':checked');
 			if ( $selected.length === 0 || $selected.val() !== $valid_choices.val() ) {
 				// No option selected, OR the selected value is not the same as the only valid one
-				autoselect_lock = true;
+				in_autoselect_scope = true;
 				if ( $valid_choices.is( 'input' ) ) {
 					// Pills
 					$valid_choices.click();
@@ -78,7 +79,7 @@ function attributesAutoselect( $variation_selectors ) {
 					const ev = new Event('change');
 					$select[0].dispatchEvent(ev);
 				}
-				autoselect_lock = false;
+				in_autoselect_scope = false;
 			}
 		}
 	} );
@@ -296,14 +297,21 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} else {
 					context.selectedValue = context.option.value;
 				}
-				actions.setAttribute( context.name, context.selectedValue );
-				!autoselect_lock && attributesAutoselectOthers();
+				if ( in_autoselect_scope ) {
+					// Avoid infinite recursion
+				} else {
+					attributesAutoselectOthers();
+				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
-				!autoselect_lock && attributesAutoselectOthers();
+				if ( in_autoselect_scope ) {
+					// Avoid infinite recursion
+				} else {
+					attributesAutoselectOthers();
+				}
 			},
 		},
 		callbacks: {
