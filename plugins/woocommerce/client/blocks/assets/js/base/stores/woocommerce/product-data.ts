@@ -3,23 +3,20 @@
  */
 import { getContext, store } from '@wordpress/interactivity';
 
-export type Context = {
-	productId: number | null;
-	variationId: number | null;
+type EntityId = number | null;
+type ProductRef = {
+	productId: EntityId;
+	variationId: EntityId;
 };
 
+export type Context = ProductRef;
+
 type ServerState = {
-	templateState: {
-		productId: number | null;
-		variationId: number | null;
-	};
+	templateState: ProductRef;
 };
 
 const productDataStore = store< {
-	state: {
-		productId: number | null;
-		variationId: number | null;
-	} & ServerState;
+	state: ProductRef & ServerState;
 	actions: {
 		setVariationId: ( variationId: number | null ) => void;
 	};
@@ -27,7 +24,7 @@ const productDataStore = store< {
 	'woocommerce/product-data',
 	{
 		state: {
-			get productId(): number | null {
+			get productId(): EntityId {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
@@ -37,7 +34,7 @@ const productDataStore = store< {
 					productDataStore?.state?.templateState?.productId
 				);
 			},
-			get variationId(): number | null {
+			get variationId(): EntityId {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
@@ -49,7 +46,7 @@ const productDataStore = store< {
 			},
 		},
 		actions: {
-			setVariationId: ( variationId: number | null ) => {
+			setVariationId: ( variationId: EntityId ) => {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
