@@ -7,7 +7,7 @@ sidebar_label: Navigation
 
 Place your product navigation elements within the existing WooCommerce menu structure.
 
-## Extension with it’s own menu item
+## Extension with its own menu item
 
 The two options to extend the WooCommerce menu structure are within the category menu or within the relevant settings areas.
 
@@ -27,11 +27,11 @@ If your plugin adds a settings screen to set up the plugin, settings should be u
 
 For example, shipping and payments extensions will appear in their relevant Settings area. Only if necessary, create a top-level settings tab if your extension has settings that don’t fit under existing tabs and creating a sub-tab isn’t appropriate.
 
-**Don’t add top level navigation**
-If your product is extending WooCommerce, then there’s a 99.9% chance your product navigation, and settings should live within the WooCommerce nav structure—see above menu structure examples.
+**Don’t add top-level navigation**
+If your product is extending WooCommerce, there’s a 99.9% chance your product navigation and settings should live within the WooCommerce nav structure—see the menu structure examples above.
 
 **Don’t: No iframes, only APIs**
-To create a cohesive experience, application data should be loaded via API instead of an iFrame.
+To create a cohesive experience, application data should be loaded via API instead of an iframe.
 
 **Do: Keep menu structure simple**
 Keep menu structure simple. Use existing WooCommerce menu structures as much as possible to reduce redundancies.
@@ -42,7 +42,7 @@ If your plugin must introduce multiple pages or areas, consider grouping them in
 
 Some extensions don’t require a menu item because they extend specific features within an existing product area.
 
-Integrated features includes extensions that don't live in the nav and add a feature to an existing system. For example, the Product Bundles plugin is contained to the product form.
+Integrated features include extensions that don't live in the navigation and simply add functionality to an existing system. For example, the Product Bundles plugin is limited to the product form.
 
 In this case, there’s no navigation item or extension home screen. The Plugins page can be used to share updates with your users.
 
@@ -53,7 +53,7 @@ The plugin name represents a way for merchants to identify your plugin across mu
 **Don’t: use an existing feature or extension in the plugin title**
 The plugin name should appear at all times in the UI as a functional and original name. e.g “Appointments” instead of “VendorXYZ Bookings Plugin for WooCommerce.”
 
-**Do: One line navigation label**
+**Do: One-line navigation label**
 Keep extension names short, ideally within 20 characters, to make it easier for merchants to read and understand.
 
 Keep all navigation labels on one line. Do not introduce a second line in any of the menu items.
