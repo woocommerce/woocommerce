@@ -252,12 +252,12 @@ export const TaskItem = ( {
 						</div>
 					) }
 				</Text>
+				{ inProgress && (
+					<div className="woocommerce-task-list__item-progress">
+						{ __( 'In progress', 'woocommerce' ) }
+					</div>
+				) }
 			</div>
-			{ inProgress && (
-				<div className="woocommerce-task-list__item-progress">
-					{ __( 'In progress', 'woocommerce' ) }
-				</div>
-			) }
 			{ showEllipsisMenu && (
 				<EllipsisMenu
 					label={ __( 'Task Options', 'woocommerce' ) }
