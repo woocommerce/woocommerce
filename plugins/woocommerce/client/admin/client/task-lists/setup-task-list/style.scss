@@ -185,6 +185,11 @@
 		border: 1px solid var(--wp-admin-theme-color);
 		background: transparent;
 	}
+
+	.woocommerce-task-list__item.in_progress .woocommerce-task__icon {
+		background: linear-gradient(to left, var(--wp-admin-theme-color) 50%, transparent 50%);
+	}
+
 	.woocommerce-task-list__item.complete:not(.complete) .woocommerce-task__icon {
 		border: none;
 	}
