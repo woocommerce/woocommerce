@@ -70,6 +70,29 @@ class EmailActionController {
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
 			$notification->save();
+
+            // We need session for notices to work.
+            if ( ! WC()->session->has_session() ) {
+                // Generate a random customer ID.
+                WC()->session->set_customer_session_cookie( true );
+            }
+
+            $product = wc_get_product( $notification->get_product_id() );
+
+            /* translators: %s is product name */
+            $notice_text = sprintf( esc_html__( 'Successfully verified stock notifications for "%s".', 'woocommerce' ), $product->get_name() );
+            wc_add_notice( $notice_text );
+            
+            /**
+             * `woocommerce_customer_stock_notification_verified_url` filter.
+             *
+             * @since 0.0.0
+             *
+             * @param  string  $url
+             * @return string
+             */
+            $url = apply_filters( 'woocommerce_customer_stock_notification_verified_url', get_permalink( wc_get_page_id( 'shop' ) ) );
+            wp_safe_redirect( $url );
 		}
 	}
 
@@ -97,6 +120,28 @@ class EmailActionController {
             $notification->set_cancellation_source( NotificationCancellationSource::USER );
             $notification->set_date_cancelled( time() );
 			$notification->save();
+
+            // We need session for notices to work.
+            if ( ! WC()->session->has_session() ) {
+                // Generate a random customer ID.
+                WC()->session->set_customer_session_cookie( true );
+            }
+
+            $product = wc_get_product( $notification->get_product_id() );
+
+            /* translators: %2$s product name, %1$s user email */
+            $notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce-back-in-stock-notifications' ), $notification->get_user_email(), $product->get_name() );
+            wc_add_notice( $notice_text );
+            /**
+             * `woocommerce_customer_stock_notification_unsubscribe_url` filter.
+             *
+             * @since 0.0.0
+             *
+             * @param  string  $url
+             * @return string
+             */
+            $url = apply_filters( 'woocommerce_customer_stock_notification_unsubscribe_url', get_permalink( wc_get_page_id( 'shop' ) ) );
+            wp_safe_redirect( $url );
 		}
 	}
 
