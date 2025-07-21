@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix issue in Analytics reports where itemsLabel can be undefined and cause an error with Gutenberg 21.2.0
+Fix areas where undefined can be passed into sprintf and cause a fatal error with Gutenberg 21.2.0, in particular in Analytics reports.
