@@ -157,10 +157,10 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 				</Tooltip>
 			</div>
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Autoselect', 'woocommerce' ) }>
+				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __( 'Auto-select attributes on user selection', 'woocommerce' ) }
-						help={ __( 'This controls which other attributes will be auto-selected when an attribute is changed. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
+						label={ __( 'Auto-select other attributes on user selection', 'woocommerce' ) }
+						help={ __( 'This controls whether other attributes will be auto-selected when an attribute is changed. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
 						checked={ autoselect }
 						onChange={ () => setAttributes( { autoselect: !autoselect } ) }
 						__nextHasNoMarginBottom
