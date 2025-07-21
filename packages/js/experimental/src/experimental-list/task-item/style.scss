@@ -74,7 +74,9 @@ $task-alert-yellow: #f0b849;
 	}
 
 	.woocommerce-task-list__item-text {
-		padding: $gap 0;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
 
 		.woocommerce-pill {
 			padding: 1px $gap-smaller;
