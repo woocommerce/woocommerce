@@ -476,7 +476,7 @@ abstract class Task {
 	/**
 	 * The task in progress label.
 	 *
-	 * @return bool
+	 * @return string
 	 */
 	public function in_progress_label() {
 		return __( 'In progress', 'woocommerce' );
