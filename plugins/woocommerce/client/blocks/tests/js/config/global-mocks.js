@@ -39,6 +39,7 @@ global.wcSettings = {
 		failed: 'Failed',
 	},
 	placeholderImgSrc: 'placeholder.jpg',
+	placeholderImgSrcFullSize: 'placeholder-full-size.jpg',
 	productCount: 101,
 	locale: {
 		siteLocale: 'en_US',
