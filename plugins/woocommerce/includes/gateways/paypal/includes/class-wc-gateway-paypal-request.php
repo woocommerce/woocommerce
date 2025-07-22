@@ -166,8 +166,22 @@ class WC_Gateway_Paypal_Request {
 					'amount'    => array(
 						'currency_code' => get_woocommerce_currency(),
 						'value'         => $order->get_total(),
+						'breakdown'     => array(
+							'item_total' => array(
+								'currency_code' => get_woocommerce_currency(),
+								'value'         => $this->get_paypal_order_items_total( $order ),
+							),
+							'shipping'   => array(
+								'currency_code' => get_woocommerce_currency(),
+								'value'         => $order->get_shipping_total(),
+							),
+							'tax_total'  => array(
+								'currency_code' => get_woocommerce_currency(),
+								'value'         => $order->get_total_tax(),
+							),
+						),
 					),
-					// 'items'  => $this->get_paypal_order_items( $order ), // TODO: Add line items.
+					'items'     => $this->get_paypal_order_items( $order ),
 					'payee'     => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
@@ -208,6 +222,44 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $custom_id;
+	}
+
+	/**
+	 * Get the order items for the PayPal create-order request
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	private function get_paypal_order_items( $order ) {
+		$items = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$items[] = array(
+				'name'        => $item->get_name(),
+				'quantity'    => $item->get_quantity(),
+				'unit_amount' => array(
+					'currency_code' => get_woocommerce_currency(),
+					'value'         => $order->get_item_total( $item, false, false ),
+				),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get the total for all items.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return float
+	 */
+	private function get_paypal_order_items_total( $order ) {
+		$total = 0;
+		foreach ( $order->get_items() as $item ) {
+			$total += (float) $item->get_total();
+		}
+
+		return $total;
 	}
 
 	/**
