@@ -62,22 +62,28 @@ class ProductGallery extends \WP_UnitTestCase {
 		return do_blocks(
 			sprintf(
 				'<!-- wp:woocommerce/single-product {"productId":%d} -->
-				<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery%s -->
-				<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
+				<div class="wp-block-woocommerce-single-product woocommerce">
+					<!-- wp:woocommerce/product-gallery %s -->
+					<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery">
+						<!-- wp:woocommerce/product-gallery-thumbnails /-->
 
-				<!-- wp:woocommerce/product-gallery-large-image -->
-				<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
+						<!-- wp:woocommerce/product-gallery-large-image -->
+						<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks">
+							<!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
 
-				<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+							<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 
-				<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-				<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-				<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-				<!-- /wp:woocommerce/product-gallery-large-image --></div>
-				<!-- /wp:woocommerce/product-gallery --></div>
+							<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
+							<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
+							<!-- /wp:woocommerce/product-gallery-large-image-next-previous -->
+						</div>
+						<!-- /wp:woocommerce/product-gallery-large-image -->
+					</div>
+					<!-- /wp:woocommerce/product-gallery -->
+				</div>
 				<!-- /wp:woocommerce/single-product -->',
 				$product_id,
-				$gallery_attrs
+				$gallery_attributes
 			)
 		);
 	}
@@ -136,7 +142,7 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		$markup = $this->render_product_gallery(
 			$data['product']->get_id(),
-			'hoverZoom="true"'
+			'{"hoverZoom":true}'
 		);
 
 		// Check that hover zoom is enabled in the context.
@@ -153,7 +159,7 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		$markup = $this->render_product_gallery(
 			$data['product']->get_id(),
-			'fullScreenOnClick="true"'
+			'{"fullScreenOnClick":true}'
 		);
 
 		// Check that fullscreen is enabled in the context.
