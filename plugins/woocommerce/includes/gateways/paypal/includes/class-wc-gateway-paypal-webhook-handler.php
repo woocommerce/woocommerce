@@ -71,9 +71,10 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
 			$order->add_order_note(
 				sprintf(
-					/* translators: %1$s: PayPal order ID */
+					/* translators: %1$s: PayPal order ID, %2$s: Status */
 					__( 'PayPal payment approval failed. PayPal Order ID: %1$s. Status: %2$s', 'woocommerce' ),
-					$paypal_order_id
+					$paypal_order_id,
+					$status
 				)
 			);
 		}
