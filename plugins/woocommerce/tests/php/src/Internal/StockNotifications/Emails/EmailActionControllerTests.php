@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
+use WC_Helper_Product;
 
 /**
  * EmailActionControllerTests tests.
@@ -19,8 +20,9 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * Test that verification action is sets notification status to active.
 	 */
 	public function test_process_verification_action_sets_status_active() {
+        $product = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
-		$notification->set_product_id( 1 );
+		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::PENDING );
 		$notification->set_user_email( 'test@example.com' );
 		$key = time() . ':' . HasherHelper::wp_fast_hash( 'test' );
@@ -28,17 +30,18 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$id = $notification->save();
 
 		$controller = new EmailActionController();
-		$controller->maybe_process_verification_action( (string) $id, 'test');
-		$notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::ACTIVE, $notification->get_status() );
+		$controller->process_verification_action( $notification, 'test');
+        $updated_notification = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::ACTIVE, $updated_notification->get_status() );
 	}
 
 	/**
 	 * Test that unsubscribe action sets notification status to cancelled, and sets cancellation source to user.
 	 */
 	public function test_process_unsubscribe_action_sets_status_cancelled() {
+        $product = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
-		$notification->set_product_id( 1 );
+		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_user_email( 'test@example.com' );
 		$key = HasherHelper::wp_fast_hash( 'test' );
@@ -46,9 +49,9 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$id = $notification->save();
 
 		$controller = new EmailActionController();
-		$controller->maybe_process_unsubscribe_action( (string) $id, 'test' );
-		$notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::CANCELLED, $notification->get_status() );
-		$this->assertEquals( NotificationCancellationSource::USER, $notification->get_cancellation_source() );
+		$controller->process_unsubscribe_action( $notification, 'test' );
+		$updated_notification = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::CANCELLED, $updated_notification->get_status() );
+		$this->assertEquals( NotificationCancellationSource::USER, $updated_notification->get_cancellation_source() );
 	}
 }

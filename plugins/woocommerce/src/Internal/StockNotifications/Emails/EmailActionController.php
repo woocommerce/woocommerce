@@ -23,42 +23,46 @@ class EmailActionController {
 	 * Initializes the controller by adding actions to process verification and unsubscribe actions from requests.
 	 */
 	public function __construct() {
-		add_action( 'template_redirect', array( $this, 'maybe_process_verification_action_from_request' ) );
-		add_action( 'template_redirect', array( $this, 'maybe_process_unsubscribe_action_from_request' ) );
+		add_action( 'template_redirect', array( $this, 'maybe_process_email_action' ) );
 	}
 
 	/**
-	 * This method checks if the request contains a verification action and processes it.
+	 * This method checks if the request contains indicators to process an action from an email link.
 	 */
-	public function maybe_process_verification_action_from_request(): void {
-		$this->maybe_process_verification_action( $_GET['notification_id'] ?? null, $_GET['email_link_action_key'] ?? null);
+	public function maybe_process_email_action(): void {
+        if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
+            return;
+        }
+		$this->validate_request( $_GET['notification_id'], $_GET['email_link_action_key'] );
 	}
 
-	/**
-	 * This method checks if the request contains an unsubscribe action and processes it.
-	 */
-	public function maybe_process_unsubscribe_action_from_request(): void {
-		$this->maybe_process_unsubscribe_action( $_GET['notification_id'] ?? null, $_GET['email_link_action_key'] ?? null );
-	}
+    public function validate_request( string $notification_id, string $email_link_action_key ): void {
+        if ( empty( $email_link_action_key ) || empty( $notification_id ) ) {
+            return;
+        }
+
+        $notification = $this->get_notification_to_be_processed( $notification_id );
+
+        if ( ! $notification ) {
+            return;
+        }
+
+        $action_key = $notification->get_meta( 'email_link_action_key' );
+        if ( str_contains( $action_key, ':' ) ) {
+            $this->process_verification_action( $notification, $email_link_action_key );
+        } else {
+            $this->process_unsubscribe_action( $notification, $email_link_action_key );
+        }
+    }
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.
 	 *
-	 * @param string $notification_id The ID of the notification to process.
+	 * @param Notification $notification The notification to process.
 	 * @param string $action_key The action key to verify.
 	 * @return void
 	 */
-	public function maybe_process_verification_action( string $notification_id, string $action_key ): void {
-		if ( ! $action_key ) {
-			return;
-		}
-
-		$notification = $this->get_notification_to_be_processed( $notification_id );
-
-		if ( ! $notification ) {
-			return;
-		}
-
+	public function process_verification_action( Notification $notification, string $action_key): void {
 		if ( $notification->check_verification_key( $action_key ) ) {
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
@@ -91,21 +95,11 @@ class EmailActionController {
 	/**
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
 	 *
-	 * @param string $notification_id The ID of the notification to process.
+	 * @param Notification $notification The Notification to process.
 	 * @param string $action_key The action key to verify.
 	 * @return void
 	 */
-	public function maybe_process_unsubscribe_action( string $notification_id, string $action_key ): void {
-		if ( ! $action_key ) {
-			return;
-		}
-
-		$notification = $this->get_notification_to_be_processed( $notification_id );
-
-		if ( ! $notification ) {
-			return;
-		}
-
+	public function process_unsubscribe_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_unsubscribe_key( $action_key ) ) {
 			$notification->set_status( NotificationStatus::CANCELLED );
 			$notification->set_cancellation_source( NotificationCancellationSource::USER );
