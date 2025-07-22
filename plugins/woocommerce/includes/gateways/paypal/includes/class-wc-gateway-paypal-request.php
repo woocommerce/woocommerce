@@ -91,6 +91,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Create a PayPal order using the Orders v2 API.
 	 *
+	 * This method creates a PayPal order and returns the order details including
+	 * the approval URL where customers will be redirected to complete payment.
+	 *
 	 * @param WC_Order $order Order object.
 	 * @return array|null
 	 * @throws Exception If the PayPal order creation fails.
