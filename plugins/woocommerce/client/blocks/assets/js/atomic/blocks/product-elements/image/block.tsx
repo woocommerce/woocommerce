@@ -4,10 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import {
-	PLACEHOLDER_IMG_SRC,
-	PLACEHOLDER_IMG_SRC_FULL_SIZE,
-} from '@woocommerce/settings';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -23,6 +20,7 @@ import {
 	isEmpty,
 	ProductResponseItem,
 } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -64,7 +62,7 @@ const ImagePlaceholder = ( props: {
 } ): JSX.Element => {
 	const { showFullSize, ...restProps } = props;
 	const src = showFullSize
-		? PLACEHOLDER_IMG_SRC_FULL_SIZE
+		? getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC )
 		: PLACEHOLDER_IMG_SRC;
 
 	return (
