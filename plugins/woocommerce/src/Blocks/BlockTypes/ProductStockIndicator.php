@@ -143,7 +143,7 @@ class ProductStockIndicator extends AbstractBlock {
 				array(
 					'products' => array(
 						$product_to_render->get_id() => array(
-							'availability_html' => '',
+							'availability_html' => wc_get_stock_html( $product_to_render ),
 							'variations'        => $formatted_variations_data,
 						),
 					),
