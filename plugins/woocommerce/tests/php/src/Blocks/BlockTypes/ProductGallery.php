@@ -97,6 +97,23 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Helper method to clean up product and image data.
+	 *
+	 * @param array|WC_Product $data Product data array or WC_Product instance.
+	 */
+	private function cleanup_product_data( $data ) {
+		if ( is_array( $data ) ) {
+			$data['product']->delete( true );
+			wp_delete_attachment( $data['main_image_id'], true );
+			foreach ( $data['gallery_image_ids'] as $gallery_image_id ) {
+				wp_delete_attachment( $gallery_image_id, true );
+			}
+		} elseif ( is_object( $data ) && is_a( $data, 'WC_Product' ) ) {
+			$data->delete( true );
+		}
+	}
+
+	/**
 	 * Test that the ProductGallery block renders correctly with multiple images.
 	 */
 	public function test_product_gallery_render_with_multiple_images() {
@@ -122,12 +139,7 @@ class ProductGallery extends \WP_UnitTestCase {
 		// Check that the aspect ratio class is applied.
 		$this->assertStringContainsString( 'wc-block-components-product-image--aspect-ratio-auto', $markup );
 
-		// Clean up.
-		$data['product']->delete( true );
-		wp_delete_attachment( $data['main_image_id'], true );
-		foreach ( $data['gallery_image_ids'] as $gallery_image_id ) {
-			wp_delete_attachment( $gallery_image_id, true );
-		}
+		$this->cleanup_product_data( $data );
 	}
 
 	/**
@@ -144,12 +156,7 @@ class ProductGallery extends \WP_UnitTestCase {
 		// Check that hover zoom is enabled in the context.
 		$this->assertStringContainsString( 'data-hover-zoom="true"', $markup );
 
-		// Clean up.
-		$data['product']->delete( true );
-		wp_delete_attachment( $data['main_image_id'], true );
-		foreach ( $data['gallery_image_ids'] as $gallery_image_id ) {
-			wp_delete_attachment( $gallery_image_id, true );
-		}
+		$this->cleanup_product_data( $data );
 	}
 
 	/**
@@ -166,12 +173,7 @@ class ProductGallery extends \WP_UnitTestCase {
 		// Check that fullscreen is enabled in the context.
 		$this->assertStringContainsString( 'data-full-screen-on-click="true"', $markup );
 
-		// Clean up.
-		$data['product']->delete( true );
-		wp_delete_attachment( $data['main_image_id'], true );
-		foreach ( $data['gallery_image_ids'] as $gallery_image_id ) {
-			wp_delete_attachment( $gallery_image_id, true );
-		}
+		$this->cleanup_product_data( $data );
 	}
 
 	/**
@@ -186,8 +188,7 @@ class ProductGallery extends \WP_UnitTestCase {
 		// Should contain placeholder image.
 		$this->assertStringContainsString( 'woocommerce-placeholder', $markup );
 
-		// Clean up.
-		$product->delete( true );
+		$this->cleanup_product_data( $product );
 	}
 
 	/**
