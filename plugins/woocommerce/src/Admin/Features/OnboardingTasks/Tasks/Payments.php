@@ -296,7 +296,7 @@ class Payments extends Task {
 		$providers = $this->get_payments_providers();
 
 		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not WooPayments.
+			// Check if the provider is enabled and is not an offline payment method.
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
@@ -346,7 +346,9 @@ class Payments extends Task {
 			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
+			// Get the raw list of payment providers, including suggestions, but remove shells.
+			// This way we prevent shell gateways that are (wrongly) reported as enabled from affecting the task completion.
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false, true );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			return array();

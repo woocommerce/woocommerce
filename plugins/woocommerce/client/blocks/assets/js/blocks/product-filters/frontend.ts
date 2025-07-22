@@ -3,6 +3,11 @@
  */
 import * as iAPI from '@wordpress/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import { decodeHtmlEntities } from '../../utils/html-entities';
+
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
@@ -30,6 +35,7 @@ function selectFilter() {
 
 	context.activeFilters = newActiveFilters;
 }
+
 function unselectFilter() {
 	const { item } = getContext< ProductFiltersContext >();
 	actions.removeActiveFiltersBy(
@@ -76,7 +82,11 @@ const productFiltersStore = {
 				params[ key ] = value;
 			}
 
+			const config = getConfig( BLOCK_NAME );
+			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
+
 			activeFilters.forEach( ( filter ) => {
+				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
 				if ( ! value ) return;
@@ -101,6 +111,12 @@ const productFiltersStore = {
 					params[ `query_type_${ slug }` ] =
 						filter.attributeQueryType || 'or';
 				}
+
+				if ( type.includes( 'taxonomy' ) ) {
+					const [ , taxonomy ] = type.split( '/' );
+					const paramKey = taxonomyParamsMap[ taxonomy ];
+					addParam( paramKey, value );
+				}
 			} );
 			return params;
 		},
@@ -115,6 +131,7 @@ const productFiltersStore = {
 				} )
 				.map( ( item ) => ( {
 					...item,
+					activeLabel: decodeHtmlEntities( item.activeLabel ),
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
