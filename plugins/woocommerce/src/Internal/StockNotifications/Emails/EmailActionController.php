@@ -30,11 +30,11 @@ class EmailActionController {
 	 * This method checks if the request contains indicators to process an action from an email link.
 	 */
 	public function maybe_process_email_action(): void {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
 			return;
 		}
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$this->validate_request( wp_unslash( $_GET['notification_id'] ), wp_unslash( $_GET['email_link_action_key'] ) );
 	}
 
