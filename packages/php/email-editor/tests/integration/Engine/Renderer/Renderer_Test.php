@@ -421,7 +421,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '- Complete your profile', $text_content );
 		$this->assertStringContainsString( '[features](https://example.com/features)', $text_content );
 		$this->assertStringContainsString( '> ', $text_content ); // Check blockquote format.
-		$this->assertStringContainsString( "We’re excited to have you on board!", $text_content );
+		$this->assertStringContainsString( 'We’re excited to have you on board!', $text_content );
 		$this->assertStringContainsString( "Best regards,\nThe Team", $text_content );
 	}
 
