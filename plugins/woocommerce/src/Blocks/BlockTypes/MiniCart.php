@@ -508,7 +508,8 @@ class MiniCart extends AbstractBlock {
 			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
 			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
-			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+			$extra_classes                    = StyleAttributesUtils::get_classes_from_attributes( $attributes );
+			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s %s', $classes_styles['classes'], $extra_classes['class'] );
 			$wrapper_styles                   = $classes_styles['styles'];
 			$template_part_contents           = $this->get_template_part_contents( false );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
@@ -756,7 +757,8 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+		$extra_classes   = StyleAttributesUtils::get_classes_from_attributes( $attributes );
+		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s %s', $classes_styles['classes'], $extra_classes['class'] );
 		$wrapper_styles  = $classes_styles['styles'];
 
 		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
