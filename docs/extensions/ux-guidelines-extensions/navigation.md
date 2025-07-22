@@ -27,7 +27,7 @@ If your plugin adds a settings screen to set up the plugin, settings should be u
 
 For example, shipping and payments extensions will appear in their relevant Settings area. Only if necessary, create a top-level settings tab if your extension has settings that don’t fit under existing tabs and creating a sub-tab isn’t appropriate.
 
-### Don’t add top-level navigation
+### Don’t: Add top-level navigation
 
 If your product is extending WooCommerce, there’s a 99.9% chance your product navigation and settings should live within the WooCommerce nav structure—see the menu structure examples above.
 
@@ -53,7 +53,7 @@ In this case, there’s no navigation item or extension home screen. The Plugins
 
 The plugin name represents a way for merchants to identify your plugin across multiple touchpoints in the WooCommerce admin.
 
-### Don’t: use an existing feature or extension in the plugin title
+### Don’t: Use an existing feature or extension in the plugin title
 
 The plugin name should appear at all times in the UI as a functional and original name. e.g “Appointments” instead of “VendorXYZ Bookings Plugin for WooCommerce.”
 
