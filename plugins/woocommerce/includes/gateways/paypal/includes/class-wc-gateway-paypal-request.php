@@ -115,18 +115,11 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
-			if ( ( 200 !== $http_code && 201 !== $http_code ) || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
+			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code );
 			}
 
-			// Find the 'approve' link in the response -- this is where we will redirect the customer to.
-			$redirect_url = null;
-			foreach ( $response_data['links'] as $link ) {
-				if ( 'approve' === $link['rel'] && 'GET' === $link['method'] ) {
-					$redirect_url = $link['href'];
-					break;
-				}
-			}
+			$redirect_url = $this->get_approve_link( $http_code, $response_data );
 
 			return array(
 				'id'           => $response_data['id'],
@@ -136,6 +129,30 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
+	}
+
+	/**
+	 * Get the approve link from the response data.
+	 *
+	 * @param int   $http_code The HTTP code of the response.
+	 * @param array $response_data The response data.
+	 * @return string|null
+	 */
+	private function get_approve_link( $http_code, $response_data ) {
+		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
+		if ( 200 === $http_code && isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
+			$rel = 'payer-action';
+		} else {
+			$rel = 'approve';
+		}
+
+		foreach ( $response_data['links'] as $link ) {
+			if ( $rel === $link['rel'] && 'GET' === $link['method'] ) {
+				return $link['href'];
+			}
+		}
+
+		return null;
 	}
 
 	/**
