@@ -4,7 +4,10 @@
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import {
+	PLACEHOLDER_IMG_SRC,
+	PLACEHOLDER_IMG_SRC_FULL_SIZE,
+} from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -28,17 +31,6 @@ import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
-
-// PLACEHOLDER_IMG_SRC is in thumbnail size which may have aspect-ratio
-// set in Customizer and it may not reflect the aspect-ratio of the full size image.
-// So we're "creating" a full size placeholder URL from the thumbnail URL.
-// Example input: https://example.com/path/to/placeholder-150x150.png
-// Example output: https://example.com/path/to/placeholder.png
-const getPlaceholderSrc = ( showFullSize: boolean ) => {
-	return showFullSize
-		? PLACEHOLDER_IMG_SRC.replace( /-\d+x\d+(?=\.[^.]+$)/, '' )
-		: PLACEHOLDER_IMG_SRC;
-};
 
 const buildStyles = ( props: Partial< ImageProps > ) => {
 	const { aspectRatio, height, width, scale } = props;
@@ -71,7 +63,9 @@ const ImagePlaceholder = ( props: {
 	showFullSize: boolean;
 } ): JSX.Element => {
 	const { showFullSize, ...restProps } = props;
-	const src = getPlaceholderSrc( showFullSize );
+	const src = showFullSize
+		? PLACEHOLDER_IMG_SRC_FULL_SIZE
+		: PLACEHOLDER_IMG_SRC;
 
 	return (
 		<img
