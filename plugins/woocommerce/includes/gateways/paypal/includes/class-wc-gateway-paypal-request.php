@@ -115,8 +115,8 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
-			if ( 200 !== $http_code || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
-				throw new Exception( 'PayPal order creation failed. Response status:' . $http_code );
+			if ( ( 200 !== $http_code && 201 !== $http_code ) || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
+				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code );
 			}
 
 			// Find the 'approve' link in the response -- this is where we will redirect the customer to.
