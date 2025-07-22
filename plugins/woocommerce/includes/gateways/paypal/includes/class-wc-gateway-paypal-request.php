@@ -173,27 +173,29 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_paypal_create_order_request_body( $order ) {
+		$currency = $order->get_currency();
+
 		return array(
 			'intent'              => $this->get_paypal_order_intent(),
 			'purchase_units'      => array(
 				array(
 					'custom_id' => $this->get_paypal_order_custom_id( $order ),
 					'amount'    => array(
-						'currency_code' => get_woocommerce_currency(),
+						'currency_code' => $currency,
 						'value'         => $order->get_total(),
 						// Note: We are not including discount in the breakdown, as PayPal tries to subtract
 						// it from the total, and ends up rejecting the order as it does not tally correctly.
 						'breakdown'     => array(
 							'item_total' => array(
-								'currency_code' => get_woocommerce_currency(),
+								'currency_code' => $currency,
 								'value'         => $this->get_paypal_order_items_total( $order ),
 							),
 							'shipping'   => array(
-								'currency_code' => get_woocommerce_currency(),
+								'currency_code' => $currency,
 								'value'         => $order->get_shipping_total(),
 							),
 							'tax_total'  => array(
-								'currency_code' => get_woocommerce_currency(),
+								'currency_code' => $currency,
 								'value'         => $order->get_total_tax(),
 							),
 						),
