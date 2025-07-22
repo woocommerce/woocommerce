@@ -254,7 +254,7 @@ export const TaskItem = ( {
 						</div>
 					) }
 				</Text>
-				{ inProgress && (
+				{ inProgress && inProgressLabel && (
 					<div className="woocommerce-task-list__item-progress">
 						{ inProgressLabel }
 					</div>
