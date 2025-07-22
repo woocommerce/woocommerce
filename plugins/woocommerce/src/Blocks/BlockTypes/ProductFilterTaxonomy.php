@@ -67,7 +67,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
 			if ( ! empty( $params[ $param_key ] ) && is_string( $params[ $param_key ] ) ) {
-				$term_slugs                          = explode( ',', $params[ $param_key ] );
+				$term_slugs                          = array_map( 'sanitize_title', explode( ',', $params[ $param_key ] ) );
 				$active_taxonomies[ $taxonomy_slug ] = $term_slugs;
 				$all_term_slugs                      = array_merge( $all_term_slugs, $term_slugs );
 			}
@@ -171,7 +171,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		$param_key      = $taxonomy_params[ $taxonomy ];
 
 		if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
-			$selected_terms = array_filter( explode( ',', $filter_params[ $param_key ] ) );
+			$selected_terms = array_filter( array_map( 'sanitize_title', explode( ',', $filter_params[ $param_key ] ) ) );
 		}
 
 		$filter_context = array(
@@ -182,7 +182,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		if ( ! empty( $taxonomy_counts ) ) {
 			$taxonomy_options = array_map(
-				function ( $term ) use ( $block_attributes, $taxonomy_counts, $selected_terms, $taxonomy ) {
+				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
 

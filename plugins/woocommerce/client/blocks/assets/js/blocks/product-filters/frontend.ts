@@ -76,6 +76,9 @@ const productFiltersStore = {
 				params[ key ] = value;
 			}
 
+			const config = getConfig( BLOCK_NAME );
+			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
+
 			activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
@@ -105,10 +108,7 @@ const productFiltersStore = {
 
 				if ( type.includes( 'taxonomy' ) ) {
 					const [ , taxonomy ] = type.split( '/' );
-					const config = getConfig( BLOCK_NAME );
-					const taxonomyParamsMap = config?.taxonomyParamsMap || {};
-					const paramKey =
-						taxonomyParamsMap[ taxonomy ] || `filter_${ taxonomy }`;
+					const paramKey = taxonomyParamsMap[ taxonomy ];
 					addParam( paramKey, value );
 				}
 			} );
