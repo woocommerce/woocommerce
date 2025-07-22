@@ -229,17 +229,17 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( is_callable( array( $registry, 'resolve_platform' ) ) );
 	}
 
-		/**
-		 * Test that PlatformRegistry can handle platform validation.
-		 *
-		 * Note: This test only verifies method structure since WP_CLI calls
-		 * would cause failures in the test environment.
-		 */
+	/**
+	 * Test that PlatformRegistry can handle platform validation.
+	 *
+	 * Note: This test only verifies method structure since WP_CLI calls
+	 * would cause failures in the test environment.
+	 */
 	public function test_platform_validation_structure() {
 		$registry = new PlatformRegistry();
 
 		// Test that the registry can check for platform existence.
-		$this->assertFalse( $registry->get_platform( 'nonexistent_platform' ) );
+		$this->assertNull( $registry->get_platform( 'nonexistent_platform' ) );
 
 		// Test that get_platforms returns an array.
 		$this->assertIsArray( $registry->get_platforms() );
