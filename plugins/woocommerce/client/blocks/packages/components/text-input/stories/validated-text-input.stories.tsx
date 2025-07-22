@@ -217,15 +217,14 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
+	const { customFormatter } = args;
 	const getFormattedValue = useCallback(
 		( val: string | number | readonly string[] | undefined ) => {
 			const stringVal =
 				typeof val === 'string' ? val : String( val || '' );
-			return args.customFormatter
-				? args.customFormatter( stringVal )
-				: stringVal;
+			return customFormatter ? customFormatter( stringVal ) : stringVal;
 		},
-		[ args ]
+		[ customFormatter ]
 	);
 
 	const [ inputValue, setInputValue ] = useState(
