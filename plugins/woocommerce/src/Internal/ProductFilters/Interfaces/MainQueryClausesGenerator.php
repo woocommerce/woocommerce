@@ -1,6 +1,6 @@
 <?php
 /**
- * ClausesProviderInterface interface file.
+ * MainQueryClausesGenerator interface file.
  */
 
 declare(strict_types=1);
@@ -10,18 +10,18 @@ namespace Automattic\WooCommerce\Internal\ProductFilters\Interfaces;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * QueryClausesGenerator interface.
+ * MainQueryClausesGenerator interface.
  *
  * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
-interface QueryClausesGenerator {
+interface MainQueryClausesGenerator {
 
 	/**
-	 * Add conditional query clauses based on the filter params in query vars.
+	 * Add conditional query clauses for main query based on the filter params in query vars.
 	 *
 	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( array $args, \WP_Query $wp_query ): array;
+	public function add_query_clauses_for_main_query( array $args, \WP_Query $wp_query ): array;
 }
