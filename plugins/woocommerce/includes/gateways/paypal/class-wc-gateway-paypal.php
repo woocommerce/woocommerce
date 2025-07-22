@@ -368,6 +368,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @param  int $order_id Order ID.
 	 * @return array
+	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
 		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
@@ -587,22 +588,23 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Checks if the gateway should use Orders v2 API.
 	 *
-	 * TODO: We expect this flag to be true if the merchant can be migrated,
-	 * i.e. does not need PayPal API keys, and they have accepted the ToS.
-	 *
 	 * @return bool
 	 */
 	protected function use_orders_v2() {
-		$paypal_settings = get_option( 'woocommerce_paypal_settings' );
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: We expect this flag to be true if the merchant can be migrated,
+		// i.e. does not need PayPal API keys, and they have accepted the ToS.
 
 		/**
 		 * Filters whether the gateway should use Orders v2 API.
 		 *
 		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.1.0
 		 */
 		return apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			isset( $paypal_settings['use_orders_v2'] ) && 'yes' === $paypal_settings['use_orders_v2']
+			'yes' === $this->get_option( 'use_orders_v2' )
 		);
 	}
 }

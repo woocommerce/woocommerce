@@ -99,6 +99,7 @@ class WC_Gateway_Paypal_Request {
 		try {
 			$request_body = $this->get_create_paypal_order_request_body( $order );
 
+			// phpcs:disable Generic.Commenting.Todo.TaskFound
 			// TODO: Replace with the wpcom endpoint when it's ready.
 			$response      = wp_remote_post(
 				$this->get_paypal_create_order_request_url(),
@@ -114,7 +115,6 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
-			error_log( 'PayPal create order response: ' . wc_print_r( $response_data, true ) );
 			if ( 200 !== $http_code || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
 				throw new Exception( 'PayPal order creation failed. Response status:' . $http_code );
 			}
@@ -140,11 +140,12 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the PayPal create-order request URL.
-	 * TODO: This will be replaced with a constant pointing to the wpcom endpoint.
 	 *
 	 * @return string
 	 */
 	private function get_paypal_create_order_request_url() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
 		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
 	}
 
@@ -155,18 +156,19 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_create_paypal_order_request_body( $order ) {
+		// phpcs:disable Generic.Commenting.Todo.TaskFound
+		// phpcs:disable Squiz.PHP.CommentedOutCode.Found
 		return array(
 			'intent'              => 'CAPTURE', // TODO: Or 'AUTHORIZE' for capture-later.
 			'purchase_units'      => array(
 				array(
 					'custom_id' => $this->get_paypal_order_custom_id( $order ),
-					'amount' => array(
+					'amount'    => array(
 						'currency_code' => get_woocommerce_currency(),
-						'value' => $order->get_total(),
+						'value'         => $order->get_total(),
 					),
-					// 'items' => $this->get_paypal_order_items( $order ), // TODO: Add line items.
-					// 'description' => '', // TODO: Add description.
-					'payee' => array(
+					// 'items'  => $this->get_paypal_order_items( $order ), // TODO: Add line items.
+					'payee'     => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
 				),
@@ -179,6 +181,8 @@ class WC_Gateway_Paypal_Request {
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
 		);
+		// phpcs:enable Generic.Commenting.Todo.TaskFound
+		// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 	}
 
 	/**

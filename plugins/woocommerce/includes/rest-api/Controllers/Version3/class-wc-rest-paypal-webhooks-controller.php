@@ -9,6 +9,8 @@
  * @since   2.6.0
  */
 
+declare(strict_types=1);
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -39,6 +41,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 * @return void
 	 */
 	public function register_routes() {
+		// phpcs:disable Generic.Commenting.Todo.TaskFound
 		// TODO: Remove me before merging the feature branch.
 		// GET /v3/paypal-webhooks/test-webhook.
 		register_rest_route(
@@ -67,6 +70,8 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 
 	/**
 	 * Test the webhook.
+	 *
+	 * phpcs:disable Generic.Commenting.Todo.TaskFound
 	 * TODO: Remove me before merging the feature branch.
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -74,7 +79,6 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 */
 	public function test_webhook( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
-		error_log( 'PayPal test webhook received: ' . wc_print_r( $data, true ) );
 		return new WP_REST_Response( 'Test webhook processed', 200 );
 	}
 
