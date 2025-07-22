@@ -264,7 +264,7 @@ class WC_Gateway_Paypal_Request {
 				'name'        => $item->get_name(),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
-					'currency_code' => get_woocommerce_currency(),
+					'currency_code' => $order->get_currency(),
 					'value'         => $order->get_item_total( $item, $include_tax = false, $rounding_enabled = false ),
 				),
 			);
