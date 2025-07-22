@@ -55,24 +55,10 @@ class ProductGallery extends \WP_UnitTestCase {
 	 * Helper method to render the product gallery block.
 	 *
 	 * @param int    $product_id The product ID.
-	 * @param array  $gallery_attributes Optional gallery attributes.
+	 * @param string $gallery_attributes Optional gallery attributes.
 	 * @return string The rendered markup.
 	 */
-	private function render_product_gallery( $product_id, $gallery_attributes = array() ) {
-		$gallery_attrs = '';
-		if ( ! empty( $gallery_attributes ) ) {
-			$gallery_attrs = ' ' . implode(
-				' ',
-				array_map(
-					function( $key, $value ) {
-						return sprintf( '%s="%s"', $key, $value === true ? 'true' : $value );
-					},
-					array_keys( $gallery_attributes ),
-					$gallery_attributes
-				)
-			);
-		}
-
+	private function render_product_gallery( $product_id, $gallery_attributes = '' ) {
 		return do_blocks(
 			sprintf(
 				'<!-- wp:woocommerce/single-product {"productId":%d} -->
@@ -150,7 +136,7 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		$markup = $this->render_product_gallery(
 			$data['product']->get_id(),
-			array( 'hoverZoom' => true )
+			'hoverZoom="true"'
 		);
 
 		// Check that hover zoom is enabled in the context.
@@ -167,7 +153,7 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		$markup = $this->render_product_gallery(
 			$data['product']->get_id(),
-			array( 'fullScreenOnClick' => true )
+			'fullScreenOnClick="true"'
 		);
 
 		// Check that fullscreen is enabled in the context.
