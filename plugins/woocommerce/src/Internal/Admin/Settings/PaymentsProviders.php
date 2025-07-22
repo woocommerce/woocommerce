@@ -500,7 +500,7 @@ class PaymentsProviders {
 		return ( empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() ) ) ||
 			// Special case for WooPayments gateways that are not the main one: their method title is "WooPayments",
 			// but their ID is made up of the main gateway ID and a suffix for the payment method.
-			(  'WooPayments' === $gateway->get_method_title() && str_starts_with( $gateway->id, WooPaymentsService::GATEWAY_ID . '_' ) );
+			( 'WooPayments' === $gateway->get_method_title() && str_starts_with( $gateway->id, WooPaymentsService::GATEWAY_ID . '_' ) );
 	}
 
 	/**
