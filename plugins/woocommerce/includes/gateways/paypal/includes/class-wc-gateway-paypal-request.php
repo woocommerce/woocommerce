@@ -101,7 +101,7 @@ class WC_Gateway_Paypal_Request {
 
 			// phpcs:disable Generic.Commenting.Todo.TaskFound
 			// TODO: Replace with the wpcom endpoint when it's ready.
-			$response      = wp_remote_post(
+			$response = wp_remote_post(
 				$this->get_paypal_create_order_request_url(),
 				array(
 					'method'  => 'POST',
@@ -111,6 +111,11 @@ class WC_Gateway_Paypal_Request {
 					'body'    => wp_json_encode( $request_body ),
 				)
 			);
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
+			}
+
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
