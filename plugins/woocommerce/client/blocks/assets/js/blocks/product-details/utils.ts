@@ -1,20 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	PartialProduct,
-	ProductDimensions,
-	ProductProductAttribute,
-} from '@woocommerce/data';
+import { PartialProduct, ProductDimensions } from '@woocommerce/data';
+import { isEmpty } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 
 export const isAdditionalProductDataEmpty = (
 	product: PartialProduct
 ): boolean => {
-	const isWeightEmpty = ( value: string | undefined ) => {
-		return ! value || value.length === 0;
-	};
-
 	const isDimensionsEmpty = ( value: ProductDimensions | undefined ) => {
 		return (
 			! value ||
@@ -24,16 +17,10 @@ export const isAdditionalProductDataEmpty = (
 		);
 	};
 
-	const isAttributesEmpty = (
-		value: ProductProductAttribute[] | undefined
-	) => {
-		return ! value || value.length === 0;
-	};
-
 	return (
-		isWeightEmpty( product.weight ) &&
+		isEmpty( product.weight ) &&
 		isDimensionsEmpty( product.dimensions ) &&
-		isAttributesEmpty( product.attributes )
+		isEmpty( product.attributes )
 	);
 };
 
