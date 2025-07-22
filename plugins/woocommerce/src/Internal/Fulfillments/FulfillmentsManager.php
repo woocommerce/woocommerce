@@ -166,7 +166,6 @@ class FulfillmentsManager {
 		$this->update_fulfillment_status( $order, $fulfillments );
 	}
 
-
 	/**
 	 * Update fulfillments after a refund is created.
 	 *

@@ -637,7 +637,6 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 5, $quantities_by_item[ $item_id_2 ] ); // 10 - 8 = 2 pending, 2 reduced from pending, 3 reduced from fulfillment, 5.
 	}
 
-
 	/**
 	 * Test fulfillment modifications with multiple refunds.
 	 */

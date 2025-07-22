@@ -344,7 +344,6 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $fulfillment->get_id(), $result[0]->fulfillment_id );
 	}
 
-
 	/**
 	 * Tests the delete_meta method of the order fulfillment data store.
 	 */

@@ -32,7 +32,6 @@ class FulfillmentsController {
 		add_action( 'init', array( $this, 'initialize_fulfillments' ), 10, 0 );
 	}
 
-
 	/**
 	 * Initialize the fulfillments controller.
 	 */
