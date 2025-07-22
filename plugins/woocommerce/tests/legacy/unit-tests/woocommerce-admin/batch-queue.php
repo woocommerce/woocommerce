@@ -139,8 +139,7 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 		OrdersScheduler::set_queue( null );
 
 		// Clear queues to ensure we're starting fresh.
-		CustomersScheduler::clear_queued_actions();
-		OrdersScheduler::clear_queued_actions();
+		WC_Helper_Queue::run_all_pending();
 
 		// Schedule an action that depends on blocking job.
 		OrdersScheduler::schedule_action( 'import_batch_init', array( 1, false ) );
