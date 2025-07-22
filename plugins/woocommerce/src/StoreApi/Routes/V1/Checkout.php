@@ -405,6 +405,17 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		
+		// Nonce validation
+		$nonce = $request->get_header( 'Nonce' );
+		if ( ! wp_verify_nonce( $nonce, 'wc_store_api' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_missing_nonce',
+				__( 'Missing or invalid nonce. This endpoint requires a valid Nonce header.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
 
 		$validation_callback = $this->validate_callback( $request );
