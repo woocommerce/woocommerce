@@ -19,6 +19,20 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	} ) ),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...originalModule,
+		getSetting: jest.fn( ( key, defaultValue ) => {
+			if ( key === 'placeholderImgSrcFullSize' ) {
+				return 'placeholder-full-size.jpg';
+			}
+			// Use the original getSetting for other keys
+			return originalModule.getSetting( key, defaultValue );
+		} ),
+	};
+} );
+
 const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
