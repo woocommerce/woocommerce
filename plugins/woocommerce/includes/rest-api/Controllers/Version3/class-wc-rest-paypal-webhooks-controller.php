@@ -86,7 +86,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 * Process the webhook.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return void
+	 * @return WP_REST_Response The response object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
 		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
