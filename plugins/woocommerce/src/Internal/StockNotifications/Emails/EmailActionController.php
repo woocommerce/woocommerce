@@ -32,8 +32,8 @@ class EmailActionController {
 	 */
 	public function maybe_process_verification_action_from_request(): void {
 		$this->maybe_process_verification_action(
-			$_GET['notification_id'] ? wp_unslash( $_GET['notification_id'] ) : null,
-			$_GET['email_link_action_key'] ? wp_unslash( $_GET['email_link_action_key'] ) : null
+			$_GET['notification_id'] ?? null,
+			$_GET['email_link_action_key'] ?? null
 		);
 	}
 
@@ -42,14 +42,13 @@ class EmailActionController {
 	 */
 	public function maybe_process_unsubscribe_action_from_request(): void {
 		$this->maybe_process_unsubscribe_action(
-			$_GET['notification_id'] ? wp_unslash( $_GET['notification_id'] ) : null,
-			$_GET['email_link_action_key'] ? wp_unslash( $_GET['email_link_action_key'] ) : null
+            $_GET['notification_id'] ?? null,
+            $_GET['email_link_action_key'] ?? null
 		);
 	}
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.
-	 * TODO: redirect the request, notify the user of successful verification.
 	 *
 	 * @param string $notification_id The ID of the notification to process.
 	 * @param string $action_key The action key to verify.
