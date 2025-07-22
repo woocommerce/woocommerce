@@ -14,6 +14,7 @@ export type TaskType = {
 	isDismissed: boolean;
 	isSnoozed: boolean;
 	isInProgress: boolean;
+	inProgressLabel: string;
 	isVisible: boolean;
 	isSnoozeable: boolean;
 	isDisabled: boolean;
