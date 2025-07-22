@@ -54,8 +54,6 @@ export const TaskListItem = ( {
 		content,
 		id,
 		isComplete,
-		isInProgress,
-		inProgressLabel,
 		isDismissable,
 		isSnoozeable,
 		time,
@@ -189,8 +187,8 @@ export const TaskListItem = ( {
 					key={ id }
 					title={ title }
 					badge={ badge }
-					inProgress={ isInProgress }
-					inProgressLabel={ inProgressLabel }
+					inProgress={ false } // In progress design is not supported for "Things to do next" task list.
+					inProgressLabel={ '' } // In progress design is not supported for "Things to do next" task list.
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }
