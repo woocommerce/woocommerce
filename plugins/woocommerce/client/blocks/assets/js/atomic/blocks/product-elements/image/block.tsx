@@ -4,7 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -20,7 +20,6 @@ import {
 	isEmpty,
 	ProductResponseItem,
 } from '@woocommerce/types';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
