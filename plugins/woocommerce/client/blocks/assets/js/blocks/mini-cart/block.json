@@ -12,7 +12,12 @@
 		"multiple": false,
 		"typography": {
 			"fontSize": true
-		}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"interactivity": true
 	},
 	"example": {
 		"attributes": {
