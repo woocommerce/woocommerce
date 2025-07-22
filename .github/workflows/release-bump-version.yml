@@ -3,19 +3,19 @@ name: 'Release: Bump version number'
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Release branch.'
+        type: string
+        required: true
+        default: ''
       bump_type:
         description: 'Type of version bump to perform'
         required: true
         type: choice
         options:
           - stable
-          - dev
           - rc
-      branch:
-        description: 'Source branch to use.'
-        type: string
-        required: true
-        default: ''
+          - dev
 
 permissions:
   contents: write
