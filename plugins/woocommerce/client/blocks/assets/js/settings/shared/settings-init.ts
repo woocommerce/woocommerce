@@ -63,6 +63,7 @@ export interface WooCommerceSharedSettings {
 	locale: WooCommerceSiteLocale;
 	orderStatuses: Record< string, string > | never[];
 	placeholderImgSrc: string;
+	placeholderImgSrcFullSize: string;
 	siteTitle: string;
 	storePages:
 		| Record<
@@ -103,6 +104,7 @@ const defaults: WooCommerceSharedSettings = {
 	},
 	orderStatuses: [],
 	placeholderImgSrc: '',
+	placeholderImgSrcFullSize: '',
 	siteTitle: '',
 	storePages: [],
 	wcAssetUrl: '',
