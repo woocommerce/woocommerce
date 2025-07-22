@@ -43,6 +43,7 @@ export type Store = {
 	actions: {
 		addNotice: ( notice: Notice ) => string;
 		removeNotice: ( noticeId: string | PointerEvent ) => void;
+		removeAllNotices: () => void;
 	};
 	callbacks: {
 		renderNoticeContent: () => void;
@@ -149,6 +150,11 @@ const { state } = store< Store >(
 				if ( index !== -1 ) {
 					notices.splice( index, 1 );
 				}
+			},
+
+			removeAllNotices: () => {
+				const { notices } = state;
+				notices.splice( 0, notices.length );
 			},
 		},
 		callbacks: {

@@ -140,6 +140,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await colorBlueOption.click();
 			await logoNoOption.click();
 
+			// Verify error was removed.
+			await expect(
+				page.getByText(
+					'Please select product attributes before adding to cart.'
+				)
+			).toBeHidden();
+
+			// Verify blocks updated.
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
 			await expect( productPrice ).toHaveText( '$45.00' );
 		} );

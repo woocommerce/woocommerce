@@ -220,6 +220,7 @@ const addToCartWithOptionsStore = store<
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
+				addToCartWithOptionsStore.actions.cleanErrorNotices();
 				const context = getContext< Context >();
 				const productId = childProductId || context.productId;
 
@@ -430,6 +431,20 @@ const addToCartWithOptionsStore = store<
 						type: productType,
 					} );
 				}
+			},
+			*cleanErrorNotices() {
+				// Todo: Use the module exports instead of `store()` once the store-notices
+				// store is public.
+				yield import( '@woocommerce/stores/store-notices' );
+				const { actions: noticeActions } = store< StoreNotices >(
+					'woocommerce/store-notices',
+					{},
+					{
+						lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+					}
+				);
+
+				noticeActions.removeAllNotices();
 			},
 		},
 	},
