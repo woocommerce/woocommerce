@@ -115,6 +115,9 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				throw new Exception( 'Invalid JSON response from PayPal: ' . json_last_error_msg() );
+			}
 			if ( ( 200 !== $http_code && 201 !== $http_code ) || ! isset( $response_data['id'] ) || ! isset( $response_data['links'] ) ) {
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code );
 			}
