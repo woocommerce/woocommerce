@@ -408,7 +408,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Use reflection to test private method.
-		$reflection = new \ReflectionClass( 'WC_Tax' );
+		$reflection = new ReflectionClass( 'WC_Tax' );
 		$method     = $reflection->getMethod( 'get_shipping_tax_class_from_cart_items' );
 		$method->setAccessible( true );
 
