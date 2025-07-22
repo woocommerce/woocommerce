@@ -52,14 +52,12 @@
 		"<rootDir>/vendor/",
 		"<rootDir>/tests/"
 	],
-	"roots": [
-		"<rootDir>",
-		"<rootDir>/../legacy/js"
-	],
+	"roots": [ "<rootDir>", "<rootDir>/../legacy/js" ],
 	"resolver": "<rootDir>/tests/js/scripts/resolver.js",
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/scripts/babel-transformer.js"
 	},
 	"verbose": true,
-	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest"
+	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest",
+	"testEnvironment": "jest-fixed-jsdom"
 }
