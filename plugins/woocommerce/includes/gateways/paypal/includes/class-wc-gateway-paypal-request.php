@@ -116,7 +116,7 @@ class WC_Gateway_Paypal_Request {
 			$response_data = json_decode( $body, true );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
-				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code );
+				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
 			$redirect_url = $this->get_approve_link( $http_code, $response_data );
