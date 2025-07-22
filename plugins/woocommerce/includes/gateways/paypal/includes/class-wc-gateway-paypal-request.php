@@ -181,6 +181,8 @@ class WC_Gateway_Paypal_Request {
 					'amount'    => array(
 						'currency_code' => get_woocommerce_currency(),
 						'value'         => $order->get_total(),
+						// Note: We are not including discount in the breakdown, as PayPal tries to subtract
+						// it from the total, and ends up rejecting the order as it does not tally correctly.
 						'breakdown'     => array(
 							'item_total' => array(
 								'currency_code' => get_woocommerce_currency(),
