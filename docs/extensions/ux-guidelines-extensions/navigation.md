@@ -36,6 +36,7 @@ If your product is extending WooCommerce, there’s a 99.9% chance your product 
 To create a cohesive experience, application data should be loaded via API instead of an iframe.
 
 ### Do: Keep menu structure simple
+
 Keep menu structure simple. Use existing WooCommerce menu structures as much as possible to reduce redundancies.
 
 If your plugin must introduce multiple pages or areas, consider grouping them in tabs using existing components to remain consistent with WooCommerce structure.
