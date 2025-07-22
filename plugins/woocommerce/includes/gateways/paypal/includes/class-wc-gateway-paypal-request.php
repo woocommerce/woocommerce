@@ -156,10 +156,8 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_create_paypal_order_request_body( $order ) {
-		// phpcs:disable Generic.Commenting.Todo.TaskFound
-		// phpcs:disable Squiz.PHP.CommentedOutCode.Found
 		return array(
-			'intent'              => 'CAPTURE', // TODO: Or 'AUTHORIZE' for capture-later.
+			'intent'              => $this->get_paypal_order_intent(),
 			'purchase_units'      => array(
 				array(
 					'custom_id' => $this->get_paypal_order_custom_id( $order ),
@@ -192,11 +190,10 @@ class WC_Gateway_Paypal_Request {
 				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 				// Customer redirected here on cancellation.
 				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),
+				// phpcs:ignore Generic.Commenting.Todo.TaskFound,Squiz.PHP.CommentedOutCode.Found
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
 		);
-		// phpcs:enable Generic.Commenting.Todo.TaskFound
-		// phpcs:enable Squiz.PHP.CommentedOutCode.Found
 	}
 
 	/**
@@ -260,6 +257,20 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $total;
+	}
+
+	/**
+	 * Get the value for the intent field in the create-order request.
+	 *
+	 * @return string
+	 */
+	private function get_paypal_order_intent() {
+		$payment_action = $this->gateway->get_option( 'paymentaction' );
+		if ( 'authorization' === $payment_action ) {
+			return 'AUTHORIZE';
+		}
+
+		return 'CAPTURE';
 	}
 
 	/**
