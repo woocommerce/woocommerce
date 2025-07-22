@@ -119,6 +119,15 @@ class Payments extends Task {
 	}
 
 	/**
+	 * The task in progress label.
+	 *
+	 * @return string
+	 */
+	public function in_progress_label() {
+		return __( 'Test account', 'woocommerce' );
+	}
+
+	/**
 	 * The task action URL.
 	 *
 	 * Empty string means the JS logic will handle the task linking.
