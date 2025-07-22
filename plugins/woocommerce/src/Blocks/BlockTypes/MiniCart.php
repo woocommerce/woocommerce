@@ -502,7 +502,6 @@ class MiniCart extends AbstractBlock {
 
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-			var_dump($classes_styles);
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
 			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
