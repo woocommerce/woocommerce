@@ -87,7 +87,7 @@ const InstallWooPaymentsStep = ( {
 			<div className="launch-your-store-payments-content__step--install-woopayments-logo">
 				<img
 					src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-					alt="Woo Logo"
+					alt={ __( 'Woo Logo', 'woocommerce' ) }
 				/>
 			</div>
 			<h1 className="launch-your-store-payments-content__step--install-woopayments-title">
