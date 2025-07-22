@@ -52,28 +52,57 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Helper method to render the product gallery block.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param array  $gallery_attributes Optional gallery attributes.
+	 * @return string The rendered markup.
+	 */
+	private function render_product_gallery( $product_id, $gallery_attributes = array() ) {
+		$gallery_attrs = '';
+		if ( ! empty( $gallery_attributes ) ) {
+			$gallery_attrs = ' ' . implode(
+				' ',
+				array_map(
+					function( $key, $value ) {
+						return sprintf( '%s="%s"', $key, $value === true ? 'true' : $value );
+					},
+					array_keys( $gallery_attributes ),
+					$gallery_attributes
+				)
+			);
+		}
+
+		return do_blocks(
+			sprintf(
+				'<!-- wp:woocommerce/single-product {"productId":%d} -->
+				<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery%s -->
+				<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
+
+				<!-- wp:woocommerce/product-gallery-large-image -->
+				<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
+
+				<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+
+				<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
+				<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
+				<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
+				<!-- /wp:woocommerce/product-gallery-large-image --></div>
+				<!-- /wp:woocommerce/product-gallery --></div>
+				<!-- /wp:woocommerce/single-product -->',
+				$product_id,
+				$gallery_attrs
+			)
+		);
+	}
+
+	/**
 	 * Test that the ProductGallery block renders correctly with multiple images.
 	 */
 	public function test_product_gallery_render_with_multiple_images() {
 		$data = $this->create_product_with_gallery( 3 );
 
-		$markup = do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} -->
-<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery -->
-<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
-
-<!-- wp:woocommerce/product-gallery-large-image -->
-<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
-
-<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
-
-<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-<!-- /wp:woocommerce/product-gallery-large-image --></div>
-<!-- /wp:woocommerce/product-gallery --></div>
-<!-- /wp:woocommerce/single-product -->'
-		);
+		$markup = $this->render_product_gallery( $data['product']->get_id() );
 
 		// Check that the gallery wrapper is rendered.
 		$this->assertStringContainsString( 'wc-block-product-gallery', $markup );
@@ -102,26 +131,15 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	* Test that the ProductGallery block renders correctly with hover zoom enabled.
-	*/
+	 * Test that the ProductGallery block renders correctly with hover zoom enabled.
+	 */
 	public function test_product_gallery_render_with_hover_zoom() {
 		$data = $this->create_product_with_gallery( 1 );
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} -->
-<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery {"hoverZoom":true} -->
-<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
-
-<!-- wp:woocommerce/product-gallery-large-image -->
-<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
-
-<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
-
-<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-<!-- /wp:woocommerce/product-gallery-large-image --></div>
-<!-- /wp:woocommerce/product-gallery --></div>
-<!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			array( 'hoverZoom' => true )
+		);
 
 		// Check that hover zoom is enabled in the context.
 		$this->assertStringContainsString( 'data-hover-zoom="true"', $markup );
@@ -135,26 +153,15 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	* Test that the ProductGallery block renders correctly with fullscreen on click enabled.
-	*/
+	 * Test that the ProductGallery block renders correctly with fullscreen on click enabled.
+	 */
 	public function test_product_gallery_render_with_fullscreen_on_click() {
 		$data = $this->create_product_with_gallery( 1 );
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} -->
-		<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery {"fullScreenOnClick":true} -->
-		<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image -->
-		<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
-
-		<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-		<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-		<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-		<!-- /wp:woocommerce/product-gallery-large-image --></div>
-		<!-- /wp:woocommerce/product-gallery --></div>
-		<!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_gallery(
+			$data['product']->get_id(),
+			array( 'fullScreenOnClick' => true )
+		);
 
 		// Check that fullscreen is enabled in the context.
 		$this->assertStringContainsString( 'data-full-screen-on-click="true"', $markup );
@@ -168,27 +175,13 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	* Test that the ProductGallery block handles products without images correctly.
-	*/
+	 * Test that the ProductGallery block handles products without images correctly.
+	 */
 	public function test_product_gallery_render_without_images() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->
-		<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery -->
-		<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image -->
-		<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
-
-		<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-		<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-		<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-		<!-- /wp:woocommerce/product-gallery-large-image --></div>
-		<!-- /wp:woocommerce/product-gallery --></div>
-		<!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_gallery( $product->get_id() );
 
 		// Should contain placeholder image.
 		$this->assertStringContainsString( 'woocommerce-placeholder', $markup );
@@ -198,24 +191,10 @@ class ProductGallery extends \WP_UnitTestCase {
 	}
 
 	/**
-	* Test that the ProductGallery block handles invalid product IDs correctly.
-	*/
+	 * Test that the ProductGallery block handles invalid product IDs correctly.
+	 */
 	public function test_product_gallery_render_with_invalid_product() {
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":99999} -->
-		<div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-gallery -->
-		<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image -->
-		<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false,"isDescendentOfSingleProductBlock":true} /-->
-
-		<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
-
-		<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
-		<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
-		<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
-		<!-- /wp:woocommerce/product-gallery-large-image --></div>
-		<!-- /wp:woocommerce/product-gallery --></div>
-		<!-- /wp:woocommerce/single-product -->' );
+		$markup = $this->render_product_gallery( 99999 );
 
 		$this->assertEmpty( $markup );
 	}
