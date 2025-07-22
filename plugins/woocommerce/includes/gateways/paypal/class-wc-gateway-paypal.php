@@ -376,7 +376,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
 
-		if ( $this->use_orders_v2() ) {
+		if ( $this->should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception( 'PayPal order creation failed' );
@@ -590,7 +590,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @return bool
 	 */
-	protected function use_orders_v2() {
+	protected function should_use_orders_v2() {
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// TODO: We expect this flag to be true if the merchant can be migrated,
 		// i.e. does not need PayPal API keys, and they have accepted the ToS.
