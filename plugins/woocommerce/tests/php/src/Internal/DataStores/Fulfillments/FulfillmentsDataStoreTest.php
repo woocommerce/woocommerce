@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use WC_Meta_Data;
 
 /**
- * Tests for the WC_Order_Fulfillment_Data_Store_Test  class.
+ * Tests for the WC_Order_Fulfillment_Data_Store_Test class.
  *
  * @package WooCommerce\Tests\Order_Fulfillment
  */
@@ -19,7 +19,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var FulfillmentsDataStore
 	 */
-	private static FulfillmentsDataStore $order_fulfillment_data_store;
+	private FulfillmentsDataStore $data_store;
 
 	/**
 	 * Runs before all the tests of the class.
@@ -27,8 +27,9 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
-		self::$order_fulfillment_data_store = new FulfillmentsDataStore();
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 	}
 
 	/**
@@ -37,6 +38,24 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
 		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Set up the test case.
+	 */
+	public function setUp(): void {
+		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+	}
+
+	/**
+	 * Tear down the test case.
+	 */
+	public function tearDown(): void {
+		global $wpdb;
+		// Clean up the fulfillment meta table.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
+		// Clean up the fulfillment table.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
 	}
 
 	/**
@@ -60,7 +79,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 		$this->assertFulfillmentRecordInDB( $fulfillment );
 		$this->assertFulfillmentMetaInDB( $fulfillment );
 	}
@@ -85,7 +104,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid entity type.' );
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 	}
 
 	/**
@@ -108,7 +127,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid entity ID.' );
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 	}
 
 	/**
@@ -124,7 +143,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'The fulfillment should contain at least one item.' );
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 	}
 
 	/**
@@ -140,7 +159,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'The fulfillment should contain at least one item.' );
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 	}
 
 	/**
@@ -167,7 +186,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid item.' );
 
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 	}
 
 	/**
@@ -190,14 +209,14 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$this->assertNotNull( $fulfillment->get_id() );
 
 		$new_fulfillment = new Fulfillment();
 		$new_fulfillment->set_id( $fulfillment->get_id() );
 
-		self::$order_fulfillment_data_store->read( $new_fulfillment );
+		$this->data_store->read( $new_fulfillment );
 
 		$this->assertFulfillmentRecordInDB( $new_fulfillment );
 		$this->assertFulfillmentMetaInDB( $new_fulfillment );
@@ -224,7 +243,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$fulfillment->set_entity_id( '456' );
 		$fulfillment->set_items(
@@ -240,7 +259,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		self::$order_fulfillment_data_store->update( $fulfillment );
+		$this->data_store->update( $fulfillment );
 
 		$this->assertFulfillmentRecordInDB( $fulfillment );
 		$this->assertFulfillmentMetaInDB( $fulfillment );
@@ -267,7 +286,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$this->assertNotNull( $fulfillment->get_id() );
 		$this->assertNull( $fulfillment->get_date_deleted() );
@@ -278,7 +297,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		// Cache the ID before deletion.
 		$fulfillment_id = $fulfillment->get_id();
 
-		self::$order_fulfillment_data_store->delete( $fulfillment );
+		$this->data_store->delete( $fulfillment );
 		// The fulfillment should be reset to it's initial state.
 		$this->assertEquals( 0, $fulfillment->get_id() );
 		$this->assertEquals( null, $fulfillment->get_entity_type() );
@@ -315,7 +334,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEquals( 0, $fulfillment->get_id() );
 
-		$result = self::$order_fulfillment_data_store->read_meta( $fulfillment );
+		$result = $this->data_store->read_meta( $fulfillment );
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 1, $result );
@@ -324,7 +343,6 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( '_items', $result[0]->meta_key );
 		$this->assertEquals( $fulfillment->get_id(), $result[0]->fulfillment_id );
 	}
-
 
 	/**
 	 * Tests the delete_meta method of the order fulfillment data store.
@@ -356,7 +374,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $items, $meta[0]->value );
 		$this->assertNotNull( $meta[0]->id );
 
-		self::$order_fulfillment_data_store->delete_meta( $fulfillment, $meta[0] ); // phpcs:ignore
+		$this->data_store->delete_meta( $fulfillment, $meta[0] ); // phpcs:ignore
 
 		global $wpdb;
 		$db_metadata = $wpdb->get_results(
@@ -392,7 +410,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEquals( 0, $fulfillment->get_id() );
 
-		self::$order_fulfillment_data_store->add_meta(
+		$this->data_store->add_meta(
 			$fulfillment,
 			new WC_Meta_Data(
 				array(
@@ -461,7 +479,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $new_metadata );
 		$this->assertEquals( '_items', $new_metadata[0]->key );
 
-		$result = self::$order_fulfillment_data_store->update_meta( $fulfillment, $new_metadata[0] );
+		$result = $this->data_store->update_meta( $fulfillment, $new_metadata[0] );
 
 		$this->assertEquals( 1, $result );
 	}
@@ -471,7 +489,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_read_fulfillments() {
 		$this->prepare_db_for_test();
-		$fulfillments = self::$order_fulfillment_data_store->read_fulfillments( 'order-fulfillment', '123' );
+		$fulfillments = $this->data_store->read_fulfillments( 'order-fulfillment', '123' );
 		$this->assertCount( 2, $fulfillments );
 		$this->assertEquals( '123', $fulfillments[0]->get_entity_id() );
 		$this->assertEquals( 'order-fulfillment', $fulfillments[0]->get_entity_type() );
@@ -514,20 +532,20 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$fulfillment_id = $fulfillment->get_id();
 		$this->assertNotNull( $fulfillment_id );
 
 		// Delete the fulfillment.
-		self::$order_fulfillment_data_store->delete( $fulfillment );
+		$this->data_store->delete( $fulfillment );
 
 		// Create a new fulfillment object and try to read the deleted one.
 		$deleted_fulfillment = new Fulfillment();
 		$deleted_fulfillment->set_id( $fulfillment_id );
 
 		// Should be able to read deleted fulfillment by ID.
-		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+		$this->data_store->read( $deleted_fulfillment );
 
 		$this->assertEquals( $fulfillment_id, $deleted_fulfillment->get_id() );
 		$this->assertEquals( 'order-fulfillment', $deleted_fulfillment->get_entity_type() );
@@ -551,25 +569,25 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$fulfillment_id = $fulfillment->get_id();
 		$this->assertNotNull( $fulfillment_id );
 
 		// Delete the fulfillment.
-		self::$order_fulfillment_data_store->delete( $fulfillment );
+		$this->data_store->delete( $fulfillment );
 
 		// Create a new fulfillment object and read the deleted one.
 		$deleted_fulfillment = new Fulfillment();
 		$deleted_fulfillment->set_id( $fulfillment_id );
-		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+		$this->data_store->read( $deleted_fulfillment );
 
 		// Try to update the deleted fulfillment - should not affect any rows.
 		$deleted_fulfillment->set_entity_id( '456' );
 		$deleted_fulfillment->set_status( 'fulfilled' );
 
 		// Update should not throw an error but should not affect any rows.
-		self::$order_fulfillment_data_store->update( $deleted_fulfillment );
+		$this->data_store->update( $deleted_fulfillment );
 
 		// Verify the database record was not updated.
 		global $wpdb;
@@ -602,13 +620,13 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		self::$order_fulfillment_data_store->create( $fulfillment );
+		$this->data_store->create( $fulfillment );
 
 		$fulfillment_id = $fulfillment->get_id();
 		$this->assertNotNull( $fulfillment_id );
 
 		// Delete the fulfillment the first time.
-		self::$order_fulfillment_data_store->delete( $fulfillment );
+		$this->data_store->delete( $fulfillment );
 
 		// At this point, the fulfillment object should be reset.
 		$this->assertEquals( 0, $fulfillment->get_id() );
@@ -616,7 +634,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		// Read the deleted fulfillment back.
 		$deleted_fulfillment = new Fulfillment();
 		$deleted_fulfillment->set_id( $fulfillment_id );
-		self::$order_fulfillment_data_store->read( $deleted_fulfillment );
+		$this->data_store->read( $deleted_fulfillment );
 
 		$first_deletion_time = $deleted_fulfillment->get_date_deleted();
 		$this->assertNotNull( $first_deletion_time );
@@ -640,7 +658,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		// Try to delete the already deleted fulfillment - should return early.
-		self::$order_fulfillment_data_store->delete( $deleted_fulfillment );
+		$this->data_store->delete( $deleted_fulfillment );
 
 		// Verify hooks were not called.
 		$this->assertFalse( $before_delete_called );
