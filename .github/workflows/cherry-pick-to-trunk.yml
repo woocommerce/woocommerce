@@ -182,16 +182,13 @@ jobs:
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
             :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `trunk`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
-            ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\\n\\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
+            ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\n\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
 
   handle-failures:
     needs: [prepare, cherry-pick, frozen-release-check]
     runs-on: ubuntu-latest
     if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
     steps:
-      - name: Handle failure
-        run: echo "Processing cherry-pick failure"
-
       - name: Add "cherry pick failed" label
         if: always()
         uses: actions/github-script@v7
@@ -261,4 +258,4 @@ jobs:
             :warning: *Cherry pick from `${{ env.BASE_BRANCH }}` to `trunk` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
             Please resolve before releasing.  
             Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
-            ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\\n\\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
+            ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\n\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
