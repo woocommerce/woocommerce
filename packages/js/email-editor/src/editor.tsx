@@ -20,6 +20,7 @@ import {
 	initStoreTracking,
 	initDomTracking,
 } from './events';
+import { initContentValidationMiddleware } from './middleware/content-validation';
 import { useContentValidation } from './hooks/use-content-validation';
 
 function Editor() {
@@ -60,6 +61,7 @@ export function initialize( elementId: string ) {
 	initStoreTracking();
 	initDomTracking();
 	createStore();
+	initContentValidationMiddleware();
 	initializeLayout();
 	initBlocks();
 	initHooks();
