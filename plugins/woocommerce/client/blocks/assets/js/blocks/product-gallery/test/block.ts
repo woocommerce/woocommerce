@@ -47,6 +47,18 @@ const handlers = [
 					thumbnail: 'test-thumb-1.jpg',
 					alt: 'Test 1',
 				},
+				{
+					id: 2,
+					src: 'test-image-2.jpg',
+					thumbnail: 'test-thumb-2.jpg',
+					alt: 'Test 2',
+				},
+				{
+					id: 3,
+					src: 'test-image-3.jpg',
+					thumbnail: 'test-thumb-3.jpg',
+					alt: 'Test 3',
+				},
 			],
 		} );
 	} ),
@@ -59,11 +71,38 @@ beforeAll( () => server.listen() );
 afterEach( () => server.resetHandlers() );
 afterAll( () => server.close() );
 
-async function setup() {
-	const productGalleryBlock = createBlock( blockJson.name, {
-		hoverZoom: true,
-		fullScreenOnClick: true,
+async function setup( attributes = {} ) {
+	const productImageBlock = createBlock( 'woocommerce/product-image', {
+		showProductLink: false,
+		showSaleBadge: false,
+		aspectRatio: '16/9',
+		...attributes,
 	} );
+
+	const largeImageBlock = createBlock(
+		'woocommerce/product-gallery-large-image',
+		{},
+		[
+			productImageBlock,
+			createBlock( 'woocommerce/product-sale-badge', { align: 'right' } ),
+			createBlock(
+				'woocommerce/product-gallery-large-image-next-previous'
+			),
+		]
+	);
+
+	const thumbnailsBlock = createBlock(
+		'woocommerce/product-gallery-thumbnails'
+	);
+
+	const productGalleryBlock = createBlock(
+		blockJson.name,
+		{
+			hoverZoom: true,
+			fullScreenOnClick: true,
+		},
+		[ thumbnailsBlock, largeImageBlock ]
+	);
 
 	const singleProductBlock = [
 		{
@@ -124,5 +163,26 @@ describe( 'Product Gallery Block', () => {
 		expect( productImage ).toBeInTheDocument();
 		expect( productImage ).toHaveAttribute( 'src', 'test-image-1.jpg' );
 		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
+	} );
+
+	it( 'should ensure thumbnail height matches large image height with custom aspect ratio', async () => {
+		await setup( { aspectRatio: '16/9' } );
+
+		// Get the large image
+		const productImage = screen.getByTestId( 'product-image' );
+		expect( productImage ).toBeInTheDocument();
+
+		// Get the thumbnails block
+		const thumbnailsBlock = screen.getByRole( 'document', {
+			name: /Block: Thumbnails/i,
+		} );
+		expect( thumbnailsBlock ).toBeInTheDocument();
+
+		// Get the heights
+		const largeImageHeight = productImage.getBoundingClientRect().height;
+		const thumbnailHeight = thumbnailsBlock.getBoundingClientRect().height;
+
+		// Check that the heights match
+		expect( thumbnailHeight ).toBe( largeImageHeight );
 	} );
 } );
