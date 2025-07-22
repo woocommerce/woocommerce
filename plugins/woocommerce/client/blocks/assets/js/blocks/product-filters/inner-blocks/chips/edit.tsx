@@ -102,7 +102,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 							>
 								<span className="wc-block-product-filter-chips__label">
 									<span className="wc-block-product-filter-chips__text">
-										{ decodeHtmlEntities( item.label ) }
+										{ typeof item.label === 'string'
+											? decodeHtmlEntities( item.label )
+											: item.label }
 									</span>
 									{ showCounts && (
 										<span className="wc-block-product-filter-chips__count">

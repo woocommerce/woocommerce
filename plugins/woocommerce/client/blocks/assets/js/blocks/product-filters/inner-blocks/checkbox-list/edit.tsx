@@ -117,9 +117,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
 											<span className="wc-block-product-filter-checkbox-list__text">
-												{ decodeHtmlEntities(
-													item.label
-												) }
+												{ typeof item.label === 'string'
+													? decodeHtmlEntities(
+															item.label
+													  )
+													: item.label }
 											</span>
 											{ showCounts && (
 												<span className="wc-block-product-filter-checkbox-list__count">
