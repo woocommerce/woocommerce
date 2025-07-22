@@ -94,7 +94,6 @@ class AssetDataRegistry {
 			'dashboardUrl'              => wc_get_account_endpoint_url( 'dashboard' ),
 			'orderStatuses'             => $this->get_order_statuses(),
 			'placeholderImgSrc'         => wc_placeholder_img_src(),
-			'placeholderImgSrcFullSize' => wc_placeholder_img_src( 'woocommerce_single' ),
 			'productsSettings'          => $this->get_products_settings(),
 			'siteTitle'                 => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 			'storePages'                => $this->get_store_pages(),

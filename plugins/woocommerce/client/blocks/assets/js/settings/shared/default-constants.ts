@@ -19,8 +19,6 @@ export const HOME_URL = allSettings.homeUrl as string | undefined;
 export const LOCALE = allSettings.locale;
 export const ORDER_STATUSES = allSettings.orderStatuses;
 export const PLACEHOLDER_IMG_SRC = allSettings.placeholderImgSrc as string;
-export const PLACEHOLDER_IMG_SRC_FULL_SIZE =
-	allSettings.placeholderImgSrcFullSize as string;
 export const SITE_TITLE = allSettings.siteTitle;
 export const STORE_PAGES = allSettings.storePages;
 export const WC_ASSET_URL = allSettings.wcAssetUrl;
