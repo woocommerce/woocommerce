@@ -142,6 +142,8 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		// Verify color palette is synced.
 		$this->assertArrayHasKey( 'color', $synced_data['settings'] );
 		$this->assertArrayHasKey( 'palette', $synced_data['settings']['color'] );
+		$this->assertEquals( '#007cba', $synced_data['settings']['color']['palette'][0]['color'] );
+		$this->assertEquals( 'Primary Color', $synced_data['settings']['color']['palette'][0]['name'] );
 	}
 
 	/**
@@ -154,7 +156,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 			'settings' => array(),
 			'styles'   => array(
 				'typography' => array(
-					'fontFamily' => 'Arial, sans-serif',
+					'fontFamily' => "Arial, 'Helvetica Neue', Helvetica, sans-serif",
 					'fontSize'   => '16px',
 					'fontWeight' => '400',
 				),
@@ -173,7 +175,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		// Verify typography is synced.
 		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
-		$this->assertEquals( 'Arial, sans-serif', $synced_data['styles']['typography']['fontFamily'] );
+		$this->assertStringContainsString( 'Arial, ', $synced_data['styles']['typography']['fontFamily'] );
 		$this->assertEquals( '16px', $synced_data['styles']['typography']['fontSize'] );
 	}
 
@@ -488,5 +490,233 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->assertEquals( 3, $synced_data['version'] );
 		$this->assertIsArray( $synced_data['settings'] );
 		$this->assertIsArray( $synced_data['styles'] );
+	}
+
+	/**
+	 * Test get_theme returns null for empty synced data.
+	 */
+	public function test_get_theme_returns_null_for_empty_synced_data(): void {
+		// Mock sync_site_styles to return empty data.
+		$controller = new class() extends Site_Style_Sync_Controller {
+			/**
+			 * Mock sync_site_styles to return empty data.
+			 */
+			public function sync_site_styles(): array {
+				return array();
+			}
+		};
+
+		$result = $controller->get_theme();
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test get_email_safe_fonts loads and caches fonts from theme.json.
+	 */
+	public function test_get_email_safe_fonts_loads_from_theme_json(): void {
+		$fonts = $this->controller->get_email_safe_fonts();
+
+		// Should be an array.
+		$this->assertIsArray( $fonts );
+
+		// Should contain email-safe fonts from theme.json.
+		$this->assertArrayHasKey( 'arial', $fonts );
+		$this->assertArrayHasKey( 'georgia', $fonts );
+		$this->assertArrayHasKey( 'courier-new', $fonts );
+		$this->assertArrayHasKey( 'trebuchet-ms', $fonts );
+		$this->assertArrayHasKey( 'verdana', $fonts );
+		$this->assertArrayHasKey( 'tahoma', $fonts );
+		$this->assertArrayHasKey( 'lucida', $fonts );
+
+		// Verify actual font family values.
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $fonts['arial'] );
+		$this->assertEquals( "Georgia, Times, 'Times New Roman', serif", $fonts['georgia'] );
+		$this->assertEquals( "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace", $fonts['courier-new'] );
+	}
+
+	/**
+	 * Test convert_to_email_safe_font with email-safe font slug.
+	 */
+	public function test_convert_to_email_safe_font_with_safe_font_slug(): void {
+		// Use reflection to access private method.
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		// Test with email-safe font slug.
+		$result = $method->invoke( $this->controller, 'arial' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+
+		$result = $method->invoke( $this->controller, 'georgia' );
+		$this->assertEquals( "Georgia, Times, 'Times New Roman', serif", $result );
+
+		$complex_font_family = "Georgia, Times, 'Times New Roman', serif";
+		$result              = $method->invoke( $this->controller, $complex_font_family );
+		$this->assertEquals( $complex_font_family, $result );
+	}
+
+	/**
+	 * Test convert_to_email_safe_font with common web font mappings.
+	 */
+	public function test_convert_to_email_safe_font_with_web_font_mappings(): void {
+		// Use reflection to access private method.
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		// Test Helvetica - should be preserved since it's found in Arial fallback.
+		$result = $method->invoke( $this->controller, 'Helvetica' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+
+		// Test Times - should be preserved since it's found in Georgia fallback.
+		$result = $method->invoke( $this->controller, 'Times' );
+		$this->assertEquals( "Georgia, Times, 'Times New Roman', serif", $result );
+
+		// Test Courier - should be preserved since it's found in Courier New fallback.
+		$result = $method->invoke( $this->controller, 'Courier' );
+		$this->assertEquals( "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace", $result );
+
+		// Test with a truly unknown font that would trigger mapping.
+		$result = $method->invoke( $this->controller, 'UnknownHelvetica' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+	}
+
+	/**
+	 * Test convert_to_email_safe_font with unknown font defaults to Arial.
+	 */
+	public function test_convert_to_email_safe_font_unknown_font_defaults_to_arial(): void {
+		// Use reflection to access private method.
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		// Test with unknown font.
+		$result = $method->invoke( $this->controller, 'UnknownFont' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+
+		$result = $method->invoke( $this->controller, 'CustomWebFont' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+	}
+
+	/**
+	 * Test font family conversion in typography styles sync.
+	 */
+	public function test_typography_styles_font_family_conversion(): void {
+		// Mock theme data with font that will be preserved.
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array(
+					'fontFamily' => 'Helvetica, sans-serif',
+					'fontSize'   => '16px',
+				),
+			),
+		);
+
+		// Create a mock theme.
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Verify font family is preserved since Helvetica is found in email-safe families.
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $synced_data['styles']['typography']['fontFamily'] );
+	}
+
+	/**
+	 * Test element styles font conversion.
+	 */
+	public function test_element_styles_font_conversion(): void {
+		// Mock theme data with element styles using fonts that will be preserved.
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'elements' => array(
+					'heading' => array(
+						'typography' => array(
+							'fontFamily' => 'Helvetica, sans-serif',
+							'fontSize'   => '24px',
+						),
+					),
+					'button'  => array(
+						'typography' => array(
+							'fontFamily' => 'Times, serif',
+						),
+					),
+				),
+			),
+		);
+
+		// Create a mock theme.
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Verify element fonts are processed.
+		$this->assertArrayHasKey( 'elements', $synced_data['styles'] );
+		$this->assertArrayHasKey( 'heading', $synced_data['styles']['elements'] );
+		$this->assertArrayHasKey( 'button', $synced_data['styles']['elements'] );
+
+		// Check font family is preserved in heading since Helvetica is found in email-safe families.
+		$this->assertEquals(
+			"Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			$synced_data['styles']['elements']['heading']['typography']['fontFamily']
+		);
+
+		// Check font family is preserved in button since Times is found in email-safe families.
+		$this->assertEquals(
+			"Georgia, Times, 'Times New Roman', serif",
+			$synced_data['styles']['elements']['button']['typography']['fontFamily']
+		);
+	}
+
+	/**
+	 * Test case-insensitive font slug matching.
+	 */
+	public function test_convert_to_email_safe_font_case_insensitive(): void {
+		// Use reflection to access private method.
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		// Test with uppercase font names.
+		$result = $method->invoke( $this->controller, 'ARIAL' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+
+		$result = $method->invoke( $this->controller, 'GEORGIA' );
+		$this->assertEquals( "Georgia, Times, 'Times New Roman', serif", $result );
+
+		// Test with mixed case.
+		$result = $method->invoke( $this->controller, 'AriaL' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+	}
+
+	/**
+	 * Test actual font conversion for unknown fonts.
+	 */
+	public function test_convert_unknown_fonts_to_email_safe(): void {
+		// Use reflection to access private method.
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		// Test truly unknown fonts that should map to Arial.
+		$result = $method->invoke( $this->controller, 'CustomWebFont' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
+
+		$result = $method->invoke( $this->controller, 'SomeUnknownFont' );
+		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
 	}
 }

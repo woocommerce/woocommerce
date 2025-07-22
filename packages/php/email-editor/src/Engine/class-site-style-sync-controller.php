@@ -28,6 +28,13 @@ class Site_Style_Sync_Controller {
 	private ?WP_Theme_JSON $site_theme = null;
 
 	/**
+	 * Email-safe fonts
+	 *
+	 * @var array
+	 */
+	private $email_safe_fonts = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -83,6 +90,11 @@ class Site_Style_Sync_Controller {
 		}
 
 		$synced_data = $this->sync_site_styles();
+
+		if ( empty( $synced_data ) || ! isset( $synced_data['version'] ) ) {
+			return null;
+		}
+
 		return new WP_Theme_JSON( $synced_data, 'theme' );
 	}
 
@@ -181,6 +193,30 @@ class Site_Style_Sync_Controller {
 	}
 
 	/**
+	 * Get email-safe fonts
+	 *
+	 * @return array Email-safe fonts.
+	 */
+	public function get_email_safe_fonts(): array {
+		if ( empty( $this->email_safe_fonts ) ) {
+			/**
+			 * Pull email-safe fonts from theme.json (src/Engine/theme.json).
+			 *
+			 * @var array{settings?: array{typography?: array{fontFamilies?: array<array{name: string, slug: string, fontFamily: string}>}}} $theme_data
+			 */
+			$theme_data    = (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true );
+			$font_families = $theme_data['settings']['typography']['fontFamilies'] ?? array();
+
+			if ( ! empty( $font_families ) ) {
+				foreach ( $font_families as $font_family ) {
+					$this->email_safe_fonts[ strtolower( $font_family['slug'] ) ] = $font_family['fontFamily'];
+				}
+			}
+		}
+		return $this->email_safe_fonts;
+	}
+
+	/**
 	 * Convert site color styles to email format
 	 *
 	 * @param array $color_styles Site color styles.
@@ -209,9 +245,9 @@ class Site_Style_Sync_Controller {
 	private function convert_typography_styles( array $typography_styles ): array {
 		$email_typography = array();
 
-		// Preserve font family.
+		// Convert font family to email-safe alternative.
 		if ( isset( $typography_styles['fontFamily'] ) ) {
-			$email_typography['fontFamily'] = $typography_styles['fontFamily'];
+			$email_typography['fontFamily'] = $this->convert_to_email_safe_font( $typography_styles['fontFamily'] );
 		}
 
 		// Convert font size to px if needed.
@@ -303,6 +339,54 @@ class Site_Style_Sync_Controller {
 	}
 
 	/**
+	 * Convert font family to email-safe alternative
+	 *
+	 * @param string $font_family Original font family.
+	 * @return string Email-safe font family.
+	 */
+	private function convert_to_email_safe_font( string $font_family ): string {
+		// Get email-safe fonts.
+		$email_safe_fonts = $this->get_email_safe_fonts();
+
+		// Map common web fonts to email-safe alternatives.
+		$font_map = array(
+			'helvetica' => $email_safe_fonts['arial'], // Arial fallback.
+			'times'     => $email_safe_fonts['georgia'], // Georgia fallback.
+			'courier'   => $email_safe_fonts['courier-new'], // Courier New.
+			'trebuchet' => $email_safe_fonts['trebuchet-ms'],
+		);
+
+		$email_safe_fonts = array_merge( $email_safe_fonts, $font_map );
+
+		$get_font_family = function ( $font_name ) use ( $email_safe_fonts ) {
+			$font_name_lower = strtolower( $font_name );
+
+			// First check for match in the email-safe slug.
+			if ( isset( $email_safe_fonts[ $font_name_lower ] ) ) {
+				return $email_safe_fonts[ $font_name_lower ];
+			}
+
+			// If no match in the slug, check for match in the font family name.
+			foreach ( $email_safe_fonts as $safe_font_slug => $safe_font ) {
+				if ( stripos( $safe_font, $font_name_lower ) !== false ) {
+					return $safe_font;
+				}
+			}
+			return null;
+		};
+
+		// Check if it's already an email-safe font.
+		$font_family_array = explode( ',', $font_family );
+		$safe_font_family  = $get_font_family( trim( $font_family_array[0] ) );
+		if ( $safe_font_family ) {
+			return $safe_font_family;
+		}
+
+		// Default to arial font if no match found.
+		return $email_safe_fonts['arial'];
+	}
+
+	/**
 	 * Convert size value to px format.
 	 *
 	 * @param string $size Original size value.
@@ -323,6 +407,10 @@ class Site_Style_Sync_Controller {
 	 * @return string|array Spacing values in px format.
 	 */
 	private function convert_spacing_values( $spacing_values ) {
+		if ( ! is_string( $spacing_values ) && ! is_array( $spacing_values ) ) {
+			return $spacing_values;
+		}
+
 		if ( is_string( $spacing_values ) ) {
 			return $this->convert_to_px_size( $spacing_values );
 		}
@@ -332,6 +420,8 @@ class Site_Style_Sync_Controller {
 		foreach ( $spacing_values as $side => $value ) {
 			if ( is_string( $value ) ) {
 				$px_values[ $side ] = $this->convert_to_px_size( $value );
+			} else {
+				$px_values[ $side ] = $value;
 			}
 		}
 
