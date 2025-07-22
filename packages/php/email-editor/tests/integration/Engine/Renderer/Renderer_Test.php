@@ -401,7 +401,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => $html_content,
 			)
 		);
-		$email_post    = get_post( $email_post_id );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
 		$this->assertInstanceOf( \WP_Post::class, $email_post );
 
 		$rendered = $this->renderer->render(
@@ -419,8 +420,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '- Verify your email address', $text_content );
 		$this->assertStringContainsString( '- Complete your profile', $text_content );
 		$this->assertStringContainsString( '[features](https://example.com/features)', $text_content );
-		$this->assertStringContainsString( '> ', $text_content ); // Check blockquote format
-		$this->assertStringContainsString( 'We’re excited to have you on board', $text_content ); // Check content
+		$this->assertStringContainsString( '> ', $text_content ); // Check blockquote format.
+		$this->assertStringContainsString( 'We\'re excited to have you on board', $text_content ); // Check content.
 		$this->assertStringContainsString( "Best regards,\nThe Team", $text_content );
 	}
 
@@ -449,12 +450,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 					'post_content' => $case_data[0],
 				)
 			);
-			$email_post    = get_post( $email_post_id );
+			$this->assertIsInt( $email_post_id );
+			$email_post = get_post( $email_post_id );
 			$this->assertInstanceOf( \WP_Post::class, $email_post );
 
 			$rendered = $this->renderer->render( $email_post, 'Test', '', 'en' );
 
-			if ( empty( $case_data[1] ) ) {
+			if ( '' === $case_data[1] ) {
 				$this->assertEmpty( trim( $rendered['text'] ), "Failed edge case: {$case_name}" );
 			} else {
 				$this->assertStringContainsString( $case_data[1], $rendered['text'], "Failed edge case: {$case_name}" );
