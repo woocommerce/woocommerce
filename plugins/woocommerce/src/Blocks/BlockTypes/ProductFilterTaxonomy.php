@@ -290,7 +290,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
 		$taxonomy_data   = array();
 
-		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
+		foreach ( array_keys( $taxonomy_params ) as $taxonomy_slug ) {
 			$taxonomy = get_taxonomy( $taxonomy_slug );
 
 			if ( ! $taxonomy ) {
