@@ -86,7 +86,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return WC_Order|null
 	 */
 	private function get_wc_order( $custom_id ) {
-		$data     = json_decode( $custom_id );
+		$data = json_decode( $custom_id );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			WC_Gateway_Paypal::log( 'Invalid JSON in custom ID: ' . wc_print_r( $custom_id, true ) );
+			return null;
+		}
 		$order_id = $data->order_id ?? null;
 		if ( ! $order_id ) {
 			return null;
