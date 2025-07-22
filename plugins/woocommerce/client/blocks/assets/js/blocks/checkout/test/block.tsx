@@ -10,9 +10,9 @@ import {
 	checkoutStore,
 	validationStore,
 } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
  * Internal dependencies
@@ -138,13 +138,13 @@ const CheckoutBlock = () => {
 
 describe( 'Testing Checkout', () => {
 	beforeEach( () => {
+		// Set up MSW handlers for cart API
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
 		act( () => {
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
 			// need to clear the store resolution state between tests.
 			dispatch( cartStore ).invalidateResolutionForStore();
 			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
@@ -170,17 +170,17 @@ describe( 'Testing Checkout', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		// MSW handlers are reset automatically in the global setup
 	} );
 
 	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument()
+		);
 
 		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
@@ -286,16 +286,20 @@ describe( 'Testing Checkout', () => {
 					email: '',
 				},
 			};
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( cartWithAddress ) );
-				}
-				return Promise.resolve( '' );
-			} );
+			// Override the MSW handler with cart that has address
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( cartWithAddress );
+				} )
+			);
 		} );
 		const { rerender } = render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Edit shipping address' } )
+			).toBeInTheDocument()
+		);
 
 		expect(
 			screen.getByRole( 'button', { name: 'Edit shipping address' } )
@@ -362,8 +366,6 @@ describe( 'Testing Checkout', () => {
 				selector: '.wc-block-components-address-card span',
 			} )
 		).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
@@ -372,18 +374,20 @@ describe( 'Testing Checkout', () => {
 				...previewCart,
 				needs_shipping: false,
 			};
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve(
-						JSON.stringify( cartWithVirtualProduct )
-					);
-				}
-				return Promise.resolve( '' );
-			} );
+			// Override the MSW handler with virtual product cart
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( cartWithVirtualProduct );
+				} )
+			);
 		} );
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Edit billing address' } )
+			).toBeInTheDocument()
+		);
 
 		expect(
 			screen.getByRole( 'button', { name: 'Edit billing address' } )
@@ -467,8 +471,14 @@ describe( 'Testing Checkout', () => {
 		// Render the CheckoutBlock
 		const { rerender, queryByText } = render( <CheckoutBlock /> );
 
-		// Wait for the component to fully load, assuming fetch calls or state updates
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		// Wait for the component to fully load
+		await waitFor( () =>
+			expect(
+				screen.getByText(
+					/You are currently checking out as a guest./i
+				)
+			).toBeInTheDocument()
+		);
 
 		// Query the text.
 		expect(
@@ -499,7 +509,9 @@ describe( 'Testing Checkout', () => {
 		const user = userEvent.setup();
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument()
+		);
 
 		const shippingForm = screen.getByRole( 'group', {
 			name: /shipping address/i,
@@ -582,8 +594,12 @@ describe( 'Testing Checkout', () => {
 			}
 		} );
 
-		// wait for fetch to be called
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		// wait for form to be ready
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: /Place order/i } )
+			).toBeInTheDocument()
+		);
 
 		// Submit the form
 		await act( async () => {

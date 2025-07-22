@@ -5,7 +5,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import * as wpDataFunctions from '@wordpress/data';
 import { CART_STORE_KEY, paymentStore } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import {
 	registerPaymentMethod,
 	registerExpressPaymentMethod,
@@ -125,12 +125,13 @@ const resetMockExpressPaymentMethods = () => {
 
 describe( 'PaymentMethods', () => {
 	beforeEach( () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-				return Promise.resolve( JSON.stringify( previewCart ) );
-			}
-			return Promise.resolve( '' );
-		} );
+		// Setup MSW handlers for cart API
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
+
 		// need to clear the store resolution state between tests.
 		wpDataFunctions
 			.dispatch( CART_STORE_KEY )
@@ -142,7 +143,7 @@ describe( 'PaymentMethods', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		// MSW handlers are reset automatically in the global setup
 	} );
 
 	test( 'should show no payment methods component when there are no payment methods', async () => {
