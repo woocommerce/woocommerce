@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import clsx from 'clsx';
@@ -100,24 +100,48 @@ const renderTabs = (
 							) }
 							title={
 								tabKey === 'my-subscriptions'
-									? __(
-											'Number of updates available for your subscriptions',
-											'woocommerce'
+									? sprintf(
+											/* translators: %d: number of updates */
+											_n(
+												'%d update available for your subscriptions',
+												'%d updates available for your subscriptions',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
 									  )
-									: __(
-											'Number of matching items in this category',
-											'woocommerce'
+									: sprintf(
+											/* translators: %d: number of matching items */
+											_n(
+												'%d matching item in this category',
+												'%d matching items in this category',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
 									  )
 							}
 							aria-label={
 								tabKey === 'my-subscriptions'
-									? __(
-											'Number of updates available for your subscriptions',
-											'woocommerce'
+									? sprintf(
+											/* translators: %d: number of updates */
+											_n(
+												'%d update available for your subscriptions',
+												'%d updates available for your subscriptions',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
 									  )
-									: __(
-											'Number of matching items in this category',
-											'woocommerce'
+									: sprintf(
+											/* translators: %d: number of matching items */
+											_n(
+												'%d matching item in this category',
+												'%d matching items in this category',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
 									  )
 							}
 						>
