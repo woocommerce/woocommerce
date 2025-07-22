@@ -98,9 +98,9 @@
 
 		// Mobile styles - remove negative left margin and adjust padding
 		@media screen and (max-width: 782px) {
-			left: 0;
+			padding: 16px;
 			width: 100%;
-			padding: 0;
+			left: 0;
 		}
 	}
 }
