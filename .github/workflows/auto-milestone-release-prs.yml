@@ -4,7 +4,7 @@ name: Auto-Add Milestone to Release PRs
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   add-milestone:
