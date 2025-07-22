@@ -189,7 +189,7 @@ describe( 'Product Image Block', () => {
 
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -252,7 +252,7 @@ describe( 'Product Image Block', () => {
 
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -280,7 +280,7 @@ describe( 'Product Image Block', () => {
 
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 			expect( placeholderImage.getAttribute( 'width' ) ).toBe( null );
 			expect( placeholderImage.getAttribute( 'height' ) ).toBe( null );
