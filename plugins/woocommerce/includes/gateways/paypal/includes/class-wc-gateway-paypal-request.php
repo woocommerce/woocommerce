@@ -152,8 +152,8 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		foreach ( $response_data['links'] as $link ) {
-			if ( $rel === $link['rel'] && 'GET' === $link['method'] ) {
-				return $link['href'];
+			if ( $rel === $link['rel'] && 'GET' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				return esc_url_raw( $link['href'] );
 			}
 		}
 
