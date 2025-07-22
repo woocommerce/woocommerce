@@ -479,7 +479,7 @@ abstract class Task {
 	 * @return string
 	 */
 	public function in_progress_label() {
-		return __( 'In progress', 'woocommerce' );
+		return esc_html__( 'In progress', 'woocommerce' );
 	}
 
 	/**

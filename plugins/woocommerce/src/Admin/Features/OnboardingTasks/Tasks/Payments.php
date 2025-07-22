@@ -124,7 +124,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function in_progress_label() {
-		return __( 'Test account', 'woocommerce' );
+		return esc_html__( 'Test account', 'woocommerce' );
 	}
 
 	/**
