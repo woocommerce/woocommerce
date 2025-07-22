@@ -8,6 +8,7 @@ import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Block, getBlockTypes, createBlock } from '@wordpress/blocks';
+import { getInnerBlockByName } from '@woocommerce/utils';
 import {
 	ComboboxControl,
 	PanelBody,
@@ -27,7 +28,6 @@ import {
 import { sortOrderOptions } from './constants';
 import { BlockAttributes, EditProps } from './types';
 import { getAttributeFromId } from './utils';
-import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 

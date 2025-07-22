@@ -7,8 +7,6 @@
 
 declare( strict_types=1 );
 
-use ReflectionClass;
-
 /**
  * Unit tests for the WC_Tax class get_shipping_tax_rates method and related functionality.
  * Covers edge case bug from https://github.com/woocommerce/woocommerce/issues/58757

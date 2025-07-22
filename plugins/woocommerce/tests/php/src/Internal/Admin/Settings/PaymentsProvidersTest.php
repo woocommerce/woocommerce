@@ -2074,6 +2074,192 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the remove_shell_payment_gateways method.
+	 *
+	 * @dataProvider data_provider_test_remove_shell_payment_gateways
+	 *
+	 * @param array $gateways_to_mock     List of payment gateways instances to mock.
+	 * @param array $expected_gateway_ids List of expected gateway IDs after removing shell gateways.
+	 *
+	 * @return void
+	 */
+	public function test_remove_shell_payment_gateways( array $gateways_to_mock, array $expected_gateway_ids ) {
+		// Arrange.
+		$this->mock_payment_gateways( $gateways_to_mock );
+		$payment_gateways = $this->sut->get_payment_gateways( false ); // Get raw gateways list.
+
+		// Act.
+		$result = $this->sut->remove_shell_payment_gateways( $payment_gateways );
+
+		// Assert.
+		$actual_gateway_ids = array_values(
+			array_map(
+				function ( $gateway ) {
+					return $gateway->id;
+				},
+				$result
+			)
+		);
+
+		$this->assertSame( $expected_gateway_ids, $actual_gateway_ids );
+
+		// Clean up.
+		$this->unmock_payment_gateways();
+	}
+
+	/**
+	 * Data provider for test_remove_shell_payment_gateways.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_remove_shell_payment_gateways(): array {
+		return array(
+			'empty gateways list'                         => array(
+				array(),
+				array(),
+			),
+			'non-shell gateway only'                      => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'shell gateway only (should be preserved)'    => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'multiple shell gateways from same extension (all preserved)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'mix of shell and non-shell from same extension (shells removed)' => array(
+				array(
+					'shell_gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'real_gateway1'  => array(
+						'enabled'            => true,
+						'method_title'       => 'Real Gateway Title',
+						'method_description' => 'Real Gateway Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'shell_gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'real_gateway1' ),
+			),
+			'multiple extensions with different shell configurations' => array(
+				array(
+					'plugin1_shell'      => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin1_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 1 Real',
+						'method_description' => 'Plugin 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin2_shell_only' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+					'plugin3_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 3 Real',
+						'method_description' => 'Plugin 3 Description',
+						'plugin_slug'        => 'plugin3',
+						'plugin_file'        => 'plugin3/plugin3',
+					),
+				),
+				array( 'plugin1_real', 'plugin2_shell_only', 'plugin3_real' ),
+			),
+			'shell gateway with missing plugin details (should be preserved)' => array(
+				array(
+					'gateway_no_plugin' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => '',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway_no_plugin' ),
+			),
+			'gateway with title only (not a shell)'       => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'gateway with description only (not a shell)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+		);
+	}
+
+	/**
 	 * Mock a set of payment gateways.
 	 *
 	 * @param array $gateways The list of gateway details keyed by the gateway id.

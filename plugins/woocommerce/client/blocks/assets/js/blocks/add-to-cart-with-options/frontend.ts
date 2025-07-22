@@ -9,6 +9,7 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -25,6 +26,11 @@ export type Context = {
 	quantity: Record< number, number >;
 	tempQuantity: number;
 	groupedProductIds: number[];
+	childProductId: number;
+	quantityConstraints: Record<
+		number,
+		{ min: number; max: number | null; step: number }
+	>;
 };
 
 interface GroupedCartItem {
@@ -43,6 +49,15 @@ const { state: wooState } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const getDefaultConstraints = (
+	productType: string,
+	childProductId?: number
+) => ( {
+	min: productType === 'grouped' && childProductId ? 0 : 1,
+	step: 1,
+	max: null,
+} );
 
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
@@ -70,18 +85,21 @@ const getInputData = (
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const parsedMinValue = parseInt( inputElement.min, 10 );
-	const parsedMaxValue = parseInt( inputElement.max, 10 );
-	const parsedStep = parseInt( inputElement.step, 10 );
-
-	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
-	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
-	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
-	const step = isNaN( parsedStep ) ? 1 : parsedStep;
+	const { productType, productId, quantityConstraints } =
+		getContext< Context >();
 	const childProductId = parseInt(
 		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
 		10
 	);
+	const id = childProductId || productId;
+	const constraints =
+		quantityConstraints?.[ id ] ||
+		getDefaultConstraints( productType, childProductId );
+	const minValue = constraints.min;
+	const maxValue = constraints.max;
+	const step = constraints.step;
+
+	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
 		currentValue,
@@ -139,7 +157,7 @@ const getNewQuantity = ( productId: number, quantity: number ) => {
 };
 
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change' );
+	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );
 };
 
@@ -148,21 +166,32 @@ const addToCartWithOptionsStore = store(
 	{
 		state: {
 			get isFormValid(): boolean {
-				const { availableVariations, selectedAttributes, productType } =
-					getContext< Context >();
-				if ( productType !== 'variable' ) {
+				const context = getContext< Context >();
+				if ( ! context ) {
 					return true;
 				}
-				const matchedVariation = getMatchedVariation(
+				const {
 					availableVariations,
-					selectedAttributes
-				);
+					selectedAttributes,
+					productType,
+					quantity,
+				} = context;
+				if ( productType === 'variable' ) {
+					const matchedVariation = getMatchedVariation(
+						availableVariations,
+						selectedAttributes
+					);
 
-				// Variable products must be in stock and have a selected variation
-				return Boolean(
-					matchedVariation?.is_in_stock &&
-						matchedVariation?.variation_id
-				);
+					// Variable products must be in stock and have a selected variation
+					return Boolean(
+						matchedVariation?.is_in_stock &&
+							matchedVariation?.variation_id
+					);
+				}
+				if ( productType === 'grouped' ) {
+					return Object.values( quantity ).some( ( qty ) => qty > 0 );
+				}
+				return true;
 			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
@@ -183,14 +212,45 @@ const addToCartWithOptionsStore = store(
 				}
 				return context.selectedAttributes;
 			},
+			get allowsDecrease() {
+				const {
+					quantity,
+					childProductId,
+					productType,
+					quantityConstraints,
+					productId,
+				} = getContext< Context >();
+				const id = childProductId || productId;
+				const currentQuantity = quantity[ id ] || 0;
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
+				const minValue = constraints.min;
+				const step = constraints.step;
+				return currentQuantity - step >= minValue;
+			},
+			get allowsIncrease() {
+				const {
+					quantity,
+					childProductId,
+					productType,
+					quantityConstraints,
+					productId,
+				} = getContext< Context >();
+				const id = childProductId || productId;
+				const currentQuantity = quantity[ id ] || 0;
+				const constraints =
+					quantityConstraints?.[ id ] ||
+					getDefaultConstraints( productType, childProductId );
+				const maxValue = constraints.max;
+				const step = constraints.step;
+				return maxValue === null || currentQuantity + step <= maxValue;
+			},
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				const productId =
-					childProductId && childProductId > 0
-						? childProductId
-						: context.productId;
+				const productId = childProductId || context.productId;
 
 				context.quantity = {
 					...context.quantity,
@@ -243,7 +303,7 @@ const addToCartWithOptionsStore = store(
 				} = inputData;
 				const newValue = currentValue + step;
 
-				if ( maxValue === undefined || newValue <= maxValue ) {
+				if ( maxValue === null || newValue <= maxValue ) {
 					const updatedValue = Math.max( minValue, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
 						updatedValue,
@@ -375,6 +435,30 @@ const addToCartWithOptionsStore = store(
 					}
 
 					if ( addedItems.length === 0 ) {
+						// Todo: Use the module exports instead of `store()` once the store-notices
+						// store is public.
+						yield import( '@woocommerce/stores/store-notices' );
+						const { actions: noticeActions } =
+							store< StoreNotices >(
+								'woocommerce/store-notices',
+								{},
+								{
+									lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+								}
+							);
+
+						const errorMessage =
+							wooState?.errorMessages
+								?.groupedProductAddToCartMissingItems;
+
+						if ( errorMessage ) {
+							noticeActions.addNotice( {
+								notice: errorMessage,
+								type: 'error',
+								dismissible: true,
+							} );
+						}
+
 						return;
 					}
 
@@ -407,7 +491,7 @@ const addToCartWithOptionsStore = store(
 			},
 		},
 		callbacks: {
-			setProductData: () => {
+			setSelectedVariationId: () => {
 				const { availableVariations, selectedAttributes } =
 					getContext< Context >();
 				const matchedVariation = getMatchedVariation(
@@ -420,15 +504,8 @@ const addToCartWithOptionsStore = store(
 					{},
 					{ lock: universalLock }
 				);
-
-				if ( matchedVariation ) {
-					actions.setProductData(
-						'price_html',
-						matchedVariation.price_html
-					);
-				} else {
-					actions.setProductData( 'price_html', null );
-				}
+				const matchedVariationId = matchedVariation?.variation_id;
+				actions.setVariationId( matchedVariationId ?? null );
 			},
 		},
 	},

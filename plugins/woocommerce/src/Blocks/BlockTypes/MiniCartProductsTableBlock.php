@@ -111,7 +111,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 						data-wp-each--cart-item="woocommerce::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
-						<tr class="wc-block-cart-items__row" tabindex="-1">
+						<tr class="wc-block-cart-items__row" data-wp-run="callbacks.filterCartItemClass" tabindex="-1">
 							<td class="wc-block-cart-item__image" aria-hidden="true">
 								<img data-wp-bind--hidden="!state.isProductHiddenFromCatalog" data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">
 								<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
@@ -132,7 +132,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									>
 									</div>
 									<div class="wc-block-cart-item__prices">
-										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+										<span data-wp-text="state.beforeItemPrice"></span>
+										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
 											</span>
@@ -142,18 +143,17 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											</span>
 											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
 										</span>
-										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price" hidden>
+										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 											</span>
 										</span>
+										<span data-wp-text="state.afterItemPrice"></span>
 									</div>
 									<div 
 										data-wp-bind--hidden="!state.cartItemHasDiscount" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
-										hidden
 									>
-										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $save_label; ?>
+										<?php echo $save_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										<span
 											data-wp-text="state.cartItemDiscount" 
 											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
@@ -161,7 +161,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										</span>
 									</div>
 									<div class="wc-block-components-product-metadata">
-										<div data-wp-watch="state.itemShortDescription" >
+										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
 									</div>
@@ -198,7 +198,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 												＋
 											</button>
 										</div>
-										<button data-wp-on--click="actions.removeItemFromCart" data-wp-bind--aria-label="state.removeFromCartLabel" class="wc-block-cart-item__remove-link" >
+										<button
+											data-wp-bind--hidden="!state.itemShowRemoveItemLink"
+											data-wp-on--click="actions.removeItemFromCart"
+											data-wp-bind--aria-label="state.removeFromCartLabel"
+											class="wc-block-cart-item__remove-link"
+										>
 											<?php echo esc_html( $remove_item_label ); ?>
 										</button>
 									</div>
@@ -213,7 +218,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									<div 
 										data-wp-bind--hidden="!state.isLineItemTotalDiscountVisible" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
-										hidden
 									>
 										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										<?php echo $save_label; ?>
