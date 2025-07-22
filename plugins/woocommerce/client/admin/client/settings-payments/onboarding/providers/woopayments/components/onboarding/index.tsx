@@ -26,6 +26,7 @@ export default function WooPaymentsOnboarding( {
 		currentStep,
 		navigateToStep,
 		justCompletedStepId,
+		sessionEntryPoint,
 	} = useOnboardingContext();
 
 	const location = useLocation();
@@ -33,7 +34,7 @@ export default function WooPaymentsOnboarding( {
 	// Forces navigation to the current step only if the URL does not already match.
 	useEffect( () => {
 		if (
-			currentStep &&
+			currentStep?.path &&
 			! location.pathname.endsWith( currentStep?.path ?? '' )
 		) {
 			navigateToStep( currentStep.id );
@@ -66,6 +67,9 @@ export default function WooPaymentsOnboarding( {
 									'Set up WooPayments',
 									'woocommerce'
 								) }
+								context={ {
+									sessionEntryPoint,
+								} }
 							/>
 						</div>
 					}

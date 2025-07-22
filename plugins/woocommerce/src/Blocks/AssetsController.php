@@ -266,6 +266,7 @@ final class AssetsController {
 		$current_version = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
 			'wordpress'   => get_bloginfo( 'version' ),
+			'site_url'    => wp_guess_url(),
 		);
 
 		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
@@ -288,6 +289,7 @@ final class AssetsController {
 			'version' => array(
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
+				'site_url'    => wp_guess_url(),
 			),
 		);
 

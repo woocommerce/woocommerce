@@ -3,71 +3,62 @@
  */
 import { getContext, store } from '@wordpress/interactivity';
 
-type ProductData = {
-	price_html: string | null;
+type EntityId = number | null;
+type ProductRef = {
+	productId: EntityId;
+	variationId: EntityId;
 };
 
-export type Context = {
-	originalProductData: ProductData;
-	productData: ProductData;
-};
+export type Context = ProductRef;
 
 type ServerState = {
-	templateState: {
-		originalProductData: ProductData;
-		productData: ProductData;
-	};
+	templateState: ProductRef;
 };
 
 const productDataStore = store< {
-	state: {
-		productData: ProductData;
-		originalProductData: ProductData;
-	} & ServerState;
+	state: ProductRef & ServerState;
 	actions: {
-		setProductData: (
-			key: keyof ProductData,
-			value: string | null
-		) => void;
+		setVariationId: ( variationId: EntityId ) => void;
 	};
 } >(
 	'woocommerce/product-data',
 	{
 		state: {
-			get productData(): ProductData {
+			get productId(): EntityId {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
 				return (
-					context?.productData ||
-					productDataStore?.state?.templateState?.productData
+					context?.productId ||
+					productDataStore?.state?.templateState?.productId
 				);
 			},
-			get originalProductData(): ProductData {
+			get variationId(): EntityId {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
 				return (
-					context?.originalProductData ||
-					productDataStore?.state?.templateState?.originalProductData
+					context?.variationId ||
+					productDataStore?.state?.templateState?.variationId
 				);
 			},
 		},
 		actions: {
-			setProductData: ( key, value ) => {
+			setVariationId: ( variationId: EntityId ) => {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
-				if ( context?.productData ) {
-					context.productData[ key ] = value;
+				if ( context?.variationId !== undefined ) {
+					context.variationId = variationId;
 				} else if (
-					productDataStore?.state?.templateState?.productData
+					productDataStore?.state?.templateState?.variationId !==
+					undefined
 				) {
-					productDataStore.state.templateState.productData[ key ] =
-						value;
+					productDataStore.state.templateState.variationId =
+						variationId;
 				}
 			},
 		},

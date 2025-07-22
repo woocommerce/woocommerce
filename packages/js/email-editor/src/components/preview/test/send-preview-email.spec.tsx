@@ -1,5 +1,5 @@
 /* eslint-disable @woocommerce/dependency-group -- because we import mocks first, we deactivate this rule to avoid ESLint errors */
-import '../../__mocks__/setup-shared-mocks';
+import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
@@ -91,6 +91,7 @@ const setupUseSelectMock = ( overrides: Partial< PreviewState > = {} ) => {
 			selector: (
 				select: ( storeName: string ) => {
 					getPreviewState: () => PreviewState;
+					getEmailPostType: () => string;
 				}
 			) => unknown
 		) =>
@@ -103,6 +104,7 @@ const setupUseSelectMock = ( overrides: Partial< PreviewState > = {} ) => {
 					errorMessage: '',
 					...overrides,
 				} ),
+				getEmailPostType: () => 'post',
 			} ) )
 	);
 };

@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import {
-	PaymentsProviderState,
-	PaymentsProviderOnboardingState,
+	PaymentGatewayProvider,
+	PaymentsProviderIncentive,
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
@@ -15,21 +15,18 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { recordPaymentsEvent } from '~/settings-payments/utils';
+import {
+	isWooPayments,
+	recordPaymentsOnboardingEvent,
+	recordPaymentsProviderEvent,
+} from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 interface CompleteSetupButtonProps {
 	/**
-	 * The ID of the gateway to activate payments for.
+	 * The provider details for the payment gateway.
 	 */
-	gatewayId: string;
-	/**
-	 * The state of the gateway.
-	 */
-	gatewayState: PaymentsProviderState;
-	/**
-	 * The onboarding state for this gateway.
-	 */
-	onboardingState: PaymentsProviderOnboardingState;
+	gatewayProvider: PaymentGatewayProvider;
 	/**
 	 * The settings URL to navigate to, if we don't have an onboarding URL.
 	 */
@@ -58,6 +55,16 @@ interface CompleteSetupButtonProps {
 	 * The onboarding type for the gateway.
 	 */
 	onboardingType?: string;
+	/**
+	 * Callback used when an incentive is accepted.
+	 *
+	 * @param id Incentive ID.
+	 */
+	acceptIncentive?: ( id: string ) => void;
+	/**
+	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
+	 */
+	incentive?: PaymentsProviderIncentive | null;
 }
 
 /**
@@ -66,9 +73,7 @@ interface CompleteSetupButtonProps {
  * or settings) based on the gateway's and onboarding state.
  */
 export const CompleteSetupButton = ( {
-	gatewayId,
-	gatewayState,
-	onboardingState,
+	gatewayProvider,
 	settingsHref,
 	onboardingHref,
 	gatewayHasRecommendedPaymentMethods,
@@ -76,6 +81,8 @@ export const CompleteSetupButton = ( {
 	buttonText = __( 'Complete setup', 'woocommerce' ),
 	setOnboardingModalOpen,
 	onboardingType,
+	acceptIncentive = () => {},
+	incentive = null,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 
@@ -86,34 +93,40 @@ export const CompleteSetupButton = ( {
 		[]
 	);
 
-	const accountConnected = gatewayState.account_connected;
-	const onboardingStarted = onboardingState.started;
-	const onboardingCompleted = onboardingState.completed;
+	const accountConnected = gatewayProvider.state.account_connected;
+	const onboardingStarted = gatewayProvider.onboarding.state.started;
+	const onboardingCompleted = gatewayProvider.onboarding.state.completed;
 
 	useEffect( () => {
 		// Prefetch WooPayments onboarding data if conditions are met
 		if (
-			gatewayId === 'woocommerce_payments' &&
+			isWooPayments( gatewayProvider.id ) &&
 			onboardingType === 'native_in_context' &&
 			! onboardingCompleted
 		) {
 			// Calling the selector triggers the data fetch
 			select( woopaymentsOnboardingStore ).getOnboardingData();
 		}
-	}, [ gatewayId, onboardingType, onboardingCompleted, select ] );
+	}, [ gatewayProvider.id, onboardingCompleted, onboardingType, select ] );
 
 	const completeSetup = () => {
 		// Record the click of this button.
-		recordPaymentsEvent( 'provider_complete_setup_click', {
-			provider_id: gatewayId,
-			onboarding_started: onboardingState.started,
-			onboarding_completed: onboardingState.completed,
-			onboarding_test_mode: onboardingState.test_mode,
-		} );
+		recordPaymentsProviderEvent( 'complete_setup_click', gatewayProvider );
 
 		setIsUpdating( true );
 
+		if ( incentive ) {
+			acceptIncentive( incentive.promo_id );
+		}
+
 		if ( onboardingType === 'native_in_context' ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'complete_setup_button',
+					source: wooPaymentsOnboardingSessionEntrySettings,
+				}
+			);
 			setOnboardingModalOpen( true );
 		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {
@@ -143,7 +156,7 @@ export const CompleteSetupButton = ( {
 
 	return (
 		<Button
-			key={ gatewayId }
+			key={ gatewayProvider.id }
 			variant={ 'primary' }
 			isBusy={ isUpdating }
 			disabled={ isUpdating || !! installingPlugin }

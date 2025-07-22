@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { Skeleton } from '../..';
@@ -8,8 +13,11 @@ import './style.scss';
 
 export const CartLineItemsSkeleton = ( { rows = 2 }: { rows?: number } ) => {
 	return (
-		// Adding .wc-block-cart and .is-large for inheriting styles from the Cart block.
-		<div className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items wc-block-cart is-large">
+		<div
+			className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items wc-block-cart is-large"
+			aria-live="polite"
+			aria-label={ __( 'Loading your cart…', 'woocommerce' ) }
+		>
 			<table className="wc-block-cart-items wp-block-woocommerce-cart-line-items-block">
 				<thead>
 					<tr className="wc-block-cart-items__header">

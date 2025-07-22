@@ -10,35 +10,63 @@ import type {
 	ApiResponse,
 	CartResponseTotals,
 } from '@woocommerce/types';
-import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type {
+	Store as StoreNotices,
+	Notice,
+} from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
 
+export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
+
 export type OptimisticCartItem = {
 	key?: string;
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
+	name: string;
+	type: string;
+};
+
+export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
+	variation?: SelectedAttributes[];
 };
 
 export type Store = {
 	state: {
+		errorMessages?: {
+			[ key: string ]: string;
+		};
 		restUrl: string;
 		nonce: string;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		products?: {
+			[ productId: number ]: {
+				price_html?: string;
+				availability_html?: string;
+				variations?: {
+					[ variationId: number ]: {
+						price_html?: string;
+						availability_html: string;
+					};
+				};
+			};
+		};
 	};
 	actions: {
-		addCartItem: ( args: OptimisticCartItem ) => void;
-		batchAddCartItems: ( items: OptimisticCartItem[] ) => void;
+		removeCartItem: ( key: string ) => void;
+		addCartItem: ( args: ClientCartItem ) => void;
+		batchAddCartItems: ( items: ClientCartItem[] ) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
+		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
 	};
 };
 
@@ -65,6 +93,64 @@ function generateError( error: ApiErrorResponse ): Error {
 	} );
 }
 
+const generateErrorNotice = ( error: Error | ApiErrorResponse ): Notice => ( {
+	notice: error.message,
+	type: 'error',
+	dismissible: true,
+} );
+
+const generateInfoNotice = ( message: string ): Notice => ( {
+	notice: message,
+	type: 'notice',
+	dismissible: true,
+} );
+
+const getInfoNoticesFromCartUpdates = (
+	oldCart: Store[ 'state' ][ 'cart' ],
+	newCart: Cart,
+	quantityChanges: QuantityChanges
+): Notice[] => {
+	const oldItems = oldCart.items;
+	const newItems = newCart.items;
+
+	const {
+		productsPendingAdd: pendingAdd = [],
+		cartItemsPendingQuantity: pendingQuantity = [],
+		cartItemsPendingDelete: pendingDelete = [],
+	} = quantityChanges;
+
+	const autoDeletedToNotify = oldItems.filter(
+		( old ) =>
+			old.key &&
+			! newItems.some( ( item ) => old.key === item.key ) &&
+			! pendingDelete.includes( old.key )
+	);
+
+	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		const old = oldItems.find( ( o ) => o.key === item.key );
+		return old
+			? ! pendingQuantity.includes( item.key ) &&
+					item.quantity !== old.quantity
+			: ! pendingAdd.includes( item.id );
+	} );
+	return [
+		...autoDeletedToNotify.map( ( item ) =>
+			// TODO: move the message template to iAPI config.
+			generateInfoNotice(
+				'"%s" was removed from your cart.'.replace( '%s', item.name )
+			)
+		),
+		...autoUpdatedToNotify.map( ( item ) =>
+			// TODO: move the message template to iAPI config.
+			generateInfoNotice(
+				'The quantity of "%1$s" was changed to %2$d.'
+					.replace( '%1$s', item.name )
+					.replace( '%2$d', item.quantity.toString() )
+			)
+		),
+	];
+};
+
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 
@@ -88,6 +174,54 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
+			*removeCartItem( key: string ) {
+				const previousCart = JSON.stringify( state.cart );
+
+				// optimistically update the cart
+				state.cart.items = state.cart.items.filter(
+					( item ) => item.key !== key
+				);
+
+				try {
+					const res: Response = yield fetch(
+						`${ state.restUrl }wc/store/v1/cart/remove-item`,
+						{
+							method: 'POST',
+							headers: {
+								Nonce: state.nonce,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify( { key } ),
+						}
+					);
+
+					const json: Cart | ApiErrorResponse = yield res.json();
+
+					if ( isApiErrorResponse( res, json ) ) {
+						throw generateError( json );
+					}
+					const quantityChanges = { cartItemsPendingDelete: [ key ] };
+					const infoNotices = getInfoNoticesFromCartUpdates(
+						state.cart,
+						json,
+						quantityChanges
+					);
+					const errorNotices = json.errors.map( generateErrorNotice );
+					yield actions.updateNotices(
+						[ ...infoNotices, ...errorNotices ],
+						true
+					);
+
+					state.cart = json;
+					emitSyncEvent( { quantityChanges } );
+				} catch ( error ) {
+					state.cart = JSON.parse( previousCart );
+
+					// Shows the error notice.
+					actions.showNoticeError( error as Error );
+				}
+			},
+
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
 				let item = state.cart.items.find(
 					( { id: productId } ) => id === productId
@@ -126,10 +260,16 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					// Checks if the response was successful, but still contains some errors.
-					json.errors?.forEach( ( error ) => {
-						actions.showNoticeError( error );
-					} );
+					const infoNotices = getInfoNoticesFromCartUpdates(
+						state.cart,
+						json,
+						quantityChanges
+					);
+					const errorNotices = json.errors.map( generateErrorNotice );
+					yield actions.updateNotices(
+						[ ...infoNotices, ...errorNotices ],
+						true
+					);
 
 					// Updates the local cart.
 					state.cart = json;
@@ -150,6 +290,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*batchAddCartItems( items: OptimisticCartItem[] ) {
 				const previousCart = structuredClone( state.cart );
 				const quantityChanges: QuantityChanges = {};
@@ -228,7 +369,6 @@ const { state, actions } = store< Store >(
 							throw generateError( response );
 					} );
 
-					// Gets the last successful cart response.
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -236,42 +376,66 @@ const { state, actions } = store< Store >(
 									response.status < 300
 						  )
 						: [];
-					const lastSuccessfulCartResponse = successfulResponses[
-						successfulResponses.length - 1
-					]?.body as Cart;
 
-					// Checks if the last successful cart response is valid.
-					if ( ! lastSuccessfulCartResponse ) {
-						throw new Error(
-							'No successful cart response received.'
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					// Only update the cart and trigger events if there is at least one successful response.
+					if ( successfulResponses.length > 0 ) {
+						const lastSuccessfulCartResponse = successfulResponses[
+							successfulResponses.length - 1
+						]?.body as Cart;
+
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							state.cart,
+							lastSuccessfulCartResponse,
+							quantityChanges
 						);
-					}
 
-					// Checks if the last successful response contains any errors.
-					if (
-						lastSuccessfulCartResponse?.errors &&
-						Array.isArray( lastSuccessfulCartResponse.errors )
-					) {
-						lastSuccessfulCartResponse.errors.forEach(
-							( error ) => {
-								actions.showNoticeError( error );
+						// Generate notices for any error that successful
+						// responses may contain.
+						const errorNotices = successfulResponses.flatMap(
+							( response ) => {
+								const errors = ( response.body.errors ??
+									[] ) as ApiErrorResponse[];
+								return errors.map( generateErrorNotice );
 							}
 						);
+
+						yield actions.updateNotices(
+							[ ...infoNotices, ...errorNotices ],
+							true
+						);
+
+						// Use the last successful response to update the local cart.
+						state.cart = lastSuccessfulCartResponse;
+
+						// Dispatches a legacy event.
+						triggerAddedToCartEvent( {
+							preserveCartData: true,
+						} );
+
+						// Dispatches the event to sync the @wordpress/data store.
+						emitSyncEvent( { quantityChanges } );
 					}
 
-					// Use the last successful response to update the local cart.
-					const cartResponse = lastSuccessfulCartResponse;
-
-					// Updates the local cart.
-					state.cart = cartResponse;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
-					} );
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
+					// Show error notices for all failed responses.
+					yield actions.updateNotices(
+						errorResponses
+							.filter(
+								( response ) =>
+									response.body &&
+									typeof response.body === 'object'
+							)
+							.map( ( { body } ) =>
+								generateErrorNotice( body as ApiErrorResponse )
+							)
+					);
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
@@ -281,6 +445,7 @@ const { state, actions } = store< Store >(
 					actions.showNoticeError( error as Error );
 				}
 			},
+
 			*refreshCartItems() {
 				// Skips if there's a pending request.
 				if ( pendingRefresh ) return;
@@ -298,6 +463,11 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
+					yield actions.updateNotices(
+						json.errors.map( generateErrorNotice ),
+						true
+					);
+
 					// Updates the local cart.
 					state.cart = json;
 
@@ -313,6 +483,7 @@ const { state, actions } = store< Store >(
 					pendingRefresh = false;
 				}
 			},
+
 			*showNoticeError( error: Error | ApiErrorResponse ) {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
@@ -325,9 +496,14 @@ const { state, actions } = store< Store >(
 					}
 				);
 
+				const { code, message } = error as ApiErrorResponse;
+
+				const userFriendlyMessage =
+					state.errorMessages?.[ code ] || message;
+
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: error.message,
+					notice: userFriendlyMessage,
 					type: 'error',
 					dismissible: true,
 				} );
@@ -335,6 +511,33 @@ const { state, actions } = store< Store >(
 				// Emmits console.error for troubleshooting.
 				// eslint-disable-next-line no-console
 				console.error( error );
+			},
+
+			*updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
+				// Todo: Use the module exports instead of `store()` once the store-notices
+				// store is public.
+				yield import( '@woocommerce/stores/store-notices' );
+				const { state: noticeState, actions: noticeActions } =
+					store< StoreNotices >(
+						'woocommerce/store-notices',
+						{},
+						{
+							lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+						}
+					);
+
+				// Todo: Check what should happen if the notice is already displayed.
+				const noticeIds = newNotices.map( ( notice ) =>
+					noticeActions.addNotice( notice )
+				);
+
+				const { notices } = noticeState;
+				if ( removeOthers ) {
+					notices
+						.map( ( { id } ) => id )
+						.filter( ( id ) => ! noticeIds.includes( id ) )
+						.forEach( ( id ) => noticeActions.removeNotice( id ) );
+				}
 			},
 		},
 	},

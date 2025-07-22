@@ -1075,13 +1075,32 @@ add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.
  */
 function wc_cancel_unpaid_orders() {
-	$held_duration = get_option( 'woocommerce_hold_stock_minutes' );
+	$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
 	// Re-schedule the event before cancelling orders
 	// this way in case of a DB timeout or (plugin) crash the event is always scheduled for retry.
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	/**
+	 * Filters the interval at which to cancel unpaid orders in minutes.
+	 *
+	 * @since 5.1.0
+	 *
+	 * @param int $cancel_unpaid_interval The interval at which to cancel unpaid orders in minutes.
+	 */
 	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
-	wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
+	// Clear existing scheduled events.
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	} else {
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	}
+
+	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	if ( function_exists( 'as_schedule_single_action' ) ) {
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+	} else {
+		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+	}
 
 	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
 		return;
@@ -1277,4 +1296,43 @@ function wc_delete_order_note( $note_id ) {
 	}
 
 	return false;
+}
+
+/**
+ * Apply wptexturize while preserving URLs to prevent their content from being altered.
+ *
+ * @since 10.1.0
+ * @param string $content The order note content.
+ * @return string The processed content.
+ */
+function wc_wptexturize_order_note( $content ) {
+	// Pattern to match URLs (http, https protocols).
+	$url_pattern = '/\b(?:https?):\/\/[^\s<>"{}|\\^`\[\]]+/i';
+
+	// Find all URLs in the content.
+	preg_match_all( $url_pattern, $content, $urls );
+
+	if ( empty( $urls[0] ) ) {
+		// No URLs found, safe to apply wptexturize.
+		return wptexturize( $content );
+	}
+
+	// Get unique URLs to avoid issues with duplicate URLs.
+	$unique_urls = array_unique( $urls[0] );
+
+	// Replace URLs with placeholders.
+	$placeholders        = array();
+	$placeholder_content = $content;
+
+	foreach ( $unique_urls as $index => $url ) {
+		$placeholder                  = sprintf( '___WC_URL_PLACEHOLDER_%d___', $index );
+		$placeholders[ $placeholder ] = $url;
+		$placeholder_content          = str_replace( $url, $placeholder, $placeholder_content );
+	}
+
+	// Apply wptexturize to content with placeholders.
+	$texturized_content = wptexturize( $placeholder_content );
+
+	// Restore original URLs.
+	return str_replace( array_keys( $placeholders ), array_values( $placeholders ), $texturized_content );
 }

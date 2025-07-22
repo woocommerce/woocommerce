@@ -259,22 +259,18 @@ class WC_Structured_Data {
 					);
 
 					if ( $product->is_on_sale() ) {
-						$children                = array_map( 'wc_get_product', $product->get_children() );
-						$lowest_child_sale_price = $highest;
-
-						foreach ( $children as $child ) {
-							$child_sale_price = $child->get_sale_price();
-
-							if ( empty( $child_sale_price ) || (int) $child_sale_price > (int) $lowest_child_sale_price ) {
-								continue;
+						$lowest_child_sale_price = $product->get_variation_sale_price( 'min', false );
+						foreach ( $product->get_variation_prices()['sale_price'] as $variation_id => $variation_price ) {
+							if ( $variation_price === $lowest_child_sale_price ) {
+								break;
 							}
-
-							$lowest_child_sale_price = $child_sale_price;
-							$date_on_sale_to         = $child->get_date_on_sale_to();
-							$sale_price_valid_until  = $date_on_sale_to
-								? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
-								: null;
 						}
+						$date_on_sale_to        = isset( $variation_id )
+							? wc_get_product( $variation_id )->get_date_on_sale_to()
+							: null;
+						$sale_price_valid_until = $date_on_sale_to
+							? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
+							: null;
 
 						$markup_offer['priceSpecification'] = array(
 							array(

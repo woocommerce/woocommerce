@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add to Cart + Options: avoid JS error when removing items from the Mini-Cart block due to missing context
+
+

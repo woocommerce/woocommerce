@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Check that product availability contains a class before accessing it
+
+
