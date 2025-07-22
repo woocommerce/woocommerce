@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clean iAPI errors when interacting with the Add to Cart + Options form again
