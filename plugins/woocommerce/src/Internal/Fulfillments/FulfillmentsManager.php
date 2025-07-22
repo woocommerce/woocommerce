@@ -22,9 +22,9 @@ use WC_Order_Refund;
  */
 class FulfillmentsManager {
 	/**
-	 * Class constructor.
+	 * This method registers the hooks related to fulfillments.
 	 */
-	public function __construct() {
+	public function register() {
 		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
 		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'woocommerce_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );

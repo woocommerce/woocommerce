@@ -35,9 +35,10 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$container               = wc_get_container();
-		$fulfillments_controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
-		$fulfillments_controller->register();
+		$container  = wc_get_container();
+		$controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 	}
 
 	/**
@@ -54,7 +55,8 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		$this->manager    = new FulfillmentsManager();
+		$this->manager    = wc_get_container()->get( FulfillmentsManager::class );
+		$this->manager->register();
 	}
 
 	/**

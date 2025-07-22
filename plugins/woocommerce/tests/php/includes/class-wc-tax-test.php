@@ -7,8 +7,6 @@
 
 declare( strict_types=1 );
 
-use ReflectionClass;
-
 /**
  * Unit tests for the WC_Tax class get_shipping_tax_rates method and related functionality.
  * Covers edge case bug from https://github.com/woocommerce/woocommerce/issues/58757
@@ -410,7 +408,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 
 		// Use reflection to test private method.
-		$reflection = new ReflectionClass( 'WC_Tax' );
+		$reflection = new \ReflectionClass( 'WC_Tax' );
 		$method     = $reflection->getMethod( 'get_shipping_tax_class_from_cart_items' );
 		$method->setAccessible( true );
 
