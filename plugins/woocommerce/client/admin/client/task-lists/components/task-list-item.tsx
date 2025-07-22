@@ -54,6 +54,8 @@ export const TaskListItem = ( {
 		content,
 		id,
 		isComplete,
+		isInProgress,
+		inProgressLabel,
 		isDismissable,
 		isSnoozeable,
 		time,
@@ -187,6 +189,8 @@ export const TaskListItem = ( {
 					key={ id }
 					title={ title }
 					badge={ badge }
+					inProgress={ isInProgress }
+					inProgressLabel={ inProgressLabel }
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }
