@@ -3,6 +3,11 @@
  */
 import * as iAPI from '@wordpress/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import { decodeHtmlEntities } from '../../utils/html-entities';
+
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
@@ -30,6 +35,7 @@ function selectFilter() {
 
 	context.activeFilters = newActiveFilters;
 }
+
 function unselectFilter() {
 	const { item } = getContext< ProductFiltersContext >();
 	actions.removeActiveFiltersBy(
@@ -125,6 +131,7 @@ const productFiltersStore = {
 				} )
 				.map( ( item ) => ( {
 					...item,
+					activeLabel: decodeHtmlEntities( item.activeLabel ),
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
