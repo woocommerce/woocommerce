@@ -34,15 +34,15 @@ class EmailActionController {
 		if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
 			return;
 		}
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$this->validate_request( wp_unslash( $_GET['notification_id'] ), wp_unslash( $_GET['email_link_action_key'] ) );
 	}
 
 	/**
 	 * Checks request parameters and processes the notification based on the action key.
 	 *
-	 * @param string $notification_id
-	 * @param string $email_link_action_key
+	 * @param string $notification_id The ID of the notification to process.
+	 * @param string $email_link_action_key The action key from the email link.
 	 * @return void
 	 */
 	public function validate_request( string $notification_id, string $email_link_action_key ): void {
@@ -68,10 +68,10 @@ class EmailActionController {
 	 * If the verification key matches, it updates the notification status to active.
 	 *
 	 * @param Notification $notification The notification to process.
-	 * @param string $action_key The action key to verify.
+	 * @param string       $action_key The action key to verify.
 	 * @return void
 	 */
-	public function process_verification_action( Notification $notification, string $action_key): void {
+	public function process_verification_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_verification_key( $action_key ) ) {
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
@@ -105,7 +105,7 @@ class EmailActionController {
 	 * If the unsubscribe key matches, it updates the notification status to cancelled.
 	 *
 	 * @param Notification $notification The Notification to process.
-	 * @param string $action_key The action key to verify.
+	 * @param string       $action_key The action key to verify.
 	 * @return void
 	 */
 	public function process_unsubscribe_action( Notification $notification, string $action_key ): void {
@@ -143,9 +143,9 @@ class EmailActionController {
 	 * Retrieves the notification to be processed based on the provided notification ID and action key.
 	 *
 	 * @param string $notification_id The ID of the notification to process.
-	 * @return Notification The notification object if found and has an action key, null otherwise.
+	 * @return Notification|false The notification object if found and has an action key, null otherwise.
 	 */
-	public function get_notification_to_be_processed( string $notification_id ): Notification|false {
+	public function get_notification_to_be_processed( string $notification_id ): ?Notification {
 		$notification = Factory::get_notification( (int) $notification_id );
 
 		if ( ! $notification ) {
