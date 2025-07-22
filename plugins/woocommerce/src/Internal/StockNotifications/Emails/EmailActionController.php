@@ -31,20 +31,14 @@ class EmailActionController {
 	 * This method checks if the request contains a verification action and processes it.
 	 */
 	public function maybe_process_verification_action_from_request(): void {
-		$this->maybe_process_verification_action(
-			$_GET['notification_id'] ?? null,
-			$_GET['email_link_action_key'] ?? null
-		);
+		$this->maybe_process_verification_action( $_GET['notification_id'] ?? null, $_GET['email_link_action_key'] ?? null);
 	}
 
 	/**
 	 * This method checks if the request contains an unsubscribe action and processes it.
 	 */
 	public function maybe_process_unsubscribe_action_from_request(): void {
-		$this->maybe_process_unsubscribe_action(
-            $_GET['notification_id'] ?? null,
-            $_GET['email_link_action_key'] ?? null
-		);
+		$this->maybe_process_unsubscribe_action( $_GET['notification_id'] ?? null, $_GET['email_link_action_key'] ?? null );
 	}
 
 	/**
