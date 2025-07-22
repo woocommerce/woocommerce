@@ -74,6 +74,21 @@ jobs:
             core.setOutput('current_version', `${major}.${minor}`);
             core.setOutput('previous_version', previousVersion);
 
+      - name: Check the necessary branches exist
+        run: |
+          CURRENT_BRANCH="release/${{ steps.calculate-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="release/${{ steps.calculate-versions.outputs.previous_version }}"
+
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${CURRENT_BRANCH} > /dev/null; then
+            echo "::error::Branch '$CURRENT_BRANCH' for the ${{ steps.calculate-versions.outputs.current_version }} version does not exist."
+            exit 1
+          fi
+
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${PREVIOUS_BRANCH} > /dev/null; then
+            echo "::error::Branch '$PREVIOUS_BRANCH' for the ${{ steps.calculate-versions.outputs.previous_version }} version does not exist."
+            exit 1
+          fi
+
   count-commits-and-contributors:
     name: Count commits and contributors between releases
     needs: extract-versions

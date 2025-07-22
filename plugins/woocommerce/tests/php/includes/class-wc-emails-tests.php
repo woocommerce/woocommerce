@@ -1,5 +1,8 @@
 <?php
 
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+
 /**
  * Class WC_Emails_Tests.
  */
@@ -58,5 +61,38 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		ob_end_clean();
 		$this->assertStringContainsString( 'dummy_key', $content );
 		$this->assertStringContainsString( 'dummy_meta_value', $content );
+	}
+
+	/**
+	 * Test that fulfillment meta function outputs linked meta.
+	 */
+	public function test_fulfillment_meta() {
+		// Ensure the FulfillmentsController is registered, which is necessary for the translation of meta keys.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id'   => $order->get_id(),
+				'entity_type' => 'WC_Order',
+			)
+		);
+
+		add_filter(
+			'woocommerce_fulfillment_meta_key_translations',
+			function ( $translations ) {
+				$translations['test_meta_key'] = __( 'Test meta key', 'woocommerce' );
+				return $translations;
+			}
+		);
+
+		$email_object = new WC_Emails();
+		ob_start();
+		$email_object->fulfillment_meta( $order, $fulfillment, true, true );
+		$content = ob_get_contents();
+		ob_end_clean();
+		$this->assertStringContainsString( 'Test meta key', $content );
+		$this->assertStringContainsString( 'test_meta_value', $content );
 	}
 }
