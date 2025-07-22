@@ -125,7 +125,8 @@
 		.woocommerce-task-list__item-text {
 			display: flex;
 			flex-direction: row;
-			justify-content: space-between;
+			align-items: center;
+			gap: $gap;
 			padding: 0;
 			margin-top: 0;
 		}
@@ -202,7 +203,8 @@
 	.woocommerce-task-list__item-text {
 		display: flex;
 		flex-direction: row;
-		justify-content: space-between;
+		align-items: center;
+		gap: $gap;
 	}
 
 	.numbered-circle {
