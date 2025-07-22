@@ -16,13 +16,17 @@ import {
 } from '@wordpress/block-editor';
 
 /**
+ * External dependencies
+ */
+import { getInnerBlockByName } from '@woocommerce/utils';
+
+/**
  * Internal dependencies
  */
 import { ProductDetailsEditProps } from './types';
 import { getTemplate, isAdditionalProductDataEmpty } from './utils';
 import { LegacyProductDetailsPreview } from './legacy-preview';
 import './editor.scss';
-import { getInnerBlockByName } from '@woocommerce/utils';
 
 /**
  * Check if block is inside a Query Loop with non-product post type
