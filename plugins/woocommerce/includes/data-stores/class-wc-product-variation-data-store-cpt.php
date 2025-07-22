@@ -684,10 +684,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	public static function on_add_product_attribute( $attribute_id, $attribute, $old_slug ) {
-		llp('add');
+		/* llp('add'); */
 	}
 	public static function on_delete_product_attribute( $attribute_id, $attribute, $old_slug ) {
-		llp('delete');
+		/* llp('delete'); */
 	}
 
 	public static function on_update_product_attribute( $attribute_id, $attribute, $old_slug ) {
