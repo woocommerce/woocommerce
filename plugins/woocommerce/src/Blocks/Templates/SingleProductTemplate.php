@@ -91,8 +91,8 @@ class SingleProductTemplate extends AbstractTemplate {
 					'woocommerce/product-data',
 					array(
 						'templateState' => array(
-							'originalProductData' => ProductDataUtils::get_product_data( $product ),
-							'productData'         => array(),
+							'productId'   => $product->get_id(),
+							'variationId' => null,
 						),
 					)
 				);

@@ -117,6 +117,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const logoNoOption = page.locator( 'label:has-text("No")' );
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
+		const colorRedOption = page.locator( 'label:has-text("Red")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
@@ -132,30 +133,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'updates product price when attributes are selected', async () => {
+		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+			await expect( page.getByText( 'Out of stock' ) ).toBeHidden();
 
+			await colorBlueOption.click();
 			await logoNoOption.click();
+
+			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect( productPrice ).toHaveText( '$45.00' );
+		} );
+
+		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await colorGreenOption.click();
 
-			// Wait until the variation is found and the button becomes visually
-			// enabled.
 			// Note: The button is always enabled for accessibility reasons.
 			// Instead, we check directly for the "disabled" class, which grays
 			// out the button.
 			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
 
-			await expect( productPrice ).toHaveText( '$45.00' );
-		} );
-
-		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await addToCartButton.click();
 
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
 		await test.step( '"X in cart" text reflects the correct amount in variations', async () => {
-			await colorBlueOption.click();
+			await colorRedOption.click();
 
 			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
 

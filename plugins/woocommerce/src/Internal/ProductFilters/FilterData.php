@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for filter counts.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class FilterData {
 	/**
