@@ -474,6 +474,15 @@ abstract class Task {
 	}
 
 	/**
+	 * The task in progress label.
+	 *
+	 * @return bool
+	 */
+	public function in_progress_label() {
+		return __( 'In progress', 'woocommerce' );
+	}
+
+	/**
 	 * If a task is always accessible, relevant for when a task list is hidden but a task can still be viewed.
 	 *
 	 * @return bool
@@ -527,6 +536,7 @@ abstract class Task {
 			'actionUrl'       => $this->get_action_url(),
 			'isComplete'      => $is_complete,
 			'isInProgress'    => $this->is_in_progress(),
+			'inProgressLabel' => $this->in_progress_label(),
 			'time'            => $this->get_time(),
 			'level'           => 3,
 			'isActioned'      => $this->is_actioned(),
