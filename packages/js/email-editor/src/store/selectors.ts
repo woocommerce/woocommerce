@@ -202,9 +202,8 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate | null => {
-		const currentTemplate =
-			select( editorStore ).getEditedPostAttribute( 'template' );
+	( select ) => (_state, templateSlug?: string): EmailTemplate | null => {
+		const currentTemplate = templateSlug || select( editorStore ).getEditedPostAttribute( 'template' );
 
 		if ( currentTemplate ) {
 			const templateWithSameSlug = select( coreDataStore )
@@ -216,9 +215,7 @@ export const getEditedPostTemplate = createRegistrySelector(
 				?.find( ( template ) => template.slug === currentTemplate );
 
 			if ( ! templateWithSameSlug ) {
-				return regularizedGetEntityRecord(
-					templateWithSameSlug
-				) as EmailTemplate;
+				return null;
 			}
 
 			// @ts-expect-error getEditedPostAttribute
@@ -249,7 +246,7 @@ export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
 			templateId
 		) as unknown as EmailTemplate;
 	}
-	return getEditedPostTemplate();
+	return select( storeName ).getEditedPostTemplate();
 } );
 
 export const getCurrentTemplateContent = () => {
