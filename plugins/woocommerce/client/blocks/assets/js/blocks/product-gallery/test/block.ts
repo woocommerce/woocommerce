@@ -3,6 +3,9 @@
  */
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
+import { createBlock } from '@wordpress/blocks';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 /**
  * Internal dependencies
@@ -10,41 +13,116 @@ import { screen } from '@testing-library/react';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import blockJson from '../block.json';
 import '../';
+import '../inner-blocks/product-gallery-large-image';
+import '../inner-blocks/product-gallery-thumbnails';
+import '../inner-blocks/product-gallery-next-previous-buttons';
+import '../../single-product';
+import '../../../atomic/blocks/product-elements/image';
+import '../../../atomic/blocks/product-elements/sale-badge';
 
-// Mock settings
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( () => ( {
-		productId: '123',
-		images: [
-			{
-				id: 1,
-				src: 'test-image-1.jpg',
-				thumbnail: 'test-thumb-1.jpg',
-				alt: 'Test 1',
-			},
-		],
-	} ) ),
-} ) );
+// Setup MSW
+const handlers = [
+	http.get( '/wp/v2/product/:id', () => {
+		return HttpResponse.json( {
+			id: 123,
+			title: { rendered: 'Test Product' },
+			images: [
+				{
+					id: 1,
+					src: 'test-image-1.jpg',
+					thumbnail: 'test-thumb-1.jpg',
+					alt: 'Test 1',
+				},
+			],
+		} );
+	} ),
+	http.get( '/wc/store/v1/products/:id', () => {
+		return HttpResponse.json( {
+			id: 123,
+			name: 'Test Product',
+			images: [
+				{
+					id: 1,
+					src: 'test-image-1.jpg',
+					thumbnail: 'test-thumb-1.jpg',
+					alt: 'Test 1',
+				},
+			],
+		} );
+	} ),
+];
+
+const server = setupServer( ...handlers );
+
+// Start MSW
+beforeAll( () => server.listen() );
+afterEach( () => server.resetHandlers() );
+afterAll( () => server.close() );
 
 async function setup() {
-	const testBlock = [
+	const productGalleryBlock = createBlock( blockJson.name, {
+		hoverZoom: true,
+		fullScreenOnClick: true,
+	} );
+
+	const singleProductBlock = [
 		{
-			name: blockJson.name,
+			name: 'woocommerce/single-product',
 			attributes: {
-				hoverZoom: true,
-				fullScreenOnClick: true,
+				productId: '123',
 			},
+			innerBlocks: [ productGalleryBlock ],
 		},
 	];
-	return initializeEditor( testBlock );
+	return initializeEditor( singleProductBlock );
 }
 
 describe( 'Product Gallery Block', () => {
-	it( 'should render the block with default attributes', async () => {
+	it( 'should render the block in the editor with correct structure', async () => {
 		await setup();
-		const block = screen.getByLabelText( /Block: Product Gallery/i );
+
+		// Get the main block wrapper
+		const block = screen.getByRole( 'document', {
+			name: /Block: Product Gallery/i,
+		} );
 		expect( block ).toBeInTheDocument();
-		expect( block ).toHaveAttribute( 'data-hover-zoom', 'true' );
-		expect( block ).toHaveAttribute( 'data-full-screen-on-click', 'true' );
+
+		// Check inner blocks container
+		const innerBlocks = block.querySelector( '.block-editor-inner-blocks' );
+		expect( innerBlocks ).toBeInTheDocument();
+
+		// Check layout container
+		const layout = block.querySelector(
+			'.block-editor-block-list__layout'
+		);
+		expect( layout ).toBeInTheDocument();
+		expect( layout ).toHaveClass( 'is-layout-flex' );
+		expect( layout ).toHaveClass( 'is-horizontal' );
+		expect( layout ).toHaveClass( 'is-nowrap' );
+
+		// Check for large image block and its inner blocks
+		const largeImageBlock = screen.getByRole( 'document', {
+			name: /Block: Large Image/i,
+		} );
+		expect( largeImageBlock ).toBeInTheDocument();
+
+		// Check inner blocks of large image
+		expect(
+			screen.getByRole( 'document', { name: /Block: Product Image/i } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'document', { name: /Block: On-Sale Badge/i } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'document', {
+				name: /Block: Next\/Previous Buttons/i,
+			} )
+		).toBeInTheDocument();
+
+		// Check that the product image is rendered
+		const productImage = screen.getByTestId( 'product-image' );
+		expect( productImage ).toBeInTheDocument();
+		expect( productImage ).toHaveAttribute( 'src', 'test-image-1.jpg' );
+		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
 	} );
 } );
