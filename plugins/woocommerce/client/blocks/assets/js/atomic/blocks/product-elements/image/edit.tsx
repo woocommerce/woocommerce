@@ -9,7 +9,11 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { createInterpolateElement, useRef } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
@@ -36,6 +40,7 @@ import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 
 const TEMPLATE = [
 	[
@@ -76,6 +81,34 @@ const Edit = ( {
 		[ clientId ]
 	);
 
+	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const { isDescendentOfSingleProductBlock } =
+		useIsDescendentOfSingleProductBlock( {
+			blockClientId: blockProps?.id,
+		} );
+
+	useEffect( () => {
+		if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductBlock,
+				showSaleBadge: false,
+			} );
+		} else {
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductBlock,
+			} );
+		}
+	}, [
+		isDescendentOfQueryLoop,
+		isDescendentOfSingleProductBlock,
+		setAttributes,
+	] );
+
+	const showAllControls =
+		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
+
 	const innerBlockProps = useInnerBlocksProps(
 		{
 			className: 'wc-block-components-product-image__inner-container',
@@ -96,7 +129,7 @@ const Edit = ( {
 		<div { ...blockProps }>
 			{ /* Don't show controls in product gallery as we rely on
 			core supports API (aspect ratio setting) */ }
-			{ ! isInProductGallery && (
+			{ showAllControls && ! isInProductGallery && (
 				<InspectorControls>
 					<ImageSizeSettings
 						scale={ scale }
@@ -164,7 +197,7 @@ const Edit = ( {
 				</InspectorControls>
 			) }
 			<Block { ...{ ...attributes, ...context } }>
-				{ ! isInProductGallery && <div { ...innerBlockProps } /> }
+				{ showAllControls && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>
 	);
