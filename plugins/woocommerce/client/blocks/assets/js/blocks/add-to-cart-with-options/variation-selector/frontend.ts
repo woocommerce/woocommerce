@@ -310,13 +310,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const { actions } = store< ProductDataStore >(
-					'woocommerce/product-data',
-					{},
-					{ lock: universalLock }
-				);
+				const { actions: productDataActions } =
+					store< ProductDataStore >(
+						'woocommerce/product-data',
+						{},
+						{ lock: universalLock }
+					);
 				const matchedVariationId = matchedVariation?.variation_id;
-				actions.setVariationId( matchedVariationId ?? null );
+				productDataActions.setVariationId( matchedVariationId ?? null );
 			},
 		},
 	},
