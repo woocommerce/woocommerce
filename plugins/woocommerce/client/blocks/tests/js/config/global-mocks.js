@@ -36,7 +36,7 @@ global.wcSettings = {
 		completed: 'Completed',
 		cancelled: 'Cancelled',
 		refunded: 'Refunded',
-		failed: 'Failed',woocommerce/plugins/woocommerce/src/Blocks/BlockTypes/ProductImage.php
+		failed: 'Failed',
 	},
 	placeholderImgSrc: 'placeholder.jpg',
 	productCount: 101,
