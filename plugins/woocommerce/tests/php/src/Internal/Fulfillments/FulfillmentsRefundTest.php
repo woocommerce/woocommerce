@@ -35,9 +35,10 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$container               = wc_get_container();
-		$fulfillments_controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
-		$fulfillments_controller->register();
+		$container  = wc_get_container();
+		$controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 	}
 
 	/**
@@ -54,7 +55,8 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		$this->manager    = new FulfillmentsManager();
+		$this->manager    = wc_get_container()->get( FulfillmentsManager::class );
+		$this->manager->register();
 	}
 
 	/**
@@ -634,7 +636,6 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 6, $quantities_by_item[ $item_id_1 ] ); // 10 - 6 = 4 pending, 3 reduced from pending, fulfillment stays the same.
 		$this->assertEquals( 5, $quantities_by_item[ $item_id_2 ] ); // 10 - 8 = 2 pending, 2 reduced from pending, 3 reduced from fulfillment, 5.
 	}
-
 
 	/**
 	 * Test fulfillment modifications with multiple refunds.
