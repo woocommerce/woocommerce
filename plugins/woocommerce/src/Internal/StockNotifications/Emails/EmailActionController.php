@@ -30,39 +30,39 @@ class EmailActionController {
 	 * This method checks if the request contains indicators to process an action from an email link.
 	 */
 	public function maybe_process_email_action(): void {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
-            return;
-        }
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
+			return;
+		}
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$this->validate_request( wp_unslash( $_GET['notification_id'] ), wp_unslash( $_GET['email_link_action_key'] ) );
 	}
 
-    /**
-     * Checks request parameters and processes the notification based on the action key.
-     * 
-     * @param string $notification_id
-     * @param string $email_link_action_key
-     * @return void
-     */
-    public function validate_request( string $notification_id, string $email_link_action_key ): void {
-        if ( empty( $email_link_action_key ) || empty( $notification_id ) ) {
-            return;
-        }
+	/**
+	 * Checks request parameters and processes the notification based on the action key.
+	 *
+	 * @param string $notification_id
+	 * @param string $email_link_action_key
+	 * @return void
+	 */
+	public function validate_request( string $notification_id, string $email_link_action_key ): void {
+		if ( empty( $email_link_action_key ) || empty( $notification_id ) ) {
+			return;
+		}
 
-        $notification = $this->get_notification_to_be_processed( $notification_id );
+		$notification = $this->get_notification_to_be_processed( $notification_id );
 
-        if ( ! $notification ) {
-            return;
-        }
+		if ( ! $notification ) {
+			return;
+		}
 
-        $action_key = $notification->get_meta( 'email_link_action_key' );
-        if ( str_contains( $action_key, ':' ) ) {
-            $this->process_verification_action( $notification, $email_link_action_key );
-        } else {
-            $this->process_unsubscribe_action( $notification, $email_link_action_key );
-        }
-    }
+		$action_key = $notification->get_meta( 'email_link_action_key' );
+		if ( str_contains( $action_key, ':' ) ) {
+			$this->process_verification_action( $notification, $email_link_action_key );
+		} else {
+			$this->process_unsubscribe_action( $notification, $email_link_action_key );
+		}
+	}
 
 	/**
 	 * If the verification key matches, it updates the notification status to active.

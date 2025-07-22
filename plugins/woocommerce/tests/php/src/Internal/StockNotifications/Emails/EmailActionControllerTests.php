@@ -20,7 +20,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * Test that verification action is sets notification status to active.
 	 */
 	public function test_process_verification_action_sets_status_active() {
-        $product      = WC_Helper_Product::create_simple_product();
+		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::PENDING );
@@ -31,7 +31,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 
 		$controller = new EmailActionController();
 		$controller->process_verification_action( $notification, 'test' );
-        $updated_notification = Factory::get_notification( $id );
+		$updated_notification = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::ACTIVE, $updated_notification->get_status() );
 	}
 
@@ -39,7 +39,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * Test that unsubscribe action sets notification status to cancelled, and sets cancellation source to user.
 	 */
 	public function test_process_unsubscribe_action_sets_status_cancelled() {
-        $product      = WC_Helper_Product::create_simple_product();
+		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::ACTIVE );
