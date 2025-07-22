@@ -9,6 +9,7 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type AvailableVariation = {
 	attributes: Record< string, string >;
@@ -123,7 +124,37 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
-const addToCartWithOptionsStore = store(
+export type AddToCartWithOptionsStore = {
+	state: {
+		isFormValid: boolean;
+		allowsDecrease: boolean;
+		allowsIncrease: boolean;
+	};
+	actions: {
+		setQuantity: ( value: number, childProductId?: number ) => void;
+		increaseQuantity: (
+			event: HTMLElementEvent< HTMLButtonElement >
+		) => void;
+		decreaseQuantity: (
+			event: HTMLElementEvent< HTMLButtonElement >
+		) => void;
+		handleQuantityInput: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => void;
+		handleQuantityChange: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => void;
+		handleQuantityCheckboxChange: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => void;
+		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
+	};
+};
+
+const addToCartWithOptionsStore = store<
+	AddToCartWithOptionsStore &
+		Partial< VariableProductAddToCartWithOptionsStore >
+>(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
@@ -136,14 +167,10 @@ const addToCartWithOptionsStore = store(
 				const { productType, quantity } = context;
 
 				if ( productType === 'variable' ) {
-					// `isVariableProductFormValid` is defined in
-					// `variation-selector/frontend.ts`, only for variable
-					// products.
-					const { isVariableProductFormValid } =
-						( addToCartWithOptionsStore?.state as {
-							isVariableProductFormValid?: boolean;
-						} ) ?? {};
-					return isVariableProductFormValid ?? true;
+					return (
+						addToCartWithOptionsStore?.state
+							?.isVariableProductFormValid ?? true
+					);
 				}
 
 				if ( productType === 'grouped' ) {
@@ -404,5 +431,3 @@ const addToCartWithOptionsStore = store(
 	},
 	{ lock: true }
 );
-
-export type AddToCartWithOptionsStore = typeof addToCartWithOptionsStore;
