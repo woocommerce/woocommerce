@@ -191,12 +191,10 @@ class WC_Gateway_Paypal_Request {
 					'amount'    => array(
 						'currency_code' => $currency,
 						'value'         => $order->get_total(),
-						// Note: We are not including discount in the breakdown, as PayPal tries to subtract
-						// it from the total, and ends up rejecting the order as it does not tally correctly.
 						'breakdown'     => array(
 							'item_total' => array(
 								'currency_code' => $currency,
-								'value'         => $this->get_paypal_order_items_total( $order ),
+								'value'         => $this->get_paypal_order_items_subtotal( $order ),
 							),
 							'shipping'   => array(
 								'currency_code' => $currency,
@@ -205,6 +203,10 @@ class WC_Gateway_Paypal_Request {
 							'tax_total'  => array(
 								'currency_code' => $currency,
 								'value'         => $order->get_total_tax(),
+							),
+							'discount'   => array(
+								'currency_code' => $currency,
+								'value'         => $order->get_discount_total(),
 							),
 						),
 					),
@@ -265,7 +267,8 @@ class WC_Gateway_Paypal_Request {
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
-					'value'         => $order->get_item_total( $item, $include_tax = false, $rounding_enabled = false ),
+					// We want to use the subtotal (before discounts), as we are including the discount in the breakdown.
+					'value'         => $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
 				),
 			);
 		}
@@ -274,15 +277,15 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Get the total for all items.
+	 * Get the subtotal for all items, before discounts.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return float
 	 */
-	private function get_paypal_order_items_total( $order ) {
+	private function get_paypal_order_items_subtotal( $order ) {
 		$total = 0;
 		foreach ( $order->get_items() as $item ) {
-			$total += (float) $item->get_total();
+			$total += (float) $item->get_subtotal();
 		}
 
 		return $total;
