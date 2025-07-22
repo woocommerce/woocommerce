@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use WC_Cache_Helper;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
+use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -408,19 +407,13 @@ class FilterData {
 
 				$ancestor_term_taxonomy_id = $this->get_term_taxonomy_id_from_term_id( $ancestor_term_id, $taxonomy_escaped );
 
-				// Get all descendants for this ancestor (cached).
-				$cache_key   = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'descendants_' . $taxonomy_escaped . '_' . $ancestor_term_id;
-				$descendants = wp_cache_get( $cache_key );
+				// Get all descendants for this ancestor (WordPress handles caching internally).
+				$descendants = get_term_children( $ancestor_term_id, $taxonomy_escaped );
 
-				if ( false === $descendants ) {
-					$descendants = get_term_children( $ancestor_term_id, $taxonomy_escaped );
-
-					if ( ! is_wp_error( $descendants ) ) {
-						$descendants[] = $ancestor_term_id; // Include the ancestor term itself.
-						wp_cache_set( $cache_key, $descendants, '', HOUR_IN_SECONDS );
-					} else {
-						$descendants = array( $ancestor_term_id );
-					}
+				if ( ! is_wp_error( $descendants ) ) {
+					$descendants[] = $ancestor_term_id; // Include the ancestor term itself.
+				} else {
+					$descendants = array( $ancestor_term_id );
 				}
 
 				$hierarchy_counts[ $ancestor_term_taxonomy_id ] = $descendants;
@@ -449,8 +442,6 @@ class FilterData {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$count_result = $wpdb->get_row( $batch_count_sql, ARRAY_A );
-
-		dd( $count_result );
 
 		if ( empty( $count_result ) ) {
 			return array();
