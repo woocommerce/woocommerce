@@ -21,7 +21,11 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->combinator = new FulfillmentsManager();
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
+		$this->combinator = wc_get_container()->get( FulfillmentsManager::class );
 	}
 
 	/**
