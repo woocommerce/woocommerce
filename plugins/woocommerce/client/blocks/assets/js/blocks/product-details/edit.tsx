@@ -22,6 +22,7 @@ import { ProductDetailsEditProps } from './types';
 import { getTemplate, isAdditionalProductDataEmpty } from './utils';
 import { LegacyProductDetailsPreview } from './legacy-preview';
 import './editor.scss';
+import { getInnerBlockByName } from '@woocommerce/utils';
 
 /**
  * Check if block is inside a Query Loop with non-product post type
@@ -56,66 +57,41 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 		[ context.postId ]
 	);
 
-	const isInnerBlockOfSingleProductBlock = useSelect(
+	const {
+		isInnerBlockOfSingleProductBlock,
+		hasInnerBlocks,
+		wasBlockJustInserted,
+		accordionItemClientId,
+	} = useSelect(
 		( select ) => {
-			const blocks = select(
-				blockEditorStore
+			const blockEditorSelect = select( blockEditorStore );
+
+			// Check if block is inner block of single product block
+			const singleProductParentBlocks = blockEditorSelect
 				// @ts-expect-error - getBlockParentsByBlockName is not typed
-			).getBlockParentsByBlockName(
-				clientId,
-				'woocommerce/single-product'
-			);
-			return blocks.length > 0;
-		},
-		[ clientId ]
-	);
+				.getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/single-product'
+				);
+			const isInnerBlock = singleProductParentBlocks.length > 0;
 
-	const template = useMemo( () => {
-		return getTemplate( product, {
-			isInnerBlockOfSingleProductBlock,
-		} );
-	}, [ product, isInnerBlockOfSingleProductBlock ] );
-
-	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
-		( select ) => {
+			// Get inner blocks and insertion status
 			// @ts-expect-error - getBlocks is not typed
-			const blocks = select( blockEditorStore ).getBlocks( clientId );
+			const blocks = blockEditorSelect.getBlocks( clientId );
 			const innerBlocks = blocks.length > 0;
 			const blockJustInserted =
 				// @ts-expect-error - wasBlockJustInserted is not typed
-				select( blockEditorStore ).wasBlockJustInserted( clientId );
+				blockEditorSelect.wasBlockJustInserted( clientId );
 
-			return {
-				hasInnerBlocks: innerBlocks,
-				wasBlockJustInserted: blockJustInserted,
-			};
-		},
-		[ clientId ]
-	);
-
-	const { accordionItemClientId } = useSelect(
-		( select ) => {
-			if ( ! wasBlockJustInserted ) {
-				return {
-					accordionItemClientId: null,
-				};
-			}
-
-			const productSpecificationClientIds = select(
+			const productDetailsBlock = select(
 				blockEditorStore
 				// @ts-expect-error - getBlocksByName is not typed
-			).getBlocksByName( 'woocommerce/product-specifications' );
+			).getBlock( clientId );
 
-			const productDetailsDescendants =
-				// @ts-expect-error - getClientIdsOfDescendants is not typed
-				select( blockEditorStore ).getClientIdsOfDescendants(
-					clientId
-				);
-
-			const productSpecificationClientId =
-				productSpecificationClientIds.find( ( id: string ) =>
-					productDetailsDescendants.includes( id )
-				);
+			const productSpecificationClientId = getInnerBlockByName(
+				productDetailsBlock,
+				'woocommerce/product-specifications'
+			)?.clientId;
 
 			const accordionClientId = select(
 				blockEditorStore
@@ -126,11 +102,20 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 			)[ 0 ];
 
 			return {
+				isInnerBlockOfSingleProductBlock: isInnerBlock,
+				hasInnerBlocks: innerBlocks,
+				wasBlockJustInserted: blockJustInserted,
 				accordionItemClientId: accordionClientId,
 			};
 		},
-		[ clientId, wasBlockJustInserted ]
+		[ clientId ]
 	);
+
+	const template = useMemo( () => {
+		return getTemplate( product, {
+			isInnerBlockOfSingleProductBlock,
+		} );
+	}, [ product, isInnerBlockOfSingleProductBlock ] );
 
 	const { removeBlock } = useDispatch( blockEditorStore );
 
