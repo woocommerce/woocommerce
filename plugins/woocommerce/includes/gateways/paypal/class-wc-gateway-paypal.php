@@ -379,7 +379,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( $this->should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
-				throw new Exception( 'PayPal order creation failed' );
+				throw new Exception(
+					esc_html__( 'We are unable to process your PayPal payment at this time. Please try again or use a different payment method.', 'woocommerce' )
+				);
 			}
 
 			// Save the PayPal order ID. This is different from the WooCommerce order ID.
