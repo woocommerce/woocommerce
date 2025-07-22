@@ -28,7 +28,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 
-		add_filter( 'woocommerce_blocks_product_filters_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
 		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
@@ -60,27 +59,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 	}
 
-	/**
-	 * Register the query param keys.
-	 *
-	 * @param array $filter_param_keys The active filters data.
-	 * @param array $url_param_keys    The query param parsed from the URL.
-	 *
-	 * @return array Active filters param keys.
-	 */
-	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$attribute_param_keys = array_filter(
-			$url_param_keys,
-			function ( $param ) {
-				return strpos( $param, 'filter_' ) === 0 || strpos( $param, 'query_type_' ) === 0;
-			}
-		);
 
-		return array_merge(
-			$filter_param_keys,
-			$attribute_param_keys
-		);
-	}
 
 	/**
 	 * Prepare the active filter items.

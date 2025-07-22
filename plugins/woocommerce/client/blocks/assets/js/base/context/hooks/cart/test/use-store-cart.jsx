@@ -30,6 +30,7 @@ describe( 'useStoreCart', () => {
 	const mockCartData = {
 		coupons: [],
 		items: mockCartItems,
+		crossSells: [],
 		fees: [],
 		itemsCount: 1,
 		itemsWeight: 10,
@@ -42,8 +43,10 @@ describe( 'useStoreCart', () => {
 		extensions: {},
 		errors: [],
 		paymentRequirements: [],
-		receiveCart: undefined,
-		receiveCartContents: undefined,
+		receiveCart: () => undefined,
+		receiveCartContents: () => undefined,
+		paymentMethods: [],
+		hasPendingItemsOperations: false,
 	};
 	const mockCartTotals = {
 		currency_code: 'USD',
@@ -53,6 +56,7 @@ describe( 'useStoreCart', () => {
 	const mockStoreCartData = {
 		cartCoupons: [],
 		cartItems: mockCartItems,
+		crossSellsProducts: [],
 		cartItemErrors: [],
 		cartItemsCount: 1,
 		cartItemsWeight: 10,
@@ -69,9 +73,9 @@ describe( 'useStoreCart', () => {
 		extensions: {},
 		isLoadingRates: false,
 		cartHasCalculatedShipping: true,
+		paymentMethods: [],
 		paymentRequirements: [],
-		receiveCart: undefined,
-		receiveCartContents: undefined,
+		hasPendingItemsOperations: false,
 	};
 
 	const getWrappedComponents = ( Component ) => (
@@ -105,6 +109,7 @@ describe( 'useStoreCart', () => {
 				isAddressFieldsForShippingRatesUpdating: jest
 					.fn()
 					.mockReturnValue( false ),
+				hasPendingItemsOperations: jest.fn().mockReturnValue( false ),
 			},
 		};
 		registry.registerStore( storeKey, {
