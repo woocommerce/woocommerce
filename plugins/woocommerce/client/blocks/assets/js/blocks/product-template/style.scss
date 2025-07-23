@@ -45,7 +45,12 @@ $min-product-width: 150px;
 
 	&__responsive {
 		display: grid;
-		grid-gap: $grid-gap;
+		gap: $grid-gap; // Use modern 'gap' instead of 'grid-gap'
+    
+		// Fallback for older browsers if needed
+		@supports not (gap: 1em) {
+			grid-gap: $grid-gap;
+		}
 
 		@for $i from 2 through 6 {
 			$gap-count: calc(#{$i} - 1);

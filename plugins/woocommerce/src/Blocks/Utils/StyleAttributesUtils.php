@@ -600,6 +600,26 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for block gap from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return array
+	 */
+	public static function get_block_gap_class_and_style( $attributes ) {
+		$block_gap = $attributes['style']['spacing']['blockGap'] ?? null;
+
+		if ( ! $block_gap ) {
+			return self::EMPTY_STYLE;
+		}
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'gap: %s;', self::get_spacing_value( $block_gap ) ),
+		);
+	}
+
+	/**
 	 * Get class and style for shadow from attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -761,6 +781,7 @@ class StyleAttributesUtils {
 			'border_radius'    => self::get_border_radius_class_and_style( $attributes ),
 			'border_width'     => self::get_border_width_class_and_style( $attributes ),
 			'border_style'     => self::get_border_style_class_and_style( $attributes ),
+			'block_gap'        => self::get_block_gap_class_and_style( $attributes ),
 			'font_family'      => self::get_font_family_class_and_style( $attributes ),
 			'font_size'        => self::get_font_size_class_and_style( $attributes ),
 			'font_style'       => self::get_font_style_class_and_style( $attributes ),
