@@ -30,6 +30,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	 * @var array
 	 */
 	protected $test_product_data;
+
 	/**
 	 * Holds the test variant data.
 	 *
