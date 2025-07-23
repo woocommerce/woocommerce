@@ -56,7 +56,7 @@ class ListCommand {
 		$formatted_items = array();
 		$platform_count  = count( $platforms );
 		$current_index   = 0;
-		
+
 		foreach ( $platforms as $id => $details ) {
 			$formatted_items[] = array(
 				'id'      => $id,
@@ -64,7 +64,7 @@ class ListCommand {
 				'fetcher' => $details['fetcher'] ?? '',
 				'mapper'  => $details['mapper'] ?? '',
 			);
-			
+
 			// Add separator row between platforms (but not after the last one).
 			++$current_index;
 			if ( $current_index < $platform_count ) {
