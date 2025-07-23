@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -140,6 +141,72 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Capture a PayPal payment using the Orders v2 API.
+	 *
+	 * This method captures a PayPal payment and updates the order status.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string $capture_url The URL to capture the payment.
+	 * @return void
+	 * @throws Exception If the PayPal payment capture fails.
+	 */
+	public function capture_payment( $order, $capture_url ) {
+		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		if ( ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot capture payment.' );
+			return;
+		}
+
+		if ( ! $capture_url ) {
+			WC_Gateway_Paypal::log( 'Capture URL not found. Cannot capture payment.' );
+			return;
+		}
+
+		try {
+			$request_body = array(
+				'capture_url' => $capture_url,
+				'paypal_order_id' => $paypal_order_id,
+			);
+
+			// phpcs:disable Generic.Commenting.Todo.TaskFound
+			// TODO: Replace with the wpcom endpoint when it's ready.
+			$response     = wp_remote_post(
+				$this->get_paypal_capture_payment_request_url(),
+				array(
+					'method'  => 'POST',
+					'headers' => array(
+						'Content-Type' => 'application/json',
+					),
+					'body'    => wp_json_encode( $request_body ),
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				WC_Gateway_Paypal::log( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
+				return;
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+
+			if ( 200 !== $http_code ) {
+				throw new Exception( 'PayPal payment capture failed. Response status: ' . $http_code . '. Response body: ' . $body );
+			}
+
+		} catch ( Exception $e ) {
+			WC_Gateway_Paypal::log( $e->getMessage() );
+			$order->add_order_note(
+				sprintf(
+					/* translators: %1$s: PayPal order ID */
+					__( 'PayPal payment capture failed. PayPal Order ID: %1$s', 'woocommerce' ),
+					$paypal_order_id
+				)
+			);
+			$order->update_status( OrderStatus::FAILED );
+		}
+	}
+
+	/**
 	 * Get the approve link from the response data.
 	 *
 	 * @param int   $http_code The HTTP code of the response.
@@ -172,6 +239,17 @@ class WC_Gateway_Paypal_Request {
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
 		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
+	}
+
+	/**
+	 * Get the PayPal capture-payment request URL.
+	 *
+	 * @return string
+	 */
+	private function get_paypal_capture_payment_request_url() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/capture-payment' );
 	}
 
 	/**
