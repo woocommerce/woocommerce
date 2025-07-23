@@ -113,7 +113,7 @@ jobs:
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ [0-9]{4}-XX-XX =/= $NEXT_STABLE $(date +%Y)-XX-XX =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
 
           # Update composer.json and package.json.
           for filename in {composer,package}.json; do
