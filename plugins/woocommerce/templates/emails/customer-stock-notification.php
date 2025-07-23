@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 0.0.0
+ * @version 10.2.0
  */
 
 // Exit if accessed directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Hook: woocommerce_email_header.
  *
- * @since 0.0.0
+ * @since 10.2.0
  *
  * @hooked WC_Emails::email_header() Output the email header
  */
@@ -42,7 +42,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 		/**
 		 * Hook: woocommerce_email_stock_notification_product.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @hooked \Automattic\WooCommerce\Internal\StockNotifications\Templates::email_product_image - 10
 		 * @hooked \Automattic\WooCommerce\Internal\StockNotifications\Templates::email_product_title - 20
@@ -93,7 +93,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 /**
  * Hook: woocommerce_email_footer.
  *
- * @since 0.0.0
+ * @since 10.2.0
  *
  * @hooked WC_Emails::email_footer() Output the email footer
  */
