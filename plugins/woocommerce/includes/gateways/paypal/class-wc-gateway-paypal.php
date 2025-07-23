@@ -12,6 +12,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -78,6 +79,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public $identity_token;
 
+	/**
+	 * Jetpack connection manager.
+	 *
+	 * @var Jetpack_Connection_Manager
+	 */
+	protected $jetpack_connection_manager;
+
 
 	/**
 	 * Constructor for the gateway.
@@ -135,6 +143,32 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( 'yes' === $this->enabled ) {
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+		}
+
+		$this->maybe_register_site_with_wpcom();
+	}
+
+	/**
+	 * Register the site with WPCOM if it is not already registered.
+	 */
+	private function maybe_register_site_with_wpcom() {
+		if ( ! is_admin() || ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
+		$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		$is_connected                     = $this->jetpack_connection_manager->is_connected();
+
+		// Sit is already connected.
+		if ( $is_connected ) {
+			return;
+		}
+
+		$result = $this->jetpack_connection_manager->try_registration();
+		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( 'WPCOMRegistration failed: ' . $result->get_error_message() );
+			return;
 		}
 	}
 
