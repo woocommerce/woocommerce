@@ -4,7 +4,7 @@
 import { useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import React, { useEffect, useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -87,7 +87,10 @@ const InstallWooPaymentsStep = ( {
 			<div className="launch-your-store-payments-content__step--install-woopayments-logo">
 				<img
 					src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-					alt={ __( 'Woo Logo', 'woocommerce' ) }
+					alt={
+						/* translators: %s: plugin name */
+						sprintf( __( '%s Logo', 'woocommerce' ), 'WooCommerce' )
+					}
 				/>
 			</div>
 			<h1 className="launch-your-store-payments-content__step--install-woopayments-title">
