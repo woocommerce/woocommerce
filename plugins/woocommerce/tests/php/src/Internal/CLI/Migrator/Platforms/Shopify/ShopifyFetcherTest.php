@@ -33,6 +33,24 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Mock WP_CLI class if it doesn't exist.
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			eval( '
+				class WP_CLI {
+					public static $last_debug_message = "";
+					public static $last_warning_message = "";
+					
+					public static function debug( $message ) {
+						self::$last_debug_message = $message;
+					}
+					
+					public static function warning( $message ) {
+						self::$last_warning_message = $message;
+					}
+				}
+			' );
+		}
+
 		$this->fetcher = new ShopifyFetcher();
 		$this->mock_shopify_client = $this->createMock( ShopifyClient::class );
 		$this->fetcher->init( $this->mock_shopify_client );
@@ -177,21 +195,10 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->method( 'rest_request' )
 			->willReturn( $api_error );
 
-		// Capture WP_CLI warning output.
-		$warning_output = '';
-		add_filter( 'wp_cli_logger', function( $logger ) use ( &$warning_output ) {
-			$logger->warning = function( $message ) use ( &$warning_output ) {
-				$warning_output = $message;
-			};
-			return $logger;
-		} );
-
 		$result = $this->fetcher->fetch_total_count( array() );
 
 		$this->assertEquals( 0, $result );
-		$this->assertStringContains( 'Could not fetch total product count', $warning_output );
-
-		remove_all_filters( 'wp_cli_logger' );
+		$this->assertStringContainsString( 'Could not fetch total product count', \WP_CLI::$last_warning_message );
 	}
 
 	/**
@@ -205,21 +212,10 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->method( 'rest_request' )
 			->willReturn( $mock_response );
 
-		// Capture WP_CLI warning output.
-		$warning_output = '';
-		add_filter( 'wp_cli_logger', function( $logger ) use ( &$warning_output ) {
-			$logger->warning = function( $message ) use ( &$warning_output ) {
-				$warning_output = $message;
-			};
-			return $logger;
-		} );
-
 		$result = $this->fetcher->fetch_total_count( array() );
 
 		$this->assertEquals( 0, $result );
-		$this->assertStringContains( 'missing count field', $warning_output );
-
-		remove_all_filters( 'wp_cli_logger' );
+		$this->assertStringContainsString( 'missing count field', \WP_CLI::$last_warning_message );
 	}
 
 	/**

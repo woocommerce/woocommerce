@@ -58,7 +58,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) use ( $mock_response ) {
 			// Verify the request URL is correct.
-			$this->assertStringContains( 'test-store.myshopify.com/admin/api/2025-04/products/count.json', $url );
+			$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-04/products/count.json', $url );
 			// Verify the authorization header.
 			$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
 			return $mock_response;
@@ -85,8 +85,8 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) {
 			// Verify query parameters are added to URL.
-			$this->assertStringContains( 'status=active', $url );
-			$this->assertStringContains( 'vendor=Nike', $url );
+			$this->assertStringContainsString( 'status=active', $url );
+			$this->assertStringContainsString( 'vendor=Nike', $url );
 			return array(
 				'response' => array( 'code' => 200 ),
 				'body'     => wp_json_encode( array( 'count' => 15 ) ),
@@ -119,7 +119,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
-		$this->assertStringContains( 'not configured', $result->get_error_message() );
+		$this->assertStringContainsString( 'not configured', $result->get_error_message() );
 	}
 
 	/**
@@ -157,7 +157,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
-		$this->assertStringContains( 'Connection timeout', $result->get_error_message() );
+		$this->assertStringContainsString( 'Connection timeout', $result->get_error_message() );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -185,8 +185,8 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
-		$this->assertStringContains( '401', $result->get_error_message() );
-		$this->assertStringContains( 'Unauthorized', $result->get_error_message() );
+		$this->assertStringContainsString( '401', $result->get_error_message() );
+		$this->assertStringContainsString( 'Unauthorized', $result->get_error_message() );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -212,7 +212,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
-		$this->assertStringContains( 'Failed to decode', $result->get_error_message() );
+		$this->assertStringContainsString( 'Failed to decode', $result->get_error_message() );
 
 		remove_all_filters( 'pre_http_request' );
 	}
