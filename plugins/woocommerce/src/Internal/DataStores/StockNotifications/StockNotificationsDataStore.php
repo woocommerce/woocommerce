@@ -72,6 +72,11 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 * @return string
 	 */
 	public function get_database_schema(): string {
+
+		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) || ! WOOCOMMERCE_BIS_ALPHA_ENABLED ) {
+			return '';
+		}
+
 		global $wpdb;
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
