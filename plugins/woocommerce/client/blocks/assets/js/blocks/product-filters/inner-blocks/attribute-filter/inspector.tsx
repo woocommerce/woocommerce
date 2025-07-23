@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
-import { AttributeSetting } from '@woocommerce/types';
 import { InspectorControls } from '@wordpress/block-editor';
 import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement, useState } from '@wordpress/element';
@@ -10,7 +8,6 @@ import { __ } from '@wordpress/i18n';
 import { Block, getBlockTypes, createBlock } from '@wordpress/blocks';
 import { getInnerBlockByName } from '@woocommerce/utils';
 import {
-	ComboboxControl,
 	PanelBody,
 	SelectControl,
 	ToggleControl,
@@ -27,9 +24,6 @@ import {
  */
 import { sortOrderOptions } from './constants';
 import { BlockAttributes, EditProps } from './types';
-import { getAttributeFromId } from './utils';
-
-const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 let displayStyleOptions: Block[] = [];
 
@@ -38,16 +32,9 @@ export const Inspector = ( {
 	attributes,
 	setAttributes,
 }: EditProps ) => {
-	const {
-		attributeId,
-		sortOrder,
-		queryType,
-		displayStyle,
-		showCounts,
-		hideEmpty,
-	} = attributes;
-	const { updateBlockAttributes, insertBlock, replaceBlock } =
-		dispatch( 'core/block-editor' );
+	const { sortOrder, queryType, displayStyle, showCounts, hideEmpty } =
+		attributes;
+	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
 	const filterBlock = useSelect(
 		( select ) => {
 			return select( 'core/block-editor' ).getBlock( clientId );
@@ -56,11 +43,6 @@ export const Inspector = ( {
 	);
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, unknown > >( {} );
-
-	const filterHeadingBlock = getInnerBlockByName(
-		filterBlock,
-		'core/heading'
-	);
 
 	if ( displayStyleOptions.length === 0 ) {
 		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
@@ -73,38 +55,6 @@ export const Inspector = ( {
 	return (
 		<>
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Attribute', 'woocommerce' ) }>
-					<ComboboxControl
-						__nextHasNoMarginBottom
-						options={ ATTRIBUTES.map( ( item ) => ( {
-							value: item.attribute_id,
-							label: item.attribute_label,
-						} ) ) }
-						value={ attributeId + '' }
-						onChange={ ( value ) => {
-							const numericId = parseInt( value || '', 10 );
-							setAttributes( {
-								attributeId: numericId,
-							} );
-							const attributeObject =
-								getAttributeFromId( numericId );
-							if ( filterHeadingBlock ) {
-								updateBlockAttributes(
-									filterHeadingBlock.clientId,
-									{
-										content:
-											attributeObject?.label ??
-											__( 'Attribute', 'woocommerce' ),
-									}
-								);
-							}
-						} }
-						help={ __(
-							'Choose the attribute to show in this filter.',
-							'woocommerce'
-						) }
-					/>
-				</PanelBody>
 				<PanelBody title={ __( 'Display', 'woocommerce' ) }>
 					<SelectControl
 						label={ __( 'Sort order', 'woocommerce' ) }
@@ -118,7 +68,10 @@ export const Inspector = ( {
 							...sortOrderOptions,
 						] }
 						onChange={ ( value ) =>
-							setAttributes( { sortOrder: value } )
+							setAttributes( {
+								sortOrder:
+									value as BlockAttributes[ 'sortOrder' ],
+							} )
 						}
 						help={ __(
 							'Determine the order of filter options.',
