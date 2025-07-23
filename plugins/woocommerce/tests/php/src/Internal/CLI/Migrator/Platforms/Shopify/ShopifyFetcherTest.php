@@ -275,5 +275,4 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $result );
 	}
-
 }
