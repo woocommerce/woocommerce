@@ -113,7 +113,9 @@ class PlatformRegistry {
 			);
 		}
 
-		return new $fetcher_class();
+		// Use the WooCommerce DI container to properly inject dependencies.
+		$container = wc_get_container();
+		return $container->get( $fetcher_class );
 	}
 
 	/**
@@ -150,7 +152,9 @@ class PlatformRegistry {
 			);
 		}
 
-		return new $mapper_class();
+		// Use the WooCommerce DI container to properly inject dependencies.
+		$container = wc_get_container();
+		return $container->get( $mapper_class );
 	}
 
 	/**
