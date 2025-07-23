@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch.'
+        description: 'Release branch'
         type: string
         required: true
         default: ''
-      bump_type:
+      bump-type:
         description: 'Type of version bump to perform'
         required: true
         type: choice
@@ -16,6 +16,16 @@ on:
           - stable
           - rc
           - dev
+  workflow_call:
+    inputs:
+      branch:
+        description: Release branch
+        type: string
+        required: true
+      bump-type:
+        description: Type of version bump to perform
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -43,8 +53,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = context.payload.inputs.branch;
-            const bumpType = context.payload.inputs.bump_type;
+            const branch = `${{ inputs.branch }}`;
+            const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
             const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-rc\.(?<rc>\d+))?/ );
@@ -141,5 +151,4 @@ jobs:
             --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
-            --head ${branch_name} \
-            --reviewer "${{ github.actor }}"
+            --head ${branch_name}
