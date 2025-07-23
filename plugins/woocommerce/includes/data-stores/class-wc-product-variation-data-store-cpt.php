@@ -647,6 +647,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
 	}
 
+	public static function regenerate_variation_summaries( $variation_ids ) {
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		$variation_ids = array_unique( array_filter( $variation_ids ) );
+
+		foreach ( $variation_ids as $variation_id ) {
+			self::regenerate_variation_attribute_summary( $variation_id );
+		}
+	}
+
 	public static function regenerate_variation_attribute_summary( $variation_id ) {
 		global $wpdb;
 
@@ -672,21 +684,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
 	}
 
-	public static function regenerate_variation_summaries( $variation_ids ) {
-		if ( empty( $variation_ids ) ) {
-			return;
-		}
-
-		$variation_ids = array_unique( array_filter( $variation_ids ) );
-
-		$limit = apply_filters( 'wc_variation_summary_regen_limit', 0, $variation_ids );
-		if ( $limit > 0 ) {
-			$variation_ids = array_slice( $variation_ids, 0, $limit );
-		}
-
-		foreach ( $variation_ids as $variation_id ) {
-			self::regenerate_variation_attribute_summary( $variation_id );
-		}
+	public static function get_regen_threshold() {
+		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
 	}
 
 	public static function on_delete_product_attribute( $attribute_id, $attribute, $old_slug ) {
@@ -742,9 +741,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
-	public static function get_regen_threshold() {
-		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
+	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
+		$variation_ids = get_posts(
+			array(
+				'post_type'   => 'product_variation',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'key'     => 'attribute_' . $taxonomy,
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		self::regenerate_variation_summaries( $variation_ids );
 	}
+
 
 	/**
 	 * Handles regeneration of variation summaries when a variable product's attributes are updated.
@@ -781,24 +795,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$variation_ids = $product->get_children();
-		self::regenerate_variation_summaries( $variation_ids );
-	}
-
-	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
-		$variation_ids = get_posts(
-			array(
-				'post_type'   => 'product_variation',
-				'numberposts' => -1,
-				'fields'      => 'ids',
-				'meta_query'  => array(
-					array(
-						'key'     => 'attribute_' . $taxonomy,
-						'compare' => 'EXISTS',
-					),
-				),
-			)
-		);
-
 		self::regenerate_variation_summaries( $variation_ids );
 	}
 
