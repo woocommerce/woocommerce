@@ -40,7 +40,7 @@ class ShopifyClient {
 	 * @param array  $body         Request body for POST/PUT.
 	 * @return object|\WP_Error Decoded JSON response object or WP_Error on failure.
 	 */
-	public function rest_request( string $path, array $query_params = [], string $method = 'GET', array $body = [] ) {
+	public function rest_request( string $path, array $query_params = array(), string $method = 'GET', array $body = array() ) {
 		$credentials = $this->get_credentials();
 		if ( is_wp_error( $credentials ) ) {
 			return $credentials;
@@ -159,4 +159,4 @@ class ShopifyClient {
 
 		return $data;
 	}
-} 
+}

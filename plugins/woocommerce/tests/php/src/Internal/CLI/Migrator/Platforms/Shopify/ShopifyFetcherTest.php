@@ -35,7 +35,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		// Mock WP_CLI class if it doesn't exist.
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			eval( '
+			eval(
+				'
 				class WP_CLI {
 					public static $last_debug_message = "";
 					public static $last_warning_message = "";
@@ -48,10 +49,11 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 						self::$last_warning_message = $message;
 					}
 				}
-			' );
+			'
+			);
 		}
 
-		$this->fetcher = new ShopifyFetcher();
+		$this->fetcher             = new ShopifyFetcher();
 		$this->mock_shopify_client = $this->createMock( ShopifyClient::class );
 		$this->fetcher->init( $this->mock_shopify_client );
 	}
@@ -106,13 +108,13 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$mock_response = (object) array( 'count' => 25 );
 
 		$expected_query_params = array(
-			'status'           => 'draft',
-			'vendor'           => 'Nike',
-			'product_type'     => 'Shoes',
-			'created_at_min'   => '2024-01-01T00:00:00Z',
-			'created_at_max'   => '2024-12-31T23:59:59Z',
-			'updated_at_min'   => '2024-06-01T00:00:00Z',
-			'updated_at_max'   => '2024-06-30T23:59:59Z',
+			'status'         => 'draft',
+			'vendor'         => 'Nike',
+			'product_type'   => 'Shoes',
+			'created_at_min' => '2024-01-01T00:00:00Z',
+			'created_at_max' => '2024-12-31T23:59:59Z',
+			'updated_at_min' => '2024-06-01T00:00:00Z',
+			'updated_at_max' => '2024-06-30T23:59:59Z',
 		);
 
 		$this->mock_shopify_client->expects( $this->once() )
@@ -126,13 +128,13 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->willReturn( $mock_response );
 
 		$filter_args = array(
-			'status'           => 'draft',
-			'vendor'           => 'Nike',
-			'product_type'     => 'Shoes',
-			'created_at_min'   => '2024-01-01T00:00:00Z',
-			'created_at_max'   => '2024-12-31T23:59:59Z',
-			'updated_at_min'   => '2024-06-01T00:00:00Z',
-			'updated_at_max'   => '2024-06-30T23:59:59Z',
+			'status'         => 'draft',
+			'vendor'         => 'Nike',
+			'product_type'   => 'Shoes',
+			'created_at_min' => '2024-01-01T00:00:00Z',
+			'created_at_max' => '2024-12-31T23:59:59Z',
+			'updated_at_min' => '2024-06-01T00:00:00Z',
+			'updated_at_max' => '2024-06-30T23:59:59Z',
 		);
 
 		$result = $this->fetcher->fetch_total_count( $filter_args );
@@ -148,9 +150,11 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$this->mock_shopify_client->expects( $this->never() )
 			->method( 'rest_request' );
 
-		$result = $this->fetcher->fetch_total_count( array(
-			'ids' => array( '123', '456', '789' ),
-		) );
+		$result = $this->fetcher->fetch_total_count(
+			array(
+				'ids' => array( '123', '456', '789' ),
+			)
+		);
 
 		$this->assertEquals( 3, $result );
 	}
@@ -163,9 +167,11 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$this->mock_shopify_client->expects( $this->never() )
 			->method( 'rest_request' );
 
-		$result = $this->fetcher->fetch_total_count( array(
-			'ids' => '123,456,789,999',
-		) );
+		$result = $this->fetcher->fetch_total_count(
+			array(
+				'ids' => '123,456,789,999',
+			)
+		);
 
 		$this->assertEquals( 4, $result );
 	}
@@ -177,9 +183,11 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$this->mock_shopify_client->expects( $this->never() )
 			->method( 'rest_request' );
 
-		$result = $this->fetcher->fetch_total_count( array(
-			'ids' => array( '123', '', '456', null, '789' ),
-		) );
+		$result = $this->fetcher->fetch_total_count(
+			array(
+				'ids' => array( '123', '', '456', null, '789' ),
+			)
+		);
 
 		// Should filter out empty values, so only 3 valid IDs.
 		$this->assertEquals( 3, $result );

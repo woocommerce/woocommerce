@@ -33,7 +33,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->client = new ShopifyClient();
+		$this->client                  = new ShopifyClient();
 		$this->mock_credential_manager = $this->createMock( CredentialManager::class );
 		$this->client->init( $this->mock_credential_manager );
 	}
@@ -45,10 +45,12 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		// Mock credentials.
 		$this->mock_credential_manager->method( 'get_credentials' )
 			->with( 'shopify' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'test-token-123',
-			) );
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
 
 		// Mock successful HTTP response.
 		$mock_response = array(
@@ -56,13 +58,18 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			'body'     => wp_json_encode( array( 'count' => 42 ) ),
 		);
 
-		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) use ( $mock_response ) {
-			// Verify the request URL is correct.
-			$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-04/products/count.json', $url );
-			// Verify the authorization header.
-			$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
-			return $mock_response;
-		}, 10, 3 );
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args, $url ) use ( $mock_response ) {
+				// Verify the request URL is correct.
+				$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-04/products/count.json', $url );
+				// Verify the authorization header.
+				$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
+				return $mock_response;
+			},
+			10,
+			3
+		);
 
 		$result = $this->client->rest_request( '/products/count.json' );
 
@@ -78,22 +85,29 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rest_request_with_query_params(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'test-token-123',
-			) );
-
-		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) {
-			// Verify query parameters are added to URL.
-			$this->assertStringContainsString( 'status=active', $url );
-			$this->assertStringContainsString( 'vendor=Nike', $url );
-			return array(
-				'response' => array( 'code' => 200 ),
-				'body'     => wp_json_encode( array( 'count' => 15 ) ),
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
 			);
-		}, 10, 3 );
 
-		$result = $this->client->rest_request( 
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args, $url ) {
+				// Verify query parameters are added to URL.
+				$this->assertStringContainsString( 'status=active', $url );
+				$this->assertStringContainsString( 'vendor=Nike', $url );
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array( 'count' => 15 ) ),
+				);
+			},
+			10,
+			3
+		);
+
+		$result = $this->client->rest_request(
 			'/products/count.json',
 			array(
 				'status' => 'active',
@@ -128,10 +142,12 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	public function test_rest_request_partial_credentials(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
 			->with( 'shopify' )
-			->willReturn( array(
-				'shop_url' => 'test-store.myshopify.com',
+			->willReturn(
+				array(
+					'shop_url' => 'test-store.myshopify.com',
 				// Missing access_token.
-			) );
+				)
+			);
 
 		$result = $this->client->rest_request( '/products/count.json' );
 
@@ -144,14 +160,19 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rest_request_http_error(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'test-token-123',
-			) );
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
 
-		add_filter( 'pre_http_request', function() {
-			return new WP_Error( 'http_request_failed', 'Connection timeout' );
-		} );
+		add_filter(
+			'pre_http_request',
+			function () {
+				return new WP_Error( 'http_request_failed', 'Connection timeout' );
+			}
+		);
 
 		$result = $this->client->rest_request( '/products/count.json' );
 
@@ -167,19 +188,26 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rest_request_api_error(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'invalid-token',
-			) );
-
-		add_filter( 'pre_http_request', function() {
-			return array(
-				'response' => array( 'code' => 401 ),
-				'body'     => wp_json_encode( array(
-					'errors' => array( 'Unauthorized' ),
-				) ),
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'invalid-token',
+				)
 			);
-		} );
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array( 'code' => 401 ),
+					'body'     => wp_json_encode(
+						array(
+							'errors' => array( 'Unauthorized' ),
+						)
+					),
+				);
+			}
+		);
 
 		$result = $this->client->rest_request( '/products/count.json' );
 
@@ -196,17 +224,22 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rest_request_invalid_json(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'test-token-123',
-			) );
-
-		add_filter( 'pre_http_request', function() {
-			return array(
-				'response' => array( 'code' => 200 ),
-				'body'     => 'invalid json {',
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
 			);
-		} );
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => 'invalid json {',
+				);
+			}
+		);
 
 		$result = $this->client->rest_request( '/products/count.json' );
 
@@ -222,19 +255,26 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_url_building_protocol_handling(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com', // No protocol.
-				'access_token' => 'test-token-123',
-			) );
-
-		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) {
-			// Should add https:// protocol.
-			$this->assertStringStartsWith( 'https://test-store.myshopify.com', $url );
-			return array(
-				'response' => array( 'code' => 200 ),
-				'body'     => wp_json_encode( array( 'count' => 0 ) ),
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com', // No protocol.
+					'access_token' => 'test-token-123',
+				)
 			);
-		}, 10, 3 );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args, $url ) {
+				// Should add https:// protocol.
+				$this->assertStringStartsWith( 'https://test-store.myshopify.com', $url );
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array( 'count' => 0 ) ),
+				);
+			},
+			10,
+			3
+		);
 
 		$this->client->rest_request( '/products/count.json' );
 
@@ -246,22 +286,29 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 */
 	public function test_post_request_with_body(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn( array(
-				'shop_url'     => 'test-store.myshopify.com',
-				'access_token' => 'test-token-123',
-			) );
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
 
 		$request_body = array( 'product' => array( 'title' => 'Test Product' ) );
 
-		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) use ( $request_body ) {
-			$this->assertEquals( 'POST', $parsed_args['method'] );
-			$this->assertEquals( wp_json_encode( $request_body ), $parsed_args['body'] );
-			$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
-			return array(
-				'response' => array( 'code' => 201 ),
-				'body'     => wp_json_encode( array( 'product' => array( 'id' => 123 ) ) ),
-			);
-		}, 10, 3 );
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args, $url ) use ( $request_body ) {
+				$this->assertEquals( 'POST', $parsed_args['method'] );
+				$this->assertEquals( wp_json_encode( $request_body ), $parsed_args['body'] );
+				$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
+				return array(
+					'response' => array( 'code' => 201 ),
+					'body'     => wp_json_encode( array( 'product' => array( 'id' => 123 ) ) ),
+				);
+			},
+			10,
+			3
+		);
 
 		$result = $this->client->rest_request( '/products.json', array(), 'POST', $request_body );
 
@@ -270,4 +317,4 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		remove_all_filters( 'pre_http_request' );
 	}
-} 
+}
