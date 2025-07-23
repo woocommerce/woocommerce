@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -116,9 +117,6 @@ jobs:
     name: Perform code freeze
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: prepare-for-code-freeze
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       # Repo preparation to be able to use the monorepo-utils for the version bumps.
       - name: Checkout trunk
