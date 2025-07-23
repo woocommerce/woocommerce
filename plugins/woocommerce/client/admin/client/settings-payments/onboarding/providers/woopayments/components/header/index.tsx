@@ -3,7 +3,6 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { close } from '@wordpress/icons';
-import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -25,10 +24,8 @@ export default function WooPaymentsStepHeader( {
 		<div className="settings-payments-onboarding-modal__header">
 			<img
 				src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-				alt={
-					/* translators: %s: plugin name */
-					sprintf( __( '%s Logo', 'woocommerce' ), 'WooCommerce' )
-				}
+				alt=""
+				role="presentation"
 				className="settings-payments-onboarding-modal__header--logo"
 			/>
 			<Button
