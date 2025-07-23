@@ -313,16 +313,16 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	public function test_get_taxonomy_counts_with_hierarchical_categories() {
 		// Create parent category.
 		$parent_term = wp_insert_term( 'Electronics', 'product_cat' );
-		$parent_id = $parent_term['term_id'];
+		$parent_id   = $parent_term['term_id'];
 
 		// Create child category.
 		$child_term = wp_insert_term( 'Phones', 'product_cat', array( 'parent' => $parent_id ) );
-		$child_id = $child_term['term_id'];
+		$child_id   = $child_term['term_id'];
 
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
 
-		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
 		$query_vars = array_filter( $wp_query->query_vars );
 
 		$actual_taxonomy_counts = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
@@ -348,11 +348,11 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	public function test_get_taxonomy_counts_with_hierarchical_categories_with_max_price() {
 		// Create parent category.
 		$parent_term = wp_insert_term( 'Electronics', 'product_cat' );
-		$parent_id = $parent_term['term_id'];
+		$parent_id   = $parent_term['term_id'];
 
 		// Create child category.
 		$child_term = wp_insert_term( 'Phones', 'product_cat', array( 'parent' => $parent_id ) );
-		$child_id = $child_term['term_id'];
+		$child_id   = $child_term['term_id'];
 
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
@@ -364,9 +364,9 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		$actual_taxonomy_counts = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
 
-		// Parent category should have count of 1, child category should have count of 0.
+		// Parent category should have count of 1, child category should not be in results.
 		$this->assertSame( 1, $actual_taxonomy_counts[ $parent_id ] );
-		$this->assertSame( 0, $actual_taxonomy_counts[ $child_id ] );
+		$this->assertArrayNotHasKey( $child_id, $actual_taxonomy_counts );
 
 		wp_delete_term( $child_id, 'product_cat' );
 		wp_delete_term( $parent_id, 'product_cat' );
