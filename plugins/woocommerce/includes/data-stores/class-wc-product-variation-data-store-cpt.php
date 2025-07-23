@@ -36,11 +36,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 
 		// Attributes
-		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
-		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
+		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
+		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
 
 		// Terms
-		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
+		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
 
 		// Action Scheduler
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
@@ -688,17 +688,17 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
 	}
 
-	public static function on_delete_product_attribute( $attribute_id, $attribute, $old_slug ) {
+	public static function handle_global_attribute_deleted( $attribute_id, $attribute, $old_slug ) {
 		// We can reuse the update function to trigger variation summary rebuilds.
-		// However, the on_delete_product_attribute includes the "pa_" prefix in $old_slug, and
-		// the on_update_product_attribute does not. Remove it to keep compatibility.
+		// However, the handle_global_attribute_deleted includes the "pa_" prefix in $old_slug, and
+		// the handle_global_attribute_updated does not. Remove it to keep compatibility.
 		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
 			$old_slug = substr( $old_slug, 3 );
 		}
-		self::on_update_product_attribute( $attribute_id, $attribute, $old_slug );
+		self::handle_global_attribute_updated( $attribute_id, $attribute, $old_slug );
 	}
 
-	public static function on_update_product_attribute( $attribute_id, $attribute, $old_slug ) {
+	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
 		$taxonomy = 'pa_' . $old_slug;
 
 		$variation_ids = get_posts(
@@ -805,7 +805,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param int    $tt_id    Term taxonomy ID.
 	 * @param string $taxonomy Taxonomy slug.
 	 */
-	public static function on_edit_product_term( $term_id, $tt_id, $taxonomy ) {
+	public static function handle_attribute_term_updated( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
 			return;
 		}
