@@ -37,7 +37,7 @@ class EmailActionController {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $notification_id = absint( wp_unslash( $_GET['notification_id'] ) );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $action_key      = sanitize_text_field( wp_unslash( $_GET['email_link_action_key'] ) );
+        $action_key = sanitize_text_field( wp_unslash( $_GET['email_link_action_key'] ) );
 
 		$this->validate_and_maybe_process_request( $notification_id, $action_key );
 	}
@@ -45,7 +45,7 @@ class EmailActionController {
 	/**
 	 * Checks request parameters and processes the notification based on the action key.
 	 *
-	 * @param int $notification_id The ID of the notification to process.
+	 * @param int    $notification_id The ID of the notification to process.
 	 * @param string $email_link_action_key The action key from the email link.
 	 * @return void
 	 */
