@@ -32,14 +32,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			return;
 		}
 
-		// not needed - update?
-		/* add_action( 'woocommerce_save_product_variation', array( __CLASS__, 'on_save_product_variation' ), 20, 1 ); */
-
-		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
-		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
+		// Parent Product Updates Attributes
 		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 
+		// Attributes
+		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
+
+		// Terms
+		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
 
 		$hooks_added = true;
 	}
