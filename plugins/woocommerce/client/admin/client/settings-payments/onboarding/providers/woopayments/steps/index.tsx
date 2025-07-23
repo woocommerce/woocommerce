@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,7 +26,11 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'wpcom_connection',
 		order: 2,
 		type: 'backend',
-		label: __( 'Connect with WordPress.com', 'woocommerce' ),
+		label: sprintf(
+			/* translators: %s: WordPress.com */
+			__( 'Connect with %s', 'woocommerce' ),
+			'WordPress.com'
+		),
 		content: <WordPressComStep />,
 		dependencies: [ 'payment_methods' ],
 	},
@@ -68,7 +72,11 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'wpcom_connection',
 		order: 2,
 		type: 'backend',
-		label: __( 'Connect with WordPress.com', 'woocommerce' ),
+		label: sprintf(
+			/* translators: %s: WordPress.com */
+			__( 'Connect with %s', 'woocommerce' ),
+			'WordPress.com'
+		),
 		content: <WordPressComStep />,
 		dependencies: [ 'payment_methods' ],
 	},
