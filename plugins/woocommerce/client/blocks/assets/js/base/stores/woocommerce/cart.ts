@@ -224,26 +224,27 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
-				let item = state.cart.items.find( ( item ) => {
-					const { id: productId } = item;
-
-					if ( item.type === 'variation' ) {
+				let item = state.cart.items.find( ( cartItem ) => {
+					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
 						// While different variations have different attributes,
 						// some variations might accept 'Any' value for an attribute,
 						// in which case, we need to check that the attributes match.
 						if (
-							id !== productId ||
-							! item.variation ||
+							id !== cartItem.id ||
+							! cartItem.variation ||
 							! variation ||
-							item.variation.length !== variation.length
+							cartItem.variation.length !== variation.length
 						) {
 							return false;
 						}
-						return doesCartItemMatchAttributes( item, variation );
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
 					}
 
-					return id === productId;
+					return id === cartItem.id;
 				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );
