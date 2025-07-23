@@ -33,7 +33,6 @@ import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
 import {
-	events as transitionalEvents,
 	services as transitionalServices,
 	actions as transitionalActions,
 } from './transitional';
@@ -54,7 +53,6 @@ import { isFeatureEnabled } from '~/utils/features';
 export type customizeStoreStateMachineEvents =
 	| introEvents
 	| assemblerHubEvents
-	| transitionalEvents
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
