@@ -9,9 +9,10 @@ use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-// Include the helper
-require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
-
+// Include the helper if the class is not already loaded
+if ( ! class_exists( 'WC_Gateway_PayPal_Helper' ) ) {
+    require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
+}
 $settings = array(
 	'enabled'               => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
