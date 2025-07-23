@@ -63,10 +63,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$theme_controller_mock->method( 'get_styles' )->willReturn( $styles );
 		$theme_controller_mock->method( 'get_layout_settings' )->willReturn( array( 'contentSize' => '660px' ) );
 
+		// Create a mock for Personalization_Tags_Registry.
+		$personalization_tags_registry_mock = $this->createMock( \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry::class );
+		$personalization_tags_registry_mock->method( 'get_all' )->willReturn( array() );
+
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
-				'theme_controller' => $theme_controller_mock,
+				'theme_controller'              => $theme_controller_mock,
+				'personalization_tags_registry' => $personalization_tags_registry_mock,
 			)
 		);
 
@@ -206,6 +211,50 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'test-email-template-extra'
 		);
 		$this->assertStringContainsString( 'test-template-class-extra', $rendered['html'] );
+	}
+
+	/**
+	 * Test that rendering preserves personalization tags.
+	 */
+	public function testItPreservesPersonalizationTags(): void {
+		$registry = new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry(
+			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
+		);
+		$registry->register(
+			new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag(
+				'Customer Username',
+				'[woocommerce/customer-username]',
+				'Customer',
+				function () {
+					return '';
+				}
+			)
+		);
+
+		$this->renderer = $this->getServiceWithOverrides(
+			Renderer::class,
+			array(
+				'personalization_tags_registry' => $registry,
+			)
+		);
+
+		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
+		wp_update_post(
+			array(
+				'ID'           => $this->email_post->ID,
+				'post_content' => $this->email_post->post_content,
+			)
+		);
+		$rendered = $this->renderer->render(
+			$this->email_post,
+			'Subject',
+			'Preheader content',
+			'en'
+		);
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['html'] );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['text'] );
 	}
 
 	/**

@@ -96,6 +96,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 					'color'  => '#123456',
 					'radius' => '10px',
 					'width'  => '2px',
+					'style'  => 'solid',
 				),
 				'color'   => array(
 					'background' => '#abcdef',

@@ -498,7 +498,7 @@ The below example shows how to apply custom validation to the `namespace/gov-id`
 
 ```php
 add_action(
-'woocommerce_validate_additional_field',
+	'woocommerce_validate_additional_field',
 	function ( WP_Error $errors, $field_key, $field_value ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
@@ -954,7 +954,7 @@ In this example, we ensure that VAT is made up of a country code and 8-12 number
 ```php
 'validation' => [
 	"type" => "string",
-	"pattern" => "^[A-Z]{2}[0-9]{8,12}$"
+	"pattern" => "^[A-Z]{2}[0-9]{8,12}$",
 	"errorMessage" => "Please enter a valid VAT code with 2 letters for country code and 8-12 numbers."
 ]
 ```
@@ -966,9 +966,9 @@ Validation can also be against other fields, for example, an alternative email f
 	"type" => "string",
 	"format" => "email",
 	"not" => [
-		"const" => ["$data", "0/customer/billing_address/email"]
-	]
-	"errorMessage" => "Please enter a valid VAT code with 2 letters for country code and 8-12 numbers."
+		"const" => [ '$data' => "/customer/billing_address/email" ]
+	],
+	"errorMessage" => "Please enter a valid alternative email."
 ]
 ```
 
@@ -1145,7 +1145,7 @@ add_action(
 						$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 					}
 				}
-				return $error;
+				return $errors;
 			},
 			10,
 			3

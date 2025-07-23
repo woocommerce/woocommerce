@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add taxonomy support to Product Collection Data API endpoint with calculate_taxonomy_counts parameter

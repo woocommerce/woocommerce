@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Filters: properly handle special characters in filter option label.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add support for dynamic multi-field product search via `search_fields` and `search` parameters in the Products REST API endpoint with cross-field matching capability.
