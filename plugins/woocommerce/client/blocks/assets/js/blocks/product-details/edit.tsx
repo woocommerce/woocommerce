@@ -5,7 +5,7 @@ import { productsStore } from '@woocommerce/data';
 import { useEffect, useMemo } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { Disabled } from '@wordpress/components';
+import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 
 import {
 	store as blockEditorStore,
@@ -13,6 +13,7 @@ import {
 	// @ts-expect-error - useInnerBlocksProps is not exported from @wordpress/block-editor
 	useInnerBlocksProps,
 	Warning,
+	InspectorControls,
 } from '@wordpress/block-editor';
 
 /**
@@ -47,8 +48,14 @@ const useIsInvalidQueryLoopContext = ( clientId: string, postType: string ) => {
 	);
 };
 
-const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
+const Edit = ( {
+	clientId,
+	context,
+	attributes,
+	setAttributes,
+}: ProductDetailsEditProps ) => {
 	const blockProps = useBlockProps();
+	const { hideTabTitle } = attributes;
 
 	const product = useSelect(
 		( select ) => {
@@ -166,8 +173,24 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls key="inspector">
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __(
+							'Show tab title in content',
+							'woocommerce'
+						) }
+						checked={ ! hideTabTitle }
+						onChange={ () =>
+							setAttributes( {
+								hideTabTitle: ! hideTabTitle,
+							} )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
 			<Disabled>
-				<LegacyProductDetailsPreview hideTabTitle={ true } />
+				<LegacyProductDetailsPreview hideTabTitle={ hideTabTitle } />
 			</Disabled>
 		</div>
 	);

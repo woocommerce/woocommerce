@@ -182,8 +182,8 @@ class SingleProduct extends AbstractBlock {
 		}
 
 		$interactivity_context = array(
-			'originalProductData' => ProductDataUtils::get_product_data( $product ),
-			'productData'         => array(),
+			'productId'   => $product->get_id(),
+			'variationId' => null,
 		);
 
 		$html = new \WP_HTML_Tag_Processor( $content );
