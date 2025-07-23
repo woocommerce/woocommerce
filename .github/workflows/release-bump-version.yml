@@ -30,7 +30,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-
+  issues: write
 concurrency:
   group: release-bump-version-${{ inputs.branch }}
 
