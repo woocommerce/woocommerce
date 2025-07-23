@@ -17,7 +17,6 @@ export const doesCartItemMatchAttributes = (
 		return false;
 	}
 
-	// In case the attributes list length is different in both the objects.
 	if ( cartItem.variation.length !== selectedAttributes.length ) {
 		return false;
 	}
