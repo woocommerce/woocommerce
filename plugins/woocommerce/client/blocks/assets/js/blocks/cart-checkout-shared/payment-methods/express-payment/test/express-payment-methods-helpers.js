@@ -35,11 +35,11 @@ describe( 'getExpressPaymentMethodsState', () => {
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 
-		it( 'should handle null parameters gracefully', () => {
+		it( 'should handle empty parameters gracefully', () => {
 			const result = getExpressPaymentMethodsState( {
-				availableExpressPaymentMethods: null,
+				availableExpressPaymentMethods: {},
 				expressPaymentMethodsInitialized: false,
-				registeredExpressPaymentMethods: null,
+				registeredExpressPaymentMethods: {},
 			} );
 
 			expect( result.hasRegisteredExpressPaymentMethods ).toBe( false );
