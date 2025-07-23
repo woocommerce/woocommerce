@@ -9,6 +9,7 @@
 		background: $input-background-light;
 		width: 100%;
 		position: relative;
+		line-height: 0;
 
 		.has-dark-controls & {
 			background-color: $input-background-dark;
@@ -80,6 +81,15 @@
 
 		.has-error & {
 			color: $alert-red;
+		}
+	}
+
+	// For phones we're increasing the font-size of the input to 16px to avoid
+	// mobile Safari auto-zooming on the input (16px is the minimum font-size
+	// required to disable this behavior).
+	@include breakpoint("<480px") {
+		.wc-blocks-components-select__select {
+			@include font-for-mobile-inputs-locked;
 		}
 	}
 
