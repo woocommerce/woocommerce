@@ -39,7 +39,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
 		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 
-		add_action( 'woocommerce_attribute_add', array( __CLASS__, 'on_add_product_attribute' ), 10, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
 
 		$hooks_added = true;
@@ -684,11 +683,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
-	public static function on_add_product_attribute( $attribute_id, $attribute, $old_slug ) {
-		/* llp('add'); */
-	}
 	public static function on_delete_product_attribute( $attribute_id, $attribute, $old_slug ) {
-		/* llp('delete'); */
+		// We can reuse the update function to trigger variation summary rebuilds.
+		// However, the on_delete_product_attribute includes the "pa_" prefix in $old_slug, and
+		// the on_update_product_attribute does not. Remove it to keep compatibility.
+		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
+			$old_slug = substr( $old_slug, 3 );
+		}
+		self::on_update_product_attribute( $attribute_id, $attribute, $old_slug );
 	}
 
 	public static function on_update_product_attribute( $attribute_id, $attribute, $old_slug ) {
@@ -711,6 +713,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Update variation summaries that used this product attribute, but
 		// wait until shutdown. This will allow WooC to carry out post_meta migrations
 		// if the slug of the attribute changed.
+		llp('rebuild ' . json_encode($variation_ids));
 		register_shutdown_function(
 			function () use ( $variation_ids ) {
 				self::regenerate_variation_summaries( $variation_ids );
@@ -719,12 +722,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	* Handles regeneration of variation summaries when a variable product's attributes are updated.
-	*
-	* @since 10.2.0
-	* @param WC_Product $product The variable product whose attributes were updated.
-	* @param bool $force Whether the update was forced.
-	*/
+	 * Handles regeneration of variation summaries when a variable product's attributes are updated.
+	 *
+	 * @since 10.2.0
+	 * @param WC_Product $product The variable product whose attributes were updated.
+	 * @param bool $force Whether the update was forced.
+	 */
 	public static function on_product_attributes_updated( $product, $force ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
