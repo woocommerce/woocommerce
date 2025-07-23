@@ -719,6 +719,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			)
 		);
 
+		// Update variation summaries that used this product attribute, but
+		// wait until shutdown. This will allow WooC to carry out post_meta migrations
+		// if the slug of the attribute changed.
 		register_shutdown_function(
 			function () use ( $variation_ids ) {
 				self::regenerate_variation_summaries( $variation_ids );
