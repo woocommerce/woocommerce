@@ -85,7 +85,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'cursor', $result );
 			$this->assertArrayHasKey( 'hasNextPage', $result );
 
-			// All should return stub values regardless of args
+			// All should return stub values regardless of args.
 			$this->assertEquals( array(), $result['items'] );
 			$this->assertNull( $result['cursor'] );
 			$this->assertFalse( $result['hasNextPage'] );
@@ -105,7 +105,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_fetch_total_count_returns_stub_value() {
 		$result = $this->fetcher->fetch_total_count( array() );
-		$this->assertEquals( 0, $result );
+		$this->assertEquals( 0, $result ); // Stub implementation always returns 0.
 	}
 
 	/**
@@ -123,7 +123,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 			$result = $this->fetcher->fetch_total_count( $args );
 
 			$this->assertIsInt( $result );
-			$this->assertEquals( 0, $result ); // Stub implementation always returns 0
+			$this->assertEquals( 0, $result ); // Stub implementation always returns 0.
 		}
 	}
 
@@ -137,7 +137,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 		$fetch_batch_method = $reflection->getMethod( 'fetch_batch' );
 		$params             = $fetch_batch_method->getParameters();
 		$this->assertEquals( 'array', (string) $params[0]->getType() );
-		$this->assertEquals( 'array', (string) $fetch_batch_method->getReturnType() );
+		$this->assertEquals( 'array', (string) $fetch_batch_method->getReturnType() ); // Ensures return type is array.
 
 		$fetch_count_method = $reflection->getMethod( 'fetch_total_count' );
 		$params             = $fetch_count_method->getParameters();
@@ -149,8 +149,8 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 	 * Test that the fetcher is ready for future enhancement.
 	 */
 	public function test_stub_implementation_ready_for_enhancement() {
-		// This test documents that this is a stub implementation
-		// Future PRs should replace these methods with actual Shopify GraphQL API calls
+		// This test documents that this is a stub implementation.
+		// Future PRs should replace these methods with actual Shopify GraphQL API calls.
 
 		$result = $this->fetcher->fetch_batch( array() );
 		$count  = $this->fetcher->fetch_total_count( array() );
