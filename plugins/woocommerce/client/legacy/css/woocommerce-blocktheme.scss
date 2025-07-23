@@ -195,7 +195,7 @@
 					&:disabled,
 					&[disabled] {
 						// Grayed-out & disabled options
-						color: --wc-option-disabled-text;
+						color: GrayText;
 					}
 				}
 			}

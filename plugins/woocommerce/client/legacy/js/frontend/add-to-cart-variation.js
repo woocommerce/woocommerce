@@ -565,7 +565,7 @@
 				new_attr_select.find( 'option:first' ).remove();
 			}
 
-			const $unattached_options = new_attr_select.find( 'option:not([value=""], .attached)' );
+			const $unattached_options = new_attr_select.find( 'option:not([value=""], .attached, .enabled)' );
 			switch ( unattached_attributes_action ) {
 				case 'hide':
 					// Hide unattached
@@ -584,7 +584,7 @@
 
 			// Finally, copy to DOM and set value.
 			current_attr_select.html( new_attr_select.html() );
-			current_attr_select.find( 'option:not([value=""], .enabled)' ).prop( 'disabled', true );
+			//current_attr_select.find( 'option:not([value=""], .enabled)' ).prop( 'disabled', true );
 
 			// Choose selected value.
 			if ( selected_attr_val ) {
