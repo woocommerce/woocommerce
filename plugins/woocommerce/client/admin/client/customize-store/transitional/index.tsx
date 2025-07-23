@@ -7,7 +7,7 @@
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { Button, Modal } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -22,7 +22,6 @@ import { Icon, brush, tag } from '@wordpress/icons';
 import { trackEvent } from '../tracking';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
-export * as actions from './actions';
 export * as services from './services';
 
 export const Transitional = () => {
