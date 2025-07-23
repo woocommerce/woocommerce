@@ -40,9 +40,9 @@ const CartExpressPayment = () => {
 	}, [] );
 
 	const {
-		hasRegisteredExpressPayments,
-		hasRegisteredNotInitializedExpressPayments,
-		hasNoValidRegisteredExpressPayments,
+		hasRegisteredExpressPaymentMethods,
+		hasRegisteredNotInitializedExpressPaymentMethods,
+		hasNoValidRegisteredExpressPaymentMethods,
 		availableExpressPaymentsCount,
 	} = getExpressPaymentMethodsState( {
 		availableExpressPaymentMethods,
@@ -51,8 +51,8 @@ const CartExpressPayment = () => {
 	} );
 
 	if (
-		! hasRegisteredExpressPayments ||
-		hasNoValidRegisteredExpressPayments
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPaymentMethods
 	) {
 		return null;
 	}
@@ -80,7 +80,7 @@ const CartExpressPayment = () => {
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
 					{ isCalculating ||
-					hasRegisteredNotInitializedExpressPayments ? (
+					hasRegisteredNotInitializedExpressPaymentMethods ? (
 						<ul className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,

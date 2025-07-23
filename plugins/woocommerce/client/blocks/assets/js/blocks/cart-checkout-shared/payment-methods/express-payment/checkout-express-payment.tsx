@@ -52,9 +52,9 @@ const CheckoutExpressPayment = () => {
 	const { isEditor } = useEditorContext();
 
 	const {
-		hasRegisteredExpressPayments,
-		hasRegisteredNotInitializedExpressPayments,
-		hasNoValidRegisteredExpressPayments,
+		hasRegisteredExpressPaymentMethods,
+		hasRegisteredNotInitializedExpressPaymentMethods,
+		hasNoValidRegisteredExpressPaymentMethods,
 		availableExpressPaymentsCount,
 	} = getExpressPaymentMethodsState( {
 		availableExpressPaymentMethods,
@@ -63,8 +63,8 @@ const CheckoutExpressPayment = () => {
 	} );
 
 	if (
-		! hasRegisteredExpressPayments ||
-		hasNoValidRegisteredExpressPayments
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPaymentMethods
 	) {
 		// Make sure errors are shown in the editor and for admins. For example,
 		// when a payment method fails to register.
@@ -111,7 +111,7 @@ const CheckoutExpressPayment = () => {
 						className="wc-block-components-express-payment__title"
 						headingLevel="2"
 					>
-						{ hasRegisteredNotInitializedExpressPayments ? (
+						{ hasRegisteredNotInitializedExpressPaymentMethods ? (
 							<Skeleton
 								width="127px"
 								height="18px"
@@ -130,7 +130,7 @@ const CheckoutExpressPayment = () => {
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
 					{ isCalculating ||
-					hasRegisteredNotInitializedExpressPayments ? (
+					hasRegisteredNotInitializedExpressPaymentMethods ? (
 						<ul className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,

@@ -8,11 +8,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 		it( 'should return default values for empty state', () => {
 			const result = getExpressPaymentMethodsState( {} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( false );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( false );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 
@@ -23,11 +25,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: undefined,
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( false );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( false );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 
@@ -38,11 +42,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: null,
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( false );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( false );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 	} );
@@ -55,11 +61,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: { stripe: {}, paypal: {} },
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
-				true
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( true );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
+				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 ); // Default fallback
 		} );
 
@@ -70,11 +78,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: { stripe: {} },
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
-				true
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( true );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
+				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 ); // Default fallback
 		} );
 	} );
@@ -87,11 +97,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: { stripe: {}, paypal: {} },
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
-				false
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
+				true
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( true );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 ); // Default fallback
 		} );
 	} );
@@ -104,11 +116,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: { stripe: {}, paypal: {} },
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 
@@ -119,11 +133,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: { stripe: {} },
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 1 );
 		} );
 
@@ -142,11 +158,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				},
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 3 );
 		} );
 	} );
@@ -195,11 +213,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				},
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( true );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( true );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 1 );
 		} );
 
@@ -210,11 +230,13 @@ describe( 'getExpressPaymentMethodsState', () => {
 				registeredExpressPaymentMethods: {},
 			} );
 
-			expect( result.hasRegisteredExpressPayments ).toBe( false );
-			expect( result.hasRegisteredNotInitializedExpressPayments ).toBe(
+			expect( result.hasRegisteredExpressPaymentMethods ).toBe( false );
+			expect(
+				result.hasRegisteredNotInitializedExpressPaymentMethods
+			).toBe( false );
+			expect( result.hasNoValidRegisteredExpressPaymentMethods ).toBe(
 				false
 			);
-			expect( result.hasNoValidRegisteredExpressPayments ).toBe( false );
 			expect( result.availableExpressPaymentsCount ).toBe( 2 );
 		} );
 	} );
