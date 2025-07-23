@@ -97,7 +97,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	public function test_handle_count_request_success() {
 		// Mock WP_CLI if not available.
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		// Create mock fetcher.
@@ -118,7 +118,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Use reflection to call private method.
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_count_request' );
+		$method     = $reflection->getMethod( 'handle_count_request' );
 		$method->setAccessible( true );
 
 		// Capture output using output buffering.
@@ -135,7 +135,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_count_request_with_status_filter() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
@@ -153,7 +153,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_count_request' );
+		$method     = $reflection->getMethod( 'handle_count_request' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -169,7 +169,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_count_request_error() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
@@ -186,7 +186,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_count_request' );
+		$method     = $reflection->getMethod( 'handle_count_request' );
 		$method->setAccessible( true );
 
 		$this->expectException( \WP_CLI\ExitException::class );
@@ -198,7 +198,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_fetch_request_success() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		// Mock product data.
@@ -249,7 +249,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method     = $reflection->getMethod( 'handle_fetch_request' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -269,7 +269,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_fetch_request_with_cursor() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		$mock_products = array(
@@ -304,11 +304,18 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method     = $reflection->getMethod( 'handle_fetch_request' );
 		$method->setAccessible( true );
 
 		ob_start();
-		$method->invoke( $this->command, 'shopify', array( 'limit' => '3', 'after' => 'cursor123' ) );
+		$method->invoke(
+			$this->command,
+			'shopify',
+			array(
+				'limit' => '3',
+				'after' => 'cursor123',
+			)
+		);
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'Test Product 3', $output );
@@ -320,7 +327,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_fetch_request_error() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
@@ -337,7 +344,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method     = $reflection->getMethod( 'handle_fetch_request' );
 		$method->setAccessible( true );
 
 		$this->expectException( \WP_CLI\ExitException::class );
@@ -349,7 +356,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_fetch_request_empty_results() {
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+			require_once __DIR__ . '/../../Platforms/Shopify/Mocks/MockWPCLI.php';
 		}
 
 		$mock_response = array(
@@ -371,7 +378,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $mock_registry );
 
 		$reflection = new \ReflectionClass( $this->command );
-		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method     = $reflection->getMethod( 'handle_fetch_request' );
 		$method->setAccessible( true );
 
 		ob_start();

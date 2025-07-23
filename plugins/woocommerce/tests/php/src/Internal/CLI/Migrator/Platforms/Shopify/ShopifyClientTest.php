@@ -1,4 +1,10 @@
 <?php
+/**
+ * Shopify Client Test
+ *
+ * @package Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify
+ */
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify;

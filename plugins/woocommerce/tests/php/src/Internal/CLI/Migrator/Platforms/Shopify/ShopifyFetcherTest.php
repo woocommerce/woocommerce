@@ -1,4 +1,10 @@
 <?php
+/**
+ * Shopify Fetcher Test
+ *
+ * @package Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify
+ */
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify;
@@ -325,8 +331,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->with(
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
-					'first' => 5,
-					'query' => '',
+					'first'         => 5,
+					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
@@ -377,15 +383,20 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->with(
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
-					'first' => 3,
-					'after' => 'cursor2',
-					'query' => '',
+					'first'         => 3,
+					'after'         => 'cursor2',
+					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
 			->willReturn( $mock_response_data );
 
-		$result = $this->fetcher->fetch_batch( array( 'limit' => 3, 'after_cursor' => 'cursor2' ) );
+		$result = $this->fetcher->fetch_batch(
+			array(
+				'limit'        => 3,
+				'after_cursor' => 'cursor2',
+			)
+		);
 
 		$this->assertCount( 1, $result['items'] );
 		$this->assertFalse( $result['hasNextPage'] );
@@ -462,34 +473,61 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 	 */
 	public function test_build_graphql_variables(): void {
 		$reflection = new \ReflectionClass( $this->fetcher );
-		$method = $reflection->getMethod( 'build_graphql_variables' );
+		$method     = $reflection->getMethod( 'build_graphql_variables' );
 		$method->setAccessible( true );
 
 		// Test with all parameters.
 		$variables = array(
-			'first' => 10,
-			'after' => 'cursor123',
-			'query' => '',
+			'first'         => 10,
+			'after'         => 'cursor123',
+			'query'         => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 10, 'after_cursor' => 'cursor123' ) ) );
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 10,
+					'after_cursor' => 'cursor123',
+				)
+			)
+		);
 
 		// Test with null cursor (should filter out null values).
 		$variables = array(
-			'first' => 5,
-			'query' => '',
+			'first'         => 5,
+			'query'         => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 5, 'after_cursor' => null ) ) );
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 5,
+					'after_cursor' => null,
+				)
+			)
+		);
 
 		// Test with empty cursor (empty strings are not filtered out).
 		$variables = array(
-			'first' => 15,
-			'after' => '',
-			'query' => '',
+			'first'         => 15,
+			'after'         => '',
+			'query'         => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 15, 'after_cursor' => '' ) ) );
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 15,
+					'after_cursor' => '',
+				)
+			)
+		);
 	}
 
 	/**
@@ -498,13 +536,17 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 	public function test_fetch_batch_large_limit(): void {
 		$mock_response_data = (object) array(
 			'products' => (object) array(
-				'edges'    => array_fill( 0, 50, (object) array(
-					'cursor' => 'cursor_n',
-					'node'   => (object) array(
-						'id'    => 'gid://shopify/Product/n',
-						'title' => 'Product N',
-					),
-				) ),
+				'edges'    => array_fill(
+					0,
+					50,
+					(object) array(
+						'cursor' => 'cursor_n',
+						'node'   => (object) array(
+							'id'    => 'gid://shopify/Product/n',
+							'title' => 'Product N',
+						),
+					)
+				),
 				'pageInfo' => (object) array(
 					'hasNextPage' => true,
 					'endCursor'   => 'cursor_50',
@@ -517,8 +559,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->with(
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
-					'first' => 50,
-					'query' => '',
+					'first'         => 50,
+					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
@@ -557,8 +599,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			->with(
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
-					'first' => 1,
-					'query' => '',
+					'first'         => 1,
+					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
