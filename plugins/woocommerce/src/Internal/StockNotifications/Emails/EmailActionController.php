@@ -34,10 +34,10 @@ class EmailActionController {
 		if ( ! isset( $_GET['notification_id'] ) || ! isset( $_GET['email_link_action_key'] ) ) {
 			return;
 		}
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $notification_id = absint( wp_unslash( $_GET['notification_id'] ) );
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $action_key = sanitize_text_field( wp_unslash( $_GET['email_link_action_key'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$notification_id = absint( wp_unslash( $_GET['notification_id'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action_key = sanitize_text_field( wp_unslash( $_GET['email_link_action_key'] ) );
 
 		$this->validate_and_maybe_process_request( $notification_id, $action_key );
 	}
