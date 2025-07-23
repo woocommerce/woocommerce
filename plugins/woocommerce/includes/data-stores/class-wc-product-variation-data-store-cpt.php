@@ -237,8 +237,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$changes = $product->get_changes();
 
-		if ( array_intersect( array( 'attributes' ), array_keys( $changes ) ) ) {
-			$product->set_attribute_summary( self::generate_attribute_summary( $product ) );
+		// Always recompute and sync the attribute summary as a safety net.
+		// This ensures it's up-to-date not just for direct attribute changes (e.g., via $changes['attributes']),
+		// but also for indirect desyncs, like when a global term (e.g., 'Blue' -> 'Blue2') is updated elsewhere.
+		// We ideally handle those at the source (e.g., global term update hooks), but this provides a fallback.
+		$new_attribute_summary = self::generate_attribute_summary( $product );
+		// Compare the fresh attribute summary with the stored summary and update if out of sync.
+		if ( $new_attribute_summary !== $product->get_attribute_summary() ) {
+			$product->set_attribute_summary( $new_attribute_summary );
+
+			// If attributes weren't explicitly changed in this update, flag it to ensure the product is saved.
+			// This acts as a "just-in-case" trigger for indirect desyncs.
+			if ( ! isset( $changes['attributes'] ) ) {
+				$changes['attributes'] = true;
+			}
 		}
 
 		// Only update the post when the post data changes.
