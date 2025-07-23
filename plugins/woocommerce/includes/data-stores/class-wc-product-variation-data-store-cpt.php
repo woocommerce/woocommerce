@@ -42,6 +42,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Terms
 		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
 
+		// Action Scheduler
+		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
+
 		$hooks_added = true;
 	}
 
@@ -714,12 +717,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// Update variation summaries that used this product attribute, but
 		// wait until shutdown. This will allow WooC to carry out post_meta migrations
 		// if the slug of the attribute changed.
-		llp('rebuild ' . json_encode($variation_ids));
 		register_shutdown_function(
 			function () use ( $variation_ids ) {
 				self::regenerate_variation_summaries( $variation_ids );
 			}
 		);
+	}
+
+	public static function get_regen_threshold() {
+		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
 	}
 
 	/**
@@ -732,11 +738,34 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public static function on_product_attributes_updated( $product, $force ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
-			if ( ! empty( $variation_ids ) && is_array( $variation_ids ) ) {
+			$threshold = self::get_regen_threshold();
+			$count = count( $variation_ids );
+
+			if ( $count <= $threshold ) {
 				self::regenerate_variation_summaries( $variation_ids );
+			} else {
+				if ( function_exists( 'as_schedule_single_action' ) ) {
+					as_schedule_single_action(
+						time(),
+						'wc_regenerate_product_variation_summaries',
+						array( $product->get_id() ),
+						'woocommerce'
+					);
+				}
 			}
 		}
 	}
+
+	public static function regenerate_product_variation_summaries( $product_id ) {
+		$product = wc_get_product( $product_id );
+		if ( ! $product || ! $product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		$variation_ids = $product->get_children();
+		self::regenerate_variation_summaries( $variation_ids );
+	}
+
 
 	/**
 	 * Hook called after a term is updated to handle updates for product variations.
