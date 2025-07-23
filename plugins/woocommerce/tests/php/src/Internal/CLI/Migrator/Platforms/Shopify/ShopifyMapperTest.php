@@ -122,8 +122,8 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 			 *
 			 * @var string
 			 */
-			public $id   = 'custom_123';
-			
+			public $id = 'custom_123';
+
 			/**
 			 * Test name property.
 			 *
