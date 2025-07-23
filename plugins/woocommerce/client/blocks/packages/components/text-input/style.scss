@@ -33,17 +33,6 @@
 		}
 	}
 
-	input[type="number"] {
-		appearance: textfield;
-		-moz-appearance: textfield;
-
-		&::-webkit-outer-spin-button,
-		&::-webkit-inner-spin-button {
-			appearance: none;
-			margin: 0;
-		}
-	}
-
 	input[type="tel"],
 	input[type="url"],
 	input[type="text"],
@@ -82,6 +71,17 @@
 		}
 	}
 
+	input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
 	input:-webkit-autofill,
 	&.is-active input[type="tel"],
 	&.is-active input[type="url"],
@@ -100,6 +100,30 @@
 		transform: scale(0.8571);
 		// 1px (border) + padding of the input when label + value displayed
 		top: 1px + $gap-smaller;
+	}
+
+	// For phones we're increasing the font-size of the input to 16px to avoid
+	// mobile Safari auto-zooming on the input (16px is the minimum font-size
+	// required to disable this behavior).
+	@include breakpoint("<480px") {
+		label {
+			@include font-for-mobile-inputs-locked;
+		}
+
+		&.is-active label,
+		input:-webkit-autofill + label {
+			// Base font-size is 16px; 0.75 * 16px = 12px
+			transform: scale(0.75);
+		}
+
+		input[type="tel"],
+		input[type="url"],
+		input[type="text"],
+		input[type="number"],
+		input[type="password"],
+		input[type="email"] {
+			@include font-for-mobile-inputs-locked;
+		}
 	}
 
 	&.has-error input {
