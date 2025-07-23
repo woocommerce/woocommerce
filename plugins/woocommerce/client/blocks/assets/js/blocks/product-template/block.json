@@ -52,6 +52,11 @@
 			"allowInheriting": false,
 			"allowSizingOnChildren": false,
 			"allowVerticalAlignment": false
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
 		}
 	},
 	"editorStyle": "file:../woocommerce/product-template-editor.css",
