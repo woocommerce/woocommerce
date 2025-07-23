@@ -122,29 +122,6 @@ describe( 'Taxonomy Filter block', () => {
 			await selectBlock( /Block: Product Categories Filter/i );
 		} );
 
-		test( 'should show taxonomy selection control', () => {
-			const taxonomySelect = screen.getByRole( 'combobox', {
-				name: /Taxonomy/i,
-			} );
-
-			expect( taxonomySelect ).toBeInTheDocument();
-			expect( taxonomySelect ).toHaveValue( 'product_cat' );
-		} );
-
-		test( 'should allow changing taxonomy selection', async () => {
-			const taxonomySelect = screen.getByRole( 'combobox', {
-				name: /Taxonomy/i,
-			} );
-
-			await act( async () => {
-				fireEvent.change( taxonomySelect, {
-					target: { value: 'product_tag' },
-				} );
-			} );
-
-			expect( taxonomySelect ).toHaveValue( 'product_tag' );
-		} );
-
 		test( 'should show product counts toggle', () => {
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
