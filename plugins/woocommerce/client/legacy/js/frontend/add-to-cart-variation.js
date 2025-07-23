@@ -235,7 +235,7 @@
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
 						} else {
-							form.$form.trigger( 'reset_data' );
+							form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
 							attributes.chosenCount = 0;
 
 							if ( ! form.loading ) {
@@ -256,7 +256,7 @@
 				if ( variation ) {
 					form.$form.trigger( 'found_variation', [ variation ] );
 				} else {
-					form.$form.trigger( 'reset_data' );
+					form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
 					attributes.chosenCount = 0;
 
 					if ( ! form.loading ) {
