@@ -44,6 +44,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		// Action Scheduler
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
+		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_term_variation_summaries', array( __CLASS__, 'regenerate_term_variation_summaries' ), 10, 2 );
 
 		$hooks_added = true;
@@ -715,14 +716,30 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			)
 		);
 
-		// Update variation summaries that used this product attribute, but
-		// wait until shutdown. This will allow WooC to carry out post_meta migrations
-		// if the slug of the attribute changed.
-		register_shutdown_function(
-			function () use ( $variation_ids ) {
-				self::regenerate_variation_summaries( $variation_ids );
+		$threshold = self::get_regen_threshold();
+		$count = count( $variation_ids );
+
+		if ( $count <= $threshold ) {
+			// Update variation summaries that used this product attribute, but
+			// wait until shutdown. This will allow WooC to carry out post_meta migrations
+			// if the slug of the attribute changed.
+			register_shutdown_function(
+				function () use ( $variation_ids ) {
+					self::regenerate_variation_summaries( $variation_ids );
+				}
+			);
+		} else {
+			$new_slug = ! empty( $attribute['slug'] ) ? $attribute['slug'] : $old_slug;
+			$new_taxonomy = 'pa_' . $new_slug;
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				as_schedule_single_action(
+					time() + 1,
+					'wc_regenerate_attribute_variation_summaries',
+					array( $new_taxonomy ),
+					'woocommerce'
+				);
 			}
-		);
+		}
 	}
 
 	public static function get_regen_threshold() {
@@ -767,6 +784,23 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		self::regenerate_variation_summaries( $variation_ids );
 	}
 
+	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
+		$variation_ids = get_posts(
+			array(
+				'post_type'   => 'product_variation',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'key'     => 'attribute_' . $taxonomy,
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+
+		self::regenerate_variation_summaries( $variation_ids );
+	}
 
 	/**
 	 * Hook called after a term is updated to handle updates for product variations.
