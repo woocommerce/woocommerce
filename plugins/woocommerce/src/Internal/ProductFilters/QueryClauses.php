@@ -374,9 +374,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 						}
 					}
 
-					if ( ! is_wp_error( $children ) ) {
-						$expanded_term_ids = array_merge( $expanded_term_ids, $children );
-					}
+					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
 				}
 
 				$term_ids = array_unique( $expanded_term_ids );
