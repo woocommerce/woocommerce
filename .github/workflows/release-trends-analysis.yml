@@ -56,7 +56,7 @@ jobs:
         run: |
           cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: code freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
           prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
-          issue=$( gh issue create --title "[Release] CFEs trend analysis for ${{ inputs.milestone }} milestone" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
+          issue=$( gh issue create --title "[Release] quality trend analysis for ${{ inputs.milestone }} milestone (CFEs and PRRs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
 
           gh issue comment ${issue} --body "
           @coderabbitai: for the following GitHub issues and their comments:
