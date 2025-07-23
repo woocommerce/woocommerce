@@ -337,7 +337,9 @@ final class WooCommerce {
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
-		$container->get( StockNotifications::class );
+		if ( defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) && WOOCOMMERCE_BIS_ALPHA_ENABLED ) {
+			$container->get( StockNotifications::class );
+		}
 
 		/**
 		 * These classes have a register method for attaching hooks.
