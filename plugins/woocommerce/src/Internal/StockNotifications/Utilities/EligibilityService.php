@@ -75,6 +75,25 @@ class EligibilityService {
 	}
 
 	/**
+	 * Check if a product allows signups.
+	 *
+	 * @param WC_Product $product The product to check.
+	 * @return bool True if the product allows signups, false otherwise.
+	 */
+	public function product_allows_signups( WC_Product $product ): bool {
+		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+			if ( ! $parent_product instanceof WC_Product ) {
+				return false;
+			}
+
+			return $this->product_allows_signups( $parent_product );
+		}
+
+		return 'no' !== $product->get_meta( Config::get_product_signups_meta_key() );
+	}
+
+	/**
 	 * Check if a stock status is eligible for notifications.
 	 *
 	 * @param string $stock_status The stock status to check.

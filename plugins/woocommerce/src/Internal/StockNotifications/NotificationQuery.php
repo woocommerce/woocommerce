@@ -27,4 +27,26 @@ class NotificationQuery {
 	public static function product_has_active_notifications( array $product_ids ): bool {
 		return \WC_Data_Store::load( 'stock_notification' )->product_has_active_notifications( $product_ids );
 	}
+
+	/**
+	 * Check if a notification exists by email.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param string $email The email address.
+	 * @return bool True if the notification exists, false otherwise.
+	 */
+	public static function notification_exists_by_email( int $product_id, string $email ): bool {
+		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_email( $product_id, $email );
+	}
+
+	/**
+	 * Get a notification by user ID.
+	 *
+	 * @param int $product_id The product ID.
+	 * @param int $user_id The user ID.
+	 * @return bool True if the notification exists, false otherwise.
+	 */
+	public static function notification_exists_by_user_id( int $product_id, int $user_id ): bool {
+		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_user_id( $product_id, $user_id );
+	}
 }

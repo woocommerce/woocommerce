@@ -24,6 +24,10 @@ class SettingsController {
 
 		// Display admin notices about incompatible settings combinations.
 		add_action( 'admin_notices', array( $this, 'output_admin_notices' ) );
+
+		// Display and save product-level stock notifications option.
+		add_action( 'woocommerce_product_options_stock_status', array( $this, 'add_disable_stock_notifications_checkbox' ), 20 );
+		add_action( 'woocommerce_admin_process_product_object', array( $this, 'process_product_object' ) );
 	}
 
 	/**
@@ -171,7 +175,7 @@ class SettingsController {
 			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_allow_signups' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && Config::allows_signups() ) {
 			wp_admin_notice(
 				sprintf(
 					/* translators: %s settings page link */
@@ -184,6 +188,73 @@ class SettingsController {
 					'dismissible' => false,
 				)
 			);
+		}
+	}
+
+	/**
+	 * Setting to allow admins disabling bis on product level.
+	 *
+	 * @return void
+	 */
+	public function add_disable_stock_notifications_checkbox() {
+
+		if ( ! Config::allows_signups() ) {
+			return;
+		}
+
+		global $product_object;
+		if ( ! is_a( $product_object, 'WC_Product' ) ) {
+			return;
+		}
+
+		$enable_signups = 'no' !== $product_object->get_meta( Config::get_product_signups_meta_key() ) ? 'yes' : 'no';
+
+		wp_nonce_field( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
+		woocommerce_wp_checkbox(
+			array(
+				'id'            => Config::get_product_signups_meta_key(),
+				'label'         => __( 'Stock notifications', 'woocommerce' ),
+				'value'         => $enable_signups,
+				'wrapper_class' => implode(
+					' ',
+					array_map(
+						function ( $type ) {
+							return 'show_if_' . $type;
+						},
+						Config::get_supported_product_types()
+					)
+				),
+				'description'   => __( 'Let customers sign up to be notified when this product is restocked', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
+	 * Save product settings meta.
+	 *
+	 * @param  WC_Product $product The product object.
+	 * @return void
+	 */
+	public static function process_product_object( $product ) {
+
+		if ( ! Config::allows_signups() ) {
+			return;
+		}
+
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			return;
+		}
+
+		if ( ! $product->is_type( Config::get_supported_product_types() ) ) {
+			return;
+		}
+
+		$posted_is_enabled = isset( $_POST[ Config::get_product_signups_meta_key() ] );
+		$current_value     = $product->get_meta( Config::get_product_signups_meta_key() );
+		if ( ( $posted_is_enabled && 'no' === $current_value ) || ( ! $posted_is_enabled && 'yes' === $current_value ) ) {
+			check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
+
+			$product->update_meta_data( Config::get_product_signups_meta_key(), $posted_is_enabled ? 'yes' : 'no' );
 		}
 	}
 }
