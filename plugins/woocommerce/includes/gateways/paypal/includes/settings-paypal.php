@@ -9,7 +9,10 @@ use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-return array(
+// Include the helper
+require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
+
+$settings = array(
 	'enabled'               => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
 		'type'    => 'checkbox',
@@ -127,7 +130,11 @@ return array(
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
-	'api_details'           => array(
+);
+
+if ( ! WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+	$api_settings = array(
+		'api_details'           => array(
 		'title'       => __( 'API credentials', 'woocommerce' ),
 		'type'        => 'title',
 		/* translators: %s: URL */
@@ -179,6 +186,10 @@ return array(
 		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
 		'default'     => '',
 		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' ),
-	),
-);
+			'placeholder' => __( 'Optional', 'woocommerce' ),
+		),
+	);
+	$settings = array_merge( $settings, $api_settings );
+}
+
+return $settings;
