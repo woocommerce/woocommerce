@@ -117,7 +117,7 @@ class SignupService {
 				/**
 				 * Action: woocommerce_customer_stock_notifications_signup
 				 *
-				 * @since 0.0.0
+				 * @since 10.2.0
 				 *
 				 * @param Notification $notification The notification.
 				 */
@@ -154,7 +154,7 @@ class SignupService {
 		/**
 		 * Action: woocommerce_customer_stock_notifications_signup
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param Notification $notification The notification.
 		 */

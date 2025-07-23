@@ -107,7 +107,7 @@ class FormHandlerService {
 		/**
 		 * Filter to require nonce check.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param bool $requires_nonce_check Whether to require nonce check.
 		 * @return bool

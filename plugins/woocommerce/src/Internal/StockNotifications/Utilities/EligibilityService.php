@@ -65,7 +65,7 @@ class EligibilityService {
 		 * Filter: woocommerce_customer_stock_notifications_product_is_valid
 		 * Allows custom validation for whether a product is generally eligible for notifications.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param bool $is_valid True if the product is valid for notifications, false otherwise.
 		 * @param WC_Product $product The product to check.
@@ -130,7 +130,7 @@ class EligibilityService {
 	 * 1. Checking if a product has any active notifications
 	 * 2. Determining which notifications need to be sent during a stock broadcast
 	 *
-	 * @since 0.0.0
+	 * @since 10.2.0
 	 *
 	 * @param WC_Product $product The product to check.
 	 * @return array<int> Array of product IDs to check for notifications.
@@ -171,7 +171,7 @@ class EligibilityService {
 		/**
 		 * Filter: woocommerce_customer_stock_notification_should_skip_sending
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * Prevent or manage sending a specific notification.
 		 *
@@ -193,7 +193,7 @@ class EligibilityService {
 		/**
 		 * Filter: woocommerce_customer_stock_notification_throttle_threshold
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param int $threshold Throttle time in seconds should pass from the last notification delivery time.
 		 */

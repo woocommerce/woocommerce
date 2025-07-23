@@ -2,7 +2,7 @@
 /**
  * Admin View: Stock Notifications list
  *
- * @since    0.0.0
+ * @since    10.2.0
  */
 
 declare( strict_types = 1 );

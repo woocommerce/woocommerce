@@ -72,7 +72,7 @@ class JobManager {
 			/**
 			 * Filter: woocommerce_customer_stock_notifications_first_batch_delay
 			 *
-			 * @since 0.0.0
+			 * @since 10.2.0
 			 *
 			 * Schedule the first batch with a delay to prevent overwhelming the system.
 			 *
@@ -126,7 +126,7 @@ class JobManager {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_next_batch_delay
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param int   $delay       Delay time in seconds before next batch.
 		 * @param int   $product_id  Product ID being scheduled.

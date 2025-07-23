@@ -139,7 +139,7 @@ class EmailManager {
 		/**
 		 * `woocommerce_email_stock_notification_emails_to_style` filter.
 		 *
-		 * @since  0.0.0
+		 * @since  10.2.0
 		 *
 		 * @return array
 		 */
@@ -156,7 +156,7 @@ class EmailManager {
 		/**
 		 * `woocommerce_email_stock_notification_base_text_color` filter.
 		 *
-		 * @since  0.0.0
+		 * @since  10.2.0
 		 *
 		 * @return string
 		 */

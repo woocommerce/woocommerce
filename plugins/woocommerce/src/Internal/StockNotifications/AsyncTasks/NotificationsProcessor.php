@@ -100,7 +100,7 @@ class NotificationsProcessor {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_batch_size
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * Allow customization of batch size for processing notifications.
 		 *

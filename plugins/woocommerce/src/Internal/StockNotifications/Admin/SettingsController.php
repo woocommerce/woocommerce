@@ -76,7 +76,7 @@ class SettingsController {
 		/**
 		 * Filter the Customer Stock Notifications settings.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param array $default_customer_stock_notifications_settings The default Customer Stock Notifications settings.
 		 */

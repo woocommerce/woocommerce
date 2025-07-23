@@ -54,7 +54,7 @@ class Config {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_supported_product_types
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param array $product_types Product types.
 		 */
@@ -83,7 +83,7 @@ class Config {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_supported_product_stock_statuses
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param array $product_stock_statuses Product stock statuses.
 		 */
@@ -110,7 +110,7 @@ class Config {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_supported_stock_statuses
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param array $stock_statuses Stock statuses.
 		 */
@@ -198,7 +198,7 @@ class Config {
 		 * Filter the verification codes expiration time (in seconds).
 		 *
 		 * @param int $threshold
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 */
 		self::$verification_expiration_time_threshold = (int) apply_filters(
 			'woocommerce_customer_stock_notifications_verification_expiration_time_threshold',

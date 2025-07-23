@@ -147,7 +147,7 @@ class StockSyncController {
 		/**
 		 * Allows for additional processing of the product IDs after they have been queued.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param array $product_ids The product IDs to process.
 		 */

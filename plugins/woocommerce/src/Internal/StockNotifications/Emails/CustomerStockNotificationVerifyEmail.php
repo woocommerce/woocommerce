@@ -82,7 +82,7 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 		/**
 		 * Allows modifying the email introduction content.
 		 *
-		 * @since  0.0.0
+		 * @since  10.2.0
 		 *
 		 * @return string
 		 */
@@ -148,7 +148,7 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 		/**
 		 * Filter the button text.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param string $button_text The button text.
 		 * @param Notification $notification The notification object.

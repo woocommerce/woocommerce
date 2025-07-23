@@ -95,7 +95,7 @@ class EmailActionController {
 			/**
 			 * `woocommerce_customer_stock_notification_verified_redirect_url` filter.
 			 *
-			 * @since 0.0.0
+			 * @since 10.2.0
 			 *
 			 * @param  string  $url
 			 * @return string
@@ -133,7 +133,7 @@ class EmailActionController {
 			/**
 			 * `woocommerce_customer_stock_notification_unsubscribe_redirect_url` filter.
 			 *
-			 * @since 0.0.0
+			 * @since 10.2.0
 			 *
 			 * @param  string  $url
 			 * @return string

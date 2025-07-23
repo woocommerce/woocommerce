@@ -139,7 +139,7 @@ class ProductPageIntegration {
 		/**
 		 * Filter the account required message HTML.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param string|null $pre The message.
 		 * @param WC_Product  $product Product object.
@@ -168,7 +168,7 @@ class ProductPageIntegration {
 		/**
 		 * Filter the already signed up message HTML.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param string|null  $pre The message.
 		 * @param WC_Product   $product Product object.
@@ -232,7 +232,7 @@ class ProductPageIntegration {
 		/**
 		 * Filter whether personalization is enabled while rendering the form.
 		 *
-		 * @since 0.0.0
+		 * @since 10.2.0
 		 *
 		 * @param bool $enabled Whether personalization is enabled.
 		 * @return bool
