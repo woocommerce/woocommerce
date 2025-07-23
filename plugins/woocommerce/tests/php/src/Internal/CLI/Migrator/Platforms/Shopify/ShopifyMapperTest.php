@@ -117,7 +117,18 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 
 		// Test with custom object.
 		$custom_object = new class() {
+			/**
+			 * Test ID property.
+			 *
+			 * @var string
+			 */
 			public $id   = 'custom_123';
+			
+			/**
+			 * Test name property.
+			 *
+			 * @var string
+			 */
 			public $name = 'Custom Product';
 		};
 		$result        = $this->mapper->map_product_data( $custom_object );
