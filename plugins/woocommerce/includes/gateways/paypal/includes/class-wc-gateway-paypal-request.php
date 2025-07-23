@@ -185,6 +185,13 @@ class WC_Gateway_Paypal_Request {
 
 		return array(
 			'intent'              => $this->get_paypal_order_intent(),
+			'payment_source'      => array(
+				'paypal' => array(
+					'experience_context' => array(
+						'user_action' => 'PAY_NOW',
+					),
+				),
+			),
 			'purchase_units'      => array(
 				array(
 					'custom_id' => $this->get_paypal_order_custom_id( $order ),
