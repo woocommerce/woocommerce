@@ -221,9 +221,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			$context = array(
-				'productId'   => $product->get_id(),
-				'productType' => $product->get_type(),
-				'quantity'    => array( $product->get_id() => $default_quantity ),
+				'productId'           => $product->get_id(),
+				'productType'         => $product->get_type(),
+				'quantity'            => array( $product->get_id() => $default_quantity ),
+				'quantityConstraints' => array(),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
@@ -234,7 +235,6 @@ class AddToCartWithOptions extends AbstractBlock {
 						return array(
 							'variation_id' => $variation['variation_id'],
 							'attributes'   => $variation['attributes'],
-							'price_html'   => $variation['price_html'],
 							'is_in_stock'  => $variation['is_in_stock'],
 						);
 					},
@@ -250,6 +250,22 @@ class AddToCartWithOptions extends AbstractBlock {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
 						$context['groupedProductIds'][] = $child_product_id;
+
+						$args = Utils::get_quantity_input_args( $child_product );
+						$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 0;
+						// For grouped children, if min is 1 (the default), set to 0 unless a filter sets otherwise.
+						if ( 1 === $min ) {
+							$min = 0;
+						}
+						$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
+							? (int) $args['max_value']
+							: null;
+						$step = isset( $args['step'] ) ? (int) $args['step'] : 1;
+						$context['quantityConstraints'][ $child_product_id ] = array(
+							'min'  => $min,
+							'max'  => $max,
+							'step' => $step,
+						);
 					}
 				}
 
@@ -274,6 +290,20 @@ class AddToCartWithOptions extends AbstractBlock {
 						}
 					}
 				}
+			} else {
+				// Not grouped: just add constraints for the main product.
+				$args = Utils::get_quantity_input_args( $product );
+				$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 1;
+				$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
+				? (int) $args['max_value']
+				: null;
+				$step = isset( $args['step'] ) ? (int) $args['step'] : 1;
+
+				$context['quantityConstraints'][ $product->get_id() ] = array(
+					'min'  => $min,
+					'max'  => $max,
+					'step' => $step,
+				);
 			}
 
 			$hooks_before = '';
@@ -456,7 +486,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				'style'                     => esc_attr( $classes_and_styles['styles'] ),
 				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
 				'data-wp-class--is-invalid' => '!state.isFormValid',
-				'data-wp-watch'             => 'callbacks.setProductData',
+				'data-wp-watch'             => 'callbacks.setSelectedVariationId',
 				'data-wp-context'           => wp_json_encode(
 					$context,
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP

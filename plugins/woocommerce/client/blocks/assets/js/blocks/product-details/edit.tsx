@@ -9,8 +9,9 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 	Warning,
+	InspectorControls,
 } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
+import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -106,8 +107,14 @@ const useIsInvalidQueryLoopContext = ( clientId: string, postType: string ) => {
 	);
 };
 
-const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
+const Edit = ( {
+	clientId,
+	context,
+	attributes,
+	setAttributes,
+}: ProductDetailsEditProps ) => {
 	const blockProps = useBlockProps();
+	const { hideTabTitle } = attributes;
 
 	const { hasInnerBlocks, wasBlockJustInserted } = useSelect(
 		( select ) => {
@@ -116,7 +123,7 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 				hasInnerBlocks: blocks.length > 0,
 				wasBlockJustInserted:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore method exists but not typed
+					// @ts-expected-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 			};
 		},
@@ -150,8 +157,24 @@ const Edit = ( { clientId, context }: ProductDetailsEditProps ) => {
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls key="inspector">
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __(
+							'Show tab title in content',
+							'woocommerce'
+						) }
+						checked={ ! hideTabTitle }
+						onChange={ () =>
+							setAttributes( {
+								hideTabTitle: ! hideTabTitle,
+							} )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
 			<Disabled>
-				<LegacyProductDetailsPreview hideTabTitle={ true } />
+				<LegacyProductDetailsPreview hideTabTitle={ hideTabTitle } />
 			</Disabled>
 		</div>
 	);
