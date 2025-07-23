@@ -586,4 +586,27 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
 	}
+
+	/**
+	 * Checks if the gateway should use Orders v2 API.
+	 *
+	 * @return bool
+	 */
+	protected function should_use_orders_v2() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: We expect this flag to be true if the merchant can be migrated,
+		// i.e. does not need PayPal API keys, and they have accepted the ToS.
+
+		/**
+		 * Filters whether the gateway should use Orders v2 API.
+		 *
+		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.1.0
+		 */
+		return apply_filters(
+			'woocommerce_paypal_use_orders_v2',
+			'yes' === $this->get_option( 'use_orders_v2' )
+		);
+	}
 }
