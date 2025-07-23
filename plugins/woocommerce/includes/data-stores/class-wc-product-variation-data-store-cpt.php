@@ -666,7 +666,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
 	}
 
-	protected static function regenerate_variation_summaries( $variation_ids ) {
+	public static function regenerate_variation_summaries( $variation_ids ) {
 		if ( empty( $variation_ids ) ) {
 			return;
 		}
