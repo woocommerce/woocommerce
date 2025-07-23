@@ -54,8 +54,8 @@ class ListCommand {
 		}
 
 		$formatted_items = array();
-		$platform_count = count( $platforms );
-		$current_index = 0;
+		$platform_count  = count( $platforms );
+		$current_index   = 0;
 		
 		foreach ( $platforms as $id => $details ) {
 			$formatted_items[] = array(
@@ -66,7 +66,7 @@ class ListCommand {
 			);
 			
 			// Add separator row between platforms (but not after the last one).
-			$current_index++;
+			++$current_index;
 			if ( $current_index < $platform_count ) {
 				$formatted_items[] = array(
 					'id'      => str_repeat( '-', 20 ),
