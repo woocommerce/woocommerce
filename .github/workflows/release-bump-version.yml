@@ -31,6 +31,9 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-bump-version-${{ inputs.branch }}
+
 jobs:
   bump-version:
     name: Bump WooCommerce Version

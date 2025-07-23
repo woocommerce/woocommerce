@@ -36,6 +36,9 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: release-build-zip-file-${{ inputs.branch }}-${{ ( inputs.create_github_release == true && 'with-release' ) || github.run_id }}
+
 jobs:
   verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'

@@ -8,6 +8,9 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-code-freeze
+
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
     GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'

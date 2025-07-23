@@ -14,6 +14,9 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: release-wporg-svn
+
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
