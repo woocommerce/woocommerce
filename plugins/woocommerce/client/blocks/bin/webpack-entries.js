@@ -282,12 +282,8 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 };
 
 // Script module blocks scripts and styles are handled in
-// webpack-config-interactive-blocks.js
+// webpack-config-interactivity-blocks-frontend.js.
 const frontendScriptModuleBlocksToSkip = Object.keys( scriptModuleEntries );
-
-// But some of the interactive blocks are still reusing CSS that's delivered
-// through the fallback (non-interactive) block.
-const blocksNeedingFallbackCSS = [ 'mini-cart' ];
 
 const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	...Object.fromEntries(
@@ -301,8 +297,9 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	),
 } );
 
-// Remove styles from style build, that are already included in interactivity
-// script modules build, but only if they don't need fallback CSS.
+// Remove styles from style build,
+// that are already included in interactivity
+// script modules build.
 const blockStylingEntries = getBlockEntries(
 	'{index,block,frontend}.{t,j}s{,x}',
 	{
@@ -312,13 +309,9 @@ const blockStylingEntries = getBlockEntries(
 				...genericBlocks,
 				...cartAndCheckoutBlocks,
 			} ).filter( ( [ blockName ] ) => {
-				const blockFullName = `woocommerce/${ blockName }`;
-				const hasInteractivity =
-					frontendScriptModuleBlocksToSkip.includes( blockFullName );
-				const needsFallbackCSS =
-					blocksNeedingFallbackCSS.includes( blockName );
-
-				return ! hasInteractivity || needsFallbackCSS;
+				return ! frontendScriptModuleBlocksToSkip.includes(
+					`woocommerce/${ blockName }`
+				);
 			} )
 		),
 	}
