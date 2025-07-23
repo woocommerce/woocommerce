@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { use, subscribe, select, dispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -105,11 +106,20 @@ export const initContentValidationMiddleware = () => {
 	} ) );
 
 	// Remove error notice that could be confusing for users.
+	// Use a translated message to support all languages
 	subscribe( () => {
+		// Get the translated "Saving failed" message
+		// eslint-disable-next-line @wordpress/i18n-text-domain
+		const savingFailedMessage = __( 'Saving failed.' );
+		// Create a regular expression that escapes special characters and matches the beginning of the string
+		const savingFailedRegex = new RegExp(
+			'^' + savingFailedMessage.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' )
+		);
+
 		select( 'core/notices' )
 			.getNotices()
 			.forEach( ( notice ) => {
-				if ( /^Saving failed/.test( notice.content ) ) {
+				if ( savingFailedRegex.test( notice.content ) ) {
 					dispatch( 'core/notices' ).removeNotice( notice.id );
 				}
 			} );
