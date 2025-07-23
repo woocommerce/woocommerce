@@ -193,7 +193,7 @@
 				option {
 					&.disabled,
 					&:disabled,
-					&:disabled[disabled] {
+					&[disabled] {
 						// Grayed-out & disabled options
 						color: --wc-option-disabled-text;
 					}

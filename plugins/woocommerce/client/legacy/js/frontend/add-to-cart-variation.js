@@ -4,10 +4,10 @@
 	 * VariationForm class which handles variation forms and attributes.
 	 */
 	var VariationForm = function( $form ) {
-		var self = this,
-			autoselect_on_page_load =
-				$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselectOnPageLoad' ) ||
-				false;
+		var self = this;
+		const autoselect_on_page_load =
+			$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselectOnPageLoad' ) ||
+			false;
 
 		self.$form                = $form;
 		self.$attributeFields     = $form.find( '.variations select' );
@@ -860,6 +860,40 @@
 		$gallery_img.wc_reset_variation_attr( 'src' );
 		$product_link.wc_reset_variation_attr( 'href' );
 	};
+
+	/**
+	 * Autoselect variation attributes.
+	 *
+	 * If we return true here, the caller should check/confirm variations again
+	 */
+	$.fn.wc_variations_autoselect = function( form, $eventTargetSelect ) {
+		const autoselect =
+				form.$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselect' ) ||
+				false;
+		if ( ! autoselect ) {
+			return false;
+		} else {
+			if ( $eventTargetSelect.val() === '' ) {
+				return false;
+			} else {
+				const $otherSelectElements = form.$attributeFields.not( $eventTargetSelect );
+				$otherSelectElements.each( function () {
+					const $selectElement = $( this );
+					// Options that HAVE a value and are NOT disabled
+					const $validOptions = $selectElement.children( 'option:not([value=""], [disabled], [class*="disabled"])' );
+					if ( $validOptions.length === 1 ) {
+						// Only 1 option (+ the "Choose an option" choice)
+						if ( $selectElement.val() !== $validOptions.val() ) {
+							$selectElement.val( $validOptions.val() );
+							$selectElement.trigger( 'change' ).trigger( 'click' );
+						}
+					}
+				} );
+
+				return true; // Caller: please check variations
+			}
+		}
+	}
 
 	$(function() {
 		if ( typeof wc_add_to_cart_variation_params !== 'undefined' ) {

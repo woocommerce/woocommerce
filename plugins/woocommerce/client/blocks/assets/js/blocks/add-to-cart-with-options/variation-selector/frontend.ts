@@ -53,7 +53,10 @@ function attributesAutoselect( $variation_selectors ) {
 		);
 	$variation_selectors.each( function () {
 		const $current_variation_selector = $( this );
-		// Dropdown options or Pill inputs that HAVE a value and are NOT disabled, and are compatible with the possible variations
+		// Dropdown options or Pill inputs,
+		// that HAVE a value (Choose an Option has an empty value of ""),
+		// are NOT disabled (disabled by attribute is when you cannot click it, disabled by class is when it is simply grayed-out, but you can still click it),
+		// and are compatible with the possible variations
 		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], [disabled], [class*="disabled"])' ).filter( ( i, e ) => {
 			const $el = $( e );
 			return isAttributeValueValid( {
@@ -67,7 +70,7 @@ function attributesAutoselect( $variation_selectors ) {
 			// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
 			const $selected = $current_variation_selector.find(':checked');
 			if ( $selected.length === 0 || $selected.val() !== $valid_choices.val() ) {
-				// No option selected, OR the selected value is not the same as the only valid one
+				// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
 				in_autoselect_scope = true;
 				if ( $valid_choices.is( 'input' ) ) {
 					// Pills
@@ -76,6 +79,7 @@ function attributesAutoselect( $variation_selectors ) {
 					// Dropdowns
 					const $select = $valid_choices.parent( 'select' );
 					$select.val( $valid_choices.val() );
+					// Manually dispatch a native javascript event because Wordpress uses native events, not jQuery events
 					const ev = new Event('change');
 					$select[0].dispatchEvent(ev);
 				}
