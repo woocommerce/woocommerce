@@ -279,7 +279,7 @@ jobs:
         run: |
           gh pr edit $PR_NUMBER --add-label "cherry pick to frozen release" --repo "$OWNER/$REPO"
 
-      - name: Comment issue has been approved
+      - name: Comment on PRR issue that it has been approved
         env:
           ISSUE_URL: ${{ github.event.issue.html_url }}
           GH_TOKEN: ${{ github.token }}
@@ -288,7 +288,24 @@ jobs:
           gh issue comment "$ISSUE_URL" --body "This request has been approved. Please merge the PR to release branch when it is approved and ready to be merged.
 
           You are targeting your fix for WC version: **${RELEASE_NUMBER}**."
-
+          
+      - name: Comment on pull request that request has been approved
+        env:
+          OWNER: ${{ github.event.repository.owner.login }}
+          REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ needs.prep.outputs.pr_number }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_NUMBER: ${{ needs.verify.outputs.release_number }}
+        run: |
+          gh pr comment $PR_NUMBER --repo "$OWNER/$REPO" --body "✅ **Your Point Release Request has been approved!**
+      
+          This PR is now approved for inclusion in WC version **${RELEASE_NUMBER}**.
+      
+          **Next steps:**
+          - Ensure your PR is ready for review and merge
+          - Once approved by reviewers, merge this PR to the release branch
+          - Cherry-pick labels have been automatically added, please remove any that should not apply prior to merging."
+    
       - name: Set Slack Message
         id: set-message
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1

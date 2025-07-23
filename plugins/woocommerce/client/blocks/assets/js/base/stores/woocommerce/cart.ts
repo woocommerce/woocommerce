@@ -49,11 +49,11 @@ export type Store = {
 		products?: {
 			[ productId: number ]: {
 				price_html?: string;
-				availability_html?: string;
+				availability?: string;
 				variations?: {
 					[ variationId: number ]: {
 						price_html?: string;
-						availability_html: string;
+						availability: string;
 					};
 				};
 			};

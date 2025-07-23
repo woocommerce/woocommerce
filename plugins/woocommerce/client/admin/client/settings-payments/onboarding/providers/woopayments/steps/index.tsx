@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -18,14 +19,18 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'payment_methods',
 		order: 1,
 		type: 'backend',
-		label: 'Choose your payment methods',
+		label: __( 'Choose your payment methods', 'woocommerce' ),
 		content: <PaymentMethodsSelection />,
 	},
 	{
 		id: 'wpcom_connection',
 		order: 2,
 		type: 'backend',
-		label: 'Connect with WordPress.com',
+		label: sprintf(
+			/* translators: %s: WordPress.com */
+			__( 'Connect with %s', 'woocommerce' ),
+			'WordPress.com'
+		),
 		content: <WordPressComStep />,
 		dependencies: [ 'payment_methods' ],
 	},
@@ -33,7 +38,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'test_account',
 		order: 3,
 		type: 'backend',
-		label: 'Ready to test payments',
+		label: __( 'Ready to test payments', 'woocommerce' ),
 		dependencies: [ 'wpcom_connection' ],
 		content: <TestAccountStep />,
 	},
@@ -41,7 +46,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'business_verification',
 		order: 4,
 		type: 'backend',
-		label: 'Activate Payments',
+		label: __( 'Activate Payments', 'woocommerce' ),
 		dependencies: [ 'test_account' ],
 		content: <BusinessVerificationStep />,
 	},
@@ -49,7 +54,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'finish',
 		order: 5,
 		type: 'frontend',
-		label: 'Submit for verification',
+		label: __( 'Submit for verification', 'woocommerce' ),
 		dependencies: [ 'business_verification' ],
 		content: <FinishStep />,
 	},
@@ -60,14 +65,18 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'payment_methods',
 		order: 1,
 		type: 'backend',
-		label: 'Choose your payment methods',
+		label: __( 'Choose your payment methods', 'woocommerce' ),
 		content: <PaymentMethodsSelection />,
 	},
 	{
 		id: 'wpcom_connection',
 		order: 2,
 		type: 'backend',
-		label: 'Connect with WordPress.com',
+		label: sprintf(
+			/* translators: %s: WordPress.com */
+			__( 'Connect with %s', 'woocommerce' ),
+			'WordPress.com'
+		),
 		content: <WordPressComStep />,
 		dependencies: [ 'payment_methods' ],
 	},
@@ -75,7 +84,7 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'business_verification',
 		order: 3,
 		type: 'backend',
-		label: 'Activate Payments',
+		label: __( 'Activate Payments', 'woocommerce' ),
 		dependencies: [ 'wpcom_connection' ],
 		content: <BusinessVerificationStep />,
 	},

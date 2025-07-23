@@ -1,4 +1,4 @@
-name: 🚧 Code freeze exception request
+name: 🚧 Code freeze exception request [RETIRED]
 description: Request to process a particular pull request as a code freeze exception.
 title: "[CFE]: "
 labels: ["code freeze exception"]
@@ -6,6 +6,26 @@ body:
   - type: markdown
     attributes:
       value: |
+        🚧 The code freeze exception approval process is retired. If you need to apply a FIX to the frozen release do one of the following: 🚧
+        
+        **Make a PR against trunk (Most Common)**
+        1. Create your pull request against trunk.
+        2. Add the milestone corresponding to the release you are fixing.  E.g. use milestone `10.0.0` for targeting the `release/10.0` branch.
+        3. Get your pull request reviewed and merged.
+        4. A new pull request will be generated against the release branch with your changes. 
+        
+        **Make a PR against the release branch**
+        1. Create your pull request against the frozen release branch.
+        2. Add the label `cherry pick to trunk` to the PR.
+        3. Get your pull request reviewed and merged.
+        4. A new pull request will be generated against trunk with your changes.
+        
+        It is important that the newly generated pull request is reviewed, tested, and merged as soon as possible to avoid 
+        delaying the next planned build release.
+        
+        For full instructions on backporting, please see our [Backporting Guide](https://github.com/woocommerce/woocommerce/blob/main/docs/contribution/releases/backporting.md).
+        
+        ---
         Your target WC version will be extracted from the base of your PR. Ex: Base branch of PR is `release/9.5`. The Target WC version will be 9.5
         Use this template to request changes to be included in a version of WooCommerce that is past its code freeze date.
         **The request will be reviewed** and accepted or denied:
