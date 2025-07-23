@@ -72,8 +72,6 @@ jobs:
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
-      nextPrepReleaseBranch: ${{ steps.calculate-versions.outputs.nextPrepReleaseBranch }}
-      nextTrunkVersion: ${{ steps.calculate-versions.outputs.nextTrunkVersion }}
     steps:
       - name: Verify no PRs open by the github-actions bot are open
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -115,12 +113,10 @@ jobs:
             const trunkMainVersion = m[1];
             const nextReleaseVersion = trunkVersion.replace( '-dev', '' );
             const nextReleaseBranch = `release/${ nextReleaseVersion.slice( 0, -2 ) }`;
-            const nextPrepReleaseBranch = `prep/${ nextReleaseBranch }-for-next-dev-cycle-${ nextReleaseVersion.slice( 0, -2 ) }`;
             const nextTrunkVersion = `${ ( Number( trunkMainVersion ) + 0.1 ).toFixed( 1 ) }.0-dev`;
 
             core.setOutput( 'nextReleaseVersion', nextReleaseVersion );
             core.setOutput( 'nextReleaseBranch', nextReleaseBranch );
-            core.setOutput( 'nextPrepReleaseBranch', nextPrepReleaseBranch );
             core.setOutput( 'nextTrunkVersion', nextTrunkVersion );
 
   run-code-freeze:
@@ -160,7 +156,7 @@ jobs:
     with:
       skip_verify: true
       create_github_release: false
-      branch: ${{ needs.prepare-for-code-freeze.outputs.nextPrepReleaseBranch }}
+      branch: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
 
   notify-slack:
     name: Notify Slack
