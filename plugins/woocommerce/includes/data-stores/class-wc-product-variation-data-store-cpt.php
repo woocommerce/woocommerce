@@ -44,6 +44,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		// Action Scheduler
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
+		add_action( 'wc_regenerate_term_variation_summaries', array( __CLASS__, 'regenerate_term_variation_summaries' ), 10, 2 );
 
 		$hooks_added = true;
 	}
@@ -746,7 +747,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			} else {
 				if ( function_exists( 'as_schedule_single_action' ) ) {
 					as_schedule_single_action(
-						time(),
+						time() + 1,
 						'wc_regenerate_product_variation_summaries',
 						array( $product->get_id() ),
 						'woocommerce'
@@ -801,9 +802,44 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			)
 		);
 
-		if ( ! empty( $variation_ids ) ) {
-			self::regenerate_variation_summaries( $variation_ids );
+		if ( empty( $variation_ids ) ) {
+			return;
 		}
+
+		$threshold = self::get_regen_threshold();
+		$count = count( $variation_ids );
+
+		if ( $count <= $threshold ) {
+			self::regenerate_variation_summaries( $variation_ids );
+		} else {
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				as_schedule_single_action(
+					time() + 1,
+					'wc_regenerate_term_variation_summaries',
+					array( $taxonomy, $new_term->slug ),
+					'woocommerce'
+				);
+			}
+		}
+	}
+
+	public static function regenerate_term_variation_summaries( $taxonomy, $term_slug ) {
+		global $wpdb;
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT pm.post_id FROM {$wpdb->postmeta} pm
+				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = %s",
+				'attribute_' . $taxonomy,
+				$term_slug,
+				'product_variation'
+			)
+		);
+
+		self::regenerate_variation_summaries( $variation_ids );
 	}
 }
 
