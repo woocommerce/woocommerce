@@ -35,7 +35,7 @@
 			"radius": true,
 			"__experimentalSkipSerialization": true
 		},
-		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
+		"__experimentalSelector": ".wc-block-navigation-arrows__button"
 	},
 	"ancestor": [
 		"woocommerce/product-gallery-large-image",

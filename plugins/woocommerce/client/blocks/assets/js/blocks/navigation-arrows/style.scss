@@ -1,4 +1,4 @@
-:where(.wc-block-product-gallery-large-image-next-previous) {
+:where(.wc-block-navigation-arrows) {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -29,21 +29,20 @@
 	}
 }
 
-
-:where(.wc-block-product-gallery-large-image-next-previous__icon) {
+:where(.wc-block-navigation-arrows__icon) {
 	color: inherit;
 }
 
 // Icons are centred but they are perceived off hence adjusting with padding.
-:where(.wc-block-product-gallery-large-image-next-previous__icon--left) {
+:where(.wc-block-navigation-arrows__icon--left) {
 	padding: 2px 2px 0 0;
 }
 
-:where(.wc-block-product-gallery-large-image-next-previous__icon--right) {
+:where(.wc-block-navigation-arrows__icon--right) {
 	padding: 2px 0 0 2px;
 }
 
-:where(.wc-block-product-gallery-large-image-next-previous__button) {
+:where(.wc-block-navigation-arrows__button) {
 	cursor: pointer;
 	z-index: 3;
 	pointer-events: all;
@@ -56,8 +55,8 @@
 	outline-offset: -2px;
 }
 
-:where(.wc-block-product-gallery-large-image-next-previous__button[aria-disabled="true"]) {
-	:where(.wc-block-product-gallery-large-image-next-previous__icon) {
+:where(.wc-block-navigation-arrows__button[aria-disabled="true"]) {
+	:where(.wc-block-navigation-arrows__icon) {
 		opacity: 30%;
 	}
 	cursor: not-allowed;

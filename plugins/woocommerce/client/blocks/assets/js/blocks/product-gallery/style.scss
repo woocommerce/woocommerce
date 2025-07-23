@@ -299,7 +299,7 @@ $dialog-padding: 20px;
 
 		// This rule is overriding a `display: flex` from WordPress core, that's
 		// why it needs a higher specificity.
-		.wc-block-product-gallery-large-image-next-previous.wc-block-product-gallery-large-image-next-previous {
+		.wc-block-navigation-arrows {
 			display: none;
 		}
 

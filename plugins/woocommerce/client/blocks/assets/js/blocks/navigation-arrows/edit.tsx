@@ -38,10 +38,7 @@ const getVerticalAlignmentClass = ( attributes: BlockAttributes ) => {
 export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const verticalAlignmentClass = getVerticalAlignmentClass( attributes );
 	const { style, ...blockProps } = useBlockProps( {
-		className: clsx(
-			'wc-block-product-gallery-large-image-next-previous',
-			verticalAlignmentClass
-		),
+		className: clsx( 'wc-block-navigation-arrows', verticalAlignmentClass ),
 	} );
 
 	const borderProps = useBorderProps( attributes );
@@ -50,7 +47,7 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const shadowProps = useShadowProps( attributes );
 
 	const buttonClassName = clsx(
-		'wc-block-product-gallery-large-image-next-previous__button',
+		'wc-block-navigation-arrows__button',
 		borderProps.className,
 		colorProps.className,
 		spacingProps.className,
@@ -72,10 +69,10 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 				style={ buttonStyles }
 				disabled
 			>
-				<PrevIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left" />
+				<PrevIcon className="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--left" />
 			</button>
 			<button className={ buttonClassName } style={ buttonStyles }>
-				<NextIcon className="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right" />
+				<NextIcon className="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--right" />
 			</button>
 		</div>
 	);
