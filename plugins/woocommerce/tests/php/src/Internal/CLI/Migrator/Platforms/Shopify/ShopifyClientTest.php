@@ -58,7 +58,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', function( $preempt, $parsed_args, $url ) use ( $mock_response ) {
 			// Verify the request URL is correct.
-			$this->assertStringContains( 'test-store.myshopify.com/admin/api/2025-01/products/count.json', $url );
+			$this->assertStringContains( 'test-store.myshopify.com/admin/api/2025-04/products/count.json', $url );
 			// Verify the authorization header.
 			$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
 			return $mock_response;
