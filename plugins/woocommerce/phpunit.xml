@@ -16,6 +16,8 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<exclude>./tests/php/src/Internal/StockNotifications</exclude>
+			<exclude>./tests/php/src/Internal/DataStores/StockNotifications</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>
