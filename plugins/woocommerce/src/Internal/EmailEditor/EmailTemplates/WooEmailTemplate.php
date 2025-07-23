@@ -73,9 +73,9 @@ class WooEmailTemplate {
 
 		if ( ! empty( $custom_logo ) ) {
 			// Use Site logo if available.
-			return '<!-- wp:site-logo {"width":130} /-->';
+			return '<!-- wp:site-logo {"width":130, "isLink":false} /-->';
 		}
 
-		return '<!-- wp:site-title {"level":2,"linkTarget":"_blank"} /-->';
+		return '<!-- wp:site-title {"level":2} /-->';
 	}
 }
