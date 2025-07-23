@@ -373,7 +373,12 @@ const ProductTemplateEdit = (
 		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
 	}
 
-	const blockProps = useBlockProps( {
+	const blockGapStyle = ( props.attributes as any )?.style?.spacing?.blockGap;
+	const gapValue = blockGapStyle?.startsWith('var:preset|spacing|') 
+		? `var(--wp--preset--spacing--${blockGapStyle.split('|')[2]})`
+		: blockGapStyle;
+
+	const baseBlockProps = useBlockProps( {
 		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
@@ -381,6 +386,14 @@ const ProductTemplateEdit = (
 			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
 		),
 	} );
+
+	const blockProps = {
+		...baseBlockProps,
+		style: {
+			...baseBlockProps.style,
+			...( hasLayoutFlex && gapValue ? { gap: gapValue } : {} ),
+		},
+	};
 
 	if ( ! products ) {
 		return (
