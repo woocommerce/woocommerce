@@ -31,6 +31,7 @@ export const RegionPicker = ( { options, initialValues } ) => {
 			onChange={ onChange }
 			options={ options }
 			placeholder={ __( 'Start typing to filter zones', 'woocommerce' ) }
+			alwaysShowPlaceholder
 			selectAllLabel={ __( 'Everywhere', 'woocommerce' ) }
 			individuallySelectParent
 			maxVisibleTags={ 5 }
