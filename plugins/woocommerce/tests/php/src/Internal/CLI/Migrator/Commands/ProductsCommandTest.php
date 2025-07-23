@@ -12,6 +12,8 @@ namespace Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Commands;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ProductsCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify\ShopifyFetcher;
+use WP_Error;
 
 /**
  * Test cases for ProductsCommand.
@@ -87,5 +89,296 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$this->command->init( $this->credential_manager, $this->platform_registry );
 
 		$this->assertTrue( true );
+	}
+
+	/**
+	 * Test handle_count_request with successful count response.
+	 */
+	public function test_handle_count_request_success() {
+		// Mock WP_CLI if not available.
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		// Create mock fetcher.
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_total_count' )
+			->with( array() )
+			->willReturn( 1023 );
+
+		// Mock platform registry to return the mock fetcher.
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		// Use reflection to call private method.
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_count_request' );
+		$method->setAccessible( true );
+
+		// Capture output using output buffering.
+		ob_start();
+		$method->invoke( $this->command, 'shopify', array() );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '1023', $output );
+		$this->assertStringContainsString( 'products found', $output );
+	}
+
+	/**
+	 * Test handle_count_request with status filter.
+	 */
+	public function test_handle_count_request_with_status_filter() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_total_count' )
+			->with( array( 'status' => 'ACTIVE' ) )
+			->willReturn( 1021 );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_count_request' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->command, 'shopify', array( 'status' => 'active' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '1021', $output );
+		$this->assertStringContainsString( 'active products found', $output );
+	}
+
+	/**
+	 * Test handle_count_request with error response.
+	 */
+	public function test_handle_count_request_error() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_total_count' )
+			->willReturn( new WP_Error( 'api_error', 'Failed to fetch count' ) );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_count_request' );
+		$method->setAccessible( true );
+
+		$this->expectException( \WP_CLI\ExitException::class );
+		$method->invoke( $this->command, 'shopify', array() );
+	}
+
+	/**
+	 * Test handle_fetch_request with successful fetch response.
+	 */
+	public function test_handle_fetch_request_success() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		// Mock product data.
+		$mock_products = array(
+			(object) array(
+				'id'       => 'gid://shopify/Product/123',
+				'title'    => 'Test Product 1',
+				'status'   => 'ACTIVE',
+				'variants' => (object) array(
+					'edges' => array(
+						(object) array(
+							'node' => (object) array(
+								'id'    => 'gid://shopify/ProductVariant/456',
+								'title' => 'Default Title',
+							),
+						),
+					),
+				),
+			),
+			(object) array(
+				'id'       => 'gid://shopify/Product/124',
+				'title'    => 'Test Product 2',
+				'status'   => 'DRAFT',
+				'variants' => (object) array(
+					'edges' => array(),
+				),
+			),
+		);
+
+		$mock_response = array(
+			'items'       => $mock_products,
+			'hasNextPage' => true,
+			'cursor'      => 'cursor123',
+		);
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_batch' )
+			->with( 5, null )
+			->willReturn( $mock_response );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Test Product 1', $output );
+		$this->assertStringContainsString( 'Test Product 2', $output );
+		$this->assertStringContainsString( 'ACTIVE', $output );
+		$this->assertStringContainsString( 'DRAFT', $output );
+		$this->assertStringContainsString( 'More products available', $output );
+		$this->assertStringContainsString( '--after=cursor123', $output );
+	}
+
+	/**
+	 * Test handle_fetch_request with cursor pagination.
+	 */
+	public function test_handle_fetch_request_with_cursor() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		$mock_products = array(
+			(object) array(
+				'id'       => 'gid://shopify/Product/125',
+				'title'    => 'Test Product 3',
+				'status'   => 'ACTIVE',
+				'variants' => (object) array(
+					'edges' => array(),
+				),
+			),
+		);
+
+		$mock_response = array(
+			'items'       => $mock_products,
+			'hasNextPage' => false,
+			'cursor'      => 'cursor456',
+		);
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_batch' )
+			->with( 3, 'cursor123' )
+			->willReturn( $mock_response );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->command, 'shopify', array( 'limit' => '3', 'after' => 'cursor123' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Test Product 3', $output );
+		$this->assertStringNotContainsString( 'More products available', $output );
+	}
+
+	/**
+	 * Test handle_fetch_request with error response.
+	 */
+	public function test_handle_fetch_request_error() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_batch' )
+			->willReturn( new WP_Error( 'graphql_error', 'GraphQL query failed' ) );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->with( 'shopify' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method->setAccessible( true );
+
+		$this->expectException( \WP_CLI\ExitException::class );
+		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
+	}
+
+	/**
+	 * Test handle_fetch_request with empty results.
+	 */
+	public function test_handle_fetch_request_empty_results() {
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
+		}
+
+		$mock_response = array(
+			'items'       => array(),
+			'hasNextPage' => false,
+			'cursor'      => null,
+		);
+
+		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
+		$mock_fetcher->expects( $this->once() )
+			->method( 'fetch_batch' )
+			->willReturn( $mock_response );
+
+		$mock_registry = $this->createMock( PlatformRegistry::class );
+		$mock_registry->expects( $this->once() )
+			->method( 'get_fetcher' )
+			->willReturn( $mock_fetcher );
+
+		$this->command->init( $this->credential_manager, $mock_registry );
+
+		$reflection = new \ReflectionClass( $this->command );
+		$method = $reflection->getMethod( 'handle_fetch_request' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'No products found', $output );
+		$this->assertStringNotContainsString( 'More products available', $output );
 	}
 }
