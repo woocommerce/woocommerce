@@ -3,9 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version Override (X.Y.Z format). If not provided, it is extracted from the release branch. Ensure branch "release/{version}" exists on remote.'
-        required: false
-        default: ''
+        description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
+        required: true
       append_changelog:
         description: 'Append changelog entries to the existing changelog file instead of replacing it.'
         type: boolean
@@ -30,25 +29,8 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Get version from the branch name workflow is running on
-        if: ${{ github.event.inputs.version == '' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        id: extract-version
-        with:
-          script: |
-            const refName = process.env.GITHUB_REF_NAME;
-            const versionMatch = refName.match(/^release\/(\d+\.\d+(?:\.\d+)?)$/); // Match either X.Y or X.Y.Z formats
-            if (versionMatch) {
-              const version = versionMatch[1];
-              console.log(`Extracted version: ${version}`);
-              core.setOutput('version', version);
-            } else {
-              core.setFailed(`Branch name ${refName} does not match the expected pattern 'release/x.y' or 'release/x.y.z'`);
-              process.exit(1);
-            }
-
-      - name: Validate version input override
-        if: ${{ github.event.inputs.version != '' }}
+      - name: Validate version input
+        id: validate-version
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           VERSION: ${{ github.event.inputs.version }}
@@ -57,15 +39,80 @@ jobs:
             const version = process.env.VERSION;
             if (!/^\d+\.\d+(?:\.\d+)?$/.test(version)) {
               core.setFailed('Invalid version format. The version must be in the format X.Y or X.Y.Z');
-              process.exit(1);
             }
 
             console.log(`Version: ${version}`);
 
+            // Extract minor version (X.Y format)
+            const versionParts = version.split('.');
+            const minorVersion = `${versionParts[0]}.${versionParts[1]}`;
+
+            console.log(`Minor version: ${minorVersion}`);
+
+            core.setOutput('version', version);
+            core.setOutput('minor_version', minorVersion);
+
+      - name: Validate release date input
+        if: ${{ github.event.inputs.release_date != '' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          RELEASE_DATE: ${{ github.event.inputs.release_date }}
+        with:
+          script: |
+            const releaseDate = process.env.RELEASE_DATE;
+
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(releaseDate)) {
+              core.setFailed('Invalid release date format. The release date must be in the format YYYY-MM-DD');
+              process.exit(1);
+            }
+
+            const [year, month, day] = releaseDate.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+
+            if (
+              date.getFullYear() !== year ||
+              date.getMonth() !== month - 1 ||
+              date.getDate() !== day
+            ) {
+              core.setFailed('Invalid release date. The release date must be an actual date.');
+              process.exit(1);
+            }
+
+            console.log(`Release date validated: ${releaseDate}`);
+
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
             fetch-depth: 0
+
+      - name: Check the necessary branch exists
+        id: check-branch
+        run: |
+          VERSION_BRANCH="release/${{ steps.validate-version.outputs.version }}"
+          MINOR_BRANCH="release/${{ steps.validate-version.outputs.minor_version }}"
+
+          echo "Checking for version branch: $VERSION_BRANCH"
+
+          if git ls-remote --exit-code --heads origin ${VERSION_BRANCH} > /dev/null; then
+            echo "Found version branch: $VERSION_BRANCH"
+            SELECTED_BRANCH=${VERSION_BRANCH}
+          else
+            echo "Version branch '$VERSION_BRANCH' does not exist"
+            echo "Checking for minor version branch: $MINOR_BRANCH"
+
+            if git ls-remote --exit-code --heads origin ${MINOR_BRANCH} > /dev/null; then
+              echo "Found minor version branch: $MINOR_BRANCH"
+              SELECTED_BRANCH=${MINOR_BRANCH}
+            else
+              echo "Minor version branch '$MINOR_BRANCH' does not exist"
+              echo "::error::Neither branch '$VERSION_BRANCH' nor '$MINOR_BRANCH' exists."
+              exit 1
+            fi
+          fi
+
+          echo "Using branch: $SELECTED_BRANCH"
+          echo "selected_branch=${SELECTED_BRANCH}" >> $GITHUB_OUTPUT
 
       - name: Setup PNPM
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -86,17 +133,12 @@ jobs:
       - name: Generate changelog changes and create PR
         id: changelog
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.validate-version.outputs.version }}
+          SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [[ -z "${{ github.event.inputs.version }}" ]]; then
-            # The version is empty, so we need to extract it from the provided branch name
-            BRANCH_ARG="-b ${{ github.ref_name }}"
-            VERSION="${{ steps.extract-version.outputs.version }}"
-          else
-            # The version is provided, so we use it directly
-            BRANCH_ARG=""
-            VERSION="${{ github.event.inputs.version }}"
-          fi
+          echo "Using branch: $SELECTED_BRANCH"
+          echo "Generating changelog for version: $VERSION"
 
           APPEND_CHANGELOG=""
           if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
@@ -108,9 +150,4 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          # Normalize the version by removing .0 patch if present, as the changelog command does not support it
-          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
-            VERSION=${VERSION%.0}
-          fi
-
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION $BRANCH_ARG $APPEND_CHANGELOG $OVERRIDE_DATE
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE
