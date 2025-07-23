@@ -72,6 +72,7 @@ const blocks = {
 		customDir: 'classic-template',
 	},
 	'classic-shortcode': {},
+	'navigation-arrows': {},
 	'page-content-wrapper': {},
 	'payment-method-icons': {},
 	'price-filter': {},

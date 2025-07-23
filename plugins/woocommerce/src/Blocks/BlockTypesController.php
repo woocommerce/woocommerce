@@ -472,6 +472,7 @@ final class BlockTypesController {
 			'ProductGalleryLargeImage',
 			'ProductGalleryLargeImageNextPrevious',
 			'ProductGalleryThumbnails',
+			'NavigationArrows',
 			'ProductImage',
 			'ProductImageGallery',
 			'ProductMeta',
