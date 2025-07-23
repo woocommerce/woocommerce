@@ -3,27 +3,14 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { Block, createBlock, getBlockTypes } from '@wordpress/blocks';
-import { useState } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
-import { getInnerBlockByName } from '@woocommerce/utils';
-import {
-	PanelBody,
-	ToggleControl,
-	// @ts-expect-error - no types.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// @ts-expect-error - no types.
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-} from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { BlockAttributes, EditProps } from './types';
-
-let displayStyleOptions: Block[] = [];
+import { EditProps } from './types';
+import { DisplayStyleSwitcher } from '../../components/display-style-switcher';
+import metadata from './block.json';
 
 export const Inspector = ( {
 	attributes,
@@ -32,75 +19,18 @@ export const Inspector = ( {
 }: EditProps ) => {
 	const { displayStyle, showCounts, hideEmpty } = attributes;
 
-	if ( displayStyleOptions.length === 0 ) {
-		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-			blockType.ancestor?.includes( 'woocommerce/product-filter-status' )
-		);
-	}
-
-	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
-	const filterBlock = useSelect(
-		( select ) => {
-			return select( 'core/block-editor' ).getBlock( clientId );
-		},
-		[ clientId ]
-	);
-
-	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
-		useState< Record< string, unknown > >( {} );
-
 	return (
 		<>
 			<InspectorControls group="settings">
 				<PanelBody title={ __( 'Display', 'woocommerce' ) }>
-					<ToggleGroupControl
-						value={ displayStyle }
-						isBlock
-						onChange={ (
-							value: BlockAttributes[ 'displayStyle' ]
-						) => {
-							if ( ! filterBlock ) return;
-							const currentStyleBlock = getInnerBlockByName(
-								filterBlock,
-								displayStyle
-							);
-
-							if ( currentStyleBlock ) {
-								setDisplayStyleBlocksAttributes( {
-									...displayStyleBlocksAttributes,
-									[ displayStyle ]:
-										currentStyleBlock.attributes,
-								} );
-								replaceBlock(
-									currentStyleBlock.clientId,
-									createBlock(
-										value,
-										displayStyleBlocksAttributes[ value ] ||
-											{}
-									)
-								);
-							} else {
-								insertBlock(
-									createBlock( value ),
-									filterBlock.innerBlocks.length,
-									filterBlock.clientId,
-									false
-								);
-							}
-							setAttributes( { displayStyle: value } );
-						} }
-						style={ { width: '100%' } }
-						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					>
-						{ displayStyleOptions.map( ( blockType ) => (
-							<ToggleGroupControlOption
-								key={ blockType.name }
-								label={ blockType.title }
-								value={ blockType.name }
-							/>
-						) ) }
-					</ToggleGroupControl>
+					<DisplayStyleSwitcher
+						clientId={ clientId }
+						currentStyle={ displayStyle }
+						onChange={ ( value ) =>
+							setAttributes( { displayStyle: value } )
+						}
+						parentBlockName={ metadata.name }
+					/>
 					<ToggleControl
 						label={ __( 'Product counts', 'woocommerce' ) }
 						checked={ showCounts }

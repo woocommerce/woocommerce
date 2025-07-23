@@ -22,7 +22,7 @@ export const DisplayStyleSwitcher = ( {
 }: {
 	clientId: string;
 	currentStyle: string;
-	onChange: ( value: string | number | undefined ) => void;
+	onChange: ( value: string ) => void;
 	parentBlockName: string;
 } ) => {
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
