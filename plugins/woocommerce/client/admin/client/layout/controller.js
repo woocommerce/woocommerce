@@ -26,7 +26,7 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import getReports from '../analytics/report/get-reports';
+import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
@@ -82,7 +82,7 @@ const LaunchStore = lazy( () =>
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
-export const getPages = () => {
+export const getPages = ( reports = [] ) => {
 	const pages = [];
 	const initialBreadcrumbs = [
 		[ '', getAdminSetting( 'woocommerceTranslation' ) ],
@@ -145,7 +145,7 @@ export const getPages = () => {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
 			breadcrumbs: ( { match } ) => {
-				const report = find( getReports(), {
+				const report = find( reports, {
 					report: match.params.report,
 				} );
 				if ( ! report ) {
@@ -357,7 +357,8 @@ export const getPages = () => {
 };
 
 export function usePages() {
-	const [ pages, setPages ] = useState( getPages );
+	const reports = useReports();
+	const [ pages, setPages ] = useState( () => getPages( reports ) );
 
 	/*
 	 * Handler for new pages being added after the initial filter has been run,
@@ -367,7 +368,7 @@ export function usePages() {
 	useEffect( () => {
 		const handleHookAdded = ( hookName ) => {
 			if ( hookName === PAGES_FILTER && didFilter( PAGES_FILTER ) > 0 ) {
-				setPages( getPages() );
+				setPages( getPages( reports ) );
 			}
 		};
 
@@ -375,12 +376,12 @@ export function usePages() {
 		addAction( 'hookAdded', namespace, handleHookAdded );
 
 		// Refresh pages to catch any hooks added between initial getPages and this effect
-		setPages( getPages() );
+		setPages( getPages( reports ) );
 
 		return () => {
 			removeAction( 'hookAdded', namespace );
 		};
-	}, [] );
+	}, [ reports ] );
 
 	return pages;
 }
