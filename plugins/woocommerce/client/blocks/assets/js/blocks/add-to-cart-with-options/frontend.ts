@@ -491,7 +491,7 @@ const addToCartWithOptionsStore = store(
 			},
 		},
 		callbacks: {
-			setProductData: () => {
+			setSelectedVariationId: () => {
 				const { availableVariations, selectedAttributes } =
 					getContext< Context >();
 				const matchedVariation = getMatchedVariation(
@@ -504,15 +504,8 @@ const addToCartWithOptionsStore = store(
 					{},
 					{ lock: universalLock }
 				);
-
-				if ( matchedVariation ) {
-					actions.setProductData(
-						'price_html',
-						matchedVariation.price_html
-					);
-				} else {
-					actions.setProductData( 'price_html', null );
-				}
+				const matchedVariationId = matchedVariation?.variation_id;
+				actions.setVariationId( matchedVariationId ?? null );
 			},
 		},
 	},
