@@ -209,6 +209,7 @@ class ShopifyClient {
 	 * @return array Request arguments for wp_remote_request.
 	 */
 	private function build_graphql_request_args( string $access_token, string $query, array $variables ): array {
+		// PHPCS: $query and $variables are used in the body below, so no change needed unless not used.
 		return array(
 			'method'  => 'POST',
 			'headers' => array(

@@ -375,7 +375,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			3
 		);
 
-		$query = 'query { products(first: 1) { edges { cursor node { id title } } pageInfo { hasNextPage endCursor } } }';
+		$query  = 'query { products(first: 1) { edges { cursor node { id title } } pageInfo { hasNextPage endCursor } } }';
 		$result = $this->client->graphql_request( $query );
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
@@ -422,7 +422,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			3
 		);
 
-		$query = 'query($first: Int, $query: String) { products(first: $first, query: $query) { edges { node { id } } } }';
+		$query  = 'query($first: Int, $query: String) { products(first: $first, query: $query) { edges { node { id } } } }';
 		$result = $this->client->graphql_request( $query, $variables );
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
@@ -455,7 +455,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$query = 'query { products { edges { node { id } } } }';
+		$query  = 'query { products { edges { node { id } } } }';
 		$result = $this->client->graphql_request( $query );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -534,7 +534,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$query = 'query { products { edges { node { id } } } }';
+		$query  = 'query { products { edges { node { id } } } }';
 		$result = $this->client->graphql_request( $query );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -551,7 +551,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			->with( 'shopify' )
 			->willReturn( array() ); // Empty credentials array.
 
-		$query = 'query { products { edges { node { id } } } }';
+		$query  = 'query { products { edges { node { id } } } }';
 		$result = $this->client->graphql_request( $query );
 
 		$this->assertInstanceOf( WP_Error::class, $result );

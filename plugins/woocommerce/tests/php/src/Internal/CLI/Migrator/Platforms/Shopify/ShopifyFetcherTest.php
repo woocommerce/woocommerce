@@ -466,33 +466,30 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		// Test with all parameters.
-		$variables = $method->invoke( $this->fetcher, array( 'limit' => 10, 'after_cursor' => 'cursor123' ) );
-		$expected = array(
+		$variables = array(
 			'first' => 10,
 			'after' => 'cursor123',
 			'query' => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $expected, $variables );
+		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 10, 'after_cursor' => 'cursor123' ) ) );
 
 		// Test with null cursor (should filter out null values).
-		$variables = $method->invoke( $this->fetcher, array( 'limit' => 5, 'after_cursor' => null ) );
-		$expected = array(
+		$variables = array(
 			'first' => 5,
 			'query' => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $expected, $variables );
+		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 5, 'after_cursor' => null ) ) );
 
 		// Test with empty cursor (empty strings are not filtered out).
-		$variables = $method->invoke( $this->fetcher, array( 'limit' => 15, 'after_cursor' => '' ) );
-		$expected = array(
+		$variables = array(
 			'first' => 15,
 			'after' => '',
 			'query' => '',
 			'variantsFirst' => 100,
 		);
-		$this->assertEquals( $expected, $variables );
+		$this->assertEquals( $variables, $method->invoke( $this->fetcher, array( 'limit' => 15, 'after_cursor' => '' ) ) );
 	}
 
 	/**

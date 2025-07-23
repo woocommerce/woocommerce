@@ -187,18 +187,20 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		if ( is_wp_error( $response_data ) ) {
 			\WP_CLI::warning( 'Failed to fetch products via GraphQL: ' . $response_data->get_error_message() );
 			return array(
-				'items'       => array(),
-				'cursor'      => null,
-				'hasNextPage' => false,
+				'items'         => array(),
+				'cursor'        => null,
+				'hasNextPage'   => false,
+				'has_next_page' => false,
 			);
 		}
 
 		if ( ! isset( $response_data->products->edges ) ) {
 			\WP_CLI::warning( 'Invalid GraphQL response structure - missing products.edges field.' );
 			return array(
-				'items'       => array(),
-				'cursor'      => null,
-				'hasNextPage' => false,
+				'items'         => array(),
+				'cursor'        => null,
+				'hasNextPage'   => false,
+				'has_next_page' => false,
 			);
 		}
 
@@ -212,9 +214,10 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		}
 
 		return array(
-			'items'       => $items,
-			'cursor'      => $last_cursor,
-			'hasNextPage' => $page_info ? $page_info->hasNextPage : false,
+			'items'         => $items,
+			'cursor'        => $last_cursor,
+			'hasNextPage'   => $page_info ? $page_info->hasNextPage : false,
+			'has_next_page' => $page_info ? $page_info->hasNextPage : false,
 		);
 	}
 
