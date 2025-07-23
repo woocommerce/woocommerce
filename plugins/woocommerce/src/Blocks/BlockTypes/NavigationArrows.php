@@ -10,21 +10,15 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * NavigationArrows class.
  */
 class NavigationArrows extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'navigation-arrows';
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Include and render the block.
