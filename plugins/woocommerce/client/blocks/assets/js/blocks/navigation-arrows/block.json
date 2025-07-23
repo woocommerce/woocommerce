@@ -40,5 +40,7 @@
 	"ancestor": [
 		"woocommerce/product-gallery-large-image",
 		"woocommerce/product-collection"
-	]
+	],
+	"style": "file:../woocommerce/navigation-arrows-style.css",
+	"editorStyle": "file:../woocommerce/navigation-arrows-editor.css"
 }
