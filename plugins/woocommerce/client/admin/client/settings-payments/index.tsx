@@ -395,7 +395,13 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 				title={ __( 'Settings', 'woocommerce' ) }
 				context={ 'wc_settings_payments__woopayments' }
 			/>
-			<Suspense fallback={ <div>{ __( 'Loading WooPayments settings...', 'woocommerce' ) }</div> }>
+			<Suspense
+				fallback={
+					<div>
+						{ __( 'Loading WooPayments settings…', 'woocommerce' ) }
+					</div>
+				}
+			>
 				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
 		</>

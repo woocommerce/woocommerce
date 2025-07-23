@@ -511,7 +511,10 @@ const TestAccountStep = () => {
 											WC_ASSET_URL +
 											'images/icons/store.svg'
 										}
-										alt={ __( 'Store icon', 'woocommerce' ) }
+										alt={ __(
+											'Store icon',
+											'woocommerce'
+										) }
 									/>
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
@@ -568,7 +571,10 @@ const TestAccountStep = () => {
 											WC_ASSET_URL +
 											'images/icons/dollar.svg'
 										}
-										alt={ __( 'Dollar icon', 'woocommerce' ) }
+										alt={ __(
+											'Dollar icon',
+											'woocommerce'
+										) }
 									/>
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
