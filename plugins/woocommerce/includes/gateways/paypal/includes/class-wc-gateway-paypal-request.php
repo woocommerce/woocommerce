@@ -89,6 +89,223 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Create a PayPal order using the Orders v2 API.
+	 *
+	 * This method creates a PayPal order and returns the order details including
+	 * the approval URL where customers will be redirected to complete payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array|null
+	 * @throws Exception If the PayPal order creation fails.
+	 */
+	public function create_paypal_order( $order ) {
+		try {
+			$request_body = $this->get_paypal_create_order_request_body( $order );
+
+			// phpcs:disable Generic.Commenting.Todo.TaskFound
+			// TODO: Replace with the wpcom endpoint when it's ready.
+			$response = wp_remote_post(
+				$this->get_paypal_create_order_request_url(),
+				array(
+					'method'  => 'POST',
+					'headers' => array(
+						'Content-Type' => 'application/json',
+					),
+					'body'    => wp_json_encode( $request_body ),
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
+
+			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
+				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
+			}
+
+			$redirect_url = $this->get_approve_link( $http_code, $response_data );
+
+			return array(
+				'id'           => $response_data['id'],
+				'redirect_url' => $redirect_url,
+			);
+		} catch ( Exception $e ) {
+			WC_Gateway_Paypal::log( $e->getMessage() );
+			return null;
+		}
+	}
+
+	/**
+	 * Get the approve link from the response data.
+	 *
+	 * @param int   $http_code The HTTP code of the response.
+	 * @param array $response_data The response data.
+	 * @return string|null
+	 */
+	private function get_approve_link( $http_code, $response_data ) {
+		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
+		if ( 200 === $http_code && isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
+			$rel = 'payer-action';
+		} else {
+			$rel = 'approve';
+		}
+
+		foreach ( $response_data['links'] as $link ) {
+			if ( $rel === $link['rel'] && 'GET' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				return esc_url_raw( $link['href'] );
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the PayPal create-order request URL.
+	 *
+	 * @return string
+	 */
+	private function get_paypal_create_order_request_url() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
+	}
+
+	/**
+	 * Build the request body for the PayPal create-order request.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	private function get_paypal_create_order_request_body( $order ) {
+		$currency = $order->get_currency();
+
+		return array(
+			'intent'              => $this->get_paypal_order_intent(),
+			'purchase_units'      => array(
+				array(
+					'custom_id' => $this->get_paypal_order_custom_id( $order ),
+					'amount'    => array(
+						'currency_code' => $currency,
+						'value'         => $order->get_total(),
+						'breakdown'     => array(
+							'item_total' => array(
+								'currency_code' => $currency,
+								'value'         => $this->get_paypal_order_items_subtotal( $order ),
+							),
+							'shipping'   => array(
+								'currency_code' => $currency,
+								'value'         => $order->get_shipping_total(),
+							),
+							'tax_total'  => array(
+								'currency_code' => $currency,
+								'value'         => $order->get_total_tax(),
+							),
+							'discount'   => array(
+								'currency_code' => $currency,
+								'value'         => $order->get_discount_total(),
+							),
+						),
+					),
+					'items'     => $this->get_paypal_order_items( $order ),
+					'payee'     => array(
+						'email_address' => $this->gateway->get_option( 'email' ),
+					),
+				),
+			),
+			'application_context' => array(
+				// Customer redirected here on approval.
+				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+				// Customer redirected here on cancellation.
+				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),
+				// phpcs:ignore Generic.Commenting.Todo.TaskFound,Squiz.PHP.CommentedOutCode.Found
+				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
+			),
+		);
+	}
+
+	/**
+	 * Build the custom ID for the PayPal order. The custom ID will be used by the proxy for webhook forwarding,
+	 * and by later steps to identify the order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 * @throws Exception If the custom ID is too long.
+	 */
+	private function get_paypal_order_custom_id( $order ) {
+		$custom_id = wp_json_encode(
+			array(
+				'order_id'  => $order->get_id(),
+				'order_key' => $order->get_order_key(),
+				// Endpoint for the proxy to forward webhooks to.
+				'endpoint'  => get_site_url( null, '/wp-json/wc/v3/paypal-webhooks' ),
+			)
+		);
+
+		if ( strlen( $custom_id ) > 255 ) {
+			throw new Exception( 'PayPal order custom ID is too long. Max length is 255 chars.' );
+		}
+
+		return $custom_id;
+	}
+
+	/**
+	 * Get the order items for the PayPal create-order request
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	private function get_paypal_order_items( $order ) {
+		$items = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$items[] = array(
+				'name'        => $item->get_name(),
+				'quantity'    => $item->get_quantity(),
+				'unit_amount' => array(
+					'currency_code' => $order->get_currency(),
+					// We want to use the subtotal (before discounts), as we are including the discount in the breakdown.
+					'value'         => $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
+				),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get the subtotal for all items, before discounts.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return float
+	 */
+	private function get_paypal_order_items_subtotal( $order ) {
+		$total = 0;
+		foreach ( $order->get_items() as $item ) {
+			$total += (float) $item->get_subtotal();
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Get the value for the intent field in the create-order request.
+	 *
+	 * @return string
+	 */
+	private function get_paypal_order_intent() {
+		$payment_action = $this->gateway->get_option( 'paymentaction' );
+		if ( 'authorization' === $payment_action ) {
+			return 'AUTHORIZE';
+		}
+
+		return 'CAPTURE';
+	}
+
+	/**
 	 * Limit length of an arg.
 	 *
 	 * @param  string  $string Argument to limit.

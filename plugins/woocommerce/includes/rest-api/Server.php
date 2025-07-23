@@ -200,6 +200,7 @@ class Server {
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// TODO: IMPORTANT Remove me before merging the feature branch.
 			'paypal-webhooks-proxy'    => 'WC_REST_Paypal_Webhooks_Proxy_Controller',
+			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 		);
 	}
 
