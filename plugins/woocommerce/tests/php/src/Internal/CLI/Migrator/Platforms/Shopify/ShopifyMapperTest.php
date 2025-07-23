@@ -25,20 +25,6 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	private ShopifyMapper $mapper;
 
 	/**
-	 * Holds the test product data.
-	 *
-	 * @var array
-	 */
-	protected $test_product_data;
-
-	/**
-	 * Holds the test variant data.
-	 *
-	 * @var array
-	 */
-	protected $test_variant_data;
-
-	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
