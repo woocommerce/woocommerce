@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Analyze CFEs trends
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: code freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
           issue=$( gh issue create --title "[Release] CFEs trend analysis for ${{ inputs.milestone }} milestone" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
@@ -32,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Analyze PRRs trends
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
           issue=$( gh issue create --title "[Release] PRRs trends analysis for ${{ inputs.milestone }} milestone" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
@@ -53,6 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Analyze quality issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: code freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
           prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
