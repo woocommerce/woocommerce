@@ -44,7 +44,7 @@ class ListCommand extends BaseCommand {
 			);
 
 			// Add separator row between platforms (but not after the last one).
-			$current_index++;
+			++$current_index;
 			if ( $current_index < $platform_count ) {
 				$formatted_items[] = array(
 					'id'      => str_repeat( '-', 20 ),
