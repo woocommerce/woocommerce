@@ -34,6 +34,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			case 'CHECKOUT.ORDER.APPROVED':
 				$this->process_checkout_order_approved( $data );
 				break;
+			case 'PAYMENT.CAPTURE.COMPLETED':
+				$this->process_payment_capture_completed( $data );
+				break;
 			default:
 				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( $data, true ) );
 				break;
@@ -79,6 +82,25 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Process the PAYMENT.CAPTURE.COMPLETED webhook event.
+	 *
+	 * @param array $event The webhook event data.
+	 */
+	private function process_payment_capture_completed( $event ) {
+		$custom_id = $event['resource']['custom_id'];
+		$order     = $this->get_wc_order( $custom_id );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			return;
+		}
+
+		$order->payment_complete();
+		$order->set_transaction_id( $event['resource']['id'] );
+		$order->add_order_note( 'PayPal payment captured. ID: ' . $event['resource']['id'] );
+		$order->save();
 	}
 
 	/**
