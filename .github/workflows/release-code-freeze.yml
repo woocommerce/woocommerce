@@ -87,79 +87,62 @@ jobs:
               core.setFailed('There are PRs by the github-actions bot that are still open. Please merge or close before proceeding.');
               process.exit(1);
             }
+      - uses: actions/checkout@v4
+        with:
+          ref: trunk
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+          sparse-checkout-cone-mode: false
+      - name: Fetch version from trunk
+        id: fetch-trunk-version
+        run: |
+          header_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          echo "Trunk version is '$header_version'."
+          echo "trunk-version=$header_version" >> $GITHUB_OUTPUT
       - name: Compute next release and dev cycle versions
         id: calculate-versions
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
-            const bumpMinorVersion = (v) => {
-              const [major, minor, patch] = v.split('.').map(Number);
-              return minor >= 9 ? `${major + 1}.0.0` : `${major}.${minor + 1}.0`
-            };
+            const trunkVersion = `${{ steps.fetch-trunk-version.outputs.trunk-version }}`;
 
-            const currentRelease = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
+            const m = trunkVersion.match( /^(\d+\.\d+)\.\d+(-dev)?$/ );
+            if ( ! m ) {
+                core.setFailed( `Trunk version number is incorrect: ${ trunkVersion }` );
+                return;
+            }
 
-            const currentVersion = currentRelease.data.tag_name.replace(/[^0-9.]+/, '');
-            const nextReleaseVersion = bumpMinorVersion(currentVersion);
-            const nextReleaseBranch = `release/${nextReleaseVersion.slice(0, -2)}`;
-            const nextPrepReleaseBranch = `prep/${nextReleaseBranch}-for-next-dev-cycle-${nextReleaseVersion.slice(0, -2)}`;
-            const nextTrunkVersion = bumpMinorVersion(nextReleaseVersion);
+            const trunkMainVersion = m[1];
+            const nextReleaseVersion = trunkVersion.replace( '-dev', '' );
+            const nextReleaseBranch = `release/${ nextReleaseVersion.slice( 0, -2 ) }`;
+            const nextPrepReleaseBranch = `prep/${ nextReleaseBranch }-for-next-dev-cycle-${ nextReleaseVersion.slice( 0, -2 ) }`;
+            const nextTrunkVersion = `${ ( Number( trunkMainVersion ) + 0.1 ).toFixed( 1 ) }.0-dev`;
 
-            core.setOutput('nextReleaseVersion', nextReleaseVersion);
-            core.setOutput('nextReleaseBranch', nextReleaseBranch);
-            core.setOutput('nextPrepReleaseBranch', nextPrepReleaseBranch);
-            core.setOutput('nextTrunkVersion', nextTrunkVersion);
+            core.setOutput( 'nextReleaseVersion', nextReleaseVersion );
+            core.setOutput( 'nextReleaseBranch', nextReleaseBranch );
+            core.setOutput( 'nextPrepReleaseBranch', nextPrepReleaseBranch );
+            core.setOutput( 'nextTrunkVersion', nextTrunkVersion );
 
   run-code-freeze:
     name: Perform code freeze
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: prepare-for-code-freeze
     steps:
-      # Repo preparation to be able to use the monorepo-utils for the version bumps.
       - name: Checkout trunk
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: trunk
-      - name: Setup PNPM
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-      - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-            node-version-file: .nvmrc
-            cache: pnpm
-
-      - name: Install prerequisites
-        run: |
-            pnpm install --filter monorepo-utils --ignore-scripts
-            # ignore scripts speeds up setup significantly, but we still need to build monorepo utils
-            pnpm build
-        working-directory: tools/monorepo-utils
-
-      # Actual code freeze steps.
       - name: Push frozen branch to the repo
         run: |
           # Last opportunity to bail if branch already exists.
           if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}) ]]; then
-            echo "::error::Release branch already exists."
+            echo "::error::Release branch '${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}' already exists."
             exit 1
           fi
 
           git checkout trunk
           git checkout -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
           git push origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
-      - name: Create next dev cycle milestone
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm utils code-freeze milestone -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -m ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}
-      - name: Bump versions in frozen release branch for rc.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm utils code-freeze version-bump ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-rc.1 -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
 
   bump-version-in-trunk:
     name: Bump version in trunk for next development cycle
@@ -171,7 +154,7 @@ jobs:
       bump-type: dev
 
   build-zip:
-    name: 'Build WooCommerce Release Zip'
+    name: Build WooCommerce release ZIP
     uses: ./.github/workflows/release-build-zip-file.yml
     needs: [prepare-for-code-freeze, run-code-freeze]
     with:
