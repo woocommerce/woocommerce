@@ -480,6 +480,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						onError: {
 							target: 'transitional', // leave it as initialised default on error
 						},
+						onDone: {
+							target: 'transitional',
+						},
 					},
 				},
 				skipTransitional: {
