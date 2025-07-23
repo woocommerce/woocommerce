@@ -265,12 +265,11 @@ const addToCartWithOptionsStore = store<
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
 				const { variationId } = addToCartWithOptionsStore.state;
-				const productId =
-					variationId || childProductId || context.productId;
+				const id = variationId || childProductId || context.productId;
 
 				context.quantity = {
 					...context.quantity,
-					[ productId ]: value,
+					[ id ]: value,
 				};
 			},
 			increaseQuantity: (
@@ -458,9 +457,10 @@ const addToCartWithOptionsStore = store<
 					yield actions.batchAddCartItems( addedItems );
 				} else {
 					const { variationId } = addToCartWithOptionsStore.state;
+					const id = variationId || productId;
 					const newQuantity = getNewQuantity(
-						variationId || productId,
-						quantity[ variationId || productId ],
+						id,
+						quantity[ id ],
 						selectedAttributes
 					);
 
@@ -470,7 +470,7 @@ const addToCartWithOptionsStore = store<
 						{ lock: universalLock }
 					);
 					yield actions.addCartItem( {
-						id: variationId || productId,
+						id,
 						quantity: newQuantity,
 						variation: selectedAttributes,
 						type: productType,
