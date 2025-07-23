@@ -1021,13 +1021,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
 			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
 
-			// Regenerate variation summaries if this is a variable product and attributes changed.
-			if ( $product->is_type( 'variable' ) ) {
-				$variation_ids = $product->get_children();
-				if ( ! empty( $variation_ids ) && is_array( $variation_ids ) ) {
-					WC_Product_Variation_Data_Store_CPT::regenerate_variation_summaries( $variation_ids );
-				}
-			}
+			do_action( 'woocommerce_product_attributes_updated', $product, $force );
 		}
 	}
 

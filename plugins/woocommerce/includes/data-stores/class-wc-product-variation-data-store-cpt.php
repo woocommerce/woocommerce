@@ -37,6 +37,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
 		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
+		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 
 		add_action( 'woocommerce_attribute_add', array( __CLASS__, 'on_add_product_attribute' ), 10, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
@@ -715,6 +716,22 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				self::regenerate_variation_summaries( $variation_ids );
 			}
 		);
+	}
+
+	/**
+	* Handles regeneration of variation summaries when a variable product's attributes are updated.
+	*
+	* @since 10.2.0
+	* @param WC_Product $product The variable product whose attributes were updated.
+	* @param bool $force Whether the update was forced.
+	*/
+	public static function on_product_attributes_updated( $product, $force ) {
+		if ( $product->is_type( 'variable' ) ) {
+			$variation_ids = $product->get_children();
+			if ( ! empty( $variation_ids ) && is_array( $variation_ids ) ) {
+				self::regenerate_variation_summaries( $variation_ids );
+			}
+		}
 	}
 
 	/**
