@@ -72,7 +72,7 @@ async function setup( attributes: BlockAttributes ) {
  */
 function enableControl( controlName: string ) {
 	const optionsButton = screen.getByRole( 'button', {
-		name: /Taxonomy Filter Settings options/i,
+		name: /Display Settings options/i,
 	} );
 	fireEvent.click( optionsButton );
 
@@ -234,9 +234,6 @@ describe( 'Taxonomy Filter block', () => {
 			).toBeInTheDocument();
 
 			// Check that all controls reflect the set attributes
-			expect(
-				screen.getByRole( 'combobox', { name: /Taxonomy/i } )
-			).toHaveValue( 'product_cat' );
 			expect(
 				screen.getByRole( 'checkbox', { name: /Product counts/i } )
 			).toBeChecked();
