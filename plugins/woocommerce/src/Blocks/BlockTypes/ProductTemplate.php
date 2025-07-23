@@ -97,7 +97,6 @@ class ProductTemplate extends AbstractBlock {
 		}
 
 		$wrapper_attributes = get_block_wrapper_attributes( $wrapper_attributes_array );
-
 		$content = '';
 		while ( $query->have_posts() ) {
 			$query->the_post();
