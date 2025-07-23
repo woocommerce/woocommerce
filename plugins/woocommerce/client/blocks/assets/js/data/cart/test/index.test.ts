@@ -52,7 +52,7 @@ describe( 'Window load event handler', () => {
 		mockFinishResolution = jest.fn();
 		mockWpDispatch.mockReturnValue( {
 			finishResolution: mockFinishResolution,
-		} as any );
+		} as unknown as ReturnType< typeof wpDispatch > );
 	} );
 
 	afterAll( () => {
