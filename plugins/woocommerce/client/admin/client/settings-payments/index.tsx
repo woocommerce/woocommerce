@@ -19,7 +19,7 @@ import {
 	useLocation,
 } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -398,7 +398,11 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 			<Suspense
 				fallback={
 					<div>
-						{ __( 'Loading WooPayments settings…', 'woocommerce' ) }
+						{ sprintf(
+							/* translators: %s: WooPayments */
+							__( 'Loading %s settings…', 'woocommerce' ),
+							'WooPayments'
+						) }
 					</div>
 				}
 			>
