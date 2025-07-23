@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce a new filter that allows to skip WC_Install::init

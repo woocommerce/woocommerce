@@ -321,7 +321,12 @@ class WC_Install {
 	 * Hook in tabs.
 	 */
 	public static function init() {
-		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) ) {
+		// On very large stores, running WC_Install::init during page loads may cause significant performance overhead.
+		// Setting this filter to true will skip the automatic initialization,
+		// but you must run `wp wc update` manually after any WooCommerce upgrade to ensure database updates are applied.
+		$skip_install_init = apply_filters( 'woocommerce_skip_install_init', false );
+
+		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) || $skip_install_init ) {
 			return;
 		}
 
