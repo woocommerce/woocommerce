@@ -49,12 +49,11 @@ final class ProductFilterRating extends AbstractBlock {
 			return $items;
 		}
 
-		$valid_ratings  = array( '1', '2', '3', '4', '5' );
-		$active_ratings = explode( ',', $params[ self::RATING_FILTER_QUERY_VAR ] );
+		$active_ratings = array_map( 'absint', explode( ',', $params[ self::RATING_FILTER_QUERY_VAR ] ) );
 		$active_ratings = array_filter(
 			$active_ratings,
-			function ( $rating ) use ( $valid_ratings ) {
-				return in_array( $rating, $valid_ratings, true );
+			function ( $rating ) {
+				return $rating > 0 && $rating < 6;
 			}
 		);
 		$active_ratings = array_unique( $active_ratings );
@@ -95,28 +94,26 @@ final class ProductFilterRating extends AbstractBlock {
 		$rating_counts_with_min = array_filter(
 			$rating_counts,
 			function ( $rating ) use ( $min_rating ) {
-				return $rating['rating'] >= $min_rating;
+				return $rating['rating'] >= $min_rating & $rating['rating'] < 6;
 			}
 		);
 		$filter_params          = $block->context['filterParams'] ?? array();
 		$rating_query           = $filter_params[ self::RATING_FILTER_QUERY_VAR ] ?? '';
-		$selected_rating        = array_filter( explode( ',', $rating_query ) );
+		$selected_rating        = array_filter( array_map( 'absint', explode( ',', $rating_query ) ) );
 
 		$filter_options = array_map(
 			function ( $rating ) use ( $selected_rating ) {
-				$value = (string) $rating['rating'];
-
 				$aria_label = sprintf(
 					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
 					__( 'Rated %1$d out of 5', 'woocommerce' ),
-					$value,
+					$rating['rating'],
 				);
 
 				return array(
-					'label'     => $this->render_rating_label( (int) $value ),
+					'label'     => $this->render_rating_label( (int) $rating['rating'] ),
 					'ariaLabel' => $aria_label,
-					'value'     => $value,
-					'selected'  => in_array( $value, $selected_rating, true ),
+					'value'     => $rating['rating'],
+					'selected'  => in_array( $rating['rating'], $selected_rating, true ),
 					'count'     => $rating['count'],
 					'type'      => 'rating',
 				);
