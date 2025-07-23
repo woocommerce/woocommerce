@@ -35,7 +35,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 					align: 'right',
 				},
 			],
-			[ 'woocommerce/product-gallery-large-image-next-previous' ],
+			[ 'woocommerce/navigation-arrows' ],
 		],
 	],
 ];
