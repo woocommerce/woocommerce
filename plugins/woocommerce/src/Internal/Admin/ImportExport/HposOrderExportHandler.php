@@ -132,6 +132,8 @@ class HposOrderExportHandler {
 
 		$title = sprintf( 'Order – %s', $date_created );
 
+		$meta = $order->get_meta_data();
+
 		?>
 		<item>
 			<title><?php echo esc_html( $title ); ?></title>
@@ -140,8 +142,8 @@ class HposOrderExportHandler {
 			<dc:creator><?php echo esc_html( 'admin' ); ?></dc:creator>
 			<guid isPermaLink="false"><?php echo esc_html( get_site_url( null, "?post_type=shop_order&p={$order_id}" ) ); ?></guid>
 			<description></description>
-			<content:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></content:encoded>
-			<excerpt:encoded><?php echo $this->wxr_cdata( '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></excerpt:encoded>
+			<content:encoded><?php echo $this->wxr_cdata( '' ); ?></content:encoded>
+			<excerpt:encoded><?php echo $this->wxr_cdata( '' ); ?></excerpt:encoded>
 			<wp:post_id><?php echo (int) $order_id; ?></wp:post_id>
 			<wp:post_date><?php echo esc_html( $date_created ); ?></wp:post_date>
 			<wp:post_date_gmt><?php echo esc_html( $date_created ); ?></wp:post_date_gmt>
@@ -154,8 +156,68 @@ class HposOrderExportHandler {
 			<wp:post_type>shop_order</wp:post_type>
 			<wp:post_password></wp:post_password>
 			<wp:is_sticky>0</wp:is_sticky>
+
+			<?php
+			// Add essential meta keys
+			$essential_meta = array(
+				'_order_key'      => $order->get_order_key(),
+				'_order_currency' => $order->get_currency(),
+				'_order_total'    => $order->get_total(),
+				'_billing_email'  => $order->get_billing_email(),
+				'_payment_method' => $order->get_payment_method(),
+				'_order_version'  => \WC()->version,
+			);
+
+			foreach ( $essential_meta as $key => $value ) {
+				?>
+				<wp:postmeta>
+					<wp:meta_key><?php echo $this->wxr_cdata( $key ); ?></wp:meta_key>
+					<wp:meta_value><?php echo $this->wxr_cdata( maybe_serialize( $value ) ); ?></wp:meta_value>
+				</wp:postmeta>
+				<?php
+			}
+
+			// Export all other custom meta.
+			foreach ( $meta as $meta_item ) {
+				$key   = $meta_item->get_data()['key'];
+				$value = $meta_item->get_data()['value'];
+				?>
+				<wp:postmeta>
+					<wp:meta_key><?php echo $this->wxr_cdata( $key ); ?></wp:meta_key>
+					<wp:meta_value><?php echo $this->wxr_cdata( maybe_serialize( $value ) ); ?></wp:meta_value>
+				</wp:postmeta>
+				<?php
+			}
+			?>
 		</item>
 		<?php
+	}
+
+	/**
+	 * Checks if an imported order has enough postmeta to be backfilled to HPOS.
+	 *
+	 * @param int $post_id The post ID of the imported order.
+	 * @return bool Whether the postmeta is complete enough for backfilling.
+	 */
+	protected function is_valid_order_for_backfill( int $post_id ): bool {
+		$required_keys = array(
+			'_order_key',
+			'_order_currency',
+			'_order_total',
+			'_billing_email',
+			'_payment_method',
+			'_order_version',
+		);
+
+		foreach ( $required_keys as $key ) {
+			$value = get_post_meta( $post_id, $key, true );
+			if ( false === $value || '' === $value ) {
+				error_log( "[HPOS Backfill] Skipping order $post_id: missing meta $key" );
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -166,8 +228,13 @@ class HposOrderExportHandler {
 	 */
 	public function maybe_backfill_hpos_order( $post_id, $original_post_id ) {
 		if ( get_post_type( $post_id ) === 'shop_order' ) {
+			if ( ! $this->is_valid_order_for_backfill( $post_id ) ) {
+				error_log( "HPOS backfill skipped: missing required meta for order $post_id." );
+				return;
+			}
+
 			try {
-				$handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
+				$handler = wc_get_container()->get( LegacyDataHandler::class );
 				$handler->backfill_order_to_datastore( $post_id, 'posts', 'hpos' );
 			} catch ( \Exception $e ) {
 				error_log( 'HPOS import backfill failed for order ' . $post_id . ': ' . $e->getMessage() );
