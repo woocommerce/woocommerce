@@ -35,8 +35,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		// not needed - update?
 		/* add_action( 'woocommerce_save_product_variation', array( __CLASS__, 'on_save_product_variation' ), 20, 1 ); */
 
-		/* add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 ); */
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'on_update_product_attribute' ), 50, 3 );
+		add_action( 'edited_term', array( __CLASS__, 'on_edit_product_term' ), 10, 3 );
 
 		add_action( 'woocommerce_attribute_add', array( __CLASS__, 'on_add_product_attribute' ), 10, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'on_delete_product_attribute' ), 10, 3 );
@@ -727,6 +727,45 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				self::regenerate_variation_summaries( $variation_ids );
 			}
 		);
+	}
+
+	/**
+	* Hook called after a term is updated to handle updates for product variations.
+	*
+	* @param int    $term_id  Term ID.
+	* @param int    $tt_id    Term taxonomy ID.
+	* @param string $taxonomy Taxonomy slug.
+	*/
+	public static function on_edit_product_term( $term_id, $tt_id, $taxonomy ) {
+		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
+			return;
+		}
+
+		$new_term = get_term( $term_id, $taxonomy );
+		if ( is_wp_error( $new_term ) || ! $new_term ) {
+			return;
+		}
+
+		$meta_key = 'attribute_' . $taxonomy;
+
+		global $wpdb;
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT pm.post_id
+				FROM $wpdb->postmeta pm
+				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = 'product_variation'",
+				$meta_key,
+				$new_term->slug
+			)
+		);
+
+		if ( ! empty( $variation_ids ) ) {
+			self::regenerate_variation_summaries( $variation_ids );
+		}
 	}
 }
 
