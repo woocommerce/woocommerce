@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acf967c466bc4a6560e4d0c36fac80ca",
+    "content-hash": "94c771b05fdac0876b77d37bba58e2be",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1590,6 +1590,126 @@
                 "symlink": false,
                 "relative": true
             }
+        },
+        {
+            "name": "wordpress/components",
+            "version": "v0.0.5-alpha",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/php-toolkit.git",
+                "reference": "b3bc700ba00db985551d1564a6377d7242968610"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/php-toolkit/zipball/b3bc700ba00db985551d1564a6377d7242968610",
+                "reference": "b3bc700ba00db985551d1564a6377d7242968610",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "phpcompatibility/php-compatibility": "10.x-dev",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^9.5",
+                "squizlabs/php_codesniffer": "^3.6",
+                "wp-coding-standards/wpcs": "^2.3",
+                "yoast/phpunit-polyfills": "2.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "exclude-from-classmap": [
+                    "**/Tests/",
+                    "**/bin/",
+                    "/Tests/"
+                ],
+                "classmap": [
+                    "components/BlockParser/",
+                    "components/Blueprints/vendor-patched/",
+                    "components/DataLiberation/vendor-patched/",
+                    "components/Markdown/vendor-patched",
+                    "components/Merge/vendor-patched",
+                    "components/HTML/./"
+                ],
+                "files": [
+                    "components/DataLiberation/URL/functions.php",
+                    "components/Encoding/utf8_decoder.php",
+                    "components/Filesystem/functions.php",
+                    "components/Zip/functions.php",
+                    "components/Polyfill/wordpress.php",
+                    "components/Polyfill/mbstring.php",
+                    "components/Polyfill/php_functions.php",
+                    "components/Git/functions.php"
+                ],
+                "psr-4": {
+                    "WordPress\\Blueprints\\": "components/Blueprints/",
+                    "WordPress\\CLI\\": "components/CLI/",
+                    "WordPress\\DataLiberation\\": "components/DataLiberation/",
+                    "Rowbot\\": "components/DataLiberation/vendor-patched/",
+                    "Brick\\": "components/DataLiberation/vendor-patched/",
+                    "WordPress\\HttpClient\\": "components/HttpClient/",
+                    "WordPress\\Merge\\": "components/Merge/",
+                    "WordPress\\Markdown\\": "components/Markdown/",
+                    "WordPress\\Filesystem\\": "components/Filesystem/",
+                    "WordPress\\XML\\": "components/XML/",
+                    "WordPress\\ByteStream\\": "components/ByteStream/",
+                    "WordPress\\Zip\\": "components/Zip/",
+                    "WordPress\\HttpServer\\": "components/HttpServer/",
+                    "WordPress\\CORSProxy\\": "components/CORSProxy/",
+                    "WordPress\\Git\\": "components/Git/"
+                }
+            },
+            "archive": {
+                "exclude": [
+                    "/plugins",
+                    "/examples"
+                ]
+            },
+            "scripts": {
+                "build-php-toolkit-phar": [
+                    "bash bin/build-libraries-phar.sh"
+                ],
+                "build-blueprints-phar": [
+                    "box compile -c phar-blueprints.json"
+                ],
+                "regenerate-json-schema": [
+                    "node components/Blueprints/Versions/Version2/json-schema/regenerate-schema.ts"
+                ],
+                "test": [
+                    "phpunit -c phpunit.xml"
+                ],
+                "lint": [
+                    "phpcs --standard=WordPress ."
+                ],
+                "lint-fix": [
+                    "phpcbf --standard=WordPress ."
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Zielinski",
+                    "email": "adam@adamziel.com"
+                },
+                {
+                    "name": "WordPress Contributors"
+                }
+            ],
+            "description": "WordPress Components",
+            "homepage": "https://wordpress.org",
+            "keywords": [
+                "components",
+                "wordpress"
+            ],
+            "support": {
+                "source": "https://github.com/WordPress/php-toolkit/tree/v0.0.5-alpha",
+                "issues": "https://github.com/WordPress/php-toolkit/issues"
+            },
+            "time": "2025-06-13T09:54:10+00:00"
         }
     ],
     "packages-dev": [

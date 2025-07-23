@@ -32,6 +32,10 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "github",
+			"url": "https://github.com/WordPress/php-toolkit"
 		}
 	],
 	"require": {
@@ -48,7 +52,8 @@
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*"
+		"woocommerce/email-editor": "*",
+		"wordpress/components": "v0.0.5-alpha"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
