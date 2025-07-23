@@ -147,7 +147,7 @@ export const Inspector = ( {
 								queryType === 'and'
 									? createInterpolateElement(
 											__(
-												'Show results for <b>all</b> selected attributes. Displayed products must contain <b>all of them</b> to appear in the results.',
+												'Display products that match <b>all</b> selected attributes (they need to include <b>all of them</b>).',
 												'woocommerce'
 											),
 											{
@@ -155,7 +155,7 @@ export const Inspector = ( {
 											}
 									  )
 									: __(
-											"Show results for any of the attributes selected (displayed products don't have to have them all).",
+											"Display products that match any of the selected attributes (they don't need to match all).",
 											'woocommerce'
 									  )
 							}
