@@ -25,7 +25,7 @@ import {
 /**
  * Internal dependencies
  */
-import { sortOrderOptions } from './constants';
+import { sortOrderOptions, sortOrders } from './constants';
 import { BlockAttributes, EditProps } from './types';
 import metadata from './block.json';
 import { resetDisplayStyleBlock } from '../../components/display-style-switcher';
@@ -103,12 +103,17 @@ export const Inspector = ( {
 								},
 								...sortOrderOptions,
 							] }
-							onChange={ ( value ) =>
-								setAttributes( {
-									sortOrder:
-										value as BlockAttributes[ 'sortOrder' ],
-								} )
-							}
+							onChange={ ( value ) => {
+								if (
+									value &&
+									Object.keys( sortOrders ).includes( value )
+								) {
+									setAttributes( {
+										sortOrder:
+											value as keyof typeof sortOrders,
+									} );
+								}
+							} }
 							help={ __(
 								'Determine the order of filter options.',
 								'woocommerce'
