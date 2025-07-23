@@ -131,7 +131,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 	 * Test that methods handle type declarations correctly.
 	 */
 	public function test_method_signatures() {
-		// Test that fetch_batch requires array and returns array
+		// Test that fetch_batch requires array and returns array.
 		$reflection = new \ReflectionClass( $this->fetcher );
 
 		$fetch_batch_method = $reflection->getMethod( 'fetch_batch' );
@@ -155,7 +155,7 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 		$result = $this->fetcher->fetch_batch( array() );
 		$count  = $this->fetcher->fetch_total_count( array() );
 
-		// Current stub behavior - will change when real implementation is added
+		// Current stub behavior - will change when real implementation is added.
 		$this->assertEquals( array(), $result['items'], 'Stub returns empty items array' );
 		$this->assertEquals( 0, $count, 'Stub returns zero count' );
 
