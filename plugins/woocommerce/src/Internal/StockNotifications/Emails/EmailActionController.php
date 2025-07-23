@@ -49,7 +49,7 @@ class EmailActionController {
 	 * @param string $email_link_action_key The action key from the email link.
 	 * @return void
 	 */
-	private function validate_and_maybe_process_request( int $notification_id, string $email_link_action_key ): void {
+	public function validate_and_maybe_process_request( int $notification_id, string $email_link_action_key ): void {
 		if ( empty( $email_link_action_key ) || empty( $notification_id ) ) {
 			return;
 		}
