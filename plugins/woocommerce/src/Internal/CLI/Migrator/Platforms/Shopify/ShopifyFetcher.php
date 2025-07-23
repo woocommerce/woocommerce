@@ -236,7 +236,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		return array_filter(
 			$variables,
 			function ( $value ) {
-				return $value !== null;
+				return null !== $value;
 			}
 		);
 	}

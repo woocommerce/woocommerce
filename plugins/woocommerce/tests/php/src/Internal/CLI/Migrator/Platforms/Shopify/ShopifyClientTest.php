@@ -399,16 +399,19 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		$variables = array( 'first' => 5, 'query' => 'status:active' );
+		$variables = array(
+			'first' => 5,
+			'query' => 'status:active',
+		);
 
 		add_filter(
 			'pre_http_request',
-			function ( $preempt, $parsed_args, $url ) use ( $variables ) {
+			function ( $preempt, $parsed_args ) use ( $variables ) {
 				// Verify variables are included in the request body.
 				$body = json_decode( $parsed_args['body'], true );
 				$this->assertArrayHasKey( 'variables', $body );
 				$this->assertEquals( $variables, $body['variables'] );
-				
+
 				// Return mock response.
 				return array(
 					'response' => array( 'code' => 200 ),
@@ -496,7 +499,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$query = 'query { products { edges { node { id invalidField } } } }';
+		$query  = 'query { products { edges { node { id invalidField } } } }';
 		$result = $this->client->graphql_request( $query );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -546,7 +549,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	public function test_graphql_request_no_credentials(): void {
 		$this->mock_credential_manager->method( 'get_credentials' )
 			->with( 'shopify' )
-			->willReturn( array() ); // Empty credentials array
+			->willReturn( array() ); // Empty credentials array.
 
 		$query = 'query { products { edges { node { id } } } }';
 		$result = $this->client->graphql_request( $query );
