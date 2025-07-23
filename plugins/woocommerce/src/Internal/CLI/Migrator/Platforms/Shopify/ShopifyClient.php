@@ -1,4 +1,10 @@
 <?php
+/**
+ * Shopify Client
+ *
+ * @package Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify
+ */
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
@@ -207,16 +213,19 @@ class ShopifyClient {
 	 * @param string $query        The GraphQL query.
 	 * @param array  $variables    The GraphQL variables.
 	 * @return array Request arguments for wp_remote_request.
+	 * 
+	 * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 */
 	private function build_graphql_request_args( string $access_token, string $query, array $variables ): array {
-		// PHPCS: $query and $variables are used in the body below, so no change needed unless not used.
+		$request_body = compact( 'query', 'variables' );
+		
 		return array(
 			'method'  => 'POST',
 			'headers' => array(
 				'Content-Type'           => 'application/json',
 				'X-Shopify-Access-Token' => $access_token,
 			),
-			'body'    => wp_json_encode( compact( 'query', 'variables' ) ),
+			'body'    => wp_json_encode( $request_body ),
 			'timeout' => 60, // Increase timeout for potentially large GraphQL queries.
 		);
 	}
