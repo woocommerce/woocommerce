@@ -214,9 +214,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
 		},
-		transitionalScreen: {
-			hasCompleteSurvey: false,
-		},
 		isFontLibraryAvailable: null,
 		isPTKPatternsAPIAvailable: null,
 		activeThemeHasMods: undefined,
@@ -487,10 +484,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						onError: {
 							target: 'transitional', // leave it as initialised default on error
 						},
-						onDone: {
-							target: 'transitional',
-							actions: [ 'assignHasCompleteSurvey' ],
-						},
 					},
 				},
 				skipTransitional: {
@@ -502,11 +495,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					],
 					meta: {
 						component: AssemblerHub,
-					},
-					on: {
-						COMPLETE_SURVEY: {
-							actions: 'completeSurvey',
-						},
 					},
 				},
 			},
