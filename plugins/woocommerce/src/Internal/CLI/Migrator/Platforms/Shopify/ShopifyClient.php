@@ -25,6 +25,7 @@ class ShopifyClient {
 	/**
 	 * Initialize the client with dependencies.
 	 *
+	 * @internal
 	 * @param CredentialManager $credential_manager The credential manager.
 	 */
 	final public function init( CredentialManager $credential_manager ): void {

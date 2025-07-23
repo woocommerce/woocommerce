@@ -37,6 +37,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 	/**
 	 * Initialize the fetcher with dependencies.
 	 *
+	 * @internal
 	 * @param ShopifyClient $shopify_client The Shopify client.
 	 */
 	final public function init( ShopifyClient $shopify_client ): void {

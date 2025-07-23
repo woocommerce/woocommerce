@@ -297,7 +297,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		add_filter(
 			'pre_http_request',
-			function ( $preempt, $parsed_args, $url ) use ( $request_body ) {
+			function ( $preempt, $parsed_args ) use ( $request_body ) {
 				$this->assertEquals( 'POST', $parsed_args['method'] );
 				$this->assertEquals( wp_json_encode( $request_body ), $parsed_args['body'] );
 				$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );

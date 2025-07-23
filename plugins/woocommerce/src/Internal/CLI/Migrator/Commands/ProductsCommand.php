@@ -117,7 +117,7 @@ final class ProductsCommand {
 
 		$count = $fetcher->fetch_total_count( $filter_args );
 
-		if ( $count === 0 ) {
+		if ( 0 === $count ) {
 			WP_CLI::log( 'No products found or unable to fetch count.' );
 		} else {
 			$status_filter = isset( $assoc_args['status'] ) ? " with status '{$assoc_args['status']}'" : '';

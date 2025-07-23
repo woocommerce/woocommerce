@@ -35,22 +35,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		// Mock WP_CLI class if it doesn't exist.
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			eval(
-				'
-				class WP_CLI {
-					public static $last_debug_message = "";
-					public static $last_warning_message = "";
-					
-					public static function debug( $message ) {
-						self::$last_debug_message = $message;
-					}
-					
-					public static function warning( $message ) {
-						self::$last_warning_message = $message;
-					}
-				}
-			'
-			);
+			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
 		}
 
 		$this->fetcher             = new ShopifyFetcher();
@@ -290,4 +275,5 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $result );
 	}
+
 }
