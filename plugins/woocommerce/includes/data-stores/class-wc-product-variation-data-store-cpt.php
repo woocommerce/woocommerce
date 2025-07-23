@@ -22,10 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 
 	/**
-	* Static init to add hooks once per request.
-	*
-	* @since 10.2.0
-	*/
+	 * Static init to add hooks once per request.
+	 *
+	 * @since 10.2.0
+	 */
 	public static function init_hooks() {
 		static $hooks_added = false;
 		if ( $hooks_added ) {
@@ -121,18 +121,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_name( $new_title );
 			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
 		}
-
-		/**
-		 * If the attribute summary is not in sync, update here. Used when searching for variations by attribute values.
-		 * This is meant to also cover the case when global attribute name or value is updated, then the attribute summary is updated
-		 * for respective products when they're read.
-		 */
-		/* $new_attribute_summary = self::generate_attribute_summary( $product ); */
-		/**/
-		/* if ( $new_attribute_summary !== $post_object->post_excerpt ) { */
-		/* 	$product->set_attribute_summary( $new_attribute_summary ); */
-		/* 	$updates = array_merge( $updates, array( 'post_excerpt' => $new_attribute_summary ) ); */
-		/* } */
 
 		if ( ! empty( $updates ) ) {
 			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $updates, array( 'ID' => $product->get_id() ) );
@@ -730,12 +718,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	* Hook called after a term is updated to handle updates for product variations.
-	*
-	* @param int    $term_id  Term ID.
-	* @param int    $tt_id    Term taxonomy ID.
-	* @param string $taxonomy Taxonomy slug.
-	*/
+	 * Hook called after a term is updated to handle updates for product variations.
+	 *
+	 * @param int    $term_id  Term ID.
+	 * @param int    $tt_id    Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 */
 	public static function on_edit_product_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
 			return;
