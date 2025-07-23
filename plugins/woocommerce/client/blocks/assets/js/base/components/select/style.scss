@@ -9,6 +9,7 @@
 		background: $input-background-light;
 		width: 100%;
 		position: relative;
+		// Resetting line-height to avoid any unnecessary space around the input
 		line-height: 0;
 
 		.has-dark-controls & {
