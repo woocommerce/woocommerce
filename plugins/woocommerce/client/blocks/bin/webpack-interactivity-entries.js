@@ -2,23 +2,7 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
 
-const ignoredBlocks = [
-	// Mini cart is a special case, we have two instances of the block:
-	// interactive and non-interactive one. Because of that:
-	// - Interactive one relies on assets produced by non-interactive one (CSS),
-	//   all interactive blocks found here will skip standard asset collection
-	//   by webpack, so we need to avoid it.
-	// - Interactive variant frontend script module is manually included in
-	//   webpack-config-interactive-blocks.js, so no need to include it here.
-	// @TODO Remove this exclusion after removal of non-interactive version of mini-cart.
-	'woocommerce/mini-cart',
-];
-
 function blockSupportsInteractivity( blockJson ) {
-	if ( ignoredBlocks.includes( blockJson?.name ) ) {
-		return false;
-	}
-
 	if ( typeof blockJson?.supports?.interactivity === 'object' ) {
 		return blockJson.supports.interactivity?.interactive === true;
 	}
