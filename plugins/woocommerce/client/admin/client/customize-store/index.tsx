@@ -32,10 +32,7 @@ import {
 import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	services as transitionalServices,
-	actions as transitionalActions,
-} from './transitional';
+import { services as transitionalServices } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -178,7 +175,6 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
-	...transitionalActions,
 	...machineActions,
 };
 
