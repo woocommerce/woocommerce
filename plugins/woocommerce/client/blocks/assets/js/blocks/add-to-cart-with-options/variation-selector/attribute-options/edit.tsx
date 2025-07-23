@@ -67,6 +67,7 @@ export default function AttributeOptionsEdit(
 		optionStyle,
 		autoselect,
 		autoselectOnPageLoad,
+		disabledAttributesAction,
 	} = attributes;
 
 	const blockProps = useBlockProps( {
@@ -139,6 +140,18 @@ export default function AttributeOptionsEdit(
 						help={ __( 'This controls whether or not attributes with only one possible option will be auto-selected upon loading the page.', 'woocommerce' ) }
 						checked={ autoselectOnPageLoad }
 						onChange={ () => setAttributes( { autoselectOnPageLoad: ! autoselectOnPageLoad } ) }
+						__nextHasNoMarginBottom
+					/>
+					<SelectControl
+						label={ __( 'Values in conflict with current selection', 'woocommerce' ) }
+						help={ __( 'This controls what to do with attribute values that conflict with the current selection.', 'woocommerce' ) }
+						value={ disabledAttributesAction }
+						options={ [
+							{ label: __( 'Hidden',                                                                  'woocommerce' ), value: 'hide' },
+							{ label: __( 'Grayed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
+							{ label: __( 'Grayed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
+						] }
+						onChange={ ( value ) => setAttributes( { disabledAttributesAction: value } ) }
 						__nextHasNoMarginBottom
 					/>
 				</PanelBody>

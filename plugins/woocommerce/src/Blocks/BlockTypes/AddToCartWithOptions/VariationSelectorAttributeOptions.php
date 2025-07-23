@@ -142,6 +142,28 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$attribute_id    = $block->context['woocommerce/attributeId'];
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
+		$attrs = $block->__get( 'attributes' );
+		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
+
+		$wp_interactivity_directive = '';
+		$func_name = 'state.isOptionDisabled';
+		switch ( $disabled_attributes_action ) {
+			case 'hide':
+				// Hide disabled
+				$wp_interactivity_directive = 'data-wp-bind--hidden';
+				break;
+			case 'disable':
+				// Disable (prop) -- Browser disallows selecting
+				$wp_interactivity_directive = 'data-wp-bind--disabled';
+				break;
+			case 'gray':
+				// Disable (class) -- Browser allows selecting
+				$wp_interactivity_directive =  'data-wp-class--disabled';
+				break;
+			default:
+				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );
+				break;
+		}
 
 		wp_interactivity_state(
 			'woocommerce/add-to-cart-with-options',
@@ -161,15 +183,15 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'<input type="radio" %s/>',
 				$this->get_normalized_attributes(
 					array(
-						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
-						'name'                   => $attribute_slug,
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--checked'  => 'state.isOptionSelected',
-						'data-wp-bind--disabled' => 'state.isOptionDisabled',
-						'data-wp-watch'          => 'callbacks.watchSelected',
-						'data-wp-on--click'      => 'actions.handlePillClick',
-						'data-wp-on--keydown'    => 'actions.handleKeyDown',
-						'data-wp-context'        => array(
+						'class'                     => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
+						'name'                      => $attribute_slug,
+						'value'                     => $attribute_term['value'],
+						'data-wp-bind--checked'     => 'state.isOptionSelected',
+						$wp_interactivity_directive => $func_name,
+						'data-wp-watch'             => 'callbacks.watchSelected',
+						'data-wp-on--click'         => 'actions.handlePillClick',
+						'data-wp-on--keydown'       => 'actions.handleKeyDown',
+						'data-wp-context'           => array(
 							'option' => $attribute_term,
 						),
 					),
@@ -224,13 +246,35 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		);
 
 		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+		$attrs = $block->__get( 'attributes' );
+		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
+
+		$wp_interactivity_directive = '';
+		$func_name = 'state.isOptionDisabled';
+		switch ( $disabled_attributes_action ) {
+			case 'hide':
+				// Hide disabled
+				$wp_interactivity_directive = 'data-wp-bind--hidden';
+				break;
+			case 'disable':
+				// Disable (prop) -- Browser disallows selecting
+				$wp_interactivity_directive = 'data-wp-bind--disabled';
+				break;
+			case 'gray':
+				// Disable (class) -- Browser allows selecting
+				$wp_interactivity_directive = 'data-wp-class--disabled';
+				break;
+			default:
+				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );
+				break;
+		}
 
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
-				'value'                  => $attribute_term['value'],
-				'data-wp-bind--disabled' => 'state.isOptionDisabled',
-				'data-wp-context'        => array(
+				'value'                     => $attribute_term['value'],
+				$wp_interactivity_directive => $func_name,
+				'data-wp-context'           => array(
 					'option'  => $attribute_term,
 					'name'    => $attribute_slug,
 					'options' => $attribute_terms,
