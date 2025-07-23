@@ -130,6 +130,7 @@ const coreModules = [
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
+	'@woocommerce/stores/utils',
 	'@woocommerce/stores/store-notices',
 	'@woocommerce/stores/woocommerce/cart',
 	'@woocommerce/stores/woocommerce/product-data',

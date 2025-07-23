@@ -41,6 +41,7 @@ const entries = {
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/product-data':
 		'./assets/js/base/stores/woocommerce/product-data.ts',
+	'@woocommerce/stores/utils': './assets/js/base/stores/utils/index.ts',
 };
 
 module.exports = {

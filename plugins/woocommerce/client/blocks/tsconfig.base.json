@@ -115,6 +115,9 @@
 			"@woocommerce/shared-hocs": [
 				"assets/js/shared/hocs"
 			],
+			"@woocommerce/stores/utils": [
+				"assets/js/base/stores/utils"
+			],
 			"@woocommerce/stores/store-notices": [
 				"assets/js/base/stores/store-notices"
 			],

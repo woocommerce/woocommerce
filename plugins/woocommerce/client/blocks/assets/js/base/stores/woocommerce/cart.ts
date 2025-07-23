@@ -19,6 +19,7 @@ import type {
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+import { doesCartItemMatchAttributes } from '../utils';
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
@@ -223,9 +224,27 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
-				let item = state.cart.items.find(
-					( { id: productId } ) => id === productId
-				);
+				let item = state.cart.items.find( ( item ) => {
+					const { id: productId } = item;
+
+					if ( item.type === 'variation' ) {
+						// If it's a variation, check that attributes match.
+						// While different variations have different attributes,
+						// some variations might accept 'Any' value for an attribute,
+						// in which case, we need to check that the attributes match.
+						if (
+							id !== productId ||
+							! item.variation ||
+							! variation ||
+							item.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes( item, variation );
+					}
+
+					return id === productId;
+				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};

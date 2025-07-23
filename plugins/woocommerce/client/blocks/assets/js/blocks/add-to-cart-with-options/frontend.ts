@@ -8,6 +8,7 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
+import { doesCartItemMatchAttributes } from '@woocommerce/stores/utils';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
@@ -115,10 +116,30 @@ const getInputData = (
 	};
 };
 
-const getNewQuantity = ( productId: number, quantity: number ) => {
-	const product = wooState.cart?.items.find(
-		( item ) => item.id === productId
-	);
+const getNewQuantity = (
+	productId: number,
+	quantity: number,
+	variation?: SelectedAttributes[]
+) => {
+	const product = wooState.cart?.items.find( ( item ) => {
+		if ( item.type === 'variation' ) {
+			// If it's a variation, check that attributes match.
+			// While different variations have different attributes,
+			// some variations might accept 'Any' value for an attribute,
+			// in which case, we need to check that the attributes match.
+			if (
+				item.id !== productId ||
+				! item.variation ||
+				! variation ||
+				item.variation.length !== variation.length
+			) {
+				return false;
+			}
+			return doesCartItemMatchAttributes( item, variation );
+		}
+
+		return item.id === productId;
+	} );
 	const currentQuantity = product?.quantity || 0;
 	return currentQuantity + quantity;
 };
@@ -190,8 +211,19 @@ const addToCartWithOptionsStore = store<
 					productType,
 					quantityConstraints,
 					productId,
+					availableVariations,
+					selectedAttributes,
 				} = getContext< Context >();
-				const id = childProductId || productId;
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const id =
+					matchedVariation?.variation_id ||
+					childProductId ||
+					productId;
 				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
@@ -207,8 +239,19 @@ const addToCartWithOptionsStore = store<
 					productType,
 					quantityConstraints,
 					productId,
+					availableVariations,
+					selectedAttributes,
 				} = getContext< Context >();
-				const id = childProductId || productId;
+
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const id =
+					matchedVariation?.variation_id ||
+					childProductId ||
+					productId;
 				const currentQuantity = quantity[ id ] || 0;
 				const constraints =
 					quantityConstraints?.[ id ] ||
@@ -221,7 +264,9 @@ const addToCartWithOptionsStore = store<
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				const productId = childProductId || context.productId;
+				const { variationId } = addToCartWithOptionsStore.state;
+				const productId =
+					variationId || childProductId || context.productId;
 
 				context.quantity = {
 					...context.quantity,
@@ -412,9 +457,11 @@ const addToCartWithOptionsStore = store<
 
 					yield actions.batchAddCartItems( addedItems );
 				} else {
+					const { variationId } = addToCartWithOptionsStore.state;
 					const newQuantity = getNewQuantity(
-						productId,
-						quantity[ productId ]
+						variationId || productId,
+						quantity[ variationId || productId ],
+						selectedAttributes
 					);
 
 					const { actions } = store< WooCommerce >(
@@ -422,9 +469,8 @@ const addToCartWithOptionsStore = store<
 						{},
 						{ lock: universalLock }
 					);
-
 					yield actions.addCartItem( {
-						id: productId,
+						id: variationId || productId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
 						type: productType,
