@@ -14,23 +14,21 @@ import { formatAddress } from '@woocommerce/blocks/checkout/utils';
 import { Button } from '@ariakit/react';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const AddressCard = ( {
-	address,
-	onEdit,
-	target,
-	isExpanded,
-}: {
+type Props = {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
 	isExpanded: boolean;
-} ): JSX.Element | null => {
+};
+
+const getFormattedAddress = ( address: Props[ 'address' ] ) => {
 	const countryData = getSetting< Record< string, CountryData > >(
 		'countryData',
 		{}
@@ -49,14 +47,25 @@ const AddressCard = ( {
 		// `as string` is fine here because we check if it's a string above.
 		formatToUse = countryData[ address.country ].format as string;
 	}
-	const { name: formattedName, address: formattedAddress } = formatAddress(
-		address,
-		formatToUse
-	);
+
+	return formatAddress( address, formatToUse );
+};
+
+const AddressCard = ( { address, onEdit, target, isExpanded }: Props ) => {
+	const { name: formattedName, address: formattedAddress } =
+		getFormattedAddress( address );
+
 	const label =
 		target === 'shipping'
 			? __( 'Edit shipping address', 'woocommerce' )
 			: __( 'Edit billing address', 'woocommerce' );
+
+	const fullAddress = useMemo( () => {
+		return [ ...formattedAddress, address.phone ]
+			.filter( ( field ) => !! field )
+			.map( ( field ) => decodeEntities( field ) )
+			.join( ', ' );
+	}, [ formattedAddress, address.phone ] );
 
 	return (
 		<div className="wc-block-components-address-card">
@@ -75,16 +84,8 @@ const AddressCard = ( {
 						'wc-block-components-address-card__address-section--secondary'
 					) }
 				>
-					{ formattedAddress
-						.filter( ( field ) => !! field )
-						.map( ( field ) => decodeEntities( field ) )
-						.join( ', ' ) }
+					{ fullAddress }
 				</span>
-				{ address.phone ? (
-					<span className="wc-block-components-address-card__address-section">
-						{ address.phone }
-					</span>
-				) : null }
 			</address>
 			{ onEdit && (
 				<Button
