@@ -10,8 +10,8 @@ import { __ } from '@wordpress/i18n';
 import { storeName as emailEditorStore } from '../store';
 
 // Store original actions and rewritten actions
-const originalActions = {};
-const rewrittenActions = {};
+const originalActions = new WeakMap();
+const rewrittenActions = new WeakMap();
 
 // Define which stores and actions we want to intercept
 const INTERCEPTED_ACTIONS = {
@@ -84,15 +84,10 @@ export const initContentValidationMiddleware = () => {
 								}
 							}
 
-							try {
-								// If validation passes, call the original function
-								return await originalActions[ storeName ][
-									actionName
-								]( ...args );
-							} catch ( error ) {
-								// For other types of errors, just rethrow them
-								throw error;
-							}
+							// If validation passes, call the original function
+							return await originalActions[ storeName ][
+								actionName
+							]( ...args );
 						};
 
 						actions[ actionName ] =
