@@ -75,7 +75,7 @@ jobs:
           ${cfes}
           
           please answer the following questions (full report):
-          - What are the PR changes types (one of the following options: bug fix, performance fix, enhancement, configuration changes, maintenance, other)?
+          - What are the changes types (one of the following options: bug fix, performance fix, enhancement, configuration changes, maintenance, other)?
           - What are the root causes (one of the following options: backward compatibility break, strict types issue, loose types issue, error/exception handling issue, validation issue, business logic issue, configuration issue, environment issue, other)?
           - Replace the 'other' option from above with one of your choice, which is fit to the PR context.
           - Which PRs, in your opinion, address issues caused by the technical debt?
