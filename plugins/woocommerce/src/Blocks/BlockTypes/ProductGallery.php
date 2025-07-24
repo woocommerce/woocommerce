@@ -121,9 +121,26 @@ class ProductGallery extends AbstractBlock {
 		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
 		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
+		$namespace              = $this->get_full_block_name();
+
+		$actions = array(
+			'navigation-arrows' => array(
+				'onClickPrevious'   => array(
+					'namespace' => $namespace,
+					'action'    => 'selectPreviousImage',
+				),
+				// Another potential action
+				'onClickNext' => array(
+					'namespace' => $namespace,
+					'action'    => 'selectNextImage',
+				),
+			),
+		);
+
+		$navigation_arrows_actions = wp_interactivity_data_wp_context( $actions, 'woocommerce/navigation-arrows/actions' );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+			$p->set_attribute( 'data-wp-interactive', $namespace );
 			$p->set_attribute(
 				'data-wp-context',
 				wp_json_encode(
