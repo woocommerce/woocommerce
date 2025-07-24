@@ -31,6 +31,8 @@ describe( 'useTaskListsState', () => {
 		canView: true,
 		isComplete: false,
 		isDismissed: false,
+		isInProgress: false,
+		inProgressLabel: '',
 		time: '1 minute',
 		content: 'Mock content',
 		additionalInfo: '',
