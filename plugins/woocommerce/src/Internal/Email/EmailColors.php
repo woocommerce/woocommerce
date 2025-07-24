@@ -85,8 +85,8 @@ class EmailColors {
 		$bg          = is_string( $bg ) ? sanitize_hex_color( $bg ) : '';
 		$body_bg     = is_string( $body_bg ) ? sanitize_hex_color( $body_bg ) : '';
 		$body_text   = is_string( $body_text ) ? sanitize_hex_color( $body_text ) : '';
-		$base        = is_string( $base ) ? sanitize_hex_color( $base ) : '';
-		$footer_text = is_string( $footer_text ) ? sanitize_hex_color( $footer_text ) : '';
+		$base        = is_string( $base ) ? sanitize_hex_color( $base ) : $body_text;
+		$footer_text = is_string( $footer_text ) ? sanitize_hex_color( $footer_text ) : $body_text;
 
 		return compact(
 			'base',
