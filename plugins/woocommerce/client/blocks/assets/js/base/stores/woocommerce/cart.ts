@@ -463,11 +463,6 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					yield actions.updateNotices(
-						json.errors.map( generateErrorNotice ),
-						true
-					);
-
 					// Updates the local cart.
 					state.cart = json;
 
