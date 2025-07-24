@@ -61,7 +61,7 @@ const Edit = ( {
 
 	const ref = useRef< HTMLDivElement >( null );
 
-	const blockProps = useBlockProps( { style: { width, height } } );
+	const blockProps = useBlockProps();
 	const wasBlockJustInserted = useSelect(
 		( select ) =>
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -142,7 +142,7 @@ const Edit = ( {
 						/>
 					) }
 					<ToggleGroupControl
-						label={ __( 'Image Sizing', 'woocommerce' ) }
+						label={ __( 'Resolution', 'woocommerce' ) }
 						isBlock
 						help={
 							! isBlockTheme
@@ -177,7 +177,7 @@ const Edit = ( {
 						/>
 						<ToggleGroupControlOption
 							value={ ImageSizing.THUMBNAIL }
-							label={ __( 'Cropped', 'woocommerce' ) }
+							label={ __( 'Thumbnail', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>

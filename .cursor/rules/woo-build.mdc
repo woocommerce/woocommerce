@@ -1,5 +1,5 @@
 ---
-description:
+description: This rule provides guidance for building the WooCommerce plugin and watching for changes in the repository.
 globs:
 alwaysApply: false
 ---

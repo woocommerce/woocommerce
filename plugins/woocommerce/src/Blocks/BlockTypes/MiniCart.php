@@ -118,6 +118,25 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+
+		// Priority 20 ensures this runs after WooCommerce block registration (priority 10)
+		// allowing us to modify the block supports in the registry after registration is complete.
+		add_action( 'init', array( $this, 'enable_interactivity_support' ), 20 );
+	}
+
+	/**
+	 * Enable interactivity through Block Supports API. We're using WP_Block_Type_Registry instead
+	 * of get_block_type_supports method available in AbstractBlock as the latter works only for
+	 * blocks without static block.json metadata.
+	 */
+	public function enable_interactivity_support() {
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
+
+			if ( $block_type ) {
+				$block_type->supports['interactivity'] = true;
+			}
+		}
 	}
 
 	/**
@@ -477,6 +496,7 @@ class MiniCart extends AbstractBlock {
 		wp_enqueue_script_module( $this->get_full_block_name() );
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$cart = $this->get_cart_instance();
 
@@ -507,12 +527,28 @@ class MiniCart extends AbstractBlock {
 				}
 			}
 
+			// The following translation is a temporary workaround. It will be
+			// reverted to the previous form (`%1$d item in cart`) as soon as the
+			// `@wordpress/i18n` package is available as a script module.
+			$button_aria_label_template = isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+				/* translators: %d is the number of products in the cart. */
+				? __( 'Number of items in the cart: %d', 'woocommerce' )
+				/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+				: __( 'Number of items in the cart: %1$d. Total price of %2$s', 'woocommerce' );
+
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
-					'totalItemsInCart'  => $cart_item_count,
-					'badgeIsVisible'    => $badge_is_visible,
-					'formattedSubtotal' => $formatted_subtotal,
+					'totalItemsInCart'   => $cart_item_count,
+					'badgeIsVisible'     => $badge_is_visible,
+					'formattedSubtotal'  => $formatted_subtotal,
+					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
+					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
+						$state = wp_interactivity_state();
+						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
+							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
+							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
+					},
 				)
 			);
 
@@ -525,9 +561,10 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'   => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour' => $on_cart_click_behaviour,
-					'checkoutUrl'          => wc_get_checkout_url(),
+					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'    => $on_cart_click_behaviour,
+					'checkoutUrl'             => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate' => $button_aria_label_template,
 				)
 			);
 
@@ -544,6 +581,7 @@ class MiniCart extends AbstractBlock {
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupOpenDrawerListener"
+				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
@@ -551,9 +589,9 @@ class MiniCart extends AbstractBlock {
 			>
 				<button 
 					data-wp-on--click="callbacks.openDrawer"
+					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
 					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>"
 				>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
@@ -574,7 +612,7 @@ class MiniCart extends AbstractBlock {
 						?>
 					<?php endif; ?>
 				</button>
-				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass" class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden">
+				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass">
 					<div 
 						data-wp-bind--role="state.drawerRole"
 						data-wp-bind--aria-modal="context.isOpen"

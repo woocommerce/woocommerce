@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Address MySQL 5.5.5 incompatibility issue

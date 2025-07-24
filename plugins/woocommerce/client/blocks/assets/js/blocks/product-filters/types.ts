@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
+import type { ReactNode } from 'react';
 
 export type BlockAttributes = {
 	productId?: string;
@@ -10,8 +11,16 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes >;
 
-export type FilterOptionItem = {
-	label: string;
+export type FilterOptionItem = (
+	| {
+			label: string;
+			ariaLabel?: string;
+	  }
+	| {
+			label: ReactNode;
+			ariaLabel: string;
+	  }
+ ) & {
 	value: string;
 	selected?: boolean;
 	count: number;

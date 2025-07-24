@@ -65,11 +65,11 @@ export const getProductData = () => {
 	let tagsText = '';
 
 	if ( ! isBlockEditor ) {
-		tagsText = (
-			document.querySelector(
-				'[name="tax_input[product_tag]"]'
-			) as HTMLInputElement
-		 ).value;
+		const tagsElement = document.querySelector(
+			'[name="tax_input[product_tag]"]'
+		) as HTMLInputElement | null;
+		tagsText = tagsElement?.value || '';
+
 		const content = document.querySelector(
 			'#content'
 		) as HTMLInputElement;
@@ -79,11 +79,10 @@ export const getProductData = () => {
 			description_value = tinymce.get( 'content' ).getContent();
 		}
 	} else {
-		description_value = (
-			document.querySelector(
-				'.block-editor-rich-text__editable'
-			) as HTMLInputElement
-		 )?.value;
+		const blockEditorElement = document.querySelector(
+			'.block-editor-rich-text__editable'
+		) as HTMLInputElement | null;
+		description_value = blockEditorElement?.value || '';
 	}
 
 	const productTypeOptions = getProductTypeOptions();
@@ -141,8 +140,8 @@ export const getProductData = () => {
 				(
 					document.querySelector(
 						'#_thumbnail_id'
-					) as HTMLInputElement
-				 )?.value,
+					) as HTMLInputElement | null
+				 )?.value || '0',
 				10
 			) > 0
 				? 'Yes'
@@ -181,21 +180,36 @@ export const getProductData = () => {
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
-	const month = (
-		document.querySelector( `#${ prefix }mm` ) as HTMLInputElement
-	 )?.value;
-	const day = (
-		document.querySelector( `#${ prefix }jj` ) as HTMLInputElement
-	 )?.value;
-	const year = (
-		document.querySelector( `#${ prefix }aa` ) as HTMLInputElement
-	 )?.value;
-	const hours = (
-		document.querySelector( `#${ prefix }hh` ) as HTMLInputElement
-	 )?.value;
-	const seconds = (
-		document.querySelector( `#${ prefix }mn` ) as HTMLInputElement
-	 )?.value;
+	const month =
+		(
+			document.querySelector(
+				`#${ prefix }mm`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const day =
+		(
+			document.querySelector(
+				`#${ prefix }jj`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const year =
+		(
+			document.querySelector(
+				`#${ prefix }aa`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const hours =
+		(
+			document.querySelector(
+				`#${ prefix }hh`
+			) as HTMLInputElement | null
+		 )?.value || '';
+	const seconds =
+		(
+			document.querySelector(
+				`#${ prefix }mn`
+			) as HTMLInputElement | null
+		 )?.value || '';
 
 	return `${ month }-${ day }-${ year } ${ hours }:${ seconds }`;
 };
@@ -584,12 +598,20 @@ const attachProductVariationsTracks = () => {
 			callback: () => {
 				const selectElement = document.querySelector(
 					'#field_to_edit'
-				) as HTMLSelectElement;
+				) as HTMLSelectElement | null;
+				if ( ! selectElement ) {
+					return;
+				}
 				// Get the index of the selected option
 				const selectedIndex = selectElement.selectedIndex;
+				const selectedOption = selectElement.options[ selectedIndex ];
+				if ( ! selectedOption ) {
+					return;
+				}
+
 				recordEvent( 'product_variations_buttons', {
 					action: 'bulk_actions',
-					selected: selectElement.options[ selectedIndex ]?.value,
+					selected: selectedOption?.value,
 				} );
 			},
 		},
