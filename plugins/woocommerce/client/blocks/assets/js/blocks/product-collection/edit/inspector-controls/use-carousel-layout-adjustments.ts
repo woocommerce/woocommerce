@@ -13,7 +13,7 @@ import { getInnerBlockBy, getInnerBlockByName } from '@woocommerce/utils';
 import {
 	coreQueryPaginationBlockName,
 	productTemplateBlockName,
-	nextPreviousArrowsBlockName,
+	navigationArrowsBlockName,
 	paginationDefaultAttributes,
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
@@ -22,7 +22,7 @@ import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
  * Handles the transition to carousel layout:
  * - Create Group block
  *   - Move Product Template block to the Group block
- *   - Add Next/Previous Arrows block
+ *   - Add Navigation Arrows block
  * - Remove Pagination block (if exists)
  *
  * @param {BlockInstance} productCollectionBlock - The product collection block.
@@ -47,7 +47,7 @@ const handleTransitionToCarouselLayout = (
 	const productTemplateBlockClientId = productTemplateBlock?.clientId;
 	const productCollectionBlockClientId = productCollectionBlock?.clientId;
 
-	const nextPrevArrowsBlock = createBlock( nextPreviousArrowsBlockName );
+	const navigationArrowsBlock = createBlock( navigationArrowsBlockName );
 	const productTemplateUpdatedBlock = createBlock(
 		productTemplateBlockName,
 		{
@@ -63,7 +63,7 @@ const handleTransitionToCarouselLayout = (
 		productTemplateBlock.innerBlocks
 	);
 	const groupBlock = createBlock( 'core/group', {}, [
-		nextPrevArrowsBlock,
+		navigationArrowsBlock,
 		productTemplateUpdatedBlock,
 	] );
 
@@ -85,7 +85,7 @@ const handleTransitionToCarouselLayout = (
 
 /**
  * Handles the transition from carousel layout:
- * - Remove Next/Previous Arrows block (if exists)
+ * - Remove Navigation Arrows block (if exists)
  * - Move Product Template block to the product collection block
  * - Remove Group block (if empty)
  * - Add Pagination block for default collection (if needed)
@@ -101,13 +101,13 @@ const handleTransitionFromCarouselLayout = (
 ) => {
 	const { removeBlock, insertBlock, replaceBlock } = actions;
 
-	const nextPrevArrowsBlock = getInnerBlockByName(
+	const navigationArrowsBlock = getInnerBlockByName(
 		productCollectionBlock,
-		nextPreviousArrowsBlockName
+		navigationArrowsBlockName
 	);
 
-	if ( nextPrevArrowsBlock ) {
-		removeBlock( nextPrevArrowsBlock?.clientId, false );
+	if ( navigationArrowsBlock ) {
+		removeBlock( navigationArrowsBlock?.clientId, false );
 	}
 
 	// Find the group block containing the product template
