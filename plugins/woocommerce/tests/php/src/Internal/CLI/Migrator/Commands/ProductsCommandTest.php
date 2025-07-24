@@ -123,7 +123,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
+		\WP_CLI::$last_log_message     = '';
 
 		$method->invoke( $this->command, 'shopify', array() );
 
@@ -160,7 +160,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
+		\WP_CLI::$last_log_message     = '';
 
 		$method->invoke( $this->command, 'shopify', array( 'status' => 'active' ) );
 
@@ -196,7 +196,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
+		\WP_CLI::$last_log_message     = '';
 
 		$method->invoke( $this->command, 'shopify', array() );
 
@@ -253,7 +253,12 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
 		$mock_fetcher->expects( $this->once() )
 			->method( 'fetch_batch' )
-			->with( array( 'limit' => 5, 'after_cursor' => null ) )
+			->with(
+				array(
+					'limit'        => 5,
+					'after_cursor' => null,
+				)
+			)
 			->willReturn( $mock_response );
 
 		$mock_registry = $this->createMock( PlatformRegistry::class );
@@ -270,8 +275,8 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
-		\WP_CLI::$all_log_messages = array();
+		\WP_CLI::$last_log_message     = '';
+		\WP_CLI::$all_log_messages     = array();
 
 		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
 
@@ -318,7 +323,12 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
 		$mock_fetcher->expects( $this->once() )
 			->method( 'fetch_batch' )
-			->with( array( 'limit' => 3, 'after_cursor' => 'cursor123' ) )
+			->with(
+				array(
+					'limit'        => 3,
+					'after_cursor' => 'cursor123',
+				)
+			)
 			->willReturn( $mock_response );
 
 		$mock_registry = $this->createMock( PlatformRegistry::class );
@@ -335,8 +345,8 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
-		\WP_CLI::$all_log_messages = array();
+		\WP_CLI::$last_log_message     = '';
+		\WP_CLI::$all_log_messages     = array();
 
 		$method->invoke(
 			$this->command,
@@ -372,7 +382,12 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
 		$mock_fetcher->expects( $this->once() )
 			->method( 'fetch_batch' )
-			->with( array( 'limit' => 5, 'after_cursor' => null ) )
+			->with(
+				array(
+					'limit'        => 5,
+					'after_cursor' => null,
+				)
+			)
 			->willReturn( $mock_error_response );
 
 		$mock_registry = $this->createMock( PlatformRegistry::class );
@@ -389,7 +404,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
+		\WP_CLI::$last_log_message     = '';
 
 		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
 
@@ -415,7 +430,12 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
 		$mock_fetcher->expects( $this->once() )
 			->method( 'fetch_batch' )
-			->with( array( 'limit' => 5, 'after_cursor' => null ) )
+			->with(
+				array(
+					'limit'        => 5,
+					'after_cursor' => null,
+				)
+			)
 			->willReturn( $mock_response );
 
 		$mock_registry = $this->createMock( PlatformRegistry::class );
@@ -431,7 +451,7 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 
 		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
-		\WP_CLI::$last_log_message = '';
+		\WP_CLI::$last_log_message     = '';
 
 		$method->invoke( $this->command, 'shopify', array( 'limit' => '5' ) );
 

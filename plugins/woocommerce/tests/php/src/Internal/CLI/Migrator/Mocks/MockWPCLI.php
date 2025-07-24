@@ -72,7 +72,7 @@ class MockWPCLI {
 	 * @param string $message Log message.
 	 */
 	public static function log( $message ): void {
-		self::$last_log_message = $message;
+		self::$last_log_message   = $message;
 		self::$all_log_messages[] = $message;
 	}
 
