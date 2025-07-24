@@ -16,7 +16,23 @@ import { __ } from '@wordpress/i18n';
  */
 import { ProductDescriptionEditProps } from './types';
 
-function ReadOnlyContent( { layoutClassNames, postType, postId } ) {
+function Placeholder( { layoutClassNames } ) {
+	const blockProps = useBlockProps( { className: layoutClassNames } );
+	return (
+		<div { ...blockProps }>
+			<p>
+				{ __(
+					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
+					'woocommerce'
+				) }
+			</p>
+		</div>
+	);
+}
+
+function Content( props ) {
+	const { context: { postType, postId } = {}, layoutClassNames } = props;
+
 	const [ , , content ] = useEntityProp(
 		'postType',
 		postType,
@@ -36,33 +52,6 @@ function ReadOnlyContent( { layoutClassNames, postType, postId } ) {
 			{ ...blockProps }
 			dangerouslySetInnerHTML={ { __html: content?.rendered } }
 		></div>
-	);
-}
-
-function Placeholder( { layoutClassNames } ) {
-	const blockProps = useBlockProps( { className: layoutClassNames } );
-	return (
-		<div { ...blockProps }>
-			<p>
-				{ __(
-					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
-					'woocommerce'
-				) }
-			</p>
-		</div>
-	);
-}
-
-function Content( props ) {
-	const { context: { postType, postId } = {}, layoutClassNames } = props;
-
-	return (
-		<ReadOnlyContent
-			parentLayout={ props.parentLayout }
-			layoutClassNames={ layoutClassNames }
-			postType={ postType }
-			postId={ postId }
-		/>
 	);
 }
 
