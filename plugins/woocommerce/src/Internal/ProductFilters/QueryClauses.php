@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\ProductFilters;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -126,13 +127,19 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $args;
 		}
 
-		$stock_statuses = array_intersect(
+		$filtered_stock_statuses = array_intersect(
 			array_map( 'esc_sql', $stock_statuses ),
 			array_keys( wc_get_product_stock_status_options() )
 		);
 
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $stock_statuses ) . '")';
+		if ( ! empty( $filtered_stock_statuses ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $filtered_stock_statuses ) . '")';
+		}
+
+		if ( ! empty( $stock_statuses ) && empty( $filtered_stock_statuses ) ) {
+			$args['where'] .= ' AND 1=0';
+		}
 
 		return $args;
 	}
@@ -226,8 +233,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$all_terms = get_terms(
 			array(
-				'taxonomy' => array_keys( $chosen_attributes ),
-				'slug'     => $all_terms_slugs,
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_terms_slugs,
+				'hide_empty' => false,
 			)
 		);
 
@@ -328,13 +336,13 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		);
 
 		if ( is_wp_error( $all_terms ) ) {
-			$logger = wc_get_logger();
-			$logger->error(
-				$all_terms->get_error_message(),
-				array(
-					'taxonomies' => $chosen_taxonomies,
-				)
-			);
+			/**
+			 * No error logging needed here because:
+			 * 1. Taxonomy existence is already validated in the initial get_terms() call above
+			 * 2. get_terms() only returns WP_Error for invalid taxonomy or rare DB connection issues
+			 * 3. If the taxonomy was invalid, we would have failed earlier and never reached this code
+			 * 4. Database errors would likely affect the entire request, not just this call
+			 */
 			return $args;
 		}
 
@@ -347,6 +355,36 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
 			if ( empty( $term_ids ) ) {
 				continue;
+			}
+
+			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+				$expanded_term_ids = $term_ids;
+
+				foreach ( $term_ids as $term_id ) {
+					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
+					$children  = wp_cache_get( $cache_key );
+
+					if ( false === $children ) {
+						$children = get_terms(
+							array(
+								'taxonomy'   => $taxonomy,
+								'child_of'   => $term_id,
+								'fields'     => 'ids',
+								'hide_empty' => false,
+							)
+						);
+
+						if ( ! is_wp_error( $children ) ) {
+							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
+						} else {
+							$children = array();
+						}
+					}
+
+					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
+				}
+
+				$term_ids = array_unique( $expanded_term_ids );
 			}
 
 			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
