@@ -65,7 +65,7 @@ final class ProductFilterRating extends AbstractBlock {
 		foreach ( $active_ratings as $rating ) {
 			$items[] = array(
 				'type'        => 'rating',
-				'value'       => $rating,
+				'value'       => (string) $rating,
 				/* translators: %s is referring to rating value. Example: Rated 4 out of 5. */
 				'activeLabel' => sprintf( __( 'Rating: Rated %d out of 5', 'woocommerce' ), $rating ),
 			);
@@ -112,7 +112,7 @@ final class ProductFilterRating extends AbstractBlock {
 				return array(
 					'label'     => $this->render_rating_label( (int) $rating['rating'] ),
 					'ariaLabel' => $aria_label,
-					'value'     => $rating['rating'],
+					'value'     => (string) $rating['rating'],
 					'selected'  => in_array( $rating['rating'], $selected_rating, true ),
 					'count'     => $rating['count'],
 					'type'      => 'rating',
