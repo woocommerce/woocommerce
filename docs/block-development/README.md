@@ -5,56 +5,12 @@ This section is your starting point for learning how to build, customize, and ex
 
 Whether you’re new to block development or looking to deepen your expertise, this guide will walk you through the process step by step, from the basics to advanced extensibility.
 
----
-
-## 📚 Recommended Learning Path
-
-1. **Getting Started**
-   - [Introduction & Setup](/docs/block-development/getting-started/extensibility-overview/)
-   - Prerequisites and environment setup
-   - FAQs
-
-2. **Step-by-Step Tutorials**
-   - Hands-on guides to build your first block and add features
-   - Progress from beginner to advanced topics
-
-3. **Reference**
-   - Detailed API and block reference documentation
-
-4. **Extensible Blocks**
-   - Learn how to extend and customize existing blocks
-   - Deep dives into Cart, Checkout, and Product Collection blocks
-
-
----
-
-## 📂 Section Overview
-
-| Section/Folders                | Description                                      |
-|-------------------------------|--------------------------------------------------|
-| `getting-started.md`           | Quickstart, prerequisites, and setup instructions|
-| `tutorials/`                   | Step-by-step guides for building blocks          |
-| `reference/`                   | API and block reference material                 |
-| `extensibility-in-blocks/`     | Guides for extending and customizing blocks      |
-| `cart-and-checkout-blocks/`    | Cart and Checkout block documentation            |
-| `product-collection-block/`    | Product Collection block documentation           |
-
----
-
-## 🚀 Start Here
+## Start Here
 
 - **[Getting Started](/docs/block-development/getting-started/extensibility-overview/)**: Set up your environment and create your first block.
 - **[Tutorials](/docs/category/tutorials/)**: Follow hands-on guides to build and enhance your blocks.
 - **[Reference](/docs/category/reference/)**: Look up APIs, filters, and block details as you build.
 - **[Extensibility](/docs/category/extensible-blocks/)**: Learn to extend and customize blocks for advanced use cases.
 - **[Cart & Checkout](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/)** and **[Product Collection](/docs/block-development/extensible-blocks/product-collection-block/)**: Explore specialized block documentation.
-
----
-
-## 🧭 Tips
-
-- Follow the sections in order for a smooth learning experience.
-- Use the reference section as a lookup while building.
-- Each folder contains a `README.md` or overview to guide you.
 
 Happy building!
