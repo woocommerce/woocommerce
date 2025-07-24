@@ -21,6 +21,9 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-wporg-svn
+
 jobs:
   validate-release:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
