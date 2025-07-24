@@ -11,7 +11,7 @@ use WP_CLI;
 /**
  * The products command.
  */
-final class ProductsCommand {
+class ProductsCommand {
 
 	/**
 	 * The credential manager.
@@ -35,7 +35,7 @@ final class ProductsCommand {
 	 *
 	 * @internal
 	 */
-	public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 	}
@@ -56,13 +56,13 @@ final class ProductsCommand {
 	 * @return void
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		// Resolve and validate the platform
+		// Resolve and validate the platform.
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
 			WP_CLI::log( "Credentials for '{$platform}' not found. Let's set them up." );
-			
-			// Get platform-specific credential fields and set them up
+
+			// Get platform-specific credential fields and set them up.
 			$required_fields = $this->platform_registry->get_platform_credential_fields( $platform );
 			if ( empty( $required_fields ) ) {
 				WP_CLI::error( "The platform '{$platform}' does not have configured credential fields." );

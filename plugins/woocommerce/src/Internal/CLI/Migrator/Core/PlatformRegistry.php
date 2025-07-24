@@ -163,19 +163,19 @@ class PlatformRegistry {
 	 */
 	public function resolve_platform( array $assoc_args, string $default_platform = 'shopify' ): string {
 		$platform = $assoc_args['platform'] ?? null;
-		
+
 		if ( empty( $platform ) ) {
 			$platform = $default_platform;
 			WP_CLI::log( "Platform not specified, using default: '{$platform}'." );
 		}
 
-		// Validate the platform exists
+		// Validate the platform exists.
 		if ( ! $this->get_platform( $platform ) ) {
 			$available_platforms = array_keys( $this->get_platforms() );
 			if ( empty( $available_platforms ) ) {
-				WP_CLI::error( "No platforms are currently registered. Please ensure platform plugins are installed and activated." );
+				WP_CLI::error( 'No platforms are currently registered. Please ensure platform plugins are installed and activated.' );
 			} else {
-				WP_CLI::error( 
+				WP_CLI::error(
 					sprintf(
 						"Platform '%s' is not registered. Available platforms: %s",
 						$platform,
@@ -197,12 +197,12 @@ class PlatformRegistry {
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
 		$platform_config = $this->get_platform( $platform_slug );
-		
+
 		if ( ! $platform_config ) {
 			return array();
 		}
 
-		// For now, we'll use hardcoded fields but this could be configurable per platform
+		// For now, we'll use hardcoded fields but this could be configurable per platform.
 		switch ( $platform_slug ) {
 			case 'shopify':
 				return array(

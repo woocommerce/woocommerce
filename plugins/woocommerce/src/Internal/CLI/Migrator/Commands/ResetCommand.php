@@ -35,7 +35,7 @@ class ResetCommand {
 	 *
 	 * @internal
 	 */
-	public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 	}
@@ -56,7 +56,7 @@ class ResetCommand {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
-		// Resolve and validate the platform
+		// Resolve and validate the platform.
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
