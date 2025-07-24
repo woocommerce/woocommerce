@@ -6,8 +6,10 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -503,6 +505,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		clean_post_cache( $order->get_id() );
 		wc_delete_shop_order_transients( $order );
 		wp_cache_delete( 'order-items-' . $order->get_id(), 'orders' );
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $order->get_id() );
+		}
 	}
 
 	/**

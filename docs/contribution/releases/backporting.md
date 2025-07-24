@@ -5,41 +5,52 @@ sidebar_label: Backporting
 
 # Backporting in WooCommerce
 
-Backporting is the process of applying a change from `trunk` to an open release branch.  When a release branch is created, it is copied from the `trunk` branch at the time of code freeze.  Changes are applied to `trunk` and then backported to the release branch as needed.
+Backporting is the process of applying changes from `trunk` to a release branch. This ensures critical fixes reach customers in upcoming releases.  Note that these flows apply only to UPCOMING RELEASES  (not patches to already-released versions).
 
-## Requesting backports (Contributors)
+## Release Branch Lifecycle
 
-### Cherry picking to a frozen release
+When a release branch is created, it's copied from `trunk` at the time of code freeze. After creation:
 
-If you have a pull request that should be backported to a frozen release, you should target `trunk` as your base branch.  You can then request that the change is backported by adding the `cherry pick to frozen release` label to the pull request.  Make sure to add the `Milestone` of the version you're targetting to the PR.
+- The release branch no longer receives new feature updates
+- Only critical changes are allowed
+- Because we do not merge the release branches back into `trunk`, any fixes in a release branch must also be applied to `trunk`.
 
-Note that adding this label does not guarantee that the change will be backported.  The change must be qualified for backporting.
+## Qualifying Changes for Backporting
 
-> If you're nearing the deadline for the final release, you may want to get in touch with the release lead directly to make them aware of the changes.
+Changes qualify for backporting only if they are:
 
-### Cherry picking to trunk
+- **Bug fixes** that affect the release
+- **Performance improvements** that impact WooCommerce functionality
+- **Time-sensitive features** that impact business goals
+- **Contractually required features** for WooCommerce
 
-On occassion, more urgent changes may occur where we need to target the release branch directly as our base branch.  When this happens, you should add the label `cherry pick to trunk` if this change is also meant to be included in `trunk`.
+## Backporting Process for Contributors
 
-## Qualifying changes
+### Standard Workflow: Trunk to Release Branch
 
-Changes are qualified for backporting if they are:
+**When to use:** Most backporting scenarios
 
-- A bug fix.
-- A change that impacts the performance of WooCommerce.
-- A new feature that is time sensitive and impacts WooCommerce's business goals.
-- A new feature that is contractually required by WooCommerce.
+1. **Target `trunk`** as your base branch
+2. **Add milestone** matching your target release (e.g., `9.8.0`)
+3. **Get PR reviewed and merged** into `trunk`
+4. **Automated workflow** creates a cherry-pick PR for the release branch
+5. **The original contributor or merger** reviews and merges the backport PR
 
-## Manually backporting pull requests (Release Lead)
+> **Note:** For urgent fixes near release deadlines, contact the release lead directly.
 
-### Cherry picking to a frozen release
+### Alternative Workflow: Release Branch to Trunk
 
-Before cutting a new RC, you should manually backport any PRs with the respective labels.
+**When to use:** Critical fixes that must target the release branch directly
 
-1. Check out the release branch `git checkout release/x.y`.
-2. Find all the [PRs labeled to be cherry picked](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22cherry+pick+to+frozen+release%22) to the release branch.  Filter by the current release milestone (`X.Y.0`) to limit to PRs relevant to this release.
-3. Cherry-pick each PR (in chronological order) using `git cherry-pick [SHA]`.
-4. After cherry-picking all PRs, push to the release branch using `git push`.
-5. Remove the `cherry pick to frozen release` label and update the milestone to the current release for all cherry-picked PRs.
+1. **Target the release branch** as your base branch
+2. **Add label** `cherry pick to trunk` if the change should also go to `trunk`
+3. **Get PR reviewed and merged** into the release branch
+4. **Automated workflow** creates a forward-port PR for `trunk`
+5. **Merge the trunk PR** as soon as possible to avoid delays
 
-The SHA for a pull request can be found in the pull request activity once the PR has been merged.
+## Important Notes
+
+- Changes must meet backporting qualifications
+- Frozen releases only accept critical bug fixes
+- All backports require review and testing
+- Forward-ports to trunk should be merged promptly as these are tracked with the same milestone as the original PR.
