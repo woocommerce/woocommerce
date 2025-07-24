@@ -123,13 +123,13 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 		// Future PRs should replace this method with actual Shopify to WooCommerce data mapping.
 
 		$shopify_product = (object) array(
-			'id'          => 'gid://shopify/Product/123456789',
-			'title'       => 'Amazing T-Shirt',
-			'handle'      => 'amazing-t-shirt',
-			'description' => 'A really amazing t-shirt',
+			'id'           => 'gid://shopify/Product/123456789',
+			'title'        => 'Amazing T-Shirt',
+			'handle'       => 'amazing-t-shirt',
+			'description'  => 'A really amazing t-shirt',
 			'product_type' => 'Apparel',
-			'vendor'      => 'Cool Brand',
-			'variants'    => array(
+			'vendor'       => 'Cool Brand',
+			'variants'     => array(
 				(object) array(
 					'id'                => 'gid://shopify/ProductVariant/987654321',
 					'price'             => '25.00',
@@ -137,7 +137,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 					'inventoryQuantity' => 100,
 				),
 			),
-			'images'      => array(
+			'images'       => array(
 				(object) array(
 					'url'     => 'https://example.com/image.jpg',
 					'altText' => 'Amazing T-Shirt',
