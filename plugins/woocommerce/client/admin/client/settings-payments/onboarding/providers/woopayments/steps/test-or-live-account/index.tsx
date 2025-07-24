@@ -37,13 +37,16 @@ const TestOrLiveAccountStep = () => {
 				<div className="woocommerce-payments-test-or-live-account-step__success_content_container">
 					<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-or-live-account-step__success_content">
 						<h1 className="woocommerce-payments-test-or-live-account-step__success_content_title">
-							{ __( "You're almost there!", 'woocommerce' ) }
+							{ __(
+								"You're almost there — time to activate payments!",
+								'woocommerce'
+							) }
 						</h1>
 						<div className="woocommerce-woopayments-modal__content__item">
 							<div className="woocommerce-woopayments-modal__content__item__description">
 								<p>
 									{ __(
-										'Activate payments to start accepting real orders and processing transactions.',
+										'Activate payments to accept real orders and process transactions.',
 										'woocommerce'
 									) }
 								</p>
@@ -68,7 +71,7 @@ const TestOrLiveAccountStep = () => {
 									<div>
 										{ interpolateComponents( {
 											mixedString: __(
-												'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
+												'Provide some additional details about your business to process real transactions. {{link}}Learn more{{/link}}',
 												'woocommerce'
 											),
 											components: {
@@ -129,7 +132,10 @@ const TestOrLiveAccountStep = () => {
 								isBusy={ isContinueButtonLoading }
 								disabled={ isContinueButtonLoading }
 							>
-								{ __( 'Activate payments', 'woocommerce' ) }
+								{ __(
+									'Start accepting payments',
+									'woocommerce'
+								) }
 							</Button>
 
 							<div className="woocommerce-payments-test-or-live-account-step__success_content_or-divider">
@@ -150,7 +156,7 @@ const TestOrLiveAccountStep = () => {
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
 										{ __(
-											'Create a test account',
+											'Test payments first, activate later',
 											'woocommerce'
 										) }
 									</h3>
@@ -158,7 +164,7 @@ const TestOrLiveAccountStep = () => {
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
-													"We'll create a test account for you so that you can begin {{link}}testing payments on your store{{/link}}. You'll need to complete setup later to accept real payments.",
+													"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll need to activate payments later to process real transactions.",
 													'woocommerce'
 												),
 												components: {
@@ -184,7 +190,7 @@ const TestOrLiveAccountStep = () => {
 									navigateToNextStep();
 								} }
 							>
-								{ __( 'Create a test account', 'woocommerce' ) }
+								{ __( 'Test payments', 'woocommerce' ) }
 							</Button>
 						</div>
 					</div>
