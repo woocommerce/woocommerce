@@ -4,12 +4,41 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 use WP_CLI;
 
 /**
  * The command for resetting platform credentials.
  */
-class ResetCommand extends BaseCommand {
+class ResetCommand {
+
+	/**
+	 * The credential manager.
+	 *
+	 * @var CredentialManager
+	 */
+	private CredentialManager $credential_manager;
+
+	/**
+	 * The platform registry.
+	 *
+	 * @var PlatformRegistry
+	 */
+	private PlatformRegistry $platform_registry;
+
+	/**
+	 * Class initialization, invoked by the DI container.
+	 *
+	 * @param CredentialManager $credential_manager The credential manager.
+	 * @param PlatformRegistry  $platform_registry  The platform registry.
+	 *
+	 * @internal
+	 */
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+		$this->credential_manager = $credential_manager;
+		$this->platform_registry  = $platform_registry;
+	}
 
 	/**
 	 * Resets (deletes) the credentials for a given platform.
@@ -27,7 +56,8 @@ class ResetCommand extends BaseCommand {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
-		$platform = $this->get_platform( $assoc_args );
+		// Resolve and validate the platform.
+		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
 			WP_CLI::warning( "No credentials found for '{$platform}' to reset." );
