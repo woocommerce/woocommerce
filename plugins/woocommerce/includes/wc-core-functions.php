@@ -1367,7 +1367,8 @@ function wc_get_customer_default_location() {
 	);
 
 	// Ensure defaults are valid.
-	$allowed_countries = WC()->countries->get_allowed_countries();
+	$allowed_countries          = WC()->countries->get_allowed_countries();
+	$allowed_shipping_countries = WC()->countries->get_shipping_countries();
 
 	if ( ! in_array( $default_location['country'], array_keys( $allowed_countries ), true ) ) {
 		$default_location = array(
@@ -1381,8 +1382,12 @@ function wc_get_customer_default_location() {
 		$default_location = wc_get_customer_geolocation( $default_location );
 	}
 
-	// If only one country is valid, preselect it.
-	if ( 1 === count( $allowed_countries ) ) {
+	// If only one country is valid for both shipping and billing, preselect it.
+	if (
+		is_array( $allowed_shipping_countries ) &&
+		is_array( $allowed_countries ) &&
+		1 === count( array_merge( $allowed_countries, $allowed_shipping_countries ) )
+	) {
 		$default_location['country'] = key( $allowed_countries );
 	}
 
