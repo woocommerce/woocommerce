@@ -89,7 +89,7 @@ const blocks = {
 	},
 	'product-gallery-large-image-next-previous': {
 		customDir:
-			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
+			'product-gallery/inner-blocks/product-gallery-next-previous-buttons',
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',

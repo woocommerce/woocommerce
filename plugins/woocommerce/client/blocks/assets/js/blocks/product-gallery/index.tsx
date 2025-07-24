@@ -11,8 +11,6 @@ import metadata from './block.json';
 import { Edit } from './edit';
 import { Save } from './save';
 import icon from './icon';
-import './inner-blocks/product-gallery-next-previous-buttons';
-import './inner-blocks/product-gallery-thumbnails';
 
 const updateInnerBlocks = ( blocks: BlockInstance[] ): BlockInstance[] => {
 	return blocks.map( ( block: BlockInstance ) => {

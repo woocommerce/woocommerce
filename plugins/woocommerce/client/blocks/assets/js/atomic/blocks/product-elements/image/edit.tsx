@@ -142,7 +142,7 @@ const Edit = ( {
 						/>
 					) }
 					<ToggleGroupControl
-						label={ __( 'Image Sizing', 'woocommerce' ) }
+						label={ __( 'Resolution', 'woocommerce' ) }
 						isBlock
 						help={
 							! isBlockTheme
@@ -177,7 +177,7 @@ const Edit = ( {
 						/>
 						<ToggleGroupControlOption
 							value={ ImageSizing.THUMBNAIL }
-							label={ __( 'Cropped', 'woocommerce' ) }
+							label={ __( 'Thumbnail', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
