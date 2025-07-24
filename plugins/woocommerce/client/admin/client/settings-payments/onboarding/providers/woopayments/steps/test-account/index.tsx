@@ -38,7 +38,7 @@ const TestDriveLoader: React.FunctionComponent< {
 			<Loader.Illustration>
 				<img
 					src={ `${ WC_ASSET_URL }images/onboarding/test-account-setup.svg` }
-					alt="setup"
+					alt={ __( 'Setup', 'woocommerce' ) }
 					style={ { maxWidth: '223px' } }
 				/>
 			</Loader.Illustration>

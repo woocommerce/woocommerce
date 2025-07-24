@@ -34,6 +34,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 
 /**
  * Base class for MailPoet tests.
@@ -279,6 +280,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 				return new Email_Api_Controller(
 					$container->get( Personalization_Tags_Registry::class ),
 				);
+			}
+		);
+		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
 			}
 		);
 		$container->set(

@@ -4,7 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -29,6 +29,16 @@ import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
 
+const buildStyles = ( props: Partial< ImageProps > ) => {
+	const { aspectRatio, height, width, scale } = props;
+	return {
+		height,
+		width,
+		objectFit: scale,
+		aspectRatio,
+	};
+};
+
 const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	// Default to placeholder image if no product images are available.
 	if ( ! product.images.length ) {
@@ -45,11 +55,19 @@ const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	return product.images[ 0 ];
 };
 
-const ImagePlaceholder = ( props ): JSX.Element => {
+const ImagePlaceholder = ( props: {
+	style?: Record< string, unknown >;
+	showFullSize: boolean;
+} ): JSX.Element => {
+	const { showFullSize, ...restProps } = props;
+	const src = showFullSize
+		? getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC )
+		: PLACEHOLDER_IMG_SRC;
+
 	return (
 		<img
-			{ ...props }
-			src={ PLACEHOLDER_IMG_SRC }
+			{ ...restProps }
+			src={ src }
 			// Decorative image with no value, so alt should be empty.
 			alt=""
 			width={ undefined }
@@ -71,7 +89,7 @@ interface ImageProps {
 	loaded: boolean;
 	showFullSize: boolean;
 	fallbackAlt: string;
-	scale: string;
+	scale: 'cover' | 'contain' | 'fill';
 	width?: string | undefined;
 	height?: string | undefined;
 	aspectRatio: string | undefined;
@@ -91,29 +109,33 @@ const Image = ( {
 	const imageProps = {
 		alt: alt || fallbackAlt,
 		hidden: ! loaded,
-		src: thumbnail,
-		...( showFullSize && { src, srcSet: srcset, sizes } ),
+		src: showFullSize ? src : thumbnail,
+		...( showFullSize && { srcSet: srcset, sizes } ),
 	};
 
-	const imageStyles: Record< string, string | undefined > = {
+	const imageStyles = buildStyles( {
 		height,
 		width,
-		objectFit: scale,
+		scale,
 		aspectRatio,
-	};
+	} );
+
+	if ( ! image ) {
+		return (
+			<ImagePlaceholder
+				showFullSize={ showFullSize }
+				style={ imageStyles }
+			/>
+		);
+	}
 
 	return (
-		<>
-			{ imageProps.src && (
-				/* eslint-disable-next-line jsx-a11y/alt-text */
-				<img
-					style={ imageStyles }
-					data-testid="product-image"
-					{ ...imageProps }
-				/>
-			) }
-			{ ! image && <ImagePlaceholder style={ imageStyles } /> }
-		</>
+		/* eslint-disable-next-line jsx-a11y/alt-text */
+		<img
+			style={ imageStyles }
+			data-testid="product-image"
+			{ ...imageProps }
+		/>
 	);
 };
 
@@ -159,7 +181,22 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { product, isLoading } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
+	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
+	const finalAspectRatio =
+		objectHasProp( style, 'dimensions' ) &&
+		objectHasProp( style.dimensions, 'aspectRatio' ) &&
+		isString( style.dimensions.aspectRatio )
+			? style.dimensions.aspectRatio
+			: aspectRatio;
+
 	if ( ! product?.id ) {
+		const imageStyles = buildStyles( {
+			height,
+			width,
+			scale,
+			aspectRatio: finalAspectRatio,
+		} );
+
 		return (
 			<>
 				<div
@@ -174,7 +211,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					) }
 					style={ styleProps.style }
 				>
-					<ImagePlaceholder />
+					<ImagePlaceholder
+						showFullSize={ showFullSize }
+						style={ imageStyles }
+					/>
 				</div>
 				{ children }
 			</>
@@ -230,17 +270,11 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
 						loaded={ ! isLoading }
-						showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
+						showFullSize={ showFullSize }
 						width={ width }
 						height={ height }
 						scale={ scale }
-						aspectRatio={
-							objectHasProp( style, 'dimensions' ) &&
-							objectHasProp( style.dimensions, 'aspectRatio' ) &&
-							isString( style.dimensions.aspectRatio )
-								? style.dimensions.aspectRatio
-								: aspectRatio
-						}
+						aspectRatio={ finalAspectRatio }
 					/>
 				</ParentComponent>
 			</div>
