@@ -205,7 +205,7 @@ export const OnboardingProvider: React.FC< {
 			nextSibling?: WooPaymentsProviderOnboardingStep
 		): boolean => {
 			if ( step.type !== 'frontend' ) {
-				return Boolean( step.status === 'completed' );
+				return step.status === 'completed';
 			}
 
 			if ( parentStep ) {
