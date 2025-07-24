@@ -376,7 +376,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
 
-		if ( $this->should_use_orders_v2() ) {
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
