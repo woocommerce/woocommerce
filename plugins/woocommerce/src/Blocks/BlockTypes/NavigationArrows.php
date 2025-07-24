@@ -35,15 +35,15 @@ class NavigationArrows extends AbstractBlock {
 		?>
 		<div
 			class="wc-block-navigation-arrows <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
-			data-wp-interactive="woocommerce/product-gallery"
+			data-wp-interactive="woocommerce/navigation-arrows"
 		>
 			<button
 				class="wc-block-navigation-arrows__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-				data-wp-on--click="actions.selectPreviousImage"
-				data-wp-on--keydown="actions.onArrowsKeyDown"
-				data-wp-bind--aria-disabled="context.disableLeft"
-				aria-label="Previous image"
+				data-wp-on--click="actions.previous.onClick"
+				data-wp-on--keydown="actions.previous.onKeyDown"
+				data-wp-bind--aria-disabled="context.previous.isDisabled"
+				aria-label="context.previous.label"
 			>
 				<svg
 					class="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--left"
@@ -63,10 +63,10 @@ class NavigationArrows extends AbstractBlock {
 			<button
 				class="wc-block-navigation-arrows__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-				data-wp-on--click="actions.selectNextImage"
-				data-wp-on--keydown="actions.onArrowsKeyDown"
-				data-wp-bind--aria-disabled="context.disableRight"
-				aria-label="Next image"
+				data-wp-on--click="actions.next.onClick"
+				data-wp-on--keydown="actions.next.onKeyDown"
+				data-wp-bind--aria-disabled="context.next.isDisabled"
+				aria-label="context.next.label"
 			>
 				<svg
 					class="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--right"
