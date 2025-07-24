@@ -12,6 +12,7 @@ import clsx from 'clsx';
  */
 import { useFullScreen } from '~/utils';
 import { useComponentFromXStateService } from '~/utils/xstate/useComponentFromService';
+import { useMobileHeaderFromXStateService } from '~/utils/xstate/useMobileHeaderFromService';
 
 import './styles.scss';
 import {
@@ -71,8 +72,20 @@ const LaunchStoreController = () => {
 
 	const isSidebarVisible = ! sidebarState.hasTag( 'fullscreen' );
 
+	// Auto-close mobile sidebar when navigating to different states
+	useEffect( () => {
+		if ( isMobileSidebarOpen ) {
+			setIsMobileSidebarOpen( false );
+		}
+	}, [ sidebarState.value ] ); // Close sidebar whenever the state changes
+
 	const [ CurrentSidebarComponent ] =
 		useComponentFromXStateService< SidebarComponentProps >(
+			sidebarMachineService
+		);
+
+	const [ CurrentMobileHeaderComponent ] =
+		useMobileHeaderFromXStateService< SidebarComponentProps >(
 			sidebarMachineService
 		);
 
@@ -128,6 +141,14 @@ const LaunchStoreController = () => {
 					) }
 				</SidebarContainer>
 				<MainContentContainer>
+					{ CurrentMobileHeaderComponent && (
+						<CurrentMobileHeaderComponent
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ sidebarState.context }
+							onMobileClose={ handleClose }
+						/>
+					) }
 					{ ! isMobileSidebarOpen && (
 						<MobileSidebarToggle
 							onToggle={ handleMobileSidebarToggle }
