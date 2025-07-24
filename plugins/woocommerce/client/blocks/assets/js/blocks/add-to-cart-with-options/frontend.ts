@@ -152,6 +152,7 @@ export type AddToCartWithOptionsStore = {
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
 		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
+		cleanErrorNotices: () => void;
 	};
 };
 
@@ -220,7 +221,6 @@ const addToCartWithOptionsStore = store<
 		},
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
-				addToCartWithOptionsStore.actions.cleanErrorNotices();
 				const context = getContext< Context >();
 				const productId = childProductId || context.productId;
 
@@ -340,6 +340,7 @@ const addToCartWithOptionsStore = store<
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();
+				addToCartWithOptionsStore.actions.cleanErrorNotices();
 
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
