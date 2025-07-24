@@ -728,7 +728,7 @@ class WC_Session_Handler extends WC_Session {
 		global $wpdb;
 
 		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
-			return false;
+			return $default_value;
 		}
 
 		// Try to get it from the cache, it will return false if not present or if object cache not in use.
