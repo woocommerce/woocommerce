@@ -40,24 +40,13 @@ class EmailColors {
 			$body_text_color_default   = '#1e1e1e';
 			$footer_text_color_default = '#787c82';
 
-			if ( wp_is_block_theme() && function_exists( 'wp_get_global_styles' ) ) {
-				$global_styles             = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
-				$base_color_global         = ! empty( $global_styles['elements']['button']['color']['background'] )
-					? sanitize_hex_color( $global_styles['elements']['button']['color']['background'] ) : '';
-				$bg_color_global           = ! empty( $global_styles['color']['background'] )
-					? sanitize_hex_color( $global_styles['color']['background'] ) : '';
-				$body_bg_color_global      = ! empty( $global_styles['color']['background'] )
-					? sanitize_hex_color( $global_styles['color']['background'] ) : '';
-				$body_text_color_global    = ! empty( $global_styles['color']['text'] )
-					? sanitize_hex_color( $global_styles['color']['text'] ) : '';
-				$footer_text_color_global  = ! empty( $global_styles['elements']['caption']['color']['text'] )
-					? sanitize_hex_color( $global_styles['elements']['caption']['color']['text'] ) : '';
-				$base_color_default        = $base_color_global ? $base_color_global : $base_color_default;
-				$bg_color_default          = $bg_color_global ? $bg_color_global : $bg_color_default;
-				$body_bg_color_default     = $body_bg_color_global ? $body_bg_color_global : $body_bg_color_default;
-				$body_text_color_default   = $body_text_color_global ? $body_text_color_global : $body_text_color_default;
-				$footer_text_color_default = $footer_text_color_global ? $footer_text_color_global : $footer_text_color_default;
-			}
+			$global_colors = self::get_colors_from_global_styles();
+
+			$base_color_default        = $global_colors['base'] ? $global_colors['base'] : $base_color_default;
+			$bg_color_default          = $global_colors['bg'] ? $global_colors['bg'] : $bg_color_default;
+			$body_bg_color_default     = $global_colors['body_bg'] ? $global_colors['body_bg'] : $body_bg_color_default;
+			$body_text_color_default   = $global_colors['body_text'] ? $global_colors['body_text'] : $body_text_color_default;
+			$footer_text_color_default = $global_colors['footer_text'] ? $global_colors['footer_text'] : $footer_text_color_default;
 		}
 
 		return compact(
@@ -66,6 +55,45 @@ class EmailColors {
 			'body_bg_color_default',
 			'body_text_color_default',
 			'footer_text_color_default',
+		);
+	}
+
+	/**
+	 * Get email colors from global styles.
+	 *
+	 * @return array Array of colors.
+	 */
+	public static function get_colors_from_global_styles() {
+		if ( ! wp_is_block_theme() || ! function_exists( 'wp_get_global_styles' ) ) {
+			return array(
+				'base'        => '',
+				'bg'          => '',
+				'body_bg'     => '',
+				'body_text'   => '',
+				'footer_text' => '',
+			);
+		}
+
+		$styles = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
+
+		$bg          = $styles['color']['background'] ?? '';
+		$body_bg     = $styles['color']['background'] ?? '';
+		$body_text   = $styles['color']['text'] ?? '';
+		$base        = $styles['elements']['button']['color']['background'] ?? '';
+		$footer_text = $styles['elements']['caption']['color']['text'] ?? '';
+
+		$bg          = is_string( $bg ) ? sanitize_hex_color( $bg ) : '';
+		$body_bg     = is_string( $body_bg ) ? sanitize_hex_color( $body_bg ) : '';
+		$body_text   = is_string( $body_text ) ? sanitize_hex_color( $body_text ) : '';
+		$base        = is_string( $base ) ? sanitize_hex_color( $base ) : '';
+		$footer_text = is_string( $footer_text ) ? sanitize_hex_color( $footer_text ) : '';
+
+		return compact(
+			'base',
+			'bg',
+			'body_bg',
+			'body_text',
+			'footer_text',
 		);
 	}
 }
