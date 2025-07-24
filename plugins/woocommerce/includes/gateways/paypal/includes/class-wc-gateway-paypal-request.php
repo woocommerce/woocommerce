@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
@@ -146,7 +148,7 @@ class WC_Gateway_Paypal_Request {
 	 * This method captures a PayPal payment and updates the order status.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $capture_url The URL to capture the payment.
+	 * @param string   $capture_url The URL to capture the payment.
 	 * @return void
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
@@ -164,13 +166,13 @@ class WC_Gateway_Paypal_Request {
 
 		try {
 			$request_body = array(
-				'capture_url' => $capture_url,
+				'capture_url'     => $capture_url,
 				'paypal_order_id' => $paypal_order_id,
 			);
 
 			// phpcs:disable Generic.Commenting.Todo.TaskFound
 			// TODO: Replace with the wpcom endpoint when it's ready.
-			$response     = wp_remote_post(
+			$response = wp_remote_post(
 				$this->get_paypal_capture_payment_request_url(),
 				array(
 					'method'  => 'POST',
@@ -186,13 +188,12 @@ class WC_Gateway_Paypal_Request {
 				return;
 			}
 
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
+			$http_code = wp_remote_retrieve_response_code( $response );
+			$body      = wp_remote_retrieve_body( $response );
 
 			if ( 200 !== $http_code ) {
 				throw new Exception( 'PayPal payment capture failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
-
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			$order->add_order_note(
