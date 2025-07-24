@@ -9,6 +9,10 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+
+/**
+ * Internal dependencies
+ */
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type AvailableVariation = {
