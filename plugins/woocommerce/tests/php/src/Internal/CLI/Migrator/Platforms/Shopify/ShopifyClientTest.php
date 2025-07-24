@@ -368,7 +368,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $preempt, $parsed_args, $url ) use ( $mock_response ) {
 				// Verify the request URL is correct GraphQL endpoint.
-				$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-01/graphql.json', $url );
+				$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-04/graphql.json', $url );
 				// Verify the authorization header.
 				$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
 				// Verify it's a POST request.

@@ -202,7 +202,7 @@ class ShopifyClient {
 
 		$shop_url = untrailingslashit( $domain );
 		// Use the same API version as REST.
-		$api_version = '2025-01';
+		$api_version = '2025-04';
 		return "{$shop_url}/admin/api/{$api_version}/graphql.json";
 	}
 
