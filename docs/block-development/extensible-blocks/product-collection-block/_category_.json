@@ -1,7 +1,7 @@
 {
-  "label": "Product Collection Block",
-  "link": {
-    "type": "generated-index",
-    "title": "Product Collection Block"
-  }
+	"label": "Product Collection Block",
+	"link": {
+		"type": "doc",
+		"id": "README"
+	}
 }
