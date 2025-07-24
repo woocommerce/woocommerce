@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
  * ProductGalleryThumbnails class.
  */
 class ProductGalleryThumbnails extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
