@@ -146,6 +146,7 @@ class Initializer {
 		switch ( $block_name ) {
 			case 'core/heading':
 			case 'core/paragraph':
+			case 'core/site-title':
 				$renderer = new Text();
 				break;
 			case 'core/column':

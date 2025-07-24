@@ -13,7 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
- * This renderer covers both core/paragraph and core/heading blocks
+ * This renderer covers both core/paragraph, core/heading and core/site-title blocks.
  */
 class Text extends Abstract_Block_Renderer {
 	/**

@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Fallback block renderer.
@@ -29,6 +30,19 @@ class Fallback extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		return $block_content;
+		$block_attrs = $parsed_block['attrs'] ?? array();
+
+		$table_attrs = array(
+			'style' => 'border-collapse: separate;', // Needed because of border radius.
+			'width' => '100%',
+		);
+
+		$align = $block_attrs['textAlign'] ?? $block_attrs['align'] ?? 'left';
+
+		$cell_attrs = array(
+			'align' => $align,
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( $block_content, $table_attrs, $cell_attrs );
 	}
 }
