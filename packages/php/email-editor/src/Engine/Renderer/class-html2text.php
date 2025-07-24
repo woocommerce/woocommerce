@@ -2,6 +2,10 @@
 /**
  * HTML to Text Converter class
  *
+ * This file was extracted from the `soundasleep/html2text` package.
+ * Copyright (c) 2019 Jevon Wright
+ * MIT License
+ *
  * @package Automattic\WooCommerce\EmailEditor
  */
 
