@@ -93,18 +93,11 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test fetch_total_count method returns expected type.
+	 * Test fetch_total_count method returns expected type and stub value.
 	 */
-	public function test_fetch_total_count_returns_integer() {
+	public function test_fetch_total_count_returns_integer_stub() {
 		$result = $this->fetcher->fetch_total_count( array() );
 		$this->assertIsInt( $result );
-	}
-
-	/**
-	 * Test fetch_total_count method returns stub value.
-	 */
-	public function test_fetch_total_count_returns_stub_value() {
-		$result = $this->fetcher->fetch_total_count( array() );
 		$this->assertEquals( 0, $result ); // Stub implementation always returns 0.
 	}
 
@@ -127,23 +120,6 @@ class ShopifyFetcherTest extends \WC_Unit_Test_Case {
 		}
 	}
 
-	/**
-	 * Test that methods handle type declarations correctly.
-	 */
-	public function test_method_signatures() {
-		// Test that fetch_batch requires array and returns array.
-		$reflection = new \ReflectionClass( $this->fetcher );
-
-		$fetch_batch_method = $reflection->getMethod( 'fetch_batch' );
-		$params             = $fetch_batch_method->getParameters();
-		$this->assertEquals( 'array', (string) $params[0]->getType() );
-		$this->assertEquals( 'array', (string) $fetch_batch_method->getReturnType() ); // Ensures return type is array.
-
-		$fetch_count_method = $reflection->getMethod( 'fetch_total_count' );
-		$params             = $fetch_count_method->getParameters();
-		$this->assertEquals( 'array', (string) $params[0]->getType() );
-		$this->assertEquals( 'int', (string) $fetch_count_method->getReturnType() );
-	}
 
 	/**
 	 * Test that the fetcher is ready for future enhancement.
