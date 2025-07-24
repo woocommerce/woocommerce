@@ -131,11 +131,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-ipn-handler.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
 			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
-				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
+				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
@@ -150,24 +150,31 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 	/**
 	 * Register the site with WPCOM if it is not already registered.
+	 *
+	 * @return void
 	 */
 	private function maybe_register_site_with_wpcom() {
-		if ( ! is_admin() || ! $this->should_use_orders_v2() ) {
+		if ( ! is_admin() ||
+			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
+			! WC_Gateway_Paypal_Helper::is_wpcom_tos_accepted()
+		) {
 			return;
 		}
 
 		$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
 		$is_connected                     = $this->jetpack_connection_manager->is_connected();
 
-		// Sit is already connected.
 		if ( $is_connected ) {
 			return;
 		}
 
 		$result = $this->jetpack_connection_manager->try_registration();
 		if ( is_wp_error( $result ) ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( 'WPCOMRegistration failed: ' . $result->get_error_message() );
+			// phpcs:ignore Generic.Commenting.Todo.TaskFound
+			// TODO: Remove before merging feature branch.
+			error_log( 'Jetpack registration failed: ' . $result->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+			WC_Gateway_Paypal_Helper::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
 			return;
 		}
 	}
@@ -405,7 +412,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
@@ -455,7 +462,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Init the API class and set the username/password etc.
 	 */
 	protected function init_api() {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-api-handler.php';
 
 		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
 		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
