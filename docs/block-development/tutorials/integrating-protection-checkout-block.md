@@ -145,3 +145,28 @@ function plugin_check_turnstile_token( $result ) {
     return $result;
 }
 ```
+
+## Key points about server-side validation
+
+- **Check for POST requests and the correct endpoint:** Ensure your validation logic only runs for POST requests to the checkout endpoint. This prevents unnecessary processing and avoids interfering with unrelated requests.
+- **Safely access the protection token:** Always verify that the `extensions` key and your namespace exist in the request body before accessing the token. This prevents PHP notices and ensures your code handles malformed requests gracefully.
+- **Return the `$result` parameter unless validation fails:** Always return the original `$result` parameter if your validation passes or if your logic should not run. Only return a `WP_Error` object if validation fails. This avoids interfering with other authentication or validation logic that may be running in WooCommerce or other plugins.
+- **Allow certain payment methods to bypass protection (optional):** For example, you may want to skip CAPTCHA for express payment methods or hosted checkouts. Make this configurable via a filter so other developers can extend or override the behavior.
+
+## Important Notes
+
+### Security Considerations
+
+1. **Always validate on the server side:** Client-side validation (e.g., JavaScript) can be bypassed by malicious users. Never rely solely on client-side checks for security-critical features like CAPTCHA or fraud protection.
+2. **Use HTTPS:** Ensure your site uses HTTPS so that protection tokens and other sensitive data are transmitted securely between the client and server.
+3. **Implement rate limiting:** Protect your endpoints from abuse by implementing [rate limiting](/docs/apis/store-api/rate-limiting/). This helps prevent brute-force attacks and reduces server load.
+4. **Token expiration:** Ensure that protection tokens (e.g., CAPTCHA tokens) have appropriate expiration times and are validated for freshness on the server. Expired tokens should be rejected.
+
+### Testing Your Integration
+
+When testing your protection integration, consider the following:
+
+1. **Test with the Checkout block enabled:** Ensure your protection mechanism works as expected in the block-based checkout flow.
+2. **Verify validation failure for missing or invalid tokens:** Attempt to submit the checkout without a token or with an invalid token, and confirm that the server rejects the request appropriately.
+3. **Test with different payment methods:** Make sure your logic correctly allows or blocks requests based on the selected payment method, especially if you allow some methods to bypass protection.
+4. **Ensure compatibility with legitimate checkout flows:** Confirm that your protection mechanism does not interfere with normal, valid checkout submissions and that it works smoothly for real customers.
