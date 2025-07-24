@@ -258,6 +258,210 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test HTML to text conversion with various tags
+	 *
+	 * @dataProvider html_to_text_conversion_provider
+	 * @group html2text
+	 * @param string $html_content HTML content to test.
+	 * @param string $expected_text_contains Expected text that should be found.
+	 * @param string $description Test case description.
+	 */
+	public function testItConvertsHtmlToTextCorrectly( string $html_content, string $expected_text_contains, string $description ): void {
+		// Create email post with specific HTML content.
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => $html_content,
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render(
+			$email_post,
+			'Test Subject',
+			'Test Preheader',
+			'en'
+		);
+
+		$this->assertStringContainsString(
+			$expected_text_contains,
+			$rendered['text'],
+			sprintf( 'Failed test: %s. Expected text to contain: "%s"', $description, $expected_text_contains )
+		);
+	}
+
+	/**
+	 * Data provider for HTML to text conversion tests
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	public function html_to_text_conversion_provider(): array {
+		return array(
+			'simple_paragraph'    => array(
+				'<!-- wp:paragraph --><p>Hello world!</p><!-- /wp:paragraph -->',
+				'Hello world!',
+				'Simple paragraph conversion',
+			),
+			'heading_tags'        => array(
+				'<!-- wp:heading {"level":1} --><h1>Main Title</h1><!-- /wp:heading --><!-- wp:heading {"level":2} --><h2>Subtitle</h2><!-- /wp:heading -->',
+				"Main Title\n\nSubtitle",
+				'Heading tags conversion with proper spacing',
+			),
+			'link_conversion'     => array(
+				'<!-- wp:paragraph --><p>Visit our <a href="https://example.com">website</a> for more info.</p><!-- /wp:paragraph -->',
+				'[website](https://example.com)',
+				'Links converted to markdown format',
+			),
+			'div_elements'        => array(
+				'<!-- wp:group --><div class="wp-block-group"><div class="wp-block-group__inner-container"><!-- wp:paragraph --><p>Nested content</p><!-- /wp:paragraph --></div></div><!-- /wp:group -->',
+				'Nested content',
+				'Div elements converted properly',
+			),
+			'list_items'          => array(
+				'<!-- wp:list --><ul><li>First item</li><li>Second item</li><li>Third item</li></ul><!-- /wp:list -->',
+				"- First item\n- Second item\n- Third item",
+				'List items converted with bullet points',
+			),
+			'ordered_list'        => array(
+				'<!-- wp:list {"ordered":true} --><ol><li>First step</li><li>Second step</li></ol><!-- /wp:list -->',
+				"- First step\n- Second step",
+				'Ordered lists converted to dashes',
+			),
+			'blockquote'          => array(
+				'<!-- wp:quote --><blockquote class="wp-block-quote"><p>This is a quoted text</p></blockquote><!-- /wp:quote -->',
+				'> This is a quoted text',
+				'Blockquotes converted with > prefix',
+			),
+			'image_with_alt'      => array(
+				'<!-- wp:image --><div class="wp-block-image"><img src="example.jpg" alt="Product image"/></div><!-- /wp:image -->',
+				'[Product image]',
+				'Images with alt text converted to brackets',
+			),
+			'preformatted_text'   => array(
+				'<!-- wp:preformatted --><pre class="wp-block-preformatted">Code example
+  with indentation</pre><!-- /wp:preformatted -->',
+				'Code example',
+				'Preformatted text preserves formatting',
+			),
+			'table_content'       => array(
+				'<!-- wp:table --><div class="wp-block-table"><table><thead><tr><th>Header 1</th><th>Header 2</th></tr></thead><tbody><tr><td>Cell 1</td><td>Cell 2</td></tr></tbody></table></div><!-- /wp:table -->',
+				"Header 1\tHeader 2",
+				'Table content converted with tab separation',
+			),
+			'strong_emphasis'     => array(
+				'<!-- wp:paragraph --><p>This is <strong>important</strong> and <em>emphasized</em> text.</p><!-- /wp:paragraph -->',
+				'This is important and emphasized text.',
+				'Strong and emphasis tags converted to plain text',
+			),
+			'line_breaks'         => array(
+				'<!-- wp:paragraph --><p>Line one<br>Line two<br/>Line three</p><!-- /wp:paragraph -->',
+				"Line one\nLine two\nLine three",
+				'Line breaks converted correctly',
+			),
+			'special_entities'    => array(
+				'<!-- wp:paragraph --><p>Special chars: &amp; &lt; &gt; &quot; &#039;</p><!-- /wp:paragraph -->',
+				"Special chars: & < > \" '",
+				'HTML entities converted to regular characters',
+			),
+			'non_breaking_spaces' => array(
+				'<!-- wp:paragraph --><p>Word&nbsp;spacing&nbsp;test</p><!-- /wp:paragraph -->',
+				'Word spacing test',
+				'Non-breaking spaces converted to regular spaces',
+			),
+			'nested_structure'    => array(
+				'<!-- wp:group --><div class="wp-block-group"><!-- wp:heading --><h2>Section Title</h2><!-- /wp:heading --><!-- wp:paragraph --><p>Content with <a href="http://test.com">link</a> and <strong>bold text</strong>.</p><!-- /wp:paragraph --><!-- wp:list --><ul><li>List item</li></ul><!-- /wp:list --></div><!-- /wp:group -->',
+				'Section Title',
+				'Complex nested structure handled correctly',
+			),
+		);
+	}
+
+	/**
+	 * Test HTML to text conversion preserves essential content
+	 */
+	public function testItPreservesEssentialContentInTextVersion(): void {
+		$html_content = '
+			<!-- wp:heading --><h1>Welcome Email</h1><!-- /wp:heading -->
+			<!-- wp:paragraph --><p>Dear Customer,</p><!-- /wp:paragraph -->
+			<!-- wp:paragraph --><p>Thank you for joining us! Here are your next steps:</p><!-- /wp:paragraph -->
+			<!-- wp:list -->
+			<ul>
+				<li>Verify your email address</li>
+				<li>Complete your profile</li>
+				<li>Explore our <a href="https://example.com/features">features</a></li>
+			</ul>
+			<!-- /wp:list -->
+			<!-- wp:quote --><blockquote><p>We\'re excited to have you on board!</p></blockquote><!-- /wp:quote -->
+			<!-- wp:paragraph --><p>Best regards,<br>The Team</p><!-- /wp:paragraph -->
+		';
+
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => $html_content,
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render(
+			$email_post,
+			'Welcome!',
+			'Join us today',
+			'en'
+		);
+
+		// Verify all key content elements are preserved.
+		$text_content = $rendered['text'];
+		$this->assertStringContainsString( 'Welcome Email', $text_content );
+		$this->assertStringContainsString( 'Dear Customer,', $text_content );
+		$this->assertStringContainsString( 'Thank you for joining us!', $text_content );
+		$this->assertStringContainsString( '- Verify your email address', $text_content );
+		$this->assertStringContainsString( '- Complete your profile', $text_content );
+		$this->assertStringContainsString( '[features](https://example.com/features)', $text_content );
+		$this->assertStringContainsString( '> ', $text_content ); // Check blockquote format.
+		$this->assertStringContainsString( 'We’re excited to have you on board!', $text_content );
+		$this->assertStringContainsString( "Best regards,\nThe Team", $text_content );
+	}
+
+	/**
+	 * Test HTML to text conversion handles edge cases
+	 */
+	public function testItHandlesEdgeCasesInHtmlToText(): void {
+		$test_cases = array(
+			'empty_content'         => array(
+				'<!-- wp:paragraph --><p></p><!-- /wp:paragraph -->',
+				'',
+			),
+			'only_whitespace'       => array(
+				'<!-- wp:paragraph --><p>   </p><!-- /wp:paragraph -->',
+				'',
+			),
+			'nested_empty_elements' => array(
+				'<!-- wp:group --><div><div><p></p></div></div><!-- /wp:group -->',
+				'',
+			),
+		);
+
+		foreach ( $test_cases as $case_name => $case_data ) {
+			$email_post_id = $this->factory->post->create(
+				array(
+					'post_content' => $case_data[0],
+				)
+			);
+			$this->assertIsInt( $email_post_id );
+			$email_post = get_post( $email_post_id );
+			$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+			$rendered = $this->renderer->render( $email_post, 'Test', '', 'en' );
+
+			// All edge cases should result in empty or minimal text content.
+			$this->assertEmpty( trim( $rendered['text'] ), "Failed edge case: {$case_name}" );
+		}
+	}
+
+	/**
 	 * Returns the value of the style attribute for the first tag that matches the query.
 	 *
 	 * @param string $html HTML content.

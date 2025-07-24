@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
         required: false
         default: ''
       skip_verify:
@@ -17,7 +17,7 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
         type: string
         required: false
         default: ''
@@ -35,6 +35,9 @@ on:
         value: ${{ jobs.build.outputs.artifact-url }}
 
 permissions: {}
+
+concurrency:
+  group: release-build-zip-file-${{ inputs.branch }}-${{ ( inputs.create_github_release == true && 'with-release' ) || github.run_id }}
 
 jobs:
   verify-prs:
@@ -168,7 +171,8 @@ jobs:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-4vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [ verify-prs, verify-release-versions ]
     outputs:
-      artifact-url: ${{ steps.output-artifact-url.outputs.artifact_url }}
+      artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
+      commit-hash: ${{ steps.fetch-build-details.outputs.commit-hash }}
     permissions:
       contents: read
     steps:
@@ -207,11 +211,15 @@ jobs:
           path: zipfile
           retention-days: 1
 
-      - name: Output artifact URL
-        id: output-artifact-url
+      - name: Fetch build details
+        id: fetch-build-details
         run: |
           ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
-          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+          echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
+          # Fetch commit hash for this build.
+          commit_hash=$(git rev-parse "${{ inputs.branch || github.ref }}")
+          echo "commit-hash=$commit_hash" >> $GITHUB_OUTPUT
 
   create-release:
     name: Create GitHub release
@@ -252,7 +260,7 @@ jobs:
             './woocommerce.zip' \
             --title '${{ steps.get_version.outputs.version }}' \
             --notes '' \
-            --target '${{ inputs.branch || github.ref }}' \
+            --target '${{ needs.build.outputs.commit-hash }}' \
             --latest=false \
             --draft \
             $FLAGS

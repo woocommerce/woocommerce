@@ -16,13 +16,6 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 	protected $block_name = 'product-gallery-large-image-next-previous';
 
 	/**
-	 * It isn't necessary register block assets because it is a server side block.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null

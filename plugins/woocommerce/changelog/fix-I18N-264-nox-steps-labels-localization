@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add i18n support to NOX and NOX in LYS step labels.

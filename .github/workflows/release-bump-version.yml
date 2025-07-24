@@ -3,23 +3,36 @@ name: 'Release: Bump version number'
 on:
   workflow_dispatch:
     inputs:
-      bump_type:
+      branch:
+        description: 'Release branch'
+        type: string
+        required: true
+        default: ''
+      bump-type:
         description: 'Type of version bump to perform'
         required: true
         type: choice
         options:
           - stable
-          - dev
           - rc
+          - dev
+  workflow_call:
+    inputs:
       branch:
-        description: 'Source branch to use.'
+        description: Release branch
         type: string
         required: true
-        default: ''
+      bump-type:
+        description: Type of version bump to perform
+        type: string
+        required: true
 
 permissions:
   contents: write
   pull-requests: write
+  issues: write
+concurrency:
+  group: release-bump-version-${{ inputs.branch }}
 
 jobs:
   bump-version:
@@ -43,8 +56,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = context.payload.inputs.branch;
-            const bumpType = context.payload.inputs.bump_type;
+            const branch = `${{ inputs.branch }}`;
+            const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
             const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-rc\.(?<rc>\d+))?/ );
@@ -103,7 +116,7 @@ jobs:
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ [0-9]{4}-XX-XX =/= $NEXT_STABLE $(date +%Y)-XX-XX =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
 
           # Update composer.json and package.json.
           for filename in {composer,package}.json; do
@@ -141,5 +154,25 @@ jobs:
             --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
-            --head ${branch_name} \
-            --reviewer "${{ github.actor }}"
+            --head ${branch_name}
+
+      - name: Ensure milestone for dev version exists
+        if: ${{ inputs.bump-type == 'dev' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const milestone = '${{ steps.compute-new-version.outputs.nextStable }}';
+
+            try {
+              await github.rest.issues.createMilestone({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: milestone,
+              });
+            } catch ( e ) {
+              if ( e.response.data.errors?.some( (err) => 'already_exists' === err.code ) ) {
+                console.log( `Milestone ${ milestone } already exists.` );
+              } else {
+                throw e;
+              }
+            }
