@@ -15,7 +15,7 @@ To create a new platform plugin (e.g., for Magento, BigCommerce, etc.), follow t
 
 ### 1. Create Your Plugin Structure
 
-```
+```text
 your-platform-migrator/
 ├── your-platform-migrator.php          # Main plugin file
 ├── src/
@@ -50,6 +50,7 @@ add_filter( 'woocommerce_migrator_platforms', function( $platforms ) {
 ### 4. Handle Dependencies
 
 Your plugin should:
+
 - Check if WooCommerce Migrator is active
 - Handle its own autoloading
 - Initialize during appropriate WordPress hooks
@@ -86,4 +87,4 @@ Platform plugins should include comprehensive tests that verify:
 - Provide configuration options for API credentials
 - Support resumable migrations (via ImportSession)
 
-For more details, refer to the WooCommerce Migrator documentation. 
+For more details, refer to the WooCommerce Migrator documentation.

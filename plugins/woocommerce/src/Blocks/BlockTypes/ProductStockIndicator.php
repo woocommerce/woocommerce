@@ -127,14 +127,12 @@ class ProductStockIndicator extends AbstractBlock {
 		$watch_attribute    = '';
 
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$variations_data           = $product_to_render->get_available_variations();
+			$variations                = $product_to_render->get_available_variations( 'objects' );
 			$formatted_variations_data = array();
-			foreach ( $variations_data as $variation ) {
-				if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['availability_html'] ) ) {
-					continue;
-				}
-				$formatted_variations_data[ $variation['variation_id'] ] = array(
-					'availability_html' => $variation['availability_html'],
+			foreach ( $variations as $variation ) {
+				$variation_availability                            = $variation->get_availability();
+				$formatted_variations_data[ $variation->get_id() ] = array(
+					'availability' => $variation_availability['availability'],
 				);
 			}
 
@@ -143,8 +141,8 @@ class ProductStockIndicator extends AbstractBlock {
 				array(
 					'products' => array(
 						$product_to_render->get_id() => array(
-							'availability_html' => '',
-							'variations'        => $formatted_variations_data,
+							'availability' => $availability['availability'],
+							'variations'   => $formatted_variations_data,
 						),
 					),
 				)
@@ -153,7 +151,7 @@ class ProductStockIndicator extends AbstractBlock {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
 			$context                                   = array(
-				'productElementKey' => 'availability_html',
+				'productElementKey' => 'availability',
 			);
 			$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 			$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
