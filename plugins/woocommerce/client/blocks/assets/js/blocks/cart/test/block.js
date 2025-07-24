@@ -199,6 +199,7 @@ describe( 'Testing cart', () => {
 					},
 				},
 			],
+			items_count: 2,
 		};
 
 		server.use(
@@ -217,26 +218,35 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'updates quantity when changed in server', async () => {
-		const cart = {
-			...previewCart,
-			// Make it so there is only one item to simplify things.
-			items: [
-				{
-					...previewCart.items[ 0 ],
-					quantity: 5,
-				},
-			],
-		};
-		const itemName = cart.items[ 0 ].name;
-
 		render( <CartBlock /> );
 
 		await waitFor( () =>
 			expect(
 				screen.getByLabelText(
-					`Quantity of ${ itemName } in your cart.`
+					`Quantity of ${ previewCart.items[ 1 ].name } in your cart.`
 				)
-			).toHaveValue( '2' )
+			).toHaveValue( 1 )
+		);
+
+		// Update the quantity of the second item to 5
+		const cart = {
+			...previewCart,
+			items: [
+				{
+					...previewCart.items[ 0 ],
+				},
+				{
+					...previewCart.items[ 1 ],
+					quantity: 5,
+				},
+			],
+			items_count: 7,
+		};
+
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( cart );
+			} )
 		);
 
 		act( () => {
@@ -247,9 +257,9 @@ describe( 'Testing cart', () => {
 		await waitFor( () =>
 			expect(
 				screen.getByLabelText(
-					`Quantity of ${ itemName } in your cart.`
+					`Quantity of ${ cart.items[ 1 ].name } in your cart.`
 				)
-			).toHaveValue( '5' )
+			).toHaveValue( 5 )
 		);
 
 		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
@@ -267,17 +277,13 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'does not show the remove item button when a filter prevents this', async () => {
-		const cart = {
-			...previewCart,
-			// Make it so there is only one item to simplify things.
-			items: [ previewCart.items[ 0 ] ],
-		};
-
+		// We're removing the link for the first previewCart item
 		registerCheckoutFilters( 'woo-blocks-test-extension', {
 			showRemoveItemLink: ( value, extensions, { cartItem } ) => {
-				return cartItem.id !== cart.items[ 0 ].id;
+				return cartItem.id !== previewCart.items[ 0 ].id;
 			},
 		} );
+
 		render( <CartBlock /> );
 
 		await waitFor( () => {
@@ -286,22 +292,6 @@ describe( 'Testing cart', () => {
 			).toBeInTheDocument();
 		} );
 
-		act( () => {
-			dispatch( storeKey ).receiveCart( cart );
-		} );
-
-		expect( console ).toHaveErrored();
-
-		// TODO: This can be simplified to expect(console).toHaveErroredWith('error message', expect.any( String ))
-		// after this ticket is done https://github.com/WordPress/gutenberg/issues/22850
-		// eslint-disable-next-line no-console
-		const [ firstArg, secondArg ] = console.error.mock.calls.at( -1 );
-		expect( firstArg ).toEqual(
-			'Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s'
-		);
-		// The stack trace
-		expect( secondArg ).toBeTruthy();
-
-		expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 0 );
+		expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 1 );
 	} );
 } );
