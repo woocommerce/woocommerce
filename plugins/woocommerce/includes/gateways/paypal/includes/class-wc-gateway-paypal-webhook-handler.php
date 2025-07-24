@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-request.php';
+require_once __DIR__ . '/class-wc-gateway-paypal-request.php';
 
 /**
  * Handles webhook events.
@@ -134,12 +134,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * Capture the payment.
 	 *
 	 * @param WC_Order $order The order object.
-	 * @param array $links The links from the webhook event.
+	 * @param array    $links The links from the webhook event.
 	 */
 	private function capture_payment( $order, $links ) {
 		$capture_url = null;
 		foreach ( $links as $link ) {
-			if ( $link['rel'] === 'capture' && $link['method'] === 'POST' && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+			if ( 'capture' === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
 				$capture_url = esc_url_raw( $link['href'] );
 				break;
 			}
@@ -150,7 +150,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
 			return;
 		}
-		$gateway = $payment_gateways['paypal'];
+		$gateway        = $payment_gateways['paypal'];
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 		$paypal_request->capture_payment( $order, $capture_url );
 	}
