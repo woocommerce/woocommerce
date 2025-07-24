@@ -270,22 +270,12 @@ export const OnboardingProvider: React.FC< {
 			for ( const [ index, step ] of steps.entries() ) {
 				// Special completion check for frontend steps.
 				if ( step.type === 'frontend' ) {
-					let isCompleted = false;
-					if ( parentStep ) {
-						// Rule 2: A frontend sub-step is completed if its parent is, or if the next backend sibling is active/done.
-						const nextSubStep = steps[ index + 1 ];
-						isCompleted =
-							parentStep.status === 'completed' ||
-							( nextSubStep &&
-								nextSubStep.type === 'backend' &&
-								( nextSubStep.status === 'in_progress' ||
-									nextSubStep.status === 'completed' ) );
-					} else if ( step.subSteps?.length ) {
-						// Rule 1: A frontend top-level step is completed if all its sub-steps are.
-						isCompleted = step.subSteps.every(
-							( s ) => s.status === 'completed'
-						);
-					}
+					const nextSubStep = steps[ index + 1 ];
+					const isCompleted = isFrontendStepCompleted(
+						step,
+						parentStep,
+						nextSubStep
+					);
 
 					if ( isCompleted ) {
 						continue; // Skip this step, it's considered done for navigation.
@@ -487,19 +477,43 @@ export const OnboardingProvider: React.FC< {
 		// Now determine dependencies status in a second pass to avoid stale data
 		const resolveFrontendDependencies = (
 			stepsToResolve: WooPaymentsProviderOnboardingStep[],
-			allMappedSteps: WooPaymentsProviderOnboardingStep[]
+			allMappedSteps: WooPaymentsProviderOnboardingStep[],
+			parentStep?: WooPaymentsProviderOnboardingStep
 		): WooPaymentsProviderOnboardingStep[] => {
-			return stepsToResolve.map( ( step ) => {
+			return stepsToResolve.map( ( step, index ) => {
 				const resolvedStep = { ...step };
 
 				if ( resolvedStep.type === 'frontend' ) {
-					resolvedStep.status = 'not_started';
+					// Handle sub-steps first if they exist
+					if ( resolvedStep.subSteps?.length ) {
+						resolvedStep.subSteps = resolveFrontendDependencies(
+							resolvedStep.subSteps,
+							allMappedSteps,
+							resolvedStep
+						);
+					}
+
+					// Apply the completion logic using the helper function
+					const nextSubStep = stepsToResolve[ index + 1 ];
+					const isCompleted = isFrontendStepCompleted(
+						resolvedStep,
+						parentStep,
+						nextSubStep
+					);
+
+					resolvedStep.status = isCompleted
+						? 'completed'
+						: 'not_started';
 				}
 
-				if ( resolvedStep.subSteps ) {
+				if (
+					resolvedStep.subSteps &&
+					resolvedStep.type !== 'frontend'
+				) {
 					resolvedStep.subSteps = resolveFrontendDependencies(
 						resolvedStep.subSteps,
-						allMappedSteps
+						allMappedSteps,
+						resolvedStep
 					);
 				}
 				return resolvedStep;
