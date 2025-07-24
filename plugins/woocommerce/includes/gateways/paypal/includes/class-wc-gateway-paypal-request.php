@@ -274,8 +274,8 @@ class WC_Gateway_Paypal_Request {
 			),
 			'purchase_units'      => array(
 				array(
-					'custom_id' => $this->get_paypal_order_custom_id( $order ),
-					'amount'    => array(
+					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
+					'amount'     => array(
 						'currency_code' => $currency,
 						'value'         => $order->get_total(),
 						'breakdown'     => array(
@@ -297,8 +297,9 @@ class WC_Gateway_Paypal_Request {
 							),
 						),
 					),
-					'items'     => $this->get_paypal_order_items( $order ),
-					'payee'     => array(
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
+					'items'      => $this->get_paypal_order_items( $order ),
+					'payee'      => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
 				),
