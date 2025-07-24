@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix error in email style sync in themes using refs in global styles colors
