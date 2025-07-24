@@ -186,7 +186,6 @@ export type PersonalizationTag = {
 
 export type ContentValidation = {
 	validateContent: () => boolean;
-	isInvalid: boolean;
 };
 
 export type State = {

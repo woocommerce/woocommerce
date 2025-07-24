@@ -21,7 +21,7 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
-import { useContentValidation } from './hooks/use-content-validation';
+import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
 function Editor() {
 	const { postId, postType, settings } = useSelect(
@@ -33,6 +33,7 @@ function Editor() {
 		[]
 	);
 	useContentValidation();
+	useRemoveSavingFailedNotices();
 
 	// Set allowed blockTypes to the editor settings.
 	settings.allowedBlockTypes = getAllowedBlockNames();

@@ -21,7 +21,6 @@ import { useValidationNotices } from './use-validation-notices';
 const EMPTY_ARRAY = [];
 
 export type ContentValidationData = {
-	isInvalid: boolean;
 	validateContent: () => boolean;
 };
 
@@ -94,13 +93,12 @@ export const useContentValidation = (): ContentValidationData => {
 	useEffect( () => {
 		dispatch( emailEditorStore ).setContentValidation( {
 			validateContent,
-			isInvalid: hasValidationNotice(),
 		} );
 
 		return () => {
 			dispatch( emailEditorStore ).setContentValidation( undefined );
 		};
-	}, [ validateContent, hasValidationNotice ] );
+	}, [ validateContent ] );
 
 	// Subscribe to updates so notices can be dismissed once resolved.
 	useEffect( () => {
@@ -115,7 +113,6 @@ export const useContentValidation = (): ContentValidationData => {
 	}, [ hasValidationNotice, validateContent ] );
 
 	return {
-		isInvalid: hasValidationNotice(),
 		validateContent,
 	};
 };
