@@ -27,15 +27,8 @@ The `render_block` filter allows you to modify the output of any WordPress block
 add_filter(
     'render_block_woocommerce/checkout-actions-block',
     function( $block_content ) {
-        ob_start();
-        ?>
-        <div class="my-captcha-element" data-sitekey="<?php echo esc_attr( get_option( 'plugin_captcha_sitekey' ) ); ?>">
-        </div>
-        <?php
-        echo $block_content;
-        $block_content = ob_get_contents();
-        ob_end_clean();
-        return $block_content;
+        $captcha = '<div class="my-captcha-element" data-sitekey="' . esc_attr( get_option( 'plugin_captcha_sitekey' ) ) . '"></div>';
+        return $block_content . $captcha;
     },
     999,
     1
@@ -47,7 +40,7 @@ add_filter(
 - The filter targets `woocommerce/checkout-actions-block` which is the block containing the place order button
 - We use a priority of `999` to ensure our content is added after other modifications
 - The `data-sitekey` attribute stores your CAPTCHA configuration, but this may be different for your plugin
-- We append our protection element after the original block content.
+- We append our protection element after the original block content by concatenating it to `$block_content` (no output buffering needed)
 
 ## Step 2: Client-Side Integration
 
