@@ -61,8 +61,8 @@ class WC_Gateway_Paypal_Helper {
 		// If API keys are set, the merchant is not eligible for migration
 		// as they may be using features that cannot be seamlessly migrated.
 		$is_test_mode = isset( $settings['testmode'] ) && 'yes' === $settings['testmode'];
-		$api_username = $is_test_mode ? $settings['sandbox_api_username'] : $settings['api_username'];
-		$api_password = $is_test_mode ? $settings['sandbox_api_password'] : $settings['api_password'];
+		$api_username = $is_test_mode ? ( $settings['sandbox_api_username'] ?? null ) : ( $settings['api_username'] ?? null );
+		$api_password = $is_test_mode ? ( $settings['sandbox_api_password'] ?? null ) : ( $settings['api_password'] ?? null );
 
 		/**
 		 * Filters whether the merchant is eligible for migration from WPS to PPCP.
