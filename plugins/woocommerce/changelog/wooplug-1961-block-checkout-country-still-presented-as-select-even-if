@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+The country select field on Checkout block will not expand idf the store only sells to one country
