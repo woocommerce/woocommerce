@@ -10,7 +10,7 @@ This document lists the filters that are currently available to extensions and o
 
 ## Cart Line Items filters
 
-The following [Cart Line Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-cart-line-items/) are available:
+The following [Cart Line Items filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/cart-line-items/) are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
@@ -25,7 +25,7 @@ The following screenshot shows which parts the individual filters affect:
 
 ## Order Summary Items filters
 
-The following [Order Summary Items filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-order-summary-items/) are available:
+The following [Order Summary Items filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/order-summary-items/) are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
@@ -38,14 +38,14 @@ The following screenshot shows which parts the individual filters affect:
 
 ## Totals Footer Item filter
 
-The following [Totals Footer Item filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-totals-footer-item/) is available:
+The following [Totals Footer Item filter](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/totals-footer-item/) is available:
 
 -   `totalLabel`
 -   `totalValue`
 
 ## Checkout and place order button filters
 
-The following [Checkout and place order button filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-checkout-and-place-order-button/) are available:
+The following [Checkout and place order button filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/checkout-and-place-order-button/) are available:
 
 -   `proceedToCheckoutButtonLabel`
 -   `proceedToCheckoutButtonLink`
@@ -53,7 +53,7 @@ The following [Checkout and place order button filters](https://developer.woocom
 
 ## Coupon filters
 
-The following [Coupon filters](https://developer.woocommerce.com/docs/cart-and-checkout-filters-coupons/) are available:
+The following [Coupon filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/coupons/) are available:
 
 -   `coupons`
 -   `showApplyCouponNotice`
@@ -61,7 +61,7 @@ The following [Coupon filters](https://developer.woocommerce.com/docs/cart-and-c
 
 ## Additional Cart and Checkout inner block types filter
 
-The following [Additional Cart and Checkout inner block types filter](https://developer.woocommerce.com/docs/cart-and-checkout-filters-inner-block-types/) is available:
+The following [Additional Cart and Checkout inner block types filter](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/additional-cart-checkout-inner-block-types/) is available:
 
 -   `additionalCartCheckoutInnerBlockTypes`
 

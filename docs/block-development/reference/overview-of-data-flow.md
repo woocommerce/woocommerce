@@ -11,7 +11,7 @@ In the WooCommerce Cart and Checkout blocks, the server is the source of truth f
 -   Cart item details (items, quantities, and prices)
 -   Cart totals (e.g. taxes, fees, subtotals)
 -   Customer information (shipping and billing addresses, other customer data)
-    -   Additional fields added using the [Additional Checkout Fields API](https://developer.woocommerce.com/docs/cart-and-checkout-additional-checkout-fields/) are also persisted server-side.
+    -   Additional fields added using the [Additional Checkout Fields API](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/additional-checkout-fields/) are also persisted server-side.
 -   Shipping methods and rates
 -   Other cart details, such as applied coupons
 

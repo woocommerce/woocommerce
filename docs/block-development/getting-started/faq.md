@@ -229,7 +229,7 @@ This depends on what you want to render.
 
 #### Rendering a field
 
-The recommended approach to rendering fields in the Checkout block is to use the [Additional Checkout Fields API](https://developer.woocommerce.com/docs/cart-and-checkout-additional-checkout-fields/).
+The recommended approach to rendering fields in the Checkout block is to use the [Additional Checkout Fields API](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/additional-checkout-fields/).
 
 #### Rendering a custom block
 
