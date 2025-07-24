@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -29,24 +28,6 @@ class NavigationArrows extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$post_id = $block->context['postId'];
-		if ( ! isset( $post_id ) ) {
-			return '';
-		}
-
-		$product = wc_get_product( $post_id );
-
-		if ( ! $product instanceof \WC_Product ) {
-			return '';
-		}
-
-		$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
-
-		// Don't show the arrows block if there is only one image.
-		if ( $product_gallery_image_count <= 1 ) {
-			return '';
-		}
-
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
 		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
