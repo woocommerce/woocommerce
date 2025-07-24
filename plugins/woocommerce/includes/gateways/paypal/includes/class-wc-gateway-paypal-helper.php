@@ -51,7 +51,7 @@ class WC_Gateway_Paypal_Helper {
 	}
 
 	/**
-	 * Check if the merchant is eligible for migration from WPSto PPCP.
+	 * Check if the merchant is eligible for migration from WPS to PPCP.
 	 *
 	 * @return bool
 	 */
