@@ -29,7 +29,7 @@ final class Runner {
 		$container = wc_get_container();
 
 		WP_CLI::add_command(
-			'wc migrator products',
+			'wc migrate products',
 			$container->get( ProductsCommand::class ),
 			array(
 				'shortdesc' => 'Migrate products from a source platform to WooCommerce.',
@@ -38,7 +38,7 @@ final class Runner {
 		);
 
 		WP_CLI::add_command(
-			'wc migrator reset',
+			'wc migrate reset',
 			$container->get( ResetCommand::class ),
 			array(
 				'shortdesc' => 'Resets (deletes) the credentials for a given platform.',
@@ -46,7 +46,7 @@ final class Runner {
 		);
 
 		WP_CLI::add_command(
-			'wc migrator setup',
+			'wc migrate setup',
 			$container->get( SetupCommand::class ),
 			array(
 				'shortdesc' => 'Interactively sets up the credentials for a given platform.',
@@ -54,7 +54,7 @@ final class Runner {
 		);
 
 		WP_CLI::add_command(
-			'wc migrator list',
+			'wc migrate list',
 			$container->get( ListCommand::class ),
 			array(
 				'shortdesc' => 'Lists all registered migration platforms.',

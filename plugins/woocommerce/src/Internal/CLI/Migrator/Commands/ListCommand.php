@@ -4,19 +4,38 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 use WP_CLI;
 
 /**
  * Lists all registered migration platforms.
  */
-class ListCommand extends BaseCommand {
+class ListCommand {
+
+	/**
+	 * The platform registry.
+	 *
+	 * @var PlatformRegistry
+	 */
+	private PlatformRegistry $platform_registry;
+
+	/**
+	 * Class initialization, invoked by the DI container.
+	 *
+	 * @param PlatformRegistry $platform_registry The platform registry.
+	 *
+	 * @internal
+	 */
+	public function init( PlatformRegistry $platform_registry ): void {
+		$this->platform_registry = $platform_registry;
+	}
 
 	/**
 	 * Lists all registered migration platforms.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp wc migrator list
+	 *     $ wp wc migrate list
 	 *
 	 * @param array $args       The positional arguments.
 	 * @param array $assoc_args The associative arguments.
