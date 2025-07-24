@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -2601,6 +2602,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 			// We have to clear the cache after a direct DB update.
 			$this->sut->clear_cached_data( array( $refund->get_id() ) );
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $refund->get_id() );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
