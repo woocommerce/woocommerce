@@ -126,13 +126,19 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $args;
 		}
 
-		$stock_statuses = array_intersect(
+		$filtered_stock_statuses = array_intersect(
 			array_map( 'esc_sql', $stock_statuses ),
 			array_keys( wc_get_product_stock_status_options() )
 		);
 
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $stock_statuses ) . '")';
+		if ( ! empty( $filtered_stock_statuses ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $filtered_stock_statuses ) . '")';
+		}
+
+		if ( ! empty( $stock_statuses ) && empty( $filtered_stock_statuses ) ) {
+			$args['where'] .= ' AND 1=0';
+		}
 
 		return $args;
 	}
@@ -226,8 +232,9 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		$all_terms = get_terms(
 			array(
-				'taxonomy' => array_keys( $chosen_attributes ),
-				'slug'     => $all_terms_slugs,
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_terms_slugs,
+				'hide_empty' => false,
 			)
 		);
 
