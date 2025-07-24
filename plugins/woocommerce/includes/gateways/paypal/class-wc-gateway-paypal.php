@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -642,7 +644,6 @@ add_action( 'init', function() {
 				return;
 			}
 
-			require_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
 			$gateway        = $payment_gateways['paypal'];
 			$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 			$paypal_request->capture_payment( $order, $capture_url );
