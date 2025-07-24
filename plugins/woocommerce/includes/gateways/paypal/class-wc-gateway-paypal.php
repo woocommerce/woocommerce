@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+require_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 /**
  * WC_Gateway_Paypal Class.
@@ -617,36 +617,44 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
  * Register PayPal scheduled actions on init.
  * This ensures the action is available even when the gateway isn't instantiated.
  */
-add_action( 'init', function() {
-    if ( ! has_action( 'woocommerce_paypal_capture_payment' ) ) {
-		// Process scheduled payment capture.
-        add_action( 'woocommerce_paypal_capture_payment', function( $order_id, $capture_url ) {
-            if ( ! $order_id || ! $capture_url ) {
-				return;
-			}
-	
-			$order = wc_get_order( $order_id );
-			if ( ! $order ) {
-				WC_Gateway_Paypal::log( 'Order not found for capture: ' . $order_id );
-				return;
-			}
-	
-			// Skip if the order is already paid.
-			if ( $order->is_paid() ) {
-				WC_Gateway_Paypal::log( 'Order already processed, skip capturing order: ' . $order_id );
-				return;
-			}
-	
-			WC_Gateway_Paypal::log( 'Beginning to process scheduled payment capture for order ' . $order_id );
-			$payment_gateways = WC()->payment_gateways()->payment_gateways();
-			if ( ! isset( $payment_gateways['paypal'] ) ) {
-				WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
-				return;
-			}
+add_action(
+	'init',
+	function () {
+		if ( ! has_action( 'woocommerce_paypal_capture_payment' ) ) {
+			// Process scheduled payment capture.
+			add_action(
+				'woocommerce_paypal_capture_payment',
+				function ( $order_id, $capture_url ) {
+					if ( ! $order_id || ! $capture_url ) {
+						return;
+					}
 
-			$gateway        = $payment_gateways['paypal'];
-			$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-			$paypal_request->capture_payment( $order, $capture_url );
-        }, 10, 2 );
-    }
-});
+					$order = wc_get_order( $order_id );
+					if ( ! $order ) {
+						WC_Gateway_Paypal::log( 'Order not found for capture: ' . $order_id );
+						return;
+					}
+
+					// Skip if the order is already paid.
+					if ( $order->is_paid() ) {
+						WC_Gateway_Paypal::log( 'Order already processed, skip capturing order: ' . $order_id );
+						return;
+					}
+
+					WC_Gateway_Paypal::log( 'Beginning to process scheduled payment capture for order ' . $order_id );
+					$payment_gateways = WC()->payment_gateways()->payment_gateways();
+					if ( ! isset( $payment_gateways['paypal'] ) ) {
+						WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
+						return;
+					}
+
+					$gateway        = $payment_gateways['paypal'];
+					$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
+					$paypal_request->capture_payment( $order, $capture_url );
+				},
+				10,
+				2
+			);
+		}
+	}
+);

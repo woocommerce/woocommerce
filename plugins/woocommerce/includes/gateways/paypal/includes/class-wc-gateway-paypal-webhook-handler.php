@@ -137,7 +137,6 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array    $links The links from the webhook event.
 	 */
 	private function schedule_payment_capture( $order, $links ) {
-		// Find capture URL
 		$capture_url = null;
 		foreach ( $links as $link ) {
 			if ( 'capture' === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
@@ -151,9 +150,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		// Schedule background job.
+		// Schedule a background job to capture the payment.
 		WC()->queue()->schedule_single(
-			time() + 10, // Capture in 10 seconds
+			time() + 10, // Capture in 10 seconds.
 			'woocommerce_paypal_capture_payment',
 			array(
 				'order_id'    => $order->get_id(),
