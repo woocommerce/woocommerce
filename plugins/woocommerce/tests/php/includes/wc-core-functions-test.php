@@ -181,16 +181,25 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_default_country', 'DE:LS' );
 		update_option( 'woocommerce_allowed_countries', 'specific' );
-		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB', 'FI' ) );
 		$result = wc_get_customer_default_location();
 		$this->assertEquals( '', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+
+		// Test with default address, but onyl one specific country set. Address defaults to allowed country.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'DE:LS' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( 'GB', $result['country'] );
 		$this->assertEquals( '', $result['state'] );
 
 		// Test with no default address.
 		update_option( 'woocommerce_default_customer_address', '' );
 		update_option( 'woocommerce_default_country', 'GB' );
 		$result = wc_get_customer_default_location();
-		$this->assertEquals( '', $result['country'] );
+		$this->assertEquals( 'GB', $result['country'] );
 		$this->assertEquals( '', $result['state'] );
 
 		// Test with geolocation.
