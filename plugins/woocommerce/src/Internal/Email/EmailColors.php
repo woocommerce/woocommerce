@@ -42,11 +42,13 @@ class EmailColors {
 
 			$global_colors = self::get_colors_from_global_styles();
 
-			$base_color_default        = $global_colors['base'] ? $global_colors['base'] : $base_color_default;
-			$bg_color_default          = $global_colors['bg'] ? $global_colors['bg'] : $bg_color_default;
-			$body_bg_color_default     = $global_colors['body_bg'] ? $global_colors['body_bg'] : $body_bg_color_default;
-			$body_text_color_default   = $global_colors['body_text'] ? $global_colors['body_text'] : $body_text_color_default;
-			$footer_text_color_default = $global_colors['footer_text'] ? $global_colors['footer_text'] : $footer_text_color_default;
+			if ( $global_colors ) {
+				$base_color_default        = $global_colors['base'];
+				$bg_color_default          = $global_colors['bg'];
+				$body_bg_color_default     = $global_colors['body_bg'];
+				$body_text_color_default   = $global_colors['body_text'];
+				$footer_text_color_default = $global_colors['footer_text'];
+			}
 		}
 
 		return compact(
@@ -61,17 +63,11 @@ class EmailColors {
 	/**
 	 * Get email colors from global styles.
 	 *
-	 * @return array Array of colors.
+	 * @return array|null Array of colors or null if global styles are not available or complete.
 	 */
 	public static function get_colors_from_global_styles() {
 		if ( ! wp_is_block_theme() || ! function_exists( 'wp_get_global_styles' ) ) {
-			return array(
-				'base'        => '',
-				'bg'          => '',
-				'body_bg'     => '',
-				'body_text'   => '',
-				'footer_text' => '',
-			);
+			return null;
 		}
 
 		$styles = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
@@ -87,6 +83,11 @@ class EmailColors {
 		$body_text   = is_string( $body_text ) ? sanitize_hex_color( $body_text ) : '';
 		$base        = is_string( $base ) ? sanitize_hex_color( $base ) : $body_text;
 		$footer_text = is_string( $footer_text ) ? sanitize_hex_color( $footer_text ) : $body_text;
+
+		// Only return colors if all are set, otherwise email styles might not match and the email can become unreadable.
+		if ( ! $bg || ! $body_bg || ! $body_text || ! $base || ! $footer_text ) {
+			return null;
+		}
 
 		return compact(
 			'base',
