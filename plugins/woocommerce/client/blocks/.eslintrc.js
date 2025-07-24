@@ -248,7 +248,23 @@ module.exports = {
 			},
 		},
 		{
+			files: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
+			parser: '@typescript-eslint/parser',
+			plugins: [ 'jest', '@typescript-eslint' ],
+			extends: [ 'plugin:jest/recommended' ],
+			rules: {
+				'jest/no-mocks-import': 'off',
+			},
+		},
+		{
 			files: [ '*.ts', '*.tsx' ],
+			excludedFiles: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
 			parser: '@typescript-eslint/parser',
 			extends: [
 				'plugin:@woocommerce/eslint-plugin/recommended',
