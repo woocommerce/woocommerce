@@ -203,7 +203,7 @@ export const OnboardingProvider: React.FC< {
 			step: WooPaymentsProviderOnboardingStep,
 			parentStep?: WooPaymentsProviderOnboardingStep,
 			nextSibling?: WooPaymentsProviderOnboardingStep
-		): boolean => {
+		): boolean | undefined => {
 			if ( step.type !== 'frontend' ) {
 				return step.status === 'completed';
 			}
