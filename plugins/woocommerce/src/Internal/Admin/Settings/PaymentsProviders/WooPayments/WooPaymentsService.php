@@ -480,7 +480,6 @@ class WooPaymentsService {
 	 *
 	 * @return bool Whether the onboarding step was cleaned.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
-	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
 	public function clean_onboarding_step_progress( string $step_id, string $location ): bool {
 		// We need to do reduced acceptance checks here because this is a cleanup action.
