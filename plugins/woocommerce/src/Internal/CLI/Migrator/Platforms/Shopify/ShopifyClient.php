@@ -213,12 +213,12 @@ class ShopifyClient {
 	 * @param string $query        The GraphQL query.
 	 * @param array  $variables    The GraphQL variables.
 	 * @return array Request arguments for wp_remote_request.
-	 * 
+	 *
 	 * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 */
 	private function build_graphql_request_args( string $access_token, string $query, array $variables ): array {
 		$request_body = compact( 'query', 'variables' );
-		
+
 		return array(
 			'method'  => 'POST',
 			'headers' => array(
@@ -226,7 +226,7 @@ class ShopifyClient {
 				'X-Shopify-Access-Token' => $access_token,
 			),
 			'body'    => wp_json_encode( $request_body ),
-			'timeout' => 60, // Increase timeout for potentially large GraphQL queries.
+			'timeout' => 60,
 		);
 	}
 
