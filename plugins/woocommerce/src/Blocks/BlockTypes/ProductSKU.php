@@ -67,6 +67,31 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
+		$is_interactive = $product->is_type( 'variable' );
+
+		if ( $is_interactive ) {
+			$variations                = $product->get_available_variations( 'objects' );
+			$formatted_variations_data = array();
+			foreach ( $variations as $variation ) {
+				$formatted_variations_data[ $variation->get_id() ] = array(
+					'sku' => $variation->get_sku(),
+				);
+			}
+
+			wp_interactivity_state(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'sku'        => $product_sku,
+							'variations' => $formatted_variations_data,
+						),
+					),
+				)
+			);
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+		}
+
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		$prefix = isset( $attributes['prefix'] ) ? wp_kses_post( ( $attributes['prefix'] ) ) : __( 'SKU: ', 'woocommerce' );
@@ -82,7 +107,7 @@ class ProductSKU extends AbstractBlock {
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
 				%3$s
-				<span class="sku">%4$s</span>
+				<span class="sku" data-wp-interactive="woocommerce/product-elements" data-wp-context=\'{"productElementKey": "sku"}\' data-wp-watch="callbacks.updateValue">%4$s</span>
 				%5$s
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
