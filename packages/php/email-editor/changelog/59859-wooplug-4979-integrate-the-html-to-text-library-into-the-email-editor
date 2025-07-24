@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Integrated the convert class from the external HTML to Text library and removed the dependency from the Email Editor package.
+

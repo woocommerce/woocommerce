@@ -18,8 +18,7 @@
 	},
 	"require": {
 		"php": ">=7.4",
-		"pelago/emogrifier": "^7.3",
-		"soundasleep/html2text": "^2.1"
+		"pelago/emogrifier": "^7.3"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
