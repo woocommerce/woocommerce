@@ -82,7 +82,7 @@ registerCheckoutFilters( 'example-extension', {
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _context_ `string` (allowed values: `wc/cart` and `wc/checkout`) - The context of the coupon notice.
-    -   _code_ `string` - The coupon code.
+    -   _couponCode_ `string` - The coupon code.
 
 ### Returns 
 
@@ -140,7 +140,7 @@ registerCheckoutFilters( 'example-extension', {
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _context_ `string` (allowed values: `wc/cart` and `wc/checkout`) - The context of the coupon notice.
-    -   _code_ `string` - The coupon code.
+    -   _couponCode_ `string` - The coupon code.
 
 ### Returns 
 
