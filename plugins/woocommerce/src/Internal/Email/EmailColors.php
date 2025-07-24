@@ -72,11 +72,11 @@ class EmailColors {
 
 		$styles = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
 
-		$bg          = $styles['color']['background'] ?? '';
-		$body_bg     = $styles['color']['background'] ?? '';
-		$body_text   = $styles['color']['text'] ?? '';
-		$base        = $styles['elements']['button']['color']['background'] ?? '';
-		$footer_text = $styles['elements']['caption']['color']['text'] ?? '';
+		$bg          = $styles['color']['background'] ?? null;
+		$body_bg     = $styles['color']['background'] ?? null;
+		$body_text   = $styles['color']['text'] ?? null;
+		$base        = $styles['elements']['button']['color']['background'] ?? null;
+		$footer_text = $styles['elements']['caption']['color']['text'] ?? null;
 
 		$bg          = is_string( $bg ) ? sanitize_hex_color( $bg ) : '';
 		$body_bg     = is_string( $body_bg ) ? sanitize_hex_color( $body_bg ) : '';
