@@ -43,7 +43,7 @@ const TestDriveLoader: React.FunctionComponent< {
 			<Loader.Illustration>
 				<img
 					src={ `${ WC_ASSET_URL }images/onboarding/test-account-setup.svg` }
-					alt="setup"
+					alt={ __( 'Setup', 'woocommerce' ) }
 					style={ { maxWidth: '223px' } }
 				/>
 			</Loader.Illustration>
@@ -511,7 +511,10 @@ const TestAccountStep = () => {
 											WC_ASSET_URL +
 											'images/icons/store.svg'
 										}
-										alt="store icon"
+										alt={ __(
+											'Store icon',
+											'woocommerce'
+										) }
 									/>
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
@@ -568,7 +571,10 @@ const TestAccountStep = () => {
 											WC_ASSET_URL +
 											'images/icons/dollar.svg'
 										}
-										alt="dollar icon"
+										alt={ __(
+											'Dollar icon',
+											'woocommerce'
+										) }
 									/>
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
