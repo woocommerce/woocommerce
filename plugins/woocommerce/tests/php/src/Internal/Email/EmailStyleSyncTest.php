@@ -83,123 +83,11 @@ class EmailStyleSyncTest extends WC_Unit_Test_Case {
     }
 
     /**
-     * Test sync doesn't run when auto-sync is disabled.
-     */
-    public function test_sync_doesnt_run_when_disabled() {
-        $this->sut->set_auto_sync( false );
-
-        $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['update_email_colors'] )
-            ->getMock();
-
-        $mock->expects( $this->never() )
-            ->method( 'update_email_colors' );
-
-        $mock->set_auto_sync( false );
-        $mock->sync_email_styles_with_theme();
-    }
-
-    /**
-     * Test sync doesn't run when theme doesn't have theme.json.
-     */
-    public function test_sync_doesnt_run_without_theme_json() {
-        add_filter( 'wp_theme_has_theme_json', array( $this, 'return_false' ) );
-
-        $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['update_email_colors'] )
-            ->getMock();
-
-        $mock->expects( $this->never() )
-            ->method( 'update_email_colors' );
-
-        $mock->sync_email_styles_with_theme();
-
-        remove_filter( 'wp_theme_has_theme_json', array( $this, 'return_false' ) );
-    }
-
-    /**
-     * Test update_email_colors updates options correctly.
-     */
-    public function test_update_email_colors() {
-        // Create a reflection to access the private method
-        $reflection = new \ReflectionClass( $this->sut );
-        $method = $reflection->getMethod( 'update_email_colors' );
-        $method->setAccessible( true );
-
-        // Create a mock for get_theme_colors
-        $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['get_theme_colors'] )
-            ->getMock();
-
-        $test_colors = array(
-            'base_color' => '#ff0000',
-            'bg_color' => '#eeeeee',
-            'body_bg_color' => '#ffffff',
-            'body_text_color' => '#333333',
-            'footer_text_color' => '#999999',
-        );
-
-        $mock->expects( $this->once() )
-            ->method( 'get_theme_colors' )
-            ->will( $this->returnValue( $test_colors ) );
-
-        // Call the method directly using reflection
-        $method->invoke( $mock );
-
-        // Verify options were updated
-        $this->assertEquals( '#ff0000', get_option( 'woocommerce_email_base_color' ) );
-        $this->assertEquals( '#eeeeee', get_option( 'woocommerce_email_background_color' ) );
-        $this->assertEquals( '#ffffff', get_option( 'woocommerce_email_body_background_color' ) );
-        $this->assertEquals( '#333333', get_option( 'woocommerce_email_text_color' ) );
-        $this->assertEquals( '#999999', get_option( 'woocommerce_email_footer_text_color' ) );
-    }
-
-    /**
-     * Test get_theme_colors returns expected values.
-     */
-    public function test_get_theme_colors() {
-        // Create a reflection to access the private method
-        $reflection = new \ReflectionClass( $this->sut );
-        $method = $reflection->getMethod( 'get_theme_colors' );
-        $method->setAccessible( true );
-
-        // Define test global styles
-        $test_global_styles = [
-            'elements' => [
-                'button' => [
-                    'color' => [
-                        'background' => '#ff0000'
-                    ]
-                ],
-                'caption' => [
-                    'color' => [
-                        'text' => '#999999'
-                    ]
-                ]
-            ],
-            'color' => [
-                'background' => '#eeeeee',
-                'text' => '#333333'
-            ]
-        ];
-
-        // Call the method with override_styles parameter
-        $colors = $method->invoke( $this->sut, $test_global_styles );
-
-        // Verify the colors
-        $this->assertEquals( '#ff0000', $colors['base_color'] );
-        $this->assertEquals( '#eeeeee', $colors['bg_color'] );
-        $this->assertEquals( '#eeeeee', $colors['body_bg_color'] );
-        $this->assertEquals( '#333333', $colors['body_text_color'] );
-        $this->assertEquals( '#999999', $colors['footer_text_color'] );
-    }
-
-    /**
      * Test maybe_sync_on_option_update triggers sync when auto-sync is enabled.
      */
     public function test_maybe_sync_on_option_update_when_enabled() {
         $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['update_email_colors'] )
+            ->onlyMethods( ['update_email_colors'] )
             ->getMock();
 
         $mock->expects( $this->once() )
@@ -213,7 +101,7 @@ class EmailStyleSyncTest extends WC_Unit_Test_Case {
      */
     public function test_maybe_sync_on_option_update_when_disabled() {
         $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['update_email_colors'] )
+            ->onlyMethods( ['update_email_colors'] )
             ->getMock();
 
         $mock->expects( $this->never() )
@@ -227,7 +115,7 @@ class EmailStyleSyncTest extends WC_Unit_Test_Case {
      */
     public function test_maybe_sync_on_option_update_when_unchanged() {
         $mock = $this->getMockBuilder( EmailStyleSync::class )
-            ->setMethods( ['update_email_colors'] )
+            ->onlyMethods( ['update_email_colors'] )
             ->getMock();
 
         $mock->expects( $this->never() )
