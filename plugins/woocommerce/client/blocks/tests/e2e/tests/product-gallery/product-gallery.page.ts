@@ -166,13 +166,12 @@ export class ProductGalleryPage {
 		return this.editor.getBlockByName( blockName );
 	}
 
-	async getNextPreviousButtonsBlock( {
+	async getNavigationArrowsBlock( {
 		page,
 	}: {
 		page: 'frontend' | 'editor';
 	} ) {
-		const blockName =
-			'woocommerce/product-gallery-large-image-next-previous';
+		const blockName = 'woocommerce/navigation-arrows';
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
