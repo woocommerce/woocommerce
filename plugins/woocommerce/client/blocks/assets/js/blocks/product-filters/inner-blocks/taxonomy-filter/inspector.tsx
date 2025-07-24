@@ -3,7 +3,6 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
 import {
 	SelectControl,
 	ToggleControl,
@@ -16,39 +15,26 @@ import {
 /**
  * Internal dependencies
  */
-import type { EditProps, TaxonomyItem } from './types';
+import type { EditProps } from './types';
 import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
 } from '../../components/display-style-switcher';
 import metadata from './block.json';
-import { updateFilterHeading } from '../../utils/update-filter-heading';
-import { getTaxonomyLabel } from './utils';
-
-const taxonomies = getSetting< TaxonomyItem[] >(
-	'filterableProductTaxonomies',
-	[]
-);
-const taxonomyOptions = taxonomies.map( ( item ) => ( {
-	label: item.label,
-	value: item.name,
-} ) );
 
 export const TaxonomyFilterInspectorControls = ( {
 	attributes,
 	setAttributes,
 	clientId,
 }: EditProps ) => {
-	const { taxonomy, showCounts, sortOrder, hideEmpty, displayStyle } =
-		attributes;
+	const { showCounts, sortOrder, hideEmpty, displayStyle } = attributes;
 
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Taxonomy Filter Settings', 'woocommerce' ) }
+				label={ __( 'Display Settings', 'woocommerce' ) }
 				resetAll={ () => {
 					setAttributes( {
-						taxonomy: metadata.attributes.taxonomy.default,
 						sortOrder: metadata.attributes.sortOrder.default,
 						displayStyle: metadata.attributes.displayStyle.default,
 						showCounts: metadata.attributes.showCounts.default,
@@ -61,39 +47,6 @@ export const TaxonomyFilterInspectorControls = ( {
 					);
 				} }
 			>
-				<ToolsPanelItem
-					label={ __( 'Taxonomy', 'woocommerce' ) }
-					hasValue={ () => !! taxonomy }
-					onDeselect={ () =>
-						setAttributes( {
-							taxonomy: metadata.attributes.taxonomy.default,
-						} )
-					}
-					isShownByDefault={ true }
-				>
-					<SelectControl
-						label={ __( 'Taxonomy', 'woocommerce' ) }
-						help={ __(
-							'Select a taxonomy to filter by.',
-							'woocommerce'
-						) }
-						value={ taxonomy }
-						options={ [
-							{
-								label: __( 'Select a taxonomy', 'woocommerce' ),
-								value: '',
-							},
-							...taxonomyOptions,
-						] }
-						onChange={ ( value: string ) => {
-							setAttributes( { taxonomy: value } );
-							updateFilterHeading(
-								clientId,
-								getTaxonomyLabel( value )
-							);
-						} }
-					/>
-				</ToolsPanelItem>
 				<ToolsPanelItem
 					label={ __( 'Sort Order', 'woocommerce' ) }
 					hasValue={ () => sortOrder !== 'count-desc' }
