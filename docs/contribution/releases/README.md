@@ -5,7 +5,10 @@ sidebar_label: Releases
 
 # Releasing WooCommerce
 
-The WooCommerce release process is managed by a rotating release lead.  The documentation below outlines the process for managing releases.  To get started with a new release, see [Building and Publishing WooCommerce](/docs/contribution/releases/building-and-publishing).
+The WooCommerce release process is managed by a rotating release lead. The documentation below outlines the process for managing releases. 
+To get started with a new release, see [Building and Publishing WooCommerce](/docs/contribution/releases/building-and-publishing).
+
+> Note: Although the release process has automation in place, the rough estimate for the required capacity is one whole work week for releasing, monitoring, and coordinating release-related topics.
 
 ## Process Overview
 
