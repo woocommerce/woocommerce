@@ -68,8 +68,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 
-			// Capture the payment after approval.
-			$this->capture_payment( $order, $event['resource']['links'] );
+			// Queue capture for asynchronous processing.
+			$this->schedule_payment_capture( $order, $event['resource']['links'] );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
@@ -131,12 +131,13 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	}
 
 	/**
-	 * Capture the payment.
+	 * Schedule payment capture for background processing.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @param array    $links The links from the webhook event.
 	 */
-	private function capture_payment( $order, $links ) {
+	private function schedule_payment_capture( $order, $links ) {
+		// Find capture URL
 		$capture_url = null;
 		foreach ( $links as $link ) {
 			if ( 'capture' === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
@@ -145,13 +146,22 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			}
 		}
 
-		$payment_gateways = WC()->payment_gateways()->payment_gateways();
-		if ( ! isset( $payment_gateways['paypal'] ) ) {
-			WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
+		if ( ! $capture_url ) {
+			WC_Gateway_Paypal::log( 'No capture URL found in webhook links', 'error' );
 			return;
 		}
-		$gateway        = $payment_gateways['paypal'];
-		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-		$paypal_request->capture_payment( $order, $capture_url );
+
+		// Schedule background job.
+		WC()->queue()->schedule_single(
+			time() + 10, // Capture in 10 seconds
+			'woocommerce_paypal_capture_payment',
+			array(
+				'order_id'    => $order->get_id(),
+				'capture_url' => $capture_url,
+			),
+			'paypal-capture'
+		);
+
+		WC_Gateway_Paypal::log( 'Payment capture scheduled for order: ' . $order->get_id() );
 	}
 }
