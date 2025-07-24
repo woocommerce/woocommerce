@@ -203,6 +203,7 @@ class WC_Gateway_Paypal_Request {
 				)
 			);
 			$order->update_status( OrderStatus::FAILED );
+			$order->save();
 		}
 	}
 

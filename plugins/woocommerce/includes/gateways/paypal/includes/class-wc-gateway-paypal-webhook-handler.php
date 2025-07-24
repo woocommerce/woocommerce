@@ -97,8 +97,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		$order->payment_complete();
 		$order->set_transaction_id( $event['resource']['id'] );
+		$order->payment_complete();
 		$order->add_order_note( 'PayPal payment captured. ID: ' . $event['resource']['id'] );
 		$order->save();
 	}
@@ -145,7 +145,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			}
 		}
 
-		$gateway = WC()->payment_gateways()->payment_gateways()['paypal'];
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
+		if ( ! isset( $payment_gateways['paypal'] ) ) {
+			WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
+			return;
+		}
+		$gateway = $payment_gateways['paypal'];
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 		$paypal_request->capture_payment( $order, $capture_url );
 	}
