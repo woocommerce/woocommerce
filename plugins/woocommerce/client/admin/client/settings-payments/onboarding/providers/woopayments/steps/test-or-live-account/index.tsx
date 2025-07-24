@@ -55,7 +55,8 @@ const TestOrLiveAccountStep = () => {
 									src={
 										WC_ASSET_URL + 'images/icons/dollar.svg'
 									}
-									alt="dollar icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
@@ -143,7 +144,8 @@ const TestOrLiveAccountStep = () => {
 										WC_ASSET_URL +
 										'images/icons/post-list.svg'
 									}
-									alt="list icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
