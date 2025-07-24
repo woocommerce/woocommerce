@@ -1784,7 +1784,7 @@ class WooPaymentsService {
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
 			if ( ! $wpcom_connection['success'] ) {
 				// In case of errors, make sure we work with a list of error messages.
-				$wpcom_step['errors'] = array_values( $wpcom_connection['errors'] );
+				$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
 			}
 			$wpcom_step['actions'] = array(
 				'start' => array(
