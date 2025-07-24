@@ -191,7 +191,7 @@ final class ProductsCommand {
 		}
 
 		// Display pagination information.
-		if ( $result['hasNextPage'] && $result['cursor'] ) {
+		if ( $result['has_next_page'] && $result['cursor'] ) {
 			WP_CLI::log( '' );
 			WP_CLI::log( 'More products available. To fetch next batch, use:' );
 			WP_CLI::log( "wp wc migrate products --fetch --limit={$limit} --after={$result['cursor']}" );

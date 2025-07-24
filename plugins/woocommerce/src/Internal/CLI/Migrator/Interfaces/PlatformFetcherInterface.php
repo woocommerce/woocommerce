@@ -19,7 +19,7 @@ interface PlatformFetcherInterface {
 	 * @return array An array containing:
 	 *               'items'       => array Raw items fetched from the platform.
 	 *               'cursor'      => ?string The cursor for the next page, or null if no more pages.
-	 *               'hasNextPage' => bool Indicates if there are more pages to fetch.
+	 *               'has_next_page' => bool Indicates if there are more pages to fetch.
 	 */
 	public function fetch_batch( array $args ): array;
 

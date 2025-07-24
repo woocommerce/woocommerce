@@ -177,7 +177,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 	 * @return array An array containing:
 	 *               'items'       => array Raw product edges fetched from Shopify.
 	 *               'cursor'      => ?string The cursor for the next page, or null if no more pages.
-	 *               'hasNextPage' => bool Indicates if there are more pages to fetch.
+	 *               'has_next_page' => bool Indicates if there are more pages to fetch.
 	 */
 	public function fetch_batch( array $args ): array {
 		$variables = $this->build_graphql_variables( $args );
@@ -189,7 +189,6 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 			return array(
 				'items'         => array(),
 				'cursor'        => null,
-				'hasNextPage'   => false,
 				'has_next_page' => false,
 			);
 		}
@@ -199,7 +198,6 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 			return array(
 				'items'         => array(),
 				'cursor'        => null,
-				'hasNextPage'   => false,
 				'has_next_page' => false,
 			);
 		}
@@ -216,10 +214,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		return array(
 			'items'         => $items,
 			'cursor'        => $last_cursor,
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Shopify API property.
-			'hasNextPage'   => $page_info ? $page_info->hasNextPage : false,
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Shopify API property.
-			'has_next_page' => $page_info ? $page_info->hasNextPage : false,
+			'has_next_page' => $page_info ? $page_info->has_next_page : false,
 		);
 	}
 

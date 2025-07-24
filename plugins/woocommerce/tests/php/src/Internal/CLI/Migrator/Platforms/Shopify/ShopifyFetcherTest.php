@@ -227,10 +227,10 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'items', $result );
 		$this->assertArrayHasKey( 'cursor', $result );
-		$this->assertArrayHasKey( 'hasNextPage', $result );
+		$this->assertArrayHasKey( 'has_next_page', $result );
 		$this->assertEquals( array(), $result['items'] );
 		$this->assertNull( $result['cursor'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 	}
 
 	/**
@@ -320,8 +320,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'hasNextPage' => true,
-					'endCursor'   => 'cursor2',
+					'has_next_page' => true,
+					'endCursor'     => 'cursor2',
 				),
 			),
 		);
@@ -342,11 +342,11 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'items', $result );
-		$this->assertArrayHasKey( 'hasNextPage', $result );
+		$this->assertArrayHasKey( 'has_next_page', $result );
 		$this->assertArrayHasKey( 'cursor', $result );
 
 		$this->assertCount( 2, $result['items'] );
-		$this->assertTrue( $result['hasNextPage'] );
+		$this->assertTrue( $result['has_next_page'] );
 		$this->assertEquals( 'cursor2', $result['cursor'] );
 
 		// Verify product data structure.
@@ -372,8 +372,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'hasNextPage' => false,
-					'endCursor'   => 'cursor3',
+					'has_next_page' => false,
+					'endCursor'     => 'cursor3',
 				),
 			),
 		);
@@ -399,7 +399,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $result['items'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 		$this->assertEquals( 'cursor3', $result['cursor'] );
 	}
 
@@ -417,7 +417,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 0, $result['items'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 		$this->assertNull( $result['cursor'] );
 	}
 
@@ -438,7 +438,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 0, $result['items'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 		$this->assertNull( $result['cursor'] );
 	}
 
@@ -450,8 +450,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			'products' => (object) array(
 				'edges'    => array(),
 				'pageInfo' => (object) array(
-					'hasNextPage' => false,
-					'endCursor'   => null,
+					'has_next_page' => false,
+					'endCursor'     => null,
 				),
 			),
 		);
@@ -464,7 +464,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 0, $result['items'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 		$this->assertNull( $result['cursor'] );
 	}
 
@@ -548,8 +548,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					)
 				),
 				'pageInfo' => (object) array(
-					'hasNextPage' => true,
-					'endCursor'   => 'cursor_50',
+					'has_next_page' => true,
+					'endCursor'     => 'cursor_50',
 				),
 			),
 		);
@@ -569,7 +569,7 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$result = $this->fetcher->fetch_batch( array( 'limit' => 50 ) );
 
 		$this->assertCount( 50, $result['items'] );
-		$this->assertTrue( $result['hasNextPage'] );
+		$this->assertTrue( $result['has_next_page'] );
 	}
 
 	/**
@@ -588,8 +588,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'hasNextPage' => false,
-					'endCursor'   => 'cursor1',
+					'has_next_page' => false,
+					'endCursor'     => 'cursor1',
 				),
 			),
 		);
@@ -609,6 +609,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$result = $this->fetcher->fetch_batch( array( 'limit' => 1 ) );
 
 		$this->assertCount( 1, $result['items'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 	}
 }
