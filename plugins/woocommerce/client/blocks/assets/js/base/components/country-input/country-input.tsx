@@ -4,6 +4,7 @@
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -32,6 +33,13 @@ export const CountryInput = ( {
 		);
 	}, [ countries ] );
 
+	// Explain the select cannot be changed if there is only one country available, for screen readers.
+	const ariaLabel =
+		options.length === 1
+			? /* translators: %s is the label for the country input on the Checkout page. */
+			  sprintf( __( '%s, cannot be changed', 'woocommerce' ), label )
+			: label;
+
 	return (
 		<Select
 			className={ clsx( className, 'wc-block-components-country-input' ) }
@@ -44,6 +52,7 @@ export const CountryInput = ( {
 			required={ required }
 			autoComplete={ autoComplete }
 			readonly={ options.length === 1 && !! value }
+			aria-label={ ariaLabel }
 		/>
 	);
 };
