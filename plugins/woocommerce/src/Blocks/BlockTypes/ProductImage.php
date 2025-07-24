@@ -194,6 +194,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
+		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
 	}
 
 	/**
