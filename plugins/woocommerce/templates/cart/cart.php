@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.2.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -97,7 +97,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						?>
 						</td>
 
-						<td scope="row" class="product-name" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
+						<td scope="row" role="rowheader" class="product-name" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 						<?php
 						if ( ! $product_permalink ) {
 							echo wp_kses_post( $product_name . '&nbsp;' );
