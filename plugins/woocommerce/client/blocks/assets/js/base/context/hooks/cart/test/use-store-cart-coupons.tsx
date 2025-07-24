@@ -22,6 +22,14 @@ jest.mock( '../../../../../data/cart/resolvers', () => {
 	};
 } );
 
+type CapturedRequest = {
+	url: string;
+	method: string;
+	contentType?: string;
+	body: string;
+	headers?: Record< string, string >;
+};
+
 describe( 'useStoreCartCoupons hook API integration', () => {
 	beforeEach( () => {
 		// Reset any request handlers that were added in individual tests
@@ -31,7 +39,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	describe( 'applyCoupon API calls', () => {
 		it( 'calls the correct API endpoint when applying a coupon', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			// Mock a successful response using MSW
 			server.use(
@@ -108,7 +120,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			];
 
 			// Track the requests
-			const capturedRequests: any[] = [];
+			const capturedRequests: CapturedRequest[] = [];
 
 			// Mock successful responses for each coupon using MSW
 			server.use(
@@ -174,7 +186,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'handles API errors correctly without breaking', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			// Mock an error response using MSW
 			server.use(
@@ -223,7 +239,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'includes cache control and proper headers', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -258,17 +278,21 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			// Verify proper headers are sent
 			expect( capturedRequest ).not.toBeNull();
 			expect( capturedRequest.method ).toBe( 'POST' );
-			expect( capturedRequest.headers[ 'content-type' ] ).toContain(
+			expect( capturedRequest.headers?.[ 'content-type' ] ).toContain(
 				'application/json'
 			);
-			expect( capturedRequest.headers[ 'accept' ] ).toContain(
+			expect( capturedRequest.headers?.accept ).toContain(
 				'application/json'
 			);
 		} );
 
 		it( 'formats batch request correctly for coupon application', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -315,7 +339,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	describe( 'removeCoupon API calls', () => {
 		it( 'calls the correct API endpoint when removing a coupon', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -358,7 +386,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	describe( 'Context-specific behavior', () => {
 		it( 'works correctly with wc/checkout context', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -398,7 +430,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'works correctly with different contexts', async () => {
 			// Track the request details
-			const capturedRequests: any[] = [];
+			const capturedRequests: CapturedRequest[] = [];
 
 			server.use(
 				http.post(
@@ -455,7 +487,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	describe( 'Edge cases', () => {
 		it( 'handles special characters in coupon codes', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -490,7 +526,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'handles empty coupon codes gracefully', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			server.use(
 				http.post(
@@ -524,7 +564,11 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 		it( 'handles network failures gracefully', async () => {
 			// Track the request details
-			let capturedRequest: any = null;
+			let capturedRequest: CapturedRequest = {
+				url: '',
+				method: '',
+				body: '',
+			};
 
 			// Mock network failure using MSW
 			server.use(

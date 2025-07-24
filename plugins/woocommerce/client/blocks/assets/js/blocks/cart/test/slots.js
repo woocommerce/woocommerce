@@ -45,7 +45,6 @@ describe( 'Testing Slotfills', () => {
 	beforeEach( () => {
 		server.use(
 			http.get( '/wc/store/v1/cart/', () => {
-				console.log( 'previewCart', previewCart );
 				return HttpResponse.json( previewCart );
 			} )
 		);
