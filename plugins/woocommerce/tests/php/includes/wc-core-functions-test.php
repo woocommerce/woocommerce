@@ -186,7 +186,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '', $result['country'] );
 		$this->assertEquals( '', $result['state'] );
 
-		// Test with default address, but onyl one specific country set. Address defaults to allowed country.
+		// Test with default address, but only one specific country set. Address defaults to allowed country.
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_default_country', 'DE:LS' );
 		update_option( 'woocommerce_allowed_countries', 'specific' );
@@ -194,6 +194,21 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$result = wc_get_customer_default_location();
 		$this->assertEquals( 'GB', $result['country'] );
 		$this->assertEquals( '', $result['state'] );
+
+		// Test with default address, one shipping country and one billing country set. Address defaults to empty.
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_default_country', 'DE:LS' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'FI' ) );
+		$result = wc_get_customer_default_location();
+		$this->assertEquals( '', $result['country'] );
+		$this->assertEquals( '', $result['state'] );
+
+		// Reset the woocommerce_ship_to_countries countries and woocommerce_specific_ship_to_countries options for the next tests.
+		update_option( 'woocommerce_specific_ship_to_countries', '' );
+		update_option( 'woocommerce_ship_to_countries', '' );
 
 		// Test with no default address.
 		update_option( 'woocommerce_default_customer_address', '' );
