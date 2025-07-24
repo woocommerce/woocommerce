@@ -41,6 +41,8 @@
 		"woocommerce/product-gallery-large-image",
 		"woocommerce/product-collection"
 	],
+	"viewScript": "wc-navigation-arrows-frontend",
+	"viewScriptModule": "woocommerce/navigation-arrows",
 	"style": "file:../woocommerce/navigation-arrows-style.css",
 	"editorStyle": "file:../woocommerce/navigation-arrows-editor.css"
 }
