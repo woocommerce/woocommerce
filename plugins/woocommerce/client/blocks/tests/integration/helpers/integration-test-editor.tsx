@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import {
@@ -37,9 +37,6 @@ const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
  * @param name The block name.
  */
 export async function selectBlock( name: string | RegExp ) {
-	await waitFor( () => {
-		expect( screen.getByLabelText( name ) ).toBeInTheDocument();
-	} );
 	await act( () => userEvent.click( screen.getByLabelText( name ) ) );
 }
 
