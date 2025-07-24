@@ -1,7 +1,7 @@
 ---
 post_title: How the checkout block processes an order
 sidebar_label: Processing an order
-
+sidebar_position: 1
 ---
 
 # How the checkout block processes an order

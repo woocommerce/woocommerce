@@ -1,15 +1,14 @@
 ---
 post_title: Available slots
 sidebar_label: Available slots
-
+sidebar_position: 2
 ---
 
 # Available slots
-<!-- markdownlint-disable MD024 -->
 
 This document presents the list of available Slots that you can use for adding your custom content (Fill).
 
-If you want to add a new SlotFill component, check the [Checkout - Slot Fill document](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/slot/README.md). To read more about Slot and Fill, check the [Slot and Fill document](/docs/block-development/tutorials/slot-fills/).
+If you want to add a new SlotFill component, check the [Checkout - Slot Fill document](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/slot/README.md). To read more about Slot and Fill, check the [Slot and Fill document](/docs/block-development/reference/slot-fills/).
 
 **Note About Naming:** Slots that are prefixed with `Experimental` are experimental and subject to change or remove. Once they graduate from the experimental stage, the naming would change and the `Experimental` prefix would be dropped. Check the [Feature Gating document](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md) from more information.
 

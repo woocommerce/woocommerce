@@ -1,8 +1,8 @@
 {
-    "position": 2,
+    "position": 7,
     "label": "Checkout payment methods",
-    "collapsible": false,
-    "collapsed": false,
+    "collapsible": true,
+    "collapsed": true,
     "link": {
       "type": "generated-index",
       "title": "Checkout payment methods"

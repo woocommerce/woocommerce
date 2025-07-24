@@ -1,7 +1,7 @@
 ---
 post_title: DOM events
 sidebar_label: DOM Events
-
+sidebar_position: 3
 ---
 
 # DOM events

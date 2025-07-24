@@ -1,6 +1,6 @@
 {
-    "position": 4,
-    "label": "Available filters",
+    "position": 6,
+    "label": "Hooks and filters",
     "collapsible": true,
     "collapsed": true,
     "link": {

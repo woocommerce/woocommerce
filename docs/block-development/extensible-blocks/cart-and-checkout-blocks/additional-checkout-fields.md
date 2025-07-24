@@ -1,7 +1,7 @@
 ---
 post_title: Additional checkout fields
 sidebar_label: Additional checkout fields
-
+sidebar_position: 4
 ---
 
 # Additional checkout fields

@@ -1,7 +1,7 @@
 ---
 post_title: Removing checkout fields
 sidebar_label: Removing checkout fields
-
+sidebar_position: 5
 ---
 
 # Removing checkout fields
