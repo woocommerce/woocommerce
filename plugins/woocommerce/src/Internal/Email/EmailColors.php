@@ -27,36 +27,36 @@ class EmailColors {
 			$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 		}
 
-		$base_color_default        = '#720eec';
-		$bg_color_default          = '#f7f7f7';
-		$body_bg_color_default     = '#ffffff';
-		$body_text_color_default   = '#3c3c3c';
-		$footer_text_color_default = '#3c3c3c';
+		$base        = '#720eec';
+		$bg          = '#f7f7f7';
+		$body_bg     = '#ffffff';
+		$body_text   = '#3c3c3c';
+		$footer_text = '#3c3c3c';
 
 		if ( $email_improvements_enabled ) {
-			$base_color_default        = '#8526ff';
-			$bg_color_default          = '#ffffff';
-			$body_bg_color_default     = '#ffffff';
-			$body_text_color_default   = '#1e1e1e';
-			$footer_text_color_default = '#787c82';
+			$base        = '#8526ff';
+			$bg          = '#ffffff';
+			$body_bg     = '#ffffff';
+			$body_text   = '#1e1e1e';
+			$footer_text = '#787c82';
 
 			$global_colors = self::get_colors_from_global_styles();
 
 			if ( $global_colors ) {
-				$base_color_default        = $global_colors['base'];
-				$bg_color_default          = $global_colors['bg'];
-				$body_bg_color_default     = $global_colors['body_bg'];
-				$body_text_color_default   = $global_colors['body_text'];
-				$footer_text_color_default = $global_colors['footer_text'];
+				$base        = $global_colors['base'];
+				$bg          = $global_colors['bg'];
+				$body_bg     = $global_colors['body_bg'];
+				$body_text   = $global_colors['body_text'];
+				$footer_text = $global_colors['footer_text'];
 			}
 		}
 
 		return compact(
-			'base_color_default',
-			'bg_color_default',
-			'body_bg_color_default',
-			'body_text_color_default',
-			'footer_text_color_default',
+			'base',
+			'bg',
+			'body_bg',
+			'body_text',
+			'footer_text',
 		);
 	}
 
