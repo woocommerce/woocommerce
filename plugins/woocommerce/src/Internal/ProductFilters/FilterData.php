@@ -429,7 +429,7 @@ class FilterData {
 		$count_cases = array();
 		foreach ( $hierarchy_counts as $term_taxonomy_id => $term_ids ) {
 			$term_ids_str  = implode( ',', array_map( 'absint', $term_ids ) );
-			$count_cases[] = "SUM(CASE WHEN tt.term_id IN ({$term_ids_str}) THEN 1 ELSE 0 END) as count_{$term_taxonomy_id}";
+			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_taxonomy_id}";
 		}
 
 		$batch_count_sql = '
