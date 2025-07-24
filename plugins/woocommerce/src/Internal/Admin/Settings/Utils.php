@@ -3,8 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
-use WP_REST_Request;
+use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Admin\Features\Features;
+use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -438,31 +439,99 @@ class Utils {
 	 * @return array {
 	 *               'success' => bool Whether the request was successful.
 	 *               'errors' => array An array of error messages, if any.
-	 *               'color_scheme' => string The color scheme to use for the authorization page.
-	 *               'url' => string The URL to redirect to for authorization.
+	 *               'url' => string The URL to redirect to for authorization. In case of an error, this will be an empty string.
 	 * }
 	 */
 	public static function get_wpcom_connection_authorization( string $return_url ): array {
-		$plugin_onboarding = new OnboardingPlugins();
+		$connection_manager = new JetpackConnectionManager( 'woocommerce' );
+		$errors             = new WP_Error();
 
-		$request = new WP_REST_Request();
-		$request->set_param( 'redirect_url', $return_url );
-		$result = $plugin_onboarding->get_jetpack_authorization_url( $request );
+		// If the site is not registered with WPCOM, try to register it.
+		if ( ! $connection_manager->is_connected() ) {
+			$result = $connection_manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
 
-		if ( ! empty( $result['url'] ) ) {
-			$result['url'] = add_query_arg(
-				array(
-					// We use the new WooDNA value.
-					'from'         => 'woocommerce-onboarding',
-					// We inform Calypso that this is a WooPayments onboarding flow.
-					'plugin_name'  => 'woocommerce-payments',
-					// Use the current user's WP admin color scheme.
-					'color_scheme' => $result['color_scheme'],
-				),
-				$result['url']
+		// Bail if we are not connected to WPCOM by now.
+		if ( ! $connection_manager->is_connected() ) {
+			$errors->add(
+				'woocommerce_settings_payments_connection_error',
+				esc_html__( 'Could not connect to WordPress.com. Please try again later.', 'woocommerce' )
+			);
+
+			return array(
+				'success' => false,
+				'errors'  => $errors->get_error_messages(),
+				'url'     => '',
 			);
 		}
 
-		return $result;
+		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array(
+			'development',
+			'wpcalypso',
+			'horizon',
+			'stage',
+		), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
+			$calypso_env = 'horizon';
+		}
+
+		$authorization_url = $connection_manager->get_authorization_url( null, $return_url );
+		$authorization_url = add_query_arg( 'locale', self::get_wpcom_locale(), $authorization_url );
+
+		return array(
+			'success' => ! $errors->has_errors(),
+			'errors'  => $errors->get_error_messages(),
+			'url'     => add_query_arg(
+				array(
+					// We use the new WooDNA value.
+					'from'        => 'woocommerce-onboarding',
+					// We inform Calypso that this is a WooPayments onboarding flow.
+					'plugin_name' => 'woocommerce-payments',
+					'calypso_env' => $calypso_env,
+				),
+				$authorization_url,
+			),
+		);
+	}
+
+	/**
+	 * Return a locale string for wpcom.
+	 *
+	 * @return string
+	 */
+	public static function get_wpcom_locale(): string {
+		// List of locales that should be used with region code.
+		$locale_to_lang = array(
+			'bre'   => 'br',
+			'de_AT' => 'de-at',
+			'de_CH' => 'de-ch',
+			'de'    => 'de_formal',
+			'el'    => 'el-po',
+			'en_GB' => 'en-gb',
+			'es_CL' => 'es-cl',
+			'es_MX' => 'es-mx',
+			'fr_BE' => 'fr-be',
+			'fr_CA' => 'fr-ca',
+			'nl_BE' => 'nl-be',
+			'nl'    => 'nl_formal',
+			'pt_BR' => 'pt-br',
+			'sr'    => 'sr_latin',
+			'zh_CN' => 'zh-cn',
+			'zh_HK' => 'zh-hk',
+			'zh_SG' => 'zh-sg',
+			'zh_TW' => 'zh-tw',
+		);
+
+		$system_locale = get_locale();
+		if ( isset( $locale_to_lang[ $system_locale ] ) ) {
+			// Return the locale with region code if it's in the list.
+			return $locale_to_lang[ $system_locale ];
+		}
+
+		// If the locale is not in the list, return the language code only.
+		return explode( '_', $system_locale )[0];
 	}
 }
