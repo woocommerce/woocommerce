@@ -28,6 +28,27 @@ class MockWPCLI {
 	public static $last_warning_message = '';
 
 	/**
+	 * Last log message logged.
+	 *
+	 * @var string
+	 */
+	public static $last_log_message = '';
+
+	/**
+	 * All log messages accumulated.
+	 *
+	 * @var array
+	 */
+	public static $all_log_messages = array();
+
+	/**
+	 * Last success message logged.
+	 *
+	 * @var string
+	 */
+	public static $last_success_message = '';
+
+	/**
 	 * Mock debug method.
 	 *
 	 * @param string $message Debug message.
@@ -43,6 +64,25 @@ class MockWPCLI {
 	 */
 	public static function warning( $message ): void {
 		self::$last_warning_message = $message;
+	}
+
+	/**
+	 * Mock log method.
+	 *
+	 * @param string $message Log message.
+	 */
+	public static function log( $message ): void {
+		self::$last_log_message = $message;
+		self::$all_log_messages[] = $message;
+	}
+
+	/**
+	 * Mock success method.
+	 *
+	 * @param string $message Success message.
+	 */
+	public static function success( $message ): void {
+		self::$last_success_message = $message;
 	}
 }
 
