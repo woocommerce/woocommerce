@@ -16,16 +16,10 @@ import {
 jest.mock( '@wordpress/data' );
 jest.mock( '../persistence-layer' );
 
-const mockHasCartSession = hasCartSession as jest.MockedFunction<
-	typeof hasCartSession
->;
-const mockIsAddingToCart = isAddingToCart as jest.MockedFunction<
-	typeof isAddingToCart
->;
-const mockPersistenceLayerGet = persistenceLayer.get as jest.MockedFunction<
-	typeof persistenceLayer.get
->;
-const mockWpDispatch = wpDispatch as jest.MockedFunction< typeof wpDispatch >;
+const mockHasCartSession = jest.mocked( hasCartSession );
+const mockIsAddingToCart = jest.mocked( isAddingToCart );
+const mockPersistenceLayerGet = jest.mocked( persistenceLayer.get );
+const mockWpDispatch = jest.mocked( wpDispatch );
 
 describe( 'Window load event handler', () => {
 	let mockFinishResolution: jest.Mock;
