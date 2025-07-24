@@ -879,6 +879,6 @@ class WC_Gateway_Paypal_Request {
 			$decimals = 0;
 		}
 
-		return number_format( $price, $decimals, '.', '' );
+		return number_format( (float) $price, $decimals, '.', '' );
 	}
 }
