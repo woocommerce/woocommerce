@@ -196,6 +196,38 @@ export const OnboardingProvider: React.FC< {
 		},
 		[]
 	);
+
+	// Helper function to determine if a frontend step should be completed
+	const isFrontendStepCompleted = useCallback(
+		(
+			step: WooPaymentsProviderOnboardingStep,
+			parentStep?: WooPaymentsProviderOnboardingStep,
+			nextSibling?: WooPaymentsProviderOnboardingStep
+		): boolean => {
+			if ( step.type !== 'frontend' ) {
+				return Boolean( step.status === 'completed' );
+			}
+
+			if ( parentStep ) {
+				// Rule 2: A frontend sub-step is completed if its parent is, or if the next backend sibling is active/done.
+				return (
+					parentStep.status === 'completed' ||
+					( nextSibling &&
+						nextSibling.type === 'backend' &&
+						( nextSibling.status === 'in_progress' ||
+							nextSibling.status === 'completed' ) )
+				);
+			} else if ( step.subSteps?.length ) {
+				// Rule 1: A frontend top-level step is completed if all its sub-steps are.
+				return step.subSteps.every( ( s ) =>
+					s.status ? s.status === 'completed' : false
+				);
+			}
+
+			return false;
+		},
+		[]
+	);
 	// Navigation helper
 	const navigateToStep = useCallback(
 		( stepKey: string ) => {
