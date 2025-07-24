@@ -142,7 +142,9 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 			5 // Lower priority to run before Shopify.
 		);
 
-		$platforms = $this->registry->get_platforms();
+		// Create new registry after adding the filter to see both platforms.
+		$test_registry = new PlatformRegistry();
+		$platforms     = $test_registry->get_platforms();
 
 		$this->assertCount( 2, $platforms, 'Should have both existing and Shopify platforms.' );
 		$this->assertArrayHasKey( 'existing-platform', $platforms );
