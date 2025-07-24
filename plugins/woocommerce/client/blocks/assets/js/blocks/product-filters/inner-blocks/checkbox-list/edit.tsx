@@ -63,15 +63,16 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 
 	const loadingState = useMemo( () => {
 		return [ ...Array( 5 ) ].map( ( x, i ) => (
-			<li
+			<div
+				className="wc-block-product-filter-checkbox-list__item"
 				key={ i }
 				style={ {
 					/* stylelint-disable */
-					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+					width: Math.floor( Math.random() * 75 ) + '%',
 				} }
 			>
 				&nbsp;
-			</li>
+			</div>
 		) );
 	}, [] );
 
