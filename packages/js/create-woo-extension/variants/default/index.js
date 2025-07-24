@@ -1,7 +1,5 @@
-const { join } = require("path");
-
 module.exports = {
-	templatesPath: join(__dirname, "variants/default"),
+	templatesPath: __dirname,
 	defaultValues: {
 		npmDependencies: [
 			'@wordpress/hooks',
@@ -20,10 +18,4 @@ module.exports = {
 			postinstall: 'composer install',
 		},
 	},
-	variants: {
-		extendCartCheckoutBlock: {
-			pluginTemplatesPath: join(__dirname, "variants/extend-cart-checkout-block"),
-			blockTemplatesPath: join(__dirname, "variants/extend-cart-checkout-block"),
-		}
-	}
 };
