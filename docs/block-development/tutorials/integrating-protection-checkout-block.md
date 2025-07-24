@@ -104,7 +104,10 @@ function plugin_check_turnstile_token( $result ) {
     }
 
     // Skip if this is not the checkout endpoint.
-    if ( ! preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+    if (
+        ! isset( $GLOBALS['wp']->query_vars['rest_route'] ) ||
+        ! preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
+    ) {
         return $result;
     }
 
@@ -123,10 +126,14 @@ function plugin_check_turnstile_token( $result ) {
         }
     }
 
-    $extensions = $request_body['extensions'];
-    if ( empty( $extensions ) || ! isset( $extensions['plugin-namespace-turnstile'] ) ) {
+    if (
+        ! isset( $request_body['extensions'] ) ||
+        empty( $request_body['extensions'] ) ||
+        ! isset( $request_body['extensions']['plugin-namespace-turnstile'] )
+    ) {
         return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
     }
+    $extensions = $request_body['extensions'];
     $token = sanitize_text_field( $extensions['plugin-namespace-turnstile']['token'] );
     $check = my_token_check_function( $token );
     $success = $check['success'];
@@ -138,29 +145,3 @@ function plugin_check_turnstile_token( $result ) {
     return $result;
 }
 ```
-
-**Key points about server-side validation:**
-
-- We check for POST requests to the checkout endpoint specifically
-- The protection token is accessed via `$request_body['extensions']['your-namespace']`
-- Always return the `$result` parameter to avoid interfering with other authentication checks
-- Return a `WP_Error` object if validation fails
-- Consider allowing certain payment methods to bypass protection (e.g., express payments)
-
-## Important Notes
-
-### Security Considerations
-
-1. **Always validate on the server side** - Client-side validation can be bypassed
-2. **Use HTTPS** - Protection tokens should be transmitted securely
-3. **Rate limiting** - Consider implementing [rate limiting](/docs/apis/store-api/rate-limiting/) for your protection endpoints
-4. **Token expiration** - Ensure your protection tokens have appropriate expiration times
-
-### Testing Your Integration
-
-When testing your protection integration:
-
-1. Test with the checkout block enabled
-2. Verify that validation fails when no token is provided
-3. Test with different payment methods
-4. Ensure the protection doesn't interfere with legitimate checkout flows
