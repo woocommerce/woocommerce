@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-wc-gateway-paypal-request.php';
+
 /**
  * Handles webhook events.
  */
@@ -31,6 +33,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		switch ( $data['event_type'] ) {
 			case 'CHECKOUT.ORDER.APPROVED':
 				$this->process_checkout_order_approved( $data );
+				break;
+			case 'PAYMENT.CAPTURE.COMPLETED':
+				$this->process_payment_capture_completed( $data );
 				break;
 			default:
 				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( $data, true ) );
@@ -63,9 +68,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 
-			// phpcs:disable Generic.Commenting.Todo.TaskFound
-			// TODO: Capture the payment.
-
+			// Capture the payment after approval.
+			$this->capture_payment( $order, $event['resource']['links'] );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
@@ -78,6 +82,25 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Process the PAYMENT.CAPTURE.COMPLETED webhook event.
+	 *
+	 * @param array $event The webhook event data.
+	 */
+	private function process_payment_capture_completed( $event ) {
+		$custom_id = $event['resource']['custom_id'];
+		$order     = $this->get_wc_order( $custom_id );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			return;
+		}
+
+		$order->set_transaction_id( $event['resource']['id'] );
+		$order->payment_complete();
+		$order->add_order_note( 'PayPal payment captured. ID: ' . $event['resource']['id'] );
+		$order->save();
 	}
 
 	/**
@@ -105,5 +128,30 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Capture the payment.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @param array    $links The links from the webhook event.
+	 */
+	private function capture_payment( $order, $links ) {
+		$capture_url = null;
+		foreach ( $links as $link ) {
+			if ( 'capture' === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				$capture_url = esc_url_raw( $link['href'] );
+				break;
+			}
+		}
+
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
+		if ( ! isset( $payment_gateways['paypal'] ) ) {
+			WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
+			return;
+		}
+		$gateway        = $payment_gateways['paypal'];
+		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
+		$paypal_request->capture_payment( $order, $capture_url );
 	}
 }
