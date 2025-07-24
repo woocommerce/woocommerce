@@ -48,14 +48,23 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor.
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+		await waitFor( () => {
+			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+			// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		} );
 
-		// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeVisible();
+		} );
+
 		await selectBlock( /^Block: Order Summary$/i );
 
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
+
 		const orderSummaryAddButton = getByLabelText(
 			orderSummaryBlock,
 			/^Add block$/i

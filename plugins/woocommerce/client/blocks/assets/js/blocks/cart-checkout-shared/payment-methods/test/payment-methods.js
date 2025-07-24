@@ -142,10 +142,6 @@ describe( 'PaymentMethods', () => {
 		} );
 	} );
 
-	afterEach( () => {
-		// MSW handlers are reset automatically in the global setup
-	} );
-
 	test( 'should show no payment methods component when there are no payment methods', async () => {
 		render( <PaymentMethods /> );
 

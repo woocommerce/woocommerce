@@ -80,9 +80,7 @@ describe( 'Testing Mini-Cart', () => {
 		mockEmptyCart();
 		render( <MiniCartBlock /> );
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /0 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
 		);
 		const badgeWith0Count = screen.queryByText( '0' );
 
@@ -94,9 +92,7 @@ describe( 'Testing Mini-Cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /3 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
 		);
 		await act( async () => {
 			await user.click( screen.getByLabelText( /items/i ) );
@@ -111,9 +107,7 @@ describe( 'Testing Mini-Cart', () => {
 		const user = userEvent.setup();
 		render( <MiniCartBlock /> );
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /3 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
 		);
 
 		// Open drawer.
@@ -147,9 +141,7 @@ describe( 'Testing Mini-Cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /0 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
 		);
 
 		await act( async () => {
@@ -160,16 +152,14 @@ describe( 'Testing Mini-Cart', () => {
 		await waitFor( () =>
 			expect(
 				screen.getByText( /Your cart is currently empty!/i )
-			).toBeInTheDocument()
+			).toBeVisible()
 		);
 	} );
 
 	it( 'updates contents when removed from cart event is triggered', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /3 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
 		);
 
 		mockEmptyCart();
@@ -183,9 +173,7 @@ describe( 'Testing Mini-Cart', () => {
 			screen.queryByLabelText( /3 items in cart/i )
 		);
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /0 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
 		);
 	} );
 
@@ -193,9 +181,7 @@ describe( 'Testing Mini-Cart', () => {
 		mockEmptyCart();
 		render( <MiniCartBlock /> );
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /0 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
 		);
 
 		mockFullCart();

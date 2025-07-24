@@ -177,10 +177,8 @@ describe( 'Testing Checkout', () => {
 		render( <CheckoutBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument()
+			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
 		);
-
-		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
@@ -188,13 +186,13 @@ describe( 'Testing Checkout', () => {
 
 		expect(
 			await screen.findByText( /Payment method with cards/i )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		expect(
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		act( () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
@@ -246,7 +244,7 @@ describe( 'Testing Checkout', () => {
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		// cleanup
 		act( () => {
@@ -298,18 +296,14 @@ describe( 'Testing Checkout', () => {
 		await waitFor( () =>
 			expect(
 				screen.getByRole( 'button', { name: 'Edit shipping address' } )
-			).toBeInTheDocument()
+			).toBeVisible()
 		);
-
-		expect(
-			screen.getByRole( 'button', { name: 'Edit shipping address' } )
-		).toBeInTheDocument();
 
 		expect(
 			screen.getByText( 'Toronto ON M4W 1A6', {
 				selector: '.wc-block-components-address-card span',
 			} )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
 		await act( () =>
@@ -386,12 +380,8 @@ describe( 'Testing Checkout', () => {
 		await waitFor( () =>
 			expect(
 				screen.getByRole( 'button', { name: 'Edit billing address' } )
-			).toBeInTheDocument()
+			).toBeVisible()
 		);
-
-		expect(
-			screen.getByRole( 'button', { name: 'Edit billing address' } )
-		).toBeInTheDocument();
 	} );
 
 	it( 'Ensures checkbox labels have unique IDs', async () => {
@@ -477,13 +467,8 @@ describe( 'Testing Checkout', () => {
 				screen.getByText(
 					/You are currently checking out as a guest./i
 				)
-			).toBeInTheDocument()
+			).toBeVisible()
 		);
-
-		// Query the text.
-		expect(
-			queryByText( /You are currently checking out as a guest./i )
-		).toBeInTheDocument();
 
 		act( () => {
 			allSettings.checkoutAllowsGuest = true;
@@ -510,7 +495,7 @@ describe( 'Testing Checkout', () => {
 		render( <CheckoutBlock /> );
 
 		await waitFor( () =>
-			expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument()
+			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
 		);
 
 		const shippingForm = screen.getByRole( 'group', {
@@ -598,7 +583,7 @@ describe( 'Testing Checkout', () => {
 		await waitFor( () =>
 			expect(
 				screen.getByRole( 'button', { name: /Place order/i } )
-			).toBeInTheDocument()
+			).toBeVisible()
 		);
 
 		// Submit the form

@@ -80,7 +80,7 @@ describe( 'Testing Slotfills', () => {
 		await waitFor( () => {
 			expect(
 				screen.getByText( /My address: Street address/i )
-			).toBeInTheDocument();
+			).toBeVisible();
 		} );
 	} );
 } );

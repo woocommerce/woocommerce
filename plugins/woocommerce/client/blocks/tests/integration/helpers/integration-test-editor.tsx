@@ -37,9 +37,6 @@ const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
  * @param name The block name.
  */
 export async function selectBlock( name: string | RegExp ) {
-	await waitFor( () => {
-		expect( screen.getByLabelText( name ) ).toBeInTheDocument();
-	} );
 	await act( () => userEvent.click( screen.getByLabelText( name ) ) );
 }
 
