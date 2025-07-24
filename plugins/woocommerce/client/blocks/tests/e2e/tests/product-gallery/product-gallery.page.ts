@@ -183,14 +183,16 @@ export class ProductGalleryPage {
 	}
 
 	async clickNextButton() {
-		await this.page.getByRole( 'button', { name: 'Next' } ).click();
+		await this.page.getByRole( 'button', { name: 'Next image' } ).click();
 		// Wait for the transition to change
 		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
 		await this.page.waitForTimeout( 400 );
 	}
 
 	async clickPreviousButton() {
-		await this.page.getByRole( 'button', { name: 'Previous' } ).click();
+		await this.page
+			.getByRole( 'button', { name: 'Previous image' } )
+			.click();
 		// Wait for the transition to change
 		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
 		await this.page.waitForTimeout( 400 );

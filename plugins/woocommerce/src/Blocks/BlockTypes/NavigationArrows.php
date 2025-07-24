@@ -62,7 +62,7 @@ class NavigationArrows extends AbstractBlock {
 				data-wp-on--click="actions.selectPreviousImage"
 				data-wp-on--keydown="actions.onArrowsKeyDown"
 				data-wp-bind--aria-disabled="context.disableLeft"
-				aria-label="Previous"
+				aria-label="Previous image"
 			>
 				<svg
 					class="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--left"
@@ -85,7 +85,7 @@ class NavigationArrows extends AbstractBlock {
 				data-wp-on--click="actions.selectNextImage"
 				data-wp-on--keydown="actions.onArrowsKeyDown"
 				data-wp-bind--aria-disabled="context.disableRight"
-				aria-label="Next"
+				aria-label="Next image"
 			>
 				<svg
 					class="wc-block-navigation-arrows__icon wc-block-navigation-arrows__icon--right"
