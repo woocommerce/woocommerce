@@ -17305,12 +17305,6 @@ packages:
     peerDependencies:
       jest-environment-jsdom: '>=28.0.0'
 
-  jest-fixed-jsdom@0.0.9:
-    resolution: {integrity: sha512-KPfqh2+sn5q2B+7LZktwDcwhCpOpUSue8a1I+BcixWLOQoEVyAjAGfH+IYZGoxZsziNojoHGRTC8xRbB1wDD4g==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      jest-environment-jsdom: '>=28.0.0'
-
   jest-get-type@26.3.0:
     resolution: {integrity: sha512-TpfaviN1R2pQWkIihlfEanwOXK0zcxrKEE4MlU6Tn7keoXdN6/3gK/xl0yEh8DOunn5pOVGKf8hB4R9gVh04ig==}
     engines: {node: '>= 10.14.2'}
@@ -45715,10 +45709,6 @@ snapshots:
       '@types/node': 20.17.8
       jest-mock: 29.7.0
       jest-util: 29.7.0
-
-  jest-fixed-jsdom@0.0.9(jest-environment-jsdom@29.7.0):
-    dependencies:
-      jest-environment-jsdom: 29.7.0
 
   jest-fixed-jsdom@0.0.9(jest-environment-jsdom@29.7.0):
     dependencies:
