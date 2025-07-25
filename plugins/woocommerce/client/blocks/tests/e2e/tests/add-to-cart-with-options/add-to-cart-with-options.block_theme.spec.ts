@@ -135,7 +135,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
-			await expect( page.getByText( 'Out of stock' ) ).toBeHidden();
+			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
