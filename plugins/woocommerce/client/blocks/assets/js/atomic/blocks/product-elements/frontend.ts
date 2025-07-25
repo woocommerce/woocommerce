@@ -47,7 +47,7 @@ const ALLOWED_ATTR = [
 ];
 
 export type Context = {
-	productElementKey: 'price_html' | 'availability_html';
+	productElementKey: 'price_html' | 'availability';
 };
 
 const productElementStore = store(
