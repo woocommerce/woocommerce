@@ -73,9 +73,7 @@ const LaunchStoreController = () => {
 
 	// Auto-close mobile sidebar when navigating to different states
 	useEffect( () => {
-		if ( isMobileSidebarOpen ) {
-			setIsMobileSidebarOpen( false );
-		}
+		setIsMobileSidebarOpen( false );
 	}, [ sidebarState.value ] ); // Close sidebar whenever the state changes
 
 	const [ CurrentSidebarComponent ] =
