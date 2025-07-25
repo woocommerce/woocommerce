@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
-        required: false
+        description: 'Release branch.'
+        required: true
         default: ''
       skip_verify:
         description: 'Skip verification steps.'
@@ -19,7 +19,7 @@ on:
       branch:
         description: 'Release branch to use. Defaults to the branch the workflow is run from.'
         type: string
-        required: false
+        required: true
         default: ''
       skip_verify:
         description: 'Skip verification steps.'
