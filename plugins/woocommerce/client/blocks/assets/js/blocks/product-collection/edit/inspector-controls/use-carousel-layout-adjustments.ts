@@ -13,7 +13,7 @@ import { getInnerBlockBy, getInnerBlockByName } from '@woocommerce/utils';
 import {
 	coreQueryPaginationBlockName,
 	productTemplateBlockName,
-	nextPreviousArrowsBlockName,
+	nextPreviousButtonsBlockName,
 	paginationDefaultAttributes,
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
@@ -22,7 +22,7 @@ import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
  * Handles the transition to carousel layout:
  * - Create Group block
  *   - Move Product Template block to the Group block
- *   - Add Next/Previous Arrows block
+ *   - Add Next/Previous Buttons block
  * - Remove Pagination block (if exists)
  *
  * @param {BlockInstance} productCollectionBlock - The product collection block.
@@ -47,7 +47,7 @@ const handleTransitionToCarouselLayout = (
 	const productTemplateBlockClientId = productTemplateBlock?.clientId;
 	const productCollectionBlockClientId = productCollectionBlock?.clientId;
 
-	const nextPrevArrowsBlock = createBlock( nextPreviousArrowsBlockName );
+	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName );
 	const productTemplateUpdatedBlock = createBlock(
 		productTemplateBlockName,
 		{
@@ -85,7 +85,7 @@ const handleTransitionToCarouselLayout = (
 
 /**
  * Handles the transition from carousel layout:
- * - Remove Next/Previous Arrows block (if exists)
+ * - Remove Next/Previous Buttons block (if exists)
  * - Move Product Template block to the product collection block
  * - Remove Group block (if empty)
  * - Add Pagination block for default collection (if needed)
@@ -101,13 +101,13 @@ const handleTransitionFromCarouselLayout = (
 ) => {
 	const { removeBlock, insertBlock, replaceBlock } = actions;
 
-	const nextPrevArrowsBlock = getInnerBlockByName(
+	const nextPrevButtonsBlock = getInnerBlockByName(
 		productCollectionBlock,
-		nextPreviousArrowsBlockName
+		nextPreviousButtonsBlockName
 	);
 
-	if ( nextPrevArrowsBlock ) {
-		removeBlock( nextPrevArrowsBlock?.clientId, false );
+	if ( nextPrevButtonsBlock ) {
+		removeBlock( nextPrevButtonsBlock?.clientId, false );
 	}
 
 	// Find the group block containing the product template
@@ -234,7 +234,7 @@ const useLayoutAdjustments = (
 			return;
 		}
 
-		// When switching TO carousel layout, add arrows block and remove pagination block (if exists).
+		// When switching TO carousel layout, add Next Previous Buttons block and remove pagination block (if exists).
 		if (
 			displayLayout?.type === LayoutOptions.CAROUSEL &&
 			previousLayoutType.current !== LayoutOptions.CAROUSEL &&
@@ -248,7 +248,7 @@ const useLayoutAdjustments = (
 			);
 		}
 
-		// When switching FROM carousel layout, remove arrows block and add pagination block (if needed).
+		// When switching FROM carousel layout, remove Next Previous Buttons block and add pagination block (if needed).
 		if (
 			displayLayout?.type !== LayoutOptions.CAROUSEL &&
 			previousLayoutType.current === LayoutOptions.CAROUSEL
