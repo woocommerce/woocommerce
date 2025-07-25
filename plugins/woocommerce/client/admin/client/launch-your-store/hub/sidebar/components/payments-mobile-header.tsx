@@ -3,7 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { chevronLeft } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -12,8 +12,15 @@ import { recordEvent } from '@woocommerce/tracks';
 import type { SidebarComponentProps } from '../xstate';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
+import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
+	const { steps: allSteps, currentStep } = useOnboardingContext();
+
+	const currentStepIndex = allSteps.findIndex(
+		( step ) => step.id === currentStep?.id
+	);
+
 	const handleBackClick = () => {
 		recordEvent( 'launch_your_store_payments_back_to_hub_click' );
 
@@ -33,17 +40,26 @@ export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 	};
 
 	return (
-		<div className="launch-your-store-mobile-header payments-mobile-header">
+		<div className="mobile-header payments-mobile-header">
 			<Button
-				className="launch-your-store-mobile-header__back-button"
+				className="mobile-header__back-button"
 				onClick={ handleBackClick }
 				icon={ chevronLeft }
 				iconSize={ 20 }
 				aria-label={ __( 'Go back', 'woocommerce' ) }
 			/>
-			<h1 className="launch-your-store-mobile-header__title">
+			<h1 className="mobile-header__title">
 				{ __( 'Set up WooPayments', 'woocommerce' ) }
 			</h1>
+			<div className="mobile-header__steps">
+				{ /* translators: %1$s: current step number, %2$s: total number of steps */ }
+				{ sprintf(
+					/* translators: %1$s: current step number, %2$s: total number of steps */
+					__( 'Step %1$s of %2$s', 'woocommerce' ),
+					currentStepIndex,
+					allSteps.length
+				) }
+			</div>
 		</div>
 	);
 };
