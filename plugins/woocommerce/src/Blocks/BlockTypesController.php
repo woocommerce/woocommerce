@@ -448,6 +448,8 @@ final class BlockTypesController {
 			'FilterWrapper',
 			'HandpickedProducts',
 			'MiniCart',
+			'NextPreviousButtons',
+
 			'StoreNotices',
 			'PaymentMethodIcons',
 			'PriceFilter',
@@ -470,7 +472,6 @@ final class BlockTypesController {
 			'ProductFilterChips',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
-			'ProductGalleryLargeImageNextPrevious',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',

@@ -7,9 +7,10 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 /**
  * ProductGalleryLargeImage class.
  */
-class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
+class NextPreviousButtons extends AbstractBlock {
 	/**
-	 * Block name.
+	 * Block name. Block has been initially created for Product Gallery Large Image block
+	 * hence the slug is related to this block. But it can be used for other blocks as well.
 	 *
 	 * @var string
 	 */
