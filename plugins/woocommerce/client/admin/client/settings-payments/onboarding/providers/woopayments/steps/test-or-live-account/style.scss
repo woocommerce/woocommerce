@@ -7,27 +7,27 @@
 		text-align: center;
 	}
 
-	&__success_content_title {
-		font-size: 20px;
-		line-height: 24px;
-		font-weight: 500;
-		margin: 0;
-	}
-
-	&__success_content_container {
-		margin: 56px auto 0 auto;
-		max-width: 648px;
-
-		@include breakpoint( "<600px" ) {
-			margin: 24px auto 0 auto;
-		}
-	}
-
 	&__success_content {
 		display: flex;
 		flex-direction: column;
 		gap: $gap-small;
 		align-items: center;
+
+		&_title {
+			font-size: 20px;
+			line-height: 24px;
+			font-weight: 500;
+			margin: 0;
+		}
+
+		&_container {
+			margin: 56px auto 0 auto;
+			max-width: 648px;
+	
+			@include breakpoint( "<600px" ) {
+				margin: 24px auto 0 auto;
+			}
+		}
 
 		button {
 			width: 100%;
