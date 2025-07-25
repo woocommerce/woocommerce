@@ -129,7 +129,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				$inner_block_html = (
 					new WP_Block(
 						$inner_block->parsed_block,
-						$block->context
+						array_merge(
+							(array) $block->context,
+							array( 'iapi/provider' => 'woocommerce/product-gallery' )
+						),
 					)
 				)->render( array( 'dynamic' => true ) );
 

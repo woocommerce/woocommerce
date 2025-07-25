@@ -37,14 +37,20 @@ class NextPreviousButtons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		$iapi_provider = $block->context['iapi/provider'] ?? null;
+
+		if ( empty( $iapi_provider ) ) {
+			return '';
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
 		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
 		ob_start();
 		?>
-		<div
+	<div
 			class="wc-block-next-previous-buttons <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
-			data-wp-interactive="woocommerce/product-gallery"
+			data-wp-interactive="<?php echo esc_attr( $iapi_provider ); ?>"
 		>
 			<button
 				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
