@@ -211,7 +211,6 @@
 		"ignore-loader": "0.1.x",
 		"jest": "29.5.x",
 		"jest-circus": "29.5.x",
-		"jest-fetch-mock": "3.0.3",
 		"json2md": "1.12.0",
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
@@ -242,7 +241,9 @@
 		"webpack-cli": "5.1.x",
 		"wireit": "0.14.12",
 		"wordpress-data-wp-6-7": "npm:@wordpress/data@wp-6.7",
-		"wp-types": "3.63.0"
+		"wp-types": "3.63.0",
+		"msw": "2.10.4",
+		"jest-fixed-jsdom": "0.0.9"
 	},
 	"engines": {
 		"node": "^20.11.1"
