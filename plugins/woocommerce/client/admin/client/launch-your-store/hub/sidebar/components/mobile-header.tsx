@@ -30,7 +30,9 @@ export const LaunchStoreHubMobileHeader = ( props: SidebarComponentProps ) => {
 			<h1 className="mobile-header__title">
 				{ __( 'Launch Your Store', 'woocommerce' ) }
 			</h1>
-			{ props.onToggle && <MobileSidebarToggle onToggle={ props.onToggle } /> }
+			{ props.onToggle && (
+				<MobileSidebarToggle onToggle={ props.onToggle } />
+			) }
 		</div>
 	);
 };
