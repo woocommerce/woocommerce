@@ -113,7 +113,10 @@ describe( 'Product Details block', () => {
 			( useSelect as jest.Mock ).mockClear();
 		} );
 
-		afterAll( () => server.close() );
+		afterAll( () => {
+			server.close();
+			jest.restoreAllMocks();
+		} );
 
 		test( 'should render product specifications when product is selected', async () => {
 			await setupWithSingleProduct( {}, 2 );
@@ -179,10 +182,8 @@ describe( 'Product Details block', () => {
 			} );
 
 			expect(
-				screen.findByRole( 'table', { hidden: true } )
-			).rejects.toThrow();
+				screen.queryByRole( 'table', { hidden: true } )
+			).not.toBeInTheDocument();
 		} );
 	} );
 } );
-
-jest.restoreAllMocks();
