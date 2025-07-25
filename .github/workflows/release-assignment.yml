@@ -10,7 +10,7 @@ permissions:
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
       version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
@@ -78,7 +78,7 @@ jobs:
     name: Assign a release lead
     needs: check-upcoming-release-events
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - uses: actions/github-script@v7
         with:
