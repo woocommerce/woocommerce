@@ -15,7 +15,8 @@ import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
  * Stepper component that renders only the active step from its children
  */
 export default function Stepper( {
-	active,
+	activeTopLevelStep,
+	activeSubStep,
 	steps,
 	justCompletedStepId,
 	includeSidebar = false,
@@ -23,9 +24,13 @@ export default function Stepper( {
 	context = {},
 }: {
 	/**
-	 * The active step key
+	 * The active top-level step key
 	 */
-	active: string;
+	activeTopLevelStep: string;
+	/**
+	 * The active sub-step key
+	 */
+	activeSubStep: WooPaymentsProviderOnboardingStep | undefined;
 	/**
 	 * The ID of the step that was just completed.
 	 * This can be used by steps to mark themselves as completed but moving to the next step depends on user interaction.
@@ -51,25 +56,27 @@ export default function Stepper( {
 	};
 } ): React.ReactNode {
 	// Find the active step component
-	const activeStep = steps.find( ( step ) => step.id === active );
+	const topLevelStep = steps.find(
+		( step ) => step.id === activeTopLevelStep
+	);
 
 	// Track the step view.
 	useEffect( () => {
-		if ( activeStep ) {
+		if ( activeSubStep ) {
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_modal_step_view',
 				{
-					step: active,
+					step: activeSubStep.id,
 					source: context?.sessionEntryPoint || 'unknown',
 				}
 			);
 		}
-	}, [ active ] );
+	}, [ activeSubStep ] );
 
-	if ( ! activeStep ) return null;
+	if ( ! topLevelStep ) return null;
 
 	const activeStepIndex =
-		steps.findIndex( ( step ) => step.id === active ) + 1;
+		steps.findIndex( ( step ) => step.id === activeTopLevelStep ) + 1;
 
 	// Helper function to determine if a step is completed
 	const isStepCompleted = (
@@ -118,7 +125,7 @@ export default function Stepper( {
 								key={ step.id }
 								label={ step.label }
 								isCompleted={ isStepCompleted( step ) }
-								isActive={ step.id === active }
+								isActive={ step.id === activeTopLevelStep }
 							/>
 						) ) }
 					</div>
@@ -127,9 +134,9 @@ export default function Stepper( {
 			<div className="settings-payments-onboarding-modal__content">
 				<div
 					className="settings-payments-onboarding-modal__step"
-					id={ activeStep.id }
+					id={ activeSubStep?.id }
 				>
-					{ activeStep.content }
+					{ activeSubStep?.content }
 				</div>
 			</div>
 		</>
