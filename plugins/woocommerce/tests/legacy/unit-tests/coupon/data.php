@@ -240,10 +240,10 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 
 		// Test valid amounts.
 		$coupon->set_amount( '0' );
-		$this->assertEquals( '0.00', $coupon->get_amount() );
+		$this->assertEquals( '0', $coupon->get_amount() );
 
 		$coupon->set_amount( 0 );
-		$this->assertEquals( '0.00', $coupon->get_amount() );
+		$this->assertEquals( '0', $coupon->get_amount() );
 
 		// Test invalid negative amounts.
 		try {
@@ -263,10 +263,10 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		// Test percentage amounts.
 		$coupon->set_discount_type( 'percent' );
 		$coupon->set_amount( '100' );
-		$this->assertEquals( '100.00', $coupon->get_amount() );
+		$this->assertEquals( '100', $coupon->get_amount() );
 
 		$coupon->set_amount( 100 );
-		$this->assertEquals( '100.00', $coupon->get_amount() );
+		$this->assertEquals( '100', $coupon->get_amount() );
 
 		// Test invalid percentage amount.
 		try {
@@ -284,18 +284,18 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	public function test_set_maximum_amount_validation() {
 		$coupon = new WC_Coupon();
 		$coupon->set_minimum_amount( '100' );
-		$this->assertEquals( '100.00', $coupon->get_minimum_amount() );
+		$this->assertEquals( '100', $coupon->get_minimum_amount() );
 
 		// Test valid maximum amounts.
 		$coupon->set_maximum_amount( '500' );
-		$this->assertEquals( '500.00', $coupon->get_maximum_amount() );
+		$this->assertEquals( '500', $coupon->get_maximum_amount() );
 
 		// Test 0 and empty string, which means no limit.
 		$coupon->set_maximum_amount( '0' );
-		$this->assertEquals( '0.00', $coupon->get_maximum_amount() );
+		$this->assertEquals( '0', $coupon->get_maximum_amount() );
 
 		$coupon->set_maximum_amount( 0 );
-		$this->assertEquals( '0.00', $coupon->get_maximum_amount() );
+		$this->assertEquals( '0', $coupon->get_maximum_amount() );
 
 		$coupon->set_maximum_amount( '' );
 		$this->assertEquals( '', $coupon->get_maximum_amount() );
