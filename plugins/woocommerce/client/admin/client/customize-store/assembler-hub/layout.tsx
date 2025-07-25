@@ -43,7 +43,6 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 import './gutenberg-styles/layout.scss';
@@ -55,9 +54,7 @@ const ANIMATION_DURATION = 0.5;
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 
-	const { sendEvent, currentState, context } = useContext(
-		CustomizeStoreContext
-	);
+	const { currentState } = useContext( CustomizeStoreContext );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
@@ -92,7 +89,6 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
 	if (
@@ -107,15 +103,7 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional
-						sendEvent={ sendEvent }
-						isWooExpress={ isWooExpress() }
-						isSurveyOpen={ isSurveyOpen }
-						setSurveyOpen={ setSurveyOpen }
-						hasCompleteSurvey={
-							!! context?.transitionalScreen?.hasCompleteSurvey
-						}
-					/>
+					<Transitional />
 				</EntityProvider>
 			</EntityProvider>
 		);

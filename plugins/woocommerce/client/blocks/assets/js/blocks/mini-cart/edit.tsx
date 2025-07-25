@@ -97,10 +97,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	) as string;
 
 	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
+	// We need to set `span` in the selector so it has more specificity than the CSS.
 	useThemeColors(
 		'mini-cart-badge',
 		( { editorBackgroundColor, editorColor } ) => `
-			:where(.wc-block-mini-cart__badge) {
+			span:where(.wc-block-mini-cart__badge) {
 				color: ${ editorBackgroundColor };
 				background-color: ${ editorColor };
 			}
