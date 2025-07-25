@@ -733,7 +733,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param float|string $amount Maximum amount.
 	 */
 	public function set_maximum_amount( $amount ) {
-		if ( (float) $amount && $this->get_minimum_amount() > $amount ) {
+		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
 			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
 		}
 
