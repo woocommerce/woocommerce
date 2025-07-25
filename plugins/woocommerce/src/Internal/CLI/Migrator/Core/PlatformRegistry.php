@@ -189,28 +189,22 @@ class PlatformRegistry {
 	}
 
 	/**
-	 * Gets the required credential fields for a given platform.
+	 * Get platform-specific credential fields for setup prompts.
 	 *
-	 * @param string $platform_slug The platform slug.
+	 * @param string $platform_slug The platform identifier.
 	 *
-	 * @return array An array of field_key => prompt_text for credential collection.
+	 * @return array Array of field_name => prompt_text pairs.
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
-		$platform_config = $this->get_platform( $platform_slug );
 
-		if ( ! $platform_config ) {
-			return array();
-		}
+		// Default field mappings for known platforms.
+		$default_fields = array(
+			'shopify' => array(
+				'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
+				'access_token' => 'Enter access token:',
+			),
+		);
 
-		// For now, we'll use hardcoded fields but this could be configurable per platform.
-		switch ( $platform_slug ) {
-			case 'shopify':
-				return array(
-					'api_key'  => 'Enter your Shopify API Access Token:',
-					'shop_url' => 'Enter your Shopify store URL (e.g., my-store.myshopify.com):',
-				);
-			default:
-				return array();
-		}
+		return $default_fields[ $platform_slug ] ?? array();
 	}
 }

@@ -11,7 +11,7 @@ use WP_CLI;
 /**
  * The products command.
  */
-class ProductsCommand {
+final class ProductsCommand {
 
 	/**
 	 * The credential manager.
@@ -28,14 +28,14 @@ class ProductsCommand {
 	private PlatformRegistry $platform_registry;
 
 	/**
-	 * Class initialization, invoked by the DI container.
+	 * Initialize the command with its dependencies.
 	 *
 	 * @param CredentialManager $credential_manager The credential manager.
 	 * @param PlatformRegistry  $platform_registry  The platform registry.
 	 *
 	 * @internal
 	 */
-	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void {
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 	}

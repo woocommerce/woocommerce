@@ -28,7 +28,7 @@ class ResetCommand {
 	private PlatformRegistry $platform_registry;
 
 	/**
-	 * Class initialization, invoked by the DI container.
+	 * Initialize the command with its dependencies.
 	 *
 	 * @param CredentialManager $credential_manager The credential manager.
 	 * @param PlatformRegistry  $platform_registry  The platform registry.
