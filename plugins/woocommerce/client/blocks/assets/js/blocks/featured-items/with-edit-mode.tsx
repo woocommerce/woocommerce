@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -68,10 +68,19 @@ export const withEditMode =
 		} = props;
 
 		const className = getClassPrefixFromName( name );
+		const [ selectedOptions, setSelectedOptions ] = useState< {
+			productId?: number;
+			categoryId?: number;
+			mediaId: number;
+			mediaSrc: string;
+			editMode: boolean;
+		} >();
 
 		const onDone = () => {
-			setAttributes( { editMode: false } );
-			debouncedSpeak( editLabel );
+			if (selectedOptions) {
+				setAttributes(selectedOptions);
+				debouncedSpeak(editLabel);
+			}
 		};
 
 		const itemId =
@@ -96,18 +105,6 @@ export const withEditMode =
 				}
 			}
 		}, [ status, isDeleted, name, setAttributes ] );
-
-		if ( isLoading ) {
-			return (
-				<Placeholder
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ className }
-				>
-					<Spinner />
-				</Placeholder>
-			);
-		}
 
 		if ( attributes.editMode ) {
 			return (
@@ -135,18 +132,19 @@ export const withEditMode =
 						{ name === BLOCK_NAMES.featuredCategory && (
 							<ProductCategoryControl
 								selected={
-									attributes.categoryId
-										? [ attributes.categoryId ]
+									selectedOptions?.categoryId
+										? [ selectedOptions.categoryId ]
 										: []
 								}
 								onChange={ (
 									value: ProductCategoryResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedOptions( {
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
+										editMode: false,
 									} );
 									triggerUrlUpdate();
 								} }
@@ -156,8 +154,8 @@ export const withEditMode =
 						{ name === BLOCK_NAMES.featuredProduct && (
 							<ProductControl
 								selected={
-									attributes.productId
-										? [ attributes.productId ]
+									selectedOptions?.productId
+										? [ selectedOptions.productId ]
 										: []
 								}
 								showVariations
@@ -165,10 +163,11 @@ export const withEditMode =
 									value: ProductResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedOptions( {
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
+										editMode: false,
 									} );
 									triggerUrlUpdate();
 								} }
