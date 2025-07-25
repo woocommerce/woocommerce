@@ -104,7 +104,6 @@
 		width: calc(100% + 32px);
 		padding: 16px 16px 16px 32px;
 
-		// Mobile styles - remove negative left margin and adjust padding
 		@media screen and (max-width: 782px) {
 			padding: 16px;
 			width: 100%;

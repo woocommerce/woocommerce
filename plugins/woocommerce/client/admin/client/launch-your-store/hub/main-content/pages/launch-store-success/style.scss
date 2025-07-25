@@ -12,7 +12,6 @@
 		align-items: center;
 		justify-content: center;
 
-		// Mobile styles - prevent horizontal scroll
 		@media screen and (max-width: 782px) {
 			width: 100%;
 		}
@@ -26,7 +25,7 @@
 	min-height: 100vh;
 	max-width: 100vw;
 
-	// Mobile styles - prevent horizontal scroll
+	// Prevent horizontal scroll
 	@media screen and (max-width: 782px) {
 		width: 100%;
 		max-width: 100%;
@@ -73,7 +72,6 @@
 			}
 		}
 
-		// Mobile styles - adjust header for mobile
 		@media screen and (max-width: 782px) {
 			padding: 0 16px;
 
@@ -91,7 +89,6 @@
 		justify-content: center;
 		padding: 40px;
 
-		// Mobile styles - adjust padding for mobile
 		@media screen and (max-width: 782px) {
 			padding: 20px 16px;
 		}
