@@ -12,8 +12,7 @@
 		"multiple": false,
 		"typography": {
 			"fontSize": true
-		},
-		"interactivity": true
+		}
 	},
 	"example": {
 		"attributes": {

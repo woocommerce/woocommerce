@@ -501,6 +501,16 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => true,
 			),
+			'fulfillments'                => array(
+				'name'               => __( 'Order Fulfillments', 'woocommerce' ),
+				'description'        => __(
+					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
+					'woocommerce'
+				),
+				'enabled_by_default' => false,
+				'disable_ui'         => true,
+				'is_experimental'    => false,
+			),
 			'experimental-iapi-mini-cart' => array(
 				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
 				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),

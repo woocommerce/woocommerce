@@ -46,6 +46,18 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		products?: {
+			[ productId: number ]: {
+				price_html?: string;
+				availability?: string;
+				variations?: {
+					[ variationId: number ]: {
+						price_html?: string;
+						availability: string;
+					};
+				};
+			};
+		};
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
