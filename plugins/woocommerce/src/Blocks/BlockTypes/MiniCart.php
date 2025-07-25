@@ -118,6 +118,25 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+
+		// Priority 20 ensures this runs after WooCommerce block registration (priority 10)
+		// allowing us to modify the block supports in the registry after registration is complete.
+		add_action( 'init', array( $this, 'enable_interactivity_support' ), 20 );
+	}
+
+	/**
+	 * Enable interactivity through Block Supports API. We're using WP_Block_Type_Registry instead
+	 * of get_block_type_supports method available in AbstractBlock as the latter works only for
+	 * blocks without static block.json metadata.
+	 */
+	public function enable_interactivity_support() {
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
+
+			if ( $block_type ) {
+				$block_type->supports['interactivity'] = true;
+			}
+		}
 	}
 
 	/**
