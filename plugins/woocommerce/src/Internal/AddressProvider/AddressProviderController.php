@@ -27,7 +27,7 @@ class AddressProviderController {
 	 *
 	 * @internal
 	 */
-	function __construct() {
+	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
