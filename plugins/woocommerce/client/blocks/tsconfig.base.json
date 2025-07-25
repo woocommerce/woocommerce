@@ -31,8 +31,7 @@
 		],
 		"types": [
 			"jest",
-			"jquery",
-			"msw"
+			"jquery"
 		],
 		"paths": {
 			"@woocommerce/atomic-blocks": [
