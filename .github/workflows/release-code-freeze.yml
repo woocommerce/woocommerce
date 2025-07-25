@@ -201,7 +201,6 @@ jobs:
             console.log(`  Version: ${payload.version}`);
             console.log(`  Build ZIP: ${payload.build_zip}`);
             console.log(`  Post Status: ${payload.post_status}`);
-            console.log(`  Environment: ${process.env.ENVIRONMENT}`);
 
             const requestBody = JSON.stringify({
               payload
