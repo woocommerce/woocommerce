@@ -110,6 +110,24 @@ class Payments extends Task {
 	}
 
 	/**
+	 * Check if the task is in progress.
+	 *
+	 * @return bool
+	 */
+	public function is_in_progress() {
+		return $this->has_woopayments_test_account() && ! $this->is_complete();
+	}
+
+	/**
+	 * The task in progress label.
+	 *
+	 * @return string
+	 */
+	public function in_progress_label() {
+		return esc_html__( 'Test account', 'woocommerce' );
+	}
+
+	/**
 	 * The task action URL.
 	 *
 	 * Empty string means the JS logic will handle the task linking.
