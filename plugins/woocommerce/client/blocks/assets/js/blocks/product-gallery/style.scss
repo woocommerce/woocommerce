@@ -7,8 +7,13 @@ $dialog-padding: 20px;
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
-	aspect-ratio: 1 / 1;
 	overflow: hidden;
+
+	//When Product Image aspect ratio is auto, we are setting constraints
+	//on the large image container and display full images in square container.
+	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+		aspect-ratio: 1/1;
+	}
 
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
@@ -19,14 +24,15 @@ $dialog-padding: 20px;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
-		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
-		width: 100%;
 		display: flex;
-		overflow: hidden;
 		align-items: center;
 		justify-content: center;
+
+		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+			aspect-ratio: 1/1;
+		}
 	}
 
 	// These rules are overriding styles from WooCommerce core, that's why we
@@ -41,9 +47,12 @@ $dialog-padding: 20px;
 
 		img {
 			height: 100%;
-			// There's inline style object-fit: cover; that we need to override.
+		}
+
+		&.wc-block-components-product-image--aspect-ratio-auto img {
 			object-fit: contain !important;
 		}
+
 	}
 
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
@@ -95,15 +104,56 @@ $dialog-padding: 20px;
 	}
 }
 
-@mixin vertical-thumbnails {
-	:where(.wc-block-product-gallery-thumbnails__scrollable) {
-		flex-direction: column;
-	}
-
-	@for $i from 10 through 50 {
-		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-			flex-basis: calc($i * 1%);
-			aspect-ratio: 1 / calc(100 / $i);
+// Vertical thumbnails
+.wc-block-product-gallery:not(.is-vertical):not(:has(.is-vertical)) {
+	@include breakpoint(">600px") {
+		:where(.wc-block-product-gallery-thumbnails__scrollable) {
+			flex-direction: column;
+		}
+		@for $i from 10 through 50 {
+			&:has(.wc-block-components-product-image--aspect-ratio-auto),
+			&:has(.wc-block-components-product-image--aspect-ratio-1) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 1 / calc(100 / $i);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 4 / calc(100 / $i * 3);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 3 / calc(100 / $i * 4);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 3 / calc(100 / $i * 2);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 2 / calc(100 / $i * 3);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 16 / calc(100 / $i * 9);
+				}
+			}
+			&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
+					flex-basis: calc($i * 1%);
+					aspect-ratio: 9 / calc(100 / $i * 16);
+				}
+			}
 		}
 	}
 }
@@ -129,10 +179,6 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails) {
 	position: relative;
-
-	// Use the vertical thumbnails as a default. The default layout attributes from block.json are not set
-	// until manipulated hence the need for the mixin.
-	@include vertical-thumbnails;
 
 	$gradient-size: 14%;
 	$gradient-mid-step-size: 6%;
@@ -194,11 +240,6 @@ $dialog-padding: 20px;
 	pointer-events: none;
 	cursor: default;
 	filter: brightness(0.8);
-}
-
-// Percentage width
-:where(.is-horizontal .wc-block-product-gallery-thumbnails) {
-	@include vertical-thumbnails;
 }
 
 :where(.is-vertical .wc-block-product-gallery-thumbnails) {

@@ -95,6 +95,8 @@ class ProductGallery extends AbstractBlock {
 
 			return $html;
 		}
+
+		return $gallery_html;
 	}
 
 	/**
@@ -121,6 +123,7 @@ class ProductGallery extends AbstractBlock {
 		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
 		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
+		$html                   = $gallery_with_dialog;
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
