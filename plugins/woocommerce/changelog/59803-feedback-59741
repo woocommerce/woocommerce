@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Refactor CLI Migrator commands to improve separation of concerns by moving credential setup to CredentialManager, platform resolution to PlatformRegistry, and eliminating BaseCommand inheritance.
