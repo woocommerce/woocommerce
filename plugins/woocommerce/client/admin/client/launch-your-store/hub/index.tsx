@@ -28,7 +28,6 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
-import MobileSidebarToggle from './sidebar/components/mobile-toggle';
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
@@ -147,11 +146,8 @@ const LaunchStoreController = () => {
 							sendEventToMainContent={ sendToMainContent }
 							context={ sidebarState.context }
 							onMobileClose={ handleClose }
-						/>
-					) }
-					{ ! isMobileSidebarOpen && (
-						<MobileSidebarToggle
 							onToggle={ handleMobileSidebarToggle }
+							isMobileSidebarOpen={ isMobileSidebarOpen }
 						/>
 					) }
 					{ CurrentMainContentComponent && (

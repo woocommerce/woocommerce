@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { SidebarComponentProps } from '../xstate';
+import MobileSidebarToggle from '../../sidebar/components/mobile-toggle';
 
 export const LaunchStoreHubMobileHeader = ( props: SidebarComponentProps ) => {
 	const handleBackClick = () => {
@@ -18,17 +19,18 @@ export const LaunchStoreHubMobileHeader = ( props: SidebarComponentProps ) => {
 	};
 
 	return (
-		<div className="launch-your-store-mobile-header launch-store-hub-mobile-header">
+		<div className="mobile-header launch-store-hub-mobile-header">
 			<Button
-				className="launch-your-store-mobile-header__back-button"
+				className="mobile-header__back-button"
 				onClick={ handleBackClick }
 				icon={ chevronLeft }
 				iconSize={ 20 }
 				aria-label={ __( 'Go back', 'woocommerce' ) }
 			/>
-			<h1 className="launch-your-store-mobile-header__title">
+			<h1 className="mobile-header__title">
 				{ __( 'Launch Your Store', 'woocommerce' ) }
 			</h1>
+			<MobileSidebarToggle onToggle={ props.onToggle } />
 		</div>
 	);
 };
