@@ -35,11 +35,12 @@
 			"radius": true,
 			"__experimentalSkipSerialization": true
 		},
-		"__experimentalSelector": ".wc-block-product-gallery-large-image-next-previous__button"
+		"__experimentalSelector": ".wc-block-next-previous-buttons__button"
 	},
 	"ancestor": [
 		"woocommerce/product-gallery-large-image",
 		"woocommerce/product-collection"
 	],
-	"editorStyle": "file:../woocommerce/product-gallery-large-image-next-previous-editor.css"
+	"style": "file:../woocommerce/next-previous-buttons-style.css",
+	"editorStyle": "file:../woocommerce/next-previous-buttons-editor.css"
 }
