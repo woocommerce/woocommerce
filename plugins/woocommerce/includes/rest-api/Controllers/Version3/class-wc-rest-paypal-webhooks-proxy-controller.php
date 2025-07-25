@@ -124,6 +124,22 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 				}
 
 				break;
+			case 'PAYMENT.AUTHORIZATION.CREATED':
+				$custom_client_data = $data['resource']['custom_id'];
+				$client_endpoint    = $this->get_client_webhook_endpoint( $custom_client_data );
+
+				if ( ! $client_endpoint ) {
+					error_log( 'No client webhook endpoint found' );
+					return new WP_REST_Response( 'No client webhook endpoint found', 400 );
+				}
+
+				$response = $this->forward_webhook_to_client( $client_endpoint, $data );
+				if ( is_wp_error( $response ) || $response->get_status() !== 200 ) {
+					error_log( 'Webhook forwarding failed: ' . wc_print_r( $response, true ) );
+					return new WP_REST_Response( 'Webhook forwarding failed', 500 );
+				}
+
+				break;
 			default:
 				error_log( 'Unhandled PayPal webhook event: ' . wc_print_r( $data, true ) );
 				break;
