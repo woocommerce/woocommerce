@@ -401,7 +401,6 @@ const productGallery = {
 				}
 			}
 		},
-
 		// Next/Previous Buttons block actions
 		onClickPrevious: ( event?: MouseEvent ) => {
 			actions.selectPreviousImage( event );

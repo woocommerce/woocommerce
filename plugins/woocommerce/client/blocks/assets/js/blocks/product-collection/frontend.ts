@@ -18,6 +18,11 @@ export type ProductCollectionStoreContext = {
 	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
+	// Next/Previous Buttons block context
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+	ariaLabelPrevious: string;
+	ariaLabelNext: string;
 };
 
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
@@ -97,6 +102,19 @@ const productCollectionStore = {
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
 			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: ( event?: MouseEvent ) => {
+			console.log( 'onClickPrevious' );
+		},
+		onClickNext: ( event?: MouseEvent ) => {
+			console.log( 'onClickNext' );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			console.log( 'onKeyDownPrevious' );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			console.log( 'onKeyDownNext' );
 		},
 	},
 	callbacks: {
