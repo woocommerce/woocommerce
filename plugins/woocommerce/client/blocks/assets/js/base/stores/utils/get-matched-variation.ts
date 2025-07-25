@@ -22,27 +22,29 @@ export const getMatchedVariation = (
 	) {
 		return null;
 	}
-	return availableVariations.find( ( availableVariation ) => {
-		return Object.entries( availableVariation.attributes ).every(
-			( [ attributeName, attributeValue ] ) => {
-				const attributeMatched = selectedAttributes.some(
-					( variationAttribute ) => {
-						const isSameAttribute =
-							variationAttribute.attribute === attributeName;
-						if ( ! isSameAttribute ) {
-							return false;
+	return (
+		availableVariations.find( ( availableVariation ) => {
+			return Object.entries( availableVariation.attributes ).every(
+				( [ attributeName, attributeValue ] ) => {
+					const attributeMatched = selectedAttributes.some(
+						( variationAttribute ) => {
+							const isSameAttribute =
+								variationAttribute.attribute === attributeName;
+							if ( ! isSameAttribute ) {
+								return false;
+							}
+
+							return (
+								variationAttribute.value === attributeValue ||
+								( variationAttribute.value &&
+									attributeValue === '' )
+							);
 						}
+					);
 
-						return (
-							variationAttribute.value === attributeValue ||
-							( variationAttribute.value &&
-								attributeValue === '' )
-						);
-					}
-				);
-
-				return attributeMatched;
-			}
-		);
-	} );
+					return attributeMatched;
+				}
+			);
+		} ) || null
+	);
 };
