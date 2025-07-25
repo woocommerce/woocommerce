@@ -400,7 +400,7 @@ class WC_Gateway_Paypal_Request {
 	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
-	private function get_paypal_shipping_preference( $order) {
+	private function get_paypal_shipping_preference( $order ) {
 		if ( ! $order->needs_shipping_address() ) {
 			return 'NO_SHIPPING';
 		}
