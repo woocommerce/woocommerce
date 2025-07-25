@@ -68,8 +68,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 
-			// Capture the payment after approval.
-			$this->capture_payment( $order, $event['resource']['links'] );
+			// Authorize or capture the payment after approval.
+			if ( 'CAPTURE' === $event['resource']['intent'] ) {
+				$this->authorize_or_capture_payment( $order, $event['resource']['links'], 'capture' );
+			} else {
+				$this->authorize_or_capture_payment( $order, $event['resource']['links'], 'authorize' );
+			}
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
@@ -136,11 +140,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param WC_Order $order The order object.
 	 * @param array    $links The links from the webhook event.
 	 */
-	private function capture_payment( $order, $links ) {
-		$capture_url = null;
+	private function authorize_or_capture_payment( $order, $links, $action ) {
+		$action_url = null;
 		foreach ( $links as $link ) {
-			if ( 'capture' === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
-				$capture_url = esc_url_raw( $link['href'] );
+			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				$action_url = esc_url_raw( $link['href'] );
 				break;
 			}
 		}
@@ -152,6 +156,6 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 		$gateway        = $payment_gateways['paypal'];
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-		$paypal_request->capture_payment( $order, $capture_url );
+		$paypal_request->authorize_or_capture_payment( $order, $action_url, $action );
 	}
 }
