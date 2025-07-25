@@ -15,7 +15,7 @@ import blockJson from '../block.json';
 import '../';
 import '../inner-blocks/product-gallery-large-image';
 import '../inner-blocks/product-gallery-thumbnails';
-import '../inner-blocks/product-gallery-next-previous-buttons';
+import '../../next-previous-buttons';
 import '../../single-product';
 import '../../../atomic/blocks/product-elements/image';
 import '../../../atomic/blocks/product-elements/sale-badge';
