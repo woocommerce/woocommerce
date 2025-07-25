@@ -130,8 +130,6 @@ class ProductGallery extends AbstractBlock {
 					array(
 						'imageData'          => $image_ids,
 						'isDialogOpen'       => false,
-						'disableLeft'        => true,
-						'disableRight'       => false,
 						'isDragging'         => false,
 						'touchStartX'        => 0,
 						'touchCurrentX'      => 0,
@@ -143,6 +141,11 @@ class ProductGallery extends AbstractBlock {
 							'left'   => false,
 							'right'  => false,
 						],
+						// Next/Previous Buttons block context
+						'isDisabledPrevious' => true,
+						'isDisabledNext'     => false,
+						'ariaLabelPrevious'  => __( 'Previous image', 'woocommerce' ),
+						'ariaLabelNext'      => __( 'Next image', 'woocommerce' ),
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)

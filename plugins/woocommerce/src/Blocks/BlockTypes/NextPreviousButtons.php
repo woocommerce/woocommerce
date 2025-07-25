@@ -51,8 +51,8 @@ class NextPreviousButtons extends AbstractBlock {
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.onClickPrevious"
 				data-wp-on--keydown="actions.onKeyDownPrevious"
-				data-wp-bind--aria-disabled="context.disableLeft"
-				aria-label="Previous image"
+				data-wp-bind--aria-disabled="context.isDisabledPrevious"
+				data-wp-bind--aria-label="context.ariaLabelPrevious"
 			>
 				<svg
 					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left"
@@ -74,8 +74,8 @@ class NextPreviousButtons extends AbstractBlock {
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.onClickNext"
 				data-wp-on--keydown="actions.onKeyDownNext"
-				data-wp-bind--aria-disabled="context.disableRight"
-				aria-label="Next image"
+				data-wp-bind--aria-disabled="context.isDisabledNext"
+				data-wp-bind--aria-label="context.ariaLabelNext"
 			>
 				<svg
 					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right"
