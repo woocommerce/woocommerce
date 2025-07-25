@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
 import { useState, useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
@@ -202,7 +201,9 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 			} }
 			showLayoutSwitcher={ false }
-			getItemId={ ( item: Post ) => item.id }
+			getItemId={ ( item: EmailType ) =>
+				`${ item.id }_${ item?.email_key || '' }`
+			}
 		/>
 	);
 };

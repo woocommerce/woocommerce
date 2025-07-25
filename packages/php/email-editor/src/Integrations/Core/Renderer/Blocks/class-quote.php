@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
-use WP_Style_Engine;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Renders a quote block.
@@ -67,20 +67,16 @@ class Quote extends Abstract_Block_Renderer {
 		}
 
 		// The HTML cite tag should use block gap as margin-top.
-		$theme_styles = $rendering_context->get_theme_styles();
-		$margin_top   = $theme_styles['spacing']['blockGap'] ?? '0px';
+		$theme_styles    = $rendering_context->get_theme_styles();
+		$margin_top      = $theme_styles['spacing']['blockGap'] ?? '0px';
+		$citation_styles = Styles_Helper::get_block_styles( $parsed_block['attrs'], $rendering_context, array( 'text-align' ) );
+		$citation_styles = Styles_Helper::extend_block_styles( $citation_styles, array( 'margin' => "{$margin_top} 0px 0px 0px" ) );
 
 		return $this->add_spacer(
 			sprintf(
 				'<p style="%2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
 				$citation_content,
-				WP_Style_Engine::compile_css(
-					array(
-						'margin'     => "{$margin_top} 0px 0px 0px",
-						'text-align' => $parsed_block['attrs']['textAlign'] ?? '',
-					),
-					''
-				),
+				$citation_styles['css'],
 			),
 			$parsed_block['email_attrs'] ?? array()
 		);
@@ -106,51 +102,27 @@ class Quote extends Abstract_Block_Renderer {
 		);
 
 		// Layout, background, borders need to be on the outer table element.
-		$border                 = $block_attributes['style']['border'] ?? array();
-		$border_color_attribute = $block_attributes['borderColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] ) : null;
-		if ( ! isset( $border['color'] ) && ! is_null( $border_color_attribute ) ) {
-			$border['color'] = $border_color_attribute;
-		}
-
-		$table_styles = $this->get_styles_from_block(
+		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		$table_styles = Styles_Helper::extend_block_styles(
+			$table_styles,
 			array(
-				'color'      => array_filter(
-					array(
-						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-					)
-				),
-				'background' => $block_attributes['style']['background'] ?? array(),
-				'border'     => $border,
+				'border-collapse' => 'separate',
+				'background-size' => $table_styles['declarations']['background-size'] ?? 'cover',
 			)
-		)['declarations'];
-
-		// Set the text align attribute to the wrapper if present.
-		if ( isset( $parsed_block['attrs']['textAlign'] ) ) {
-			$table_styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		}
-
-		$table_styles['border-collapse'] = 'separate'; // Needed for the border radius to work.
-
-		// Add default background size.
-		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
+		);
 
 		// Padding properties need to be added to the table cell.
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ),
-			)
-		)['declarations'];
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
 
 		$table_attrs = array(
 			'class' => 'email-block-quote ' . $original_classname,
-			'style' => WP_Style_Engine::compile_css( $table_styles, '' ),
+			'style' => $table_styles['css'],
 			'width' => '100%',
 		);
 
 		$cell_attrs = array(
 			'class' => 'email-block-quote-content',
-			'style' => WP_Style_Engine::compile_css( $cell_styles, '' ),
+			'style' => $cell_styles['css'],
 			'width' => '100%',
 		);
 

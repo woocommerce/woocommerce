@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Feature compatibility: Make declarations lazy to avoid get_plugins() calls on frontend

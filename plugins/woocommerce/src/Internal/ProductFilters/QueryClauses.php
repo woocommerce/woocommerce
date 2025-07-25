@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -16,8 +18,27 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for filter clauses.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
-class QueryClauses implements QueryClausesGenerator {
+class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
+	/**
+	 * Hold the filter params.
+	 *
+	 * @var Params
+	 */
+	private $params;
+
+	/**
+	 * Initialize the query clauses.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @param Params $params The filter params.
+	 * @return void
+	 */
+	final public function init( Params $params ): void {
+		$this->params = $params;
+	}
 
 	/**
 	 * Add conditional query clauses based on the filter params in query vars.
@@ -29,7 +50,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( $args, $wp_query ) {
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
 			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
 			$stock_statuses = explode( ',', $stock_statuses );
@@ -51,6 +72,44 @@ class QueryClauses implements QueryClausesGenerator {
 			$this->get_chosen_attributes( $wp_query->query_vars )
 		);
 
+		$args = $this->add_taxonomy_clauses(
+			$args,
+			$this->get_chosen_taxonomies( $wp_query->query_vars )
+		);
+
+		return $args;
+	}
+
+	/**
+	 * Add query clauses for main query.
+	 * WooCommerce handles attribute, price, and rating filters in the main query.
+	 * This method is used to add stock status and taxonomy filters to the main query.
+	 *
+	 * @param array     $args     Query args.
+	 * @param \WP_Query $wp_query WP_Query object.
+	 * @return array
+	 */
+	public function add_query_clauses_for_main_query( array $args, \WP_Query $wp_query ): array {
+		if (
+			! $wp_query->is_main_query() ||
+			'product_query' !== $wp_query->get( 'wc_query' )
+		) {
+			return $args;
+		}
+
+		if ( $wp_query->get( 'filter_stock_status' ) ) {
+			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
+			$stock_statuses = explode( ',', $stock_statuses );
+			$stock_statuses = array_filter( $stock_statuses );
+
+			$args = $this->add_stock_clauses( $args, $stock_statuses );
+		}
+
+		$args = $this->add_taxonomy_clauses(
+			$args,
+			$this->get_chosen_taxonomies( $wp_query->query_vars )
+		);
+
 		return $args;
 	}
 
@@ -61,20 +120,26 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param array $stock_statuses Stock statuses to be queried.
 	 * @return array
 	 */
-	public function add_stock_clauses( $args, $stock_statuses ) {
+	public function add_stock_clauses( array $args, array $stock_statuses ): array {
 		$stock_statuses = array_filter( $stock_statuses );
 
 		if ( empty( $stock_statuses ) ) {
 			return $args;
 		}
 
-		$stock_statuses = array_intersect(
+		$filtered_stock_statuses = array_intersect(
 			array_map( 'esc_sql', $stock_statuses ),
 			array_keys( wc_get_product_stock_status_options() )
 		);
 
-		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $stock_statuses ) . '")';
+		if ( ! empty( $filtered_stock_statuses ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $filtered_stock_statuses ) . '")';
+		}
+
+		if ( ! empty( $stock_statuses ) && empty( $filtered_stock_statuses ) ) {
+			$args['where'] .= ' AND 1=0';
+		}
 
 		return $args;
 	}
@@ -91,7 +156,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * }
 	 * @return array
 	 */
-	public function add_price_clauses( $args, $price_range ) {
+	public function add_price_clauses( array $args, array $price_range ): array {
 		if ( ! isset( $price_range['min_price'] ) && ! isset( $price_range['max_price'] ) ) {
 			return $args;
 		}
@@ -125,7 +190,7 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
-	 * Add query clauses for attribute filter.
+	 * Add query clauses for filtering products by attributes.
 	 *
 	 * @param array $args              Query args.
 	 * @param array $chosen_attributes {
@@ -136,9 +201,10 @@ class QueryClauses implements QueryClausesGenerator {
 	 *         @type string   $query_type Query type. Accepts 'and' or 'or'.
 	 *     }
 	 * }
+	 *
 	 * @return array
 	 */
-	public function add_attribute_clauses( $args, $chosen_attributes ) {
+	public function add_attribute_clauses( array $args, array $chosen_attributes ): array {
 		if ( empty( $chosen_attributes ) ) {
 			return $args;
 		}
@@ -155,15 +221,36 @@ class QueryClauses implements QueryClausesGenerator {
 		}
 
 		$attribute_ids_for_and_filtering = array();
-		$all_terms                       = get_terms(
+		$clauses                         = array();
+
+		// Get all terms for all attribute taxonomies in one query for better performance.
+		$all_terms_slugs = array();
+		foreach ( $chosen_attributes as $data ) {
+			if ( ! empty( $data['terms'] ) && is_array( $data['terms'] ) ) {
+				$all_terms_slugs = array_merge( $all_terms_slugs, $data['terms'] );
+			}
+		}
+
+		$all_terms = get_terms(
 			array(
-				'include'    => array_keys( $chosen_attributes ),
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_terms_slugs,
 				'hide_empty' => false,
 			)
 		);
 
+		if ( is_wp_error( $all_terms ) ) {
+			return $args;
+		}
+
+		// Group terms by taxonomy for easier processing.
+		$terms_by_taxonomy = array();
+		foreach ( $all_terms as $term ) {
+			$terms_by_taxonomy[ $term->taxonomy ][] = $term;
+		}
+
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
-			$current_attribute_terms    = $this->get_current_attribute_terms( $all_terms, $taxonomy, count( $chosen_attributes ) );
+			$current_attribute_terms    = $terms_by_taxonomy[ $taxonomy ] ?? array();
 			$term_ids_by_slug           = wp_list_pluck( $current_attribute_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );
@@ -219,25 +306,124 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
-	 * Get all the term for current attribute.
+	 * Add query clauses for taxonomy filter (e.g., product_cat, product_tag).
 	 *
-	 * @param \WP_Term[] $all_terms      Aggreated terms array.
-	 * @param string     $taxonomy       Attribute taxonomy name.
-	 * @param int        $taxonomy_count Taxonomy count. If there is only one
-	 *                                   taxonomy, return all terms.
-	 * @return mixed
+	 * @param array $args           Query args.
+	 * @param array $chosen_taxonomies {
+	 *     Chosen taxonomies array.
+	 *
+	 *     @type array {$taxonomy: Taxonomy name} {
+	 *         @type string[] $terms Chosen terms' slug.
+	 *     }
+	 * }
+	 * @return array
 	 */
-	private function get_current_attribute_terms( $all_terms, $taxonomy, $taxonomy_count ) {
-		if ( 1 === $taxonomy_count ) {
-			return $all_terms;
+	public function add_taxonomy_clauses( array $args, array $chosen_taxonomies ): array {
+		if ( empty( $chosen_taxonomies ) ) {
+			return $args;
 		}
 
-		return array_filter(
-			$all_terms,
-			function ( $term ) use ( $taxonomy ) {
-				return $term->taxonomy === $taxonomy;
-			}
+		global $wpdb;
+
+		$tax_queries = array();
+
+		$all_terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $chosen_taxonomies ),
+				'slug'       => array_merge( ...array_values( $chosen_taxonomies ) ),
+				'hide_empty' => false,
+			)
 		);
+
+		if ( is_wp_error( $all_terms ) ) {
+			/**
+			 * No error logging needed here because:
+			 * 1. Taxonomy existence is already validated in the initial get_terms() call above
+			 * 2. get_terms() only returns WP_Error for invalid taxonomy or rare DB connection issues
+			 * 3. If the taxonomy was invalid, we would have failed earlier and never reached this code
+			 * 4. Database errors would likely affect the entire request, not just this call
+			 */
+			return $args;
+		}
+
+		$term_ids_by_taxonomy = array();
+
+		foreach ( $all_terms as $term ) {
+			$term_ids_by_taxonomy[ $term->taxonomy ][] = $term->term_id;
+		}
+
+		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
+			if ( empty( $term_ids ) ) {
+				continue;
+			}
+
+			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+				$expanded_term_ids = $term_ids;
+
+				foreach ( $term_ids as $term_id ) {
+					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
+					$children  = wp_cache_get( $cache_key );
+
+					if ( false === $children ) {
+						$children = get_terms(
+							array(
+								'taxonomy'   => $taxonomy,
+								'child_of'   => $term_id,
+								'fields'     => 'ids',
+								'hide_empty' => false,
+							)
+						);
+
+						if ( ! is_wp_error( $children ) ) {
+							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
+						} else {
+							$children = array();
+						}
+					}
+
+					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
+				}
+
+				$term_ids = array_unique( $expanded_term_ids );
+			}
+
+			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+
+			/*
+			 * Use EXISTS subquery for taxonomy filtering for several key benefits:
+			 *
+			 * 1. Performance: EXISTS stops execution as soon as the first matching row is found,
+			 *    making it faster than JOIN approaches that need to process all matches.
+			 *
+			 * 2. No duplicate rows: Unlike JOINs, EXISTS doesn't create duplicate rows when
+			 *    a product has multiple matching terms, eliminating the need for DISTINCT.
+			 *
+			 * 3. Clean boolean logic: We only care IF a product has the terms, not HOW MANY
+			 *    or which specific ones, making EXISTS semantically correct.
+			 *
+			 * 4. Efficient combination: Multiple taxonomy filters can be combined with AND
+			 *    without complex GROUP BY logic or performance degradation.
+			 */
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$tax_queries[] = $wpdb->prepare(
+				"EXISTS (
+					SELECT 1 FROM {$wpdb->term_relationships} tr
+					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					WHERE tr.object_id = {$wpdb->posts}.ID
+					AND tt.taxonomy = %s
+					AND tt.term_id IN {$term_ids_list}
+				)",
+				$taxonomy
+			);
+		}
+
+		if ( ! empty( $tax_queries ) ) {
+			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
+		} else {
+			$args['where'] .= ' AND 1=0';
+		}
+
+		return $args;
 	}
 
 	/**
@@ -246,7 +432,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param string $sql SQL join.
 	 * @return string
 	 */
-	private function append_product_sorting_table_join( $sql ) {
+	private function append_product_sorting_table_join( string $sql ): string {
 		global $wpdb;
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
@@ -263,7 +449,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 *
 	 * @return boolean
 	 */
-	private function should_adjust_price_filters_for_displayed_taxes() {
+	private function should_adjust_price_filters_for_displayed_taxes(): bool {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
 		$database = wc_prices_include_tax() ? 'incl' : 'excl';
 
@@ -278,7 +464,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param string $operator Comparison operator for column. Accepts '>=' or '<='.
 	 * @return string Constructed query.
 	 */
-	private function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
+	private function get_price_filter_query_for_displayed_taxes( float $price_filter, string $column = 'min_price', string $operator = '>=' ): string {
 		global $wpdb;
 
 		if ( ! in_array( $operator, array( '>=', '<=' ), true ) ) {
@@ -330,7 +516,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param string $tax_class Tax class for adjustment.
 	 * @return float
 	 */
-	private function adjust_price_filter_for_tax_class( $price_filter, $tax_class ) {
+	private function adjust_price_filter_for_tax_class( float $price_filter, string $tax_class ): float {
 		$tax_display    = get_option( 'woocommerce_tax_display_shop' );
 		$tax_rates      = WC_Tax::get_rates( $tax_class );
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
@@ -367,7 +553,7 @@ class QueryClauses implements QueryClausesGenerator {
 	 * @param array $query_vars The WP_Query arguments.
 	 * @return array
 	 */
-	private function get_chosen_attributes( $query_vars ) {
+	private function get_chosen_attributes( array $query_vars ): array {
 		$chosen_attributes = array();
 
 		if ( empty( $query_vars ) ) {
@@ -394,11 +580,33 @@ class QueryClauses implements QueryClausesGenerator {
 	}
 
 	/**
+	 * Get an array of taxonomies and terms selected from query arguments.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return array
+	 */
+	private function get_chosen_taxonomies( array $query_vars ): array {
+		$chosen_taxonomies = array();
+
+		if ( empty( $query_vars ) ) {
+			return $chosen_taxonomies;
+		}
+
+		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
+			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
+				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) ) );
+			}
+		}
+
+		return $chosen_taxonomies;
+	}
+
+	/**
 	 * Get attribute lookup table name.
 	 *
 	 * @return string
 	 */
-	private function get_lookup_table_name() {
+	private function get_lookup_table_name(): string {
 		return wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
 	}
 }

@@ -52,21 +52,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
-		admin,
 		requestUtils,
 	} ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-custom-product-type'
 		);
 
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
-
+		await pageObject.updateSingleProductTemplate();
 		await pageObject.switchProductType( 'Custom Product Type' );
 
 		const block = editor.canvas.getByLabel(
@@ -125,6 +117,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const logoNoOption = page.locator( 'label:has-text("No")' );
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
+		const colorRedOption = page.locator( 'label:has-text("Red")' );
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
@@ -134,26 +127,38 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await addToCartButton.click();
 
 			await expect(
-				page.getByText( ' No matching variation found.' )
+				page.getByText(
+					'Please select product attributes before adding to cart.'
+				)
 			).toBeVisible();
 		} );
 
-		await test.step( 'updates product price when attributes are selected', async () => {
+		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
 
+			await colorBlueOption.click();
 			await logoNoOption.click();
-			await colorGreenOption.click();
-			await addToCartButton.click();
 
+			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
 			await expect( productPrice ).toHaveText( '$45.00' );
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
+			await colorGreenOption.click();
+
+			// Note: The button is always enabled for accessibility reasons.
+			// Instead, we check directly for the "disabled" class, which grays
+			// out the button.
+			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+
+			await addToCartButton.click();
+
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
 		await test.step( '"X in cart" text reflects the correct amount in variations', async () => {
-			await colorBlueOption.click();
+			await colorRedOption.click();
 
 			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
 
@@ -176,19 +181,34 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/logo-collection' );
 
-		const increaseQuantityButton = page.getByLabel(
-			'Increase quantity of Beanie'
-		);
-		await increaseQuantityButton.click();
-		await increaseQuantityButton.click();
-
 		const addToCartButton = page.getByText( 'Add to cart' ).first();
 
-		await addToCartButton.click();
+		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
+			// There is the chance the button might be clicked before the iAPI
+			// stores have been loaded.
+			await expect( async () => {
+				await addToCartButton.click();
+				await expect(
+					page.getByText(
+						'Please select some products to add to the cart.'
+					)
+				).toBeVisible();
+			} ).toPass();
+		} );
 
-		await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+		await test.step( 'successfully adds to cart when child products are selected', async () => {
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of Beanie'
+			);
+			await increaseQuantityButton.click();
+			await increaseQuantityButton.click();
 
-		await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			await addToCartButton.click();
+
+			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+
+			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -223,7 +243,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 	} ) => {
 		await pageObject.updateSingleProductTemplate();
 
-		await pageObject.switchProductType( 'Variable Product' );
+		await pageObject.switchProductType( 'Variable product' );
+
+		await page.getByRole( 'tab', { name: 'Block' } ).click();
+
+		// Verify inner blocks have loaded.
+		await expect(
+			editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
 
 		const attributeOptionsBlock = await editor.getBlockByName(
 			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
@@ -234,18 +265,30 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// We need to make sure the block updated before saving.
 		// @see https://github.com/woocommerce/woocommerce/issues/57718
+		// Verify that `.editor-post-publish-button__button` has an attribute
+		// `aria-haspopup="dialog"`. When https://github.com/woocommerce/woocommerce/issues/48936
+		// is fixed, we can simply check that the Save button becomes enabled.
 		await expect(
-			editor.canvas.getByLabel( 'Color', { exact: true } )
-		).toBeVisible();
+			page.getByRole( 'button', { name: 'Save', exact: true } )
+		).toHaveAttribute( 'aria-haspopup', 'dialog' );
 
 		await editor.saveSiteEditorEntities();
 
 		await page.goto( '/hoodie' );
 
-		const colorGreenOption = page.getByRole( 'option', {
+		let colorGreenOption = page.getByRole( 'option', {
 			name: 'Green',
 			exact: true,
 		} );
+
+		// Workaround for the template not being updated on the first load.
+		if ( ! ( await colorGreenOption.isVisible() ) ) {
+			await page.reload();
+			colorGreenOption = page.getByRole( 'option', {
+				name: 'Green',
+				exact: true,
+			} );
+		}
 
 		await expect( colorGreenOption ).toBeEnabled();
 

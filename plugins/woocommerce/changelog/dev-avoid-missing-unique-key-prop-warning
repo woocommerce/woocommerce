@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Avoid warnings about missing a unique key prop from `SnackbarList` component when enabling script debug.

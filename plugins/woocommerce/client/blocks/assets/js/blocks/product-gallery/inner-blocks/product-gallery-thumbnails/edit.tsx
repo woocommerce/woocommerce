@@ -3,9 +3,9 @@
  */
 import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { useRef, useState, useEffect } from '@wordpress/element';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import type { ProductResponseImageItem } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 
@@ -42,7 +42,6 @@ export const Edit = ( {
 }: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
 	const { thumbnailSize, aspectRatio } = attributes;
 
-	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
 	const productContext = useProductDataContext();
 	const product = productContext?.product;
 
@@ -52,7 +51,7 @@ export const Edit = ( {
 	const productThumbnails = isProductContext
 		? prepareProductImages( product?.images )
 		: Array( MAX_THUMBNAILS ).fill( {
-				src: placeholderSrc,
+				src: PLACEHOLDER_IMG_SRC,
 				alt: '',
 		  } );
 

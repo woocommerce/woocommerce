@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import {
+	addAProductToCart,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { WC_API_PATH } from '../../utils/api-client';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 
 const simpleProductName = 'Cart Coupons Product';
@@ -192,7 +194,7 @@ test.describe(
 					).toBeVisible();
 					await expect(
 						page.locator(
-							'.wc-block-components-totals-discount > .wc-block-components-totals-item__value'
+							'.wc-block-components-totals-discount .wc-block-components-totals-item__value'
 						)
 					).toHaveText( discounts[ i ] );
 					await expect(
@@ -206,6 +208,15 @@ test.describe(
 					await page
 						.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
 						.click();
+					await expect(
+						page
+							.locator(
+								'.wc-block-components-notice-banner__content'
+							)
+							.getByText(
+								`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
+							)
+					).toBeVisible();
 					await expect(
 						page.locator(
 							'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'

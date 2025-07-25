@@ -1148,6 +1148,7 @@ class WC_Email extends WC_Settings_API {
 				wp_safe_redirect( $redirect );
 				exit;
 			}
+			wc_clear_template_cache();
 		}
 	}
 
@@ -1469,8 +1470,9 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$is_email_preview = apply_filters( 'woocommerce_is_email_preview', false );
 		if ( $is_email_preview ) {
+			$plugin_id = $this->plugin_id;
 			$email_id  = $this->id;
-			$transient = get_transient( "woocommerce_{$email_id}_{$key}" );
+			$transient = get_transient( "{$plugin_id}{$email_id}_{$key}" );
 			if ( false !== $transient ) {
 				$option = $transient ? $transient : $empty_value;
 			}

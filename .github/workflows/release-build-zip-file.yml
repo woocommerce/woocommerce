@@ -3,28 +3,48 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Source branch to use. Defaults to the branch the workflow is run from.'
+        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
         required: false
         default: ''
       skip_verify:
         description: 'Skip verification steps.'
         type: boolean
         required: true
-        default: false
       create_github_release:
         description: 'Create a draft GitHub release.'
         type: boolean
         required: true
-        default: false
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
+        type: string
+        required: false
+        default: ''
+      skip_verify:
+        description: 'Skip verification steps.'
+        type: boolean
+        required: true
+      create_github_release:
+        description: 'Create a draft GitHub release.'
+        type: boolean
+        required: true
+    outputs:
+      artifact_url:
+        description: 'URL of the built release artifact'
+        value: ${{ jobs.build.outputs.artifact-url }}
 
 permissions: {}
+
+concurrency:
+  group: release-build-zip-file-${{ inputs.branch }}-${{ ( inputs.create_github_release == true && 'with-release' ) || github.run_id }}
 
 jobs:
   verify-prs:
     name: 'Verify if any PR is left open by author:app/github-actions'
     outputs:
       runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
         - name: Verify if any PR is left open by author:app/github-actions
           id: verify-prs
@@ -35,7 +55,7 @@ jobs:
                   let runBuildZipJob = true;
                   const event = context.payload;
 
-                  if (event.inputs.skip_verify === 'true') {
+                  if ('${{ inputs.skip_verify }}' === 'true') {
                     core.setOutput('runBuildZipJob', runBuildZipJob);
                     console.log('Skipping verification step');
                     return;
@@ -99,7 +119,7 @@ jobs:
 
   verify-release-versions:
     name: 'Verify release and stable tag versions'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -148,8 +168,11 @@ jobs:
 
   build:
     name: Build release zip file
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-4vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [ verify-prs, verify-release-versions ]
+    outputs:
+      artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
+      commit-hash: ${{ steps.fetch-build-details.outputs.commit-hash }}
     permissions:
       contents: read
     steps:
@@ -179,6 +202,7 @@ jobs:
         run: unzip plugins/woocommerce/woocommerce.zip -d zipfile
 
       - name: Upload the zip file as an artifact
+        id: artifact-upload
         uses: actions/upload-artifact@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -187,9 +211,19 @@ jobs:
           path: zipfile
           retention-days: 1
 
+      - name: Fetch build details
+        id: fetch-build-details
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
+          # Fetch commit hash for this build.
+          commit_hash=$(git rev-parse "${{ inputs.branch || github.ref }}")
+          echo "commit-hash=$commit_hash" >> $GITHUB_OUTPUT
+
   create-release:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: build
     if: ${{ inputs.create_github_release }}
     permissions:
@@ -226,7 +260,7 @@ jobs:
             './woocommerce.zip' \
             --title '${{ steps.get_version.outputs.version }}' \
             --notes '' \
-            --target '${{ inputs.branch || github.ref }}' \
+            --target '${{ needs.build.outputs.commit-hash }}' \
             --latest=false \
             --draft \
             $FLAGS

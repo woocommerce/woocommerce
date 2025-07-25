@@ -13,6 +13,7 @@
 /client/legacy/js/jquery-qrcode/**
 /client/legacy/js/jquery-serializejson/**
 /client/legacy/js/jquery-tiptip/**
+/client/legacy/js/dompurify/**
 /client/legacy/js/jquery-ui-touch-punch/**
 /client/legacy/js/js-cookie/**
 /client/legacy/js/photoswipe/**
@@ -26,5 +27,5 @@
 /tests/e2e/**
 /vendor/**
 
-/client/admin/** 
+/client/admin/**
 /client/blocks/**

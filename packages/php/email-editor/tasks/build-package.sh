@@ -33,6 +33,8 @@ rsync -avhW --quiet \
     "$PACKAGE_DIR/composer.json" \
     "$PACKAGE_DIR/composer.lock" \
     "$PACKAGE_DIR/changelog.md" \
+    "$PACKAGE_DIR/license.txt" \
+    "$PACKAGE_DIR/SECURITY.md" \
     "$BUILD_DIR/woocommerce/email-editor/"
 
 # Copy mirror-readme.md as README.md
