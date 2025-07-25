@@ -11,7 +11,7 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/additional-checkout-fields/).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 

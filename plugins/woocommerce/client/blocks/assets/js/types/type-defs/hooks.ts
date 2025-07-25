@@ -62,6 +62,7 @@ export interface StoreCart {
 	paymentRequirements: string[];
 	receiveCart: ( cart: CartResponse ) => void;
 	receiveCartContents: ( cart: CartResponse ) => void;
+	hasPendingItemsOperations: boolean;
 }
 
 export type Query = {

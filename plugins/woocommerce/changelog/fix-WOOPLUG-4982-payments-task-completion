@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix the Payments task additional data when there are enabled shell gateways.
+
+

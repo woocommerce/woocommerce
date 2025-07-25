@@ -20,7 +20,8 @@ import {
 	initStoreTracking,
 	initDomTracking,
 } from './events';
-import { useContentValidation } from './hooks/use-content-validation';
+import { initContentValidationMiddleware } from './middleware/content-validation';
+import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
 function Editor() {
 	const { postId, postType, settings } = useSelect(
@@ -32,6 +33,7 @@ function Editor() {
 		[]
 	);
 	useContentValidation();
+	useRemoveSavingFailedNotices();
 
 	// Set allowed blockTypes to the editor settings.
 	settings.allowedBlockTypes = getAllowedBlockNames();
@@ -60,6 +62,7 @@ export function initialize( elementId: string ) {
 	initStoreTracking();
 	initDomTracking();
 	createStore();
+	initContentValidationMiddleware();
 	initializeLayout();
 	initBlocks();
 	initHooks();

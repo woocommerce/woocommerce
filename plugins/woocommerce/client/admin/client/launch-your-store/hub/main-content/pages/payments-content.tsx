@@ -28,6 +28,7 @@ import {
 	wooPaymentsExtensionSlug,
 	wooPaymentsProviderId,
 	wooPaymentsSuggestionId,
+	wooPaymentsOnboardingSessionEntryLYS,
 } from '~/settings-payments/constants';
 
 const InstallWooPaymentsStep = ( {
@@ -46,7 +47,7 @@ const InstallWooPaymentsStep = ( {
 			{
 				step: 'install_woopayments',
 				from: 'lys',
-				source: 'lys',
+				source: wooPaymentsOnboardingSessionEntryLYS,
 			}
 		);
 	}, [] );
@@ -86,7 +87,8 @@ const InstallWooPaymentsStep = ( {
 			<div className="launch-your-store-payments-content__step--install-woopayments-logo">
 				<img
 					src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-					alt="Woo Logo"
+					alt=""
+					role="presentation"
 				/>
 			</div>
 			<h1 className="launch-your-store-payments-content__step--install-woopayments-title">
@@ -158,7 +160,7 @@ export const PaymentsContent = ( {} ) => {
 			suggestion_id: wooPaymentsSuggestionId,
 			provider_extension_slug: wooPaymentsExtensionSlug,
 			from: 'lys',
-			source: 'lys',
+			source: wooPaymentsOnboardingSessionEntryLYS,
 		} );
 
 		// Install and activate the WooPayments plugin.
@@ -177,7 +179,7 @@ export const PaymentsContent = ( {} ) => {
 						suggestion_id: wooPaymentsSuggestionId,
 						provider_extension_slug: wooPaymentsExtensionSlug,
 						from: 'lys',
-						source: 'lys',
+						source: wooPaymentsOnboardingSessionEntryLYS,
 					} );
 				}
 				// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
@@ -195,7 +197,7 @@ export const PaymentsContent = ( {} ) => {
 					suggestion_id: wooPaymentsSuggestionId,
 					provider_extension_slug: wooPaymentsExtensionSlug,
 					from: 'lys',
-					source: 'lys',
+					source: wooPaymentsOnboardingSessionEntryLYS,
 					reason: 'error',
 				} );
 				createNoticesFromResponse( response );

@@ -850,7 +850,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $value Email.
 	 */
 	public function set_email( $value ) {
-		if ( $value && ! is_email( $value ) ) {
+		if ( $value && ! is_email( (string) $value ) ) {
 			$this->error( 'customer_invalid_email', __( 'Invalid email address', 'woocommerce' ) );
 		}
 		$this->set_prop( 'email', sanitize_email( $value ) );
@@ -1100,7 +1100,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $value Billing email.
 	 */
 	public function set_billing_email( $value ) {
-		if ( $value && ! is_email( $value ) ) {
+		if ( $value && ! is_email( (string) $value ) ) {
 			$this->error( 'customer_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
 		}
 		$this->set_address_prop( 'email', 'billing', sanitize_email( $value ) );

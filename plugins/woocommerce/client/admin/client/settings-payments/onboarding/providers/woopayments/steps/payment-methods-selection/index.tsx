@@ -124,6 +124,7 @@ export default function PaymentMethodsSelection() {
 				method: 'POST',
 				data: {
 					payment_methods: state,
+					source: sessionEntryPoint,
 				},
 			} ).then( () => {
 				// Update the local state.
@@ -285,6 +286,9 @@ export default function PaymentMethodsSelection() {
 									return apiFetch( {
 										url: finishUrl,
 										method: 'POST',
+										data: {
+											source: sessionEntryPoint,
+										},
 									} );
 								} )
 								.then( () => {
