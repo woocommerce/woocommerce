@@ -127,7 +127,14 @@ class Renderer {
 
 			$collection                     = $block['attrs']['collection'] ?? '';
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
-			$context                        = array( 'notices' => array() );
+			$context                        = array(
+				'notices' => array(),
+				// Next/Previous Buttons block context
+				'isDisabledPrevious' => true,
+				'isDisabledNext'     => false,
+				'ariaLabelPrevious'  => __( 'Scroll products left', 'woocommerce' ),
+				'ariaLabelNext'      => __( 'Scroll products right', 'woocommerce' ),
+			);
 
 			if ( $collection ) {
 				$context['collection'] = $collection;
