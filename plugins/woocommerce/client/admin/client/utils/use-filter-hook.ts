@@ -45,7 +45,7 @@ export function useFilterHook< T >(
 		return () => {
 			removeAction( 'hookAdded', namespace );
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- The filter name and getterFn are expected to be the same.
 	}, dependencies );
 
 	return value;
