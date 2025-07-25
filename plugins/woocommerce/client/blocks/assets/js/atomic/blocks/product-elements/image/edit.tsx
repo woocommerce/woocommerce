@@ -67,11 +67,11 @@ const Edit = ( {
 			return {
 				wasBlockJustInserted:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore method exists but not typed
+					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 				isInProductGallery:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore method exists but not typed
+					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).getBlockParentsByBlockName(
 						clientId,
 						'woocommerce/product-gallery'
