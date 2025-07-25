@@ -71,6 +71,7 @@ const blocks = {
 	'legacy-template': {
 		customDir: 'classic-template',
 	},
+	'next-previous-buttons': {},
 	'classic-shortcode': {},
 	'page-content-wrapper': {},
 	'payment-method-icons': {},
@@ -85,10 +86,6 @@ const blocks = {
 	'product-gallery': {},
 	'product-gallery-large-image': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
-	},
-	'product-gallery-large-image-next-previous': {
-		customDir:
-			'product-gallery/inner-blocks/product-gallery-next-previous-buttons',
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
