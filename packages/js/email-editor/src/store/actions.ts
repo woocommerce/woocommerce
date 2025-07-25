@@ -9,7 +9,12 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { storeName } from './constants';
-import { SendingPreviewStatus, State, PersonalizationTag } from './types';
+import {
+	SendingPreviewStatus,
+	State,
+	PersonalizationTag,
+	ContentValidation,
+} from './types';
 import { recordEvent } from '../events';
 
 export function togglePreviewModal( isOpen: boolean ) {
@@ -102,5 +107,14 @@ export function setPersonalizationTagsList( list: PersonalizationTag[] ) {
 		state: {
 			list,
 		} as Partial< State[ 'personalizationTags' ] >,
+	} as const;
+}
+
+export function setContentValidation(
+	validation: ContentValidation | undefined
+) {
+	return {
+		type: 'SET_CONTENT_VALIDATION',
+		validation,
 	} as const;
 }
