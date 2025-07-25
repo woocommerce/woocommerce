@@ -301,15 +301,15 @@ class WC_Gateway_Paypal_Request {
 					'payee'     => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
-					'shipping'    => $this->get_paypal_order_shipping( $order ),
+					'shipping'  => $this->get_paypal_order_shipping( $order ),
 				),
 			),
 			'application_context' => array(
 				'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
 				// Customer redirected here on approval.
-				'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+				'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 				// Customer redirected here on cancellation.
-				'cancel_url' => esc_url_raw( $order->get_cancel_order_url_raw() ),
+				'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				// phpcs:ignore Generic.Commenting.Todo.TaskFound,Squiz.PHP.CommentedOutCode.Found
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
