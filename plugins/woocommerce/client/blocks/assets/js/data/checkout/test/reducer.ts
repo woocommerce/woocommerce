@@ -6,7 +6,7 @@ import { defaultState } from '../default-state';
 import { STATUS } from '../constants';
 import * as actions from '../actions';
 
-describe.only( 'Checkout Store Reducer', () => {
+describe( 'Checkout Store Reducer', () => {
 	it( 'should return the initial state', () => {
 		expect( reducer( undefined, {} ) ).toEqual( defaultState );
 	} );
