@@ -915,7 +915,7 @@ abstract class WC_Data {
 				}
 				$datetime = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
 			} else {
-				// If we get here, the value is not a valid date.
+				// If we get here, the value is not a valid date type.
 				$this->error( 'invalid_date', __( 'Invalid date provided.', 'woocommerce' ) );
 			}
 
