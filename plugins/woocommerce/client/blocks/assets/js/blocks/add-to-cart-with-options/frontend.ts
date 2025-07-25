@@ -261,13 +261,25 @@ const addToCartWithOptionsStore = store<
 		actions: {
 			setQuantity( value: number, childProductId?: number ) {
 				const context = getContext< Context >();
-				const { variationId } = addToCartWithOptionsStore.state;
-				const id = variationId || childProductId || context.productId;
 
-				context.quantity = {
-					...context.quantity,
-					[ id ]: value,
-				};
+				if ( context.productType === 'variable' ) {
+					// Set the quantity for all variations, so when switching
+					// variations the quantity persists.
+					const variationIds = context.availableVariations.map(
+						( variation ) => variation.variation_id
+					);
+
+					variationIds.forEach( ( id ) => {
+						context.quantity[ id ] = value;
+					} );
+				} else {
+					const id = childProductId || context.productId;
+
+					context.quantity = {
+						...context.quantity,
+						[ id ]: value,
+					};
+				}
 			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
