@@ -393,7 +393,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	/**
 	 * Test that setting an invalid date type on a coupon doesn't cause fatal errors.
 	 * This tests the fix for issue where non-string/numeric/DateTime values cause crashes.
-	 * 
+	 *
 	 * @see https://github.com/woocommerce/woocommerce/pull/58700
 	 */
 	public function test_coupons_with_invalid_date_no_fatal_error() {
@@ -417,20 +417,20 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		// Test 3: Test the exact coupon metadata scenario from debug.patch.
 		$malformed_coupon_meta = array(
 			'date_created' => (object) array( 'a' ),
-			'code' => '0001',
-			'amount' => 5
+			'code'         => '0001',
+			'amount'       => 5,
 		);
 		$coupon->set_props( $malformed_coupon_meta );
 		$this->assertTrue( true, 'Exact debug.patch scenario handled without fatal error' );
 
 		// Test 4: Various other invalid types to ensure comprehensive coverage.
 		$invalid_types = array(
-			array( 'invalid', 'array' ),  
-			true,                          
+			array( 'invalid', 'array' ),
+			true,
 			false,
-			new stdClass(),                        
+			new stdClass(),
 			(object) array( 'key' => 'value' ),
-			42.5,    
+			42.5,
 		);
 
 		foreach ( $invalid_types as $invalid_value ) {
