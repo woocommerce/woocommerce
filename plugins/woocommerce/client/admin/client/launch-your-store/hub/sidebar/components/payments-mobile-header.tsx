@@ -56,7 +56,7 @@ export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 					/* translators: %1$s: current step number, %2$s: total number of steps */
 					__( 'Step %1$s of %2$s', 'woocommerce' ),
 					currentStepIndex,
-					allSteps.length
+					allSteps.length || 1
 				) }
 			</div>
 		</div>
