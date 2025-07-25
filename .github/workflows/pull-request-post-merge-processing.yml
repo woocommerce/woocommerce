@@ -43,7 +43,7 @@ jobs:
               with:
                 script: |
                   const pr_number = context.payload.pull_request.number;
-                  const { data: { issue }} = await github.rest.issues.get({
+                   const { data: issue } = await github.rest.issues.get({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: pr_number
