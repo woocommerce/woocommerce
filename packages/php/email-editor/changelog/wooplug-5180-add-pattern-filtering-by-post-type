@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add the new post_types property to the Abstract_Pattern class.
