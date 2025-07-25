@@ -17,9 +17,8 @@ import { useOnboardingContext } from '~/settings-payments/onboarding/providers/w
 export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 	const { steps: allSteps, currentStep } = useOnboardingContext();
 
-	const currentStepIndex = allSteps.findIndex(
-		( step ) => step.id === currentStep?.id
-	);
+	const currentStepIndex =
+		allSteps.findIndex( ( step ) => step.id === currentStep?.id ) + 1 || 1;
 
 	const handleBackClick = () => {
 		recordEvent( 'launch_your_store_payments_back_to_hub_click' );
