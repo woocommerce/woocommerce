@@ -75,17 +75,19 @@ export const SidebarContainer = ( {
 					>
 						{ title }
 					</Heading>
+				</HStack>
 
-					{ onMobileClose && (
+				{ onMobileClose && (
+					<div className="woocommerce-lys-mobile-sidebar-close">
 						<Button
 							className="mobile-sidebar-close"
 							onClick={ onMobileClose }
 							icon={ close }
-							iconSize={ 20 }
+							iconSize={ 24 }
 							aria-label={ __( 'Close sidebar', 'woocommerce' ) }
 						/>
-					) }
-				</HStack>
+					</div>
+				) }
 
 				<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
 					{ description && (
