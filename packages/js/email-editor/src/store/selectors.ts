@@ -5,8 +5,7 @@ import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
-import { serialize, parse } from '@wordpress/blocks';
-import { BlockInstance } from '@wordpress/blocks/index';
+import { serialize, parse, BlockInstance } from '@wordpress/blocks';
 import { Post } from '@wordpress/core-data/build-types/entity-types/post';
 
 /**
@@ -152,19 +151,31 @@ export const getSentEmailEditorPosts = createRegistrySelector(
 );
 
 export const getBlockPatternsForEmailTemplate = createRegistrySelector(
-	( select ) =>
-		createSelector(
+	( select ) => {
+		const emailPostType = select( storeName ).getEmailPostType();
+		return createSelector(
 			() =>
-				select( coreDataStore )
-					.getBlockPatterns()
-					.filter(
-						( { templateTypes } ) =>
-							Array.isArray( templateTypes ) &&
-							templateTypes.includes( 'email-template' )
-					)
-					.map( enhancePatternWithParsedBlocks ),
-			() => [ select( coreDataStore ).getBlockPatterns() ]
-		)
+				emailPostType
+					? select( coreDataStore )
+							.getBlockPatterns()
+							.filter( ( { templateTypes, postTypes } ) => {
+								return (
+									// Make sure the template type matches the required one.
+									Array.isArray( templateTypes ) &&
+									templateTypes.includes(
+										'email-template'
+									) &&
+									// The current post type must be matched when post types are set.
+									( postTypes === undefined ||
+										postTypes.length === 0 ||
+										postTypes.includes( emailPostType ) )
+								);
+							} )
+							.map( enhancePatternWithParsedBlocks )
+					: [],
+			() => [ select( coreDataStore ).getBlockPatterns(), emailPostType ]
+		);
+	}
 );
 
 export const canUserEditTemplates = createRegistrySelector(
