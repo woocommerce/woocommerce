@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductGalleryLargeImage class.
  */
@@ -18,15 +19,6 @@ class NextPreviousButtons extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-gallery-large-image-next-previous';
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Include and render the block.

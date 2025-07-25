@@ -15,7 +15,10 @@ export async function withFakeTimers< T >( fn: () => T ) {
 	const cancelAnimationFrameCopy = global.cancelAnimationFrame;
 
 	if ( ! usingFakeTimers ) {
-		jest.useFakeTimers( { legacyFakeTimers: true } );
+		jest.useFakeTimers( {
+			now: new Date(),
+			doNotFake: [ 'setTimeout' ],
+		} );
 	}
 
 	const result = await fn();
