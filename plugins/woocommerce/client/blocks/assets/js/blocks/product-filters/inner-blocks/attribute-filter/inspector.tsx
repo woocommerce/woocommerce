@@ -56,8 +56,10 @@ export const Inspector = ( {
 					label={ __( 'Display Settings', 'woocommerce' ) }
 					resetAll={ () => {
 						setAttributes( {
-							sortOrder: metadata.attributes.sortOrder.default,
-							queryType: metadata.attributes.queryType.default,
+							sortOrder: metadata.attributes.sortOrder
+								.default as BlockAttributes[ 'sortOrder' ],
+							queryType: metadata.attributes.queryType
+								.default as BlockAttributes[ 'queryType' ],
 							displayStyle:
 								metadata.attributes.displayStyle.default,
 							showCounts: metadata.attributes.showCounts.default,
@@ -76,8 +78,8 @@ export const Inspector = ( {
 						}
 						onDeselect={ () =>
 							setAttributes( {
-								sortOrder:
-									metadata.attributes.sortOrder.default,
+								sortOrder: metadata.attributes.sortOrder
+									.default as BlockAttributes[ 'sortOrder' ],
 							} )
 						}
 					>
@@ -120,8 +122,8 @@ export const Inspector = ( {
 						}
 						onDeselect={ () =>
 							setAttributes( {
-								queryType:
-									metadata.attributes.queryType.default,
+								queryType: metadata.attributes.queryType
+									.default as BlockAttributes[ 'queryType' ],
 							} )
 						}
 					>
@@ -129,9 +131,11 @@ export const Inspector = ( {
 							label={ __( 'Logic', 'woocommerce' ) }
 							isBlock
 							value={ queryType }
-							onChange={ (
-								value: BlockAttributes[ 'queryType' ]
-							) => setAttributes( { queryType: value } ) }
+							onChange={ ( value ) => {
+								if ( value === 'and' || value === 'or' ) {
+									setAttributes( { queryType: value } );
+								}
+							} }
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
 							style={ { width: '100%' } }
