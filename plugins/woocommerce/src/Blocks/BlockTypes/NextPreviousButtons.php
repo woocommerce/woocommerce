@@ -8,6 +8,9 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductGalleryLargeImage class.
  */
 class NextPreviousButtons extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name. Block has been initially created for Product Gallery Large Image block
 	 * hence the slug is related to this block. But it can be used for other blocks as well.
