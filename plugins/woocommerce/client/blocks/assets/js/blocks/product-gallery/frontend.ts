@@ -401,6 +401,20 @@ const productGallery = {
 				}
 			}
 		},
+
+		// Next/Previous Buttons block actions
+		onClickPrevious: ( event?: MouseEvent ) => {
+			actions.selectPreviousImage( event );
+		},
+		onClickNext: ( event?: MouseEvent ) => {
+			actions.selectNextImage( event );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
 	},
 	callbacks: {
 		watchForChangesOnAddToCartForm: () => {
