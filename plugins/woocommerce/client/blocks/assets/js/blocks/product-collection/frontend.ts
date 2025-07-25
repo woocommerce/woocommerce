@@ -35,6 +35,21 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	);
 }
 
+// TODO: This is temporary solution for demo purpose.
+// It will be replaced with the actual carousel scroll logic.
+const scrollCarousel = ( pixels: number ) => {
+	const { ref } = getElement();
+
+	const productCollection = ref?.closest(
+		'.wp-block-woocommerce-product-collection'
+	);
+	const productTemplate = productCollection?.querySelector(
+		'.wc-block-product-template'
+	);
+
+	productTemplate?.scrollBy( { left: pixels, behavior: 'smooth' } );
+};
+
 function isValidEvent( event: MouseEvent ): boolean {
 	return (
 		event.button === 0 && // Left clicks only.
@@ -104,17 +119,33 @@ const productCollectionStore = {
 			}
 		},
 		// Next/Previous Buttons block actions
-		onClickPrevious: ( event?: MouseEvent ) => {
-			console.log( 'onClickPrevious' );
+		onClickPrevious: () => {
+			scrollCarousel( -200 );
 		},
-		onClickNext: ( event?: MouseEvent ) => {
-			console.log( 'onClickNext' );
+		onClickNext: () => {
+			scrollCarousel( 200 );
 		},
 		onKeyDownPrevious: ( event: KeyboardEvent ) => {
-			console.log( 'onKeyDownPrevious' );
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				scrollCarousel( 200 );
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				scrollCarousel( -200 );
+			}
 		},
 		onKeyDownNext: ( event: KeyboardEvent ) => {
-			console.log( 'onKeyDownNext' );
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				scrollCarousel( 200 );
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				scrollCarousel( -200 );
+			}
 		},
 	},
 	callbacks: {

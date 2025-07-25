@@ -130,7 +130,7 @@ class Renderer {
 			$context                        = array(
 				'notices' => array(),
 				// Next/Previous Buttons block context
-				'isDisabledPrevious' => true,
+				'isDisabledPrevious' => false,
 				'isDisabledNext'     => false,
 				'ariaLabelPrevious'  => __( 'Scroll products left', 'woocommerce' ),
 				'ariaLabelNext'      => __( 'Scroll products right', 'woocommerce' ),
