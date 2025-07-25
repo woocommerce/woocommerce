@@ -68,9 +68,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-					'class'               => esc_attr( $classes_and_styles['classes'] ),
-					'style'               => esc_attr( $classes_and_styles['styles'] ),
+					'class' => esc_attr( $classes_and_styles['classes'] ),
+					'style' => esc_attr( $classes_and_styles['styles'] ),
 				)
 			);
 
@@ -156,10 +155,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
 						'name'                   => $attribute_slug,
 						'value'                  => $attribute_term['value'],
-						'data-wp-bind--checked'  => 'state.isPillSelected',
-						'data-wp-bind--disabled' => 'state.isPillDisabled',
+						'data-wp-bind--checked'  => 'state.isOptionSelected',
+						'data-wp-bind--disabled' => 'state.isOptionDisabled',
 						'data-wp-watch'          => 'callbacks.watchSelected',
-						'data-wp-on--click'      => 'actions.toggleSelected',
+						'data-wp-on--click'      => 'actions.handlePillClick',
 						'data-wp-on--keydown'    => 'actions.handleKeyDown',
 						'data-wp-context'        => array(
 							'option' => $attribute_term,
@@ -176,18 +175,17 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			'<div %s>%s</div>',
 			$this->get_normalized_attributes(
 				array(
-					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
-					'role'                => 'radiogroup',
-					'id'                  => $attribute_id,
-					'aria-labelledby'     => $attribute_id . '_label',
-					'data-wp-interactive' => $this->get_full_block_name() . '__pills',
-					'data-wp-context'     => array(
+					'class'           => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
+					'role'            => 'radiogroup',
+					'id'              => $attribute_id,
+					'aria-labelledby' => $attribute_id . '_label',
+					'data-wp-context' => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
 						'focused'       => '',
 					),
-					'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
+					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
 				),
 			),
 			$pills,
@@ -246,17 +244,16 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			'<select %s>%s</select>',
 			$this->get_normalized_attributes(
 				array(
-					'class'               => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
-					'id'                  => $attribute_id,
-					'data-wp-interactive' => $this->get_full_block_name() . '__dropdown',
-					'data-wp-context'     => array(
+					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
+					'id'                 => $attribute_id,
+					'data-wp-context'    => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
 					),
-					'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-on--change'  => 'actions.handleChange',
-					'name'                => $attribute_slug,
+					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
+					'data-wp-on--change' => 'actions.handleDropdownChange',
+					'name'               => $attribute_slug,
 				),
 			),
 			$options,

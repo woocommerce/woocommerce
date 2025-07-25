@@ -119,6 +119,12 @@ interface SalePriceProps {
 	 * The new price during the sale
 	 */
 	price: number | string | undefined;
+	/**
+	 * Custom style to be applied to both regular and sale price containers for RTL currency symbol handling
+	 *
+	 * Applied to both `<del>` and `<ins>` elements
+	 */
+	rtlPrefixStyles?: React.CSSProperties | undefined;
 }
 
 const SalePrice = ( {
@@ -129,6 +135,7 @@ const SalePrice = ( {
 	priceClassName,
 	priceStyle,
 	price,
+	rtlPrefixStyles,
 }: SalePriceProps ) => {
 	return (
 		<>
@@ -143,7 +150,10 @@ const SalePrice = ( {
 							'wc-block-components-product-price__regular',
 							regularPriceClassName
 						) }
-						style={ regularPriceStyle }
+						style={ {
+							...regularPriceStyle,
+							...rtlPrefixStyles,
+						} }
 					>
 						{ value }
 					</del>
@@ -162,7 +172,10 @@ const SalePrice = ( {
 							'is-discounted',
 							priceClassName
 						) }
-						style={ priceStyle }
+						style={ {
+							...priceStyle,
+							...rtlPrefixStyles,
+						} }
 					>
 						{ value }
 					</ins>
@@ -288,6 +301,15 @@ const ProductPrice = ( {
 	);
 
 	if ( isDiscounted ) {
+		// If we have rtl character in the prefix, we need to set the direction to ltr
+		// to avoid the price being displayed in the wrong direction.
+		const rtlPrefixStyles =
+			currency?.prefix && currency.prefix !== ''
+				? {
+						unicodeBidi: 'bidi-override' as const,
+						direction: 'ltr' as const,
+				  }
+				: {};
 		priceComponent = (
 			<SalePrice
 				currency={ currency }
@@ -297,6 +319,7 @@ const ProductPrice = ( {
 				regularPrice={ regularPrice }
 				regularPriceClassName={ regularPriceClassName }
 				regularPriceStyle={ regularPriceStyle }
+				rtlPrefixStyles={ rtlPrefixStyles }
 			/>
 		);
 	} else if ( minPrice !== undefined && maxPrice !== undefined ) {

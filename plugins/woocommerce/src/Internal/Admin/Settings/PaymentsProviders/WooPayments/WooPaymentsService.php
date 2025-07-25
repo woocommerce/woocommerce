@@ -480,10 +480,19 @@ class WooPaymentsService {
 	 *
 	 * @return bool Whether the onboarding step was cleaned.
 	 * @throws ApiArgumentException If the given onboarding step ID is invalid.
-	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 */
 	public function clean_onboarding_step_progress( string $step_id, string $location ): bool {
-		$this->check_if_onboarding_step_action_is_acceptable( $step_id, $location );
+		// We need to do reduced acceptance checks here because this is a cleanup action.
+		// First, check general if the onboarding action is acceptable.
+		$this->check_if_onboarding_action_is_acceptable();
+		// Second, check if the step ID is valid.
+		if ( ! $this->is_valid_onboarding_step_id( $step_id ) ) {
+			throw new ApiArgumentException(
+				'woocommerce_woopayments_onboarding_invalid_step_id',
+				esc_html__( 'Invalid onboarding step ID.', 'woocommerce' ),
+				(int) WP_Http::BAD_REQUEST
+			);
+		}
 
 		// Clear possible failed or blocked status for the step.
 		$this->clear_onboarding_step_failed( $step_id, $location );
@@ -1774,7 +1783,8 @@ class WooPaymentsService {
 			// Try to generate the authorization URL.
 			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
 			if ( ! $wpcom_connection['success'] ) {
-				$wpcom_step['errors'] = array_values( $wpcom_connection['errors'] );
+				// In case of errors, make sure we work with a list of error messages.
+				$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
 			}
 			$wpcom_step['actions'] = array(
 				'start' => array(

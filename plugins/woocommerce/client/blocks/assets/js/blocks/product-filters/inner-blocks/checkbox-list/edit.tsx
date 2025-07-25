@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, Disabled } from '@wordpress/components';
 import { checkMark } from '@woocommerce/icons';
 import { useMemo } from '@wordpress/element';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 import {
 	useBlockProps,
 	withColors,
@@ -62,15 +63,16 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 
 	const loadingState = useMemo( () => {
 		return [ ...Array( 5 ) ].map( ( x, i ) => (
-			<li
+			<div
+				className="wc-block-product-filter-checkbox-list__item"
 				key={ i }
 				style={ {
 					/* stylelint-disable */
-					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+					width: Math.floor( Math.random() * 75 ) + '%',
 				} }
 			>
 				&nbsp;
-			</li>
+			</div>
 		) );
 	}, [] );
 
@@ -116,7 +118,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
 											<span className="wc-block-product-filter-checkbox-list__text">
-												{ item.label }
+												{ typeof item.label === 'string'
+													? decodeHtmlEntities(
+															item.label
+													  )
+													: item.label }
 											</span>
 											{ showCounts && (
 												<span className="wc-block-product-filter-checkbox-list__count">

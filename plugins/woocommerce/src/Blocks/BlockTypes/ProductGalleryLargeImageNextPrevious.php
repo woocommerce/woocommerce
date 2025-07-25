@@ -8,28 +8,15 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductGalleryLargeImage class.
  */
 class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'product-gallery-large-image-next-previous';
-
-	/**
-	 * It isn't necessary register block assets because it is a server side block.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Include and render the block.
