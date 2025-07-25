@@ -8,10 +8,8 @@ import { Block, getBlockTypes } from '@wordpress/blocks';
 import {
 	SelectControl,
 	ToggleControl,
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
-	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -24,7 +22,7 @@ import {
  * Internal dependencies
  */
 import { sortOrderOptions, sortOrders } from './constants';
-import { BlockAttributes, EditProps } from './types';
+import { EditProps, DEFAULT_SORT_ORDER, DEFAULT_QUERY_TYPE } from './types';
 import metadata from './block.json';
 import {
 	DisplayStyleSwitcher,
@@ -56,10 +54,8 @@ export const Inspector = ( {
 					label={ __( 'Display Settings', 'woocommerce' ) }
 					resetAll={ () => {
 						setAttributes( {
-							sortOrder: metadata.attributes.sortOrder
-								.default as BlockAttributes[ 'sortOrder' ],
-							queryType: metadata.attributes.queryType
-								.default as BlockAttributes[ 'queryType' ],
+							sortOrder: DEFAULT_SORT_ORDER,
+							queryType: DEFAULT_QUERY_TYPE,
 							displayStyle:
 								metadata.attributes.displayStyle.default,
 							showCounts: metadata.attributes.showCounts.default,
@@ -73,13 +69,10 @@ export const Inspector = ( {
 				>
 					<ToolsPanelItem
 						label={ __( 'Sort Order', 'woocommerce' ) }
-						hasValue={ () =>
-							sortOrder !== metadata.attributes.sortOrder.default
-						}
+						hasValue={ () => sortOrder !== DEFAULT_SORT_ORDER }
 						onDeselect={ () =>
 							setAttributes( {
-								sortOrder: metadata.attributes.sortOrder
-									.default as BlockAttributes[ 'sortOrder' ],
+								sortOrder: DEFAULT_SORT_ORDER,
 							} )
 						}
 					>
@@ -117,13 +110,10 @@ export const Inspector = ( {
 					</ToolsPanelItem>
 					<ToolsPanelItem
 						label={ __( 'Logic', 'woocommerce' ) }
-						hasValue={ () =>
-							queryType !== metadata.attributes.queryType.default
-						}
+						hasValue={ () => queryType !== DEFAULT_QUERY_TYPE }
 						onDeselect={ () =>
 							setAttributes( {
-								queryType: metadata.attributes.queryType
-									.default as BlockAttributes[ 'queryType' ],
+								queryType: DEFAULT_QUERY_TYPE,
 							} )
 						}
 					>
