@@ -141,7 +141,7 @@ class ProductGallery extends AbstractBlock {
 							'left'   => false,
 							'right'  => false,
 						],
-						// Next/Previous Buttons block context
+						// Next/Previous Buttons block context.
 						'isDisabledPrevious' => true,
 						'isDisabledNext'     => false,
 						'ariaLabelPrevious'  => __( 'Previous image', 'woocommerce' ),
