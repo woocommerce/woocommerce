@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { SidebarComponentProps } from '../xstate';
-import MobileSidebarToggle from '../../sidebar/components/mobile-toggle';
+import MobileSidebarToggle from './mobile-toggle';
 
 export const LaunchStoreHubMobileHeader = ( props: SidebarComponentProps ) => {
 	const handleBackClick = () => {
