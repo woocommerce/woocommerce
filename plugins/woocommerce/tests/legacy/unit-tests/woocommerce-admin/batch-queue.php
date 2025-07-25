@@ -175,7 +175,6 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 			)
 		);
 		// Verify that no follow up action was queued.
-
 		WC_Helper_Queue::run_all_pending();
 		$this->assertCount(
 			0,
