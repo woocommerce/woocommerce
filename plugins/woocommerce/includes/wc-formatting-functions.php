@@ -641,7 +641,7 @@ function wc_price( $price, $args = array() ) {
 	if ( $args['in_span'] ) {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
-		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
+		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi class="woocommerce-Price-bidi">' . $formatted_price . '</bdi></span>';
 	} else {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
 		$return          = $formatted_price;
@@ -1362,7 +1362,7 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 	$price .= '</span>';
 
 	// Add the sale price.
-	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
+	$price .= '<ins class="woocommerce-Price-salePrice" aria-hidden="true">' . $formatted_sale_price . '</ins>';
 
 	// For accessibility (a11y) we'll also display that information to screen readers.
 	$price .= '<span class="screen-reader-text">';

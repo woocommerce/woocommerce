@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getAllByRole, getByLabelText } from '@testing-library/dom';
@@ -48,13 +48,23 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor.
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		await waitFor( () => {
+			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+			// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		} );
 
-		// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeVisible();
+		} );
+
 		await selectBlock( /^Block: Order Summary$/i );
+
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
+
 		const orderSummaryAddButton = getByLabelText(
 			orderSummaryBlock,
 			/^Add block$/i
@@ -74,10 +84,10 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeInTheDocument();
+		expect( tableOption ).toBeVisible();
 
 		// Verify Audio option is available (added only for order summary block).
-		expect( audioOption ).toBeInTheDocument();
+		expect( audioOption ).toBeVisible();
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
@@ -107,7 +117,7 @@ describe( 'Cart block editor integration', () => {
 		const filledCartTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( filledCartTableOption ).toBeInTheDocument();
+		expect( filledCartTableOption ).toBeVisible();
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
 		const filledCartAudioOption = screen.queryByRole( 'option', {
@@ -121,15 +131,21 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
 
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
 		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
 
-		expect( filledCartBlock ).toBeInTheDocument();
+		expect( filledCartBlock ).toBeVisible();
 		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /Block: Filled Cart$/i )
+			).toBeVisible();
+		} );
 
 		await selectBlock( /Block: Filled Cart/i );
 
