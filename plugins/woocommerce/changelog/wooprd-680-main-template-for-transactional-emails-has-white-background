@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix white background color hardcoding in block email template header for improved styling consistency

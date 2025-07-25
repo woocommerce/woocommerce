@@ -72,7 +72,7 @@ async function setup( attributes: BlockAttributes ) {
  */
 function enableControl( controlName: string ) {
 	const optionsButton = screen.getByRole( 'button', {
-		name: /Taxonomy Filter Settings options/i,
+		name: /Display Settings options/i,
 	} );
 	fireEvent.click( optionsButton );
 
@@ -120,29 +120,6 @@ describe( 'Taxonomy Filter block', () => {
 		beforeEach( async () => {
 			await setup( { taxonomy: 'product_cat' } );
 			await selectBlock( /Block: Product Categories Filter/i );
-		} );
-
-		test( 'should show taxonomy selection control', () => {
-			const taxonomySelect = screen.getByRole( 'combobox', {
-				name: /Taxonomy/i,
-			} );
-
-			expect( taxonomySelect ).toBeInTheDocument();
-			expect( taxonomySelect ).toHaveValue( 'product_cat' );
-		} );
-
-		test( 'should allow changing taxonomy selection', async () => {
-			const taxonomySelect = screen.getByRole( 'combobox', {
-				name: /Taxonomy/i,
-			} );
-
-			await act( async () => {
-				fireEvent.change( taxonomySelect, {
-					target: { value: 'product_tag' },
-				} );
-			} );
-
-			expect( taxonomySelect ).toHaveValue( 'product_tag' );
 		} );
 
 		test( 'should show product counts toggle', () => {
@@ -257,9 +234,6 @@ describe( 'Taxonomy Filter block', () => {
 			).toBeInTheDocument();
 
 			// Check that all controls reflect the set attributes
-			expect(
-				screen.getByRole( 'combobox', { name: /Taxonomy/i } )
-			).toHaveValue( 'product_cat' );
 			expect(
 				screen.getByRole( 'checkbox', { name: /Product counts/i } )
 			).toBeChecked();
