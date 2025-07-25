@@ -103,7 +103,7 @@
 		&-logos {
 			margin: 0 0 20px;
 			
-			@media screen and (min-width: 768px) and (max-width: 1024px) {
+			@media screen and (max-width: 1024px) {
 				.woocommerce-woopayments-payment-methods-logos {
 					display: flex;
 					flex-wrap: wrap;
