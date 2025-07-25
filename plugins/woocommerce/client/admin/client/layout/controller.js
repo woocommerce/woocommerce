@@ -2,15 +2,10 @@
  * External dependencies
  */
 import { Suspense, lazy } from '@wordpress/element';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
-import {
-	applyFilters,
-	addAction,
-	removeAction,
-	didFilter,
-} from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import {
 	getNewPath,
@@ -29,6 +24,7 @@ import { Spinner } from '@woocommerce/components';
 import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
+import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
 
 const ProductVariationPage = lazy( () =>
@@ -358,32 +354,9 @@ export const getPages = ( reports = [] ) => {
 
 export function usePages() {
 	const reports = useReports();
-	const [ pages, setPages ] = useState( () => getPages( reports ) );
-
-	/*
-	 * Handler for new pages being added after the initial filter has been run,
-	 * so that if any routing pages are added later, they can still be rendered
-	 * instead of falling back to the `NoMatch` page.
-	 */
-	useEffect( () => {
-		const handleHookAdded = ( hookName ) => {
-			if ( hookName === PAGES_FILTER && didFilter( PAGES_FILTER ) > 0 ) {
-				setPages( getPages( reports ) );
-			}
-		};
-
-		const namespace = `woocommerce/woocommerce/watch_${ PAGES_FILTER }`;
-		addAction( 'hookAdded', namespace, handleHookAdded );
-
-		// Refresh pages to catch any hooks added between initial getPages and this effect
-		setPages( getPages( reports ) );
-
-		return () => {
-			removeAction( 'hookAdded', namespace );
-		};
-	}, [ reports ] );
-
-	return pages;
+	return useFilterHook( PAGES_FILTER, () => getPages( reports ), [
+		reports,
+	] );
 }
 
 function usePrevious( value ) {

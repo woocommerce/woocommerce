@@ -2,18 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	applyFilters,
-	addAction,
-	removeAction,
-	didFilter,
-} from '@wordpress/hooks';
-import { lazy, useEffect, useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
+import { lazy } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useFilterHook } from '~/utils/use-filter-hook';
+
 const RevenueReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
 );
@@ -155,33 +152,5 @@ const getReports = () => {
 };
 
 export function useReports() {
-	const [ reports, setReports ] = useState( getReports );
-
-	/*
-	 * Handler for new reports being added after the initial filter has been run,
-	 * so that if any reports are added later, they can still be rendered
-	 * instead of being missed due to the race condition.
-	 */
-	useEffect( () => {
-		const handleHookAdded = ( hookName ) => {
-			if (
-				hookName === REPORTS_FILTER &&
-				didFilter( REPORTS_FILTER ) > 0
-			) {
-				setReports( getReports() );
-			}
-		};
-
-		const namespace = `woocommerce/woocommerce/watch_${ REPORTS_FILTER }`;
-		addAction( 'hookAdded', namespace, handleHookAdded );
-
-		// Refresh reports to catch any hooks added between initial getReports and this effect
-		setReports( getReports() );
-
-		return () => {
-			removeAction( 'hookAdded', namespace );
-		};
-	}, [] );
-
-	return reports;
+	return useFilterHook( REPORTS_FILTER, getReports );
 }
