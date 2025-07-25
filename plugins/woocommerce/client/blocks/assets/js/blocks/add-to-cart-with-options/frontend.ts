@@ -8,20 +8,17 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
-import { doesCartItemMatchAttributes } from '@woocommerce/stores/utils';
+import {
+	doesCartItemMatchAttributes,
+	getMatchedVariation,
+} from '@woocommerce/stores/utils';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type { AvailableVariation } from '@woocommerce/stores/utils';
 
 /**
  * Internal dependencies
  */
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-
-export type AvailableVariation = {
-	attributes: Record< string, string >;
-	variation_id: number;
-	price_html: string;
-	is_in_stock: boolean;
-};
 
 export type Context = {
 	productId: number;
