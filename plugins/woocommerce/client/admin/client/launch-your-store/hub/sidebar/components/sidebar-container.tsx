@@ -5,7 +5,7 @@
  */
 import clsx from 'clsx';
 import { isRTL, __ } from '@wordpress/i18n';
-import { chevronRight, chevronLeft, close } from '@wordpress/icons';
+import { Icon, chevronRight, chevronLeft, close } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import {
@@ -82,8 +82,7 @@ export const SidebarContainer = ( {
 						<Button
 							className="mobile-sidebar-close"
 							onClick={ onMobileClose }
-							icon={ close }
-							iconSize={ 24 }
+							icon={ <Icon icon={ close } size={ 24 } /> }
 							aria-label={ __( 'Close sidebar', 'woocommerce' ) }
 						/>
 					</div>
