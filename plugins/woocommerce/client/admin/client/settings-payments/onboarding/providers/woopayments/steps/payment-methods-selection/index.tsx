@@ -295,10 +295,31 @@ export default function PaymentMethodsSelection() {
 									const eventProps = {
 										// This is the entire list of payment methods that are available to the user,
 										// regardless of whether they are enabled or not, shown by default or hidden behind a Show more section.
-										displayed_payment_methods:
-											Object.keys(
-												paymentMethodsState
-											).join( ', ' ),
+										displayed_payment_methods: Object.keys(
+											initialVisibilityMap || {}
+										).join( ', ' ),
+										// This is the list of payment methods that were initially displayed to the user
+										// when the step became visible, regardless of whether they were enabled or not.
+										default_displayed_pms: Object.keys(
+											initialVisibilityMap || {}
+										)
+											.filter(
+												( paymentMethod ) =>
+													initialVisibilityMap?.[
+														paymentMethod
+													] !== false
+											)
+											.join( ', ' ),
+										// This is the list of payment methods that were enabled by default
+										// when the step became visible, regardless of whether they ended up selected or not.
+										default_selected_pms:
+											recommendedPaymentMethods
+												.filter(
+													( paymentMethod ) =>
+														paymentMethod.enabled
+												)
+												.map( ( method ) => method.id )
+												.join( ', ' ),
 										// This is the list of payment methods that ended up enabled (either by user selection or default).
 										selected_payment_methods: Object.keys(
 											paymentMethodsState
