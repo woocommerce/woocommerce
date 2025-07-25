@@ -172,6 +172,14 @@ describe( 'Product Gallery Block', () => {
 		const productImage = screen.getByTestId( 'product-image' );
 		expect( productImage ).toBeInTheDocument();
 
+		// Verify aspect ratio class is applied
+		const imageContainer = productImage.closest(
+			'.wc-block-components-product-image'
+		);
+		expect( imageContainer ).toHaveClass(
+			'wc-block-components-product-image--aspect-ratio-16-9'
+		);
+
 		// Get the thumbnails block
 		const thumbnailsBlock = screen.getByRole( 'document', {
 			name: /Block: Thumbnails/i,
