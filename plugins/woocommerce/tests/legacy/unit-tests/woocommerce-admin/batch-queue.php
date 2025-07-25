@@ -151,6 +151,31 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 				)
 			)
 		);
+		// Debug: Check what pending actions exist before running them
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$pending_actions_wc_admin = WC_Helper_Queue::get_all_pending( 'wc-admin-data' );
+		error_log( '=== DEBUG: Pending actions before first run_all_pending ===' );
+		error_log( 'Total pending actions: ' . count( $pending_actions ) );
+		error_log( 'Total wc-admin-data pending actions: ' . count( $pending_actions_wc_admin ) );
+		error_log( '--- ALL PENDING ACTIONS ---' );
+		foreach ( $pending_actions as $action ) {
+			error_log( sprintf(
+				'Action: hook=%s, group=%s, args=%s',
+				$action->get_hook(),
+				$action->get_group(),
+				json_encode( $action->get_args() )
+			) );
+		}
+		error_log( '--- WC-ADMIN-DATA ACTIONS ONLY ---' );
+		foreach ( $pending_actions_wc_admin as $action ) {
+			error_log( sprintf(
+				'Action: hook=%s, group=%s, args=%s',
+				$action->get_hook(),
+				$action->get_group(),
+				json_encode( $action->get_args() )
+			) );
+		}
+
 		// Verify that a second follow up action was queued.
 		WC_Helper_Queue::run_all_pending();
 		$this->assertCount(
@@ -174,7 +199,33 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 				)
 			)
 		);
+		// Debug: Check what pending actions exist before second run_all_pending
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$pending_actions_wc_admin = WC_Helper_Queue::get_all_pending( 'wc-admin-data' );
+		error_log( '=== DEBUG: Pending actions before second run_all_pending ===' );
+		error_log( 'Total pending actions: ' . count( $pending_actions ) );
+		error_log( 'Total wc-admin-data pending actions: ' . count( $pending_actions_wc_admin ) );
+		error_log( '--- ALL PENDING ACTIONS ---' );
+		foreach ( $pending_actions as $action ) {
+			error_log( sprintf(
+				'Action: hook=%s, group=%s, args=%s',
+				$action->get_hook(),
+				$action->get_group(),
+				json_encode( $action->get_args() )
+			) );
+		}
+		error_log( '--- WC-ADMIN-DATA ACTIONS ONLY ---' );
+		foreach ( $pending_actions_wc_admin as $action ) {
+			error_log( sprintf(
+				'Action: hook=%s, group=%s, args=%s',
+				$action->get_hook(),
+				$action->get_group(),
+				json_encode( $action->get_args() )
+			) );
+		}
+
 		// Verify that no follow up action was queued.
+		
 		WC_Helper_Queue::run_all_pending();
 		$this->assertCount(
 			0,
