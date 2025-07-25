@@ -42,8 +42,7 @@ export const TaxonomyFilterInspectorControls = ( {
 					} );
 					resetDisplayStyleBlock(
 						clientId,
-						metadata.attributes.displayStyle.default,
-						metadata.name
+						metadata.attributes.displayStyle.default
 					);
 				} }
 			>
@@ -102,8 +101,7 @@ export const TaxonomyFilterInspectorControls = ( {
 						} );
 						resetDisplayStyleBlock(
 							clientId,
-							metadata.attributes.displayStyle.default,
-							metadata.name
+							metadata.attributes.displayStyle.default
 						);
 					} }
 				>
@@ -113,7 +111,6 @@ export const TaxonomyFilterInspectorControls = ( {
 						onChange={ ( value ) =>
 							setAttributes( { displayStyle: value } )
 						}
-						parentBlockName={ metadata.name }
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem

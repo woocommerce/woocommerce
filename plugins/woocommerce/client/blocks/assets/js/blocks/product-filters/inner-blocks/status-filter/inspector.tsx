@@ -10,7 +10,6 @@ import { PanelBody, ToggleControl } from '@wordpress/components';
  */
 import { EditProps } from './types';
 import { DisplayStyleSwitcher } from '../../components/display-style-switcher';
-import metadata from './block.json';
 
 export const Inspector = ( {
 	attributes,
@@ -29,7 +28,6 @@ export const Inspector = ( {
 						onChange={ ( value ) =>
 							setAttributes( { displayStyle: value } )
 						}
-						parentBlockName={ metadata.name }
 					/>
 					<ToggleControl
 						label={ __( 'Product counts', 'woocommerce' ) }
