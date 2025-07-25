@@ -36,11 +36,11 @@ import {
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 
 const TEMPLATE = [
 	[
