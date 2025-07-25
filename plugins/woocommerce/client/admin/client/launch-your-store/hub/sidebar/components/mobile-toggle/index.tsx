@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Button } from '@wordpress/components';
-import { menu } from '@wordpress/icons';
+import { Icon, menu } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -23,8 +23,7 @@ const MobileSidebarToggle: React.FC< MobileSidebarToggleProps > = ( {
 			className="mobile-sidebar-toggle"
 			onClick={ onToggle }
 			aria-label={ __( 'Toggle sidebar', 'woocommerce' ) }
-			icon={ menu }
-			iconSize={ 24 }
+			icon={ <Icon icon={ menu } size={ 24 } /> }
 		/>
 	);
 };
