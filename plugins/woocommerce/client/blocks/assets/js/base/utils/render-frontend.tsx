@@ -144,6 +144,14 @@ const renderBlockInContainers = <
 	const roots: ReactRootWithContainer[] = [];
 
 	containers.forEach( ( el, i ) => {
+		// Add is-fading class for cart and checkout blocks before rendering
+		const isCheckoutBlock = el.classList.contains(
+			'wp-block-woocommerce-checkout'
+		);
+		const isCartBlock = el.classList.contains(
+			'wp-block-woocommerce-cart'
+		);
+
 		const props = getProps( el, i );
 
 		const errorBoundaryProps = getErrorBoundaryProps( el, i );
@@ -152,16 +160,37 @@ const renderBlockInContainers = <
 			...( props.attributes || ( {} as TAttributes ) ),
 		};
 
-		roots.push( {
-			container: el,
-			root: renderBlock( {
-				Block,
+		if ( isCheckoutBlock || isCartBlock ) {
+			el.classList.add( 'is-fading' );
+
+			// Remove is-fading class after 0.25s and start rendering
+			setTimeout( () => {
+				const root = renderBlock( {
+					Block,
+					container: el,
+					props,
+					attributes,
+					errorBoundaryProps,
+				} );
+
+				roots.push( {
+					container: el,
+					root,
+				} );
+				el.classList.remove( 'is-fading' );
+			}, 200 );
+		} else {
+			roots.push( {
 				container: el,
-				props,
-				attributes,
-				errorBoundaryProps,
-			} ),
-		} );
+				root: renderBlock( {
+					Block,
+					container: el,
+					props,
+					attributes,
+					errorBoundaryProps,
+				} ),
+			} );
+		}
 	} );
 
 	return roots;

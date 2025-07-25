@@ -49,39 +49,74 @@
 		// ~1060px is the default width of the content area in Storefront.
 		padding-right: math.percentage(math.div($gap-largest, 1060px));
 	}
+
+	.wp-block-woocommerce-checkout-fields-block {
+		display: flex;
+		flex-direction: column;
+	}
 	.wp-block-woocommerce-checkout-totals-block,
 	.wp-block-woocommerce-checkout-fields-block {
 		box-sizing: border-box;
 		margin: 0;
 
-		> div {
-			// here
-			@include skeleton-animation();
-			margin: 0 0 1.5em 0;
+		// Hide all inner children of the block
+		> * {
 			display: none;
-		}
-		div {
 			border: none;
+			// Hide merchant added blocks content
+			> * {
+				display: none;
+			}
 		}
-		.wp-block-woocommerce-checkout-contact-information-block,
+
+		> div {
+			@include skeleton-animation();
+			@include skeleton-animation-fade();
+			margin: 0 0 35px 0;
+		}
+
+		// Show main inner blocks skeletons
+		.wp-block-woocommerce-checkout-express-payment-block {
+			height: 130px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-contact-information-block {
+			height: 120px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-shipping-method-block {
+			height: 120px;
+			display: block;
+		}
+
 		.wp-block-woocommerce-checkout-payment-block {
-			min-height: 10em;
+			height: 280px;
 			display: block;
 		}
 		.wp-block-woocommerce-checkout-shipping-address-block {
-			min-height: 24em;
+			height: 300px;
 			display: block;
 		}
 		.wp-block-woocommerce-checkout-actions-block {
-			width: 50%;
-			min-height: 4em;
-			margin-left: 50%;
+			width: 190px;
+			height: 58px;
 			display: block;
+			align-self: flex-end;
 		}
 		.wp-block-woocommerce-checkout-order-summary-block {
-			min-height: 47em;
+			height: 460px;
 			display: block;
 		}
+
+		.wp-block-woocommerce-checkout-order-note-block {
+			height: 20px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-terms-block {
+			height: 15px;
+			display: block;
+		}
+
 		.wc-block-components-panel > h2 {
 			@include font-size(regular);
 			@include reset-box();
@@ -102,6 +137,20 @@
 		}
 	}
 }
+
+.wp-block-woocommerce-checkout.is-loading.is-fading {
+	div.wp-block-woocommerce-checkout-totals-block,
+	div.wp-block-woocommerce-checkout-fields-block {
+		> div {
+			background-color: transparent;
+
+			&::after {
+				background: transparent;
+			}
+		}
+	}
+}
+
 // Skeleton is shown before mobile classes are appended.
 @media only screen and (max-width: 700px) {
 	.wp-block-woocommerce-checkout.is-loading {
@@ -123,6 +172,9 @@
 			.wc-block-components-totals-coupon-link {
 				margin-left: 0;
 				margin-right: 0;
+			}
+			.wp-block-woocommerce-checkout-order-summary-block {
+				height: 55px;
 			}
 		}
 	}
