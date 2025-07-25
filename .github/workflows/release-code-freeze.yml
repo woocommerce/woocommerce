@@ -170,6 +170,9 @@ jobs:
       release-zip: ${{ steps.publish-release.outputs.release-zip }}
     steps:
       - id: publish-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release edit '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev' \
             --prerelease \
@@ -178,9 +181,6 @@ jobs:
             --draft=false
 
           echo "release-zip=https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev/woocommerce.zip" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
 
   notify-slack:
     name: Notify Slack
