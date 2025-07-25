@@ -23,7 +23,7 @@
 		&_container {
 			margin: 56px auto 0 auto;
 			max-width: 648px;
-	
+
 			@include breakpoint( "<600px" ) {
 				margin: 24px auto 0 auto;
 			}
