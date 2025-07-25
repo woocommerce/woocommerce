@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -36,6 +38,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				break;
 			case 'PAYMENT.CAPTURE.COMPLETED':
 				$this->process_payment_capture_completed( $data );
+				break;
+			case 'PAYMENT.AUTHORIZATION.CREATED':
+				$this->process_payment_authorization_created( $data );
 				break;
 			default:
 				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( $data, true ) );
@@ -104,6 +109,29 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order->set_transaction_id( $event['resource']['id'] );
 		$order->payment_complete();
 		$order->add_order_note( 'PayPal payment captured. ID: ' . $event['resource']['id'] );
+		$order->save();
+	}
+
+	/**
+	 * Process the PAYMENT.AUTHORIZATION.CREATED webhook event.
+	 *
+	 * @param array $event The webhook event data.
+	 */
+	private function process_payment_authorization_created( $event ) {
+		$custom_id = $event['resource']['custom_id'];
+		$order     = $this->get_wc_order( $custom_id );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			return;
+		}
+
+		$order->set_transaction_id( $event['resource']['id'] );
+		$order->add_order_note(
+			sprintf(
+				__( 'PayPal payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
+			)
+		);
+		$order->update_status( OrderStatus::ON_HOLD );
 		$order->save();
 	}
 

@@ -215,16 +215,6 @@ class WC_Gateway_Paypal_Request {
 			);
 			$order->update_status( OrderStatus::FAILED );
 			$order->save();
-		} finally {
-			if ( 'authorize' === $action ) {
-				$order->add_order_note(
-					sprintf(
-						__( 'PayPal payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
-					)
-				);
-				$order->update_status( OrderStatus::ON_HOLD );
-				$order->save();
-			}
 		}
 	}
 
