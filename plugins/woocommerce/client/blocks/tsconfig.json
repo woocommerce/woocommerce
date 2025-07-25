@@ -9,7 +9,8 @@
 		"./assets/js/atomic/blocks/**/block.json",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
-		"./tests/integration/**/*"
+		"./tests/integration/**/*",
+		"./tests/js/**/*"
 	],
 	"exclude": [
 		"./storybook/build",

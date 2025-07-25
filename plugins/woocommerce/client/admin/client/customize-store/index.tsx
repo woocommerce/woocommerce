@@ -32,11 +32,7 @@ import {
 import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	events as transitionalEvents,
-	services as transitionalServices,
-	actions as transitionalActions,
-} from './transitional';
+import { services as transitionalServices } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
@@ -54,7 +50,6 @@ import { isFeatureEnabled } from '~/utils/features';
 export type customizeStoreStateMachineEvents =
 	| introEvents
 	| assemblerHubEvents
-	| transitionalEvents
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
@@ -180,7 +175,6 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
-	...transitionalActions,
 	...machineActions,
 };
 
@@ -215,9 +209,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
-		},
-		transitionalScreen: {
-			hasCompleteSurvey: false,
 		},
 		isFontLibraryAvailable: null,
 		isPTKPatternsAPIAvailable: null,
@@ -491,7 +482,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						onDone: {
 							target: 'transitional',
-							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
 				},
@@ -504,11 +494,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					],
 					meta: {
 						component: AssemblerHub,
-					},
-					on: {
-						COMPLETE_SURVEY: {
-							actions: 'completeSurvey',
-						},
 					},
 				},
 			},

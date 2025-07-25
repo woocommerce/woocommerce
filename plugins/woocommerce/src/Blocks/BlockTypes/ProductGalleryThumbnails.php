@@ -10,21 +10,15 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
  * ProductGalleryThumbnails class.
  */
 class ProductGalleryThumbnails extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'product-gallery-thumbnails';
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 *  Register the context

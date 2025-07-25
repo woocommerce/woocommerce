@@ -87,8 +87,7 @@ const blocks = {
 		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
 	},
 	'product-gallery-large-image-next-previous': {
-		customDir:
-			'product-gallery/inner-blocks/product-gallery-next-previous-buttons',
+		customDir: 'next-previous-buttons',
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',

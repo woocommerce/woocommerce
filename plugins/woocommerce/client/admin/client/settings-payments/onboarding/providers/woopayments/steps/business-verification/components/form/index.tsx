@@ -99,7 +99,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_click',
 						{
-							step_id: currentStep?.id ?? 'unknown',
+							step: currentStep?.id ?? 'unknown',
 							sub_step_id: 'business',
 							action: 'business_form_continue',
 							source: sessionEntryPoint,
