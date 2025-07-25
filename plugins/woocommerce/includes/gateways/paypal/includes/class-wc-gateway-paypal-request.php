@@ -301,6 +301,7 @@ class WC_Gateway_Paypal_Request {
 					'payee'     => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
+					'shipping'    => $this->get_paypal_order_shipping( $order ),
 				),
 			),
 			'application_context' => array(
@@ -390,6 +391,34 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return 'CAPTURE';
+	}
+
+	/**
+	 * Get the shipping information for the PayPal create-order request.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	private function get_paypal_order_shipping( $order ) {
+		if ( ! $order->needs_shipping_address() ) {
+			return null;
+		}
+
+		$address_type = 'yes' === $this->gateway->get_option( 'send_shipping' ) ? 'shipping' : 'billing';
+
+		return array(
+			'name'    => array(
+				'full_name' => $order->{"get_formatted_{$address_type}_full_name"}(),
+			),
+			'address' => array(
+				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), 300 ),
+				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), 300 ),
+				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), 300 ),
+				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), 120 ),
+				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), 60 ),
+				'country_code'   => $order->{"get_{$address_type}_country"}(),
+			),
+		);
 	}
 
 	/**
