@@ -22,7 +22,10 @@ import {
 } from './core/rich-text';
 import { enhanceButtonBlock } from './core/button';
 import { enhanceButtonsBlock } from './core/buttons';
-import { alterSupportConfiguration } from './core/general-block-support';
+import {
+	alterSupportConfiguration,
+	removeBlockStylesFromAllBlocks,
+} from './core/general-block-support';
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
@@ -50,4 +53,5 @@ export function initBlocks() {
 	enhanceSocialLinksBlock();
 	modifyMoveToTrashAction();
 	registerCoreBlocks();
+	removeBlockStylesFromAllBlocks();
 }
