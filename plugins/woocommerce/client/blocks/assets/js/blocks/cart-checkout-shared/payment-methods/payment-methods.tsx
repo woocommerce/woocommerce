@@ -6,6 +6,7 @@ import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
+import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
 
 /**
  * Internal dependencies
@@ -45,10 +46,6 @@ const PaymentMethods = ( {
 		};
 	} );
 
-	if ( ! paymentMethodsInitialized ) {
-		return <CheckoutPaymentSkeleton />;
-	}
-
 	const hasPaymentMethods =
 		paymentMethodsInitialized &&
 		Object.keys( availablePaymentMethods ).length > 0;
@@ -56,16 +53,27 @@ const PaymentMethods = ( {
 		expressPaymentMethodsInitialized &&
 		Object.keys( availableExpressPaymentMethods ).length > 0;
 
-	if ( ! hasPaymentMethods && ! hasExpressPaymentMethods ) {
+	if (
+		paymentMethodsInitialized &&
+		! hasPaymentMethods &&
+		! hasExpressPaymentMethods
+	) {
 		return noPaymentMethods;
 	}
 
-	if ( hasExpressPaymentMethods && ! hasPaymentMethods ) {
+	if (
+		paymentMethodsInitialized &&
+		hasExpressPaymentMethods &&
+		! hasPaymentMethods
+	) {
 		return onlyExpressPayments;
 	}
 
 	return (
-		<>
+		<DelayedSkeleton
+			isLoading={ ! paymentMethodsInitialized }
+			skeleton={ <CheckoutPaymentSkeleton /> }
+		>
 			<SavedPaymentMethodOptions />
 			{ Object.keys( savedPaymentMethods ).length > 0 && (
 				<Label
@@ -83,7 +91,7 @@ const PaymentMethods = ( {
 				/>
 			) }
 			<PaymentMethodOptions />
-		</>
+		</DelayedSkeleton>
 	);
 };
 

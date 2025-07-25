@@ -6,6 +6,7 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -59,17 +60,23 @@ const TotalsItem = ( {
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			{ ! value || showSkeleton ? (
-				<>
-					<Skeleton
-						width="45px"
-						height="1em"
-						ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
-					/>
-				</>
-			) : (
+			<DelayedSkeleton
+				isLoading={ ! value || showSkeleton }
+				skeleton={
+					<>
+						<Skeleton
+							width="45px"
+							height="1em"
+							ariaMessage={ __(
+								'Loading price… ',
+								'woocommerce'
+							) }
+						/>
+					</>
+				}
+			>
 				<TotalsItemValue value={ value } currency={ currency } />
-			) }
+			</DelayedSkeleton>
 
 			<div className="wc-block-components-totals-item__description">
 				{ description }
