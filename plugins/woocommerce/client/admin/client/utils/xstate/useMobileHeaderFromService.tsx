@@ -31,9 +31,9 @@ export function useMobileHeaderFromXStateService< ComponentProps >(
 	>( null );
 
 	useEffect( () => {
-		if ( mobileHeaderMeta ) {
-			setMobileHeaderComponent( () => mobileHeaderMeta );
-		}
+		setMobileHeaderComponent(
+			mobileHeaderMeta ? () => mobileHeaderMeta : null
+		);
 	}, [ mobileHeaderMeta ] );
 
 	return [ MobileHeaderComponent ? MobileHeaderComponent : null ];
