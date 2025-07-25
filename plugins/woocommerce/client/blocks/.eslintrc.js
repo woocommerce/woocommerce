@@ -257,6 +257,8 @@ module.exports = {
 			extends: [ 'plugin:jest/recommended' ],
 			rules: {
 				'jest/no-mocks-import': 'off',
+				// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
+				'jest/no-standalone-expect': 'off',
 			},
 		},
 		{
