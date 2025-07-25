@@ -2,12 +2,10 @@
 	@import "../../../../settings-payments/onboarding/components/modal/style.scss";
 
 	height: 100%;
-	padding: 16px 16px 16px 32px;
+	padding: $gap $gap $gap-large $gap;
 
-	// Mobile styles - adjust padding for mobile
 	@media screen and (max-width: 782px) {
 		overflow-x: hidden;
-		padding: 0;
 	}
 
 	&__canvas {

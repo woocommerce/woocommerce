@@ -1,23 +1,9 @@
 .mobile-sidebar-toggle {
 	display: none;
-	position: fixed;
-	top: 16px;
-	left: 16px;
-	z-index: 99999;
-	background: #fff;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-	padding: 8px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	cursor: pointer;
 	transition: all 0.2s ease;
-	min-width: 40px;
-	height: 40px;
-
-	&:hover {
-		background: #f8f9fa;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-	}
+	margin-left: auto;
+	margin-right: $gap;
 
 	@media screen and (max-width: 782px) {
 		display: flex;
