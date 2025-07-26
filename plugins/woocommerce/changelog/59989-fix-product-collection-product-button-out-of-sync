@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the out-of-sync Product Button block after modifying a product's quantity from the Mini Cart.

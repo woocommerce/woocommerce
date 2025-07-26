@@ -4,15 +4,17 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductGalleryLargeImage class.
  */
-class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
+class NextPreviousButtons extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
 	/**
-	 * Block name.
+	 * Block name. Block has been initially created for Product Gallery Large Image block
+	 * hence the slug is related to this block. But it can be used for other blocks as well.
 	 *
 	 * @var string
 	 */
@@ -51,11 +53,11 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-large-image-next-previous <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
+			class="wc-block-next-previous-buttons <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 		>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectPreviousImage"
 				data-wp-on--keydown="actions.onArrowsKeyDown"
@@ -63,7 +65,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				aria-label="Previous image"
 			>
 				<svg
-					class="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--left"
+					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left"
 					xmlns="http://www.w3.org/2000/svg"
 					width="8"
 					height="12"
@@ -78,7 +80,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				</svg>
 			</button>
 			<button
-				class="wc-block-product-gallery-large-image-next-previous__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
 				data-wp-on--click="actions.selectNextImage"
 				data-wp-on--keydown="actions.onArrowsKeyDown"
@@ -86,7 +88,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				aria-label="Next image"
 			>
 				<svg
-					class="wc-block-product-gallery-large-image-next-previous__icon wc-block-product-gallery-large-image-next-previous__icon--right"
+					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right"
 					xmlns="http://www.w3.org/2000/svg"
 					width="8"
 					height="12"
