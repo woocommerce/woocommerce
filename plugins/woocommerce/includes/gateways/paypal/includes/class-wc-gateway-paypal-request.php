@@ -219,6 +219,51 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Capture a PayPal payment that has been authorized.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return void
+	 */
+	public function capture_authorized_payment( $order ) {
+		if ( ! $order || ! $order->get_transaction_id() ) {
+			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment.' );
+			return;
+		}
+
+		// Skip if the payment is already captured.
+		if ( 'COMPLETED' === $order->get_meta( '_paypal_status', true ) ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$request_url  = $this->get_paypal_capture_authorized_payment_request_url( $order->get_transaction_id() );
+
+		$response = wp_remote_post(
+			$request_url,
+			array(
+				'method'  => 'POST',
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'body'    => wp_json_encode( array() ),
+				'timeout' => 60,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			WC_Gateway_Paypal::log( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
+			return;
+		}
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+		$body      = wp_remote_retrieve_body( $response );
+
+		if ( 200 !== $http_code ) {
+			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
+		}
+	}
+
+	/**
 	 * Get the approve link from the response data.
 	 *
 	 * @param int   $http_code The HTTP code of the response.
@@ -273,6 +318,18 @@ class WC_Gateway_Paypal_Request {
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
 		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/authorize-payment' );
+	}
+
+	/**
+	 * Get the PayPal capture-authorized-payment request URL.
+	 *
+	 * @param string $authorization_id The PayPal authorization ID.
+	 * @return string
+	 */
+	private function get_paypal_capture_authorized_payment_request_url( $authorization_id ) {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/capture-authorized-payment/' . $authorization_id );
 	}
 
 	/**
