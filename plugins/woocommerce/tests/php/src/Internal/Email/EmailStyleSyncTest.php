@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Email;
 
 use Automattic\WooCommerce\Internal\Email\EmailStyleSync;
-use Automattic\WooCommerce\Internal\Email\EmailColors;
 use WC_Unit_Test_Case;
 
 /**
