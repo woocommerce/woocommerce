@@ -85,6 +85,16 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/capture-authorized-payment/{authorization_id}',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'capture_authorized_payment' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -278,6 +288,67 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		} else {
 			error_log( '(Proxy) Failed to authorize PayPal order. ' . wc_print_r( $response_data, true ) );
+			return new WP_REST_Response(
+				$response_data,
+				500
+			);
+		}
+	}
+
+	/**
+	 * Capture the PayPal payment that has been authorized.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
+	 */
+	public function capture_authorized_payment( WP_REST_Request $request ) {
+		$request_data = $request->get_json_params();
+		error_log( '(Proxy) PayPal capture authorized payment request received: ' . wc_print_r( $request_data, true ) );
+
+		$access_token = $this->get_paypal_access_token();
+		if ( ! $access_token ) {
+			error_log( '(Proxy) Failed to get PayPal access token. Cannot authorize payment.' );
+			return new WP_REST_Response(
+				array(
+					'status'  => 'error',
+					'message' => 'Failed to get PayPal access token.',
+				),
+				500
+			);
+		}
+
+		if ( empty( $request_data['authorization_id'] ) ) {
+			error_log( '(Proxy) Authorization ID missing. Cannot capture authorized payment.' );
+			return new WP_REST_Response(
+				array(
+					'status'  => 'error',
+					'message' => 'Authorize URL or PayPal order ID missing.',
+				),
+				400
+			);
+		}
+
+		$args = array(
+			'method'  => 'POST',
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . $access_token,
+			),
+		);
+
+		$response      = wp_remote_post( 'https://api-m.sandbox.paypal.com/v2/payments/authorizations/' . $request_data['authorization_id'] . '/capture', $args );
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $body, true );
+		error_log( '(Proxy) PayPal capture authorized payment response: ' . wc_print_r( $response_data, true ) );
+
+		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
+			return new WP_REST_Response(
+				$response_data,
+				200
+			);
+		} else {
+			error_log( '(Proxy) Failed to capture authorized PayPal payment. ' . wc_print_r( $response_data, true ) );
 			return new WP_REST_Response(
 				$response_data,
 				500
