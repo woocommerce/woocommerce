@@ -88,7 +88,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/capture-authorized-payment/{authorization_id}',
+			'/' . $this->rest_base . '/capture-authorized-payment/(?P<authorization_id>[a-zA-Z0-9]+)',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'capture_authorized_payment' ),
@@ -302,8 +302,8 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function capture_authorized_payment( WP_REST_Request $request ) {
-		$request_data = $request->get_json_params();
-		error_log( '(Proxy) PayPal capture authorized payment request received: ' . wc_print_r( $request_data, true ) );
+		$authorization_id = $request->get_param('authorization_id');
+		error_log( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
 
 		$access_token = $this->get_paypal_access_token();
 		if ( ! $access_token ) {
@@ -317,12 +317,12 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		}
 
-		if ( empty( $request_data['authorization_id'] ) ) {
+		if ( empty( $authorization_id ) ) {
 			error_log( '(Proxy) Authorization ID missing. Cannot capture authorized payment.' );
 			return new WP_REST_Response(
 				array(
 					'status'  => 'error',
-					'message' => 'Authorize URL or PayPal order ID missing.',
+					'message' => 'Authorization ID missing.',
 				),
 				400
 			);
@@ -336,7 +336,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			),
 		);
 
-		$response      = wp_remote_post( 'https://api-m.sandbox.paypal.com/v2/payments/authorizations/' . $request_data['authorization_id'] . '/capture', $args );
+		$response      = wp_remote_post( 'https://api-m.sandbox.paypal.com/v2/payments/authorizations/' . $authorization_id . '/capture', $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
