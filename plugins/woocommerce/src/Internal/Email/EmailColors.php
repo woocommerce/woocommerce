@@ -40,7 +40,7 @@ class EmailColors {
 			$body_text   = '#1e1e1e';
 			$footer_text = '#787c82';
 
-			$global_colors = self::get_colors_from_global_styles();
+			$global_colors = static::get_colors_from_global_styles();
 
 			if ( $global_colors ) {
 				$base        = $global_colors['base'];
@@ -66,11 +66,11 @@ class EmailColors {
 	 * @return array|null Array of colors or null if global styles are not available or complete.
 	 */
 	public static function get_colors_from_global_styles() {
-		if ( ! wp_is_block_theme() || ! function_exists( 'wp_get_global_styles' ) ) {
+		if ( ! static::wp_is_block_theme() || ! static::function_exists( 'wp_get_global_styles' ) ) {
 			return null;
 		}
 
-		$styles = wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
+		$styles = static::wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
 
 		$bg          = $styles['color']['background'] ?? null;
 		$body_bg     = $styles['color']['background'] ?? null;
@@ -96,5 +96,35 @@ class EmailColors {
 			'body_text',
 			'footer_text',
 		);
+	}
+
+	/**
+	 * Wrapper for wp_is_block_theme() so we can mock it in tests.
+	 *
+	 * @return bool
+	 */
+	protected static function wp_is_block_theme() {
+		return function_exists( 'wp_is_block_theme' ) ? wp_is_block_theme() : false;
+	}
+
+	/**
+	 * Wrapper for function_exists() so we can mock it in tests.
+	 *
+	 * @param string $function_name The function name to check.
+	 * @return bool
+	 */
+	protected static function function_exists( $function_name ) {
+		return function_exists( $function_name );
+	}
+
+	/**
+	 * Wrapper for wp_get_global_styles() so we can mock it in tests.
+	 *
+	 * @param array $args    The arguments for the wp_get_global_styles function.
+	 * @param array $options The options for the wp_get_global_styles function.
+	 * @return array|null
+	 */
+	protected static function wp_get_global_styles( $args = array(), $options = array() ) {
+		return function_exists( 'wp_get_global_styles' ) ? wp_get_global_styles( $args, $options ) : null;
 	}
 }
