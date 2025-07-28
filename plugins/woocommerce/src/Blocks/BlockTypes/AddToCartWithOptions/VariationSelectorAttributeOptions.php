@@ -187,12 +187,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
 						'focused'       => '',
 					),
-<<<<<<< HEAD
 					'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
-=======
-					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-watch'   => 'callbacks.setSelectedVariationId',
->>>>>>> fd1def2c51 (Prevent added to cart notice to appear when adding variable products to cart via the Add to Cart + Options block (#59921))
+					'data-wp-watch'       => 'callbacks.setSelectedVariationId',
 				),
 			),
 			$pills,
@@ -259,16 +255,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
 					),
-<<<<<<< HEAD
 					'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
+					'data-wp-watch'       => 'callbacks.setSelectedVariationId',
 					'data-wp-on--change'  => 'actions.handleChange',
 					'name'                => $attribute_slug,
-=======
-					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-watch'      => 'callbacks.setSelectedVariationId',
-					'data-wp-on--change' => 'actions.handleDropdownChange',
-					'name'               => $attribute_slug,
->>>>>>> fd1def2c51 (Prevent added to cart notice to appear when adding variable products to cart via the Add to Cart + Options block (#59921))
 				),
 			),
 			$options,

@@ -11,8 +11,8 @@ import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
-	AvailableVariation,
 } from '../../frontend';
+import { type AvailableVariation } from '../../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {

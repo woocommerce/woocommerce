@@ -11,14 +11,6 @@ import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
-<<<<<<< HEAD
-export type AvailableVariation = {
-	attributes: Record< string, string >;
-	variation_id: number;
-	price_html: string;
-	is_in_stock: boolean;
-};
-=======
 /**
  * Internal dependencies
  */
@@ -27,8 +19,6 @@ import {
 	type AvailableVariation,
 } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
-import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
->>>>>>> fd1def2c51 (Prevent added to cart notice to appear when adding variable products to cart via the Add to Cart + Options block (#59921))
 
 export type Context = {
 	productId: number;
@@ -123,49 +113,6 @@ const getInputData = (
 	};
 };
 
-<<<<<<< HEAD
-const getMatchedVariation = (
-	availableVariations: AvailableVariation[],
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( availableVariations ) ||
-		! Array.isArray( selectedAttributes ) ||
-		availableVariations.length === 0 ||
-		selectedAttributes.length === 0
-	) {
-		return null;
-	}
-	return availableVariations.find( ( availableVariation ) => {
-		return Object.entries( availableVariation.attributes ).every(
-			( [ attributeName, attributeValue ] ) => {
-				const attributeMatched = selectedAttributes.some(
-					( variationAttribute ) => {
-						const isSameAttribute =
-							variationAttribute.attribute === attributeName;
-						if ( ! isSameAttribute ) {
-							return false;
-						}
-
-						return (
-							variationAttribute.value === attributeValue ||
-							( variationAttribute.value &&
-								attributeValue === '' )
-						);
-					}
-				);
-
-				return attributeMatched;
-			}
-		);
-	} );
-};
-
-const getNewQuantity = ( productId: number, quantity: number ) => {
-	const product = wooState.cart?.items.find(
-		( item ) => item.id === productId
-	);
-=======
 const getNewQuantity = (
 	productId: number,
 	quantity: number,
@@ -190,7 +137,6 @@ const getNewQuantity = (
 
 		return item.id === productId;
 	} );
->>>>>>> fd1def2c51 (Prevent added to cart notice to appear when adding variable products to cart via the Add to Cart + Options block (#59921))
 	const currentQuantity = product?.quantity || 0;
 	return currentQuantity + quantity;
 };
