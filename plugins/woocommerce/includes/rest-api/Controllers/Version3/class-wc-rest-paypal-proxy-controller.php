@@ -129,7 +129,12 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			'sslverify' => false, // TODO: Set sslverify.
 		);
 
-		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $args, true ) );
+		// Sanitize the $args array to mask sensitive headers before logging.
+		$sanitized_args = $args;
+		if ( isset( $sanitized_args['headers']['Authorization'] ) ) {
+			$sanitized_args['headers']['Authorization'] = 'Bearer [REDACTED]';
+		}
+		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $sanitized_args, true ) );
 
 		$response      = wp_remote_post( $this->get_paypal_create_order_request_url( $testmode ), $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
