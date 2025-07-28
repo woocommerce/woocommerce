@@ -104,7 +104,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				error_log( '(Proxy) PayPal create order request missing required param: ' . $param . '.' );
 				return new WP_REST_Response(
 					array( 'error' => 'PayPal create order request missing required param: ' . $param . '.' ),
-				400
+					400
 				);
 			}
 		}
@@ -299,7 +299,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		$sanitized_args = $args;
 		if ( isset( $sanitized_args['headers']['Authorization'] ) ) {
 			// Get authorization type from the Authorization header.
-			$authorization_type = strpos( $sanitized_args['headers']['Authorization'], 'Bearer ' ) === 0 ? 'Bearer' : 'Basic';
+			$authorization_type                         = strpos( $sanitized_args['headers']['Authorization'], 'Bearer ' ) === 0 ? 'Bearer' : 'Basic';
 			$sanitized_args['headers']['Authorization'] = $authorization_type . ' [REDACTED]';
 		}
 		return $sanitized_args;
