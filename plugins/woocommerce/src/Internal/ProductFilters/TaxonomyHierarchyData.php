@@ -36,7 +36,7 @@ class TaxonomyHierarchyData {
 	 *
 	 * @var array
 	 */
-	private $hierarchy_cache = array();
+	private $hierarchy_data = array();
 
 	/**
 	 * Get optimized hierarchy map for a taxonomy.
@@ -50,8 +50,8 @@ class TaxonomyHierarchyData {
 		}
 
 		// Check in-memory cache first
-		if ( isset( $this->hierarchy_cache[ $taxonomy ] ) ) {
-			return $this->hierarchy_cache[ $taxonomy ];
+		if ( isset( $this->hierarchy_data[ $taxonomy ] ) ) {
+			return $this->hierarchy_data[ $taxonomy ];
 		}
 
 		// Check transient cache
@@ -73,7 +73,7 @@ class TaxonomyHierarchyData {
 
 		if ( ! empty( $cached_map ) ) {
 			// Cache in memory and return
-			$this->hierarchy_cache[ $taxonomy ] = $cached_map;
+			$this->hierarchy_data[ $taxonomy ] = $cached_map;
 			return $cached_map;
 		}
 
@@ -98,7 +98,7 @@ class TaxonomyHierarchyData {
 			set_transient( $cache_key, $transient_value, MONTH_IN_SECONDS );
 		}
 
-		$this->hierarchy_cache[ $taxonomy ] = $map;
+		$this->hierarchy_data[ $taxonomy ] = $map;
 
 		return $map;
 	}
@@ -388,7 +388,7 @@ class TaxonomyHierarchyData {
 	 */
 	public function clear_cache( string $taxonomy ): void {
 		// Clear in-memory cache for this taxonomy
-		unset( $this->hierarchy_cache[ $taxonomy ] );
+		unset( $this->hierarchy_data[ $taxonomy ] );
 
 		// Clear only the specific taxonomy's transient cache
 		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
@@ -400,7 +400,7 @@ class TaxonomyHierarchyData {
 	 */
 	public function clear_all_caches(): void {
 		// Clear all in-memory caches
-		$this->hierarchy_cache = array();
+		$this->hierarchy_data = array();
 
 		// Increment cache group version to invalidate all hierarchy caches
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
