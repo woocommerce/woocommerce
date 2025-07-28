@@ -16,7 +16,7 @@ import {
 	__experimentalDeRegisterExpressPaymentMethod,
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
  * Internal dependencies
@@ -178,12 +178,12 @@ describe( 'Payment method data store selectors/thunks', () => {
 		act( () => {
 			registerMockPaymentMethods( false );
 
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
+			// Set up MSW handlers for cart requests
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( previewCart );
+				} )
+			);
 
 			// need to clear the store resolution state between tests.
 			wpDataFunctions.dispatch( storeKey ).invalidateResolutionForStore();
@@ -196,7 +196,7 @@ describe( 'Payment method data store selectors/thunks', () => {
 	afterEach( async () => {
 		act( () => {
 			resetMockPaymentMethods();
-			fetchMock.resetMocks();
+			server.resetHandlers();
 		} );
 	} );
 
@@ -260,12 +260,12 @@ describe( 'Testing Payment Methods work correctly with saved cards turned on', (
 		act( () => {
 			registerMockPaymentMethods( true );
 
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
+			// Set up MSW handlers for cart requests
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( previewCart );
+				} )
+			);
 
 			// need to clear the store resolution state between tests.
 			wpDataFunctions.dispatch( storeKey ).invalidateResolutionForStore();
@@ -278,7 +278,7 @@ describe( 'Testing Payment Methods work correctly with saved cards turned on', (
 	afterEach( async () => {
 		act( () => {
 			resetMockPaymentMethods();
-			fetchMock.resetMocks();
+			server.resetHandlers();
 		} );
 	} );
 

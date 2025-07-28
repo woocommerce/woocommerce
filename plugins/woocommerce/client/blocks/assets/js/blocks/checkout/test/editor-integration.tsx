@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getByLabelText, getByRole } from '@testing-library/dom';
@@ -46,9 +46,13 @@ describe( 'Checkout block editor integration', () => {
 		await setup( {} );
 
 		// Verify Checkout block is properly initialized in the editor.
-		expect(
-			screen.getByLabelText( /^Block: Checkout$/i )
-		).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Checkout$/i ) ).toBeVisible();
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeVisible();
+		} );
 
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
@@ -108,7 +112,7 @@ describe( 'Checkout block editor integration', () => {
 		const contactInformationTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( contactInformationTableOption ).toBeInTheDocument();
+		expect( contactInformationTableOption ).toBeVisible();
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Checkout Totals).
 		const ContactInformationAudioOption = screen.queryByRole( 'option', {

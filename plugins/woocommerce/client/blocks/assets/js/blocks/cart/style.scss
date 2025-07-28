@@ -184,7 +184,10 @@
 		min-height: 15em;
 		display: block;
 		@include skeleton-animation();
+<<<<<<< HEAD
 		@include skeleton-animation-fade();
+=======
+>>>>>>> trunk
 	}
 
 	.wp-block-woocommerce-cart-totals-block {
@@ -202,11 +205,15 @@
 		min-height: 48px;
 		display: block;
 		@include skeleton-animation();
+<<<<<<< HEAD
 		@include skeleton-animation-fade();
+=======
+>>>>>>> trunk
 		margin: 0 0 1em 0;
 	}
 
 	div.wp-block-woocommerce-cart-order-summary-block {
+<<<<<<< HEAD
 		height: 200px;
 	}
 	div.wp-block-woocommerce-cart-order-summary-totals-block {
@@ -225,6 +232,12 @@
 		&::after {
 			background: transparent;
 		}
+=======
+		height: 20em;
+>>>>>>> trunk
+	}
+	div.wp-block-woocommerce-cart-order-summary-totals-block {
+		border-top: none;
 	}
 }
 

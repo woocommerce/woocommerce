@@ -184,6 +184,10 @@ export type PersonalizationTag = {
 	valueToInsert: string;
 };
 
+export type ContentValidation = {
+	validateContent: () => boolean;
+};
+
 export type State = {
 	postId: number | string; // Template use strings
 	postType: string;
@@ -204,6 +208,7 @@ export type State = {
 		list: PersonalizationTag[];
 		isFetching: boolean;
 	};
+	contentValidation?: ContentValidation;
 };
 
 export type EmailTemplate = {

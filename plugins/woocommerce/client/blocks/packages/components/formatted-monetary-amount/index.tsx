@@ -94,6 +94,16 @@ const FormattedMonetaryAmount = ( {
 		return null;
 	}
 
+	// If we have rtl character in the prefix, we need to set the direction to ltr
+	// to avoid the price being displayed in the wrong direction.
+	const rtlPrefixStyles =
+		currency?.prefix && currency.prefix !== ''
+			? {
+					unicodeBidi: 'bidi-override' as const,
+					direction: 'ltr' as const,
+			  }
+			: {};
+
 	const classes = clsx(
 		'wc-block-formatted-money-amount',
 		'wc-block-components-formatted-money-amount',
@@ -107,6 +117,10 @@ const FormattedMonetaryAmount = ( {
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
+		style: {
+			...props.style,
+			...rtlPrefixStyles,
+		},
 	};
 
 	// Wrapper for NumberFormat onValueChange which handles subunit conversion.
@@ -118,13 +132,15 @@ const FormattedMonetaryAmount = ( {
 		: () => void 0;
 
 	return (
-		<NumberFormat
-			className={ classes }
-			displayType={ displayType }
-			{ ...numberFormatProps }
-			value={ priceValue }
-			onValueChange={ onValueChangeWrapper }
-		/>
+		<span className="wc-block-number-format-container">
+			<NumberFormat
+				className={ classes }
+				displayType={ displayType }
+				{ ...numberFormatProps }
+				value={ priceValue }
+				onValueChange={ onValueChangeWrapper }
+			/>
+		</span>
 	);
 };
 

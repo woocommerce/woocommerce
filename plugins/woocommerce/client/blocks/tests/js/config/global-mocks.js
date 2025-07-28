@@ -367,8 +367,3 @@ if ( ! window.DOMRect ) {
 jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
-
-/*
- * Enables `window.fetch()` in Jest tests.
- */
-require( 'jest-fetch-mock' ).enableMocks();

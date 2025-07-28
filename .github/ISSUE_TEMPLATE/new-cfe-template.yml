@@ -23,7 +23,7 @@ body:
         It is important that the newly generated pull request is reviewed, tested, and merged as soon as possible to avoid 
         delaying the next planned build release.
         
-        For full instructions on backporting, please see our [Backporting Guide](https://github.com/woocommerce/woocommerce/blob/main/docs/contribution/releases/backporting.md).
+        For full instructions on backporting, please see our [Backporting Guide](https://developer.woocommerce.com/docs/contribution/releases/backporting/).
         
         ---
         Your target WC version will be extracted from the base of your PR. Ex: Base branch of PR is `release/9.5`. The Target WC version will be 9.5
