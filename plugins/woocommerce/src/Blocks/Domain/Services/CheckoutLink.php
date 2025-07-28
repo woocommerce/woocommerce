@@ -96,13 +96,14 @@ class CheckoutLink {
 
 		foreach ( $raw_products as $product_id_qty ) {
 			if ( strpos( $product_id_qty, ':' ) !== false ) {
-				list( $product_id, $qty ) = explode( ':', $product_id_qty );
+				list( $product_identifier, $qty ) = explode( ':', $product_id_qty );
 			} else {
-				$product_id = $product_id_qty;
-				$qty        = 1;
+				$product_identifier = $product_id_qty;
+				$qty                = 1;
 			}
-			$product_id = absint( $product_id );
-			$qty        = absint( $qty );
+			$qty = absint( $qty );
+
+			$product_id = $this->resolve_product_id( $product_identifier );
 
 			if ( ! $product_id || ! $qty ) {
 				continue;
@@ -112,6 +113,37 @@ class CheckoutLink {
 		}
 
 		return $products;
+	}
+
+	/**
+	 * Resolve product identifier to product ID.
+	 * First tries as numeric ID, then falls back to SKU lookup.
+	 *
+	 * @param string $identifier Product ID or SKU.
+	 * @return int Product ID if found, 0 otherwise.
+	 */
+	protected function resolve_product_id( $identifier ) {
+		$identifier = trim( $identifier );
+
+		if ( empty( $identifier ) ) {
+			return 0;
+		}
+
+		// First try as numeric product ID.
+		if ( is_numeric( $identifier ) ) {
+			$product_id = absint( $identifier );
+			if ( $product_id && wc_get_product( $product_id ) ) {
+				return $product_id;
+			}
+		}
+
+		// Fallback to SKU lookup.
+		$product_id = wc_get_product_id_by_sku( $identifier );
+		if ( $product_id && wc_get_product( $product_id ) ) {
+			return $product_id;
+		}
+
+		return 0;
 	}
 
 	/**
