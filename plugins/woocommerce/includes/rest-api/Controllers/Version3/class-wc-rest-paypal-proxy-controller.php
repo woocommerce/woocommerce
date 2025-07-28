@@ -376,7 +376,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		$capture_id   = $request->get_param( 'capture_id' );
 		$request_data = $request->get_json_params();
 		error_log( '(Proxy) PayPal refund payment request received for capture ID: ' . $capture_id );
-		
+
 		$access_token = $this->get_paypal_access_token();
 		if ( ! $access_token ) {
 			error_log( '(Proxy) Failed to get PayPal access token. Cannot authorize payment.' );

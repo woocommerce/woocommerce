@@ -377,7 +377,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	private function get_paypal_request() {
 		if ( null === $this->paypal_request ) {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 			$this->paypal_request = new WC_Gateway_Paypal_Request( $this );
 		}
 		return $this->paypal_request;
@@ -469,11 +469,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$paypal_request->refund_paypal_payment( $order, $amount, $reason );
 				return true;
 			} catch ( Exception $e ) {
-				WC_Gateway_Paypal::log( 'Refund failed: ' . $e->getMessage(), 'error' );
+				static::log( 'Refund failed: ' . $e->getMessage(), 'error' );
 				return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
 			}
 		}
-
 
 		if ( ! $this->can_refund_order( $order ) ) {
 			return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
