@@ -362,11 +362,22 @@ export function getPersonalizationTagsState(
 	return state.personalizationTags;
 }
 
-export function getPersonalizationTagsList(
-	state: State
-): State[ 'personalizationTags' ][ 'list' ] {
-	return state.personalizationTags.list;
-}
+export const getPersonalizationTagsList = createRegistrySelector(
+	( select ) => ( state: State ) => {
+		const tags = state.personalizationTags.list;
+		const postType = select( storeName ).getEmailPostType();
+
+		if ( ! postType ) {
+			return tags;
+		}
+
+		return tags.filter( ( tag ) => {
+			return (
+				tag.postTypes.length === 0 || tag.postTypes.includes( postType )
+			);
+		} );
+	}
+);
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
 	return state.theme.styles;

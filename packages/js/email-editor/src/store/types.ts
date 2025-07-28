@@ -182,6 +182,7 @@ export type PersonalizationTag = {
 	category: string;
 	attributes: string[];
 	valueToInsert: string;
+	postTypes: string[];
 };
 
 export type ContentValidation = {
