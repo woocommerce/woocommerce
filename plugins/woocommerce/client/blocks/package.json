@@ -212,12 +212,14 @@
 		"ignore-loader": "0.1.x",
 		"jest": "29.5.x",
 		"jest-circus": "29.5.x",
+		"jest-fixed-jsdom": "0.0.9",
 		"json2md": "1.12.0",
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
 		"lodash": "4.17.21",
 		"markdown-it": "13.0.1",
 		"mini-css-extract-plugin": "2.9.x",
+		"msw": "2.10.4",
 		"postcss": "8.4.x",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
@@ -242,9 +244,7 @@
 		"webpack-cli": "5.1.x",
 		"wireit": "0.14.12",
 		"wordpress-data-wp-6-7": "npm:@wordpress/data@wp-6.7",
-		"wp-types": "3.63.0",
-		"msw": "2.10.4",
-		"jest-fixed-jsdom": "0.0.9"
+		"wp-types": "3.63.0"
 	},
 	"engines": {
 		"node": "^20.11.1"
