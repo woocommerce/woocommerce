@@ -122,6 +122,7 @@ class WC_Gateway_Paypal_Request {
 						'Content-Type' => 'application/json',
 					),
 					'body'    => wp_json_encode( $request_body ),
+					'timeout' => 60,
 				)
 			);
 
@@ -187,6 +188,7 @@ class WC_Gateway_Paypal_Request {
 						'Content-Type' => 'application/json',
 					),
 					'body'    => wp_json_encode( $request_body ),
+					'timeout' => 60,
 				)
 			);
 
