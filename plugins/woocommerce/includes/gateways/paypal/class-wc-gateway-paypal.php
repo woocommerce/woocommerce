@@ -186,7 +186,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	private function maybe_register_site_with_wpcom() {
 		if ( ! is_admin() ||
 			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
-			! WC_Gateway_Paypal_Helper::is_wpcom_tos_accepted()
+			! WC_Gateway_Paypal_Helper::is_tos_accepted()
 		) {
 			return;
 		}
