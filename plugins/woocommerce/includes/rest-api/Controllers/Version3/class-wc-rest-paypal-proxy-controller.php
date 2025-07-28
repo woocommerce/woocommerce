@@ -97,6 +97,15 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 */
 	public function create_paypal_order( WP_REST_Request $request ) {
 		$request_data = $request->get_json_params();
+		if ( empty( $request_data['order'] ) || ! isset( $request_data['testmode'] ) ) {
+			error_log( '(Proxy) PayPal create order request missing params. ' . wc_print_r( $request_data, true ) );
+			return new WP_REST_Response(
+				array( 'error' => 'PayPal create order request missing params.' ),
+				400
+			);
+		}
+		$order = $request_data['order'];
+		$testmode = $request_data['testmode'];
 		error_log( '(Proxy) PayPal create order request received: ' . wc_print_r( $request_data, true ) );
 
 		$access_token = $this->get_paypal_access_token();
@@ -115,14 +124,14 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				'Authorization'     => 'Bearer ' . $access_token,
 				'PayPal-Request-Id' => uniqid(), // A unique ID for idempotency (recommended by PayPal).
 			),
-			'body'      => wp_json_encode( $request_data ),
+			'body'      => wp_json_encode( $order ),
 			'timeout'   => 45, // TODO: Set a timeout.
 			'sslverify' => false, // TODO: Set sslverify.
 		);
 
 		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $args, true ) );
 
-		$response      = wp_remote_post( 'https://api-m.sandbox.paypal.com/v2/checkout/orders', $args );
+		$response      = wp_remote_post( $this->get_paypal_create_order_request_url( $testmode ), $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
@@ -143,6 +152,16 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				500
 			);
 		}
+	}
+
+	/**
+	 * Get the PayPal create order request URL.
+	 *
+	 * @param bool $is_testmode Whether to use the sandbox environment.
+	 * @return string The request URL.
+	 */
+	private function get_paypal_create_order_request_url( $is_testmode = true ) {
+		return $is_testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
 	}
 
 	/**
