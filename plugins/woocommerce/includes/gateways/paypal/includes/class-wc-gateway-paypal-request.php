@@ -20,6 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_Paypal_Request {
 
 	/**
+	 * The maximum length of the invoice ID.
+	 *
+	 * @var int
+	 */
+	private const PAYPAL_INVOICE_ID_MAX_LENGTH = 127;
+
+	/**
 	 * Stores line items to send to PayPal.
 	 *
 	 * @var array
@@ -115,6 +122,7 @@ class WC_Gateway_Paypal_Request {
 						'Content-Type' => 'application/json',
 					),
 					'body'    => wp_json_encode( $request_body ),
+					'timeout' => 60,
 				)
 			);
 
@@ -180,6 +188,7 @@ class WC_Gateway_Paypal_Request {
 						'Content-Type' => 'application/json',
 					),
 					'body'    => wp_json_encode( $request_body ),
+					'timeout' => 60,
 				)
 			);
 
@@ -274,8 +283,8 @@ class WC_Gateway_Paypal_Request {
 			),
 			'purchase_units'      => array(
 				array(
-					'custom_id' => $this->get_paypal_order_custom_id( $order ),
-					'amount'    => array(
+					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
+					'amount'     => array(
 						'currency_code' => $currency,
 						'value'         => $order->get_total(),
 						'breakdown'     => array(
@@ -297,8 +306,9 @@ class WC_Gateway_Paypal_Request {
 							),
 						),
 					),
-					'items'     => $this->get_paypal_order_items( $order ),
-					'payee'     => array(
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'items'      => $this->get_paypal_order_items( $order ),
+					'payee'      => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
 					'shipping'  => $this->get_paypal_order_shipping( $order ),
@@ -478,7 +488,7 @@ class WC_Gateway_Paypal_Request {
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
+				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 				'custom'        => wp_json_encode(
 					array(
 						'order_id'  => $order->get_id(),
