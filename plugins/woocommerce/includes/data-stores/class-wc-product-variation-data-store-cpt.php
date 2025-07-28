@@ -699,7 +699,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		 *
 		 * @since 10.2.0
 		 * @param int $variation_id The ID of the product variation.
-		 **/
+		 */
 		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
 	}
 
@@ -821,7 +821,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 *
 	 * @since 10.2.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
-	 * @param bool $force Whether the update was forced.
+	 * @param bool       $force Whether the update was forced.
 	 */
 	public static function on_product_attributes_updated( $product, $force ) {
 		if ( $product->is_type( 'variable' ) ) {
@@ -903,26 +903,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} else {
-			if ( function_exists( 'as_schedule_single_action' ) ) {
-				as_schedule_single_action(
-					time() + 1,
-					'wc_regenerate_term_variation_summaries',
-					array( $taxonomy, $new_term->slug ),
-					'woocommerce'
-				);
-			}
+		} else if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action(
+				time() + 1,
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $new_term->slug ),
+				'woocommerce'
+			);
 		}
 	}
 
 	/**
 	 * Hook called after a term is updated to handle updates for product variations.
 	 *
-	 * @param int    $term_id  Term ID.
-	 * @param int    $tt_id    Term taxonomy ID.
-	 * @param string $taxonomy Taxonomy slug.
+	 * @param int     $term_id  Term ID.
+	 * @param int     $tt_id    Term taxonomy ID.
+	 * @param string  $taxonomy Taxonomy slug.
 	 * @param WP_Term $deleted_term Copy of the already-deleted term.
-	 * @param array  $object_ids List of term object IDs.
+	 * @param array   $object_ids List of term object IDs.
 	 */
 	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
@@ -955,15 +953,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} else {
-			if ( function_exists( 'as_schedule_single_action' ) ) {
-				as_schedule_single_action(
-					time() + 1,
-					'wc_regenerate_term_variation_summaries',
-					array( $taxonomy, $deleted_term->slug ),
-					'woocommerce'
-				);
-			}
+		} else if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action(
+				time() + 1,
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $deleted_term->slug ),
+				'woocommerce'
+			);
 		}
 	}
 
