@@ -32,17 +32,18 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			return;
 		}
 
-		// Parent Product Updates Attributes
+		// Parent Product Updates Attributes.
 		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
 
-		// Attributes
+		// Attributes.
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
 
-		// Terms
+		// Terms.
 		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
+		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 5 );
 
-		// Action Scheduler
+		// Action Scheduler.
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_term_variation_summaries', array( __CLASS__, 'regenerate_term_variation_summaries' ), 10, 2 );
@@ -893,6 +894,58 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					time() + 1,
 					'wc_regenerate_term_variation_summaries',
 					array( $taxonomy, $new_term->slug ),
+					'woocommerce'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Hook called after a term is updated to handle updates for product variations.
+	 *
+	 * @param int    $term_id  Term ID.
+	 * @param int    $tt_id    Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param WP_Term $deleted_term Copy of the already-deleted term.
+	 * @param array  $object_ids List of term object IDs.
+	 */
+	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
+		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
+			return;
+		}
+
+		$meta_key = 'attribute_' . $taxonomy;
+
+		global $wpdb;
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT pm.post_id
+				FROM $wpdb->postmeta pm
+				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = 'product_variation'",
+				$meta_key,
+				$deleted_term->slug
+			)
+		);
+
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		$threshold = self::get_regen_threshold();
+		$count = count( $variation_ids );
+
+		if ( $count <= $threshold ) {
+			self::regenerate_variation_summaries( $variation_ids );
+		} else {
+			if ( function_exists( 'as_schedule_single_action' ) ) {
+				as_schedule_single_action(
+					time() + 1,
+					'wc_regenerate_term_variation_summaries',
+					array( $taxonomy, $deleted_term->slug ),
 					'woocommerce'
 				);
 			}
