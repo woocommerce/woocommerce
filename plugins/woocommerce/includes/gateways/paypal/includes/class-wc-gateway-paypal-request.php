@@ -184,14 +184,14 @@ class WC_Gateway_Paypal_Request {
 				$request_body = array(
 					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
-          'testmode'        => $this->gateway->testmode,
+					'testmode'        => $this->gateway->testmode,
 				);
 			} else {
 				$request_url  = $this->get_paypal_authorize_payment_request_url();
 				$request_body = array(
 					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
-          'testmode'        => $this->gateway->testmode,
+					'testmode'        => $this->gateway->testmode,
 				);
 			}
 
