@@ -831,8 +831,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			if ( $count <= $threshold ) {
 				self::regenerate_variation_summaries( $variation_ids );
-			} else {
-				if ( function_exists( 'as_schedule_single_action' ) ) {
+			} elseif ( function_exists( 'as_schedule_single_action' ) ) {
 					as_schedule_single_action(
 						time() + 1,
 						'wc_regenerate_product_variation_summaries',
@@ -903,7 +902,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} else if ( function_exists( 'as_schedule_single_action' ) ) {
+		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
 			as_schedule_single_action(
 				time() + 1,
 				'wc_regenerate_term_variation_summaries',
@@ -953,7 +952,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} else if ( function_exists( 'as_schedule_single_action' ) ) {
+		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
 			as_schedule_single_action(
 				time() + 1,
 				'wc_regenerate_term_variation_summaries',
