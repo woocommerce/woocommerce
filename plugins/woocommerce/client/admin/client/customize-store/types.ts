@@ -44,9 +44,6 @@ export type customizeStoreStateMachineContext = {
 		activeTheme: string;
 		customizeStoreTaskCompleted: boolean;
 	};
-	transitionalScreen: {
-		hasCompleteSurvey: boolean;
-	};
 	isFontLibraryAvailable: boolean | null;
 	isPTKPatternsAPIAvailable: boolean | null;
 	activeThemeHasMods: boolean | undefined;

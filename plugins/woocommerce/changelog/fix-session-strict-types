@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Adds strict_types to session class and fixes type definitions and usage to reduce chances of type errors
+
+

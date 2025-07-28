@@ -154,13 +154,13 @@ $max-button-width: calc(100% / #{$max-button-columns});
 }
 
 .wp-block-woocommerce-product-collection {
-	.wc-block-product-gallery-large-image-next-previous {
+	.wc-block-next-previous-buttons {
 		position: absolute;
 		top: 0;
 		left: 0;
 		pointer-events: none;
 
-		.wc-block-product-gallery-large-image-next-previous__button {
+		.wc-block-next-previous-buttons__button {
 			// Since blocks are overlaping here, we need to override the pointer-events: none.
 			// This is the way to make the block selectable in editor.
 			pointer-events: auto;

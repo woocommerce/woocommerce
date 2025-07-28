@@ -12,7 +12,10 @@ import WordPressComStep from './wpcom-connection';
 import BusinessVerificationStep from './business-verification';
 import PaymentMethodsSelection from './payment-methods-selection';
 import TestAccountStep from './test-account';
+import TestOrLiveAccountStep from './test-or-live-account';
 import FinishStep from './finish';
+
+export const TESTING_ACCOUNT_STEP_ID = 'test_account';
 
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
@@ -35,24 +38,40 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		dependencies: [ 'payment_methods' ],
 	},
 	{
-		id: 'test_account',
+		id: 'activate_payments',
 		order: 3,
-		type: 'backend',
-		label: __( 'Ready to test payments', 'woocommerce' ),
-		dependencies: [ 'wpcom_connection' ],
-		content: <TestAccountStep />,
-	},
-	{
-		id: 'business_verification',
-		order: 4,
-		type: 'backend',
-		label: __( 'Activate Payments', 'woocommerce' ),
-		dependencies: [ 'test_account' ],
-		content: <BusinessVerificationStep />,
+		type: 'frontend',
+		label: __( 'Activate payments', 'woocommerce' ),
+		subSteps: [
+			{
+				id: 'test_or_live_account',
+				order: 1,
+				type: 'frontend',
+				label: __( 'Test or live account', 'woocommerce' ),
+				dependencies: [ 'wpcom_connection' ],
+				content: <TestOrLiveAccountStep />,
+			},
+			{
+				id: TESTING_ACCOUNT_STEP_ID,
+				order: 2,
+				type: 'backend',
+				label: __( 'Ready to test payments', 'woocommerce' ),
+				dependencies: [ 'test_or_live_account' ],
+				content: <TestAccountStep />,
+			},
+			{
+				id: 'business_verification',
+				order: 3,
+				type: 'backend',
+				label: __( 'Activate payments', 'woocommerce' ),
+				dependencies: [ 'test_or_live_account' ],
+				content: <BusinessVerificationStep />,
+			},
+		],
 	},
 	{
 		id: 'finish',
-		order: 5,
+		order: 4,
 		type: 'frontend',
 		label: __( 'Submit for verification', 'woocommerce' ),
 		dependencies: [ 'business_verification' ],
@@ -84,7 +103,7 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		id: 'business_verification',
 		order: 3,
 		type: 'backend',
-		label: __( 'Activate Payments', 'woocommerce' ),
+		label: __( 'Activate payments', 'woocommerce' ),
 		dependencies: [ 'wpcom_connection' ],
 		content: <BusinessVerificationStep />,
 	},

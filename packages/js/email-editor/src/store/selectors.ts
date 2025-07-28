@@ -372,3 +372,9 @@ export function getGlobalStylesPostId( state: State ): number | null {
 export function getUrls( state: State ): State[ 'urls' ] {
 	return state.urls;
 }
+
+export function getContentValidation(
+	state: State
+): State[ 'contentValidation' ] {
+	return state.contentValidation;
+}

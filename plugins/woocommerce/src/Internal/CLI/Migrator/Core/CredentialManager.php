@@ -80,6 +80,26 @@ class CredentialManager {
 	}
 
 	/**
+	 * Handles the interactive credential setup process for a platform.
+	 *
+	 * @param string $platform_slug The platform slug to set up credentials for.
+	 * @param array  $required_fields An array of field_key => prompt_text for credentials to collect.
+	 *
+	 * @return void
+	 */
+	public function setup_credentials( string $platform_slug, array $required_fields ): void {
+		if ( empty( $required_fields ) ) {
+			WP_CLI::error( 'No credential fields specified for setup.' );
+			return;
+		}
+
+		WP_CLI::log( 'Configuring credentials for ' . ucfirst( $platform_slug ) . '...' );
+
+		$credentials = $this->prompt_for_credentials( $required_fields );
+		$this->save_credentials( $platform_slug, $credentials );
+	}
+
+	/**
 	 * Reads a line from STDIN.
 	 *
 	 * A backward-compatible wrapper for WP_CLI::readline().
