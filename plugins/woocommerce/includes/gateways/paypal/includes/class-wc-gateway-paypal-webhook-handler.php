@@ -111,8 +111,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
 		$order->payment_complete();
 		$order->add_order_note(
-			/* translators: %1$s: Transaction ID */
 			sprintf(
+				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment captured. Transaction ID: %1$s.', 'woocommerce' ),
 				$event['resource']['id']
 			)
@@ -135,8 +135,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 
 		$order->set_transaction_id( $event['resource']['id'] );
 		$order->add_order_note(
-			/* translators: %1$s: Transaction ID */
 			sprintf(
+				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment authorized. Transaction ID: %1$s.\nChange payment status to processing or complete to capture funds.', 'woocommerce' ),
 				$event['resource']['id']
 			)
