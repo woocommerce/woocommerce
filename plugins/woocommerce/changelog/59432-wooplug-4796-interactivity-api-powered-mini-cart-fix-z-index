@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Remove product filters `z-index` when overlay is not opened.
-

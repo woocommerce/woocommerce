@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Added `global_unique_id` property to the `line_items` object for the orders endpoint.

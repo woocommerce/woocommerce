@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Improve error messaging for variable products in Add to Cart + Options block by returning a neutral API error and displaying a user-friendly message in the frontend when no attributes are selected.
