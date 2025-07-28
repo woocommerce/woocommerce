@@ -477,7 +477,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
 			$paypal_request->capture_authorized_payment( $order );

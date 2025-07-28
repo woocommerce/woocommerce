@@ -177,13 +177,13 @@ class WC_Gateway_Paypal_Request {
 			if ( 'capture' === $action ) {
 				$request_url  = $this->get_paypal_capture_payment_request_url();
 				$request_body = array(
-					'capture_url'   => $action_url,
+					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
 				);
 			} else {
 				$request_url  = $this->get_paypal_authorize_payment_request_url();
 				$request_body = array(
-					'authorize_url'     => $action_url,
+					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
 				);
 			}
@@ -217,8 +217,9 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			$order->add_order_note(
 				sprintf(
-					/* translators: %1$s: PayPal order ID */
-					__( 'PayPal ' . $action . ' payment failed. PayPal Order ID: %1$s', 'woocommerce' ),
+					/* translators: %1$s: Action, %2$s: PayPal order ID */
+					__( 'PayPal %1$s payment failed. PayPal Order ID: %2$s', 'woocommerce' ),
+					$action,
 					$paypal_order_id
 				)
 			);
@@ -245,7 +246,7 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$request_url  = $this->get_paypal_capture_authorized_payment_request_url( $order->get_transaction_id() );
+		$request_url = $this->get_paypal_capture_authorized_payment_request_url( $order->get_transaction_id() );
 
 		$response = wp_remote_post(
 			$request_url,

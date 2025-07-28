@@ -302,7 +302,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function capture_authorized_payment( WP_REST_Request $request ) {
-		$authorization_id = $request->get_param('authorization_id');
+		$authorization_id = $request->get_param( 'authorization_id' );
 		error_log( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
 
 		$access_token = $this->get_paypal_access_token();
