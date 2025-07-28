@@ -33,7 +33,7 @@ class WC_Gateway_Paypal_Helper {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			self::is_orders_v2_migration_eligible() && self::is_wpcom_tos_accepted()
+			self::is_orders_v2_migration_eligible() && self::is_tos_accepted()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -68,12 +68,12 @@ class WC_Gateway_Paypal_Helper {
 	}
 
 	/**
-	 * Check if the merchant has accepted the WPCOM ToS.
+	 * Check if the merchant has accepted the ToS.
 	 *
 	 * @return bool
 	 */
-	public static function is_wpcom_tos_accepted() {
+	public static function is_tos_accepted() {
 		$settings = get_option( 'woocommerce_paypal_settings', array() );
-		return isset( $settings['is_wpcom_tos_accepted'] ) && 'yes' === $settings['is_wpcom_tos_accepted'];
+		return isset( $settings['is_tos_accepted'] ) && 'yes' === $settings['is_tos_accepted'];
 	}
 }
