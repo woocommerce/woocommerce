@@ -616,7 +616,7 @@ function wc_create_attribute( $args ) {
 			}
 			global $wp_taxonomies;
 			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
-				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ];
+				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
 		}
 	}
