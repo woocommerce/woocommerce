@@ -97,7 +97,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 */
 	public function create_paypal_order( WP_REST_Request $request ) {
 		$request_data = $request->get_json_params();
-		if ( empty( $request_data['order'] ) || ! isset( $request_data['testmode'] ) ) {
+		if ( ! isset( $request_data['order'] ) || ! isset( $request_data['testmode'] ) ) {
 			error_log( '(Proxy) PayPal create order request missing params. ' . wc_print_r( $request_data, true ) );
 			return new WP_REST_Response(
 				array( 'error' => 'PayPal create order request missing params.' ),

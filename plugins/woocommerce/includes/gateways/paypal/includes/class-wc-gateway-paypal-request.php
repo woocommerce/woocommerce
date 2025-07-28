@@ -123,7 +123,7 @@ class WC_Gateway_Paypal_Request {
 					),
 					'body'    => wp_json_encode(
 						array(
-							'testmode' => $this->gateway->get_option( 'testmode' ),
+							'testmode' => $this->gateway->testmode,
 							'order'    => $order_request_params,
 						)
 					),
