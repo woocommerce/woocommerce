@@ -337,6 +337,72 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
+	 * Get children chunk for a specific parent (chunked strategy).
+	 *
+	 * @param int    $parent_id The parent term ID (0 for root level).
+	 * @param string $taxonomy  The taxonomy name.
+	 * @return array Array of direct children term IDs.
+	 */
+	public function get_children_chunk( int $parent_id, string $taxonomy ): array {
+		$cache_key = "wc_hierarchy_children_{$parent_id}_{$taxonomy}";
+		$children  = $this->get_cache( $cache_key );
+
+		if ( ! empty( $children ) ) {
+			return $children;
+		}
+
+		$children = $this->load_children_chunk( $parent_id, $taxonomy );
+
+		$this->set_cache( $cache_key, $children );
+
+		return $children;
+	}
+
+	/**
+	 * Get children with metadata for UI rendering (chunked strategy).
+	 *
+	 * @param int    $parent_id The parent term ID (0 for root level).
+	 * @param string $taxonomy  The taxonomy name.
+	 * @return array Array of children with term data and metadata.
+	 */
+	public function get_children_with_meta( int $parent_id, string $taxonomy ): array {
+		$cache_key = "wc_hierarchy_children_meta_{$parent_id}_{$taxonomy}";
+		$children  = $this->get_cache( $cache_key );
+
+		if ( ! empty( $children ) ) {
+			return $children;
+		}
+
+		$children = $this->load_children_with_meta( $parent_id, $taxonomy );
+
+		$this->set_cache( $cache_key, $children );
+
+		return $children;
+	}
+
+	/**
+	 * Get all descendants for a term using chunked loading.
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of all descendant term IDs.
+	 */
+	public function get_descendants_chunked( int $term_id, string $taxonomy ): array {
+		$cache_key   = "wc_hierarchy_descendants_{$term_id}_{$taxonomy}";
+		$descendants = $this->get_cache( $cache_key );
+
+		if ( ! empty( $descendants ) ) {
+			return $descendants;
+		}
+
+		$descendants = $this->load_descendants_recursive( $term_id, $taxonomy );
+
+		$this->set_cache( $cache_key, $descendants );
+
+		return $descendants;
+	}
+
+	/**
 	 * Clear hierarchy cache for a taxonomy.
 	 *
 	 * @param string $taxonomy The taxonomy name.
@@ -352,6 +418,90 @@ class TaxonomyHierarchyData {
 	public function clear_all_caches(): void {
 		// Increment cache group version to invalidate all hierarchy caches
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
+	}
+
+	/**
+	 * Load direct children for a parent term (chunked strategy implementation).
+	 *
+	 * @param int    $parent_id The parent term ID (0 for root level).
+	 * @param string $taxonomy  The taxonomy name.
+	 * @return array Array of direct children term IDs.
+	 */
+	private function load_children_chunk( int $parent_id, string $taxonomy ): array {
+		$children = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'parent'     => $parent_id,
+				'fields'     => 'ids',
+			)
+		);
+
+		if ( is_wp_error( $children ) ) {
+			return array();
+		}
+
+		return $children;
+	}
+
+	/**
+	 * Load direct children with metadata for UI rendering (chunked strategy implementation).
+	 *
+	 * @param int    $parent_id The parent term ID (0 for root level).
+	 * @param string $taxonomy  The taxonomy name.
+	 * @return array Array of children with term data and metadata.
+	 */
+	private function load_children_with_meta( int $parent_id, string $taxonomy ): array {
+		$children = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'parent'     => $parent_id,
+				'fields'     => 'all',
+			)
+		);
+
+		if ( is_wp_error( $children ) || empty( $children ) ) {
+			return array();
+		}
+
+		$children_data = array();
+		foreach ( $children as $term ) {
+			$depth = $this->compute_term_depth( $term->term_id, array( $term->term_id => $term->parent ) );
+			
+			$children_data[ $term->term_id ] = array(
+				'term_id'    => $term->term_id,
+				'name'       => $term->name,
+				'slug'       => $term->slug,
+				'parent'     => $term->parent,
+				'depth'      => $depth,
+				'menu_order' => $term->term_order ?? 0,
+				'count'      => $term->count,
+			);
+		}
+
+		return $children_data;
+	}
+
+	/**
+	 * Load all descendants recursively for a term (chunked strategy implementation).
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of all descendant term IDs.
+	 */
+	private function load_descendants_recursive( int $term_id, string $taxonomy ): array {
+		$descendants = array();
+		$children    = $this->get_children_chunk( $term_id, $taxonomy );
+
+		foreach ( $children as $child_id ) {
+			$descendants[] = $child_id;
+			// Recursively get descendants of each child
+			$child_descendants = $this->load_descendants_recursive( $child_id, $taxonomy );
+			$descendants       = array_merge( $descendants, $child_descendants );
+		}
+
+		return array_unique( $descendants );
 	}
 
 	/**
