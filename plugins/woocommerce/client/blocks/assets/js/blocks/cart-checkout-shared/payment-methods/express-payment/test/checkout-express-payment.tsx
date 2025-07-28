@@ -212,7 +212,11 @@ describe( 'CheckoutExpressPayment', () => {
 	} );
 
 	describe( 'Processing states', () => {
+<<<<<<< HEAD
 		it( 'should add conditional accessibility attributes when isProcessing', () => {
+=======
+		it( 'should add accessibility attributes when isProcessing', () => {
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
 				isProcessing: true,
@@ -256,7 +260,11 @@ describe( 'CheckoutExpressPayment', () => {
 			);
 		} );
 
+<<<<<<< HEAD
 		it( 'should add conditional accessibility attributes when express payment method is active', () => {
+=======
+		it( 'should add disabled class when express payment method is active', () => {
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
 				isProcessing: false,
@@ -384,7 +392,11 @@ describe( 'CheckoutExpressPayment', () => {
 			expect( titleSkeleton ).toHaveLength( 1 );
 		} );
 
+<<<<<<< HEAD
 		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
+=======
+		it( 'should render 1 skeleton buttons when calculating a partial update', () => {
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
 				isProcessing: false,
@@ -414,6 +426,7 @@ describe( 'CheckoutExpressPayment', () => {
 			).not.toBeInTheDocument();
 		} );
 
+<<<<<<< HEAD
 		it( 'should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
@@ -444,6 +457,8 @@ describe( 'CheckoutExpressPayment', () => {
 			).toBeInTheDocument();
 		} );
 
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,

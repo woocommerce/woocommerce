@@ -7,7 +7,10 @@ import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+<<<<<<< HEAD
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 
 /**
  * Internal dependencies
@@ -56,6 +59,7 @@ const CartLineItemsTable = ( {
 		} );
 	};
 
+<<<<<<< HEAD
 	const products = (
 		<DelayedContentWithSkeleton
 			isLoading={ isLoading }
@@ -79,6 +83,24 @@ const CartLineItemsTable = ( {
 				} ) }
 			</>
 		</DelayedContentWithSkeleton>
+=======
+	const products = isLoading ? (
+		<CartLineItemsCartSkeleton />
+	) : (
+		lineItems.map( ( lineItem, i ) => {
+			const nextItemKey =
+				lineItems.length > i + 1 ? lineItems[ i + 1 ].key : null;
+			return (
+				<CartLineItemRow
+					key={ lineItem.key }
+					lineItem={ lineItem }
+					onRemove={ onRemoveRow( nextItemKey ) }
+					ref={ rowRefs.current[ lineItem.key ] }
+					tabIndex={ -1 }
+				/>
+			);
+		} )
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 	);
 
 	return (

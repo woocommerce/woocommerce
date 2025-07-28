@@ -184,7 +184,10 @@
 		min-height: 15em;
 		display: block;
 		@include skeleton-animation();
+<<<<<<< HEAD
 		@include skeleton-animation-fade();
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 	}
 
 	.wp-block-woocommerce-cart-totals-block {
@@ -202,12 +205,22 @@
 		min-height: 48px;
 		display: block;
 		@include skeleton-animation();
+<<<<<<< HEAD
 		@include skeleton-animation-fade();
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 		margin: 0 0 1em 0;
 	}
 
 	div.wp-block-woocommerce-cart-order-summary-block {
+<<<<<<< HEAD
 		height: 200px;
+	}
+	div.wp-block-woocommerce-cart-order-summary-totals-block {
+		border-top: none;
+=======
+		height: 20em;
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 	}
 	div.wp-block-woocommerce-cart-order-summary-totals-block {
 		border-top: none;

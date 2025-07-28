@@ -159,6 +159,7 @@ const TotalsFooterItem = ( {
 								skeleton={ skeleton }
 							>
 								<>
+<<<<<<< HEAD
 									{ createInterpolateElement( description, {
 										TaxAmount: (
 											<FormattedMonetaryAmount
@@ -168,6 +169,20 @@ const TotalsFooterItem = ( {
 											/>
 										),
 									} ) }
+=======
+									<span>
+										{ __( 'Including', 'woocommerce' ) }
+									</span>
+									<Skeleton
+										height="1em"
+										width="45px"
+										tag="span"
+										ariaMessage={ __(
+											'Loading price… ',
+											'woocommerce'
+										) }
+									/>
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 								</>
 							</DelayedContentWithSkeleton>
 						</p>

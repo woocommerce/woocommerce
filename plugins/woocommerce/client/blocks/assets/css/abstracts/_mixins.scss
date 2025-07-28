@@ -369,6 +369,7 @@ $fontSizes: (
 	}
 }
 
+<<<<<<< HEAD
 @mixin skeleton-animation-fade() {
 	transition: background-color 0.2s ease;
 
@@ -385,6 +386,8 @@ $fontSizes: (
 	}
 }
 
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 @keyframes wc-skeleton-shimmer {
 	100% {
 		transform: translateX(100%);

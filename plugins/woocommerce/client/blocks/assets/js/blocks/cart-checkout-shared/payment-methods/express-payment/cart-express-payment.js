@@ -2,10 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+<<<<<<< HEAD
 import { noticeContexts, useStoreCart } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
+=======
+import { noticeContexts } from '@woocommerce/base-context';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { useSelect } from '@wordpress/data';
+import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import clsx from 'clsx';
 
@@ -18,13 +25,24 @@ import { getExpressPaymentMethodsState } from './express-payment-methods-helpers
 
 const CartExpressPayment = () => {
 	const {
+<<<<<<< HEAD
+=======
+		isCalculating,
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 		availableExpressPaymentMethods = {},
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
 		registeredExpressPaymentMethods = {},
 	} = useSelect( ( select ) => {
+<<<<<<< HEAD
 		const payment = select( paymentStore );
 		return {
+=======
+		const checkout = select( checkoutStore );
+		const payment = select( paymentStore );
+		return {
+			isCalculating: checkout.isCalculating(),
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 			availableExpressPaymentMethods:
 				payment.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
@@ -35,7 +53,10 @@ const CartExpressPayment = () => {
 				payment.getRegisteredExpressPaymentMethods(),
 		};
 	}, [] );
+<<<<<<< HEAD
 	const { hasPendingItemsOperations } = useStoreCart();
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 
 	const {
 		hasRegisteredExpressPaymentMethods,
@@ -47,6 +68,7 @@ const CartExpressPayment = () => {
 		expressPaymentMethodsInitialized,
 		registeredExpressPaymentMethods,
 	} );
+<<<<<<< HEAD
 
 	// We show the skeleton when
 	// the express payment method is not active (because they trigger recalculations) and
@@ -56,6 +78,8 @@ const CartExpressPayment = () => {
 		! isExpressPaymentMethodActive &&
 		( hasPendingItemsOperations ||
 			hasRegisteredNotInitializedExpressPaymentMethods );
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 
 	if (
 		! hasRegisteredExpressPaymentMethods ||
@@ -77,6 +101,7 @@ const CartExpressPayment = () => {
 				) }
 				aria-disabled={ isExpressPaymentMethodActive }
 				aria-live="polite"
+<<<<<<< HEAD
 				{ ...( isExpressPaymentMethodActive && {
 					'aria-busy': true,
 					'aria-label': __(
@@ -84,12 +109,23 @@ const CartExpressPayment = () => {
 						'woocommerce'
 					),
 				} ) }
+=======
+				aria-label={ __(
+					'Processing express checkout',
+					'woocommerce'
+				) }
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 			>
 				<div className="wc-block-components-express-payment__content">
 					<StoreNoticesContainer
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
+<<<<<<< HEAD
 					{ showSkeleton ? (
+=======
+					{ isCalculating ||
+					hasRegisteredNotInitializedExpressPaymentMethods ? (
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 						<ul className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,

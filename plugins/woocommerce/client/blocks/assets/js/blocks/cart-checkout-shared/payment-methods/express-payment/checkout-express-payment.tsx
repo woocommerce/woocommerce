@@ -139,7 +139,12 @@ const CheckoutExpressPayment = () => {
 					<StoreNoticesContainer
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
+<<<<<<< HEAD
 					{ showSkeleton ? (
+=======
+					{ isCalculating ||
+					hasRegisteredNotInitializedExpressPaymentMethods ? (
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 						<ul className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,

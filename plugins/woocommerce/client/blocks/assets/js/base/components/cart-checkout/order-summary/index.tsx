@@ -8,7 +8,10 @@ import {
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
 import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+<<<<<<< HEAD
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
+=======
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 /**
  * Internal dependencies
  */
@@ -26,8 +29,17 @@ const OrderSummary = ( {
 }: OrderSummaryProps ): null | JSX.Element => {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
+<<<<<<< HEAD
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 
+=======
+
+	if ( cartIsLoading || hasPendingItemsOperations ) {
+		return (
+			<CartLineItemsCheckoutSkeleton rows={ cartItems?.length || 2 } />
+		);
+	}
+>>>>>>> dfab1f648e ([Cart block] Enable progressive rendering (#59667))
 	return (
 		<DelayedContentWithSkeleton
 			isLoading={ showSkeleton }
