@@ -110,7 +110,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	public function create_paypal_order( $order ) {
 		try {
-			$request_body = $this->get_paypal_create_order_request_body( $order );
+			$order_request_params = $this->get_paypal_create_order_request_params( $order );
 
 			// phpcs:disable Generic.Commenting.Todo.TaskFound
 			// TODO: Replace with the wpcom endpoint when it's ready.
@@ -121,7 +121,12 @@ class WC_Gateway_Paypal_Request {
 					'headers' => array(
 						'Content-Type' => 'application/json',
 					),
-					'body'    => wp_json_encode( $request_body ),
+					'body'    => wp_json_encode(
+						array(
+							'testmode' => $this->gateway->testmode,
+							'order'    => $order_request_params,
+						)
+					),
 					'timeout' => 60,
 				)
 			);
@@ -179,12 +184,14 @@ class WC_Gateway_Paypal_Request {
 				$request_body = array(
 					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
+          'testmode'        => $this->gateway->testmode,
 				);
 			} else {
 				$request_url  = $this->get_paypal_authorize_payment_request_url();
 				$request_body = array(
 					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
+          'testmode'        => $this->gateway->testmode,
 				);
 			}
 
@@ -343,12 +350,12 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Build the request body for the PayPal create-order request.
+	 * Build the request parameters for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
-	private function get_paypal_create_order_request_body( $order ) {
+	private function get_paypal_create_order_request_params( $order ) {
 		$currency = $order->get_currency();
 
 		return array(
