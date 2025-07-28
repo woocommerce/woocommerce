@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Accessibility: add global event handler for anchors with button role triggering the click on spacebar keydown

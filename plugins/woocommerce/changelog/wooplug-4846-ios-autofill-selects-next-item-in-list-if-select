@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue where Safari on iOS would choose the "next" item in a required select list instead of the correct one during autofill.
