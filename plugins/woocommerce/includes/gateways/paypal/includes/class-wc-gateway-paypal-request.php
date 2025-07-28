@@ -280,20 +280,27 @@ class WC_Gateway_Paypal_Request {
 	 * @param float    $amount Refund amount.
 	 * @param string   $reason Refund reason.
 	 * @return void
+	 * @throws Exception If the PayPal refund payment fails.
 	 */
 	public function refund_paypal_payment( $order, $amount, $reason ) {
 		WC_Gateway_Paypal::log( 'Refunding PayPal payment for order ' . $order->get_id() );
 
 		$refund_type    = $amount === $order->get_total() ? 'full' : 'partial';
 		$transaction_id = $order->get_transaction_id();
-		
+
 		if ( ! $transaction_id ) {
 			WC_Gateway_Paypal::log( 'PayPal transaction ID not found. Cannot refund payment.' );
 			return;
 		}
 
 		$request_url  = $this->get_paypal_refund_payment_request_url( $transaction_id );
-		$request_body = $this->get_paypal_refund_payment_request_body( $order, $amount, $reason );
+		$request_body = array(
+			'amount'        => array(
+				'currency_code' => $order->get_currency(),
+				'value'         => $amount,	
+			),
+			'note_to_payer' => $reason,
+		);
 
 		$response = wp_remote_post(
 			$request_url,
@@ -312,7 +319,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$http_code     = wp_remote_retrieve_response_code( $response );
-		$body          = wp_remote_retrieve_body( $response );	
+		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
 
 		if ( 200 !== $http_code ) {
@@ -465,26 +472,6 @@ class WC_Gateway_Paypal_Request {
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
 		);
-	}
-
-	/**
-	 * Build the request body for the PayPal refund-payment request.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @param float $amount Refund amount.
-	 * @param string $reason Refund reason.
-	 * @return array
-	 */
-	private function get_paypal_refund_payment_request_body( $order, $amount, $reason ) {
-		$request_body = array(
-			'amount' => array(
-				'currency_code' => $order->get_currency(),
-				'value'         => $amount,	
-			),
-			'note_to_payer' => $reason,
-		);
-
-		return apply_filters( 'woocommerce_paypal_refund_request', $request_body, $order, $amount, $reason );
 	}
 
 	/**
