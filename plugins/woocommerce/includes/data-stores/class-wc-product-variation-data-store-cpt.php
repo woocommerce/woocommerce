@@ -751,6 +751,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
 		$taxonomy = 'pa_' . $old_slug;
 
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$variation_ids = get_posts(
 			array(
 				'post_type'   => 'product_variation',
@@ -764,9 +765,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				),
 			)
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
 		$threshold = self::get_regen_threshold();
-		$count = count( $variation_ids );
+		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
 			// Update variation summaries that used this product attribute, but
@@ -778,7 +780,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				}
 			);
 		} else {
-			$new_slug = ! empty( $attribute['slug'] ) ? $attribute['slug'] : $old_slug;
+			$new_slug     = ! empty( $attribute['slug'] ) ? $attribute['slug'] : $old_slug;
 			$new_taxonomy = 'pa_' . $new_slug;
 			if ( function_exists( 'as_schedule_single_action' ) ) {
 				as_schedule_single_action(
@@ -798,6 +800,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param string $taxonomy Attribute taxonomy.
 	 */
 	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		$variation_ids = get_posts(
 			array(
 				'post_type'   => 'product_variation',
@@ -811,6 +814,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				),
 			)
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
 		self::regenerate_variation_summaries( $variation_ids );
 	}
@@ -826,8 +830,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	public static function on_product_attributes_updated( $product, $force ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
-			$threshold = self::get_regen_threshold();
-			$count = count( $variation_ids );
+			$threshold     = self::get_regen_threshold();
+			$count         = count( $variation_ids );
 
 			if ( $count <= $threshold ) {
 				self::regenerate_variation_summaries( $variation_ids );
@@ -897,7 +901,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$threshold = self::get_regen_threshold();
-		$count = count( $variation_ids );
+		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
@@ -947,7 +951,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		$threshold = self::get_regen_threshold();
-		$count = count( $variation_ids );
+		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
