@@ -25,7 +25,7 @@ import {
 import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
-import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -154,7 +154,7 @@ const TotalsFooterItem = ( {
 				<>
 					{ SHOW_TAXES && parsedTaxValue !== 0 && (
 						<p className="wc-block-components-totals-footer-item-tax">
-							<DelayedSkeleton
+							<DelayedContentWithSkeleton
 								isLoading={ isLoading }
 								skeleton={ skeleton }
 							>
@@ -169,7 +169,7 @@ const TotalsFooterItem = ( {
 										),
 									} ) }
 								</>
-							</DelayedSkeleton>
+							</DelayedContentWithSkeleton>
 						</p>
 					) }
 					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (

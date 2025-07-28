@@ -3,14 +3,8 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import type { ReactNode } from 'react';
-import clsx from 'clsx';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
-export interface DelayedSkeletonProps {
+export interface DelayedContentWithSkeletonProps {
 	/**
 	 * The component to render when loading is complete
 	 */
@@ -31,15 +25,13 @@ export interface DelayedSkeletonProps {
  * Component that ensures skeleton children are displayed for a minimum duration
  * to prevent jarring quick flashes when content loads fast
  */
-export const DelayedSkeleton = ( {
+export const DelayedContentWithSkeleton = ( {
 	children,
 	isLoading,
 	skeleton,
-}: DelayedSkeletonProps ): JSX.Element => {
-	const MIN_DISPLAY_TIME = 400; // ms
-	const FADE_OUT_DURATION = 150; // ms
+}: DelayedContentWithSkeletonProps ): JSX.Element => {
+	const MIN_DISPLAY_TIME = 300;
 	const [ showSkeleton, setShowSkeleton ] = useState( isLoading );
-	const [ fadingOut, setFadingOut ] = useState( false );
 	const [ startTime, setStartTime ] = useState< number | null >( null );
 
 	useEffect( () => {
@@ -47,19 +39,13 @@ export const DelayedSkeleton = ( {
 
 		if ( isLoading ) {
 			setShowSkeleton( true );
-			setFadingOut( false );
 			setStartTime( Date.now() );
 		} else if ( startTime ) {
 			const elapsed = Date.now() - startTime;
 			const remainingTime = Math.max( 0, MIN_DISPLAY_TIME - elapsed );
-
 			timer = setTimeout( () => {
-				setFadingOut( true );
-				setTimeout( () => {
-					setShowSkeleton( false );
-					setFadingOut( false );
-					setStartTime( null );
-				}, FADE_OUT_DURATION );
+				setShowSkeleton( false );
+				setStartTime( null );
 			}, remainingTime );
 		}
 

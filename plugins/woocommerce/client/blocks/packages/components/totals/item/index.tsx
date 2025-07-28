@@ -6,7 +6,7 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
-import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -60,7 +60,7 @@ const TotalsItem = ( {
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			<DelayedSkeleton
+			<DelayedContentWithSkeleton
 				isLoading={ ! value || showSkeleton }
 				skeleton={
 					<>
@@ -76,7 +76,7 @@ const TotalsItem = ( {
 				}
 			>
 				<TotalsItemValue value={ value } currency={ currency } />
-			</DelayedSkeleton>
+			</DelayedContentWithSkeleton>
 
 			<div className="wc-block-components-totals-item__description">
 				{ description }

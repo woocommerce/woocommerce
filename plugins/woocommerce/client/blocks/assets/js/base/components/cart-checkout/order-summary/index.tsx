@@ -8,7 +8,7 @@ import {
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
 import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
-import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 /**
  * Internal dependencies
  */
@@ -29,7 +29,7 @@ const OrderSummary = ( {
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 
 	return (
-		<DelayedSkeleton
+		<DelayedContentWithSkeleton
 			isLoading={ showSkeleton }
 			skeleton={
 				<CartLineItemsCheckoutSkeleton
@@ -56,7 +56,7 @@ const OrderSummary = ( {
 					} ) }
 				</div>
 			</div>
-		</DelayedSkeleton>
+		</DelayedContentWithSkeleton>
 	);
 };
 

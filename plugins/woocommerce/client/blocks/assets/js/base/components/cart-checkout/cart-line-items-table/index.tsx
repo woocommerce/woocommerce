@@ -7,7 +7,7 @@ import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
-import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -53,7 +53,7 @@ const CartLineItemsTable = ( {
 	};
 
 	const products = (
-		<DelayedSkeleton
+		<DelayedContentWithSkeleton
 			isLoading={ isLoading }
 			skeleton={ <CartLineItemsCartSkeleton /> }
 		>
@@ -74,7 +74,7 @@ const CartLineItemsTable = ( {
 					);
 				} ) }
 			</>
-		</DelayedSkeleton>
+		</DelayedContentWithSkeleton>
 	);
 
 	return (

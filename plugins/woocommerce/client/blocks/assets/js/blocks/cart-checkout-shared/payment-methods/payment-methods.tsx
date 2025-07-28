@@ -6,7 +6,7 @@ import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
-import { DelayedSkeleton } from '@woocommerce/base-components/delayed-skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -70,7 +70,7 @@ const PaymentMethods = ( {
 	}
 
 	return (
-		<DelayedSkeleton
+		<DelayedContentWithSkeleton
 			isLoading={ ! paymentMethodsInitialized }
 			skeleton={ <CheckoutPaymentSkeleton /> }
 		>
@@ -91,7 +91,7 @@ const PaymentMethods = ( {
 				/>
 			) }
 			<PaymentMethodOptions />
-		</DelayedSkeleton>
+		</DelayedContentWithSkeleton>
 	);
 };
 
