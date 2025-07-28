@@ -28,7 +28,7 @@ export const LaunchStoreHubMobileHeader = ( props: SidebarComponentProps ) => {
 				aria-label={ __( 'Go back', 'woocommerce' ) }
 			/>
 			<h1 className="mobile-header__title">
-				{ __( 'Launch Your Store', 'woocommerce' ) }
+				{ __( 'Launch your store', 'woocommerce' ) }
 			</h1>
 			{ props.onToggle && (
 				<MobileSidebarToggle onToggle={ props.onToggle } />
