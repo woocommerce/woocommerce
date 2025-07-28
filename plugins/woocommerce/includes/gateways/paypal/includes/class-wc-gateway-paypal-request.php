@@ -274,6 +274,56 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Refund a PayPal payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param float    $amount Refund amount.
+	 * @param string   $reason Refund reason.
+	 * @return void
+	 */
+	public function refund_paypal_payment( $order, $amount, $reason ) {
+		WC_Gateway_Paypal::log( 'Refunding PayPal payment for order ' . $order->get_id() );
+
+		$refund_type    = $amount === $order->get_total() ? 'full' : 'partial';
+		$transaction_id = $order->get_transaction_id();
+		
+		if ( ! $transaction_id ) {
+			WC_Gateway_Paypal::log( 'PayPal transaction ID not found. Cannot refund payment.' );
+			return;
+		}
+
+		$request_url  = $this->get_paypal_refund_payment_request_url( $transaction_id );
+		$request_body = $this->get_paypal_refund_payment_request_body( $order, $amount, $reason );
+
+		$response = wp_remote_post(
+			$request_url,
+			array(
+				'method'  => 'POST',
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'body'    => wp_json_encode( $request_body ),
+				'timeout' => 60,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			throw new Exception( 'PayPal refund payment request failed. Response error: ' . $response->get_error_message() );
+		}
+
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );	
+		$response_data = json_decode( $body, true );
+
+		if ( 200 !== $http_code ) {
+			throw new Exception( 'PayPal refund payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
+		}
+
+		$order->add_order_note( 'PayPal ' . ( 'full' === $refund_type ? '' : 'partial ' ) . 'refund successful. Refund ID: ' . $response_data['id'] );
+		$order->save();
+	}
+
+	/**
 	 * Get the approve link from the response data.
 	 *
 	 * @param int   $http_code The HTTP code of the response.
@@ -343,6 +393,18 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Get the PayPal refund-payment request URL.
+	 *
+	 * @param string $transaction_id The PayPal transaction ID.
+	 * @return string
+	 */
+	private function get_paypal_refund_payment_request_url( $transaction_id ) {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
+		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/refund-payment/' . $transaction_id );
+	}
+
+	/**
 	 * Build the request body for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
@@ -403,6 +465,26 @@ class WC_Gateway_Paypal_Request {
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
 		);
+	}
+
+	/**
+	 * Build the request body for the PayPal refund-payment request.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param float $amount Refund amount.
+	 * @param string $reason Refund reason.
+	 * @return array
+	 */
+	private function get_paypal_refund_payment_request_body( $order, $amount, $reason ) {
+		$request_body = array(
+			'amount' => array(
+				'currency_code' => $order->get_currency(),
+				'value'         => $amount,	
+			),
+			'note_to_payer' => $reason,
+		);
+
+		return apply_filters( 'woocommerce_paypal_refund_request', $request_body, $order, $amount, $reason );
 	}
 
 	/**

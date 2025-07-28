@@ -408,6 +408,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function can_refund_order( $order ) {
 		$has_api_creds = false;
 
+		// Orders v2 API supports refunds.
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2_for_action( $order ) ) {
+			return true;
+		}
+
 		if ( $this->testmode ) {
 			$has_api_creds = $this->get_option( 'sandbox_api_username' ) && $this->get_option( 'sandbox_api_password' ) && $this->get_option( 'sandbox_api_signature' );
 		} else {
@@ -439,6 +444,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
+
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2_for_action( $order ) ) {
+			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			try {
+				$paypal_request->refund_paypal_payment( $order, $amount, $reason );
+				return true;
+			} catch ( Exception $e ) {
+				WC_Gateway_Paypal::log( 'Refund failed: ' . $e->getMessage(), 'error' );
+				return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
+			}
+		}
+
 
 		if ( ! $this->can_refund_order( $order ) ) {
 			return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
