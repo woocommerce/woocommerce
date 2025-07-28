@@ -97,15 +97,21 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 */
 	public function create_paypal_order( WP_REST_Request $request ) {
 		$request_data = $request->get_json_params();
-		if ( ! isset( $request_data['order'] ) || ! isset( $request_data['testmode'] ) ) {
-			error_log( '(Proxy) PayPal create order request missing params. ' . wc_print_r( $request_data, true ) );
-			return new WP_REST_Response(
-				array( 'error' => 'PayPal create order request missing params.' ),
+
+		$required_params = array( 'order', 'testmode' );
+		foreach ( $required_params as $param ) {
+			if ( ! isset( $request_data[ $param ] ) ) {
+				error_log( '(Proxy) PayPal create order request missing required param: ' . $param . '.' );
+				return new WP_REST_Response(
+					array( 'error' => 'PayPal create order request missing required param: ' . $param . '.' ),
 				400
-			);
+				);
+			}
 		}
+
 		$order    = $request_data['order'];
 		$testmode = $request_data['testmode'];
+
 		error_log( '(Proxy) PayPal create order request received: ' . wc_print_r( $request_data, true ) );
 
 		$access_token = $this->get_paypal_access_token( $testmode );
@@ -129,12 +135,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			'sslverify' => false, // TODO: Set sslverify.
 		);
 
-		// Sanitize the $args array to mask sensitive headers before logging.
-		$sanitized_args = $args;
-		if ( isset( $sanitized_args['headers']['Authorization'] ) ) {
-			$sanitized_args['headers']['Authorization'] = 'Bearer [REDACTED]';
-		}
-		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $sanitized_args, true ) );
+		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $this->sanitize_args( $args ), true ) );
 
 		$response      = wp_remote_post( $this->get_paypal_create_order_request_url( $testmode ), $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
@@ -251,7 +252,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			'timeout'   => 45, // TODO: Set a timeout.
 			'sslverify' => false, // TODO: Set sslverify.
 		);
-		error_log( '(Proxy) PayPal access token request: ' . wc_print_r( $args, true ) );
+		error_log( '(Proxy) PayPal access token request: ' . wc_print_r( $this->sanitize_args( $args ), true ) );
 
 		$response  = wp_remote_post( $this->get_paypal_access_token_request_url( $testmode ), $args );
 		$http_code = wp_remote_retrieve_response_code( $response );
@@ -286,6 +287,22 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 */
 	private function get_paypal_access_token_request_url( $testmode ) {
 		return $testmode ? 'https://api-m.sandbox.paypal.com/v1/oauth2/token' : 'https://api-m.paypal.com/v1/oauth2/token';
+	}
+
+	/**
+	 * Sanitize the args array to mask sensitive headers before logging.
+	 *
+	 * @param array $args The args array.
+	 * @return array The sanitized args array.
+	 */
+	private function sanitize_args( $args ) {
+		$sanitized_args = $args;
+		if ( isset( $sanitized_args['headers']['Authorization'] ) ) {
+			// Get authorization type from the Authorization header.
+			$authorization_type = strpos( $sanitized_args['headers']['Authorization'], 'Bearer ' ) === 0 ? 'Bearer' : 'Basic';
+			$sanitized_args['headers']['Authorization'] = $authorization_type . ' [REDACTED]';
+		}
+		return $sanitized_args;
 	}
 }
 
