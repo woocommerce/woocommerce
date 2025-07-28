@@ -200,7 +200,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$result = $this->jetpack_connection_manager->try_registration();
 		if ( is_wp_error( $result ) ) {
-			WC_Gateway_Paypal_Helper::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
+			WC_Gateway_Paypal::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
 			return;
 		}
 	}
