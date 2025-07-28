@@ -160,7 +160,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 * @param bool $testmode Whether to use the sandbox environment.
 	 * @return string The request URL.
 	 */
-	private function get_paypal_create_order_request_url( $testmode = true ) {
+	private function get_paypal_create_order_request_url( $testmode ) {
 		return $testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
 	}
 
