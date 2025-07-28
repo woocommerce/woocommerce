@@ -110,49 +110,47 @@ $dialog-padding: 20px;
 		:where(.wc-block-product-gallery-thumbnails__scrollable) {
 			flex-direction: column;
 		}
-		@for $i from 10 through 50 {
-			&:has(.wc-block-components-product-image--aspect-ratio-auto),
-			&:has(.wc-block-components-product-image--aspect-ratio-1) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 1 / calc(100 / $i);
-				}
+		&:has(.wc-block-components-product-image--aspect-ratio-auto),
+		&:has(.wc-block-components-product-image--aspect-ratio-1) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 1 / calc(100 / var(--wc-block-product-gallery-thumbnails-size));
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 4 / calc(100 / $i * 3);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 4 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 3 / calc(100 / $i * 4);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 4);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 3 / calc(100 / $i * 2);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 2);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 2 / calc(100 / $i * 3);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 2 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 16 / calc(100 / $i * 9);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 16 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 9);
 			}
-			&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
-				:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-					flex-basis: calc($i * 1%);
-					aspect-ratio: 9 / calc(100 / $i * 16);
-				}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 9 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 16);
 			}
 		}
 	}
@@ -246,12 +244,10 @@ $dialog-padding: 20px;
 	@include horizontal-thumbnails;
 
 	// These are min - max range values for thumbnails size.
-	@for $i from 10 through 50 {
-		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-			width: 100%;
-			height: calc($i * 1%);
-			aspect-ratio: calc(100 / $i) / 1;
-		}
+	&:where(.wc-block-product-gallery-thumbnails) {
+		width: 100%;
+		height: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+		aspect-ratio: calc(100 / var(--wc-block-product-gallery-thumbnails-size)) / 1;
 	}
 }
 
