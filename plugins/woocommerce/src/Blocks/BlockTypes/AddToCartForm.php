@@ -62,7 +62,6 @@ class AddToCartForm extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
@@ -185,7 +184,7 @@ class AddToCartForm extends AbstractBlock {
 		 * The stepper buttons don't show when the product is sold individually or stock quantity is less or equal to 1 because the quantity input field is hidden.
 		 * Additionally, if min and max purchase quantity are the same, the buttons should not be rendered at all.
 		 */
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $should_hide_quantity_selector && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $should_hide_quantity_selector;
 
 		if ( $is_descendent_of_single_product_block ) {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );

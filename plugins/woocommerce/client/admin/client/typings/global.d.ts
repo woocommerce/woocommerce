@@ -80,7 +80,6 @@ declare global {
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			blueprint: boolean;
-			'add-to-cart-with-options-stepper-layout': boolean;
 		};
 		wp: {
 			updates?: {
