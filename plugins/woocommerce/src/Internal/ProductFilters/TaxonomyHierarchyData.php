@@ -32,6 +32,13 @@ class TaxonomyHierarchyData {
 	private const SMALL_TAXONOMY_THRESHOLD = 1000;
 
 	/**
+	 * In-memory cache for hierarchy maps.
+	 *
+	 * @var array
+	 */
+	private $hierarchy_cache = array();
+
+	/**
 	 * Get optimized hierarchy map for a taxonomy.
 	 *
 	 * @param string $taxonomy The taxonomy name.
@@ -42,16 +49,58 @@ class TaxonomyHierarchyData {
 			return array();
 		}
 
-		$strategy = $this->get_optimal_strategy( $taxonomy );
+		// Check in-memory cache first
+		if ( isset( $this->hierarchy_cache[ $taxonomy ] ) ) {
+			return $this->hierarchy_cache[ $taxonomy ];
+		}
 
+		// Check transient cache
+		$cache_key  = 'wc_hierarchy_' . $taxonomy;
+		$cached_map = null;
+
+		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
+			$cache             = get_transient( $cache_key );
+			$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
+
+			if ( ! empty( $cache['version'] ) &&
+				is_array( $cache['value'] ) &&
+				! empty( $cache['value'] ) &&
+				$transient_version === $cache['version']
+			) {
+				$cached_map = $cache['value'];
+			}
+		}
+
+		if ( ! empty( $cached_map ) ) {
+			// Cache in memory and return
+			$this->hierarchy_cache[ $taxonomy ] = $cached_map;
+			return $cached_map;
+		}
+
+		// Build the map based on current strategy
+		$strategy = $this->get_optimal_strategy( $taxonomy );
 		switch ( $strategy ) {
 			case 'full_map':
-				return $this->get_full_hierarchy_map( $taxonomy );
-			case 'adjacency_map':
-				return $this->get_adjacency_hierarchy_map( $taxonomy );
+				$map = $this->build_full_hierarchy_map( $taxonomy );
+				break;
 			default:
-				return $this->get_adjacency_hierarchy_map( $taxonomy );
+				$map = $this->build_adjacency_hierarchy_map( $taxonomy );
+				break;
 		}
+
+		// Cache the map in transient and memory
+		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
+			$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
+			$transient_value   = array(
+				'version' => $transient_version,
+				'value'   => $map,
+			);
+			set_transient( $cache_key, $transient_value, DAY_IN_SECONDS );
+		}
+
+		$this->hierarchy_cache[ $taxonomy ] = $map;
+
+		return $map;
 	}
 
 	/**
@@ -63,63 +112,12 @@ class TaxonomyHierarchyData {
 	private function get_optimal_strategy( string $taxonomy ): string {
 		$term_count = wp_count_terms( array( 'taxonomy' => $taxonomy ) );
 
-		if ( is_wp_error( $term_count ) ) {
+		if ( $term_count >= self::SMALL_TAXONOMY_THRESHOLD ) {
 			return 'adjacency_map';
-		}
-
-		if ( $term_count < self::SMALL_TAXONOMY_THRESHOLD ) {
-			return 'full_map';
 		} else {
-			return 'adjacency_map';
+			return 'full_map';
 		}
 	}
-
-	/**
-	 * Get full hierarchy map for small taxonomies (<1000 terms).
-	 *
-	 * Provides maximum performance with pre-computed descendants and depth information.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Full hierarchy map with parents, children, descendants, and depth info.
-	 */
-	private function get_full_hierarchy_map( string $taxonomy ): array {
-		$cache_key = 'wc_hierarchy_full_' . $taxonomy;
-		$map       = $this->get_cache( $cache_key );
-
-		if ( ! empty( $map ) ) {
-			return $map;
-		}
-
-		$map = $this->build_full_hierarchy_map( $taxonomy );
-
-		$this->set_cache( $cache_key, $map );
-
-		return $map;
-	}
-
-	/**
-	 * Get adjacency hierarchy map for large taxonomies (1000+ terms).
-	 *
-	 * Provides balanced performance with memory efficiency.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Adjacency list hierarchy map.
-	 */
-	private function get_adjacency_hierarchy_map( string $taxonomy ): array {
-		$cache_key = 'wc_hierarchy_adj_' . $taxonomy;
-		$map       = $this->get_cache( $cache_key );
-
-		if ( ! empty( $map ) ) {
-			return $map;
-		}
-
-		$map = $this->build_adjacency_hierarchy_map( $taxonomy );
-
-		$this->set_cache( $cache_key, $map );
-
-		return $map;
-	}
-
 
 	/**
 	 * Build full hierarchy map with all relationships pre-computed.
@@ -280,20 +278,8 @@ class TaxonomyHierarchyData {
 	 * @return int The parent term ID (0 if root level).
 	 */
 	public function get_parent( int $term_id, string $taxonomy ): int {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
-
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['parents'][ $term_id ] ?? 0;
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				return $map['parents'][ $term_id ] ?? 0;
-
-			default:
-				return 0;
-		}
+		$map = $this->get_hierarchy_map( $taxonomy );
+		return $map['parents'][ $term_id ] ?? 0;
 	}
 
 	/**
@@ -304,20 +290,8 @@ class TaxonomyHierarchyData {
 	 * @return array Array of direct children term IDs.
 	 */
 	public function get_children( int $term_id, string $taxonomy ): array {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
-
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['children'][ $term_id ] ?? array();
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				return $map['children'][ $term_id ] ?? array();
-
-			default:
-				return array();
-		}
+		$map = $this->get_hierarchy_map( $taxonomy );
+		return $map['children'][ $term_id ] ?? array();
 	}
 
 	/**
@@ -328,20 +302,15 @@ class TaxonomyHierarchyData {
 	 * @return array Array of all descendant term IDs.
 	 */
 	public function get_descendants( int $term_id, string $taxonomy ): array {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
+		$map = $this->get_hierarchy_map( $taxonomy );
 
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['descendants'][ $term_id ] ?? array();
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				return $this->compute_descendants( $term_id, $map['children'] ?? array() );
-
-			default:
-				return array();
+		// Full map has pre-computed descendants
+		if ( isset( $map['descendants'] ) ) {
+			return $map['descendants'][ $term_id ] ?? array();
 		}
+
+		// Adjacency map requires computation
+		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
 	}
 
 	/**
@@ -352,20 +321,15 @@ class TaxonomyHierarchyData {
 	 * @return int The depth level (0 for root terms).
 	 */
 	public function get_depth( int $term_id, string $taxonomy ): int {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
+		$map = $this->get_hierarchy_map( $taxonomy );
 
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['meta'][ $term_id ]['depth'] ?? 0;
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				return $map['depths'][ $term_id ] ?? 0;
-
-			default:
-				return 0;
+		// Full map stores depth in meta array
+		if ( isset( $map['meta'][ $term_id ]['depth'] ) ) {
+			return $map['meta'][ $term_id ]['depth'];
 		}
+
+		// Adjacency map stores depth directly in depths array
+		return $map['depths'][ $term_id ] ?? 0;
 	}
 
 	/**
@@ -375,28 +339,23 @@ class TaxonomyHierarchyData {
 	 * @return array Array with depth as key and term IDs as values.
 	 */
 	public function get_terms_by_depth( string $taxonomy ): array {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
+		$map = $this->get_hierarchy_map( $taxonomy );
 
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['by_depth'] ?? array();
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				// Group terms by depth from the adjacency map
-				$by_depth = array();
-				foreach ( $map['depths'] as $term_id => $depth ) {
-					if ( ! isset( $by_depth[ $depth ] ) ) {
-						$by_depth[ $depth ] = array();
-					}
-					$by_depth[ $depth ][] = $term_id;
-				}
-				return $by_depth;
-
-			default:
-				return array();
+		// Full map has pre-computed by_depth array
+		if ( isset( $map['by_depth'] ) ) {
+			return $map['by_depth'];
 		}
+
+		// Adjacency map requires grouping by depth
+		$by_depth = array();
+		foreach ( $map['depths'] as $term_id => $depth ) {
+			if ( ! isset( $by_depth[ $depth ] ) ) {
+				$by_depth[ $depth ] = array();
+			}
+			$by_depth[ $depth ][] = $term_id;
+		}
+
+		return $by_depth;
 	}
 
 	/**
@@ -407,23 +366,18 @@ class TaxonomyHierarchyData {
 	 * @return array Term metadata including depth, menu_order, etc.
 	 */
 	public function get_term_meta( int $term_id, string $taxonomy ): array {
-		$strategy = $this->get_optimal_strategy( $taxonomy );
+		$map = $this->get_hierarchy_map( $taxonomy );
 
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->get_full_hierarchy_map( $taxonomy );
-				return $map['meta'][ $term_id ] ?? array();
-
-			case 'adjacency_map':
-				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
-				return array(
-					'depth'      => $map['depths'][ $term_id ] ?? 0,
-					'menu_order' => 0, // Not stored in adjacency map
-				);
-
-			default:
-				return array();
+		// Full map has complete metadata
+		if ( isset( $map['meta'][ $term_id ] ) ) {
+			return $map['meta'][ $term_id ];
 		}
+
+		// Adjacency map has limited metadata
+		return array(
+			'depth'      => $map['depths'][ $term_id ] ?? 0,
+			'menu_order' => 0, // Not stored in adjacency map
+		);
 	}
 
 
@@ -433,6 +387,9 @@ class TaxonomyHierarchyData {
 	 * @param string $taxonomy The taxonomy name.
 	 */
 	public function clear_cache( string $taxonomy ): void {
+		// Clear in-memory cache for this taxonomy
+		unset( $this->hierarchy_cache[ $taxonomy ] );
+
 		// Increment cache group version to invalidate all hierarchy caches
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
@@ -441,58 +398,10 @@ class TaxonomyHierarchyData {
 	 * Clear all hierarchy caches.
 	 */
 	public function clear_all_caches(): void {
+		// Clear all in-memory caches
+		$this->hierarchy_cache = array();
+
 		// Increment cache group version to invalidate all hierarchy caches
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
-	}
-
-
-	/**
-	 * Get cache with debug skip and version checking like FilterData.
-	 *
-	 * @param string $key Cache key.
-	 * @return array|null Cached data or null if not found/invalid.
-	 */
-	private function get_cache( string $key ): ?array {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			return null;
-		}
-
-		$cache             = get_transient( $key );
-		$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
-
-		if ( empty( $cache['version'] ) ||
-			! is_array( $cache['value'] ) ||
-			empty( $cache['value'] ) ||
-			$transient_version !== $cache['version']
-		) {
-			return null;
-		}
-
-		return $cache['value'];
-	}
-
-	/**
-	 * Set cache with transient version for cache invalidation like FilterData.
-	 *
-	 * @param string $key   Cache key.
-	 * @param array  $value Value to cache.
-	 * @return bool True if cache was set successfully.
-	 */
-	private function set_cache( string $key, array $value ): bool {
-		if ( ! is_array( $value ) ) {
-			return false;
-		}
-
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			return false;
-		}
-
-		$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
-		$transient_value   = array(
-			'version' => $transient_version,
-			'value'   => $value,
-		);
-
-		return set_transient( $key, $transient_value, DAY_IN_SECONDS );
 	}
 }
