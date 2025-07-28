@@ -78,6 +78,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public $identity_token;
 
+	/**
+	 * PayPal request instance.
+	 *
+	 * @var WC_Gateway_Paypal_Request
+	 */
+	private $paypal_request;
+
 
 	/**
 	 * Constructor for the gateway.
@@ -364,6 +371,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get a PayPal request instance.
+	 *
+	 * @return WC_Gateway_Paypal_Request
+	 */
+	private function get_paypal_request() {
+		if ( null === $this->paypal_request ) {
+			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+			$this->paypal_request = new WC_Gateway_Paypal_Request( $this );
+		}
+		return $this->paypal_request;
+	}
+
+	/**
 	 * Process the payment and return the result.
 	 *
 	 * @param  int $order_id Order ID.
@@ -371,10 +391,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
-
 		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		$paypal_request = $this->get_paypal_request();
 
 		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
@@ -446,9 +464,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2_for_action( $order ) ) {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = $this->get_paypal_request();
 			try {
 				$paypal_request->refund_paypal_payment( $order, $amount, $reason );
 				return true;
@@ -496,9 +512,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = $this->get_paypal_request();
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
