@@ -95,7 +95,7 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_colors_from_global_styles when not a block theme.
+	 * Test get_colors_from_global_styles when not a block theme or wp_get_global_styles function doesn't exist.
 	 */
 	public function test_get_colors_from_global_styles_not_block_theme() {
 		$test_class = new class() extends EmailColors {
@@ -104,41 +104,8 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 			 *
 			 * @return bool
 			 */
-			public static function wp_is_block_theme() {
-				return false;
-			}
-		};
-
-		$result = $test_class::get_colors_from_global_styles();
-
-		$this->assertEquals( null, $result );
-	}
-
-	/**
-	 * Test get_colors_from_global_styles when wp_get_global_styles function doesn't exist.
-	 */
-	public function test_get_colors_from_global_styles_function_not_exists() {
-		$test_class = new class() extends EmailColors {
-			/**
-			 * Override wp_is_block_theme to return true.
-			 *
-			 * @return bool
-			 */
-			public static function wp_is_block_theme() {
-				return true;
-			}
-
-			/**
-			 * Override function_exists to return false for wp_get_global_styles.
-			 *
-			 * @param string $function_name Function name to check.
-			 * @return bool
-			 */
-			public static function function_exists( $function_name ) {
-				if ( 'wp_get_global_styles' === $function_name ) {
-					return false;
-				}
-				return parent::function_exists( $function_name );
+			public static function get_global_styles_data() {
+				return null;
 			}
 		};
 
@@ -153,32 +120,13 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	public function test_get_colors_from_global_styles_complete_styles() {
 		$test_class = new class() extends EmailColors {
 			/**
-			 * Override wp_is_block_theme to return true.
-			 *
-			 * @return bool
-			 */
-			public static function wp_is_block_theme() {
-				return true;
-			}
-
-			/**
-			 * Override function_exists to return true.
-			 *
-			 * @param string $function_name Function name to check.
-			 * @return bool
-			 */
-			public static function function_exists( $function_name ) {
-				return true;
-			}
-
-			/**
-			 * Override wp_get_global_styles to return test styles.
+			 * Override get_global_styles_data to return test styles.
 			 *
 			 * @param array $args Arguments.
 			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function wp_get_global_styles( $args = array(), $options = array() ) {
+			public static function get_global_styles_data( $args = array(), $options = array() ) {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -219,32 +167,13 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	public function test_get_colors_from_global_styles_incomplete_styles_missing_button() {
 		$test_class = new class() extends EmailColors {
 			/**
-			 * Override wp_is_block_theme to return true.
-			 *
-			 * @return bool
-			 */
-			public static function wp_is_block_theme() {
-				return true;
-			}
-
-			/**
-			 * Override function_exists to return true.
-			 *
-			 * @param string $function_name Function name to check.
-			 * @return bool
-			 */
-			public static function function_exists( $function_name ) {
-				return true;
-			}
-
-			/**
-			 * Override wp_get_global_styles to return incomplete styles.
+			 * Override get_global_styles_data to return incomplete styles.
 			 *
 			 * @param array $args Arguments.
 			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function wp_get_global_styles( $args = array(), $options = array() ) {
+			public static function get_global_styles_data( $args = array(), $options = array() ) {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -280,32 +209,13 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	public function test_get_colors_from_global_styles_incomplete_styles_missing_footer() {
 		$test_class = new class() extends EmailColors {
 			/**
-			 * Override wp_is_block_theme to return true.
-			 *
-			 * @return bool
-			 */
-			public static function wp_is_block_theme() {
-				return true;
-			}
-
-			/**
-			 * Override function_exists to return true.
-			 *
-			 * @param string $function_name Function name to check.
-			 * @return bool
-			 */
-			public static function function_exists( $function_name ) {
-				return true;
-			}
-
-			/**
-			 * Override wp_get_global_styles to return incomplete styles.
+			 * Override get_global_styles_data to return incomplete styles.
 			 *
 			 * @param array $args Arguments.
 			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function wp_get_global_styles( $args = array(), $options = array() ) {
+			public static function get_global_styles_data( $args = array(), $options = array() ) {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -341,32 +251,13 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	public function test_get_colors_from_global_styles_returns_null_when_colors_missing() {
 		$test_class = new class() extends EmailColors {
 			/**
-			 * Override wp_is_block_theme to return true.
-			 *
-			 * @return bool
-			 */
-			public static function wp_is_block_theme() {
-				return true;
-			}
-
-			/**
-			 * Override function_exists to return true.
-			 *
-			 * @param string $function_name Function name to check.
-			 * @return bool
-			 */
-			public static function function_exists( $function_name ) {
-				return true;
-			}
-
-			/**
-			 * Override wp_get_global_styles to return incomplete styles.
+			 * Override get_global_styles_data to return incomplete styles.
 			 *
 			 * @param array $args Arguments.
 			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function wp_get_global_styles( $args = array(), $options = array() ) {
+			public static function get_global_styles_data( $args = array(), $options = array() ) {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
