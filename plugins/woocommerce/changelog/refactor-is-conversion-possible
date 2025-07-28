@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Removed getDescriptionDisallowingConversion, isConversionPossible and minor code quality improvements added.
