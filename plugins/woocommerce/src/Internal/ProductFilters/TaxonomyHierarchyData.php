@@ -55,7 +55,7 @@ class TaxonomyHierarchyData {
 		}
 
 		// Check transient cache
-		$cache_key  = 'wc_hierarchy_' . $taxonomy;
+		$cache_key  = self::CACHE_GROUP . '_' . $taxonomy;
 		$cached_map = null;
 
 		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
@@ -95,7 +95,7 @@ class TaxonomyHierarchyData {
 				'version' => $transient_version,
 				'value'   => $map,
 			);
-			set_transient( $cache_key, $transient_value, DAY_IN_SECONDS );
+			set_transient( $cache_key, $transient_value, MONTH_IN_SECONDS );
 		}
 
 		$this->hierarchy_cache[ $taxonomy ] = $map;
@@ -390,8 +390,9 @@ class TaxonomyHierarchyData {
 		// Clear in-memory cache for this taxonomy
 		unset( $this->hierarchy_cache[ $taxonomy ] );
 
-		// Increment cache group version to invalidate all hierarchy caches
-		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
+		// Clear only the specific taxonomy's transient cache
+		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
+		delete_transient( $cache_key );
 	}
 
 	/**
