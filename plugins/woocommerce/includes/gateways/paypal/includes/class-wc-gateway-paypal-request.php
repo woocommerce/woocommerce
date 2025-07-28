@@ -55,6 +55,8 @@ class WC_Gateway_Paypal_Request {
 	protected $endpoint;
 
 
+	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
+
 	/**
 	 * Constructor.
 	 *
@@ -112,23 +114,21 @@ class WC_Gateway_Paypal_Request {
 		try {
 			$order_request_params = $this->get_paypal_create_order_request_params( $order );
 
-			// phpcs:disable Generic.Commenting.Todo.TaskFound
-			// TODO: Replace with the wpcom endpoint when it's ready.
-			$response = wp_remote_post(
-				$this->get_paypal_create_order_request_url(),
+			$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+				'/wc-gateway-paypal-proxy/create-order',
+				self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 				array(
+					'headers' => array( 'Content-Type' => 'application/json' ),
 					'method'  => 'POST',
-					'headers' => array(
-						'Content-Type' => 'application/json',
-					),
-					'body'    => wp_json_encode(
-						array(
-							'testmode' => $this->gateway->testmode,
-							'order'    => $order_request_params,
-						)
-					),
 					'timeout' => 60,
-				)
+				),
+				wp_json_encode(
+					array(
+						'testmode' => $this->gateway->testmode,
+						'order'    => $order_request_params,
+					)
+				),
+				'wpcom'
 			);
 
 			if ( is_wp_error( $response ) ) {
@@ -186,14 +186,14 @@ class WC_Gateway_Paypal_Request {
 
 		try {
 			if ( 'capture' === $action ) {
-				$request_url  = $this->get_paypal_capture_payment_request_url();
+				$endpoint     = 'payments/capture';
 				$request_body = array(
 					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
 					'testmode'        => $this->gateway->testmode,
 				);
 			} else {
-				$request_url  = $this->get_paypal_authorize_payment_request_url();
+				$endpoint     = 'payments/authorize';
 				$request_body = array(
 					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
@@ -201,23 +201,20 @@ class WC_Gateway_Paypal_Request {
 				);
 			}
 
-			// phpcs:disable Generic.Commenting.Todo.TaskFound
-			// TODO: Replace with the wpcom endpoint when it's ready.
-			$response = wp_remote_post(
-				$request_url,
+			$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+				'/transact/paypal_standard/' . $endpoint,
+				self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 				array(
+					'headers' => array( 'Content-Type' => 'application/json' ),
 					'method'  => 'POST',
-					'headers' => array(
-						'Content-Type' => 'application/json',
-					),
-					'body'    => wp_json_encode( $request_body ),
 					'timeout' => 60,
-				)
+				),
+				wp_json_encode( $request_body ),
+				'wpcom'
 			);
 
 			if ( is_wp_error( $response ) ) {
-				WC_Gateway_Paypal::log( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
-				return;
+				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code = wp_remote_retrieve_response_code( $response );
