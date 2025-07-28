@@ -694,6 +694,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		);
 
 		clean_post_cache( $variation_id );
+		/**
+		 * Fires after the attribute summary of a product variation has been updated.
+		 *
+		 * @since 10.2.0
+		 * @param int $variation_id The ID of the product variation.
+		 **/
 		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
 	}
 
@@ -704,6 +710,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return int
 	 */
 	public static function get_regen_threshold() {
+		/**
+		 * Filters the threshold for synchronous regeneration of variation attribute summaries.
+		 * If the number of variations affected by an update is below this threshold, the summaries
+		 * are regenerated synchronously. Otherwise, the regeneration is scheduled asynchronously.
+		 *
+		 * @since 10.2.0
+		 * @param int $threshold The default threshold value (50).
+		 * @return int The filtered threshold value.
+		 */
 		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
 	}
 
