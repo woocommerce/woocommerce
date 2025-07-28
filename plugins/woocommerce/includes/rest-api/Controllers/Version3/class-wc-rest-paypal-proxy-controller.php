@@ -104,7 +104,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				400
 			);
 		}
-		$order = $request_data['order'];
+		$order    = $request_data['order'];
 		$testmode = $request_data['testmode'];
 		error_log( '(Proxy) PayPal create order request received: ' . wc_print_r( $request_data, true ) );
 
@@ -157,11 +157,11 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	/**
 	 * Get the PayPal create order request URL.
 	 *
-	 * @param bool $is_testmode Whether to use the sandbox environment.
+	 * @param bool $testmode Whether to use the sandbox environment.
 	 * @return string The request URL.
 	 */
-	private function get_paypal_create_order_request_url( $is_testmode = true ) {
-		return $is_testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
+	private function get_paypal_create_order_request_url( $testmode = true ) {
+		return $testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
 	}
 
 	/**
