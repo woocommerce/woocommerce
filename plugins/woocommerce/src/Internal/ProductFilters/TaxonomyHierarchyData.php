@@ -326,14 +326,201 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get descendants for a term using adjacency map (on-demand computation).
+	 * Get parent term ID for a given term (unified API).
 	 *
-	 * @param int   $term_id The term ID.
-	 * @param array $map     The adjacency hierarchy map.
-	 * @return array Array of descendant term IDs.
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return int The parent term ID (0 if root level).
 	 */
-	public function get_descendants( int $term_id, array $map ): array {
-		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
+	public function get_parent( int $term_id, string $taxonomy ): int {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['parents'][ $term_id ] ?? 0;
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				return $map['parents'][ $term_id ] ?? 0;
+
+			case 'chunked_lazy':
+				$term = get_term( $term_id, $taxonomy );
+				return ( $term && ! is_wp_error( $term ) ) ? $term->parent : 0;
+
+			default:
+				return 0;
+		}
+	}
+
+	/**
+	 * Get direct children for a term (unified API).
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of direct children term IDs.
+	 */
+	public function get_children( int $term_id, string $taxonomy ): array {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['children'][ $term_id ] ?? array();
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				return $map['children'][ $term_id ] ?? array();
+
+			case 'chunked_lazy':
+				return $this->get_children_chunk( $term_id, $taxonomy );
+
+			default:
+				return array();
+		}
+	}
+
+	/**
+	 * Get all descendants for a term (unified API).
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of all descendant term IDs.
+	 */
+	public function get_descendants( int $term_id, string $taxonomy ): array {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['descendants'][ $term_id ] ?? array();
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				return $this->compute_descendants( $term_id, $map['children'] ?? array() );
+
+			case 'chunked_lazy':
+				return $this->get_descendants_chunked( $term_id, $taxonomy );
+
+			default:
+				return array();
+		}
+	}
+
+	/**
+	 * Get depth level for a term (unified API).
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return int The depth level (0 for root terms).
+	 */
+	public function get_depth( int $term_id, string $taxonomy ): int {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['meta'][ $term_id ]['depth'] ?? 0;
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				return $map['depths'][ $term_id ] ?? 0;
+
+			case 'chunked_lazy':
+				// For chunked, compute depth on demand
+				$depth = 0;
+				$current_id = $term_id;
+				while ( $current_id > 0 ) {
+					$parent_id = $this->get_parent( $current_id, $taxonomy );
+					if ( $parent_id === 0 || $parent_id === $current_id ) {
+						break;
+					}
+					$current_id = $parent_id;
+					$depth++;
+					// Prevent infinite loops
+					if ( $depth > 50 ) {
+						break;
+					}
+				}
+				return $depth;
+
+			default:
+				return 0;
+		}
+	}
+
+	/**
+	 * Get terms organized by depth level (unified API).
+	 *
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array with depth as key and term IDs as values.
+	 */
+	public function get_terms_by_depth( string $taxonomy ): array {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['by_depth'] ?? array();
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				// Group terms by depth from the adjacency map
+				$by_depth = array();
+				foreach ( $map['depths'] as $term_id => $depth ) {
+					if ( ! isset( $by_depth[ $depth ] ) ) {
+						$by_depth[ $depth ] = array();
+					}
+					$by_depth[ $depth ][] = $term_id;
+				}
+				return $by_depth;
+
+			case 'chunked_lazy':
+				// For chunked, we'd need to load terms progressively
+				// Start with root terms and build as needed
+				$map = $this->get_chunked_hierarchy_map( $taxonomy );
+				return array( 0 => $map['root_terms'] ?? array() );
+
+			default:
+				return array();
+		}
+	}
+
+	/**
+	 * Get term metadata (unified API).
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Term metadata including depth, menu_order, etc.
+	 */
+	public function get_term_meta( int $term_id, string $taxonomy ): array {
+		$strategy = $this->get_optimal_strategy( $taxonomy );
+
+		switch ( $strategy ) {
+			case 'full_map':
+				$map = $this->get_full_hierarchy_map( $taxonomy );
+				return $map['meta'][ $term_id ] ?? array();
+
+			case 'adjacency_map':
+				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
+				return array(
+					'depth'      => $map['depths'][ $term_id ] ?? 0,
+					'menu_order' => 0, // Not stored in adjacency map
+				);
+
+			case 'chunked_lazy':
+				$term = get_term( $term_id, $taxonomy );
+				if ( $term && ! is_wp_error( $term ) ) {
+					return array(
+						'depth'      => $this->get_depth( $term_id, $taxonomy ),
+						'menu_order' => $term->term_order ?? 0,
+					);
+				}
+				return array();
+
+			default:
+				return array();
+		}
 	}
 
 	/**
