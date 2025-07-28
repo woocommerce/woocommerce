@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Abstract_Pattern;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 
 /**
  * Pattern class for WooCommerce email content.
@@ -45,6 +46,12 @@ class WooEmailContentPattern extends Abstract_Pattern {
 	 */
 	public $namespace = 'woocommerce';      // Required.
 
+	/**
+	 * List of supported post types.
+	 *
+	 * @var string[]
+	 */
+	protected $post_types = array( Integration::EMAIL_POST_TYPE );
 	/**
 	 * Get the pattern content.
 	 *
