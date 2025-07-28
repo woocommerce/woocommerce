@@ -64,17 +64,7 @@ class WC_Gateway_Paypal_Helper {
 		$api_username = $is_test_mode ? ( $settings['sandbox_api_username'] ?? null ) : ( $settings['api_username'] ?? null );
 		$api_password = $is_test_mode ? ( $settings['sandbox_api_password'] ?? null ) : ( $settings['api_password'] ?? null );
 
-		/**
-		 * Filters whether the merchant is eligible for migration from WPS to PPCP.
-		 *
-		 * @param bool $is_eligible Whether the merchant is eligible for migration from WPS to PPCP.
-		 *
-		 * @since 10.1.0
-		 */
-		return apply_filters(
-			'woocommerce_paypal_is_orders_v2_migration_eligible',
-			empty( $api_username ) && empty( $api_password )
-		);
+		return empty( $api_username ) && empty( $api_password );
 	}
 
 	/**
