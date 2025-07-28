@@ -108,7 +108,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		$testmode = $request_data['testmode'];
 		error_log( '(Proxy) PayPal create order request received: ' . wc_print_r( $request_data, true ) );
 
-		$access_token = $this->get_paypal_access_token();
+		$access_token = $this->get_paypal_access_token( $testmode );
 		if ( ! $access_token ) {
 			error_log( '(Proxy) Failed to get PayPal access token.' );
 			return new WP_REST_Response(
@@ -155,16 +155,6 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get the PayPal create order request URL.
-	 *
-	 * @param bool $testmode Whether to use the sandbox environment.
-	 * @return string The request URL.
-	 */
-	private function get_paypal_create_order_request_url( $testmode ) {
-		return $testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
-	}
-
-	/**
 	 * Capture the PayPal payment using Orders v2 API.
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -172,9 +162,25 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 */
 	public function capture_payment( WP_REST_Request $request ) {
 		$request_data = $request->get_json_params();
+
+		$required_params = array( 'testmode', 'capture_url', 'paypal_order_id' );
+		foreach ( $required_params as $param ) {
+			if ( ! isset( $request_data[$param] ) ) {
+				error_log( '(Proxy) PayPal capture payment request missing required param: ' . $param . '.' );
+				return new WP_REST_Response(
+					array( 'error' => 'PayPal capture payment request missing required param: ' . $param . '.' ),
+					400
+				);
+			}
+		}
+
 		error_log( '(Proxy) PayPal capture payment request received: ' . wc_print_r( $request_data, true ) );
 
-		$access_token = $this->get_paypal_access_token();
+		$testmode        = $request_data['testmode'];
+		$capture_url     = $request_data['capture_url'];
+		$paypal_order_id = $request_data['paypal_order_id'];
+
+		$access_token = $this->get_paypal_access_token( $testmode );
 		if ( ! $access_token ) {
 			error_log( '(Proxy) Failed to get PayPal access token. Cannot capture payment.' );
 			return new WP_REST_Response(
@@ -185,20 +191,6 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				500
 			);
 		}
-
-		if ( empty( $request_data['capture_url'] ) || empty( $request_data['paypal_order_id'] ) ) {
-			error_log( '(Proxy) Capture URL or PayPal order ID missing. Cannot capture payment.' );
-			return new WP_REST_Response(
-				array(
-					'status'  => 'error',
-					'message' => 'Capture URL or PayPal order ID missing.',
-				),
-				400
-			);
-		}
-
-		$capture_url     = $request_data['capture_url'];
-		$paypal_order_id = $request_data['paypal_order_id'];
 
 		$args = array(
 			'method'  => 'POST',
@@ -234,7 +226,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 *
 	 * @return string|null The access token.
 	 */
-	private function get_paypal_access_token() {
+	private function get_paypal_access_token( $testmode ) {
 		$paypal_client_id     = get_option( 'wc_paypal_api_client_id' );
 		$paypal_client_secret = get_option( 'wc_paypal_api_client_secret' );
 
@@ -255,7 +247,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		);
 		error_log( '(Proxy) PayPal access token request: ' . wc_print_r( $args, true ) );
 
-		$response  = wp_remote_post( 'https://api-m.sandbox.paypal.com/v1/oauth2/token', $args );
+		$response  = wp_remote_post( $this->get_paypal_access_token_request_url( $testmode ), $args );
 		$http_code = wp_remote_retrieve_response_code( $response );
 		$body      = wp_remote_retrieve_body( $response );
 		$data      = json_decode( $body, true );
@@ -268,6 +260,26 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			error_log( '(Proxy) Failed to get PayPal access token. ' . wc_print_r( $data, true ) );
 			return null;
 		}
+	}
+
+	/**
+	 * Get the PayPal create order request URL.
+	 *
+	 * @param bool $testmode Whether to use the sandbox environment.
+	 * @return string The request URL.
+	 */
+	private function get_paypal_create_order_request_url( $testmode ) {
+		return $testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
+	}
+
+	/**
+	 * Get the PayPal access token request URL.
+	 *
+	 * @param bool $testmode Whether to use the sandbox environment.
+	 * @return string The request URL.
+	 */
+	private function get_paypal_access_token_request_url( $testmode ) {
+		return $testmode ? 'https://api-m.sandbox.paypal.com/v1/oauth2/token' : 'https://api-m.paypal.com/v1/oauth2/token';
 	}
 }
 

@@ -180,6 +180,7 @@ class WC_Gateway_Paypal_Request {
 			$request_body = array(
 				'capture_url'     => $capture_url,
 				'paypal_order_id' => $paypal_order_id,
+				'testmode'        => $this->gateway->testmode,
 			);
 
 			// phpcs:disable Generic.Commenting.Todo.TaskFound
