@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Remove unused private method from WC_Product_Variable
+
+

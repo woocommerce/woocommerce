@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
-use WP_Style_Engine;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Renders a group block.
@@ -60,44 +60,31 @@ class Group extends Abstract_Block_Renderer {
 			)
 		);
 
-		// Layout, background, borders need to be on the outer table element.
-		$table_styles = $this->get_styles_from_block(
-			array(
-				'color'      => array_filter(
-					array(
-						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-						'border'     => $block_attributes['borderColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] ) : null,
-					)
-				),
-				'background' => $block_attributes['style']['background'] ?? array(),
-				'border'     => $block_attributes['style']['border'] ?? array(),
-				'spacing'    => array( 'padding' => $block_attributes['style']['spacing']['margin'] ?? array() ),
+		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		$table_styles = Styles_Helper::extend_block_styles(
+			$table_styles,
+			array_filter(
+				array(
+					'padding'         => $block_attributes['style']['spacing']['margin'] ?? null,
+					'border-collapse' => 'separate',
+					'background-size' => $table_styles['background-size'] ?? 'cover',
+				)
 			)
-		)['declarations'];
-
-		$table_styles['border-collapse'] = 'separate'; // Needed for the border radius to work.
+		);
 
 		// Padding properties need to be added to the table cell.
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ),
-			)
-		)['declarations'];
-
-		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
-		$width                           = $parsed_block['email_attrs']['width'] ?? '100%';
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
 
 		$table_attrs = array(
 			'class' => 'email-block-group ' . $original_classname,
-			'style' => WP_Style_Engine::compile_css( $table_styles, '' ),
+			'style' => $table_styles['css'],
 			'width' => '100%',
 		);
 
 		$cell_attrs = array(
 			'class' => 'email-block-group-content',
-			'style' => WP_Style_Engine::compile_css( $cell_styles, '' ),
-			'width' => $width,
+			'style' => $cell_styles['css'],
+			'width' => $parsed_block['email_attrs']['width'] ?? '100%',
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( '{group_content}', $table_attrs, $cell_attrs );

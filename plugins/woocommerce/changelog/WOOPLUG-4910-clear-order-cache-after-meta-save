@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear OrderCache entry when running $order->save_meta_data()

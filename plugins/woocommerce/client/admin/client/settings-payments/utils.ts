@@ -437,16 +437,14 @@ export const recordPaymentsOnboardingEvent = (
 				?.business_country_code ?? 'unknown';
 	}
 
-	// Capture the onboarding flow `source` and `from` from the URL parameters, if not provided.
+	// Capture the onboarding flow `source` from the URL parameters, if not provided.
 	const urlParams = new URLSearchParams( window.location.search );
 	if ( ! data.source ) {
 		data.source =
 			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
 	}
-	if ( ! data.from ) {
-		data.from =
-			urlParams.get( 'from' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
-	}
+	// We should not carry over the `from` parameter from the URL,
+	// as it meant to indicate the immediate source of the action that triggered the event.
 
 	recordEvent( eventName, data );
 };

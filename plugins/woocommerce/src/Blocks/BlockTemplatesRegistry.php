@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductBrandTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
@@ -47,6 +48,7 @@ class BlockTemplatesRegistry {
 				ProductCategoryTemplate::SLUG      => new ProductCategoryTemplate(),
 				ProductTagTemplate::SLUG           => new ProductTagTemplate(),
 				ProductAttributeTemplate::SLUG     => new ProductAttributeTemplate(),
+				ProductBrandTemplate::SLUG         => new ProductBrandTemplate(),
 				ProductSearchResultsTemplate::SLUG => new ProductSearchResultsTemplate(),
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),

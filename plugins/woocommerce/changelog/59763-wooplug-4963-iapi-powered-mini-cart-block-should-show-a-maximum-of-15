@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix iAPI-powered Mini-Cart block to limit product descriptions to 15 words maximum, matching the behavior of the current Mini-Cart block.

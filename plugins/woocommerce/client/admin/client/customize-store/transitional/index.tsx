@@ -7,7 +7,7 @@
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { Button, Modal } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -17,58 +17,19 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
-import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
 import { Icon, brush, tag } from '@wordpress/icons';
 import { trackEvent } from '../tracking';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
-export * as actions from './actions';
 export * as services from './services';
 
-export type events = { type: 'COMPLETE_SURVEY' };
-
-export const Transitional = ( {
-	sendEvent,
-	hasCompleteSurvey,
-	isWooExpress,
-	isSurveyOpen,
-	setSurveyOpen,
-}: {
-	sendEvent: ( event: events ) => void;
-	hasCompleteSurvey: boolean;
-	isWooExpress: boolean;
-	isSurveyOpen: boolean;
-	setSurveyOpen: ( isOpen: boolean ) => void;
-} ) => {
+export const Transitional = () => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const adminUrl = getNewPath( getPersistedQuery(), '/', {} );
-	const closeSurvey = () => {
-		setSurveyOpen( false );
-	};
-
-	const showSurveyButton = ! hasCompleteSurvey && ! isEntrepreneurFlow();
 
 	return (
 		<div className="woocommerce-customize-store__transitional">
-			{ isSurveyOpen && (
-				<Modal
-					title={ __( 'Share feedback', 'woocommerce' ) }
-					onRequestClose={ () => closeSurvey() }
-					shouldCloseOnClickOutside={ false }
-					className="woocommerce-ai-survey-modal"
-				>
-					<SurveyForm
-						onSend={ () => {
-							sendEvent( {
-								type: 'COMPLETE_SURVEY',
-							} );
-							closeSurvey();
-						} }
-						closeFunction={ closeSurvey }
-					/>
-				</Modal>
-			) }
 			<SiteHub
 				isTransparent={ false }
 				className="woocommerce-edit-site-layout__hub"
@@ -91,23 +52,6 @@ export const Transitional = ( {
 
 				<WooCYSSecondaryButtonSlot />
 				<div className="woocommerce-customize-store__transitional-buttons">
-					{ showSurveyButton && (
-						<Button
-							className="woocommerce-customize-store__transitional-preview-buttonwoocommerce-customize-store__transitional-preview-button"
-							variant="secondary"
-							onClick={ () => {
-								trackEvent(
-									isWooExpress
-										? 'customize_your_store_transitional_survey_click'
-										: 'customize_your_store_on_core_transitional_survey_click'
-								);
-								setSurveyOpen( true );
-							} }
-						>
-							{ __( 'Share feedback', 'woocommerce' ) }
-						</Button>
-					) }
-
 					<Button
 						href={ homeUrl }
 						className="woocommerce-customize-store__transitional-preview-button"

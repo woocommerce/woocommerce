@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix applying coupon codes that differ only in space (e.g., "cou pon" and "coupon")

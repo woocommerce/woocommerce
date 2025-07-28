@@ -39,7 +39,8 @@
 		}
 	}
 
-	&.outlined {
+	&.outlined,
+	&.is-style-outline {
 		background: transparent;
 		color: currentColor;
 

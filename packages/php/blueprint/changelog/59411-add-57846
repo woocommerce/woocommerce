@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Log warning when imported option value is overridden by hooks during Blueprint import

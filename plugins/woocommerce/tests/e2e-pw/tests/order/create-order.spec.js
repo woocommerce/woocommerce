@@ -414,7 +414,7 @@ test.describe(
 				)
 			).toBeVisible();
 			await expect(
-				page.locator( 'table' ).filter( { hasText: 'Paid: $200.00' } )
+				page.locator( 'table' ).filter( { hasText: 'Paid: $220.00' } )
 			).toBeVisible();
 		} );
 

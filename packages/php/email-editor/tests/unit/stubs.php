@@ -7,8 +7,61 @@
 
 declare(strict_types = 1);
 
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed, Generic.Files.OneObjectStructurePerFile.MultipleFound
+
+// Dummy WP functions.
+if ( ! function_exists( 'wp_parse_args' ) ) {
+	/**
+	 * Mock wp_parse_args function.
+	 *
+	 * @param array|object $args     Value to merge with $defaults.
+	 * @param array        $defaults Array that serves as the defaults.
+	 * @return array Merged user defined values with defaults.
+	 */
+	function wp_parse_args( $args, $defaults = array() ) {
+		if ( is_object( $args ) ) {
+			$parsed_args = get_object_vars( $args );
+		} elseif ( is_array( $args ) ) {
+			$parsed_args =& $args;
+		} else {
+			$parsed_args = array();
+		}
+
+		if ( is_array( $defaults ) && $defaults ) {
+			return array_merge( $defaults, $parsed_args );
+		}
+
+		return $parsed_args;
+	}
+}
+
+if ( ! function_exists( 'wp_style_engine_get_styles' ) ) {
+	/**
+	 * Mock wp_style_engine_get_styles function.
+	 *
+	 * @param array $block_styles Array of block styles.
+	 * @return array
+	 */
+	function wp_style_engine_get_styles( $block_styles ) {
+		// Return empty structure for empty input.
+		if ( empty( $block_styles ) ) {
+			return array(
+				'css'          => '',
+				'declarations' => array(),
+				'classnames'   => '',
+			);
+		}
+
+		// Return basic structure for non-empty input.
+		return array(
+			'css'          => 'padding: 10px;',
+			'declarations' => array( 'padding' => '10px' ),
+			'classnames'   => '',
+		);
+	}
+}
+
 // Dummy WP classes.
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
 if ( ! class_exists( \WP_Theme_JSON::class ) ) {
 	/**
@@ -101,6 +154,28 @@ if ( ! class_exists( \WP_Theme_JSON::class ) ) {
 		 */
 		public function get_stylesheet( $types = array( 'variables', 'styles', 'presets' ), $origins = null, $options = array() ): string {
 			return '';
+		}
+	}
+}
+
+if ( ! class_exists( \WP_Style_Engine::class ) ) {
+	/**
+	 * Class WP_Style_Engine
+	 */
+	class WP_Style_Engine {
+		/**
+		 * Compile CSS from declarations.
+		 *
+		 * @param array  $declarations Array of CSS declarations.
+		 * @param string $selector     CSS selector.
+		 * @return string
+		 */
+		public static function compile_css( $declarations, $selector = '' ) {
+			$css = '';
+			foreach ( $declarations as $property => $value ) {
+				$css .= $property . ': ' . $value . '; ';
+			}
+			return trim( $css );
 		}
 	}
 }

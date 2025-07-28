@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert: Related Products: avoids querying results on each page load.

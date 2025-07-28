@@ -23,10 +23,10 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -55,13 +55,43 @@ class Utils {
 	}
 
 	/**
+	 * Get standardized quantity input arguments for WooCommerce quantity input.
+	 *
+	 * @param \WC_Product $product The product object.
+	 * @return array Arguments for woocommerce_quantity_input().
+	 */
+	public static function get_quantity_input_args( $product ) {
+		return array(
+			/**
+			 * Filter the minimum quantity value allowed for the product.
+			 *
+			 * @since 10.1.0
+			 * @param int        $min_value Minimum quantity value.
+			 * @param WC_Product $product   Product object.
+			 */
+			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
+			/**
+			 * Filter the maximum quantity value allowed for the product.
+			 *
+			 * @since 10.1.0
+			 * @param int        $max_value Maximum quantity value.
+			 * @param WC_Product $product   Product object.
+			 */
+			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		);
+	}
+
+	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
 	 *
-	 * @param string $quantity_html The quantity HTML.
-	 * @param string $wrapper_attributes Optional wrapper attributes.
+	 * @param string   $quantity_html The quantity HTML.
+	 * @param string   $wrapper_attributes Optional wrapper attributes.
+	 * @param int|null $child_product_id Optional child product ID.
+	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '', $child_product_id = null ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		if (
 			$processor->next_tag( 'input' ) &&
@@ -74,15 +104,22 @@ class Utils {
 
 		$quantity_html = $processor->get_updated_html();
 
+		$context = array();
+		if ( $child_product_id ) {
+			$context['childProductId'] = $child_product_id;
+		}
+		$context_attribute = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
+
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
-				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
+				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
 				$wrapper_attributes,
+				$context_attribute,
 				$quantity_html
 			);
 		}
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
+		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_attribute . '>' . $quantity_html . '</div>';
 	}
 
 	/**

@@ -14,6 +14,8 @@ use WP_REST_Response;
 
 /**
  * Controller for the WooPayments-specific REST endpoints to service the Payments settings page.
+ *
+ * @internal
  */
 class WooPaymentsRestController extends RestApiControllerBase {
 
@@ -125,6 +127,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
 				),
@@ -457,10 +465,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location, false, $source );
 
 			$response = array(
 				'success'         => true,
@@ -490,12 +500,14 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$this->woopayments->onboarding_step_save( $step_id, $location, $request->get_params() );
 
 			// If some step data was saved, we also ensure that the step is marked as started, if not already.
 			// This way we maintain onboarding state consistency if the frontend does not call the start endpoint.
-			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location, false, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -547,10 +559,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->mark_onboarding_step_completed( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_completed( $step_id, $location, false, $source );
 
 			$response = array(
 				'success'         => true,
@@ -611,11 +625,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			// Mark the step as started, if not already.
-			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
 
-			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
+			$result = $this->woopayments->onboarding_test_account_init( $location, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -645,8 +661,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
-			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment );
+			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -673,8 +691,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
-			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $request->get_param( 'source' ) ?? '' );
+			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
