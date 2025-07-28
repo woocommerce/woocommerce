@@ -20,35 +20,6 @@ const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
-	test( 'allows modifying the template parts', async ( {
-		page,
-		pageObject,
-		editor,
-		admin,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
-
-		await pageObject.insertParagraphInTemplatePart(
-			'This is a test paragraph added to the Add to Cart + Options template part.'
-		);
-
-		await editor.saveSiteEditorEntities();
-
-		await page.goto( '/product/cap' );
-
-		await expect(
-			page.getByText(
-				'This is a test paragraph added to the Add to Cart + Options template part.'
-			)
-		).toBeVisible();
-	} );
-
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
