@@ -137,7 +137,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 
 		error_log( '(Proxy) PayPal order creation request: ' . wc_print_r( $this->sanitize_args( $args ), true ) );
 
-		$response      = wp_remote_post( $this->get_paypal_create_order_request_url( $testmode ), $args );
+		$response      = wp_remote_post( $this->get_paypal_api_request_url( $testmode ) . '/v2/checkout/orders', $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
@@ -254,7 +254,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		);
 		error_log( '(Proxy) PayPal access token request: ' . wc_print_r( $this->sanitize_args( $args ), true ) );
 
-		$response  = wp_remote_post( $this->get_paypal_access_token_request_url( $testmode ), $args );
+		$response  = wp_remote_post( $this->get_paypal_api_request_url( $testmode ) . '/v1/oauth2/token', $args );
 		$http_code = wp_remote_retrieve_response_code( $response );
 		$body      = wp_remote_retrieve_body( $response );
 		$data      = json_decode( $body, true );
@@ -270,23 +270,13 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get the PayPal create order request URL.
+	 * Get the PayPal Orders v2 API request URL.
 	 *
 	 * @param bool $testmode Whether to use the sandbox environment.
 	 * @return string The request URL.
 	 */
-	private function get_paypal_create_order_request_url( $testmode ) {
-		return $testmode ? 'https://api-m.sandbox.paypal.com/v2/checkout/orders' : 'https://api-m.paypal.com/v2/checkout/orders';
-	}
-
-	/**
-	 * Get the PayPal access token request URL.
-	 *
-	 * @param bool $testmode Whether to use the sandbox environment.
-	 * @return string The request URL.
-	 */
-	private function get_paypal_access_token_request_url( $testmode ) {
-		return $testmode ? 'https://api-m.sandbox.paypal.com/v1/oauth2/token' : 'https://api-m.paypal.com/v1/oauth2/token';
+	private function get_paypal_api_request_url( $testmode ) {
+		return $testmode ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 	}
 
 	/**
