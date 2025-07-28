@@ -12,9 +12,8 @@ defined( 'ABSPATH' ) || exit;
  * Class for managing taxonomy hierarchy data with performance optimization.
  *
  * Provides a tiered architecture approach:
- * - Small taxonomies (<1000 terms): Full hierarchy map for maximum performance
- * - Medium taxonomies (1000-10000 terms): Adjacency list with on-demand computation
- * - Large taxonomies (10000+ terms): Chunked lazy loading approach
+ * - Small taxonomies: Full hierarchy map for maximum performance
+ * - Large taxonomies: Adjacency list with on-demand computation
  *
  * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
@@ -26,10 +25,11 @@ class TaxonomyHierarchyData {
 	private const CACHE_GROUP = 'wc_taxonomy_hierarchy';
 
 	/**
-	 * Default thresholds for strategy selection.
+	 * Threshold for strategy selection.
+	 * Small taxonomies (<1000 terms) use full hierarchy map for maximum performance.
+	 * Large taxonomies (1000+ terms) use adjacency list with on-demand computation.
 	 */
-	private const SMALL_TAXONOMY_THRESHOLD  = 1000;
-	private const MEDIUM_TAXONOMY_THRESHOLD = 10000;
+	private const SMALL_TAXONOMY_THRESHOLD = 1000;
 
 	/**
 	 * Get optimized hierarchy map for a taxonomy.
@@ -49,8 +49,6 @@ class TaxonomyHierarchyData {
 				return $this->get_full_hierarchy_map( $taxonomy );
 			case 'adjacency_map':
 				return $this->get_adjacency_hierarchy_map( $taxonomy );
-			case 'chunked_lazy':
-				return $this->get_chunked_hierarchy_map( $taxonomy );
 			default:
 				return $this->get_adjacency_hierarchy_map( $taxonomy );
 		}
@@ -60,7 +58,7 @@ class TaxonomyHierarchyData {
 	 * Determine the optimal strategy based on taxonomy size.
 	 *
 	 * @param string $taxonomy The taxonomy name.
-	 * @return string The optimal strategy.
+	 * @return string The optimal strategy ('full_map' or 'adjacency_map').
 	 */
 	private function get_optimal_strategy( string $taxonomy ): string {
 		$term_count = wp_count_terms( array( 'taxonomy' => $taxonomy ) );
@@ -71,10 +69,8 @@ class TaxonomyHierarchyData {
 
 		if ( $term_count < self::SMALL_TAXONOMY_THRESHOLD ) {
 			return 'full_map';
-		} elseif ( $term_count < self::MEDIUM_TAXONOMY_THRESHOLD ) {
-			return 'adjacency_map';
 		} else {
-			return 'chunked_lazy';
+			return 'adjacency_map';
 		}
 	}
 
@@ -102,7 +98,7 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get adjacency hierarchy map for medium taxonomies (1000-10000 terms).
+	 * Get adjacency hierarchy map for large taxonomies (1000+ terms).
 	 *
 	 * Provides balanced performance with memory efficiency.
 	 *
@@ -124,29 +120,6 @@ class TaxonomyHierarchyData {
 		return $map;
 	}
 
-	/**
-	 * Get chunked hierarchy map for large taxonomies (10000+ terms).
-	 *
-	 * Provides lazy loading approach for large taxonomies.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Basic hierarchy structure for chunked loading.
-	 */
-	private function get_chunked_hierarchy_map( string $taxonomy ): array {
-		// For chunked approach, we only cache root level terms initially
-		$cache_key = 'wc_hierarchy_chunked_' . $taxonomy;
-		$map       = $this->get_cache( $cache_key );
-
-		if ( ! empty( $map ) ) {
-			return $map;
-		}
-
-		$map = $this->build_chunked_hierarchy_map( $taxonomy );
-
-		$this->set_cache( $cache_key, $map );
-
-		return $map;
-	}
 
 	/**
 	 * Build full hierarchy map with all relationships pre-computed.
@@ -252,32 +225,6 @@ class TaxonomyHierarchyData {
 		return $map;
 	}
 
-	/**
-	 * Build chunked hierarchy map for large taxonomies.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Basic hierarchy structure for chunked loading.
-	 */
-	private function build_chunked_hierarchy_map( string $taxonomy ): array {
-		// For chunked approach, only load root level terms initially
-		$root_terms = get_terms(
-			array(
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => false,
-				'parent'     => 0,
-				'fields'     => 'ids',
-			)
-		);
-
-		if ( is_wp_error( $root_terms ) ) {
-			$root_terms = array();
-		}
-
-		return array(
-			'root_terms' => $root_terms,
-			'strategy'   => 'chunked_lazy',
-		);
-	}
 
 	/**
 	 * Compute the depth of a term in the hierarchy.
@@ -344,10 +291,6 @@ class TaxonomyHierarchyData {
 				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
 				return $map['parents'][ $term_id ] ?? 0;
 
-			case 'chunked_lazy':
-				$term = get_term( $term_id, $taxonomy );
-				return ( $term && ! is_wp_error( $term ) ) ? $term->parent : 0;
-
 			default:
 				return 0;
 		}
@@ -371,9 +314,6 @@ class TaxonomyHierarchyData {
 			case 'adjacency_map':
 				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
 				return $map['children'][ $term_id ] ?? array();
-
-			case 'chunked_lazy':
-				return $this->get_children_chunk( $term_id, $taxonomy );
 
 			default:
 				return array();
@@ -399,9 +339,6 @@ class TaxonomyHierarchyData {
 				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
 				return $this->compute_descendants( $term_id, $map['children'] ?? array() );
 
-			case 'chunked_lazy':
-				return $this->get_descendants_chunked( $term_id, $taxonomy );
-
 			default:
 				return array();
 		}
@@ -425,24 +362,6 @@ class TaxonomyHierarchyData {
 			case 'adjacency_map':
 				$map = $this->get_adjacency_hierarchy_map( $taxonomy );
 				return $map['depths'][ $term_id ] ?? 0;
-
-			case 'chunked_lazy':
-				// For chunked, compute depth on demand
-				$depth = 0;
-				$current_id = $term_id;
-				while ( $current_id > 0 ) {
-					$parent_id = $this->get_parent( $current_id, $taxonomy );
-					if ( $parent_id === 0 || $parent_id === $current_id ) {
-						break;
-					}
-					$current_id = $parent_id;
-					$depth++;
-					// Prevent infinite loops
-					if ( $depth > 50 ) {
-						break;
-					}
-				}
-				return $depth;
 
 			default:
 				return 0;
@@ -475,12 +394,6 @@ class TaxonomyHierarchyData {
 				}
 				return $by_depth;
 
-			case 'chunked_lazy':
-				// For chunked, we'd need to load terms progressively
-				// Start with root terms and build as needed
-				$map = $this->get_chunked_hierarchy_map( $taxonomy );
-				return array( 0 => $map['root_terms'] ?? array() );
-
 			default:
 				return array();
 		}
@@ -508,86 +421,11 @@ class TaxonomyHierarchyData {
 					'menu_order' => 0, // Not stored in adjacency map
 				);
 
-			case 'chunked_lazy':
-				$term = get_term( $term_id, $taxonomy );
-				if ( $term && ! is_wp_error( $term ) ) {
-					return array(
-						'depth'      => $this->get_depth( $term_id, $taxonomy ),
-						'menu_order' => $term->term_order ?? 0,
-					);
-				}
-				return array();
-
 			default:
 				return array();
 		}
 	}
 
-	/**
-	 * Get children chunk for a specific parent (chunked strategy).
-	 *
-	 * @param int    $parent_id The parent term ID (0 for root level).
-	 * @param string $taxonomy  The taxonomy name.
-	 * @return array Array of direct children term IDs.
-	 */
-	public function get_children_chunk( int $parent_id, string $taxonomy ): array {
-		$cache_key = "wc_hierarchy_children_{$parent_id}_{$taxonomy}";
-		$children  = $this->get_cache( $cache_key );
-
-		if ( ! empty( $children ) ) {
-			return $children;
-		}
-
-		$children = $this->load_children_chunk( $parent_id, $taxonomy );
-
-		$this->set_cache( $cache_key, $children );
-
-		return $children;
-	}
-
-	/**
-	 * Get children with metadata for UI rendering (chunked strategy).
-	 *
-	 * @param int    $parent_id The parent term ID (0 for root level).
-	 * @param string $taxonomy  The taxonomy name.
-	 * @return array Array of children with term data and metadata.
-	 */
-	public function get_children_with_meta( int $parent_id, string $taxonomy ): array {
-		$cache_key = "wc_hierarchy_children_meta_{$parent_id}_{$taxonomy}";
-		$children  = $this->get_cache( $cache_key );
-
-		if ( ! empty( $children ) ) {
-			return $children;
-		}
-
-		$children = $this->load_children_with_meta( $parent_id, $taxonomy );
-
-		$this->set_cache( $cache_key, $children );
-
-		return $children;
-	}
-
-	/**
-	 * Get all descendants for a term using chunked loading.
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array of all descendant term IDs.
-	 */
-	public function get_descendants_chunked( int $term_id, string $taxonomy ): array {
-		$cache_key   = "wc_hierarchy_descendants_{$term_id}_{$taxonomy}";
-		$descendants = $this->get_cache( $cache_key );
-
-		if ( ! empty( $descendants ) ) {
-			return $descendants;
-		}
-
-		$descendants = $this->load_descendants_recursive( $term_id, $taxonomy );
-
-		$this->set_cache( $cache_key, $descendants );
-
-		return $descendants;
-	}
 
 	/**
 	 * Clear hierarchy cache for a taxonomy.
@@ -607,89 +445,6 @@ class TaxonomyHierarchyData {
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 
-	/**
-	 * Load direct children for a parent term (chunked strategy implementation).
-	 *
-	 * @param int    $parent_id The parent term ID (0 for root level).
-	 * @param string $taxonomy  The taxonomy name.
-	 * @return array Array of direct children term IDs.
-	 */
-	private function load_children_chunk( int $parent_id, string $taxonomy ): array {
-		$children = get_terms(
-			array(
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => false,
-				'parent'     => $parent_id,
-				'fields'     => 'ids',
-			)
-		);
-
-		if ( is_wp_error( $children ) ) {
-			return array();
-		}
-
-		return $children;
-	}
-
-	/**
-	 * Load direct children with metadata for UI rendering (chunked strategy implementation).
-	 *
-	 * @param int    $parent_id The parent term ID (0 for root level).
-	 * @param string $taxonomy  The taxonomy name.
-	 * @return array Array of children with term data and metadata.
-	 */
-	private function load_children_with_meta( int $parent_id, string $taxonomy ): array {
-		$children = get_terms(
-			array(
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => false,
-				'parent'     => $parent_id,
-				'fields'     => 'all',
-			)
-		);
-
-		if ( is_wp_error( $children ) || empty( $children ) ) {
-			return array();
-		}
-
-		$children_data = array();
-		foreach ( $children as $term ) {
-			$depth = $this->compute_term_depth( $term->term_id, array( $term->term_id => $term->parent ) );
-			
-			$children_data[ $term->term_id ] = array(
-				'term_id'    => $term->term_id,
-				'name'       => $term->name,
-				'slug'       => $term->slug,
-				'parent'     => $term->parent,
-				'depth'      => $depth,
-				'menu_order' => $term->term_order ?? 0,
-				'count'      => $term->count,
-			);
-		}
-
-		return $children_data;
-	}
-
-	/**
-	 * Load all descendants recursively for a term (chunked strategy implementation).
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array of all descendant term IDs.
-	 */
-	private function load_descendants_recursive( int $term_id, string $taxonomy ): array {
-		$descendants = array();
-		$children    = $this->get_children_chunk( $term_id, $taxonomy );
-
-		foreach ( $children as $child_id ) {
-			$descendants[] = $child_id;
-			// Recursively get descendants of each child
-			$child_descendants = $this->load_descendants_recursive( $child_id, $taxonomy );
-			$descendants       = array_merge( $descendants, $child_descendants );
-		}
-
-		return array_unique( $descendants );
-	}
 
 	/**
 	 * Get cache with debug skip and version checking like FilterData.
