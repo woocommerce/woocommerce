@@ -41,4 +41,19 @@ class WC_Gateway_Paypal_Helper {
 			$use_orders_v2
 		);
 	}
+
+	/**
+	 * Check if the action for this order should use Orders v2 API.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return bool
+	 */
+	public static function should_use_orders_v2_for_action( $order ) {
+		// If the order has a PayPal order ID, it means the order was created with Orders v2 API.
+		if ( $order->get_meta( '_paypal_order_id', true ) ) {
+			return true;
+		}
+
+		return false;
+	}
 }
