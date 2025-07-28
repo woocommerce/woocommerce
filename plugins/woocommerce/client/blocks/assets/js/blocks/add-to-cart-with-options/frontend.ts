@@ -8,16 +8,16 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
-import {
-	doesCartItemMatchAttributes,
-	getMatchedVariation,
-} from '@woocommerce/stores/utils';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { AvailableVariation } from '@woocommerce/stores/utils';
 
 /**
  * Internal dependencies
  */
+import {
+	getMatchedVariation,
+	type AvailableVariation,
+} from '../../base/utils/variations/get-matched-variation';
+import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {

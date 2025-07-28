@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import { doesCartItemMatchAttributes } from '@woocommerce/stores/utils';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
+import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.

@@ -3,10 +3,8 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-import { getMatchedVariation } from '@woocommerce/stores/utils';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { AvailableVariation } from '@woocommerce/stores/utils';
 
 /**
  * Internal dependencies
@@ -15,6 +13,10 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
+import {
+	getMatchedVariation,
+	type AvailableVariation,
+} from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {
