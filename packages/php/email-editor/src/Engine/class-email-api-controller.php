@@ -90,10 +90,19 @@ class Email_Api_Controller {
 	/**
 	 * Returns all registered personalization tags.
 	 *
+	 * @param WP_REST_Request $request Route request parameters.
 	 * @return WP_REST_Response
+	 * @phpstan-param WP_REST_Request<array{_locale: string, email: string, postId: int}> $request
 	 */
-	public function get_personalization_tags(): WP_REST_Response {
-		$tags = $this->personalization_tags_registry->get_all();
+	public function get_personalization_tags( WP_REST_Request $request ): WP_REST_Response {
+		$data      = $request->get_params();
+		$post_type = $data['postType'] ?? null;
+
+		if ( $post_type ) {
+			$tags = $this->personalization_tags_registry->get_by_post_type( $post_type );
+		} else {
+			$tags = $this->personalization_tags_registry->get_all();
+		}
 		return new WP_REST_Response(
 			array(
 				'success' => true,
@@ -106,6 +115,7 @@ class Email_Api_Controller {
 								'category'      => $tag->get_category(),
 								'attributes'    => $tag->get_attributes(),
 								'valueToInsert' => $tag->get_value_to_insert(),
+								'postTypes'     => $tag->get_post_types(),
 							);
 						},
 						$tags

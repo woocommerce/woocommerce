@@ -100,4 +100,20 @@ class Personalization_Tags_Registry {
 	public function get_all() {
 		return $this->tags;
 	}
+
+	/**
+	 * Retrieve personalization tags filtered by post type.
+	 *
+	 * @param string $post_type The post type to filter by.
+	 * @return array List of personalization tags for the specified post type.
+	 */
+	public function get_by_post_type( string $post_type ): array {
+		return array_filter(
+			$this->tags,
+			function ( $tag ) use ( $post_type ) {
+				$post_types = $tag->get_post_types();
+				return empty( $post_types ) || in_array( $post_type, $post_types, true );
+			}
+		);
+	}
 }
