@@ -647,6 +647,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
 	}
 
+	/**
+	 * Regenerates attribute summaries for a list of variations.
+	 *
+	 * @since 10.2.0
+	 * @param array $variation_ids Array of variation IDs.
+	 */
 	public static function regenerate_variation_summaries( $variation_ids ) {
 		if ( empty( $variation_ids ) ) {
 			return;
@@ -659,6 +665,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
+	/**
+	 * Regenerates the attribute summary for a single variation.
+	 *
+	 * @since 10.2.0
+	 * @param int $variation_id Variation ID.
+	 */
 	public static function regenerate_variation_attribute_summary( $variation_id ) {
 		global $wpdb;
 
@@ -684,10 +696,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
 	}
 
+	/**
+	 * Gets the threshold for synchronous regeneration of variation summaries.
+	 *
+	 * @since 10.2.0
+	 * @return int
+	 */
 	public static function get_regen_threshold() {
 		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
 	}
 
+	/**
+	 * Handles deletion of a global attribute by triggering variation summary updates.
+	 *
+	 * @since 10.2.0
+	 * @param int    $attribute_id Attribute ID.
+	 * @param string $attribute    Attribute name.
+	 * @param string $old_slug     Old attribute slug.
+	 */
 	public static function handle_global_attribute_deleted( $attribute_id, $attribute, $old_slug ) {
 		// We can reuse the update function to trigger variation summary rebuilds.
 		// However, the handle_global_attribute_deleted includes the "pa_" prefix in $old_slug, and
@@ -698,6 +724,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		self::handle_global_attribute_updated( $attribute_id, $attribute, $old_slug );
 	}
 
+	/**
+	 * Handles updates to a global attribute by triggering variation summary regeneration.
+	 *
+	 * @since 10.2.0
+	 * @param int    $attribute_id Attribute ID.
+	 * @param string $attribute    Attribute name.
+	 * @param string $old_slug     Old attribute slug.
+	 */
 	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
 		$taxonomy = 'pa_' . $old_slug;
 
@@ -741,6 +775,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
+	/**
+	 * Regenerates variation summaries for all variations using a specific attribute taxonomy.
+	 *
+	 * @since 10.2.0
+	 * @param string $taxonomy Attribute taxonomy.
+	 */
 	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
 		$variation_ids = get_posts(
 			array(
@@ -788,6 +828,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
+	/**
+	 * Regenerates variation summaries for all variations of a variable product.
+	 *
+	 * @since 10.2.0
+	 * @param int $product_id Variable product ID.
+	 */
 	public static function regenerate_product_variation_summaries( $product_id ) {
 		$product = wc_get_product( $product_id );
 		if ( ! $product || ! $product->is_type( 'variable' ) ) {
@@ -853,6 +899,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 	}
 
+	/**
+	 * Regenerates variation summaries for all variations using a specific term.
+	 *
+	 * @since 10.2.0
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param string $term_slug Term slug.
+	 */
 	public static function regenerate_term_variation_summaries( $taxonomy, $term_slug ) {
 		global $wpdb;
 
