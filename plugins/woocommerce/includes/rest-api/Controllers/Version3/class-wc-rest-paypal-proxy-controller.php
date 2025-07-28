@@ -165,7 +165,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 
 		$required_params = array( 'testmode', 'capture_url', 'paypal_order_id' );
 		foreach ( $required_params as $param ) {
-			if ( ! isset( $request_data[$param] ) ) {
+			if ( ! isset( $request_data[ $param ] ) ) {
 				error_log( '(Proxy) PayPal capture payment request missing required param: ' . $param . '.' );
 				return new WP_REST_Response(
 					array( 'error' => 'PayPal capture payment request missing required param: ' . $param . '.' ),
@@ -224,6 +224,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	/**
 	 * Get the PayPal API access token.
 	 *
+	 * @param bool $testmode Whether to use the sandbox environment.
 	 * @return string|null The access token.
 	 */
 	private function get_paypal_access_token( $testmode ) {
