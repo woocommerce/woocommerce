@@ -8,8 +8,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { getSettingWithCoercion, getSetting } from '@woocommerce/settings';
-import { isBoolean } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
