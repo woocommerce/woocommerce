@@ -311,7 +311,7 @@ class WC_Gateway_Paypal_Request {
 					'payee'      => array(
 						'email_address' => $this->gateway->get_option( 'email' ),
 					),
-					'shipping'  => $this->get_paypal_order_shipping( $order ),
+					'shipping'   => $this->get_paypal_order_shipping( $order ),
 				),
 			),
 			'application_context' => array(
