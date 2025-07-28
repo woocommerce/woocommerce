@@ -110,7 +110,13 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order->set_transaction_id( $event['resource']['id'] );
 		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
 		$order->payment_complete();
-		$order->add_order_note( 'PayPal payment captured. ID: ' . $event['resource']['id'] );
+		$order->add_order_note(
+			/* translators: %1$s: Transaction ID */
+			sprintf(
+				__( 'PayPal payment captured. Transaction ID: %1$s.', 'woocommerce' ),
+				$event['resource']['id']
+			)
+		);
 		$order->save();
 	}
 
@@ -129,8 +135,10 @@ class WC_Gateway_Paypal_Webhook_Handler {
 
 		$order->set_transaction_id( $event['resource']['id'] );
 		$order->add_order_note(
+			/* translators: %1$s: Transaction ID */
 			sprintf(
-				__( 'PayPal payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
+				__( 'PayPal payment authorized. Transaction ID: %1$s.\nChange payment status to processing or complete to capture funds.', 'woocommerce' ),
+				$event['resource']['id']
 			)
 		);
 		$order->update_status( OrderStatus::ON_HOLD );
@@ -169,6 +177,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 *
 	 * @param WC_Order $order The order object.
 	 * @param array    $links The links from the webhook event.
+	 * @param string   $action The action to perform (capture or authorize).
+	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ) {
 		$action_url = null;
