@@ -100,9 +100,9 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 	public function test_get_colors_from_global_styles_not_block_theme() {
 		$test_class = new class() extends EmailColors {
 			/**
-			 * Override wp_is_block_theme to return false.
+			 * Override get_global_styles_data to return null.
 			 *
-			 * @return bool
+			 * @return null
 			 */
 			public static function get_global_styles_data() {
 				return null;
@@ -122,11 +122,9 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 			/**
 			 * Override get_global_styles_data to return test styles.
 			 *
-			 * @param array $args Arguments.
-			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function get_global_styles_data( $args = array(), $options = array() ) {
+			public static function get_global_styles_data() {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -169,11 +167,9 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 			/**
 			 * Override get_global_styles_data to return incomplete styles.
 			 *
-			 * @param array $args Arguments.
-			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function get_global_styles_data( $args = array(), $options = array() ) {
+			public static function get_global_styles_data() {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -211,11 +207,9 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 			/**
 			 * Override get_global_styles_data to return incomplete styles.
 			 *
-			 * @param array $args Arguments.
-			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function get_global_styles_data( $args = array(), $options = array() ) {
+			public static function get_global_styles_data() {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
@@ -253,11 +247,9 @@ class EmailColorsTest extends WC_Unit_Test_Case {
 			/**
 			 * Override get_global_styles_data to return incomplete styles.
 			 *
-			 * @param array $args Arguments.
-			 * @param array $options Options.
 			 * @return array
 			 */
-			public static function get_global_styles_data( $args = array(), $options = array() ) {
+			public static function get_global_styles_data() {
 				return array(
 					'color'    => array(
 						'background' => '#ffffff',
