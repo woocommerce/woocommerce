@@ -25,6 +25,7 @@ $dialog-padding: 20px;
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
 		flex-shrink: 0;
+		min-width: 100%;
 		max-width: 100%;
 		display: flex;
 		align-items: center;
@@ -40,6 +41,7 @@ $dialog-padding: 20px;
 	.wc-block-components-product-image.wc-block-components-product-image {
 		margin: 0;
 		height: 100%;
+		width: 100%;
 
 		:where(a) {
 			height: 100%;
