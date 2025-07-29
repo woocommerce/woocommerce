@@ -60,6 +60,10 @@ const productButtonStore = {
 				( item ) => item.id === state.productId
 			);
 
+			if ( products.length === 0 ) {
+				return 0;
+			}
+
 			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
 				return products[ 0 ]?.quantity || 0;
