@@ -332,7 +332,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
 
-		$this->taxonomy_hierarchy_data->clear_all_caches();
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
 
 		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
 		$query_vars = array_filter( $wp_query->query_vars );
@@ -369,7 +369,7 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
 
-		$this->taxonomy_hierarchy_data->clear_all_caches();
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
 
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'max_price', 15 );

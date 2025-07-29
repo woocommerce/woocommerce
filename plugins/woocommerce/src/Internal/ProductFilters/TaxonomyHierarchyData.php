@@ -282,17 +282,6 @@ class TaxonomyHierarchyData {
 		return $map['parents'][ $term_id ] ?? 0;
 	}
 
-	/**
-	 * Get direct children for a term (unified API).
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array of direct children term IDs.
-	 */
-	public function get_children( int $term_id, string $taxonomy ): array {
-		$map = $this->get_hierarchy_map( $taxonomy );
-		return $map['children'][ $term_id ] ?? array();
-	}
 
 	/**
 	 * Get all descendants for a term (unified API).
@@ -313,72 +302,7 @@ class TaxonomyHierarchyData {
 		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
 	}
 
-	/**
-	 * Get depth level for a term (unified API).
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return int The depth level (0 for root terms).
-	 */
-	public function get_depth( int $term_id, string $taxonomy ): int {
-		$map = $this->get_hierarchy_map( $taxonomy );
 
-		// Full map stores depth in meta array
-		if ( isset( $map['meta'][ $term_id ]['depth'] ) ) {
-			return $map['meta'][ $term_id ]['depth'];
-		}
-
-		// Adjacency map stores depth directly in depths array
-		return $map['depths'][ $term_id ] ?? 0;
-	}
-
-	/**
-	 * Get terms organized by depth level (unified API).
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array with depth as key and term IDs as values.
-	 */
-	public function get_terms_by_depth( string $taxonomy ): array {
-		$map = $this->get_hierarchy_map( $taxonomy );
-
-		// Full map has pre-computed by_depth array
-		if ( isset( $map['by_depth'] ) ) {
-			return $map['by_depth'];
-		}
-
-		// Adjacency map requires grouping by depth
-		$by_depth = array();
-		foreach ( $map['depths'] as $term_id => $depth ) {
-			if ( ! isset( $by_depth[ $depth ] ) ) {
-				$by_depth[ $depth ] = array();
-			}
-			$by_depth[ $depth ][] = $term_id;
-		}
-
-		return $by_depth;
-	}
-
-	/**
-	 * Get term metadata (unified API).
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Term metadata including depth, menu_order, etc.
-	 */
-	public function get_term_meta( int $term_id, string $taxonomy ): array {
-		$map = $this->get_hierarchy_map( $taxonomy );
-
-		// Full map has complete metadata
-		if ( isset( $map['meta'][ $term_id ] ) ) {
-			return $map['meta'][ $term_id ];
-		}
-
-		// Adjacency map has limited metadata
-		return array(
-			'depth'      => $map['depths'][ $term_id ] ?? 0,
-			'menu_order' => 0, // Not stored in adjacency map
-		);
-	}
 
 
 	/**
@@ -395,14 +319,4 @@ class TaxonomyHierarchyData {
 		delete_transient( $cache_key );
 	}
 
-	/**
-	 * Clear all hierarchy caches.
-	 */
-	public function clear_all_caches(): void {
-		// Clear all in-memory caches
-		$this->hierarchy_data = array();
-
-		// Increment cache group version to invalidate all hierarchy caches
-		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
-	}
 }
