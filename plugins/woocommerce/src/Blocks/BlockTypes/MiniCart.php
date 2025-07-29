@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\Block_Delimiter;
 
@@ -130,7 +130,7 @@ class MiniCart extends AbstractBlock {
 	 * blocks without static block.json metadata.
 	 */
 	public function enable_interactivity_support() {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'experimental-iapi-mini-cart' ) ) {
 			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
 
 			if ( $block_type ) {
@@ -187,7 +187,7 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
-		if ( is_cart() || is_checkout() || Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		if ( is_cart() || is_checkout() || FeaturesUtil::feature_is_enabled( 'experimental-iapi-mini-cart' ) ) {
 			return;
 		}
 
@@ -291,7 +291,7 @@ class MiniCart extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'experimental-iapi-mini-cart' ) ) {
 			return;
 		}
 
@@ -476,7 +476,7 @@ class MiniCart extends AbstractBlock {
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
+		if ( FeaturesUtil::feature_is_enabled( 'experimental-iapi-mini-cart' ) && ! is_cart() && ! is_checkout() ) {
 			return $this->render_experimental_iapi_mini_cart( $attributes, $content, $block );
 		}
 

@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -104,7 +104,7 @@ class MiniCartContents extends AbstractBlock {
 			return '';
 		}
 
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'experimental-iapi-mini-cart' ) ) {
 			return $this->render_experimental_iapi_mini_cart_contents( $attributes, $content, $block );
 		}
 
