@@ -105,18 +105,18 @@ $settings = array(
 			esc_url( LoggingUtil::get_logs_tab_url() )
 		),
 	),
-	'image_url'        => array(
-		'title'       => __( 'Image url', 'woocommerce' ),
-		'type'        => 'text',
-		'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
-		'default'     => '',
-		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' ),
-	),
 );
 
 if ( ! $should_use_orders_v2 ) {
 	$legacy_settings = array(
+		'image_url'        => array(
+			'title'       => __( 'Image url', 'woocommerce' ),
+			'type'        => 'text',
+			'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
+			'default'     => '',
+			'desc_tip'    => true,
+			'placeholder' => __( 'Optional', 'woocommerce' ),
+		),
 		'ipn_notification' => array(
 			'title'       => __( 'IPN email notifications', 'woocommerce' ),
 			'type'        => 'checkbox',
