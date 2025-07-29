@@ -790,7 +790,7 @@ It's full schema is this one:
 				},
 				"additional_fields": {
 					"type": "object",
-					"description": "Additional checkout fields, limited to the order location.",
+					"description": "Additional checkout fields with 'order' location. These fields are rendered in the order information section.",
 					"additionalProperties": {
 						"type": "string"
 					},
@@ -826,7 +826,7 @@ It's full schema is this one:
 				},
 				"additional_fields": {
 					"type": "object",
-					"description": "Additional checkout fields, limited to the contact location.",
+					"description": "Additional checkout fields with 'contact' location. These fields are rendered in the contact information section.",
 					"additionalProperties": {
 						"type": "string"
 					}
@@ -893,12 +893,12 @@ It's full schema is this one:
 			},
 			"additionalProperties": {
 				"type": "string",
-				"description": "Custom fields with namespace identifiers"
+				"description": "Additional fields with 'address' location appear here as properties within the address objects"
 			},
 			"patternProperties": {
 				"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
 					"type": "string",
-					"description": "Custom fields with namespace identifiers"
+					"description": "Additional fields with 'address' location using namespace identifiers (e.g., 'namespace/field-name')"
 				}
 			}
 		}
