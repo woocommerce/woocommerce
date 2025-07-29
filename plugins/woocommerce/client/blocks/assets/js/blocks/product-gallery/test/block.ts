@@ -36,7 +36,7 @@ const handlers = [
 			],
 		} );
 	} ),
-	http.get( '/wc/store/v1/products/:id', () => {
+	http.get( '/wc/admin/v3/products/:id', () => {
 		return HttpResponse.json( {
 			id: 123,
 			name: 'Test Product',
