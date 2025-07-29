@@ -35,7 +35,18 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	);
 }
 
-const scrollCarousel = ( direction: 'left' | 'right' ) => {
+/**
+ * Scrolls the carousel by 90% of the container width.
+ *
+ * @param direction - The direction to scroll.
+ * @returns The new scroll position.
+ */
+const scrollCarousel = (
+	direction: 'left' | 'right'
+): {
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+} => {
 	const { ref } = getElement();
 
 	const productCollection = ref?.closest(
@@ -45,26 +56,55 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 		'.wc-block-product-template'
 	);
 
+	if ( ! productTemplate ) {
+		return {
+			isDisabledPrevious: true,
+			isDisabledNext: true,
+		};
+	}
+
+	const SCROLL_OFFSET = 5;
 	const productCollectionWidth = productCollection?.clientWidth;
-	const scrollWidth = productCollectionWidth
+	// Arbitrary value to scroll the carousel by 90% of the container width.
+	const scrollBy = productCollectionWidth
 		? 0.9 * productCollectionWidth
 		: 400;
 
 	productTemplate?.scrollBy( {
-		left: direction === 'left' ? -scrollWidth : scrollWidth,
+		left: direction === 'left' ? -scrollBy : scrollBy,
 		behavior: 'smooth',
 	} );
+
+	const { scrollLeft, scrollWidth, clientWidth } = productTemplate;
+	// scrollBy doesn't return the final position, so we need to calculate it.
+	const finalPosition =
+		direction === 'left' ? scrollLeft - scrollBy : scrollLeft + scrollBy;
+
+	return {
+		isDisabledPrevious: finalPosition < SCROLL_OFFSET,
+		isDisabledNext:
+			finalPosition >= scrollWidth - clientWidth - SCROLL_OFFSET,
+	};
 };
 
 const onKeyDown = ( event: KeyboardEvent ) => {
 	if ( event.code === 'ArrowRight' ) {
 		event.preventDefault();
-		scrollCarousel( 'right' );
+		const context = getContext< ProductCollectionStoreContext >();
+		const { isDisabledPrevious, isDisabledNext } =
+			scrollCarousel( 'right' );
+
+		context.isDisabledPrevious = isDisabledPrevious;
+		context.isDisabledNext = isDisabledNext;
 	}
 
 	if ( event.code === 'ArrowLeft' ) {
 		event.preventDefault();
-		scrollCarousel( 'left' );
+		const context = getContext< ProductCollectionStoreContext >();
+		const { isDisabledPrevious, isDisabledNext } = scrollCarousel( 'left' );
+
+		context.isDisabledPrevious = isDisabledPrevious;
+		context.isDisabledNext = isDisabledNext;
 	}
 };
 
@@ -138,10 +178,20 @@ const productCollectionStore = {
 		},
 		// Next/Previous Buttons block actions
 		onClickPrevious: () => {
-			scrollCarousel( 'left' );
+			const context = getContext< ProductCollectionStoreContext >();
+			const { isDisabledPrevious, isDisabledNext } =
+				scrollCarousel( 'left' );
+
+			context.isDisabledPrevious = isDisabledPrevious;
+			context.isDisabledNext = isDisabledNext;
 		},
 		onClickNext: () => {
-			scrollCarousel( 'right' );
+			const context = getContext< ProductCollectionStoreContext >();
+			const { isDisabledPrevious, isDisabledNext } =
+				scrollCarousel( 'right' );
+
+			context.isDisabledPrevious = isDisabledPrevious;
+			context.isDisabledNext = isDisabledNext;
 		},
 		onKeyDownPrevious: ( event: KeyboardEvent ) => {
 			onKeyDown( event );
