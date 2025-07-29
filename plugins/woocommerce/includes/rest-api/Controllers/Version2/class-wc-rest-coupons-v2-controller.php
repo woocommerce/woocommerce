@@ -286,6 +286,11 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
+		// Handle setting discount type first because that is needed for validation.
+		if ( isset( $request['discount_type'] ) ) {
+			$coupon->set_discount_type( $request['discount_type'] );
+		}
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
 			$value = $request[ $key ];
@@ -315,13 +320,6 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 						break;
 					default:
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
-							// Special validation for amount when discount_type is percent.
-							if ( 'amount' === $key && 'percent' === ( $request['discount_type'] ?? 'fixed_cart' ) ) {
-								$amount = wc_format_decimal( $value );
-								if ( $amount > 100 ) {
-									return new WP_Error( 'woocommerce_rest_invalid_coupon_amount', __( 'Percentage discount cannot exceed 100%.', 'woocommerce' ), array( 'status' => 400 ) );
-								}
-							}
 							$coupon->{"set_{$key}"}( $value );
 						}
 						break;

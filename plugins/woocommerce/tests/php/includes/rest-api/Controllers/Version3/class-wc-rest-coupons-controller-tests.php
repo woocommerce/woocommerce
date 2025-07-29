@@ -168,7 +168,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should contain validation error message.
 		$data = $response->get_data();
-		$this->assertStringContainsString( 'Percentage discount cannot exceed 100%', $data['message'] );
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
 
 		// Ensure coupon was not created.
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'invalid-percent-test' ) );
@@ -225,5 +225,33 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Ensure coupon was not created.
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-amount-test' ) );
+	}
+
+	/**
+	 * Test creating coupon with negative percentage amount.
+	 */
+	public function test_create_coupon_negative_percentage_amount() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'negative-percent-test',
+				'discount_type' => 'percent',
+				'amount'        => '-25',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Should contain validation error message from coupon class.
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
+
+		// Ensure coupon was not created.
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-percent-test' ) );
 	}
 }
