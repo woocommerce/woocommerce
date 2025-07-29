@@ -60,16 +60,16 @@ $settings = array(
 		/* translators: %s: URL */
 		'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a <a href="%s">developer account</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 	),
-	'debug'            => array(
-		'title'       => __( 'Debug log', 'woocommerce' ),
-		'type'        => 'checkbox',
-		'label'       => __( 'Enable logging', 'woocommerce' ),
-		'default'     => 'no',
-		/* translators: %s: URL */
-		'description' => sprintf(
-			// translators: %s is a placeholder for a URL.
-			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
-			esc_url( LoggingUtil::get_logs_tab_url() )
+	'paymentaction'    => array(
+		'title'       => __( 'Payment action', 'woocommerce' ),
+		'type'        => 'select',
+		'class'       => 'wc-enhanced-select',
+		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+		'default'     => 'sale',
+		'desc_tip'    => true,
+		'options'     => array(
+			'sale'          => __( 'Capture', 'woocommerce' ),
+			'authorization' => __( 'Authorize', 'woocommerce' ),
 		),
 	),
 	'invoice_prefix'   => array(
@@ -93,16 +93,16 @@ $settings = array(
 		'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 		'default'     => 'no',
 	),
-	'paymentaction'    => array(
-		'title'       => __( 'Payment action', 'woocommerce' ),
-		'type'        => 'select',
-		'class'       => 'wc-enhanced-select',
-		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
-		'default'     => 'sale',
-		'desc_tip'    => true,
-		'options'     => array(
-			'sale'          => __( 'Capture', 'woocommerce' ),
-			'authorization' => __( 'Authorize', 'woocommerce' ),
+	'debug'            => array(
+		'title'       => __( 'Debug log', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable logging', 'woocommerce' ),
+		'default'     => 'no',
+		/* translators: %s: URL */
+		'description' => sprintf(
+			// translators: %s is a placeholder for a URL.
+			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
+			esc_url( LoggingUtil::get_logs_tab_url() )
 		),
 	),
 	'image_url'        => array(
