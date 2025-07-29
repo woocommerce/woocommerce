@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove duplicate table footer in order/order-details template.
