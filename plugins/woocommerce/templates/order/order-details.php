@@ -88,11 +88,11 @@ if ( $show_downloads ) {
 			do_action( 'woocommerce_order_details_after_order_table_items', $order );
 			?>
 		</tbody>
-
+		
+		<tfoot>
 		<?php
 		if ( ! empty( $actions ) ) :
 			?>
-		<tfoot>
 			<tr>
 				<th class="order-actions--heading"><?php esc_html_e( 'Actions', 'woocommerce' ); ?>:</th>
 				<td>
@@ -112,9 +112,7 @@ if ( $show_downloads ) {
 						?>
 					</td>
 				</tr>
-			</tfoot>
 			<?php endif ?>
-		<tfoot>
 			<?php
 			foreach ( $order->get_order_item_totals() as $key => $total ) {
 				?>
