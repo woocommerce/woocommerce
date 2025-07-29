@@ -87,6 +87,9 @@ $min-product-width: 150px;
 /**
  * Carousel layout
  */
+$min-carousel-product-width: 200px;
+$max-carousel-product-width: 300px;
+
 .is-product-collection-layout-carousel {
 	overflow-x: auto;
 	scrollbar-width: none;
@@ -96,6 +99,8 @@ $min-product-width: 150px;
 
 	.wc-block-product {
 		scroll-snap-align: center;
-		min-width: $min-product-width;
+		flex: 1 0 0%; // Make all children equal width
+		min-width: $min-carousel-product-width;
+		max-width: $max-carousel-product-width;
 	}
 }
