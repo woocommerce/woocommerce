@@ -231,7 +231,7 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get parent term ID for a given term (unified API).
+	 * Get parent term ID for a given term.
 	 *
 	 * @param int    $term_id  The term ID.
 	 * @param string $taxonomy The taxonomy name.
@@ -243,7 +243,7 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get all descendants for a term (unified API).
+	 * Get all descendants for a term.
 	 *
 	 * @param int    $term_id  The term ID.
 	 * @param string $taxonomy The taxonomy name.
