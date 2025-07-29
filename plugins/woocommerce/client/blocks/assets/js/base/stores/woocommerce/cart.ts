@@ -292,22 +292,22 @@ const { state, actions } = store< Store >(
 
 				// Optimistically updates the number of items in the cart.
 				if ( item ) {
-					if ( updateOptimistically ) {
-						item.quantity = quantity;
-					}
 					if ( item.key ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
 					}
-				} else {
 					if ( updateOptimistically ) {
-						item = {
-							id,
-							quantity,
-							variation,
-						} as OptimisticCartItem;
+						item.quantity = quantity;
+					}
+				} else {
+					item = {
+						id,
+						quantity,
+						variation,
+					} as OptimisticCartItem;
+					quantityChanges.productsPendingAdd = [ id ];
+					if ( updateOptimistically ) {
 						state.cart.items.push( item );
 					}
-					quantityChanges.productsPendingAdd = [ id ];
 				}
 
 				// Updates the database.
