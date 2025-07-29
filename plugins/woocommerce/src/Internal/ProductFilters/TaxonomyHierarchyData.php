@@ -142,8 +142,6 @@ class TaxonomyHierarchyData {
 			'parents'     => array(),
 			'children'    => array(),
 			'descendants' => array(),
-			'by_depth'    => array(),
-			'meta'        => array(),
 		);
 
 		// Build basic parent-child relationships
@@ -157,20 +155,6 @@ class TaxonomyHierarchyData {
 				$map['children'][ $parent_id ] = array();
 			}
 			$map['children'][ $parent_id ][] = $term_id;
-		}
-
-		// Compute depths and organize by depth
-		foreach ( $terms as $term ) {
-			$depth                         = $this->compute_term_depth( $term->term_id, $map['parents'] );
-			$map['meta'][ $term->term_id ] = array(
-				'depth'      => $depth,
-				'menu_order' => $term->term_order ?? 0,
-			);
-
-			if ( ! isset( $map['by_depth'][ $depth ] ) ) {
-				$map['by_depth'][ $depth ] = array();
-			}
-			$map['by_depth'][ $depth ][] = $term->term_id;
 		}
 
 		// Pre-compute all descendants for each term
@@ -203,7 +187,6 @@ class TaxonomyHierarchyData {
 		$map = array(
 			'children' => array(),
 			'parents'  => array(),
-			'depths'   => array(),
 		);
 
 		foreach ( $terms as $term ) {
@@ -216,36 +199,9 @@ class TaxonomyHierarchyData {
 				$map['children'][ $parent_id ] = array();
 			}
 			$map['children'][ $parent_id ][] = $term_id;
-
-			$map['depths'][ $term_id ] = $this->compute_term_depth( $term_id, $map['parents'] );
 		}
 
 		return $map;
-	}
-
-
-	/**
-	 * Compute the depth of a term in the hierarchy.
-	 *
-	 * @param int   $term_id The term ID.
-	 * @param array $parents Parent relationships map.
-	 * @return int The depth level (0 for root terms).
-	 */
-	private function compute_term_depth( int $term_id, array $parents ): int {
-		$depth      = 0;
-		$current_id = $term_id;
-
-		while ( isset( $parents[ $current_id ] ) && $parents[ $current_id ] > 0 ) {
-			$current_id = $parents[ $current_id ];
-			++$depth;
-
-			// Prevent infinite loops in case of circular references
-			if ( $depth > 50 ) {
-				break;
-			}
-		}
-
-		return $depth;
 	}
 
 	/**
@@ -282,7 +238,6 @@ class TaxonomyHierarchyData {
 		return $map['parents'][ $term_id ] ?? 0;
 	}
 
-
 	/**
 	 * Get all descendants for a term (unified API).
 	 *
@@ -302,9 +257,6 @@ class TaxonomyHierarchyData {
 		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
 	}
 
-
-
-
 	/**
 	 * Clear hierarchy cache for a taxonomy.
 	 *
@@ -318,5 +270,4 @@ class TaxonomyHierarchyData {
 		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
 		delete_transient( $cache_key );
 	}
-
 }
