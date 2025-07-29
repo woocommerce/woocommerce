@@ -28,6 +28,7 @@ import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
+import { useProduct } from '@woocommerce/entities';
 
 const buildStyles = ( props: Partial< ImageProps > ) => {
 	const { aspectRatio, height, width, scale } = props;
@@ -141,7 +142,9 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
+	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > } & {
+		postId: string | undefined;
+	};
 
 type LegacyProps = Props & {
 	product?: ProductResponseItem;
@@ -178,7 +181,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext();
+	const { product, isResolving } = useProduct( props.postId );
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
@@ -274,7 +277,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
-						loaded={ ! isLoading }
+						loaded={ ! isResolving }
 						showFullSize={ showFullSize }
 						width={ width }
 						height={ height }
