@@ -35,9 +35,7 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	);
 }
 
-// TODO: This is temporary solution for demo purpose.
-// It will be replaced with the actual carousel scroll logic.
-const scrollCarousel = ( pixels: number ) => {
+const scrollCarousel = ( direction: 'left' | 'right' ) => {
 	const { ref } = getElement();
 
 	const productCollection = ref?.closest(
@@ -47,7 +45,27 @@ const scrollCarousel = ( pixels: number ) => {
 		'.wc-block-product-template'
 	);
 
-	productTemplate?.scrollBy( { left: pixels, behavior: 'smooth' } );
+	const productCollectionWidth = productCollection?.clientWidth;
+	const scrollWidth = productCollectionWidth
+		? 0.9 * productCollectionWidth
+		: 400;
+
+	productTemplate?.scrollBy( {
+		left: direction === 'left' ? -scrollWidth : scrollWidth,
+		behavior: 'smooth',
+	} );
+};
+
+const onKeyDown = ( event: KeyboardEvent ) => {
+	if ( event.code === 'ArrowRight' ) {
+		event.preventDefault();
+		scrollCarousel( 'right' );
+	}
+
+	if ( event.code === 'ArrowLeft' ) {
+		event.preventDefault();
+		scrollCarousel( 'left' );
+	}
 };
 
 function isValidEvent( event: MouseEvent ): boolean {
@@ -120,32 +138,16 @@ const productCollectionStore = {
 		},
 		// Next/Previous Buttons block actions
 		onClickPrevious: () => {
-			scrollCarousel( -200 );
+			scrollCarousel( 'left' );
 		},
 		onClickNext: () => {
-			scrollCarousel( 200 );
+			scrollCarousel( 'right' );
 		},
 		onKeyDownPrevious: ( event: KeyboardEvent ) => {
-			if ( event.code === 'ArrowRight' ) {
-				event.preventDefault();
-				scrollCarousel( 200 );
-			}
-
-			if ( event.code === 'ArrowLeft' ) {
-				event.preventDefault();
-				scrollCarousel( -200 );
-			}
+			onKeyDown( event );
 		},
 		onKeyDownNext: ( event: KeyboardEvent ) => {
-			if ( event.code === 'ArrowRight' ) {
-				event.preventDefault();
-				scrollCarousel( 200 );
-			}
-
-			if ( event.code === 'ArrowLeft' ) {
-				event.preventDefault();
-				scrollCarousel( -200 );
-			}
+			onKeyDown( event );
 		},
 	},
 	callbacks: {
