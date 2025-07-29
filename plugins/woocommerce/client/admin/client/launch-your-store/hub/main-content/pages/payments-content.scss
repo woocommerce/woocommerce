@@ -2,7 +2,11 @@
 	@import "../../../../settings-payments/onboarding/components/modal/style.scss";
 
 	height: 100%;
-	padding: 16px 16px 16px 32px;
+	padding: $gap $gap $gap-large $gap;
+
+	@media screen and (max-width: 782px) {
+		overflow-x: hidden;
+	}
 
 	&__canvas {
 		display: block;
@@ -11,6 +15,7 @@
 		height: 100%;
 		border-radius: 10px;
 		box-shadow: 0 15px 20px 0 rgba(0, 0, 0, 0.04), 0 13px 15px 0 rgba(0, 0, 0, 0.03), 0 6px 10px 0 rgba(0, 0, 0, 0.02), 0 0 1px 0 rgba(0, 0, 0, 0.25);
+		overflow-y: auto;
 
 		// Prevent the canvas from exceeding the viewport height.
 		&:has(.woocommerce-recommended-payment-methods) {
@@ -97,6 +102,13 @@
 
 		&-logos {
 			margin: 0 0 20px;
+
+			@media screen and (max-width: 1024px) {
+				.woocommerce-woopayments-payment-methods-logos {
+					display: flex;
+					flex-wrap: wrap;
+				}
+			}
 		}
 
 		&-button {
@@ -108,8 +120,8 @@
 		}
 
 		@media (max-width: 768px) {
-			padding: 48px 0;
-			text-align: left;
+			padding: 48px 16px;
+			text-align: center;
 		}
 	}
 }
