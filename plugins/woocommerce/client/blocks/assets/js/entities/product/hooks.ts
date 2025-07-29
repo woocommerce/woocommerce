@@ -25,15 +25,21 @@ export const useProduct = ( postId: number | string | undefined ) => {
 			) as unknown as ProductResponseItem | undefined;
 
 			const isResolving = select( coreStore ).isResolving(
+				'getEditedEntityRecord',
+				[ 'root', 'product', parsedPostId ]
+			);
+			const isResolutionFinished = select(
+				coreStore
+			).hasFinishedResolution( 'getEditedEntityRecord', [
 				'root',
 				'product',
-				// @ts-expect-error - @woocommerce/data types are not compatible with @wordpress/data types.
-				parsedPostId
-			);
+				parsedPostId,
+			] );
 
 			return {
 				product,
 				isResolving,
+				isResolutionFinished,
 			};
 		},
 		[ postId ]

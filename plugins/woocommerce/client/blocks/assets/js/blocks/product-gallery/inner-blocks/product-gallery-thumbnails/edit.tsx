@@ -40,7 +40,11 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 	context,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
+}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > & {
+	context: {
+		postId?: string;
+	};
+} ) => {
 	const { thumbnailSize, aspectRatio } = attributes;
 
 	const { product } = useProduct( context.postId );
