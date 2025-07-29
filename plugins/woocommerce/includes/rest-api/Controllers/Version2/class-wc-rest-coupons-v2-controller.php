@@ -22,6 +22,8 @@ defined( 'ABSPATH' ) || exit;
 class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 
 
+
+
 	/**
 	 * Endpoint namespace.
 	 *
