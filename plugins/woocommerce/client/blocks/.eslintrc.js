@@ -248,7 +248,25 @@ module.exports = {
 			},
 		},
 		{
+			files: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
+			parser: '@typescript-eslint/parser',
+			plugins: [ 'jest', '@typescript-eslint' ],
+			extends: [ 'plugin:jest/recommended' ],
+			rules: {
+				'jest/no-mocks-import': 'off',
+				// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
+				'jest/no-standalone-expect': 'off',
+			},
+		},
+		{
 			files: [ '*.ts', '*.tsx' ],
+			excludedFiles: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
 			parser: '@typescript-eslint/parser',
 			extends: [
 				'plugin:@woocommerce/eslint-plugin/recommended',

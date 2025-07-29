@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Register a custom variation for the site logo block to set the email editor required attributes.

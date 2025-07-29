@@ -8,8 +8,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { getSettingWithCoercion, getSetting } from '@woocommerce/settings';
-import { isBoolean } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -21,15 +20,8 @@ import type { Attributes } from './';
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { setAttributes } = props;
 
-	const isStepperLayoutFeatureEnabled = getSettingWithCoercion(
-		'isStepperLayoutFeatureEnabled',
-		false,
-		isBoolean
-	);
-
 	const quantitySelectorStyleClass =
-		props.attributes.quantitySelectorStyle ===
-			QuantitySelectorStyle.Input || ! isStepperLayoutFeatureEnabled
+		props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input
 			? 'wc-block-add-to-cart-form--input'
 			: 'wc-block-add-to-cart-form--stepper';
 
@@ -58,9 +50,6 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 			<AddToCartFormSettings
 				quantitySelectorStyle={ props.attributes.quantitySelectorStyle }
 				setAttributes={ setAttributes }
-				features={ {
-					isStepperLayoutFeatureEnabled,
-				} }
 			/>
 			<div { ...blockProps }>
 				<Tooltip
@@ -73,9 +62,8 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					<div className="wc-block-editor-add-to-cart-form-container">
 						<ProductShortDescriptionSkeleton isStatic={ true } />
 						<Disabled>
-							{ ( props.attributes.quantitySelectorStyle ===
-								QuantitySelectorStyle.Input ||
-								! isStepperLayoutFeatureEnabled ) && (
+							{ props.attributes.quantitySelectorStyle ===
+								QuantitySelectorStyle.Input && (
 								<>
 									<div className="quantity">
 										<input
@@ -113,52 +101,49 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 								</>
 							) }
 							{ props.attributes.quantitySelectorStyle ===
-								QuantitySelectorStyle.Stepper &&
-								isStepperLayoutFeatureEnabled && (
-									<>
-										<div className="quantity wc-block-components-quantity-selector">
-											<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
-												−
-											</button>
-											<input
-												style={
-													// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
-													! isSiteEditor
-														? {
-																backgroundColor:
-																	'#ffffff',
-																lineHeight:
-																	'normal',
-																minHeight:
-																	'unset',
-																boxSizing:
-																	'unset',
-																borderRadius:
-																	'unset',
-														  }
-														: {}
-												}
-												type="number"
-												value="1"
-												className="input-text qty text"
-												readOnly
-											/>
-											<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">
-												+
-											</button>
-										</div>
-										<div className={ buttonBlockClass }>
-											<button
-												className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
-											>
-												{ __(
-													'Add to cart',
-													'woocommerce'
-												) }
-											</button>
-										</div>
-									</>
-								) }
+								QuantitySelectorStyle.Stepper && (
+								<>
+									<div className="quantity wc-block-components-quantity-selector">
+										<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
+											−
+										</button>
+										<input
+											style={
+												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+												! isSiteEditor
+													? {
+															backgroundColor:
+																'#ffffff',
+															lineHeight:
+																'normal',
+															minHeight: 'unset',
+															boxSizing: 'unset',
+															borderRadius:
+																'unset',
+													  }
+													: {}
+											}
+											type="number"
+											value="1"
+											className="input-text qty text"
+											readOnly
+										/>
+										<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">
+											+
+										</button>
+									</div>
+									<div className={ buttonBlockClass }>
+										<button
+											className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+										>
+											{ __(
+												'Add to cart',
+												'woocommerce'
+											) }
+										</button>
+									</div>
+								</>
+							) }
 						</Disabled>
 					</div>
 				</Tooltip>

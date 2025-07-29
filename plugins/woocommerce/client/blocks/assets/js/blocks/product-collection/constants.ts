@@ -115,7 +115,7 @@ export const DEFAULT_FILTERS: Pick<
 };
 
 export const coreQueryPaginationBlockName = 'core/query-pagination';
-export const nextPreviousArrowsBlockName =
+export const nextPreviousButtonsBlockName =
 	'woocommerce/product-gallery-large-image-next-previous';
 export const productTemplateBlockName = 'woocommerce/product-template';
 

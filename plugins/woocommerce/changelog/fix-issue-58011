@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add to Cart + Options: Ensure the minus button in the QuantityStepper component becomes disabled, unfocusable, and unclickable when quantity is at the minimum allowed value.
