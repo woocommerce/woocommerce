@@ -465,7 +465,8 @@ const addToCartWithOptionsStore = store<
 
 					yield actions.batchAddCartItems( addedItems );
 				} else {
-					const { variationId } = addToCartWithOptionsStore.state;
+					const { isFormValid, variationId } =
+						addToCartWithOptionsStore.state;
 					const id = variationId || productId;
 					const newQuantity = getNewQuantity(
 						id,
@@ -483,6 +484,7 @@ const addToCartWithOptionsStore = store<
 						quantity: newQuantity,
 						variation: selectedAttributes,
 						type: productType,
+						updateOptimistically: isFormValid,
 					} );
 				}
 			},

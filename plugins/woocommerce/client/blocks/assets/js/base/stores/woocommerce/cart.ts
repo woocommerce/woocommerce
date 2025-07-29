@@ -29,6 +29,7 @@ export type OptimisticCartItem = {
 	variation?: CartVariationItem[];
 	name: string;
 	type: string;
+	updateOptimistically?: boolean;
 };
 
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
@@ -257,7 +258,12 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
+			*addCartItem( {
+				id,
+				quantity,
+				variation,
+				updateOptimistically = true,
+			}: OptimisticCartItem ) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -286,12 +292,21 @@ const { state, actions } = store< Store >(
 
 				// Optimistically updates the number of items in the cart.
 				if ( item ) {
-					item.quantity = quantity;
-					if ( item.key )
+					if ( updateOptimistically ) {
+						item.quantity = quantity;
+					}
+					if ( item.key ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
+					}
 				} else {
-					item = { id, quantity, variation } as OptimisticCartItem;
-					state.cart.items.push( item );
+					if ( updateOptimistically ) {
+						item = {
+							id,
+							quantity,
+							variation,
+						} as OptimisticCartItem;
+						state.cart.items.push( item );
+					}
 					quantityChanges.productsPendingAdd = [ id ];
 				}
 

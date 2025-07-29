@@ -221,9 +221,7 @@ const productButtonStore = {
 			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE &&
-				( addToCartWithOptionsState?.isFormValid === undefined ||
-					addToCartWithOptionsState?.isFormValid )
+				context.animationStatus === AnimationStatus.IDLE
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
