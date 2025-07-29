@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useProduct } from '@woocommerce/entities';
 import { ProductResponseItem } from '@woocommerce/types';
 import { createContext, useContext } from '@wordpress/element';
 
@@ -72,7 +73,29 @@ const ProductDataContext = createContext( {
 	isLoading: false,
 } );
 
-export const useProductDataContext = () => useContext( ProductDataContext );
+type UseProductDataContextProps = {
+	isAdmin?: boolean | undefined;
+	product?: ProductResponseItem | undefined;
+	isResolving?: boolean | undefined;
+};
+
+export const useProductDataContext = (
+	props: UseProductDataContextProps = {
+		isAdmin: false,
+	}
+) => {
+	const context = useContext( ProductDataContext );
+	const { isAdmin, product, isResolving } = props;
+
+	if ( ! isAdmin ) {
+		return context;
+	}
+
+	return {
+		product,
+		isLoading: isResolving,
+	};
+};
 
 interface ProductDataContextProviderProps {
 	product: ProductResponseItem | null;

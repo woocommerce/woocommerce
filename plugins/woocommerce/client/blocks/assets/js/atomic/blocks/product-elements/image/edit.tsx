@@ -41,6 +41,7 @@ import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
+import { useProduct } from '@woocommerce/entities';
 
 const TEMPLATE = [
 	[
@@ -125,6 +126,8 @@ const Edit = ( {
 		isBoolean
 	);
 
+	const { product, isResolving } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
 			{ /* Don't show controls in product gallery as we rely on
@@ -196,7 +199,12 @@ const Edit = ( {
 					</PanelBody>
 				</InspectorControls>
 			) }
-			<Block { ...{ ...attributes, ...context } }>
+			<Block
+				{ ...{ ...attributes, ...context } }
+				isAdmin={ true }
+				product={ product }
+				isLoading={ isResolving }
+			>
 				{ showAllControls && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>

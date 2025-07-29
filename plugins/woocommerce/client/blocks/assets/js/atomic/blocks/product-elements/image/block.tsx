@@ -5,12 +5,15 @@ import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
-import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
+import {
+	useInnerBlockLayoutContext,
+	useProductDataContext,
+} from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
+import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useProduct } from '@woocommerce/entities';
 import {
 	isString,
 	objectHasProp,
@@ -138,8 +141,10 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > } & {
-		postId: string | undefined;
+	HTMLAttributes< HTMLDivElement > & {
+		isAdmin?: boolean;
+		product?: ProductResponseItem;
+		isResolving?: boolean;
 	};
 
 type LegacyProps = Props & {
@@ -172,12 +177,19 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		showProductLink = true,
 		style,
 		width,
+		isAdmin,
+		product,
+		isResolving,
 		...restProps
 	} = props;
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isResolving } = useProduct( props.postId );
+	const { product: productFromContext, isLoading } = useProductDataContext( {
+		isAdmin,
+		product,
+		isResolving,
+	} );
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
@@ -191,7 +203,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
 	}`;
 
-	if ( ! product?.id ) {
+	if ( ! productFromContext?.id ) {
 		const imageStyles = buildStyles( {
 			height,
 			width,
@@ -224,24 +236,24 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image = chooseImage( product, imageId );
+	const image = chooseImage( productFromContext, imageId );
 
 	if ( image ) {
-		image.alt = image.alt || decodeEntities( product.name );
+		image.alt = image.alt || decodeEntities( productFromContext.name );
 	}
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
-	const anchorLabel = product?.name
+	const anchorLabel = productFromContext?.name
 		? // translators: %s is the product name.
-		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+		  sprintf( __( 'Link to %s', 'woocommerce' ), productFromContext.name )
 		: '';
 	const anchorProps = {
-		href: showProductLink ? product?.permalink : undefined,
+		href: showProductLink ? productFromContext?.permalink : undefined,
 		...( showProductLink && {
 			'aria-label': anchorLabel,
 			onClick: () => {
 				dispatchStoreEvent( 'product-view-link', {
-					product,
+					product: productFromContext,
 				} );
 			},
 		} ),
@@ -271,9 +283,11 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				) }
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
 					<Image
-						fallbackAlt={ decodeEntities( product.name ) }
+						fallbackAlt={ decodeEntities(
+							productFromContext.name
+						) }
 						image={ image }
-						loaded={ ! isResolving }
+						loaded={ ! isLoading }
 						showFullSize={ showFullSize }
 						width={ width }
 						height={ height }
@@ -287,4 +301,4 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	);
 };
 
-export default Block;
+export default withProductDataContext( Block );
