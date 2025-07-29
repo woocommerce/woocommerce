@@ -25,13 +25,6 @@ class TaxonomyHierarchyData {
 	private const CACHE_GROUP = 'wc_taxonomy_hierarchy';
 
 	/**
-	 * Threshold for strategy selection.
-	 * Small taxonomies (<1000 terms) use full hierarchy map for maximum performance.
-	 * Large taxonomies (1000+ terms) use adjacency list with on-demand computation.
-	 */
-	private const SMALL_TAXONOMY_THRESHOLD = 1000;
-
-	/**
 	 * In-memory cache for hierarchy maps.
 	 *
 	 * @var array
@@ -104,6 +97,17 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
+	 * Get the threshold for strategy selection.
+	 * Small taxonomies (<1000 terms) use full hierarchy map for maximum performance.
+	 * Large taxonomies (1000+ terms) use adjacency list with on-demand computation.
+	 *
+	 * @return int The threshold value.
+	 */
+	protected function get_threshold(): int {
+		return 1000;
+	}
+
+	/**
 	 * Determine the optimal strategy based on taxonomy size.
 	 *
 	 * @param string $taxonomy The taxonomy name.
@@ -112,7 +116,7 @@ class TaxonomyHierarchyData {
 	private function get_optimal_strategy( string $taxonomy ): string {
 		$term_count = wp_count_terms( array( 'taxonomy' => $taxonomy ) );
 
-		if ( $term_count >= self::SMALL_TAXONOMY_THRESHOLD ) {
+		if ( $term_count >= $this->get_threshold() ) {
 			return 'adjacency_map';
 		} else {
 			return 'full_map';
