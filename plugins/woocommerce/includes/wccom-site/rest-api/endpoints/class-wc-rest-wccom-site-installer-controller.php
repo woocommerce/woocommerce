@@ -121,7 +121,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	 */
 	public function get_product_install_state( $request ) {
 		$product_id = (int) $request->get_param( 'product_id' );
-		if ( empty( $product_id ) ) {
+		if ( $product_id <= 0 ) {
 			return rest_ensure_response( new WP_Error(
 				'missing_param',
 				'The product_id parameter is required.',
