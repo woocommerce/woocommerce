@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment, useMemo } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
@@ -10,6 +10,7 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useProduct } from '@woocommerce/entities';
 import {
 	isString,
 	objectHasProp,
@@ -24,7 +25,6 @@ import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
 import { BlockAttributes, ImageSizing, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge } from './utils';
-import { useProduct } from '@woocommerce/entities';
 
 const buildStyles = ( props: Partial< ImageProps > ) => {
 	const { aspectRatio, height, width, scale } = props;
