@@ -346,6 +346,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include __DIR__ . '/includes/settings-paypal.php';
+
+		// Additional details are added to the receiver email when subscriptions are enabled.
+		// We don't need this for Orders v2.
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+			unset( $this->form_fields['receiver_email'] );
+		}
 	}
 
 	/**
