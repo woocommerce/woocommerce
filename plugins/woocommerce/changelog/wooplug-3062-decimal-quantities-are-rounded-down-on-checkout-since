@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow decimal stock levels in Store API if implemented by extensions.

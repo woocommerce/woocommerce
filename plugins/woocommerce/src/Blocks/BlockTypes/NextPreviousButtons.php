@@ -29,21 +29,9 @@ class NextPreviousButtons extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$post_id = $block->context['postId'];
-		if ( ! isset( $post_id ) ) {
-			return '';
-		}
+		$iapi_provider = $block->context['iapi/provider'] ?? null;
 
-		$product = wc_get_product( $post_id );
-
-		if ( ! $product instanceof \WC_Product ) {
-			return '';
-		}
-
-		$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
-
-		// Don't show the arrows block if there is only one image.
-		if ( $product_gallery_image_count <= 1 ) {
+		if ( empty( $iapi_provider ) ) {
 			return '';
 		}
 
@@ -52,17 +40,17 @@ class NextPreviousButtons extends AbstractBlock {
 
 		ob_start();
 		?>
-		<div
+	<div
 			class="wc-block-next-previous-buttons <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
-			data-wp-interactive="woocommerce/product-gallery"
+			data-wp-interactive="<?php echo esc_attr( $iapi_provider ); ?>"
 		>
 			<button
 				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-				data-wp-on--click="actions.selectPreviousImage"
-				data-wp-on--keydown="actions.onArrowsKeyDown"
-				data-wp-bind--aria-disabled="context.disableLeft"
-				aria-label="Previous image"
+				data-wp-on--click="actions.onClickPrevious"
+				data-wp-on--keydown="actions.onKeyDownPrevious"
+				data-wp-bind--aria-disabled="context.isDisabledPrevious"
+				data-wp-bind--aria-label="context.ariaLabelPrevious"
 			>
 				<svg
 					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left"
@@ -82,10 +70,10 @@ class NextPreviousButtons extends AbstractBlock {
 			<button
 				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 				style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-				data-wp-on--click="actions.selectNextImage"
-				data-wp-on--keydown="actions.onArrowsKeyDown"
-				data-wp-bind--aria-disabled="context.disableRight"
-				aria-label="Next image"
+				data-wp-on--click="actions.onClickNext"
+				data-wp-on--keydown="actions.onKeyDownNext"
+				data-wp-bind--aria-disabled="context.isDisabledNext"
+				data-wp-bind--aria-label="context.ariaLabelNext"
 			>
 				<svg
 					class="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right"
