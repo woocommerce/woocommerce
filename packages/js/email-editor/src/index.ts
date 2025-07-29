@@ -37,4 +37,4 @@ export function initializeEditor( htmlId: string ) {
 	}
 }
 
-export { EmailEditor } from './editor';
+export { ExperimentalEmailEditor } from './editor';

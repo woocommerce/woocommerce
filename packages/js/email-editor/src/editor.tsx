@@ -112,7 +112,7 @@ export function initialize( elementId: string ) {
 	);
 }
 
-export function EmailEditor( {
+export function ExperimentalEmailEditor( {
 	postId,
 	postType,
 	isPreview = false,
