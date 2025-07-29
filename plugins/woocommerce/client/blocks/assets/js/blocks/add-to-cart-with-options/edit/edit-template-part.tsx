@@ -42,6 +42,7 @@ const TemplatePartInnerBlocks = ( {
 		},
 		[ templatePartId ]
 	);
+
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		value: blocks,
 		onInput,
