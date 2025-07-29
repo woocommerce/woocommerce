@@ -233,7 +233,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 	 * @param bool $testmode Whether to use the sandbox environment.
 	 * @return string|null The access token.
 	 */
-	private function get_paypal_access_token( $testmode ) {
+	public function get_paypal_access_token( $testmode ) {
 		$paypal_client_id     = get_option( 'wc_paypal_api_client_id' );
 		$paypal_client_secret = get_option( 'wc_paypal_api_client_secret' );
 

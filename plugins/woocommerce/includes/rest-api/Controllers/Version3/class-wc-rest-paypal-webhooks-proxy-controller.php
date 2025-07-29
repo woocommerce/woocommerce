@@ -86,8 +86,12 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
-		// TODO: Validate the webhook signature.
-		// https://developer.paypal.com/api/rest/webhooks/rest/#link-messageverification.
+		// Validate the webhook signature first.
+		$validation_result = $this->validate_webhook_signature_with_postback( $request );
+		if ( is_wp_error( $validation_result ) ) {
+			error_log( 'PayPal webhook signature validation failed: ' . $validation_result->get_error_message() );
+			return new WP_REST_Response( 'Webhook signature validation failed', 401 );
+		}
 
 		$data = $request->get_json_params();
 		error_log( '(Proxy) PayPal webhook received: ' . wc_print_r( $data, true ) );
@@ -130,6 +134,102 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 		}
 
 		return new WP_REST_Response( 'Webhook processed', 200 );
+	}
+
+	/**
+	 * Validate the PayPal webhook signature.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool|WP_Error True if valid, WP_Error if invalid.
+	 */
+	private function validate_webhook_signature_with_postback( WP_REST_Request $request ) {
+		// Extract required headers for signature validation.
+		$headers = $request->get_headers();
+		$data    = $request->get_json_params();
+		
+		$auth_algo        = $headers['paypal_auth_algo'][0] ?? '';
+		$cert_url         = $headers['paypal_cert_url'][0] ?? '';
+		$transmission_id  = $headers['paypal_transmission_id'][0] ?? '';
+		$transmission_sig = $headers['paypal_transmission_sig'][0] ?? '';
+		$transmission_time = $headers['paypal_transmission_time'][0] ?? '';
+
+		// Validate that all required headers are present.
+		if ( empty( $auth_algo ) || empty( $cert_url ) || empty( $transmission_id ) || 
+			 empty( $transmission_sig ) || empty( $transmission_time ) ) {
+			return new WP_Error( 'missing_headers', 'Required PayPal webhook headers are missing' );
+		}
+
+		// Get webhook ID from PayPal settings.
+		$webhook_id = get_option( 'wc_paypal_webhook_id' );
+		if ( empty( $webhook_id ) ) {
+			return new WP_Error( 'missing_webhook_id', 'PayPal webhook ID is not configured' );
+		}
+
+		// Prepare the verification request payload.
+		$verification_data = array(
+			'auth_algo'         => $auth_algo,
+			'cert_url'          => $cert_url,
+			'transmission_id'   => $transmission_id,
+			'transmission_sig'  => $transmission_sig,
+			'transmission_time' => $transmission_time,
+			'webhook_id'        => $webhook_id,
+			'webhook_event'     => $request->get_json_params(),
+		);
+
+
+		$testmode = strpos( $data['resource']['links'][0]['href'], 'sandbox' ) !== false;
+
+		// Make API call to PayPal to verify the signature.
+		$paypal_api_url = $this->get_paypal_api_base_url( $testmode ) . '/v1/notifications/verify-webhook-signature';
+		$proxy_controller = new WC_REST_Paypal_Proxy_Controller();
+		$access_token     = $proxy_controller->get_paypal_access_token( $testmode );
+
+		if ( empty( $access_token ) ) {
+			return new WP_Error( 'missing_access_token', 'PayPal access token is not available' );
+		}
+
+		$response = wp_remote_post(
+			$paypal_api_url,
+			array(
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $access_token,
+				),
+				'body'    => wp_json_encode( $verification_data ),
+				'timeout' => 30,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'verification_request_failed', 'Failed to make verification request to PayPal: ' . $response->get_error_message() );
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		if ( 200 !== $response_code ) {
+			return new WP_Error( 'verification_failed', 'PayPal signature verification failed with status: ' . $response_code );
+		}
+
+		$verification_result = json_decode( $response_body, true );
+		
+		if ( ! isset( $verification_result['verification_status'] ) || 
+			 'SUCCESS' !== $verification_result['verification_status'] ) {
+			return new WP_Error( 'signature_invalid', 'PayPal signature verification returned failure status' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the PayPal API base URL based on environment.
+	 *
+	 * @return string The API base URL.
+	 */
+	private function get_paypal_api_base_url( $testmode ) {		
+		return $testmode 
+			? 'https://api-m.sandbox.paypal.com'
+			: 'https://api-m.paypal.com';
 	}
 
 	/**
