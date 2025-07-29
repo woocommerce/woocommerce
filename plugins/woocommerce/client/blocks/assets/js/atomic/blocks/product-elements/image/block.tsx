@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { Fragment, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
@@ -228,7 +228,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image = chooseImage( product, imageId );
+	const image = useMemo(
+		() => chooseImage( product, imageId ),
+		[ product, imageId ]
+	);
 
 	if ( image ) {
 		image.alt = image.alt || decodeEntities( product.name );
@@ -291,4 +294,4 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	);
 };
 
-export default withProductDataContext( Block );
+export default Block;
