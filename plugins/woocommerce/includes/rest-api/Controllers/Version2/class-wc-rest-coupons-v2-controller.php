@@ -348,7 +348,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'amount'                      => array(
 					'description' => __( 'The amount of discount. Should always be numeric, even if setting a percentage.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status' => array(
@@ -475,12 +475,12 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'minimum_amount'              => array(
 					'description' => __( 'Minimum order amount that needs to be in the cart before coupon applies.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'maximum_amount'              => array(
 					'description' => __( 'Maximum order amount allowed when using the coupon.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'email_restrictions'          => array(
