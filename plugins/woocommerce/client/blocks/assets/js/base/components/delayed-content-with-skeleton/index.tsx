@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
+import { useReducedMotion } from '@wordpress/compose';
 import type { ReactNode } from 'react';
 
 export interface DelayedContentWithSkeletonProps {
@@ -30,11 +31,19 @@ export const DelayedContentWithSkeleton = ( {
 	isLoading,
 	skeleton,
 }: DelayedContentWithSkeletonProps ): JSX.Element => {
-	const MIN_DISPLAY_TIME = 300;
+	const disableMotion = useReducedMotion();
 	const [ showSkeleton, setShowSkeleton ] = useState( isLoading );
 	const [ startTime, setStartTime ] = useState< number | null >( null );
 
 	useEffect( () => {
+		// If motion is disabled, just sync with isLoading state
+		if ( disableMotion ) {
+			setShowSkeleton( isLoading );
+			return;
+		}
+
+		// For motion-enabled, use the delay logic
+		const MIN_DISPLAY_TIME = 2000;
 		let timer: ReturnType< typeof setTimeout >;
 
 		if ( isLoading ) {
@@ -54,7 +63,7 @@ export const DelayedContentWithSkeleton = ( {
 				clearTimeout( timer );
 			}
 		};
-	}, [ isLoading, startTime ] );
+	}, [ isLoading, startTime, disableMotion ] );
 
 	return <>{ showSkeleton ? skeleton : children }</>;
 };
