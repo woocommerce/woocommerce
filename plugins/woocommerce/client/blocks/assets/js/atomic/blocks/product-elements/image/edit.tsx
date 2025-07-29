@@ -203,7 +203,7 @@ const Edit = ( {
 				{ ...{ ...attributes, ...context } }
 				isAdmin={ true }
 				product={ product }
-				isLoading={ isResolving }
+				isResolving={ isResolving }
 			>
 				{ showAllControls && <div { ...innerBlockProps } /> }
 			</Block>
