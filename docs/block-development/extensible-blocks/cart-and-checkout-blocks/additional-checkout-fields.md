@@ -833,6 +833,12 @@ It's full schema is this one:
 					"description": "Additional checkout fields with 'contact' location. These fields are rendered in the contact information section.",
 					"additionalProperties": {
 						"type": "string"
+					},
+					"patternProperties": {
+						"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
+							"type": "string",
+							"description": "Custom fields with namespace identifiers"
+						}
 					}
 				},
 				"address": {
