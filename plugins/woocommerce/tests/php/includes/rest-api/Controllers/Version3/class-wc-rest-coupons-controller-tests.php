@@ -6,6 +6,8 @@
  */
 class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
+
+
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
@@ -161,14 +163,14 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should return 400 error
+		// Should return 400 error.
 		$this->assertEquals( 400, $response->get_status() );
 
-		// Should contain validation error message
+		// Should contain validation error message.
 		$data = $response->get_data();
 		$this->assertStringContainsString( 'Percentage discount cannot exceed 100%', $data['message'] );
 
-		// Ensure coupon was not created
+		// Ensure coupon was not created.
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'invalid-percent-test' ) );
 	}
 
@@ -189,7 +191,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should succeed
+		// Should succeed.
 		$this->assertEquals( 201, $response->get_status() );
 
 		$data = $response->get_data();
@@ -214,14 +216,14 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		// Should return 400 error
+		// Should return 400 error.
 		$this->assertEquals( 400, $response->get_status() );
 
-		// Should contain validation error message
+		// Should contain validation error message.
 		$data = $response->get_data();
 		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
 
-		// Ensure coupon was not created
+		// Ensure coupon was not created.
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-amount-test' ) );
 	}
 }
