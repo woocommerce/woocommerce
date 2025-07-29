@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
@@ -98,7 +99,15 @@ class Payments {
 					return $a['_priority'] <=> $b['_priority'];
 				}
 			);
+
+			// By default, we will add the preferred suggestions at the top of the list.
 			$last_preferred_order = -1;
+			// If WooPayments is already present, we add the preferred suggestions after it.
+			// This way we ensure default installed WooPayments is at the same place as its suggestion would be.
+			if ( isset( $providers_order_map[ WooPaymentsService::GATEWAY_ID ] ) ) {
+				$last_preferred_order = $providers_order_map[ WooPaymentsService::GATEWAY_ID ];
+			}
+
 			foreach ( $suggestions['preferred'] as $suggestion ) {
 				$suggestion_order_map_id = $this->providers->get_suggestion_order_map_id( $suggestion['id'] );
 				// Determine the suggestion's order value.
