@@ -302,7 +302,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( colorGreenOption ).toBeDisabled();
 	} );
 
-	test.only( 'respects quantity constraints', async ( {
+	test( 'respects quantity constraints', async ( {
 		page,
 		pageObject,
 		editor,
