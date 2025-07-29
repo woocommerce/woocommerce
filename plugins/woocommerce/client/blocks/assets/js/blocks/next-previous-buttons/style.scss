@@ -5,6 +5,11 @@
 	width: 100%;
 	height: 100%;
 
+	// Hidden doesn't work well with flexbox, so we need to hide it manually.
+	&[hidden] {
+		display: none !important;
+	}
+
 	&:where(.alignleft) {
 		justify-content: flex-start;
 		gap: 0;

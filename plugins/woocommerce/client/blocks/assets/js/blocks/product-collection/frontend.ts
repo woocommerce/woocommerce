@@ -19,6 +19,7 @@ export type ProductCollectionStoreContext = {
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
 	// Next/Previous Buttons block context
+	hideNextPreviousButtons: boolean;
 	isDisabledPrevious: boolean;
 	isDisabledNext: boolean;
 	ariaLabelPrevious: string;
@@ -235,6 +236,22 @@ const productCollectionStore = {
 				getContext< ProductCollectionStoreContext >();
 
 			triggerProductListRenderedEvent( { collection } );
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext< ProductCollectionStoreContext >();
+			const observer = new ResizeObserver( () => {
+				const hasOverflowX =
+					scrollableElement.scrollWidth >
+					scrollableElement.clientWidth;
+				context.hideNextPreviousButtons = ! hasOverflowX;
+			} );
+
+			observer.observe( scrollableElement );
 		},
 	},
 };

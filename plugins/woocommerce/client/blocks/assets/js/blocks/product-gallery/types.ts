@@ -25,6 +25,7 @@ export interface ProductGalleryContext {
 		right: boolean;
 	};
 	// Next/Previous Buttons block context
+	hideNextPreviousButtons: boolean;
 	isDisabledPrevious: boolean;
 	isDisabledNext: boolean;
 	ariaLabelPrevious: string;
