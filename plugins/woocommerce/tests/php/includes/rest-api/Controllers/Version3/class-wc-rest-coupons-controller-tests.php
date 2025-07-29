@@ -219,7 +219,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should contain validation error message
 		$data = $response->get_data();
-		$this->assertStringContainsString( 'Coupon amount cannot be negative', $data['message'] );
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
 
 		// Ensure coupon was not created
 		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-amount-test' ) );
