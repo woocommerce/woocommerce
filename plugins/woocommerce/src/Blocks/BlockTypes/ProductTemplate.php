@@ -78,7 +78,7 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames .= ' wc-block-product-template';
 
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( $classnames ) ) );
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( $classnames ), 'data-wp-on--scroll' => 'actions.watchScroll' ) );
 
 		$content = '';
 		while ( $query->have_posts() ) {
