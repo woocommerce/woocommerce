@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API Coupons controller
  *
@@ -19,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
+
 
 	/**
 	 * Endpoint namespace.
@@ -46,7 +48,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -58,7 +62,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						array(
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
 								'required'    => true,
@@ -72,7 +77,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -110,7 +117,9 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -304,6 +313,13 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 						break;
 					default:
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
+							// Special validation for amount when discount_type is percent.
+							if ( 'amount' === $key && 'percent' === ( $request['discount_type'] ?? 'fixed_cart' ) ) {
+								$amount = wc_format_decimal( $value );
+								if ( $amount > 100 ) {
+									return new WP_Error( 'woocommerce_rest_invalid_coupon_amount', __( 'Percentage discount cannot exceed 100%.', 'woocommerce' ), array( 'status' => 400 ) );
+								}
+							}
 							$coupon->{"set_{$key}"}( $value );
 						}
 						break;
@@ -351,7 +367,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status' => array(
+				'status'                      => array(
 					'description' => __( 'The status of the coupon. Should always be draft, published, or pending review', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
