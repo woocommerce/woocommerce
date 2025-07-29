@@ -486,9 +486,10 @@ class FeaturesController {
 				'is_experimental'    => false,
 			),
 			'experimental-iapi-mini-cart' => array(
-				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
-				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
-				'is_experimental' => true,
+				'name'               => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
+				'description'        => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
+				'is_experimental'    => true,
+				'enabled_by_default' => in_array( wp_get_environment_type(), array( 'development', 'local' ), true ),
 			),
 		);
 
