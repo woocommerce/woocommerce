@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useProduct } from '@woocommerce/entities';
 import { ProductResponseItem } from '@woocommerce/types';
 import { createContext, useContext } from '@wordpress/element';
 
@@ -79,6 +78,22 @@ type UseProductDataContextProps = {
 	isResolving?: boolean | undefined;
 };
 
+/**
+ * Hook that provides product data context for WooCommerce blocks.
+ *
+ * This hook serves as a unified interface for accessing product data across different environments for WooCommerce blocks that have the JS version for the frontend.
+ * - Frontend: Returns the React context data from ProductDataContext (e.g., from server-side rendering)
+ * - Admin/Editor: Uses the new entity-based data fetching system via WordPress Core Data API
+ *
+ * The dual behavior ensures blocks work consistently in both frontend display and admin editing
+ * contexts while leveraging the most appropriate data source for each environment.
+ *
+ * @param props             Configuration object for the hook
+ * @param props.isAdmin     Whether the hook is being used in the admin/editor context
+ * @param props.product     Product data to use directly (admin context)
+ * @param props.isResolving Whether product data is currently being fetched (admin context)
+ * @return Object containing product data and loading state
+ */
 export const useProductDataContext = (
 	props: UseProductDataContextProps = {
 		isAdmin: false,
