@@ -1311,7 +1311,7 @@ class PaymentsProviders {
 			$found = false;
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
 				if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
-					$found = true;
+					$found                                    = true;
 					$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					// Make sure we put in the actual slug and file path that we found.
 					$extension_suggestion['plugin']['slug'] = $plugin_slug;
