@@ -8,6 +8,7 @@ import { store as editorStore } from '@wordpress/editor';
  * Internal dependencies
  */
 import { storeName } from '../store';
+import { EmailTemplate } from '../store/types';
 
 /**
  * Hook to detect if we are currently in the email editor context.
@@ -52,7 +53,8 @@ export function useIsEmailEditor(): boolean {
 
 		// Check if this template is associated with the email editor post
 		// We need to check if the template is used by the email post type
-		const emailTemplates = emailEditorStore.getEmailTemplates();
+		const emailTemplates =
+			emailEditorStore.getEmailTemplates() as EmailTemplate[];
 		if ( ! emailTemplates ) {
 			return false;
 		}
@@ -61,9 +63,7 @@ export function useIsEmailEditor(): boolean {
 		// and if it's associated with the email post type
 		const isEmailTemplate = emailTemplates.some( ( template ) => {
 			return (
-				// @ts-expect-error Missing property in type
 				template.id === currentTemplate.id &&
-				// @ts-expect-error Missing property in type
 				template.post_types?.includes( emailPostType )
 			);
 		} );

@@ -65,7 +65,7 @@ export function InnerEditor( {
 				'postType',
 				currentPost.postType,
 				currentPost.postId
-			) as Post;
+			) as Post | null;
 			return {
 				template:
 					postObject && currentPost.postType !== 'wp_template'

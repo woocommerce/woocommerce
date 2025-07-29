@@ -34,7 +34,7 @@ function Editor( {
 	postType,
 	isPreview = false,
 }: {
-	postId: string;
+	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 } ) {
@@ -59,19 +59,34 @@ function Editor( {
 		return null;
 	}
 
-	// Set allowed blockTypes to the editor settings.
-	settings.allowedBlockTypes = getAllowedBlockNames();
-	settings.isPreviewMode = isPreview;
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = {
+		...settings,
+		allowedBlockTypes: getAllowedBlockNames(),
+		isPreviewMode: isPreview,
+	};
 
 	return (
 		<StrictMode>
 			<InnerEditor
 				postId={ postId }
 				postType={ postType }
-				settings={ settings }
+				settings={ editorSettings }
 			/>
 		</StrictMode>
 	);
+}
+
+function onInit() {
+	initEventCollector();
+	initStoreTracking();
+	initDomTracking();
+	createStore();
+	initContentValidationMiddleware();
+	initializeLayout();
+	initBlocks();
+	initHooks();
+	initTextHooks();
 }
 
 export function initialize( elementId: string ) {
@@ -94,15 +109,7 @@ export function initialize( elementId: string ) {
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
-	initEventCollector();
-	initStoreTracking();
-	initDomTracking();
-	createStore();
-	initContentValidationMiddleware();
-	initializeLayout();
-	initBlocks();
-	initHooks();
-	initTextHooks();
+	onInit();
 	const root = createRoot( container );
 	root.render(
 		<WrappedEditor
@@ -124,14 +131,7 @@ export function ExperimentalEmailEditor( {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
-		initEventCollector();
-		initStoreTracking();
-		initDomTracking();
-		createStore();
-		initializeLayout();
-		initBlocks();
-		initHooks();
-		initTextHooks();
+		onInit();
 		setIsInitialized( true );
 	}, [] );
 
