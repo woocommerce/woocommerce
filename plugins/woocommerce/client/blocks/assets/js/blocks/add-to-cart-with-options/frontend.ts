@@ -118,16 +118,10 @@ const getInputData = (
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const childProductId = parseInt(
-		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
-		10
-	);
-
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
 		currentValue,
-		childProductId,
 		inputElement,
 	};
 };
@@ -172,7 +166,7 @@ export type AddToCartWithOptionsStore = {
 		allowsIncrease: boolean;
 	};
 	actions: {
-		setQuantity: ( value: number, childProductId?: number ) => void;
+		setQuantity: ( value: number ) => void;
 		increaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
@@ -284,7 +278,7 @@ const addToCartWithOptionsStore = store<
 			},
 		},
 		actions: {
-			setQuantity( value: number, childProductId?: number ) {
+			setQuantity( value: number ) {
 				const context = getContext< Context >();
 
 				if ( context.productType === 'variable' ) {
@@ -298,7 +292,7 @@ const addToCartWithOptionsStore = store<
 						context.quantity[ id ] = value;
 					} );
 				} else {
-					const id = childProductId || context.productId;
+					const id = context.childProductId || context.productId;
 
 					context.quantity = {
 						...context.quantity,
@@ -313,10 +307,10 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, childProductId, inputElement } =
-					inputData;
+				const { currentValue, inputElement } = inputData;
 
 				const {
+					childProductId,
 					productType,
 					productId,
 					availableVariations,
@@ -349,8 +343,7 @@ const addToCartWithOptionsStore = store<
 				if ( max === null || newValue <= max ) {
 					const updatedValue = Math.max( min, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
-						updatedValue,
-						childProductId
+						updatedValue
 					);
 					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
@@ -363,10 +356,10 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, childProductId, inputElement } =
-					inputData;
+				const { currentValue, inputElement } = inputData;
 
 				const {
+					childProductId,
 					productType,
 					productId,
 					availableVariations,
@@ -399,8 +392,7 @@ const addToCartWithOptionsStore = store<
 				if ( newValue >= min ) {
 					const updatedValue = Math.min( max ?? Infinity, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
-						updatedValue,
-						childProductId
+						updatedValue
 					);
 					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
@@ -413,12 +405,9 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { childProductId, currentValue } = inputData;
+				const { currentValue } = inputData;
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					currentValue,
-					childProductId
-				);
+				addToCartWithOptionsStore.actions.setQuantity( currentValue );
 			},
 			handleQuantityChange: (
 				event: HTMLElementEvent< HTMLInputElement >
@@ -427,7 +416,9 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { childProductId, currentValue } = inputData;
+
+				const { childProductId } = getContext< Context >();
+				const { currentValue } = inputData;
 
 				const {
 					productType,
@@ -464,10 +455,7 @@ const addToCartWithOptionsStore = store<
 				);
 
 				if ( event.target.value !== newValue.toString() ) {
-					addToCartWithOptionsStore.actions.setQuantity(
-						newValue,
-						childProductId
-					);
+					addToCartWithOptionsStore.actions.setQuantity( newValue );
 					event.target.value = newValue.toString();
 					dispatchChangeEvent( event.target );
 				}
@@ -479,11 +467,10 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { inputElement, childProductId } = inputData;
+				const { inputElement } = inputData;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					inputElement.checked ? 1 : 0,
-					childProductId
+					inputElement.checked ? 1 : 0
 				);
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
