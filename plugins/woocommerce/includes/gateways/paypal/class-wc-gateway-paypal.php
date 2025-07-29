@@ -348,6 +348,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include __DIR__ . '/includes/settings-paypal.php';
+		/**
+		 * Filters the PayPal settings form fields to remove unsupported fields for Orders v2.
+		 *
+		 * @param array $form_fields The form fields.
+		 * @return array
+		 */
 		$this->form_fields = apply_filters( 'woocommerce_settings_api_form_fields_paypal', $this->form_fields );
 	}
 

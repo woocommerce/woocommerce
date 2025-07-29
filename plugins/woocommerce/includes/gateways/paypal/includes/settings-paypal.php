@@ -109,7 +109,7 @@ $settings = array(
 
 if ( ! $should_use_orders_v2 ) {
 	$legacy_settings = array(
-		'image_url'        => array(
+		'image_url'           => array(
 			'title'       => __( 'Image url', 'woocommerce' ),
 			'type'        => 'text',
 			'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
@@ -117,14 +117,14 @@ if ( ! $should_use_orders_v2 ) {
 			'desc_tip'    => true,
 			'placeholder' => __( 'Optional', 'woocommerce' ),
 		),
-		'ipn_notification' => array(
+		'ipn_notification'           => array(
 			'title'       => __( 'IPN email notifications', 'woocommerce' ),
 			'type'        => 'checkbox',
 			'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
 			'default'     => 'yes',
 			'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
 		),
-		'receiver_email'   => array(
+		'receiver_email'           => array(
 			'title'       => __( 'Receiver email', 'woocommerce' ),
 			'type'        => 'email',
 			'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
@@ -132,7 +132,7 @@ if ( ! $should_use_orders_v2 ) {
 			'desc_tip'    => true,
 			'placeholder' => 'you@youremail.com',
 		),
-		'identity_token'   => array(
+		'identity_token'           => array(
 			'title'       => __( 'PayPal identity token', 'woocommerce' ),
 			'type'        => 'text',
 			'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
@@ -195,7 +195,7 @@ if ( ! $should_use_orders_v2 ) {
 			'placeholder' => __( 'Optional', 'woocommerce' ),
 		),
 	);
-	$settings     = array_merge( $settings, $legacy_settings );
+	$settings = array_merge( $settings, $legacy_settings );
 }
 
 return $settings;
