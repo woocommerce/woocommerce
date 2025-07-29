@@ -67,7 +67,6 @@ const checkIfButtonsDisabled = (
  * @param direction - The direction to scroll.
  */
 const scrollCarousel = ( direction: 'left' | 'right' ) => {
-	const context = getContext< ProductCollectionStoreContext >();
 	const { ref } = getElement();
 
 	const productCollection = ref?.closest(
@@ -95,6 +94,7 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 		behavior: 'smooth',
 	} );
 
+	const context = getContext< ProductCollectionStoreContext >();
 	const { scrollLeft } = productTemplate;
 	// scrollBy doesn't return the final position, so we need to calculate it.
 	const finalPosition =
