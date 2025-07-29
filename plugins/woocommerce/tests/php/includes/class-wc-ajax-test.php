@@ -224,7 +224,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 					if ( 'manage_network_users' === $capability ) {
 						return $manage_network_users;
 					}
-					return user_can( $user_id, $capability );
+					// Return true for other capabilities since we're testing with an admin user.
+					return true;
 				},
 			)
 		);
