@@ -5,12 +5,8 @@ import { Fragment, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
-import {
-	useInnerBlockLayoutContext,
-	useProductDataContext,
-} from '@woocommerce/shared-context';
+import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
-import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import type { HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -228,10 +224,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image = useMemo(
-		() => chooseImage( product, imageId ),
-		[ product, imageId ]
-	);
+	const image = chooseImage( product, imageId );
 
 	if ( image ) {
 		image.alt = image.alt || decodeEntities( product.name );
