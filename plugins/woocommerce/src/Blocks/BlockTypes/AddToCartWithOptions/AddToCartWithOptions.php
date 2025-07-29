@@ -249,22 +249,35 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			if ( $product->is_type( 'grouped' ) ) {
 				// Add context for purchasable child products.
-				$context['groupedProductIds'] = array();
+				$children_product_data = array();
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
-						$context['groupedProductIds'][] = $child_product_id;
+						/**
+						 * Filter the minimum quantity value allowed for the product.
+						 *
+						 * @since 10.2.0
+						 * @param int        $min_value Minimum quantity value.
+						 * @param WC_Product $product   Product object.
+						 */
+						$min = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
+						/**
+						 * Filter the maximum quantity value allowed for the product.
+						 *
+						 * @since 10.2.0
+						 * @param int        $max_value Maximum quantity value.
+						 * @param WC_Product $product   Product object.
+						 */
+						$max = apply_filters( 'woocommerce_quantity_input_max', $child_product->get_max_purchase_quantity(), $child_product );
+						/**
+						 * Filter the step quantity value allowed for the product.
+						 *
+						 * @since 10.2.0
+						 * @param int        $max_value Maximum quantity value.
+						 * @param WC_Product $product   Product object.
+						 */
+						$step = apply_filters( 'woocommerce_quantity_input_step', 1, $child_product );
 
-						$args = Utils::get_quantity_input_args( $child_product );
-						$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 0;
-						// For grouped children, if min is 1 (the default), set to 0 unless a filter sets otherwise.
-						if ( 1 === $min ) {
-							$min = 0;
-						}
-						$max                                        = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
-							? (int) $args['max_value']
-							: null;
-						$step                                       = isset( $args['step'] ) ? (int) $args['step'] : 1;
 						$children_product_data[ $child_product_id ] = array(
 							'min'  => $min,
 							'max'  => $max,
@@ -273,6 +286,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					}
 				}
 
+				$context['groupedProductIds'] = array_keys( $children_product_data );
 				wp_interactivity_state(
 					'woocommerce',
 					array(
@@ -302,13 +316,30 @@ class AddToCartWithOptions extends AbstractBlock {
 					}
 				}
 			} else {
-				// Not grouped: just add constraints for the main product.
-				$args = Utils::get_quantity_input_args( $product );
-				$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 1;
-				$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
-				? (int) $args['max_value']
-				: null;
-				$step = isset( $args['step'] ) ? (int) $args['step'] : 1;
+				/**
+				 * Filter the minimum quantity value allowed for the product.
+				 *
+				 * @since 10.2.0
+				 * @param int        $min_value Minimum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				$min = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+				/**
+				 * Filter the maximum quantity value allowed for the product.
+				 *
+				 * @since 10.2.0
+				 * @param int        $max_value Maximum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				$max = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+				/**
+				 * Filter the step quantity value allowed for the product.
+				 *
+				 * @since 10.2.0
+				 * @param int        $max_value Maximum quantity value.
+				 * @param WC_Product $product   Product object.
+				 */
+				$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
 
 				wp_interactivity_state(
 					'woocommerce',
