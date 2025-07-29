@@ -12,13 +12,29 @@ import { recordEvent } from '@woocommerce/tracks';
 import type { SidebarComponentProps } from '../xstate';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
+import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
+	const { wooPaymentsRecentlyActivated } = useSetUpPaymentsContext();
+
 	const { steps: allSteps, currentStep } = useOnboardingContext();
 
-	const currentStepIndex =
+	// Current step index is determined by finding the index of the current step in all steps.
+	// If there are no steps, we default to 1 to avoid division by zero.
+	let currentStepIndex =
 		allSteps.findIndex( ( step ) => step.id === currentStep?.id ) + 1 || 1;
+
+	// Total steps is the length of all steps.
+	// If there are no steps, we default to 1 to avoid division by zero.
+	let totalSteps = allSteps.length || 1;
+
+	// If WooPayments was recently activated, we increment the step index and total steps.
+	// This is to account for the initial setup step that is not part of the onboarding steps.
+	if ( wooPaymentsRecentlyActivated ) {
+		currentStepIndex++;
+		totalSteps++;
+	}
 
 	const handleBackClick = () => {
 		recordEvent( 'launch_your_store_payments_back_to_hub_click' );
@@ -56,7 +72,7 @@ export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 					/* translators: %1$s: current step number, %2$s: total number of steps */
 					__( 'Step %1$s of %2$s', 'woocommerce' ),
 					currentStepIndex,
-					allSteps.length || 1
+					totalSteps
 				) }
 			</div>
 		</div>
