@@ -596,7 +596,11 @@ If you're not familiar with JSON Schema, you can get a quick introduction to it 
 
 ### Document object
 
-When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. An example of the document object looks like this:
+When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. 
+
+**Important:** All properties in the document object use snake_case naming convention (e.g., `total_price`, `shipping_rates`, `customer_note`), not camelCase.
+
+An example of the document object looks like this:
 
 <!-- markdownlint-disable MD033 -->
 <details>
