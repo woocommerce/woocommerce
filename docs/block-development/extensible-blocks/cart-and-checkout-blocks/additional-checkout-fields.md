@@ -625,8 +625,8 @@ When you're writing your rules, you're writing a partial schema for the document
 		"needs_shipping": true,
 		"prefers_collection": false,
 		"totals": {
-			"totalPrice": 6600,
-			"totalTax": 600
+			"total_price": 6600,
+			"total_tax": 600
 		},
 		"extensions": {}
 	},
