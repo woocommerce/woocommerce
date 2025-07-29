@@ -134,7 +134,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, '' );
 
 		try {
-			$state = $installation_manager->get_installation_status();
+			$state = $installation_manager->get_installation_status( );
 			return $this->success_response( $product_id, $state );
 		} catch ( Installer_Error $exception ) {
 			return $this->failure_response( $product_id, $exception );
