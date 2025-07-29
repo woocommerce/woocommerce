@@ -42,12 +42,11 @@ const TemplatePartInnerBlocks = ( {
 		},
 		[ templatePartId ]
 	);
-
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		value: blocks,
 		onInput,
 		onChange,
-		renderAppender: () =>
+		renderAppender:
 			! isLoading && blocks.length === 0
 				? InnerBlocks.ButtonBlockAppender
 				: null,
