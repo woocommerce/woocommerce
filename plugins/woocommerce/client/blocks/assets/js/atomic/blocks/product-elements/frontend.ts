@@ -47,7 +47,12 @@ const ALLOWED_ATTR = [
 ];
 
 export type Context = {
-	productElementKey: 'price_html' | 'availability';
+	productElementKey:
+		| 'price_html'
+		| 'availability'
+		| 'sku'
+		| 'weight'
+		| 'dimensions';
 };
 
 const productElementStore = store(

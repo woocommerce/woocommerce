@@ -50,10 +50,16 @@ export type Store = {
 			[ productId: number ]: {
 				price_html?: string;
 				availability?: string;
+				sku?: string;
+				weight?: string;
+				dimensions?: string;
 				variations?: {
 					[ variationId: number ]: {
 						price_html?: string;
-						availability: string;
+						availability?: string;
+						sku?: string;
+						weight?: string;
+						dimensions?: string;
 					};
 				};
 			};
