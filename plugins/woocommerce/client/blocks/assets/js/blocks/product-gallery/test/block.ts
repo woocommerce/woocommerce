@@ -2,11 +2,7 @@
  * External dependencies
  */
 import '@testing-library/jest-dom';
-import {
-	screen,
-	waitFor,
-	waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { createBlock } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';

@@ -15,6 +15,7 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { useProduct } from '@woocommerce/entities';
 import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -41,7 +42,6 @@ import { BLOCK_ICON as icon } from './constants';
 import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
-import { useProduct } from '@woocommerce/entities';
 
 const TEMPLATE = [
 	[
