@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Load AddressProviderController earlier to allow hooks to register

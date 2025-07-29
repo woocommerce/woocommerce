@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Don't add links when product is hidden from catalog in the iAPI powered minicart.
-

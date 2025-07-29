@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Next Previous Buttons: Make block usable as inner block in different parent blocks (i1: for now just by providing iAPI store name from the parent)

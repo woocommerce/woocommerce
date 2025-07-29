@@ -490,7 +490,7 @@ describe( 'Testing Checkout', () => {
 		} );
 	} );
 
-	it.only( "Ensures hidden postcode fields don't block Checkout", async () => {
+	it( "Ensures hidden postcode fields don't block Checkout", async () => {
 		const user = userEvent.setup();
 		render( <CheckoutBlock /> );
 

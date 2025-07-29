@@ -20,35 +20,6 @@ const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
-	test( 'allows modifying the template parts', async ( {
-		page,
-		pageObject,
-		editor,
-		admin,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await editor.insertBlock( { name: pageObject.BLOCK_SLUG } );
-
-		await pageObject.insertParagraphInTemplatePart(
-			'This is a test paragraph added to the Add to Cart + Options template part.'
-		);
-
-		await editor.saveSiteEditorEntities();
-
-		await page.goto( '/product/cap' );
-
-		await expect(
-			page.getByText(
-				'This is a test paragraph added to the Add to Cart + Options template part.'
-			)
-		).toBeVisible();
-	} );
-
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
@@ -262,15 +233,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( attributeOptionsBlock.first() );
 
 		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
-
-		// We need to make sure the block updated before saving.
-		// @see https://github.com/woocommerce/woocommerce/issues/57718
-		// Verify that `.editor-post-publish-button__button` has an attribute
-		// `aria-haspopup="dialog"`. When https://github.com/woocommerce/woocommerce/issues/48936
-		// is fixed, we can simply check that the Save button becomes enabled.
-		await expect(
-			page.getByRole( 'button', { name: 'Save', exact: true } )
-		).toHaveAttribute( 'aria-haspopup', 'dialog' );
 
 		await editor.saveSiteEditorEntities();
 

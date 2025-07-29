@@ -74,6 +74,7 @@
 		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data": "wp-6.6",
 		"@wordpress/data-controls": "wp-6.6",
+		"@wordpress/dom-ready": "wp-6.6",
 		"@wordpress/editor": "wp-6.6",
 		"@wordpress/element": "wp-6.6",
 		"@wordpress/format-library": "wp-6.6",

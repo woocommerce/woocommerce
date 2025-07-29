@@ -146,7 +146,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
-			<SidebarContainer title={ sidebarTitle }>
+			<SidebarContainer
+				title={ sidebarTitle }
+				onMobileClose={ props.onMobileClose }
+			>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
 					{ ! isWooPaymentsActive && (

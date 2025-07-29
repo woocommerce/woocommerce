@@ -1,0 +1,64 @@
+:where(.wc-block-next-previous-buttons) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+
+	&:where(.alignleft) {
+		justify-content: flex-start;
+		gap: 0;
+	}
+
+	&:where(.alignright) {
+		justify-content: flex-end;
+		gap: 0;
+	}
+
+	&:where(.aligncenter) {
+		justify-content: center;
+		gap: 0;
+	}
+
+	&:where(.aligntop) {
+		align-items: flex-start;
+	}
+
+	&:where(.alignbottom) {
+		align-items: flex-end;
+	}
+}
+
+
+:where(.wc-block-next-previous-buttons__icon) {
+	color: inherit;
+}
+
+// Icons are centred but they are perceived off hence adjusting with padding.
+:where(.wc-block-next-previous-buttons__icon--left) {
+	padding: 2px 2px 0 0;
+}
+
+:where(.wc-block-next-previous-buttons__icon--right) {
+	padding: 2px 0 0 2px;
+}
+
+:where(.wc-block-next-previous-buttons__button) {
+	cursor: pointer;
+	z-index: 3;
+	pointer-events: all;
+	border: none;
+	width: 40px;
+	height: 40px;
+	font-size: 12px;
+	padding: 0;
+	background: #fff;
+	outline-offset: -2px;
+}
+
+:where(.wc-block-next-previous-buttons__button[aria-disabled="true"]) {
+	:where(.wc-block-next-previous-buttons__icon) {
+		opacity: 30%;
+	}
+	cursor: not-allowed;
+}

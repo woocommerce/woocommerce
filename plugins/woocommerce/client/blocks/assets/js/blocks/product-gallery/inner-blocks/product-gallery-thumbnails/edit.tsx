@@ -87,17 +87,18 @@ export const Edit = ( {
 	}, [ thumbnailSize ] );
 
 	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
-	const className = clsx(
-		'wc-block-product-gallery-thumbnails',
-		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
-		{
-			'wc-block-product-gallery-thumbnails--overflow-right':
-				overflowState.right,
-			'wc-block-product-gallery-thumbnails--overflow-bottom':
-				overflowState.bottom,
-		}
-	);
-	const blockProps = useBlockProps( { className } );
+	const className = clsx( 'wc-block-product-gallery-thumbnails', {
+		'wc-block-product-gallery-thumbnails--overflow-right':
+			overflowState.right,
+		'wc-block-product-gallery-thumbnails--overflow-bottom':
+			overflowState.bottom,
+	} );
+	const blockProps = useBlockProps( {
+		className,
+		style: {
+			'--wc-block-product-gallery-thumbnails-size': thumbnailSizeValue,
+		},
+	} );
 	const imageStyles: Record< string, string | undefined > = {
 		aspectRatio,
 	};
