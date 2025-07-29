@@ -19,7 +19,7 @@ function enhanceButtonsBlock() {
 					supports: {
 						...settings.supports,
 						layout: false, // disable block editor's layouts
-						// enable MailPoet's reduced flex email layout
+						// enable email editor's reduced flex email layout
 						__experimentalEmailFlexLayout: true, // eslint-disable-line
 					},
 				};

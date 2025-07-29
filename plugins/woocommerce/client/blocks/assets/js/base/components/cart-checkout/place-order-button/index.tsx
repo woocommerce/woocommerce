@@ -36,7 +36,7 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
-	const { cartTotals } = useStoreCart();
+	const { cartTotals, cartIsLoading } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	const buttonLabel = (
@@ -87,7 +87,8 @@ const PlaceOrderButton = ( {
 				isCalculating ||
 				isDisabled ||
 				waitingForProcessing ||
-				waitingForRedirect
+				waitingForRedirect ||
+				cartIsLoading
 			}
 		>
 			{ waitingForProcessing && <Spinner /> }
