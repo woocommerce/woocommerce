@@ -12,6 +12,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -78,6 +79,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public $identity_token;
 
+	/**
+	 * Jetpack connection manager.
+	 *
+	 * @var Jetpack_Connection_Manager
+	 */
+	protected $jetpack_connection_manager;
+
 
 	/**
 	 * Constructor for the gateway.
@@ -123,11 +131,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-ipn-handler.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
 			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
-				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
+				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
@@ -135,6 +143,65 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( 'yes' === $this->enabled ) {
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+		}
+
+		$this->maybe_register_site_with_wpcom();
+	}
+
+	/**
+	 * Check if Jetpack is connected.
+	 *
+	 * @return bool
+	 */
+	public function is_jetpack_connected() {
+		if ( ! isset( $this->jetpack_connection_manager ) ) {
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		}
+		return $this->jetpack_connection_manager->is_connected();
+	}
+
+	/**
+	 * Get the blog token.
+	 *
+	 * @return string|null The blog token, or null if the blog is not connected to Jetpack.
+	 */
+	public function get_blog_token() {
+		if ( ! isset( $this->jetpack_connection_manager ) ) {
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		}
+
+		$blog_token = $this->jetpack_connection_manager->get_tokens()->get_access_token();
+		if ( is_wp_error( $blog_token ) || empty( $blog_token ) ) {
+			return null;
+		}
+
+		return $blog_token->secret;
+	}
+
+	/**
+	 * Register the site with WPCOM if it is not already registered.
+	 *
+	 * @return void
+	 */
+	private function maybe_register_site_with_wpcom() {
+		if ( ! is_admin() ||
+			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
+			! WC_Gateway_Paypal_Helper::is_tos_accepted()
+		) {
+			return;
+		}
+
+		$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		$is_connected                     = $this->jetpack_connection_manager->is_connected();
+
+		if ( $is_connected ) {
+			return;
+		}
+
+		$result = $this->jetpack_connection_manager->try_registration();
+		if ( is_wp_error( $result ) ) {
+			self::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
+			return;
 		}
 	}
 
@@ -371,7 +438,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
@@ -421,7 +488,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Init the API class and set the username/password etc.
 	 */
 	protected function init_api() {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-api-handler.php';
 
 		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
 		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
