@@ -106,7 +106,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		// The radio input is visually hidden and, thus, not clickable. That's
 		// why we need to select the <label> instead.
@@ -236,7 +236,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		// The radio input is visually hidden and, thus, not clickable. That's
 		// why we need to select the <label> instead.
@@ -279,7 +279,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		let colorGreenOption = page.getByRole( 'option', {
 			name: 'Green',
@@ -300,6 +300,72 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await page.getByLabel( 'Logo', { exact: true } ).selectOption( 'Yes' );
 
 		await expect( colorGreenOption ).toBeDisabled();
+	} );
+
+	test.only( 'respects quantity constraints', async ( {
+		page,
+		pageObject,
+		editor,
+		requestUtils,
+	} ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-quantity-constraints'
+		);
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await test.step( 'in simple products', async () => {
+			await page.goto( '/product/t-shirt/' );
+
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+			await expect( reduceQuantityButton ).toBeDisabled();
+
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '6' );
+
+			await quantityInput.fill( '8' );
+
+			await expect( increaseQuantityButton ).toBeDisabled();
+		} );
+
+		await test.step( 'in grouped products', async () => {
+			await page.goto( '/product/logo-collection/' );
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'T-Shirt',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '' );
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+			await expect( reduceQuantityButton ).toBeDisabled();
+			await increaseQuantityButton.click();
+
+			await quantityInput.fill( '8' );
+
+			await expect( increaseQuantityButton ).toBeDisabled();
+		} );
 	} );
 
 	test( "allows adding products to cart when the 'Enable AJAX add to cart buttons' setting is disabled", async ( {
