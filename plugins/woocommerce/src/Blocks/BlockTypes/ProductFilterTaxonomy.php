@@ -326,11 +326,9 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return get_terms( $args );
 		}
 
-		// Get terms with WordPress native sorting for hierarchical taxonomy
+		// Get all terms without specific ordering - we'll apply our own sorting
 		$args = array(
 			'taxonomy'   => $taxonomy,
-			'orderby'    => $orderby,
-			'order'      => $order,
 			'hide_empty' => false,
 			'fields'     => 'all',
 		);
@@ -339,79 +337,95 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			$args['include'] = array_keys( $taxonomy_counts );
 		}
 
-		$sorted_terms = get_terms( $args );
+		$terms = get_terms( $args );
 
-		if ( is_wp_error( $sorted_terms ) || empty( $sorted_terms ) ) {
-			return $sorted_terms;
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return $terms;
 		}
 
 		// Use TaxonomyHierarchyData for hierarchy operations
 		$container      = wc_get_container();
 		$hierarchy_data = $container->get( TaxonomyHierarchyData::class );
 
-		// Build sibling order maps from WordPress sorted terms
-		$terms_by_id    = array();
-		$sibling_orders = array();
+		// Group terms by parent for hierarchy building
+		$terms_by_id     = array();
+		$terms_by_parent = array();
 
-		foreach ( $sorted_terms as $term ) {
+		foreach ( $terms as $term ) {
 			$terms_by_id[ $term->term_id ] = $term;
 			$parent_id                     = $hierarchy_data->get_parent( $term->term_id, $taxonomy );
 
-			if ( ! isset( $sibling_orders[ $parent_id ] ) ) {
-				$sibling_orders[ $parent_id ] = array();
+			if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
+				$terms_by_parent[ $parent_id ] = array();
 			}
-			$sibling_orders[ $parent_id ][] = $term->term_id;
+			$terms_by_parent[ $parent_id ][] = $term;
 		}
 
-		// Get root terms in WordPress sort order
-		$root_term_ids = $sibling_orders[0] ?? array();
+		// Sort siblings at each hierarchy level
+		foreach ( $terms_by_parent as $parent_id => $siblings ) {
+			$terms_by_parent[ $parent_id ] = $this->sort_terms_by_criteria( $siblings, $orderby, $order, $taxonomy_counts );
+		}
 
-		// Build depth-first hierarchical list using WordPress sibling order
+		// Build hierarchical list with sorted siblings
 		$hierarchical_terms = array();
-		foreach ( $root_term_ids as $root_id ) {
-			if ( isset( $terms_by_id[ $root_id ] ) ) {
-				$this->add_term_and_descendants_wp_order(
-					$root_id,
-					$hierarchical_terms,
-					$terms_by_id,
-					$sibling_orders
-				);
-			}
-		}
+		$this->build_hierarchical_list( 0, $hierarchical_terms, $terms_by_parent );
 
 		return $hierarchical_terms;
 	}
 
 	/**
-	 * Recursively add a term and its descendants in depth-first order using WordPress sibling ordering.
+	 * Sort terms by the specified criteria (name or count).
 	 *
-	 * @param int   $term_id           Current term ID to add.
-	 * @param array &$hierarchical_terms Reference to the result array.
-	 * @param array $terms_by_id       Terms indexed by ID for lookup.
-	 * @param array $sibling_orders    WordPress-sorted sibling order maps by parent ID.
+	 * @param array  $terms           Array of term objects to sort.
+	 * @param string $orderby         Sort field (name, count, menu_order).
+	 * @param string $order           Sort direction (ASC, DESC).
+	 * @param array  $taxonomy_counts Context-aware term counts.
+	 * @return array Sorted terms.
 	 */
-	private function add_term_and_descendants_wp_order(
-		int $term_id,
-		array &$hierarchical_terms,
-		array $terms_by_id,
-		array $sibling_orders
-	): void {
-		// Add current term first
-		if ( isset( $terms_by_id[ $term_id ] ) ) {
-			$hierarchical_terms[] = $terms_by_id[ $term_id ];
+	private function sort_terms_by_criteria( array $terms, string $orderby, string $order, array $taxonomy_counts ): array {
+		$sort_order = 'DESC' === strtoupper( $order ) ? -1 : 1;
+
+		usort(
+			$terms,
+			function ( $a, $b ) use ( $orderby, $sort_order, $taxonomy_counts ) {
+				switch ( $orderby ) {
+					case 'count':
+						$count_a    = $taxonomy_counts[ $a->term_id ] ?? 0;
+						$count_b    = $taxonomy_counts[ $b->term_id ] ?? 0;
+						$comparison = $count_a <=> $count_b;
+						break;
+
+					case 'name':
+					default:
+						$comparison = strcasecmp( $a->name, $b->name );
+						break;
+				}
+
+				return $comparison * $sort_order;
+			}
+		);
+
+		return $terms;
+	}
+
+	/**
+	 * Build hierarchical list in depth-first order with pre-sorted siblings.
+	 *
+	 * @param int   $parent_id        Current parent ID.
+	 * @param array &$result          Reference to result array.
+	 * @param array $terms_by_parent  Terms grouped and sorted by parent ID.
+	 */
+	private function build_hierarchical_list( int $parent_id, array &$result, array $terms_by_parent ): void {
+		if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
+			return;
 		}
 
-		// Get children in WordPress sort order
-		$child_ids = $sibling_orders[ $term_id ] ?? array();
+		foreach ( $terms_by_parent[ $parent_id ] as $term ) {
+			// Add current term
+			$result[] = $term;
 
-		// Recursively add each child and its descendants
-		foreach ( $child_ids as $child_id ) {
-			$this->add_term_and_descendants_wp_order(
-				$child_id,
-				$hierarchical_terms,
-				$terms_by_id,
-				$sibling_orders
-			);
+			// Recursively add its children
+			$this->build_hierarchical_list( $term->term_id, $result, $terms_by_parent );
 		}
 	}
 }
