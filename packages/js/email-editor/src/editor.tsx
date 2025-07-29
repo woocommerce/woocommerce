@@ -53,7 +53,7 @@ function Editor( {
 	useEffect( () => {
 		setEmailPost( postId, postType );
 		setIsInitialized( true );
-	}, [ postId, postType ] );
+	}, [ postId, postType, setEmailPost ] );
 
 	if ( ! isInitialized ) {
 		return null;
