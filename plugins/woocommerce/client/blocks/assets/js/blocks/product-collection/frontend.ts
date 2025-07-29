@@ -35,27 +35,13 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	);
 }
 
-/**
- * Scrolls the carousel by 90% of the container width.
- *
- * @param direction - The direction to scroll.
- * @returns The new scroll position.
- */
-const scrollCarousel = (
-	direction: 'left' | 'right'
+const checkIfButtonsDisabled = (
+	productTemplate: HTMLElement | null,
+	currentScroll: number
 ): {
 	isDisabledPrevious: boolean;
 	isDisabledNext: boolean;
 } => {
-	const { ref } = getElement();
-
-	const productCollection = ref?.closest(
-		'.wp-block-woocommerce-product-collection'
-	);
-	const productTemplate = productCollection?.querySelector(
-		'.wc-block-product-template'
-	);
-
 	if ( ! productTemplate ) {
 		return {
 			isDisabledPrevious: true,
@@ -64,6 +50,39 @@ const scrollCarousel = (
 	}
 
 	const SCROLL_OFFSET = 5;
+	const { scrollWidth, clientWidth } = productTemplate;
+
+	return {
+		isDisabledPrevious: currentScroll < SCROLL_OFFSET,
+		isDisabledNext:
+			currentScroll >= scrollWidth - clientWidth - SCROLL_OFFSET,
+	};
+};
+
+/**
+ * Scrolls the carousel by 90% of the container width and updates
+ * the isDisabledPrevious and isDisabledNext context values.
+ *
+ * @param direction - The direction to scroll.
+ */
+const scrollCarousel = ( direction: 'left' | 'right' ) => {
+	const context = getContext< ProductCollectionStoreContext >();
+	const { ref } = getElement();
+
+	const productCollection = ref?.closest(
+		'.wp-block-woocommerce-product-collection'
+	);
+	const productTemplate = productCollection?.querySelector(
+		'.wc-block-product-template'
+	) as HTMLElement;
+
+	if ( ! productTemplate ) {
+		return {
+			isDisabledPrevious: true,
+			isDisabledNext: true,
+		};
+	}
+
 	const productCollectionWidth = productCollection?.clientWidth;
 	// Arbitrary value to scroll the carousel by 90% of the container width.
 	const scrollBy = productCollectionWidth
@@ -75,36 +94,29 @@ const scrollCarousel = (
 		behavior: 'smooth',
 	} );
 
-	const { scrollLeft, scrollWidth, clientWidth } = productTemplate;
+	const { scrollLeft } = productTemplate;
 	// scrollBy doesn't return the final position, so we need to calculate it.
 	const finalPosition =
 		direction === 'left' ? scrollLeft - scrollBy : scrollLeft + scrollBy;
 
-	return {
-		isDisabledPrevious: finalPosition < SCROLL_OFFSET,
-		isDisabledNext:
-			finalPosition >= scrollWidth - clientWidth - SCROLL_OFFSET,
-	};
+	const { isDisabledPrevious, isDisabledNext } = checkIfButtonsDisabled(
+		productTemplate,
+		finalPosition
+	);
+
+	context.isDisabledPrevious = isDisabledPrevious;
+	context.isDisabledNext = isDisabledNext;
 };
 
 const onKeyDown = ( event: KeyboardEvent ) => {
 	if ( event.code === 'ArrowRight' ) {
 		event.preventDefault();
-		const context = getContext< ProductCollectionStoreContext >();
-		const { isDisabledPrevious, isDisabledNext } =
-			scrollCarousel( 'right' );
-
-		context.isDisabledPrevious = isDisabledPrevious;
-		context.isDisabledNext = isDisabledNext;
+		scrollCarousel( 'right' );
 	}
 
 	if ( event.code === 'ArrowLeft' ) {
 		event.preventDefault();
-		const context = getContext< ProductCollectionStoreContext >();
-		const { isDisabledPrevious, isDisabledNext } = scrollCarousel( 'left' );
-
-		context.isDisabledPrevious = isDisabledPrevious;
-		context.isDisabledNext = isDisabledNext;
+		scrollCarousel( 'left' );
 	}
 };
 
@@ -178,26 +190,27 @@ const productCollectionStore = {
 		},
 		// Next/Previous Buttons block actions
 		onClickPrevious: () => {
-			const context = getContext< ProductCollectionStoreContext >();
-			const { isDisabledPrevious, isDisabledNext } =
-				scrollCarousel( 'left' );
-
-			context.isDisabledPrevious = isDisabledPrevious;
-			context.isDisabledNext = isDisabledNext;
+			scrollCarousel( 'left' );
 		},
 		onClickNext: () => {
-			const context = getContext< ProductCollectionStoreContext >();
-			const { isDisabledPrevious, isDisabledNext } =
-				scrollCarousel( 'right' );
-
-			context.isDisabledPrevious = isDisabledPrevious;
-			context.isDisabledNext = isDisabledNext;
+			scrollCarousel( 'right' );
 		},
 		onKeyDownPrevious: ( event: KeyboardEvent ) => {
 			onKeyDown( event );
 		},
 		onKeyDownNext: ( event: KeyboardEvent ) => {
 			onKeyDown( event );
+		},
+		watchScroll: () => {
+			const context = getContext< ProductCollectionStoreContext >();
+			const { ref } = getElement();
+			if ( ref ) {
+				const { isDisabledPrevious, isDisabledNext } =
+					checkIfButtonsDisabled( ref, ref.scrollLeft );
+
+				context.isDisabledPrevious = isDisabledPrevious;
+				context.isDisabledNext = isDisabledNext;
+			}
 		},
 	},
 	callbacks: {
