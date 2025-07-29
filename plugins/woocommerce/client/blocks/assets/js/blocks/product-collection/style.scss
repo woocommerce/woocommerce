@@ -5,22 +5,24 @@
 
 	:has(.is-product-collection-layout-carousel) {
 		position: relative;
+	}
 
-		.wc-block-next-previous-buttons {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			gap: 0;
-		}
+	// If buttons are siblings to Product Template we allow for absolute positioning.
+	.is-product-collection-layout-carousel ~ .wc-block-next-previous-buttons,
+	.wc-block-next-previous-buttons:has(~ .is-product-collection-layout-carousel) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		gap: 0;
+	}
 
-		@include breakpoint("<600px") {
-			// This rule is overriding a `display: flex` from WordPress core, that's
-			// why it needs a higher specificity.
-			.wc-block-next-previous-buttons.wc-block-next-previous-buttons {
-				display: none;
-			}
+	@include breakpoint("<600px") {
+		// This rule is overriding a `display: flex` from WordPress core, that's
+		// why it needs a higher specificity.
+		.wc-block-next-previous-buttons.wc-block-next-previous-buttons {
+			display: none;
 		}
 	}
 }
