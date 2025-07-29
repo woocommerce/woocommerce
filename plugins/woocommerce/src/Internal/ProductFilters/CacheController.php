@@ -59,11 +59,11 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Clear taxonomy hierarchy cache when terms are created, updated, or deleted.
 	 *
-	 * @param int    $term_id  Term ID.
-	 * @param int    $tt_id    Term taxonomy ID.
-	 * @param string $taxonomy Taxonomy slug.
+	 * @param int    $term_id          Term ID.
+	 * @param int    $term_taxonomy_id Term taxonomy ID.
+	 * @param string $taxonomy         Taxonomy slug.
 	 */
-	public function clear_taxonomy_hierarchy_cache( $term_id, $tt_id, $taxonomy ) {
+	public function clear_taxonomy_hierarchy_cache( $term_id, $term_taxonomy_id, $taxonomy ) {
 		// Only clear cache for hierarchical taxonomies
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
