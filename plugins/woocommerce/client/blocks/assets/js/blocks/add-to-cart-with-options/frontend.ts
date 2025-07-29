@@ -6,6 +6,7 @@ import { store, getContext } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
+	ProductData,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
@@ -29,10 +30,6 @@ export type Context = {
 	tempQuantity: number;
 	groupedProductIds: number[];
 	childProductId: number;
-	quantityConstraints: Record<
-		number,
-		{ min: number; max: number | null; step: number }
-	>;
 };
 
 interface GroupedCartItem {
@@ -52,15 +49,6 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const getDefaultConstraints = (
-	productType: string,
-	childProductId?: number
-) => ( {
-	min: productType === 'grouped' && childProductId ? 0 : 1,
-	step: 1,
-	max: null,
-} );
-
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
 ) => {
@@ -77,6 +65,49 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
+const getProductData = (
+	id: number,
+	productType: string,
+	availableVariations: AvailableVariation[],
+	selectedAttributes: SelectedAttributes[]
+): ProductData & { id: number } => {
+	let productId = id;
+	let productData: ProductData | undefined;
+
+	if ( productType === 'variable' ) {
+		const matchedVariation = getMatchedVariation(
+			availableVariations,
+			selectedAttributes
+		);
+		if ( matchedVariation?.variation_id ) {
+			productId = matchedVariation.variation_id;
+			productData =
+				wooState?.products?.[ id ]?.variations?.[
+					matchedVariation?.variation_id
+				];
+		}
+	} else {
+		productData = wooState?.products?.[ productId ];
+	}
+
+	// Add default quantity constraint values.
+	const defaultMinValue = productType === 'grouped' ? 0 : 1;
+	const min =
+		typeof productData?.min === 'number'
+			? productData.min
+			: defaultMinValue;
+	const max = productData?.max || Infinity;
+	const step = productData?.step || 1;
+
+	return {
+		id: productId,
+		...productData,
+		min,
+		max,
+		step,
+	};
+};
+
 const getInputData = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
 ) => {
@@ -87,27 +118,15 @@ const getInputData = (
 	}
 
 	const parsedValue = parseInt( inputElement.value, 10 );
-	const { productType, productId, quantityConstraints } =
-		getContext< Context >();
 	const childProductId = parseInt(
 		inputElement.name.match( /\[(\d+)\]/ )?.[ 1 ] ?? '0',
 		10
 	);
-	const id = childProductId || productId;
-	const constraints =
-		quantityConstraints?.[ id ] ||
-		getDefaultConstraints( productType, childProductId );
-	const minValue = constraints.min;
-	const maxValue = constraints.max;
-	const step = constraints.step;
 
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
 		currentValue,
-		minValue,
-		maxValue,
-		step,
 		childProductId,
 		inputElement,
 	};
@@ -206,56 +225,62 @@ const addToCartWithOptionsStore = store<
 					quantity,
 					childProductId,
 					productType,
-					quantityConstraints,
 					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
-				const matchedVariation = getMatchedVariation(
+				const productObject = getProductData(
+					childProductId || productId,
+					productType,
 					availableVariations,
 					selectedAttributes
 				);
 
-				const id =
-					matchedVariation?.variation_id ||
-					childProductId ||
-					productId;
+				if ( ! productObject ) {
+					return true;
+				}
+
+				const { id, min, step } = productObject;
+
+				if ( typeof step !== 'number' || typeof min !== 'number' ) {
+					return true;
+				}
+
 				const currentQuantity = quantity[ id ] || 0;
-				const constraints =
-					quantityConstraints?.[ id ] ||
-					getDefaultConstraints( productType, childProductId );
-				const minValue = constraints.min;
-				const step = constraints.step;
-				return currentQuantity - step >= minValue;
+
+				return currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
 				const {
 					quantity,
 					childProductId,
 					productType,
-					quantityConstraints,
 					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
-				const matchedVariation = getMatchedVariation(
+				const productObject = getProductData(
+					childProductId || productId,
+					productType,
 					availableVariations,
 					selectedAttributes
 				);
 
-				const id =
-					matchedVariation?.variation_id ||
-					childProductId ||
-					productId;
+				if ( ! productObject ) {
+					return true;
+				}
+
+				const { id, max, step } = productObject;
+
+				if ( typeof step !== 'number' || typeof max !== 'number' ) {
+					return true;
+				}
+
 				const currentQuantity = quantity[ id ] || 0;
-				const constraints =
-					quantityConstraints?.[ id ] ||
-					getDefaultConstraints( productType, childProductId );
-				const maxValue = constraints.max;
-				const step = constraints.step;
-				return maxValue === null || currentQuantity + step <= maxValue;
+
+				return currentQuantity + step <= max;
 			},
 		},
 		actions: {
@@ -288,18 +313,41 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
+				const { currentValue, childProductId, inputElement } =
+					inputData;
+
 				const {
-					currentValue,
-					maxValue,
-					minValue,
-					step,
-					childProductId,
-					inputElement,
-				} = inputData;
+					productType,
+					productId,
+					availableVariations,
+					selectedAttributes,
+				} = getContext< Context >();
+
+				const productObject = getProductData(
+					childProductId || productId,
+					productType,
+					availableVariations,
+					selectedAttributes
+				);
+
+				if ( ! productObject ) {
+					return true;
+				}
+
+				const { max, min, step } = productObject;
+
+				if (
+					typeof step !== 'number' ||
+					typeof min !== 'number' ||
+					typeof max !== 'number'
+				) {
+					return true;
+				}
+
 				const newValue = currentValue + step;
 
-				if ( maxValue === null || newValue <= maxValue ) {
-					const updatedValue = Math.max( minValue, newValue );
+				if ( max === null || newValue <= max ) {
+					const updatedValue = Math.max( min, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
 						updatedValue,
 						childProductId
@@ -315,21 +363,41 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
+				const { currentValue, childProductId, inputElement } =
+					inputData;
+
 				const {
-					currentValue,
-					maxValue,
-					minValue,
-					step,
-					childProductId,
-					inputElement,
-				} = inputData;
+					productType,
+					productId,
+					availableVariations,
+					selectedAttributes,
+				} = getContext< Context >();
+
+				const productObject = getProductData(
+					childProductId || productId,
+					productType,
+					availableVariations,
+					selectedAttributes
+				);
+
+				if ( ! productObject ) {
+					return true;
+				}
+
+				const { min, max, step } = productObject;
+
+				if (
+					typeof step !== 'number' ||
+					typeof min !== 'number' ||
+					typeof max !== 'number'
+				) {
+					return true;
+				}
+
 				const newValue = currentValue - step;
 
-				if ( newValue >= minValue ) {
-					const updatedValue = Math.min(
-						maxValue ?? Infinity,
-						newValue
-					);
+				if ( newValue >= min ) {
+					const updatedValue = Math.min( max ?? Infinity, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
 						updatedValue,
 						childProductId
@@ -359,12 +427,40 @@ const addToCartWithOptionsStore = store<
 				if ( ! inputData ) {
 					return;
 				}
-				const { childProductId, maxValue, minValue, currentValue } =
-					inputData;
+				const { childProductId, currentValue } = inputData;
+
+				const {
+					productType,
+					productId,
+					availableVariations,
+					selectedAttributes,
+				} = getContext< Context >();
+
+				const id = childProductId || productId;
+				const productObject = getProductData(
+					id,
+					productType,
+					availableVariations,
+					selectedAttributes
+				);
+
+				if ( ! productObject ) {
+					return true;
+				}
+
+				const { min, max, step } = productObject;
+
+				if (
+					typeof step !== 'number' ||
+					typeof min !== 'number' ||
+					typeof max !== 'number'
+				) {
+					return true;
+				}
 
 				const newValue = Math.min(
-					maxValue ?? Infinity,
-					Math.max( minValue, currentValue )
+					max ?? Infinity,
+					Math.max( min, currentValue )
 				);
 
 				if ( event.target.value !== newValue.toString() ) {

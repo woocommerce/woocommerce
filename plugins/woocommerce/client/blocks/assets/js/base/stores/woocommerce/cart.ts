@@ -41,6 +41,9 @@ export type ProductData = {
 	sku?: string;
 	weight?: string;
 	dimensions?: string;
+	min?: number;
+	max?: number | null;
+	step?: number;
 	variations?: {
 		[ variationId: number ]: {
 			price_html?: string;
@@ -48,6 +51,9 @@ export type ProductData = {
 			sku?: string;
 			weight?: string;
 			dimensions?: string;
+			min?: number;
+			max?: number;
+			step?: number;
 		};
 	};
 };
