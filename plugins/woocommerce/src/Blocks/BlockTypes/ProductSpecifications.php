@@ -80,8 +80,8 @@ class ProductSpecifications extends AbstractBlock {
 				array(
 					'products' => array(
 						$product->get_id() => array(
-							'weight'     => $product_data['weight'],
-							'dimensions' => $product_data['dimensions'],
+							'weight'     => $product_data['weight']['value'] ?? '',
+							'dimensions' => $product_data['dimensions']['value'] ?? '',
 							'variations' => $formatted_variations_data,
 						),
 					),
