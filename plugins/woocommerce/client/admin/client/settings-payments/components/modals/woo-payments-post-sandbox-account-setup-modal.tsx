@@ -110,7 +110,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										components: {
 											link: (
 												<Link
-													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
+													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/"
 													target="_blank"
 													rel="noreferrer"
 													type="external"
