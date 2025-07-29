@@ -54,7 +54,7 @@ class WC_WCCOM_Site_Installation_Manager {
 	 * @return WC_WCCOM_Site_Installation_State
 	 * @throws Installer_Error If installation status request failed.
 	 */
-	public function get_installation_status(  ): WC_WCCOM_Site_Installation_State {
+	public function get_installation_status(): WC_WCCOM_Site_Installation_State {
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $this->product_id );
 
 		if ( ! $state ) {

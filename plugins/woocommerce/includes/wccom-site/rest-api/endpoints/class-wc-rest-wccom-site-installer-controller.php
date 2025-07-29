@@ -108,7 +108,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	 * @param WP_USER $user User object.
 	 * @return bool
 	 */
-	public function user_has_permission( $user ) : bool {
+	public function user_has_permission( $user ): bool {
 		return user_can( $user, 'install_plugins' ) && user_can( $user, 'install_themes' );
 	}
 
@@ -122,18 +122,19 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	public function get_product_install_state( $request ) {
 		$product_id = (int) $request->get_param( 'product_id' );
 		if ( $product_id <= 0 ) {
-			return rest_ensure_response( new WP_Error(
-				'missing_param',
-				'The product_id parameter is required.',
-				array( 'status' => 400 )
-			));
+			return rest_ensure_response(
+				new WP_Error(
+					'missing_param',
+					'The product_id parameter is required.',
+					array( 'status' => 400 )
+				)
+			);
 		}
 
 		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, '' );
 
-
 		try {
-			$state = $installation_manager->get_installation_status( );
+			$state = $installation_manager->get_installation_status();
 			return $this->success_response( $product_id, $state );
 		} catch ( Installer_Error $exception ) {
 			return $this->failure_response( $product_id, $exception );
@@ -192,7 +193,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	/**
 	 * Generate a standardized response for a successful request.
 	 *
-	 * @param int $product_id Product ID.
+	 * @param int                                   $product_id Product ID.
 	 * @param WC_WCCOM_Site_Installation_State|null $state
 	 * @return WP_REST_Response|WP_Error
 	 */
@@ -249,4 +250,3 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 		);
 	}
 }
-
