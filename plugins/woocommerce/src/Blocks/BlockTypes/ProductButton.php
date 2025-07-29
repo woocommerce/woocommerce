@@ -277,7 +277,7 @@ class ProductButton extends AbstractBlock {
 				'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 				'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 				'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
-				'{view_cart_html}'         => $is_ajax_button && CartCheckoutUtils::has_cart_page() ? $this->get_view_cart_html() : '',
+				'{view_cart_html}'         => $is_ajax_button && CartCheckoutUtils::has_cart_page() && ! $is_descendant_of_add_to_cart_form ? $this->get_view_cart_html() : '',
 			)
 		);
 
