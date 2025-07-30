@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
@@ -84,6 +85,12 @@ class Email_Editor_Container {
 			Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
+			}
+		);
+		$container->set(
+			Assets_Manager::class,
+			function () {
+				return new Assets_Manager();
 			}
 		);
 		$container->set(
@@ -262,7 +269,8 @@ class Email_Editor_Container {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
-					$container->get( Email_Editor_Logger::class )
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);

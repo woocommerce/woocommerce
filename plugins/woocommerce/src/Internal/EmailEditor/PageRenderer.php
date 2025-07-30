@@ -75,18 +75,6 @@ class PageRenderer {
 		// Load the email editor assets.
 		$this->load_editor_assets( $edited_item );
 
-		// Load CSS from Post Editor.
-		wp_enqueue_style( 'wp-edit-post' );
-		// Load CSS for the format library - used for example in popover.
-		wp_enqueue_style( 'wp-format-library' );
-
-		// Enqueue media library scripts.
-		wp_enqueue_media();
-
-		// Enqueue CSS containing --wp--preset variables.
-		// They are needed for usage outside of the iframed email canvas (e.g. in the styles preview).
-		wp_enqueue_global_styles_css_custom_properties();
-
 		$this->preload_rest_api_data( $post_id, $post_type );
 
 		require_once ABSPATH . 'wp-admin/admin-header.php';
