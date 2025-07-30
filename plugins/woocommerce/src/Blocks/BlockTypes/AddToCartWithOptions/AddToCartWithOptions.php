@@ -273,8 +273,8 @@ class AddToCartWithOptions extends AbstractBlock {
 						 * Filter the step quantity value allowed for the product.
 						 *
 						 * @since 10.2.0
-						 * @param int        $max_value Maximum quantity value.
-						 * @param WC_Product $product   Product object.
+						 * @param int        $step_value Step quantity value.
+						 * @param WC_Product $product     Product object.
 						 */
 						$step = apply_filters( 'woocommerce_quantity_input_step', 1, $child_product );
 
@@ -336,8 +336,8 @@ class AddToCartWithOptions extends AbstractBlock {
 				 * Filter the step quantity value allowed for the product.
 				 *
 				 * @since 10.2.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
+				 * @param int        $step_value Step quantity value.
+				 * @param WC_Product $product    Product object.
 				 */
 				$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
 
