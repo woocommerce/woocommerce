@@ -42,7 +42,7 @@ class CacheController implements RegisterHooksInterface {
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
 
-		// Clear taxonomy hierarchy cache when terms change
+		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
@@ -64,7 +64,7 @@ class CacheController implements RegisterHooksInterface {
 	 * @param string $taxonomy         Taxonomy slug.
 	 */
 	public function clear_taxonomy_hierarchy_cache( $term_id, $term_taxonomy_id, $taxonomy ) {
-		// Only clear cache for hierarchical taxonomies
+		// Only clear cache for hierarchical taxonomies.
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
 		}

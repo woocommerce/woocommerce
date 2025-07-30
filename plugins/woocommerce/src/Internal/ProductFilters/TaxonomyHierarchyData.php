@@ -42,12 +42,12 @@ class TaxonomyHierarchyData {
 			return array();
 		}
 
-		// Check in-memory cache first
+		// Check in-memory cache first.
 		if ( isset( $this->hierarchy_data[ $taxonomy ] ) ) {
 			return $this->hierarchy_data[ $taxonomy ];
 		}
 
-		// Check transient cache
+		// Check transient cache.
 		$cache_key  = self::CACHE_GROUP . '_' . $taxonomy;
 		$cached_map = null;
 
@@ -65,12 +65,12 @@ class TaxonomyHierarchyData {
 		}
 
 		if ( ! empty( $cached_map ) ) {
-			// Cache in memory and return
+			// Cache in memory and return.
 			$this->hierarchy_data[ $taxonomy ] = $cached_map;
 			return $cached_map;
 		}
 
-		// Build the map based on current strategy
+		// Build the map based on current strategy.
 		$strategy = $this->get_optimal_strategy( $taxonomy );
 		switch ( $strategy ) {
 			case 'full_map':
@@ -81,7 +81,7 @@ class TaxonomyHierarchyData {
 				break;
 		}
 
-		// Cache the map in transient and memory
+		// Cache the map in transient and memory.
 		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
 			$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
 			$transient_value   = array(
@@ -148,7 +148,7 @@ class TaxonomyHierarchyData {
 			'descendants' => array(),
 		);
 
-		// Build basic parent-child relationships
+		// Build basic parent-child relationships.
 		foreach ( $terms as $term ) {
 			$term_id   = $term->term_id;
 			$parent_id = $term->parent;
@@ -161,7 +161,7 @@ class TaxonomyHierarchyData {
 			$map['children'][ $parent_id ][] = $term_id;
 		}
 
-		// Pre-compute all descendants for each term
+		// Pre-compute all descendants for each term.
 		foreach ( array_keys( $map['parents'] ) as $term_id ) {
 			$map['descendants'][ $term_id ] = $this->compute_descendants( $term_id, $map['children'] );
 		}
@@ -252,12 +252,12 @@ class TaxonomyHierarchyData {
 	public function get_descendants( int $term_id, string $taxonomy ): array {
 		$map = $this->get_hierarchy_map( $taxonomy );
 
-		// Full map has pre-computed descendants
+		// Full map has pre-computed descendants.
 		if ( isset( $map['descendants'] ) ) {
 			return $map['descendants'][ $term_id ] ?? array();
 		}
 
-		// Adjacency map requires computation
+		// Adjacency map requires computation.
 		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
 	}
 
@@ -267,10 +267,10 @@ class TaxonomyHierarchyData {
 	 * @param string $taxonomy The taxonomy name.
 	 */
 	public function clear_cache( string $taxonomy ): void {
-		// Clear in-memory cache for this taxonomy
+		// Clear in-memory cache for this taxonomy.
 		unset( $this->hierarchy_data[ $taxonomy ] );
 
-		// Clear only the specific taxonomy's transient cache
+		// Clear only the specific taxonomy's transient cache.
 		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
 		delete_transient( $cache_key );
 	}

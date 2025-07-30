@@ -309,7 +309,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array|\WP_Error Hierarchically ordered terms or error.
 	 */
 	private function get_hierarchical_terms( string $taxonomy, array $taxonomy_counts, bool $hide_empty, string $orderby, string $order ) {
-		// For non-hierarchical taxonomies, use standard ordering
+		// For non-hierarchical taxonomies, use standard ordering.
 		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 			$args = array(
 				'taxonomy' => $taxonomy,
@@ -326,7 +326,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return get_terms( $args );
 		}
 
-		// Get all terms without specific ordering - we'll apply our own sorting
+		// Get all terms without specific ordering - we'll apply our own sorting.
 		$args = array(
 			'taxonomy'   => $taxonomy,
 			'hide_empty' => false,
@@ -343,11 +343,11 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			return $terms;
 		}
 
-		// Use TaxonomyHierarchyData for hierarchy operations
+		// Use TaxonomyHierarchyData for hierarchy operations.
 		$container      = wc_get_container();
 		$hierarchy_data = $container->get( TaxonomyHierarchyData::class );
 
-		// Group terms by parent for hierarchy building
+		// Group terms by parent for hierarchy building.
 		$terms_by_id     = array();
 		$terms_by_parent = array();
 
@@ -361,12 +361,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			$terms_by_parent[ $parent_id ][] = $term;
 		}
 
-		// Sort siblings at each hierarchy level
+		// Sort siblings at each hierarchy level.
 		foreach ( $terms_by_parent as $parent_id => $siblings ) {
 			$terms_by_parent[ $parent_id ] = $this->sort_terms_by_criteria( $siblings, $orderby, $order, $taxonomy_counts );
 		}
 
-		// Build hierarchical list with sorted siblings
+		// Build hierarchical list with sorted siblings.
 		$hierarchical_terms = array();
 		$this->build_hierarchical_list( 0, $hierarchical_terms, $terms_by_parent );
 
@@ -421,10 +421,10 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		foreach ( $terms_by_parent[ $parent_id ] as $term ) {
-			// Add current term
+			// Add current term.
 			$result[] = $term;
 
-			// Recursively add its children
+			// Recursively add its children.
 			$this->build_hierarchical_list( $term->term_id, $result, $terms_by_parent );
 		}
 	}
