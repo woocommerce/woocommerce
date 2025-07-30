@@ -328,7 +328,7 @@ const addToCartWithOptionsStore = store<
 				);
 
 				if ( ! productObject ) {
-					return true;
+					return;
 				}
 
 				const { max, min, step } = productObject;
@@ -338,7 +338,7 @@ const addToCartWithOptionsStore = store<
 					typeof min !== 'number' ||
 					typeof max !== 'number'
 				) {
-					return true;
+					return;
 				}
 
 				const newValue = currentValue + step;
@@ -377,7 +377,7 @@ const addToCartWithOptionsStore = store<
 				);
 
 				if ( ! productObject ) {
-					return true;
+					return;
 				}
 
 				const { min, max, step } = productObject;
@@ -387,7 +387,7 @@ const addToCartWithOptionsStore = store<
 					typeof min !== 'number' ||
 					typeof max !== 'number'
 				) {
-					return true;
+					return;
 				}
 
 				const newValue = currentValue - step;
@@ -439,7 +439,7 @@ const addToCartWithOptionsStore = store<
 				);
 
 				if ( ! productObject ) {
-					return true;
+					return;
 				}
 
 				const { min, max, step } = productObject;
@@ -449,7 +449,7 @@ const addToCartWithOptionsStore = store<
 					typeof min !== 'number' ||
 					typeof max !== 'number'
 				) {
-					return true;
+					return;
 				}
 
 				const newValue = Math.min(
