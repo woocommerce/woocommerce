@@ -97,4 +97,12 @@ export interface ProductResponseItem {
 	};
 	slug: string;
 	grouped_products: Array< number >;
+	price: string;
+	regular_price: string;
+	sale_price: string;
+	// Experimental fields
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__experimental_max_price?: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__experimental_min_price?: string;
 }

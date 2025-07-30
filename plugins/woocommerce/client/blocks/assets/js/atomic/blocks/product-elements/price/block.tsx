@@ -94,6 +94,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	if ( isExperimentalFlagEnabled ) {
 		prices = {
+			// The Admin API returns the price already with the decimal separator, so we need to multiply by 100.
 			price: product?.price * 100,
 			sale_price: product?.sale_price * 100,
 			regular_price: product?.regular_price * 100,
