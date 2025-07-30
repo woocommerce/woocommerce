@@ -90,21 +90,35 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		return productPriceComponent;
 	}
 
-	let prices: PriceProps = product?.prices;
+	let prices: PriceProps = product?.prices ?? {};
 
 	if ( isExperimentalFlagEnabled ) {
 		prices = {
 			// The Admin API returns the price already with the decimal separator, so we need to multiply by 100.
-			price: product?.price * 100,
-			sale_price: product?.sale_price * 100,
-			regular_price: product?.regular_price * 100,
+			price: (
+				Number.parseFloat( product?.price ?? '0' ) * 100
+			).toString(),
+			sale_price: (
+				Number.parseFloat( product?.sale_price ?? '0' ) * 100
+			).toString(),
+			regular_price: (
+				Number.parseFloat( product?.regular_price ?? '0' ) * 100
+			).toString(),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
 				product?.__experimental_max_price &&
 				product?.__experimental_min_price
 					? {
-							min_amount: product.__experimental_min_price,
-							max_amount: product.__experimental_max_price,
+							min_amount: (
+								Number.parseFloat(
+									product.__experimental_min_price ?? '0'
+								) * 100
+							).toString(),
+							max_amount: (
+								Number.parseFloat(
+									product.__experimental_max_price ?? '0'
+								) * 100
+							).toString(),
 					  }
 					: null,
 		};
