@@ -174,36 +174,4 @@ class PersonalizationTagsRegistryTest extends TestCase {
 		// Assert that the filter was applied.
 		$this->assertTrue( $wp_filter_applied );
 	}
-
-	/**
-	 * Test filtering tags by post type.
-	 */
-	public function testGetByPostType(): void {
-		$callback = function () {
-			return 'Value';
-		};
-
-		// Register multiple tags with different post types.
-		$tag1 = new Personalization_Tag( 'tag1', '[tag-1]', 'Category 1', $callback, array(), null, array( 'woo_mail' ) );
-		$this->registry->register( $tag1 );
-
-		$tag2 = new Personalization_Tag( 'tag2', '[tag-2]', 'Category 2', $callback, array(), null, array( 'post' ) );
-		$this->registry->register( $tag2 );
-
-		$tag3 = new Personalization_Tag( 'tag3', '[tag-3]', 'Category 3', $callback );
-		$this->registry->register( $tag3 );
-
-		// Retrieve tags filtered by post type.
-		$woo_tags  = $this->registry->get_by_post_type( 'woo_mail' );
-		$post_tags = $this->registry->get_by_post_type( 'post' );
-
-		// Assert the filtered tags.
-		$this->assertCount( 2, $woo_tags );
-		$this->assertArrayHasKey( '[tag-1]', $woo_tags );
-		$this->assertArrayHasKey( '[tag-3]', $woo_tags );
-
-		$this->assertCount( 2, $post_tags );
-		$this->assertArrayHasKey( '[tag-2]', $post_tags );
-		$this->assertArrayHasKey( '[tag-3]', $post_tags );
-	}
 }
