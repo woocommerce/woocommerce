@@ -178,16 +178,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		style,
 		width,
 		isAdmin,
-		product,
+		product: productEntity,
 		isResolving,
 		...restProps
 	} = props;
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product: productFromContext, isLoading } = useProductDataContext( {
+	const { product, isLoading } = useProductDataContext( {
 		isAdmin,
-		product,
+		product: productEntity,
 		isResolving,
 	} );
 	const { dispatchStoreEvent } = useStoreEvents();
@@ -203,7 +203,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
 	}`;
 
-	if ( ! productFromContext?.id ) {
+	if ( ! product?.id ) {
 		const imageStyles = buildStyles( {
 			height,
 			width,
@@ -236,24 +236,24 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image = chooseImage( productFromContext, imageId );
+	const image = chooseImage( product, imageId );
 
 	if ( image ) {
-		image.alt = image.alt || decodeEntities( productFromContext.name );
+		image.alt = image.alt || decodeEntities( product.name );
 	}
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
-	const anchorLabel = productFromContext?.name
+	const anchorLabel = product?.name
 		? // translators: %s is the product name.
-		  sprintf( __( 'Link to %s', 'woocommerce' ), productFromContext.name )
+		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
 		: '';
 	const anchorProps = {
-		href: showProductLink ? productFromContext?.permalink : undefined,
+		href: showProductLink ? product?.permalink : undefined,
 		...( showProductLink && {
 			'aria-label': anchorLabel,
 			onClick: () => {
 				dispatchStoreEvent( 'product-view-link', {
-					product: productFromContext,
+					product,
 				} );
 			},
 		} ),
@@ -283,9 +283,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				) }
 				<ParentComponent { ...( showProductLink && anchorProps ) }>
 					<Image
-						fallbackAlt={ decodeEntities(
-							productFromContext.name
-						) }
+						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
 						loaded={ ! isLoading }
 						showFullSize={ showFullSize }
