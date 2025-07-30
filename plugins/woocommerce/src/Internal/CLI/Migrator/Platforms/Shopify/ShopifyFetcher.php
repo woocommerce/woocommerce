@@ -214,6 +214,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		return array(
 			'items'         => $items,
 			'cursor'        => $last_cursor,
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL response property
 			'has_next_page' => $page_info ? $page_info->hasNextPage : false,
 		);
 	}
