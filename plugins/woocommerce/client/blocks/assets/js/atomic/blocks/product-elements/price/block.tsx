@@ -41,6 +41,24 @@ interface PriceProps {
 	price_range: null | { min_amount: string; max_amount: string };
 }
 
+/**
+ * Converts a price string from the Admin API format to the Store API format.
+ *
+ * The Admin API returns prices as decimal numbers (e.g., "12.99"), while the Store API
+ * expects prices as integers representing the smallest currency unit (e.g., "1299" for $12.99).
+ * This function multiplies the price by 100 to convert from decimal to minor units.
+ *
+ * @param priceString The price as a string from the Admin API (e.g., "12.99")
+ * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
+ * @return The price converted to minor units as a string (e.g., "1299")
+ */
+const convertAdminPriceToStoreApiFormat = (
+	priceString: string | null | undefined,
+	fallback = '0'
+) => {
+	return ( Number.parseFloat( priceString ?? fallback ) * 100 ).toString();
+};
+
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		className,
@@ -94,31 +112,24 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	if ( areExperimentalFlagsEnabled ) {
 		prices = {
-			// The Admin API returns the price already with the decimal separator, so we need to multiply by 100.
-			price: (
-				Number.parseFloat( product?.price ?? '0' ) * 100
-			).toString(),
-			sale_price: (
-				Number.parseFloat( product?.sale_price ?? '0' ) * 100
-			).toString(),
-			regular_price: (
-				Number.parseFloat( product?.regular_price ?? '0' ) * 100
-			).toString(),
+			price: convertAdminPriceToStoreApiFormat( product?.price ),
+			sale_price: convertAdminPriceToStoreApiFormat(
+				product?.sale_price
+			),
+			regular_price: convertAdminPriceToStoreApiFormat(
+				product?.regular_price
+			),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
 				product?.__experimental_max_price &&
 				product?.__experimental_min_price
 					? {
-							min_amount: (
-								Number.parseFloat(
-									product.__experimental_min_price ?? '0'
-								) * 100
-							).toString(),
-							max_amount: (
-								Number.parseFloat(
-									product.__experimental_max_price ?? '0'
-								) * 100
-							).toString(),
+							min_amount: convertAdminPriceToStoreApiFormat(
+								product.__experimental_min_price
+							),
+							max_amount: convertAdminPriceToStoreApiFormat(
+								product.__experimental_max_price
+							),
 					  }
 					: null,
 		};
