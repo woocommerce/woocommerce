@@ -8,19 +8,17 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
+import {
+	isExperimentalBlocksEnabled,
+	isExperimentalWcRestApiEnabled,
+} from '@woocommerce/block-settings';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
-import { useProduct } from '@woocommerce/entities';
-import {
-	isExperimentalAPIFlagEnabled,
-	isExperimentalBlocksEnabled,
-	isExperimentalFlagEnabled,
-	isExperimentalWcRestApiEnabled,
-} from '@woocommerce/block-settings';
 
 type UnsupportedAligments = 'wide' | 'full';
 type AllowedAlignments = Exclude< BlockAlignment, UnsupportedAligments >;
