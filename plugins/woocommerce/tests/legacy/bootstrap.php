@@ -223,6 +223,9 @@ class WC_Unit_Tests_Bootstrap {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
+		// Handle Back-in-Stock Notifications alpha feature flag.
+		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
 	}
@@ -241,6 +244,8 @@ class WC_Unit_Tests_Bootstrap {
 		if ( ! getenv( 'HPOS' ) ) {
 			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
 		}
+
+
 
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
