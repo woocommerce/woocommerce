@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getConfig, getContext } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -27,9 +27,16 @@ export type Context = {
 	selectedAttributes: SelectedAttributes[];
 	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
+	validationErrors: AddToCartError[];
 	tempQuantity: number;
 	groupedProductIds: number[];
 	childProductId: number;
+};
+
+export type AddToCartError = {
+	code: string;
+	group: string;
+	message: string;
 };
 
 interface GroupedCartItem {
@@ -169,9 +176,14 @@ export type AddToCartWithOptionsStore = {
 		isFormValid: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
+		noticeIds: string[];
+		validationErrors: AddToCartError[];
 	};
 	actions: {
 		setQuantity: ( value: number ) => void;
+		addError: ( error: AddToCartError ) => string;
+		clearErrors: ( group?: string ) => void;
+		removeError: ( code: string ) => void;
 		increaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
@@ -191,14 +203,27 @@ export type AddToCartWithOptionsStore = {
 	};
 };
 
-const addToCartWithOptionsStore = store<
+const { actions, state } = store<
 	AddToCartWithOptionsStore &
 		Partial< VariableProductAddToCartWithOptionsStore >
 >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
+			noticeIds: [],
+			get validationErrors(): Array< AddToCartError > {
+
+				const context = getContext< Context >();
+
+				if ( context && context.validationErrors ) {
+					return context.validationErrors;
+				}
+
+				return [];
+			},
+
 			get isFormValid(): boolean {
+	
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return true;
@@ -206,18 +231,12 @@ const addToCartWithOptionsStore = store<
 
 				const { productType, quantity } = context;
 
-				if ( productType === 'variable' ) {
-					return (
-						addToCartWithOptionsStore?.state
-							?.isVariableProductFormValid ?? true
-					);
-				}
-
 				if ( productType === 'grouped' ) {
 					return Object.values( quantity ).some( ( qty ) => qty > 0 );
 				}
 
-				return true;
+				return state.validationErrors.length === 0;
+				
 			},
 			get allowsDecrease() {
 				const {
@@ -305,6 +324,42 @@ const addToCartWithOptionsStore = store<
 					};
 				}
 			},
+			addError: ( error: AddToCartError ): string => {
+				const { validationErrors } = state;
+
+				// Prevent adding an extra error with the same message.
+				const existingError = validationErrors.find(
+					( n ) => n.code === error.code
+				);
+
+				if ( ! existingError ) {
+					validationErrors.push( error);
+				}
+
+				return error.code;
+			},
+			removeError: ( code: string ): void => {
+				const { validationErrors } = state;
+
+				const index = validationErrors.findIndex(
+					( error ) => error.code === code
+				);
+
+				if ( index !== -1 ) {
+					validationErrors.splice( index, 1 );
+				}
+			},
+			clearErrors: ( group?: string ): void => {
+				const { validationErrors } = state;
+
+				if ( group ) {
+					const remaining = validationErrors.filter( ( error ) => error.group !== group );
+					validationErrors.splice( 0, validationErrors.length, ...remaining );
+				} else {
+					// Clear all.
+					validationErrors.length = 0;
+				}
+			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
@@ -347,9 +402,7 @@ const addToCartWithOptionsStore = store<
 
 				if ( newValue <= max ) {
 					const updatedValue = Math.max( min, newValue );
-					addToCartWithOptionsStore.actions.setQuantity(
-						updatedValue
-					);
+					actions.setQuantity( updatedValue );
 					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
@@ -396,9 +449,7 @@ const addToCartWithOptionsStore = store<
 
 				if ( newValue >= min ) {
 					const updatedValue = Math.min( max ?? Infinity, newValue );
-					addToCartWithOptionsStore.actions.setQuantity(
-						updatedValue
-					);
+					actions.setQuantity( updatedValue );
 					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
@@ -412,7 +463,8 @@ const addToCartWithOptionsStore = store<
 				}
 				const { currentValue } = inputData;
 
-				addToCartWithOptionsStore.actions.setQuantity( currentValue );
+				actions.setQuantity( currentValue );
+
 			},
 			handleQuantityChange: (
 				event: HTMLElementEvent< HTMLInputElement >
@@ -460,7 +512,7 @@ const addToCartWithOptionsStore = store<
 				);
 
 				if ( event.target.value !== newValue.toString() ) {
-					addToCartWithOptionsStore.actions.setQuantity( newValue );
+					actions.setQuantity( newValue );
 					event.target.value = newValue.toString();
 					dispatchChangeEvent( event.target );
 				}
@@ -474,12 +526,51 @@ const addToCartWithOptionsStore = store<
 				}
 				const { inputElement } = inputData;
 
-				addToCartWithOptionsStore.actions.setQuantity(
+				actions.setQuantity(
 					inputElement.checked ? 1 : 0
 				);
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();
+
+				const { isFormValid } = state;
+
+				if ( ! isFormValid ) {
+
+					// Dynamically import the store module first
+					yield import( '@woocommerce/stores/store-notices' );
+
+					const { actions: noticeActions } =
+						store< StoreNotices >(
+							'woocommerce/store-notices',
+							{},
+							{
+								lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+							}
+						);
+
+					const { noticeIds, validationErrors } = state;
+
+					// Clear previous notices.
+					noticeIds.forEach( ( id ) => {
+						noticeActions.removeNotice( id );
+					});
+					noticeIds.splice( 0, noticeIds.length );
+
+					// Add new notices and track their IDs.
+					const newNoticeIds = validationErrors.map( ( error ) =>
+						noticeActions.addNotice( {
+							notice: error.message,
+							type: 'error',
+							dismissible: true,
+						} )
+					);
+
+					// Store the new IDs in-place.
+					noticeIds.push( ...newNoticeIds );
+
+					return;
+				}
 
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
@@ -530,9 +621,9 @@ const addToCartWithOptionsStore = store<
 								}
 							);
 
-						const errorMessage =
-							wooState?.errorMessages
-								?.groupedProductAddToCartMissingItems;
+						const { errorMessages } = getConfig();
+
+						const errorMessage = errorMessages?.groupedProductAddToCartMissingItems;
 
 						if ( errorMessage ) {
 							noticeActions.addNotice( {
@@ -553,8 +644,7 @@ const addToCartWithOptionsStore = store<
 
 					yield actions.batchAddCartItems( addedItems );
 				} else {
-					const { isFormValid, variationId } =
-						addToCartWithOptionsStore.state;
+					const { isFormValid, variationId } = state;
 					const id = variationId || productId;
 					const newQuantity = getNewQuantity(
 						id,

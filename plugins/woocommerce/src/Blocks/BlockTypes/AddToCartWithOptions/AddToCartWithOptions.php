@@ -195,28 +195,36 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
-			wp_interactivity_state(
-				'woocommerce',
+			wp_interactivity_config(
+				'woocommerce/add-to-cart-with-options',
 				array(
 					// Use camelCase for error messages generated from the frontend,
 					// and snake_case for error messages generated from the backend.
 					'errorMessages' => array(
-						'groupedProductAddToCartMissingItems' => __(
+						'groupedProductAddToCartMissingItems' => esc_html__(
 							'Please select some products to add to the cart.',
 							'woocommerce'
 						),
-						'woocommerce_rest_missing_attributes' => __(
+						'variableProductMissingAttributes' => esc_html__(
 							'Please select product attributes before adding to cart.',
 							'woocommerce'
+						),
+						'variableProductOutOfStock' => sprintf(
+							esc_html__(
+								'You cannot add &quot;%s&quot; to the cart because the product is out of stock.',
+								'woocommerce'
+							),
+							$product->get_name()
 						),
 					),
 				)
 			);
 
-			$context = array(
-				'productId'   => $product->get_id(),
-				'productType' => $product->get_type(),
-				'quantity'    => array( $product->get_id() => $default_quantity ),
+			$context = array(			
+				'productId'        => $product->get_id(),
+				'productType'      => $product->get_type(),
+				'quantity'         => array( $product->get_id() => $default_quantity ),
+				'validationErrors' => array(),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
