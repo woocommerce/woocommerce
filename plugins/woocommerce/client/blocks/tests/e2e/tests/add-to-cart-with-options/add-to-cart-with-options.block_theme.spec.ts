@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -257,5 +257,30 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await page.getByLabel( 'Logo', { exact: true } ).selectOption( 'Yes' );
 
 		await expect( colorGreenOption ).toBeDisabled();
+	} );
+
+	test( "allows adding products to cart when the 'Enable AJAX add to cart buttons' setting is disabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		// Set `woocommerce_enable_ajax_add_to_cart` setting to "no".
+		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/t-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 } );
