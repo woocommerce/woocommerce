@@ -72,9 +72,12 @@ export const renderBlock = <
 		const isCheckoutBlock = container.classList.contains(
 			'wp-block-woocommerce-checkout'
 		);
+		const isCartBlock = container.classList.contains(
+			'wp-block-woocommerce-cart'
+		);
 
-		// Temporary return until the Cart block is also updated
-		if ( isCheckoutBlock ) {
+		// These blocks have progressive loading enabled
+		if ( isCheckoutBlock || isCartBlock ) {
 			return (
 				<BlockErrorBoundary { ...errorBoundaryProps }>
 					<Block { ...props } attributes={ attributes } />

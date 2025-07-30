@@ -4,6 +4,7 @@
 import { createBlock, getBlockTypes } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 import { dispatch, select, useDispatch } from '@wordpress/data';
+import { getInnerBlockByName } from '@woocommerce/utils';
 import {
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -13,30 +14,32 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
 
-/**
- * Internal dependencies
- */
-import { getInnerBlockByName } from '../../utils/get-inner-block-by-name';
-
 export const DisplayStyleSwitcher = ( {
 	clientId,
 	currentStyle,
 	onChange,
-	parentBlockName,
 }: {
 	clientId: string;
 	currentStyle: string;
-	onChange: ( value: string | number | undefined ) => void;
-	parentBlockName: string;
+	onChange: ( value: string ) => void;
 } ) => {
-	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
-		blockType.ancestor?.includes( parentBlockName )
-	);
+	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
+	const parentBlockName = filterBlock?.name;
+
+	const displayStyleOptions = getBlockTypes().filter( ( blockType ) => {
+		if ( parentBlockName ) {
+			return blockType.ancestor?.includes( parentBlockName );
+		}
+		return [];
+	} );
 
 	const { insertBlock, replaceBlock } = useDispatch( 'core/block-editor' );
 
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, unknown > >( {} );
+
+	if ( displayStyleOptions.length === 0 ) return null;
+
 	return (
 		<ToggleGroupControl
 			value={ currentStyle }
@@ -47,8 +50,6 @@ export const DisplayStyleSwitcher = ( {
 			hideLabelFromVision
 			onChange={ ( value: string | number | undefined ) => {
 				if ( ! value || typeof value !== 'string' ) return;
-				const filterBlock =
-					select( 'core/block-editor' ).getBlock( clientId );
 				if ( ! filterBlock ) return;
 				const currentStyleBlock = getInnerBlockByName(
 					filterBlock,
@@ -92,12 +93,12 @@ export const DisplayStyleSwitcher = ( {
 
 export function resetDisplayStyleBlock(
 	clientId: string,
-	defaultStyle: string,
-	parentBlockName: string
+	defaultStyle: string
 ) {
 	const filterBlock = select( 'core/block-editor' ).getBlock( clientId );
 	if ( ! filterBlock ) return;
 
+	const parentBlockName = filterBlock.name;
 	const displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
 		blockType.ancestor?.includes( parentBlockName )
 	);

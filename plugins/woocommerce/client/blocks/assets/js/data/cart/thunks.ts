@@ -160,6 +160,33 @@ export const syncCartWithIAPIStore =
 	}: QuantityChanges ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
+			// Dispatch pending state actions to show loading indicators
+			// before fetching the updated cart data
+
+			// Set pending add states for new products
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, true );
+				} );
+			}
+
+			// Set pending quantity states for items being updated
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, true );
+				} );
+			}
+
+			// Set pending delete states for items being removed
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, true );
+				} );
+			}
+
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -180,6 +207,28 @@ export const syncCartWithIAPIStore =
 			dispatch.setCartData( cartResponse );
 			setTriggerStoreSyncEvent( true );
 
+			// Clear pending states after updating cart data
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, false );
+				} );
+			}
+
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, false );
+				} );
+			}
+
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, false );
+				} );
+			}
+
 			// Get the new cart data before showing updates.
 			const newCart = select.getCartData();
 
@@ -194,6 +243,28 @@ export const syncCartWithIAPIStore =
 			updateCartErrorNotices( newCart.errors, oldCartErrors );
 			dispatch.setErrorData( null );
 		} catch ( error ) {
+			// Clear pending states on error as well
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, false );
+				} );
+			}
+
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, false );
+				} );
+			}
+
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, false );
+				} );
+			}
+
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		}

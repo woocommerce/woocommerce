@@ -8,7 +8,10 @@ import {
 	hasSelectedShippingRate,
 	getSelectedShippingRateNames,
 } from '@woocommerce/base-utils';
-import { useStoreCart } from '@woocommerce/base-context';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -28,7 +31,8 @@ export const TotalsShipping = ( {
 	placeholder = null,
 	collaterals = null,
 }: TotalShippingProps ): JSX.Element | null => {
-	const { cartTotals, cartIsLoading, shippingRates } = useStoreCart();
+	const { cartTotals, shippingRates } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState();
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const hasMultipleRates = rateNames.length > 1;
@@ -55,7 +59,7 @@ export const TotalsShipping = ( {
 					</>
 				}
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
-				showSkeleton={ cartIsLoading }
+				showSkeleton={ isLoading }
 			/>
 		</div>
 	);

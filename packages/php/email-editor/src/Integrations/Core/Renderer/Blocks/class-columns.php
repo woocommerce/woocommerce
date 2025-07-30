@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
-use WP_Style_Engine;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Renders a columns block.
@@ -57,27 +57,20 @@ class Columns extends Abstract_Block_Renderer {
 			)
 		);
 
-		$columns_styles = $this->get_styles_from_block(
+		$columns_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding', 'border', 'background', 'background-color', 'color' ) );
+		$columns_styles = Styles_Helper::extend_block_styles(
+			$columns_styles,
 			array(
-				'spacing'    => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ),
-				'color'      => $block_attributes['style']['color'] ?? array(),
-				'background' => $block_attributes['style']['background'] ?? array(),
+				'width'           => '100%',
+				'border-collapse' => 'separate',
+				'text-align'      => 'left',
+				'background-size' => $columns_styles['declarations']['background-size'] ?? 'cover',
 			)
-		)['declarations'];
-
-		$border_styles = $this->get_styles_from_block( array( 'border' => $block_attributes['style']['border'] ?? array() ) )['declarations'];
-
-		if ( ! empty( $border_styles ) ) {
-			$columns_styles = array_merge( $columns_styles, array( 'border-style' => 'solid' ), $border_styles );
-		}
-
-		if ( empty( $columns_styles['background-size'] ) ) {
-			$columns_styles['background-size'] = 'cover';
-		}
+		);
 
 		$columns_table_attrs = array(
 			'class' => 'email-block-columns ' . $original_wrapper_classname,
-			'style' => 'width:100%;border-collapse:separate;text-align:left;' . WP_Style_Engine::compile_css( $columns_styles, '' ),
+			'style' => $columns_styles['css'],
 			'align' => 'center',
 		);
 
@@ -87,21 +80,24 @@ class Columns extends Abstract_Block_Renderer {
 		$margins = $block_attributes['style']['spacing']['margin'] ?? array();
 
 		if ( ! empty( $margins ) ) {
-			$margin_to_padding_styles = $this->get_styles_from_block(
+			$magin_to_padding_attributes = array( 'style' => array( 'spacing' => array( 'padding' => $margins ) ) );
+			$margin_wrapper_styles       = Styles_Helper::get_block_styles( $magin_to_padding_attributes, $rendering_context, array( 'padding' ) );
+			$margin_wrapper_styles       = Styles_Helper::extend_block_styles(
+				$margin_wrapper_styles,
 				array(
-					'spacing' => array( 'margin' => $margins ),
+					'width'           => '100%',
+					'border-collapse' => 'separate',
+					'text-align'      => 'left',
 				)
-			)['css'];
+			);
 
 			$wrapper_table_attrs = array(
 				'class' => 'email-block-columns-wrapper',
-				'style' => 'width:100%;border-collapse:separate;text-align:left;' . $margin_to_padding_styles,
+				'style' => $margin_wrapper_styles['css'],
 				'align' => 'center',
 			);
 
-			$wrapper_cell_attrs = array();
-
-			return Table_Wrapper_Helper::render_table_wrapper( $columns_content, $wrapper_table_attrs, $wrapper_cell_attrs );
+			return Table_Wrapper_Helper::render_table_wrapper( $columns_content, $wrapper_table_attrs );
 		}
 
 		return $columns_content;

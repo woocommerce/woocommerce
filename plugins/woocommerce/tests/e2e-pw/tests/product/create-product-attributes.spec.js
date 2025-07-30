@@ -175,6 +175,15 @@ test( 'can add custom product attributes', async ( { page, product } ) => {
 		).toBeVisible();
 	} );
 
+	// There is the chance we might click on the 'Attributes' tab too early. To
+	// prevent that, we wait until the 'Variations' tab is hidden, which means
+	// the tabs have been updated.
+	await expect(
+		page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Variations' } )
+	).toBeHidden();
+
 	await goToAttributesTab( page );
 
 	for ( let j = 0; j < productAttributes.length; j++ ) {

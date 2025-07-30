@@ -147,7 +147,13 @@
 			],
 			"@wordpress/interactivity-router": [
 				"node_modules/@wordpress/interactivity-router/src/index.ts"
-			]
+			],
+			"@woocommerce/test-utils/msw": [
+				"tests/js/config/msw-setup"
+			],
+			"@woocommerce/entities": [
+				"assets/js/entities"
+			],
 		}
 	}
 }

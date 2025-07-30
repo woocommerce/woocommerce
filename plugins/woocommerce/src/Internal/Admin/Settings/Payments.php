@@ -60,26 +60,32 @@ class Payments {
 	 *
 	 * @param string $location    The location for which the providers are being determined.
 	 *                            This is an ISO 3166-1 alpha-2 country code.
-	 * @param bool   $for_display Whether the payment providers list is intended for display purposes or
+	 * @param bool   $for_display Optional. Whether the payment providers list is intended for display purposes or
 	 *                            it is meant to be used for internal business logic.
 	 *                            Primarily, this means that when it is not for display, we will use the raw
 	 *                            payment gateways list (all the registered gateways), not just the ones that
 	 *                            should be shown to the user on the Payments Settings page.
 	 *                            This complication is for backward compatibility as it relates to legacy settings hooks
 	 *                            being fired or not.
+	 * @param bool   $remove_shells Optional. Whether to remove the payment providers shells from the list.
+	 *                              If the $for_display is true, this will be ignored since the display logic will
+	 *                              handle the shells itself.
 	 *
 	 * @return array The payment providers details list.
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
-	public function get_payment_providers( string $location, bool $for_display = true ): array {
+	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
-		$suggestions      = array();
+		if ( ! $for_display && $remove_shells ) {
+			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways );
+		}
 
 		$providers_order_map = $this->providers->get_order_map();
 
 		$payment_providers = array();
 
 		// Only include suggestions if the requesting user can install plugins.
+		$suggestions = array();
 		if ( current_user_can( 'install_plugins' ) ) {
 			$suggestions = $this->providers->get_extension_suggestions( $location, self::SUGGESTIONS_CONTEXT );
 		}

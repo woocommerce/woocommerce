@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Exception;
 use WC_Payment_Gateway;
@@ -233,44 +234,8 @@ class PaymentsProviders {
 			// Handle edge-cases for certain providers.
 			$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
-			// Remove "shell" gateways that are not intended for display.
-			// We consider a gateway to be a "shell" if it has no WC admin title or description.
-			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
-			$payment_gateways         = array_filter(
-				$payment_gateways,
-				function ( $gateway ) use ( $grouped_payment_gateways ) {
-					// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
-					// This is to avoid removing all the gateways registered by an extension and
-					// preventing user access to the settings page(s) for that extension.
-					if ( $this->is_shell_payment_gateway( $gateway ) ) {
-						$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
-						// In case we don't have the needed extension details,
-						// we allow the gateway to be displayed (aka better safe than sorry).
-						if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
-							return true;
-						}
-
-						if ( empty( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) ||
-							count( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) <= 1 ) {
-							// If there are no other gateways from the same extension, we let the shell gateway be displayed.
-							return true;
-						}
-
-						// Check if there are any other gateways from the same extension that are NOT shells.
-						foreach ( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] as $extension_gateway ) {
-							if ( ! $this->is_shell_payment_gateway( $extension_gateway ) ) {
-								// If we found a gateway from the same extension that is not a shell,
-								// we hide all shells from that extension.
-								return false;
-							}
-						}
-					}
-
-					// By this point, we know that the gateway is not a shell or that it is a shell
-					// but there are no non-shell gateways from the same extension. Include it.
-					return true;
-				}
-			);
+			// Remove "shell" gateways from the list.
+			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways );
 
 			// Store the entire payment gateways list for display for later use.
 			$this->payment_gateways_for_display_memo = $payment_gateways;
@@ -293,6 +258,56 @@ class PaymentsProviders {
 		$this->payment_gateways_memo = $payment_gateways;
 
 		return $payment_gateways;
+	}
+
+	/**
+	 * Remove "shell" gateways from the provided payment gateways list.
+	 *
+	 * We consider a gateway to be a "shell" if it has no WC admin title or description.
+	 * The removal is done in a way that ensures we do not remove all gateways from an extension,
+	 * thus preventing user access to the settings page(s) for that extension.
+	 *
+	 * @param array $payment_gateways The payment gateways list to process.
+	 *
+	 * @return array The processed payment gateways list.
+	 */
+	public function remove_shell_payment_gateways( array $payment_gateways ): array {
+		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
+		return array_filter(
+			$payment_gateways,
+			function ( $gateway ) use ( $grouped_payment_gateways ) {
+				// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
+				// This is to avoid removing all the gateways registered by an extension and
+				// preventing user access to the settings page(s) for that extension.
+				if ( $this->is_shell_payment_gateway( $gateway ) ) {
+					$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+					// In case we don't have the needed extension details,
+					// we allow the gateway to be displayed (aka better safe than sorry).
+					if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
+						return true;
+					}
+
+					if ( empty( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) ||
+						count( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] ) <= 1 ) {
+						// If there are no other gateways from the same extension, we let the shell gateway be displayed.
+						return true;
+					}
+
+					// Check if there are any other gateways from the same extension that are NOT shells.
+					foreach ( $grouped_payment_gateways[ $gateway_details['plugin']['file'] ] as $extension_gateway ) {
+						if ( ! $this->is_shell_payment_gateway( $extension_gateway ) ) {
+							// If we found a gateway from the same extension that is not a shell,
+							// we hide all shells from that extension.
+							return false;
+						}
+					}
+				}
+
+				// By this point, we know that the gateway is not a shell or that it is a shell
+				// but there are no non-shell gateways from the same extension. Include it.
+				return true;
+			}
+		);
 	}
 
 	/**
@@ -474,7 +489,7 @@ class PaymentsProviders {
 	/**
 	 * Check if a payment gateway is a shell payment gateway.
 	 *
-	 * A shell payment gateway is one that has no method title or description.
+	 * A shell payment gateway is generally one that has no method title or description.
 	 * This is used to identify gateways that are not intended for display in the admin UI.
 	 *
 	 * @param WC_Payment_Gateway $gateway The payment gateway object.
@@ -482,7 +497,10 @@ class PaymentsProviders {
 	 * @return bool True if the payment gateway is a shell, false otherwise.
 	 */
 	public function is_shell_payment_gateway( WC_Payment_Gateway $gateway ): bool {
-		return empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() );
+		return ( empty( $gateway->get_method_title() ) && empty( $gateway->get_method_description() ) ) ||
+			// Special case for WooPayments gateways that are not the main one: their method title is "WooPayments",
+			// but their ID is made up of the main gateway ID and a suffix for the payment method.
+			( 'WooPayments' === $gateway->get_method_title() && str_starts_with( $gateway->id, WooPaymentsService::GATEWAY_ID . '_' ) );
 	}
 
 	/**

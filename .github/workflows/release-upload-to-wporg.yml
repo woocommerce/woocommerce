@@ -6,8 +6,16 @@ on:
         description: 'Release tag to upload (can be a draft release).'
         required: true
         default: ''
+      confirm-update:
+        description: 'I confirm that I want to upload a release to WordPress.org.'
+        type: boolean
+        required: true
+        default: false
 
 permissions: {}
+
+concurrency:
+  group: release-wporg-svn
 
 jobs:
   get-and-validate-release-asset:
@@ -20,6 +28,12 @@ jobs:
       release_asset: ${{ steps.fetch-release.outputs.release_asset }}
       overwrite_trunk: ${{ steps.check-asset.outputs.overwrite_trunk }}
     steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
+            echo "::error::You must check the confirmation checkbox to proceed."
+            exit 1
+          fi
       - name: Fetch release
         id: fetch-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1

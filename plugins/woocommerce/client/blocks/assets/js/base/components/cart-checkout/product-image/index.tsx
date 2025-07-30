@@ -7,6 +7,8 @@ import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 interface ProductImageProps {
 	image: { alt?: string; thumbnail?: string };
 	fallbackAlt: string;
+	width?: number;
+	height?: number;
 }
 /**
  * Formats and returns an image element.
@@ -18,6 +20,8 @@ interface ProductImageProps {
 const ProductImage = ( {
 	image = {},
 	fallbackAlt = '',
+	width,
+	height,
 }: ProductImageProps ): JSX.Element => {
 	const imageProps = image.thumbnail
 		? {
@@ -32,7 +36,14 @@ const ProductImage = ( {
 				alt: '',
 		  };
 
-	return <img { ...imageProps } alt={ imageProps.alt } />;
+	return (
+		<img
+			src={ imageProps.src }
+			alt={ imageProps.alt }
+			width={ width }
+			height={ height }
+		/>
+	);
 };
 
 export default ProductImage;

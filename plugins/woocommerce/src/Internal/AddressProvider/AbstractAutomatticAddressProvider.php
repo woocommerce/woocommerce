@@ -56,13 +56,13 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	public function load_jwt() {
 
 		// If we already have a loaded, valid token, we return early.
-		if ( $this->jwt && JsonWebToken::shallow_validate( $this->jwt ) ) {
+		if ( $this->jwt && is_string( $this->jwt ) && JsonWebToken::shallow_validate( $this->jwt ) ) {
 			return;
 		}
 
 		$cached_jwt = $this->get_cached_option( 'address_autocomplete_jwt' );
 		// If we have a cached, valid token, we load it to class and return early.
-		if ( $cached_jwt && JsonWebToken::shallow_validate( $cached_jwt ) ) {
+		if ( $cached_jwt && is_string( $cached_jwt ) && JsonWebToken::shallow_validate( $cached_jwt ) ) {
 			$this->jwt = $cached_jwt;
 			return;
 		}
@@ -75,7 +75,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 
 		try {
 			$fresh_jwt = $this->get_address_service_jwt();
-			if ( $fresh_jwt && JsonWebToken::shallow_validate( $fresh_jwt ) ) {
+			if ( $fresh_jwt && is_string( $fresh_jwt ) && JsonWebToken::shallow_validate( $fresh_jwt ) ) {
 				$this->set_jwt( $fresh_jwt );
 				// Clear retry data on success.
 				$this->delete_cached_option( 'jwt_retry_data' );

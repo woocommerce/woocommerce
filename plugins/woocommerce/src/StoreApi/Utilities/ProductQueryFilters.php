@@ -213,4 +213,39 @@ class ProductQueryFilters {
 
 		return array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
 	}
+
+	/**
+	 * Get taxonomy counts for the current products.
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 * @param array            $taxonomies Taxonomies to count.
+	 * @return array termId=>count pairs.
+	 */
+	public function get_taxonomy_counts( $request, $taxonomies = [] ) {
+		// Remove paging and sorting params from the request.
+		$request->set_param( 'page', null );
+		$request->set_param( 'per_page', null );
+		$request->set_param( 'order', null );
+		$request->set_param( 'orderby', null );
+
+		// Convert request to query_vars for FilterData.
+		$product_query = new ProductQuery();
+		$query_vars    = $product_query->prepare_objects_query( $request );
+
+		// Use FilterData with ProductQuery as QueryClausesGenerator.
+		$container = wc_get_container();
+
+		$filter_data_provider = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider::class );
+		$filter_data          = $filter_data_provider->with( $product_query );
+
+		$all_counts = array();
+
+		// Get counts for each taxonomy individually.
+		foreach ( $taxonomies as $taxonomy ) {
+			$counts     = $filter_data->get_taxonomy_counts( $query_vars, $taxonomy );
+			$all_counts = $all_counts + $counts; // Use + operator to preserve keys.
+		}
+
+		return $all_counts;
+	}
 }

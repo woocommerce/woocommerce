@@ -11,7 +11,8 @@ import { justifyLeft, justifyCenter, justifyRight } from '@wordpress/icons';
 import {
 	Flex,
 	FlexItem,
-	PanelBody,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
 } from '@wordpress/components';
@@ -112,19 +113,39 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		} );
 	};
 
+	const resetAll = () => {
+		const { justifyContent: _discarded, ...restLayout } =
+			attributes.layout || {};
+		setAttributes( {
+			layout: restLayout,
+		} );
+	};
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
-					<Flex>
-						<FlexItem>
-							<JustificationControls
-								justificationValue={ justifyContent }
-								onChange={ onJustificationChange }
-							/>
-						</FlexItem>
-					</Flex>
-				</PanelBody>
+				<ToolsPanel
+					label={ __( 'Layout', 'woocommerce' ) }
+					resetAll={ resetAll }
+				>
+					<ToolsPanelItem
+						isShownByDefault
+						onDeselect={ resetAll } // This attribute is usually used to reset the panel item value.
+						hasValue={ () =>
+							attributes.layout?.justifyContent || false
+						}
+						label={ __( 'Justification', 'woocommerce' ) }
+					>
+						<Flex>
+							<FlexItem>
+								<JustificationControls
+									justificationValue={ justifyContent }
+									onChange={ onJustificationChange }
+								/>
+							</FlexItem>
+						</Flex>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			{ /* @ts-expect-error No types for this exist yet. */ }
 			<BlockControls group="block" __experimentalShareWithChildBlocks>

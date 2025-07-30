@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Provider class.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class FilterDataProvider {
 	/**

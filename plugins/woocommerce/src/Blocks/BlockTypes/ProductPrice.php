@@ -83,9 +83,36 @@ class ProductPrice extends AbstractBlock {
 			$watch_attribute    = '';
 
 			if ( $is_interactive ) {
-				wp_enqueue_script_module( 'woocommerce/product-price' );
-				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-price';
-				$watch_attribute                           = 'data-wp-watch="callbacks.updatePrice"';
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				foreach ( $variations_data as $variation ) {
+					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) ) {
+							continue;
+					}
+					$formatted_variations_data[ $variation['variation_id'] ] = array(
+						'price_html' => $variation['price_html'],
+					);
+				}
+
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'price_html' => $product->get_price_html(),
+								'variations' => $formatted_variations_data,
+							),
+						),
+					)
+				);
+
+				wp_enqueue_script_module( 'woocommerce/product-elements' );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+				$context                                   = array(
+					'productElementKey' => 'price_html',
+				);
+				$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+				$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
 			}
 
 			return sprintf(

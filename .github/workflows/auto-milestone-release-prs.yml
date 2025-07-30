@@ -1,0 +1,71 @@
+# Automatically add the milestone to any PR that is created against a release branch so that, before building
+# a release, we can verify that there are no open pull requests for that release milestone.
+name: Auto-Add Milestone to Release PRs
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  add-milestone:
+    name: Add milestone to release branch PRs
+    runs-on: ubuntu-latest
+    # Only run if PR has no milestone and targets a branch starting with 'release/'
+    if: |
+      github.event.pull_request.milestone == null && 
+      startsWith(github.event.pull_request.base.ref, 'release/')
+    steps:
+      - name: Validate release branch pattern and add milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const targetBranch = context.payload.pull_request.base.ref;
+            const prNumber = context.payload.pull_request.number;
+            
+            // Validate branch matches release/{d}.{d} pattern
+            const releasePattern = /^release\/(\d+)\.(\d+)$/;
+            const match = targetBranch.match(releasePattern);
+            
+            if (!match) {
+              core.info(`Branch '${targetBranch}' does not match release/{d}.{d} pattern. Skipping milestone assignment.`);
+              return;
+            }
+            
+            const majorVersion = match[1];
+            const minorVersion = match[2];
+            const expectedMilestone = `${majorVersion}.${minorVersion}.0`;
+            
+            core.info(`PR #${prNumber} targets release branch: ${targetBranch}`);
+            core.info(`Looking for milestone: ${expectedMilestone}`);
+            
+            try {
+              // Get all milestones
+              const { data: milestones } = await github.rest.issues.listMilestones({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open'
+              });
+            
+              // Find matching milestone
+              const targetMilestone = milestones.find(milestone => 
+                milestone.title === expectedMilestone
+              );
+            
+              if (!targetMilestone) {
+                core.warning(`Milestone '${expectedMilestone}' not found. Available milestones: ${milestones.map(m => m.title).join(', ')}`);
+                return;
+              }
+            
+              // Add milestone to PR
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                milestone: targetMilestone.number
+              });
+            
+              core.info(`✅ Successfully added milestone '${expectedMilestone}' to PR #${prNumber}`);
+            
+            } catch (error) {
+              core.setFailed(`Failed to add milestone: ${error.message}`);
+            }
