@@ -343,7 +343,7 @@ const addToCartWithOptionsStore = store<
 
 				const newValue = currentValue + step;
 
-				if ( max === null || newValue <= max ) {
+				if ( newValue <= max ) {
 					const updatedValue = Math.max( min, newValue );
 					addToCartWithOptionsStore.actions.setQuantity(
 						updatedValue
