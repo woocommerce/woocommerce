@@ -99,7 +99,11 @@ class CheckoutLink {
 
 			if ( strpos( $raw_product, ':' ) !== false ) {
 
-				list( $product_id, $qty, $product_data ) = array_pad( explode( ':', $raw_product, 3 ), 3, false );
+				$exploded = explode( ':', $raw_product, 3 );
+
+				$product_id   = $exploded[0] ?? 0;
+				$qty          = $exploded[1] ?? 1;
+				$product_data = $exploded[2] ?? '';
 
 				// If the quantity is not-numeric, it may be key=value pairs.
 				if ( ! is_numeric( $qty ) ) {
@@ -109,21 +113,15 @@ class CheckoutLink {
 
 				if ( $product_data ) {
 
-					// Parse key=value pairs separated by semicolons
-					$pairs = explode( ';', $product_data );
+					// Parse the product data into key=value pairs.
+					parse_str( $product_data, $pairs );
 
 					$cart_item_data = [];
 
-					foreach ( $pairs as $pair ) {
-						if ( strpos( $pair, '=' ) === false ) {
-							continue;
-						}
-						list( $key, $value ) = explode( '=', $pair, 2 );
-						$key                 = trim( $key );
-						$value               = trim( $value );
-
-						$cart_item_data[ $key ] = wc_clean( $value );
+					foreach ( $pairs as $key => $value ) {
+						$cart_item_data[ wc_clean( $key ) ] = wc_clean( $value );
 					}
+
 				}
 			} else {
 				$product_id = $raw_product;
