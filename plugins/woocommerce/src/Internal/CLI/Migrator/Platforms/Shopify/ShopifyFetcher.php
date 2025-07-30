@@ -214,7 +214,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		return array(
 			'items'         => $items,
 			'cursor'        => $last_cursor,
-			'has_next_page' => $page_info ? $page_info->has_next_page : false,
+			'has_next_page' => $page_info ? $page_info->hasNextPage : false,
 		);
 	}
 
