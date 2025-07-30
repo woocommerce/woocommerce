@@ -24,7 +24,7 @@ type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
 		product: ProductResponseItem;
-		isExperimentalFlagEnabled: boolean;
+		areExperimentalFlagsEnabled: boolean;
 	};
 
 interface PriceProps {
@@ -48,7 +48,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
 		product: productData,
-		isExperimentalFlagEnabled,
+		areExperimentalFlagsEnabled,
 	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
@@ -92,7 +92,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	let prices: PriceProps = product?.prices ?? {};
 
-	if ( isExperimentalFlagEnabled ) {
+	if ( areExperimentalFlagsEnabled ) {
 		prices = {
 			// The Admin API returns the price already with the decimal separator, so we need to multiply by 100.
 			price: (
