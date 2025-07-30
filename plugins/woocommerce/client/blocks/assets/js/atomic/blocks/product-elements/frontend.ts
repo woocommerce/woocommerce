@@ -64,13 +64,13 @@ const productElementStore = store(
 		state: {
 			get productData(): ProductData | undefined {
 				if ( ! productDataState?.productId ) {
-					return;
+					return undefined;
 				}
 
 				const productData =
-					wooState?.products?.[ productDataState?.productId ]
+					wooState?.products?.[ productDataState.productId ]
 						?.variations?.[ productDataState?.variationId || 0 ] ||
-					wooState?.products?.[ productDataState?.productId ];
+					wooState?.products?.[ productDataState.productId ];
 
 				return productData;
 			},
