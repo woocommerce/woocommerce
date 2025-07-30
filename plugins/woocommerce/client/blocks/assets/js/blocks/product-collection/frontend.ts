@@ -18,6 +18,11 @@ export type ProductCollectionStoreContext = {
 	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
+	// Next/Previous Buttons block context
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+	ariaLabelPrevious: string;
+	ariaLabelNext: string;
 };
 
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
@@ -29,6 +34,21 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 		ref.origin === window.location.origin
 	);
 }
+
+// TODO: This is temporary solution for demo purpose.
+// It will be replaced with the actual carousel scroll logic.
+const scrollCarousel = ( pixels: number ) => {
+	const { ref } = getElement();
+
+	const productCollection = ref?.closest(
+		'.wp-block-woocommerce-product-collection'
+	);
+	const productTemplate = productCollection?.querySelector(
+		'.wc-block-product-template'
+	);
+
+	productTemplate?.scrollBy( { left: pixels, behavior: 'smooth' } );
+};
 
 function isValidEvent( event: MouseEvent ): boolean {
 	return (
@@ -96,6 +116,35 @@ const productCollectionStore = {
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
+			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: () => {
+			scrollCarousel( -200 );
+		},
+		onClickNext: () => {
+			scrollCarousel( 200 );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				scrollCarousel( 200 );
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				scrollCarousel( -200 );
+			}
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				scrollCarousel( 200 );
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				scrollCarousel( -200 );
 			}
 		},
 	},

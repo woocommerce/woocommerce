@@ -40,22 +40,29 @@ function deactivateStackOnMobile() {
 	);
 }
 
+const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
+
 /**
  * Disables layout support for columns and column blocks because
  * the default layout `flex` add gaps between columns that it is not possible to support in emails.
+ *
+ * Also, enhances the columns block to support background image.
  */
-function disableColumnsLayout() {
+function disableColumnsLayoutAndEnhanceColumnsBlock() {
 	addFilter(
 		'blocks.registerBlockType',
 		'woocommerce-email-editor/disable-columns-layout',
-		( settings, name ) => {
-			if ( name === 'core/columns' || name === 'core/column' ) {
+		( settings: Block, name ) => {
+			if ( COLUMN_BLOCKS.includes( name ) ) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 				return {
 					...settings,
 					supports: {
 						...settings.supports,
 						layout: false,
+						background: {
+							backgroundImage: true,
+						},
 					},
 				};
 			}
@@ -66,25 +73,4 @@ function disableColumnsLayout() {
 	);
 }
 
-function enhanceColumnsBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/change-columns',
-		( settings: Block, name ) => {
-			if ( name === 'core/columns' ) {
-				return {
-					...settings,
-					supports: {
-						...settings.supports,
-						background: {
-							backgroundImage: true,
-						},
-					},
-				};
-			}
-			return settings;
-		}
-	);
-}
-
-export { deactivateStackOnMobile, disableColumnsLayout, enhanceColumnsBlock };
+export { deactivateStackOnMobile, disableColumnsLayoutAndEnhanceColumnsBlock };

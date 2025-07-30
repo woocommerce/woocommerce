@@ -596,7 +596,11 @@ If you're not familiar with JSON Schema, you can get a quick introduction to it 
 
 ### Document object
 
-When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. An example of the document object looks like this:
+When you're writing your rules, you're writing a partial schema for the document object, essentially describing the ideal state you want for your field to be required or hidden. 
+
+**Important:** All properties in the document object use snake_case naming convention (e.g., `total_price`, `shipping_rates`, `customer_note`), not camelCase.
+
+An example of the document object looks like this:
 
 <!-- markdownlint-disable MD033 -->
 <details>
@@ -625,8 +629,8 @@ When you're writing your rules, you're writing a partial schema for the document
 		"needs_shipping": true,
 		"prefers_collection": false,
 		"totals": {
-			"totalPrice": 6600,
-			"totalTax": 600
+			"total_price": 6600,
+			"total_tax": 600
 		},
 		"extensions": {}
 	},
@@ -790,7 +794,7 @@ It's full schema is this one:
 				},
 				"additional_fields": {
 					"type": "object",
-					"description": "Additional checkout fields, limited to the order location.",
+					"description": "Additional checkout fields with 'order' location. These fields are rendered in the order information section.",
 					"additionalProperties": {
 						"type": "string"
 					},
@@ -826,9 +830,15 @@ It's full schema is this one:
 				},
 				"additional_fields": {
 					"type": "object",
-					"description": "Additional checkout fields, limited to the contact location.",
+					"description": "Additional checkout fields with 'contact' location. These fields are rendered in the contact information section.",
 					"additionalProperties": {
 						"type": "string"
+					},
+					"patternProperties": {
+						"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
+							"type": "string",
+							"description": "Custom fields with namespace identifiers"
+						}
 					}
 				},
 				"address": {
@@ -893,12 +903,12 @@ It's full schema is this one:
 			},
 			"additionalProperties": {
 				"type": "string",
-				"description": "Custom fields with namespace identifiers"
+				"description": "Additional fields with 'address' location appear here as properties within the address objects"
 			},
 			"patternProperties": {
 				"^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$": {
 					"type": "string",
-					"description": "Custom fields with namespace identifiers"
+					"description": "Additional fields with 'address' location using namespace identifiers (e.g., 'namespace/field-name')"
 				}
 			}
 		}
