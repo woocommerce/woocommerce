@@ -33,6 +33,7 @@ use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -338,10 +339,12 @@ final class WooCommerce {
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
-		if ( defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) && WOOCOMMERCE_BIS_ALPHA_ENABLED ) {
+		$container->get( AddressProviderController::class );
+
+		// Feature flags.
+		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
 			$container->get( StockNotifications::class );
 		}
-		$container->get( AddressProviderController::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
