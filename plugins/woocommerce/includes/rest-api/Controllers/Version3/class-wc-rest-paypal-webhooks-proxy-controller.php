@@ -87,7 +87,8 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
 		// Validate the webhook signature first.
-		$validation_result = $this->validate_webhook_signature_with_postback( $request );
+		// $validation_result = $this->validate_webhook_signature_with_postback( $request );
+		$validation_result = $this->validate_webhook_signature_by_self_check( $request );
 		if ( is_wp_error( $validation_result ) ) {
 			error_log( 'PayPal webhook signature validation failed: ' . $validation_result->get_error_message() );
 			return new WP_REST_Response( 'Webhook signature validation failed', 401 );
@@ -230,6 +231,94 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 		return $testmode 
 			? 'https://api-m.sandbox.paypal.com'
 			: 'https://api-m.paypal.com';
+	}
+
+	/**
+	 * Validate the PayPal webhook signature by self check.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool|WP_Error True if valid, WP_Error if invalid.
+	 */
+	function validate_webhook_signature_by_self_check( $request ) {
+		$headers = $request->get_headers();
+		$data    = $request->get_body();
+
+		// Validate required headers
+		$required_headers = array(
+			'paypal_transmission_id',
+			'paypal_transmission_time', 
+			'paypal_cert_url',
+			'paypal_transmission_sig'
+		);
+		
+		foreach ( $required_headers as $header ) {
+			if ( empty( $headers[ $header ][0] ?? '' ) ) {
+				return new WP_Error( 'missing_header', "Missing required header: {$header}" );
+			}
+		}
+		
+		$transmission_id = $headers['paypal_transmission_id'][0];
+		$time_stamp     = $headers['paypal_transmission_time'][0];
+		$webhook_id     = get_option( 'wc_paypal_webhook_id' );
+		
+		// Calculate CRC32 of raw event data
+		$crc = sprintf( '%u', crc32( $data ) );
+		
+		$message = "{$transmission_id}|{$time_stamp}|{$webhook_id}|{$crc}";
+		
+		// Download and cache the certificate
+		$cert_pem = $this->get_paypal_cert( $headers['paypal_cert_url'][0] );
+		
+		if ( is_wp_error( $cert_pem ) ) {
+			wc_get_logger()->error( 'Failed to download certificate: ' . $cert_pem->get_error_message(), array( 'source' => 'paypal-webhook-proxy' ) );
+			return $cert_pem;
+		}
+		
+		// Decode the base64-encoded signature
+		$signature = base64_decode( $headers['paypal_transmission_sig'][0] );
+		
+		if ( $signature === false ) {
+			return new WP_Error( 'invalid_signature', 'Could not decode base64 signature' );
+		}
+		
+		// Verify the signature using OpenSSL
+		$result = openssl_verify( $message, $signature, $cert_pem, OPENSSL_ALGO_SHA256 );
+		
+		if ( $result !== 1 ) {
+			$openssl_error = '';
+			while ( $error = openssl_error_string() ) {
+				$openssl_error .= $error . ' ';
+			}
+			return new WP_Error( 'signature_invalid', 'OpenSSL verification error: ' . trim( $openssl_error ) );
+		}
+				
+		return true;
+	}
+
+	/**
+	 * Get the PayPal certificate.
+	 *
+	 * @param string $cert_url The certificate URL.
+	 * @return string|WP_Error The certificate.
+	 */
+	function get_paypal_cert( $cert_url ) {
+		$cert = get_transient( 'paypal_cert_' . md5( $cert_url ) );
+		if ( ! $cert ) {
+			$response = wp_remote_get( $cert_url, array( 'timeout' => 30 ) );
+			
+			if ( is_wp_error( $response ) ) {
+				return new WP_Error( 'cert_fetch_failed', 'Unable to fetch certificate: ' . $response->get_error_message() );
+			}
+			
+			$cert = wp_remote_retrieve_body( $response );
+			if ( empty( $cert ) ) {
+				return new WP_Error( 'cert_empty', 'Certificate is empty' );
+			}
+			
+			set_transient( 'paypal_cert_' . md5( $cert_url ), $cert, HOUR_IN_SECONDS ); // cache for 1 hour
+		}
+		
+		return $cert;
 	}
 
 	/**
