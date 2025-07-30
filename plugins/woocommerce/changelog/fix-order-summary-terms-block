@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent order summary moving below place order button when terms and conditions block is moved

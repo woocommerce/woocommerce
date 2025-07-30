@@ -8,7 +8,9 @@
       "gradients": [],
       "background": true,
       "text": true,
-      "link": true
+      "link": true,
+      "customDuotone": false,
+      "defaultDuotone": false
     },
     "layout": {
       "contentSize": "660px",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix REST API coupon validation for percentage amounts over 100%. Resolves issue where percentage coupons with amounts > 100 were created with 0.00 amount instead of returning validation error.

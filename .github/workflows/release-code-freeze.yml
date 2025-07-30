@@ -217,6 +217,11 @@ jobs:
               post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
 
+            console.log('Webhook payload:');
+            console.log(`  Version: ${payload.version}`);
+            console.log(`  Build ZIP: ${payload.build_zip}`);
+            console.log(`  Post Status: ${payload.post_status}`);
+
             const requestBody = JSON.stringify({
               payload
             });

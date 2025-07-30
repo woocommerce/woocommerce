@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent issue where quantity would not update correctly after being edited on the client and receiving an update from the data store.

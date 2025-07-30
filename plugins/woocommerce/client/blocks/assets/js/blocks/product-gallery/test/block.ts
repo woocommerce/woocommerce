@@ -2,7 +2,7 @@
  * External dependencies
  */
 import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { createBlock } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -36,6 +36,37 @@ const handlers = [
 			],
 		} );
 	} ),
+	http.get( '/wc/v3/products/:id', () => {
+		return HttpResponse.json( {
+			id: 123,
+			name: 'Test Product',
+			images: [
+				{
+					id: 1,
+					src: 'test-image-1.jpg',
+					thumbnail: 'test-thumb-1.jpg',
+					alt: 'Test 1',
+				},
+				{
+					id: 2,
+					src: 'test-image-2.jpg',
+					thumbnail: 'test-thumb-2.jpg',
+					alt: 'Test 2',
+				},
+				{
+					id: 3,
+					src: 'test-image-3.jpg',
+					thumbnail: 'test-thumb-3.jpg',
+					alt: 'Test 3',
+				},
+			],
+		} );
+	} ),
+
+	http.get( '/wc/store/v1', () => {
+		return HttpResponse.json( {} );
+	} ),
+
 	http.get( '/wc/store/v1/products/:id', () => {
 		return HttpResponse.json( {
 			id: 123,
@@ -157,6 +188,12 @@ describe( 'Product Gallery Block', () => {
 				name: /Block: Next\/Previous Buttons/i,
 			} )
 		).toBeInTheDocument();
+
+		await waitFor( () => {
+			expect(
+				screen.getAllByRole( 'img', { hidden: true } ).at( 0 )
+			).not.toHaveAttribute( 'src', 'placeholder.jpg' );
+		} );
 
 		// Check that the product image is rendered
 		const productImage = screen.getByTestId( 'product-image' );

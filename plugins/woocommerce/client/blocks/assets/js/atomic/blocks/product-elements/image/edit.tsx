@@ -15,6 +15,7 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { useProduct } from '@woocommerce/entities';
 import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -125,6 +126,8 @@ const Edit = ( {
 		isBoolean
 	);
 
+	const { product, isResolving } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
 			{ /* Don't show controls in product gallery as we rely on
@@ -196,7 +199,12 @@ const Edit = ( {
 					</PanelBody>
 				</InspectorControls>
 			) }
-			<Block { ...{ ...attributes, ...context } }>
+			<Block
+				{ ...{ ...attributes, ...context } }
+				isAdmin={ true }
+				product={ product }
+				isResolving={ isResolving }
+			>
 				{ showAllControls && <div { ...innerBlockProps } /> }
 			</Block>
 		</div>

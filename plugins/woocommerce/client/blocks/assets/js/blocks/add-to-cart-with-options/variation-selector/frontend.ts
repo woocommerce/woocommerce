@@ -12,8 +12,11 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
-	AvailableVariation,
 } from '../frontend';
+import {
+	getMatchedVariation,
+	type AvailableVariation,
+} from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {
@@ -118,43 +121,6 @@ const isAttributeValueValid = ( {
 		).length;
 
 		return matchingAttributes >= attributesToMatch;
-	} );
-};
-
-const getMatchedVariation = (
-	availableVariations: AvailableVariation[],
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( availableVariations ) ||
-		! Array.isArray( selectedAttributes ) ||
-		availableVariations.length === 0 ||
-		selectedAttributes.length === 0
-	) {
-		return null;
-	}
-	return availableVariations.find( ( availableVariation ) => {
-		return Object.entries( availableVariation.attributes ).every(
-			( [ attributeName, attributeValue ] ) => {
-				const attributeMatched = selectedAttributes.some(
-					( variationAttribute ) => {
-						const isSameAttribute =
-							variationAttribute.attribute === attributeName;
-						if ( ! isSameAttribute ) {
-							return false;
-						}
-
-						return (
-							variationAttribute.value === attributeValue ||
-							( variationAttribute.value &&
-								attributeValue === '' )
-						);
-					}
-				);
-
-				return attributeMatched;
-			}
-		);
 	} );
 };
 

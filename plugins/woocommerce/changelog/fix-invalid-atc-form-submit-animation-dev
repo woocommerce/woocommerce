@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Resolved a minor animation glitch in the blockified add to cart button when the form is invalid for variable products
