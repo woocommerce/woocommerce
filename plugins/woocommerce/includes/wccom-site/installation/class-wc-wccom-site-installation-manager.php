@@ -58,7 +58,7 @@ class WC_WCCOM_Site_Installation_Manager {
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $this->product_id );
 
 		if ( ! $state ) {
-			throw new Installer_Error( Installer_Error_Codes::NO_INITIATED_INSTALLATION_FOUND );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::NO_INITIATED_INSTALLATION_FOUND ) );
 		}
 
 		return $state;
