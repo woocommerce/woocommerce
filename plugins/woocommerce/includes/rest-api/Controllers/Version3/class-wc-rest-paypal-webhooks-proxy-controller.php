@@ -89,6 +89,7 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 		// Validate the webhook signature first.
 		// $validation_result = $this->validate_webhook_signature_with_postback( $request );
 		$validation_result = $this->validate_webhook_signature_by_self_check( $request );
+		wc_get_logger()->info( 'PayPal webhook signature validation result: ' . wc_print_r( $validation_result, true ) );
 		if ( is_wp_error( $validation_result ) ) {
 			error_log( 'PayPal webhook signature validation failed: ' . $validation_result->get_error_message() );
 			return new WP_REST_Response( 'Webhook signature validation failed', 401 );
@@ -264,7 +265,7 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 		// Calculate CRC32 of raw event data
 		$crc = sprintf( '%u', crc32( $data ) );
 		
-		$message = "{$transmission_id}|{$time_stamp}|{$webhook_id}|{$crc}";
+		$message = "{$transmission_id}|{$time_stamp}|{$webhook_id}|{$crc}|{$webhook_id}";
 		
 		// Download and cache the certificate
 		$cert_pem = $this->get_paypal_cert( $headers['paypal_cert_url'][0] );
