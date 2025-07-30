@@ -104,15 +104,18 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
+		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku"' : '';
+
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
 				%3$s
-				<span class="sku" data-wp-interactive="woocommerce/product-elements" data-wp-context=\'{"productElementKey": "sku"}\' data-wp-watch="callbacks.updateValue">%4$s</span>
-				%5$s
+				<span class="sku" %4$s>%5$s</span>
+				%6$s
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
 			$prefix,
+			$interactive_attributes,
 			$product_sku,
 			$suffix
 		);

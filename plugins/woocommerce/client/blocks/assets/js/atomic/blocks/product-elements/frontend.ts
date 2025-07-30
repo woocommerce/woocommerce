@@ -4,7 +4,10 @@
 import { getElement, store, getContext } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	ProductData,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -58,6 +61,20 @@ export type Context = {
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
+		state: {
+			get productData(): ProductData | undefined {
+				if ( ! productDataState?.productId ) {
+					return;
+				}
+
+				const productData =
+					wooState?.products?.[ productDataState?.productId ]
+						?.variations?.[ productDataState?.variationId || 0 ] ||
+					wooState?.products?.[ productDataState?.productId ];
+
+				return productData;
+			},
+		},
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
@@ -69,11 +86,7 @@ const productElementStore = store(
 				const { productElementKey } = getContext< Context >();
 
 				const productElementHtml =
-					wooState?.products?.[ productDataState?.productId ]
-						?.variations?.[ productDataState?.variationId || 0 ]?.[
-						productElementKey
-					] ||
-					wooState?.products?.[ productDataState?.productId ]?.[
+					productElementStore?.state?.productData?.[
 						productElementKey
 					];
 

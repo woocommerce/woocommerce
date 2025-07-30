@@ -71,7 +71,7 @@ class ProductSpecifications extends AbstractBlock {
 			foreach ( $variations as $variation ) {
 				$formatted_variations_data[ $variation->get_id() ] = array(
 					'weight'     => wc_format_weight( $variation->get_weight() ),
-					'dimensions' => wc_format_dimensions( $variation->get_dimensions( false ) ),
+					'dimensions' => html_entity_decode( wc_format_dimensions( $variation->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 				);
 			}
 
@@ -81,7 +81,7 @@ class ProductSpecifications extends AbstractBlock {
 					'products' => array(
 						$product->get_id() => array(
 							'weight'     => $product_data['weight']['value'] ?? '',
-							'dimensions' => $product_data['dimensions']['value'] ?? '',
+							'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),
 							'variations' => $formatted_variations_data,
 						),
 					),
@@ -147,7 +147,7 @@ class ProductSpecifications extends AbstractBlock {
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
 							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'weight', 'dimensions' ), true ) ) : ?>
-								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-context='{"productElementKey": "<?php echo esc_attr( $product_attribute_key ); ?>"}' data-wp-watch="callbacks.updateValue">
+								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
 							<?php else : ?>	
