@@ -131,7 +131,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 			);
 		}
 
-		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id, '' );
+		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id );
 
 		try {
 			$state = $installation_manager->get_installation_status();

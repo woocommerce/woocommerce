@@ -43,7 +43,7 @@ class WC_WCCOM_Site_Installation_Manager {
 	 * @param int    $product_id The product ID.
 	 * @param string $idempotency_key The idempotency key.
 	 */
-	public function __construct( int $product_id, string $idempotency_key ) {
+	public function __construct( int $product_id, string $idempotency_key = '' ) {
 		$this->product_id      = $product_id;
 		$this->idempotency_key = $idempotency_key;
 	}
