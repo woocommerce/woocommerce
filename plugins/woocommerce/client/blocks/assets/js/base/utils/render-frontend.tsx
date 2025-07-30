@@ -144,7 +144,6 @@ const renderBlockInContainers = <
 	const roots: ReactRootWithContainer[] = [];
 
 	containers.forEach( ( el, i ) => {
-		// Add is-fading class for cart and checkout blocks before rendering
 		const isCheckoutBlock = el.classList.contains(
 			'wp-block-woocommerce-checkout'
 		);
@@ -160,7 +159,8 @@ const renderBlockInContainers = <
 			...( props.attributes || ( {} as TAttributes ) ),
 		};
 
-		// Determine rendering delay based on block type and user preferences
+		// Determine rendering delay based on block type and user preferences.
+		// The cart and checkout blocks page placeholders should fade out if motion is not reduced.
 		const shouldAnimate =
 			( isCheckoutBlock || isCartBlock ) &&
 			! window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
