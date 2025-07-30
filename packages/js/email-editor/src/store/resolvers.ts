@@ -3,7 +3,6 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { select } from '@wordpress/data';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -18,7 +17,6 @@ export function* getPersonalizationTagsList() {
 	// Access the state to check if already fetching
 	const state = yield select( storeName );
 	const isAlreadyFetching = state.personalizationTags?.isFetching;
-	const postType = yield select( storeName ).getEmailPostType();
 
 	// Exit if a fetch operation is already in progress
 	if ( isAlreadyFetching ) {
@@ -29,13 +27,8 @@ export function* getPersonalizationTagsList() {
 	yield setIsFetchingPersonalizationTags( true );
 
 	try {
-		const pathWithQuery = addQueryArgs(
-			'/woocommerce-email-editor/v1/get_personalization_tags',
-			{ postType, context: 'edit' }
-		);
-
 		const data = yield apiFetch( {
-			path: pathWithQuery,
+			path: '/woocommerce-email-editor/v1/get_personalization_tags',
 			method: 'GET',
 		} );
 

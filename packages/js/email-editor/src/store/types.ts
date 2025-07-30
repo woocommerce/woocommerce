@@ -218,6 +218,7 @@ export type EmailTemplate = {
 	content: string;
 	title: string;
 	type: string;
+	post_types: string[];
 };
 
 export type EmailTemplatePreview = Omit<
