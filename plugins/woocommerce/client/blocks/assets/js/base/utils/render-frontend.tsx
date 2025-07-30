@@ -160,36 +160,37 @@ const renderBlockInContainers = <
 			...( props.attributes || ( {} as TAttributes ) ),
 		};
 
-		if ( isCheckoutBlock || isCartBlock ) {
-			el.classList.add( 'is-fading' );
+		// Determine rendering delay based on block type and user preferences
+		const shouldAnimate =
+			( isCheckoutBlock || isCartBlock ) &&
+			! window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
-			// Remove is-fading class after 0.25s and start rendering
-			setTimeout( () => {
-				const root = renderBlock( {
-					Block,
-					container: el,
-					props,
-					attributes,
-					errorBoundaryProps,
-				} );
+		const performRender = () => {
+			const root = renderBlock( {
+				Block,
+				container: el,
+				props,
+				attributes,
+				errorBoundaryProps,
+			} );
 
-				roots.push( {
-					container: el,
-					root,
-				} );
-				el.classList.remove( 'is-fading' );
-			}, 200 );
-		} else {
 			roots.push( {
 				container: el,
-				root: renderBlock( {
-					Block,
-					container: el,
-					props,
-					attributes,
-					errorBoundaryProps,
-				} ),
+				root,
 			} );
+
+			if ( shouldAnimate ) {
+				el.classList.remove( 'is-fading' );
+			}
+		};
+
+		if ( shouldAnimate ) {
+			// Apply fade-in animation for cart/checkout blocks when motion is not reduced
+			el.classList.add( 'is-fading' );
+			setTimeout( performRender, 200 );
+		} else {
+			// Render immediately for all other cases (non-cart/checkout blocks or reduced motion)
+			performRender();
 		}
 	} );
 

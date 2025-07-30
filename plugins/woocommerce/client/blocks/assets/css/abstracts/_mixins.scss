@@ -369,6 +369,14 @@ $fontSizes: (
 	&::after {
 		transition: background-color 0.2s ease;
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: background-color 0.2s ease;
+
+		&::after {
+			transition: background-color 0.2s ease;
+		}
+	}
 }
 
 @keyframes wc-skeleton-shimmer {
