@@ -70,7 +70,7 @@ const getProductData = (
 	productType: string,
 	availableVariations: AvailableVariation[],
 	selectedAttributes: SelectedAttributes[]
-): ProductData & { id: number } => {
+): ( ProductData & { id: number } ) | null => {
 	let productId = id;
 	let productData: ProductData | undefined;
 
@@ -90,17 +90,17 @@ const getProductData = (
 		productData = wooState?.products?.[ productId ];
 	}
 
+	if ( typeof productData !== 'object' || productData === null ) {
+		return null;
+	}
+
 	// Add default quantity constraint values.
 	const defaultMinValue = productType === 'grouped' ? 0 : 1;
 	const min =
-		typeof productData?.min === 'number'
-			? productData.min
-			: defaultMinValue;
+		typeof productData.min === 'number' ? productData.min : defaultMinValue;
 	const max =
-		productData && productData?.max && productData?.max >= 1
-			? productData?.max
-			: Infinity;
-	const step = productData?.step || 1;
+		productData.max && productData.max >= 1 ? productData.max : Infinity;
+	const step = productData.step || 1;
 
 	return {
 		id: productId,
