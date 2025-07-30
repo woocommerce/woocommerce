@@ -264,7 +264,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
-		// Set `woocommerce_enable_ajax_add_to_cart` setting to "no".
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -282,5 +281,94 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await addToCartButton.click();
 
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+
+	test( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/t-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+		).toHaveValue( '1' );
+	} );
+
+	test( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/hoodie' );
+
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+
+		await colorBlueOption.click();
+		await logoYesOption.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of Hoodie in your cart.' )
+		).toHaveValue( '1' );
+	} );
+
+	test( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of T-Shirt'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+		).toHaveValue( '1' );
 	} );
 } );
