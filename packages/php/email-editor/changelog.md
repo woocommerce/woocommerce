@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/woocommerce/email-editor/releases/tag/1.3.0) - 2025-07-24 
+
+-   Patch - Integrate the convert class from the external HTML to Text library and remove the library dependency from the Email Editor package. [#59859]
+-   Minor - Add functionality to sync block theme styles to the email editor. [#59757]
+-   Minor - Add licensing and security policy. [#59859]
+
 ## [1.2.0](https://github.com/woocommerce/email-editor/releases/tag/1.2.0) - 2025-07-23 
 
 -   Patch - Fix color inheritance in Paragraph and Heading blocks. [#59732]

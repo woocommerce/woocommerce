@@ -1306,23 +1306,42 @@ class PaymentsProviders {
 			// This is a best-effort approach, as the plugin might be sitting under a directory (slug) that we can't handle.
 			// Always try the official plugin slug first, then the testing variations.
 			$plugin_slug_variations = Utils::generate_testing_plugin_slugs( $extension_suggestion['plugin']['slug'], true );
+			// Favor active plugins by checking the entire variations list for active plugins first.
+			// This way we handle cases where there are multiple variations installed and one is active.
+			$found = false;
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
-				if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
+				if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
+					$found                                    = true;
+					$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					// Make sure we put in the actual slug and file path that we found.
 					$extension_suggestion['plugin']['slug'] = $plugin_slug;
 					$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
 					// Sanity check.
 					if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
 						$extension_suggestion['plugin']['file'] = '';
+						break;
 					}
 					// Remove the .php extension from the file path. The WP API expects it without it.
 					$extension_suggestion['plugin']['file'] = Utils::trim_php_file_extension( $extension_suggestion['plugin']['file'] );
-
-					$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
-					if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
-						$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
-					}
 					break;
+				}
+			}
+			if ( ! $found ) {
+				foreach ( $plugin_slug_variations as $plugin_slug ) {
+					if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
+						$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
+						// Make sure we put in the actual slug and file path that we found.
+						$extension_suggestion['plugin']['slug'] = $plugin_slug;
+						$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+						// Sanity check.
+						if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
+							$extension_suggestion['plugin']['file'] = '';
+							break;
+						}
+						// Remove the .php extension from the file path. The WP API expects it without it.
+						$extension_suggestion['plugin']['file'] = Utils::trim_php_file_extension( $extension_suggestion['plugin']['file'] );
+						break;
+					}
 				}
 			}
 		}

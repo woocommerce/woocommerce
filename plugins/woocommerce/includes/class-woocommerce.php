@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -340,6 +341,7 @@ final class WooCommerce {
 		if ( defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) && WOOCOMMERCE_BIS_ALPHA_ENABLED ) {
 			$container->get( StockNotifications::class );
 		}
+		$container->get( AddressProviderController::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.

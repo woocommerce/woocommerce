@@ -34,7 +34,6 @@ const AddressLineFields = ( {
 				<ValidatedTextInput
 					{ ...address1FieldProps }
 					type={ address1.field.type }
-					label={ address1.field.label }
 					className={ `wc-block-components-address-form__address_1` }
 					value={ address1.value }
 					onChange={ ( newValue: string ) =>

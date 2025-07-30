@@ -141,7 +141,11 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
+	HTMLAttributes< HTMLDivElement > & {
+		isAdmin?: boolean;
+		product?: ProductResponseItem;
+		isResolving?: boolean;
+	};
 
 type LegacyProps = Props & {
 	product?: ProductResponseItem;
@@ -173,12 +177,19 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		showProductLink = true,
 		style,
 		width,
+		isAdmin,
+		product: productEntity,
+		isResolving,
 		...restProps
 	} = props;
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext( {
+		isAdmin,
+		product: productEntity,
+		isResolving,
+	} );
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;
@@ -188,6 +199,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isString( style.dimensions.aspectRatio )
 			? style.dimensions.aspectRatio
 			: aspectRatio;
+	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
+		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
+	}`;
 
 	if ( ! product?.id ) {
 		const imageStyles = buildStyles( {
@@ -203,6 +217,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					className={ clsx(
 						className,
 						'wc-block-components-product-image',
+						aspectRatioClass,
 						{
 							[ `${ parentClassName }__product-image` ]:
 								parentClassName,
@@ -250,6 +265,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					'wc-block-components-product-image',
+					aspectRatioClass,
 					{
 						[ `${ parentClassName }__product-image` ]:
 							parentClassName,

@@ -230,4 +230,89 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon( $coupon_id );
 		$this->assertEquals( $meta_value, $coupon->get_meta( 'my-custom-field' ) );
 	}
+
+	/**
+	 * Test WC_Coupon::set_amount() validation.
+	 * @since 10.0.5
+	 */
+	public function test_set_amount_validation() {
+		$coupon = new WC_Coupon();
+
+		// Test valid amounts.
+		$coupon->set_amount( '0' );
+		$this->assertEquals( '0', $coupon->get_amount() );
+
+		$coupon->set_amount( 0 );
+		$this->assertEquals( '0', $coupon->get_amount() );
+
+		// Test invalid negative amounts.
+		try {
+			$coupon->set_amount( '-1' );
+			$this->fail( 'Setting a negative string amount should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'coupon_invalid_amount', $e->getErrorCode() );
+		}
+
+		try {
+			$coupon->set_amount( -1 );
+			$this->fail( 'Setting a negative integer amount should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'coupon_invalid_amount', $e->getErrorCode() );
+		}
+
+		// Test percentage amounts.
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( '100' );
+		$this->assertEquals( '100', $coupon->get_amount() );
+
+		$coupon->set_amount( 100 );
+		$this->assertEquals( '100', $coupon->get_amount() );
+
+		// Test invalid percentage amount.
+		try {
+			$coupon->set_amount( '200' );
+			$this->fail( 'Setting a percentage amount > 100 should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'coupon_invalid_amount', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test WC_Coupon::set_maximum_amount() validation.
+	 * @since 10.0.5
+	 */
+	public function test_set_maximum_amount_validation() {
+		$coupon = new WC_Coupon();
+		$coupon->set_minimum_amount( '100' );
+		$this->assertEquals( '100', $coupon->get_minimum_amount() );
+
+		// Test valid maximum amounts.
+		$coupon->set_maximum_amount( '500' );
+		$this->assertEquals( '500', $coupon->get_maximum_amount() );
+
+		// Test 0 and empty string, which means no limit.
+		$coupon->set_maximum_amount( '0' );
+		$this->assertEquals( '0', $coupon->get_maximum_amount() );
+
+		$coupon->set_maximum_amount( 0 );
+		$this->assertEquals( '0', $coupon->get_maximum_amount() );
+
+		$coupon->set_maximum_amount( '' );
+		$this->assertEquals( '', $coupon->get_maximum_amount() );
+
+		// Test invalid maximum amounts (less than minimum).
+		try {
+			$coupon->set_maximum_amount( '50' );
+			$this->fail( 'Setting a maximum amount < minimum amount (string) should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'coupon_invalid_maximum_amount', $e->getErrorCode() );
+		}
+
+		try {
+			$coupon->set_maximum_amount( 50 );
+			$this->fail( 'Setting a maximum amount < minimum amount (int) should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'coupon_invalid_maximum_amount', $e->getErrorCode() );
+		}
+	}
 }

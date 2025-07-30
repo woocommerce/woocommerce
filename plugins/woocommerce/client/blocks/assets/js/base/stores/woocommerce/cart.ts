@@ -151,6 +151,41 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
+// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
+const doesCartItemMatchAttributes = (
+	cartItem: OptimisticCartItem,
+	selectedAttributes: SelectedAttributes[]
+) => {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedAttributes )
+	) {
+		return false;
+	}
+
+	if ( cartItem.variation.length !== selectedAttributes.length ) {
+		return false;
+	}
+
+	return cartItem.variation.every(
+		( {
+			// eslint-disable-next-line
+			raw_attribute,
+			value,
+		}: {
+			raw_attribute: string;
+			value: string;
+		} ) =>
+			selectedAttributes.some( ( item: SelectedAttributes ) => {
+				return (
+					item.attribute === raw_attribute &&
+					( item.value.toLowerCase() === value.toLowerCase() ||
+						( item.value && value === '' ) ) // Handle "any" attribute type
+				);
+			} )
+	);
+};
+
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 
@@ -223,9 +258,28 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
-				let item = state.cart.items.find(
-					( { id: productId } ) => id === productId
-				);
+				let item = state.cart.items.find( ( cartItem ) => {
+					if ( cartItem.type === 'variation' ) {
+						// If it's a variation, check that attributes match.
+						// While different variations have different attributes,
+						// some variations might accept 'Any' value for an attribute,
+						// in which case, we need to check that the attributes match.
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+
+					return id === cartItem.id;
+				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
@@ -292,7 +346,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*batchAddCartItems( items: OptimisticCartItem[] ) {
-				const previousCart = structuredClone( state.cart );
+				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
 				// Updates the database.
@@ -439,7 +493,7 @@ const { state, actions } = store< Store >(
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = previousCart;
+					state.cart = JSON.parse( previousCart );
 
 					// Shows the error notice.
 					actions.showNoticeError( error as Error );
@@ -462,11 +516,6 @@ const { state, actions } = store< Store >(
 					// Checks if the response contains an error.
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
-
-					yield actions.updateNotices(
-						json.errors.map( generateErrorNotice ),
-						true
-					);
 
 					// Updates the local cart.
 					state.cart = json;
