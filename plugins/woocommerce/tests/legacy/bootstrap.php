@@ -245,8 +245,6 @@ class WC_Unit_Tests_Bootstrap {
 			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
 		}
 
-
-
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
 		if ( $paypal ) {
