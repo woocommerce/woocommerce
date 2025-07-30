@@ -64,12 +64,12 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	/**
 	 * Create a test term.
 	 *
-	 * @param string $name Term name.
-	 * @param int    $parent Parent term ID.
+	 * @param string $name      Term name.
+	 * @param int    $parent_id Parent term ID.
 	 * @return int Term ID.
 	 */
-	private function create_test_term( string $name, int $parent = 0 ): int {
-		$term = wp_insert_term( $name, $this->taxonomy, array( 'parent' => $parent ) );
+	private function create_test_term( string $name, int $parent_id = 0 ): int {
+		$term = wp_insert_term( $name, $this->taxonomy, array( 'parent' => $parent_id ) );
 		$this->assertIsArray( $term, "Failed to create term: $name" );
 
 		$term_id               = $term['term_id'];
