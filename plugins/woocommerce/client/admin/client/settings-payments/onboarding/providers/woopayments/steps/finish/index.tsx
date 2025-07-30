@@ -14,7 +14,7 @@ import './style.scss';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const FinishStep: React.FC = () => {
-	const { context, closeModal } = useOnboardingContext();
+	const { context, closeModal, sessionEntryPoint } = useOnboardingContext();
 
 	return (
 		<>
@@ -43,6 +43,7 @@ export const FinishStep: React.FC = () => {
 								{
 									step: 'finish',
 									action: 'go_to_payments_overview',
+									source: sessionEntryPoint,
 								}
 							);
 
@@ -69,6 +70,7 @@ export const FinishStep: React.FC = () => {
 								{
 									step: 'finish',
 									action: 'close_window',
+									source: sessionEntryPoint,
 								}
 							);
 

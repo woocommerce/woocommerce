@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
-import { WC_API_PATH } from '../../utils/api-client';
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 
 const test = baseTest.extend( {

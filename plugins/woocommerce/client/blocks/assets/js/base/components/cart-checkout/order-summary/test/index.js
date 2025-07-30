@@ -11,6 +11,9 @@ import OrderSummary from '../index';
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
+	useStoreCart: () => ( {
+		cartIsLoading: false,
+	} ),
 	useContainerWidthContext: () => ( {
 		isLarge: true,
 		hasContainerWidth: true,

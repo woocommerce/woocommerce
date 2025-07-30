@@ -123,6 +123,11 @@ async function fetchSearchResults(
 		params.set( 'locale', LOCALE.userLocale );
 	}
 
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	params.set( 'connection', wccomSettings.isConnected ? '1' : '0' );
+
+	params.set( 'tracking_allowed', wccomSettings.trackingAllowed ? '1' : '0' );
+
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +

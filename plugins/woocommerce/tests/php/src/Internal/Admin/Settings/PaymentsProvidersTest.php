@@ -1417,10 +1417,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'title'             => 'Suggestion 1',
 			'description'       => 'Description 1',
 			'plugin'            => array(
-				'_type'  => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
-				'slug'   => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
-				'file'   => 'woocommerce/woocommerce',
-				'status' => PaymentsProviders::EXTENSION_INSTALLED,
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'woocommerce', // Use WooCommerce because it is an installed plugin, obviously.
 			),
 			'image'             => 'http://example.com/image1.png',
 			'icon'              => 'http://example.com/icon1.png',
@@ -1439,11 +1437,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $suggestion_id )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_id( $suggestion_id );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**
@@ -1481,11 +1486,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 										->with( $slug )
 										->willReturn( $suggestion_details );
 
+		$expected_suggestion = $suggestion_details;
+		// We expect enhanced details.
+		$expected_suggestion['plugin']['file']   = 'woocommerce/woocommerce'; // Ensure the file is set correctly.
+		$expected_suggestion['plugin']['status'] = PaymentsProviders::EXTENSION_INSTALLED; // Ensure the status is set correctly.
+		$expected_suggestion['category']         = PaymentsProviders::CATEGORY_PSP; // Ensure the category is set correctly.
+		$expected_suggestion['onboarding']       = array( 'type' => PaymentGateway::ONBOARDING_TYPE_EXTERNAL ); // Ensure the onboarding details are present.
+
 		// Act.
 		$suggestion = $this->sut->get_extension_suggestion_by_plugin_slug( $slug );
 
 		// Assert.
-		$this->assertSame( $suggestion_details, $suggestion );
+		$this->assertEquals( $expected_suggestion, $suggestion );
 	}
 
 	/**
@@ -2059,6 +2071,192 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		$this->unmock_payment_gateways();
+	}
+
+	/**
+	 * Test the remove_shell_payment_gateways method.
+	 *
+	 * @dataProvider data_provider_test_remove_shell_payment_gateways
+	 *
+	 * @param array $gateways_to_mock     List of payment gateways instances to mock.
+	 * @param array $expected_gateway_ids List of expected gateway IDs after removing shell gateways.
+	 *
+	 * @return void
+	 */
+	public function test_remove_shell_payment_gateways( array $gateways_to_mock, array $expected_gateway_ids ) {
+		// Arrange.
+		$this->mock_payment_gateways( $gateways_to_mock );
+		$payment_gateways = $this->sut->get_payment_gateways( false ); // Get raw gateways list.
+
+		// Act.
+		$result = $this->sut->remove_shell_payment_gateways( $payment_gateways );
+
+		// Assert.
+		$actual_gateway_ids = array_values(
+			array_map(
+				function ( $gateway ) {
+					return $gateway->id;
+				},
+				$result
+			)
+		);
+
+		$this->assertSame( $expected_gateway_ids, $actual_gateway_ids );
+
+		// Clean up.
+		$this->unmock_payment_gateways();
+	}
+
+	/**
+	 * Data provider for test_remove_shell_payment_gateways.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_remove_shell_payment_gateways(): array {
+		return array(
+			'empty gateways list'                         => array(
+				array(),
+				array(),
+			),
+			'non-shell gateway only'                      => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'shell gateway only (should be preserved)'    => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'multiple shell gateways from same extension (all preserved)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1', 'gateway2' ),
+			),
+			'mix of shell and non-shell from same extension (shells removed)' => array(
+				array(
+					'shell_gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'real_gateway1'  => array(
+						'enabled'            => true,
+						'method_title'       => 'Real Gateway Title',
+						'method_description' => 'Real Gateway Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'shell_gateway2' => array(
+						'enabled'            => false,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'real_gateway1' ),
+			),
+			'multiple extensions with different shell configurations' => array(
+				array(
+					'plugin1_shell'      => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin1_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 1 Real',
+						'method_description' => 'Plugin 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+					'plugin2_shell_only' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin2',
+						'plugin_file'        => 'plugin2/plugin2',
+					),
+					'plugin3_real'       => array(
+						'enabled'            => true,
+						'method_title'       => 'Plugin 3 Real',
+						'method_description' => 'Plugin 3 Description',
+						'plugin_slug'        => 'plugin3',
+						'plugin_file'        => 'plugin3/plugin3',
+					),
+				),
+				array( 'plugin1_real', 'plugin2_shell_only', 'plugin3_real' ),
+			),
+			'shell gateway with missing plugin details (should be preserved)' => array(
+				array(
+					'gateway_no_plugin' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => '',
+						'plugin_slug'        => '',
+						'plugin_file'        => '',
+					),
+				),
+				array( 'gateway_no_plugin' ),
+			),
+			'gateway with title only (not a shell)'       => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => 'Gateway 1 Title',
+						'method_description' => '',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+			'gateway with description only (not a shell)' => array(
+				array(
+					'gateway1' => array(
+						'enabled'            => true,
+						'method_title'       => '',
+						'method_description' => 'Gateway 1 Description',
+						'plugin_slug'        => 'plugin1',
+						'plugin_file'        => 'plugin1/plugin1',
+					),
+				),
+				array( 'gateway1' ),
+			),
+		);
 	}
 
 	/**

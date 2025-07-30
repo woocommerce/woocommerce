@@ -225,8 +225,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add SKU, PRICE, and IMAGE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			$data['sku']              = $item->get_product() ? $item->get_product()->get_sku() : null;
+			$data['global_unique_id'] = $item->get_product() ? $item->get_product()->get_global_unique_id() : null;
+			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
 			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
 			$data['image'] = array(
@@ -1490,65 +1491,65 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'           => array(
+							'id'               => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'name'         => array(
+							'name'             => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'parent_name'  => array(
+							'parent_name'      => array(
 								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'product_id'   => array(
+							'product_id'       => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'variation_id' => array(
+							'variation_id'     => array(
 								'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'quantity'     => array(
+							'quantity'         => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'tax_class'    => array(
+							'tax_class'        => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'subtotal'     => array(
+							'subtotal'         => array(
 								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'subtotal_tax' => array(
+							'subtotal_tax'     => array(
 								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'total'        => array(
+							'total'            => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'total_tax'    => array(
+							'total_tax'        => array(
 								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'taxes'        => array(
+							'taxes'            => array(
 								'description' => __( 'Line taxes.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
@@ -1574,7 +1575,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 									),
 								),
 							),
-							'meta_data'    => array(
+							'meta_data'        => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
@@ -1610,19 +1611,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 									),
 								),
 							),
-							'sku'          => array(
+							'sku'              => array(
 								'description' => __( 'Product SKU.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'price'        => array(
+							'global_unique_id' => array(
+								'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'price'            => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
 								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'image'        => array(
+							'image'            => array(
 								'description' => __( 'Properties of the main product image.', 'woocommerce' ),
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),

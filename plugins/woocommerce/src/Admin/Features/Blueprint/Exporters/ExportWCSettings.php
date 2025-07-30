@@ -21,6 +21,22 @@ abstract class ExportWCSettings implements StepExporter, HasAlias {
 	use UseWPFunctions;
 
 	/**
+	 * The setting options class.
+	 *
+	 * @var SettingOptions
+	 */
+	protected $setting_options;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SettingOptions|null $setting_options The setting options class.
+	 */
+	public function __construct( ?SettingOptions $setting_options = null ) {
+		$this->setting_options = $setting_options ?? new SettingOptions();
+	}
+
+	/**
 	 * Return a page I.D to export.
 	 *
 	 * @return string The page ID.
@@ -33,8 +49,7 @@ abstract class ExportWCSettings implements StepExporter, HasAlias {
 	 * @return SetSiteOptions
 	 */
 	public function export() {
-		$setting_options = new SettingOptions();
-		return new SetSiteOptions( $setting_options->get_page_options( $this->get_page_id() ) );
+		return new SetSiteOptions( $this->setting_options->get_page_options( $this->get_page_id() ) );
 	}
 
 

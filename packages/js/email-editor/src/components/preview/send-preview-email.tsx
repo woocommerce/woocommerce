@@ -19,11 +19,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import {
-	SendingPreviewStatus,
-	storeName,
-	editorCurrentPostType,
-} from '../../store';
+import { SendingPreviewStatus, storeName } from '../../store';
 import { recordEvent, recordEventOnce } from '../../events';
 
 function RawSendPreviewEmail() {
@@ -41,7 +37,14 @@ function RawSendPreviewEmail() {
 		sendingPreviewStatus,
 		isModalOpened,
 		errorMessage,
-	} = useSelect( ( select ) => select( storeName ).getPreviewState(), [] );
+		postType,
+	} = useSelect(
+		( select ) => ( {
+			...select( storeName ).getPreviewState(),
+			postType: select( storeName ).getEmailPostType(),
+		} ),
+		[]
+	);
 
 	const handleSendPreviewEmail = () => {
 		void requestSendingNewsletterPreview( previewToEmail );
@@ -51,9 +54,9 @@ function RawSendPreviewEmail() {
 		() =>
 			applyFilters(
 				'woocommerce_email_editor_check_sending_method_configuration_link',
-				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }`
+				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }`
 			) as string,
-		[]
+		[ postType ]
 	);
 
 	const closeCallback = () => {
@@ -135,7 +138,7 @@ function RawSendPreviewEmail() {
 									link: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
 										<a
-											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ editorCurrentPostType }` }
+											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }` }
 											key="sign-up-for-free"
 											target="_blank"
 											rel="noopener noreferrer"

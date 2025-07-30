@@ -1,4 +1,4 @@
-export interface PaymentGatewayLink {
+export interface PaymentsProviderLink {
 	_type: string;
 	url: string;
 }
@@ -73,6 +73,7 @@ export type PaymentsProviderOnboardingState = {
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
+	test_drive_account?: boolean;
 	wpcom_has_working_connection?: boolean;
 	wpcom_is_store_connected?: boolean;
 	wpcom_has_connected_owner?: boolean;
@@ -93,6 +94,7 @@ export type PaymentsEntity = {
 		type?: string;
 	};
 	_links: Record< string, LinkData >;
+	_suggestion_id?: string;
 };
 
 // Represents a payments provider for the main providers list.
@@ -103,7 +105,7 @@ export type PaymentsProvider = PaymentsEntity & {
 	supports?: string[];
 	management?: ManagementData;
 	state?: PaymentsProviderState;
-	links?: PaymentGatewayLink[];
+	links?: PaymentsProviderLink[];
 	onboarding?: {
 		state?: PaymentsProviderOnboardingState;
 		_links?: {
@@ -113,7 +115,6 @@ export type PaymentsProvider = PaymentsEntity & {
 		type?: string;
 	};
 	tags?: string[];
-	_suggestion_id?: string;
 	_incentive?: PaymentsProviderIncentive;
 };
 
@@ -177,7 +178,7 @@ export type SuggestedPaymentsExtension = PaymentsEntity & {
 	image: string;
 	short_description: string;
 	tags: string[];
-	links: PaymentGatewayLink[];
+	links: PaymentsProviderLink[];
 	_incentive?: PaymentsProviderIncentive;
 };
 

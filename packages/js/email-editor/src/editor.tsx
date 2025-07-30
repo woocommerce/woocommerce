@@ -9,10 +9,10 @@ import '@wordpress/format-library'; // Enables text formatting capabilities
 /**
  * Internal dependencies
  */
-import { initBlocks } from './blocks';
+import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
-import { createStore, storeName, editorCurrentPostType } from './store';
+import { createStore, storeName } from './store';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
@@ -20,23 +20,29 @@ import {
 	initStoreTracking,
 	initDomTracking,
 } from './events';
-import { useContentValidation } from './hooks/use-content-validation';
+import { initContentValidationMiddleware } from './middleware/content-validation';
+import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
 function Editor() {
-	const { postId, settings } = useSelect(
+	const { postId, postType, settings } = useSelect(
 		( select ) => ( {
 			postId: select( storeName ).getEmailPostId(),
+			postType: select( storeName ).getEmailPostType(),
 			settings: select( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
 	useContentValidation();
+	useRemoveSavingFailedNotices();
+
+	// Set allowed blockTypes to the editor settings.
+	settings.allowedBlockTypes = getAllowedBlockNames();
 
 	return (
 		<StrictMode>
 			<InnerEditor
 				postId={ postId }
-				postType={ editorCurrentPostType }
+				postType={ postType }
 				settings={ settings }
 			/>
 		</StrictMode>
@@ -56,6 +62,7 @@ export function initialize( elementId: string ) {
 	initStoreTracking();
 	initDomTracking();
 	createStore();
+	initContentValidationMiddleware();
 	initializeLayout();
 	initBlocks();
 	initHooks();

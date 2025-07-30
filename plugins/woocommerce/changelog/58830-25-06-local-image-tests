@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flaky product import E2E test by using local images instead of remote URLs

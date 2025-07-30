@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,17 +15,19 @@ import {
 } from './actions';
 import { PaymentProvidersResponse, WooPayEligibilityResponse } from './types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
+import { STORE_KEY } from './constants';
 
-export function* getPaymentProviders( country?: string ) {
+const resolveSelect = controls?.resolveSelect ?? select;
+
+export function* getPaymentProviders( businessCountry?: string ) {
 	yield getPaymentProvidersRequest();
 
 	try {
 		const paymentProvidersResponse: PaymentProvidersResponse =
 			yield apiFetch( {
-				path:
-					WC_ADMIN_NAMESPACE +
-					'/settings/payments/providers?' +
-					( country ? `location=${ country }` : '' ),
+				method: 'POST', // Use the not-so-semantic POST to avoid caching of response.
+				path: WC_ADMIN_NAMESPACE + '/settings/payments/providers',
+				data: businessCountry ? { location: businessCountry } : {},
 			} );
 		yield getPaymentProvidersSuccess(
 			paymentProvidersResponse.providers,
@@ -37,12 +40,26 @@ export function* getPaymentProviders( country?: string ) {
 	}
 }
 
-export function* getOfflinePaymentGateways( country?: string ) {
-	yield getPaymentProviders( country );
+function* getPaymentProvidersIfNeeded( businessCountry?: string ) {
+	// Just make sure the payment providers resolver has been called.
+	yield resolveSelect( STORE_KEY, 'getPaymentProviders', businessCountry );
+}
+
+export function* getOfflinePaymentGateways( businessCountry?: string ) {
+	yield getPaymentProvidersIfNeeded( businessCountry );
+}
+
+export function* getSuggestions( businessCountry?: string ) {
+	yield getPaymentProvidersIfNeeded( businessCountry );
+}
+
+export function* getSuggestionCategories( businessCountry?: string ) {
+	yield getPaymentProvidersIfNeeded( businessCountry );
 }
 
 export function* getWooPayEligibility() {
 	const response: WooPayEligibilityResponse = yield apiFetch( {
+		method: 'POST',
 		path: `${ WC_ADMIN_NAMESPACE }/settings/payments/woopayments/woopay-eligibility`,
 	} );
 

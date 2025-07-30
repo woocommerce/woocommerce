@@ -13,23 +13,6 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
  */
 class Settings_Controller {
 
-	const ALLOWED_BLOCK_TYPES = array(
-		'core/button',
-		'core/buttons',
-		'core/column',
-		'core/columns',
-		'core/group',
-		'core/heading',
-		'core/image',
-		'core/list',
-		'core/list-item',
-		'core/paragraph',
-		'core/quote',
-		'core/spacer',
-		'core/social-link',
-		'core/social-links',
-	);
-
 	const DEFAULT_SETTINGS = array(
 		'enableCustomUnits' => array( 'px', '%' ),
 	);
@@ -70,8 +53,7 @@ class Settings_Controller {
 		$core_default_settings = \get_default_block_editor_settings();
 		$theme_settings        = $this->theme_controller->get_settings();
 
-		$settings                      = array_merge( $core_default_settings, self::DEFAULT_SETTINGS );
-		$settings['allowedBlockTypes'] = self::ALLOWED_BLOCK_TYPES;
+		$settings = array_merge( $core_default_settings, self::DEFAULT_SETTINGS );
 		// Assets for iframe editor (component styles, scripts, etc.).
 		$settings['__unstableResolvedAssets'] = $this->iframe_assets;
 		$editor_content_styles                = file_get_contents( __DIR__ . '/content-editor.css' );

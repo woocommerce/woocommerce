@@ -13,7 +13,7 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
@@ -26,6 +26,7 @@
 		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
+		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
 		"utils": "./tools/monorepo-utils/bin/run"
 	},

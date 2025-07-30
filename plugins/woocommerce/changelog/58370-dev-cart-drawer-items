@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: [Experimental] Render mini cart items using interactivity API when feature flag is enabled.
-

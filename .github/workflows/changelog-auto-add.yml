@@ -38,7 +38,7 @@ jobs:
                   node-version-file: '.nvmrc'
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@v4
+              uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
             - name: Generate Changelog File
               env:

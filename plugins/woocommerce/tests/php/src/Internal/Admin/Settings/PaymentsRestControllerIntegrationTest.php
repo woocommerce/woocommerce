@@ -223,7 +223,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -248,7 +248,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -296,7 +296,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -342,7 +342,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->enable_core_paypal_pg();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -391,7 +391,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'LI' ); // Liechtenstein.
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -433,7 +433,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->enable_core_paypal_pg();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'XX' );
 		$response = $this->server->dispatch( $request );
 
@@ -466,7 +466,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->enable_core_paypal_pg();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'U' );
 		$response = $this->server->dispatch( $request );
 
@@ -474,7 +474,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', '12' );
 		$response = $this->server->dispatch( $request );
 
@@ -482,7 +482,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'USA' );
 		$response = $this->server->dispatch( $request );
 
@@ -508,7 +508,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->mock_payment_gateways();
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -925,7 +925,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -944,7 +944,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -986,7 +986,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -1006,7 +1006,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -1058,7 +1058,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 
@@ -1164,7 +1164,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		);
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/providers' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 

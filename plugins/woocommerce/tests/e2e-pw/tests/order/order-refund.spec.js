@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.use( { storageState: ADMIN_STATE_PATH } );

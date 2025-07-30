@@ -8,7 +8,7 @@ import {
 } from '@wordpress/block-editor';
 
 export default function Save( {
-	attributes: { tagName: Tag },
+	attributes: { tagName: Tag = 'div' },
 }: {
 	attributes: { tagName: string };
 } ) {

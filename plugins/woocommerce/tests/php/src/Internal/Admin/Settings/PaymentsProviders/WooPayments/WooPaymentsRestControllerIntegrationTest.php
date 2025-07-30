@@ -267,7 +267,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -291,7 +291,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
 
@@ -341,7 +341,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', $country_code ); // Liechtenstein.
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -366,7 +366,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Arrange.
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $location );
 		$response = $this->server->dispatch( $request );
 
@@ -474,8 +474,11 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					$country_code => array(
 						'steps' => array(
 							$step_id => array(
-								'data' => array(
+								'data'     => array(
 									'payment_methods' => $request_params['payment_methods'],
+								),
+								'statuses' => array(
+									'started' => $this->current_time, // The step is auto-marked as started when saved.
 								),
 							),
 						),

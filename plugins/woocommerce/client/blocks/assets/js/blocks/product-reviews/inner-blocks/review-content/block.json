@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-review-content",
 	"title": "Review Content",
 	"category": "woocommerce",
-	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"ancestor": [ "woocommerce/product-reviews" ],
 	"description": "Displays the contents of a product review.",
 	"textdomain": "woocommerce",
 	"usesContext": [ "commentId" ],

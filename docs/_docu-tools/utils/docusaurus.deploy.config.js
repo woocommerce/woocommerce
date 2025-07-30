@@ -58,11 +58,13 @@ module.exports = {
     plugins: [
         ...(baseConfig.plugins || []).map((plugin) => {
             const path = Array.isArray(plugin) ? plugin[0] : plugin;
-            return path === './llms-txt/index.ts'
-                ? (Array.isArray(plugin)
-                    ? ['../llms-txt/index.ts', plugin[1]]
-                    : '../llms-txt/index.ts')
-                : plugin;
+            if (typeof path === 'string' && path.startsWith('./')) {
+                const newPath = path.replace(/^\.\//, '../');
+                return Array.isArray(plugin)
+                    ? [newPath, plugin[1]]
+                    : newPath;
+            }
+            return plugin;
         }),
         function pluginAssetPrefix() {
             return {

@@ -45,7 +45,8 @@ interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
 const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 	const [ stripeConnectInstance, setStripeConnectInstance ] =
 		useState< StripeConnectInstance | null >( null );
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint: onboardingSource } =
+		useOnboardingContext();
 	const [ initializationError, setInitializationError ] = useState<
 		string | null
 	>( null );
@@ -56,7 +57,8 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 			try {
 				const accountSession = await createEmbeddedKycSession(
 					onboardingData,
-					currentStep?.actions?.kyc_session?.href ?? ''
+					currentStep?.actions?.kyc_session?.href ?? '',
+					onboardingSource
 				);
 
 				const { clientSecret, publishableKey } = accountSession.session;
@@ -64,7 +66,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 				if ( ! publishableKey ) {
 					throw new Error(
 						__(
-							'Unable to start onboarding. If this problem persists, please contact support.',
+							'Unable to start the business verification session. If this problem persists, please contact support.',
 							'woocommerce'
 						)
 					);
@@ -86,7 +88,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 					err instanceof Error
 						? err.message
 						: __(
-								'Unable to start onboarding. If this problem persists, please contact support.',
+								'Unable to start the business verification session. If this problem persists, please contact support.',
 								'woocommerce'
 						  )
 				);

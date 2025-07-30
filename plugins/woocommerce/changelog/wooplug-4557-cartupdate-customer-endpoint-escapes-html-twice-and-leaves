@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sanitize address data only once in CartUpdateCustomer

@@ -10,9 +10,11 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Hooks into WooCommerce actions to register cache invalidation.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class CacheController implements RegisterHooksInterface {
-	const TRANSIENT_GROUP = 'filter_data';
+	const CACHE_GROUP = 'filter_data';
 
 	/**
 	 * Hook into actions and filters.
@@ -24,10 +26,9 @@ class CacheController implements RegisterHooksInterface {
 
 	/**
 	 * Invalidate all cache under filter data group.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function clear_filter_data_cache() {
-		WC_Cache_Helper::get_transient_version( self::TRANSIENT_GROUP, true );
+		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
+		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
 }

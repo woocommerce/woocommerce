@@ -63,6 +63,12 @@ class Bootstrap {
 				'setup_email_editor_integrations',
 			)
 		);
+		add_filter(
+			'block_type_metadata_settings',
+			array( $this->core_email_editor_integration, 'update_block_settings' ),
+			10,
+			1
+		);
 	}
 
 	/**

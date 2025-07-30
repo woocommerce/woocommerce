@@ -71,13 +71,13 @@ describe( 'IncentiveModal', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_show',
-			{
+			expect.objectContaining( {
 				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
 				suggestion_id: 'test-suggestion-id',
-			}
+			} )
 		);
 	} );
 
@@ -98,13 +98,13 @@ describe( 'IncentiveModal', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_accept',
-			{
+			expect.objectContaining( {
 				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
 				suggestion_id: 'test-suggestion-id',
-			}
+			} )
 		);
 	} );
 } );

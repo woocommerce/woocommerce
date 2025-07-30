@@ -1036,7 +1036,7 @@ const stateOptions = {
 	'IN:DN': 'India - Dadra and Nagar Haveli',
 	'IN:DD': 'India - Daman and Diu',
 	'IN:DL': 'India - Delhi',
-	'IN:LD': 'India - Lakshadeep',
+	'IN:LD': 'India - Lakshadweep',
 	'IN:PY': 'India - Pondicherry (Puducherry)',
 	'ID:AC': 'Indonesia - Daerah Istimewa Aceh',
 	'ID:SU': 'Indonesia - Sumatera Utara',

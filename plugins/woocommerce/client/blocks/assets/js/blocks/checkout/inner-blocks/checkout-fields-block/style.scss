@@ -1,17 +1,24 @@
 .wc-block-checkout__form {
 	margin: 0;
 	max-width: 100%;
+
+	// Fix content jump for address forms when using select as first input
+	.wc-blocks-components-select {
+		margin-top: $gap;
+	}
+
+	.wc-block-components-address-form__country {
+		.wc-blocks-components-select {
+			margin-top: 0;
+		}
+	}
 }
-.is-mobile,
-.is-small,
-.is-medium {
+@include cart-checkout-below-large-container {
 	.wc-block-checkout__main {
 		order: 1;
 	}
 }
-.is-small,
-.is-medium,
-.is-large {
+@mixin address-form-layout {
 	.wc-block-checkout__shipping-fields,
 	.wc-block-checkout__billing-fields {
 		.wc-block-components-address-form {
@@ -59,6 +66,16 @@
 			}
 		}
 	}
+}
+
+@include cart-checkout-large-container {
+	@include address-form-layout;
+}
+@include cart-checkout-small-container {
+	@include address-form-layout;
+}
+@include cart-checkout-medium-container {
+	@include address-form-layout;
 }
 
 .wc-block-components-address-form__address_2-toggle {

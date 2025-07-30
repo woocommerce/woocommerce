@@ -50,7 +50,6 @@ type Attributes = {
 };
 
 const blockifiedFallbackConfig = {
-	isConversionPossible: () => false,
 	getBlockifiedTemplate: () => [],
 	getDescription: () => '',
 	onClickCallback: () => void 0,
@@ -219,12 +218,8 @@ const Edit = ( {
 		[ attributes.align, attributes.template, setAttributes ]
 	);
 
-	const {
-		isConversionPossible,
-		getDescription,
-		getSkeleton,
-		blockifyConfig,
-	} = conversionConfig[ templateType ];
+	const { getDescription, getSkeleton, blockifyConfig } =
+		conversionConfig[ templateType ];
 
 	const skeleton = getSkeleton ? (
 		getSkeleton()
@@ -236,8 +231,8 @@ const Edit = ( {
 		/>
 	);
 
-	const canConvert = isConversionPossible();
-	const placeholderDescription = getDescription( templateTitle, canConvert );
+	const canConvert = !! templateDetails?.type;
+	const placeholderDescription = getDescription( templateTitle );
 
 	return (
 		<div { ...blockProps }>
@@ -255,11 +250,13 @@ const Edit = ( {
 							) }
 						</span>
 					</div>
-					<p
-						dangerouslySetInnerHTML={ {
-							__html: placeholderDescription,
-						} }
-					/>
+					{ canConvert && (
+						<p
+							dangerouslySetInnerHTML={ {
+								__html: placeholderDescription,
+							} }
+						/>
+					) }
 					<p>
 						{ __(
 							'You cannot edit the content of this block. However, you can move it and place other blocks around it.',

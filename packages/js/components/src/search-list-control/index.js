@@ -166,7 +166,7 @@ export const SearchListControl = ( props ) => {
 					<span className="woocommerce-search-list__not-found-text">
 						{ searchValue
 							? // eslint-disable-next-line @wordpress/valid-sprintf
-							  sprintf( messages.noResults, searchValue )
+							  sprintf( messages.noResults || '', searchValue )
 							: messages.noItems }
 					</span>
 				</div>

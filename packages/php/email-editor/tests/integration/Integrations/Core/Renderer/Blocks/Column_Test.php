@@ -93,6 +93,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 					'left'   => array(
 						'color' => '#222222',
 						'width' => '2px',
+						'style' => 'dashed',
 					),
 					'right'  => array(
 						'color' => '#333333',
@@ -137,7 +138,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'border-bottom-width:1px;', $rendered );
 		$this->assertStringContainsString( 'border-left-color:#222222;', $rendered );
 		$this->assertStringContainsString( 'border-left-width:2px;', $rendered );
-		$this->assertStringContainsString( 'border-style:solid;', $rendered );
+		$this->assertStringContainsString( 'border-left-style:dashed;', $rendered );
 		$this->assertStringContainsString( 'padding-bottom:5px;', $rendered );
 		$this->assertStringContainsString( 'padding-left:15px;', $rendered );
 		$this->assertStringContainsString( 'padding-right:20px;', $rendered );

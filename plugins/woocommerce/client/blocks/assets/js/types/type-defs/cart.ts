@@ -100,6 +100,7 @@ export interface CartImageItem {
 export interface CartVariationItem {
 	attribute: string;
 	value: string;
+	raw_attribute: string;
 }
 
 export interface CartItemPrices extends CurrencyInfo {

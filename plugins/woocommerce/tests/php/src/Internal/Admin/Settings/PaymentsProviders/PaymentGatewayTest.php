@@ -560,7 +560,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'account_connected' => array() ) );
-		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
+		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
 
 		// Test undefined.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
@@ -579,7 +579,11 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_started' => array() ) );
-		$this->assertFalse( $this->sut->is_onboarding_started( $fake_gateway ) );
+		$this->assertTrue( $this->sut->is_onboarding_started( $fake_gateway ) );
+
+		// Test undefined.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+		$this->assertTrue( $this->sut->is_onboarding_started( $fake_gateway ) );
 	}
 
 	/**
@@ -614,9 +618,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		);
 		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
 
-		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'onboarding_completed' => true ) );
-		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
-
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway(
 			'gateway1',
@@ -625,7 +626,11 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				'onboarding_completed' => array(),
 			)
 		);
-		$this->assertFalse( $this->sut->is_onboarding_completed( $fake_gateway ) );
+		$this->assertTrue( $this->sut->is_onboarding_completed( $fake_gateway ) );
+
+		// Test undefined.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+		$this->assertTrue( $this->sut->is_onboarding_completed( $fake_gateway ) );
 	}
 
 	/**

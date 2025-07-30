@@ -31,6 +31,7 @@ class ProductAvailabilityUtils {
 		// If the product is a variable product, make sure at least one of its
 		// variations is purchasable.
 		if (
+			isset( $product_availability['class'] ) &&
 			( 'in-stock' === $product_availability['class'] || 'available-on-backorder' === $product_availability['class'] ) &&
 			ProductType::VARIABLE === $product->get_type()
 		) {

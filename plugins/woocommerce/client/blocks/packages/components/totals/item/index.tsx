@@ -5,12 +5,14 @@ import clsx from 'clsx';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
 import FormattedMonetaryAmount from '../../formatted-monetary-amount';
+import './style.scss';
 
 export interface TotalsItemProps {
 	className?: string | undefined;
@@ -19,6 +21,8 @@ export interface TotalsItemProps {
 	// Value may be a number, or react node. Numbers are passed to FormattedMonetaryAmount.
 	value: number | ReactNode;
 	description?: ReactNode;
+	showSkeleton?: boolean;
+	skeleton?: ReactElement;
 }
 
 const TotalsItemValue = ( {
@@ -48,13 +52,25 @@ const TotalsItem = ( {
 	label,
 	value,
 	description,
+	showSkeleton = false,
 }: TotalsItemProps ): ReactElement => {
 	return (
 		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>
-			<TotalsItemValue value={ value } currency={ currency } />
+			{ ! value || showSkeleton ? (
+				<>
+					<Skeleton
+						width="45px"
+						height="1em"
+						ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+					/>
+				</>
+			) : (
+				<TotalsItemValue value={ value } currency={ currency } />
+			) }
+
 			<div className="wc-block-components-totals-item__description">
 				{ description }
 			</div>

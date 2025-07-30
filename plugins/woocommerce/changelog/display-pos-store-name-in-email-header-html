@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Display Point of Sale (POS) store name in the header HTML for POS emails by extracting blog name usage in the email header template to a variable.

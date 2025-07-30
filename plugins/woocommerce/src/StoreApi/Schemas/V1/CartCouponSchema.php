@@ -89,18 +89,16 @@ class CartCouponSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $coupon_code ) {
-		$controller           = new CartController();
-		$cart                 = $controller->get_cart_instance();
-		$total_discounts      = $cart->get_coupon_discount_totals();
-		$total_discount_taxes = $cart->get_coupon_discount_tax_totals();
-		$coupon               = new \WC_Coupon( $coupon_code );
+		$controller = new CartController();
+		$cart       = $controller->get_cart_instance();
+		$coupon     = new \WC_Coupon( $coupon_code );
 		return [
-			'code'          => $coupon_code,
+			'code'          => $coupon->get_code(),
 			'discount_type' => $coupon->get_discount_type(),
 			'totals'        => (object) $this->prepare_currency_response(
 				[
-					'total_discount'     => $this->prepare_money_response( isset( $total_discounts[ $coupon_code ] ) ? $total_discounts[ $coupon_code ] : 0, wc_get_price_decimals() ),
-					'total_discount_tax' => $this->prepare_money_response( isset( $total_discount_taxes[ $coupon_code ] ) ? $total_discount_taxes[ $coupon_code ] : 0, wc_get_price_decimals(), PHP_ROUND_HALF_DOWN ),
+					'total_discount'     => $this->prepare_money_response( $cart->get_coupon_discount_amount( $coupon_code ), wc_get_price_decimals() ),
+					'total_discount_tax' => $this->prepare_money_response( $cart->get_coupon_discount_tax_amount( $coupon_code ), wc_get_price_decimals(), PHP_ROUND_HALF_DOWN ),
 				]
 			),
 		];

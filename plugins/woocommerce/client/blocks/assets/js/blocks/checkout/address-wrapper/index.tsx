@@ -16,15 +16,18 @@ export const AddressWrapper = ( {
 	isEditing = false,
 	addressCard,
 	addressForm,
+	shouldAnimate = false,
 }: {
 	isEditing: boolean;
 	addressCard: JSX.Element;
 	addressForm: JSX.Element;
+	shouldAnimate?: boolean;
 } ): JSX.Element => {
 	const wrapperClasses = clsx(
 		'wc-block-components-address-address-wrapper',
 		{
 			'is-editing': isEditing,
+			'is-animated': shouldAnimate,
 		}
 	);
 

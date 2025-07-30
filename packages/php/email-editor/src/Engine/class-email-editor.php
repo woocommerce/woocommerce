@@ -98,6 +98,7 @@ class Email_Editor {
 		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
 		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		$this->register_block_patterns();
 		$this->register_email_post_types();
 		$this->register_block_templates();
@@ -284,6 +285,16 @@ class Email_Editor {
 			$theme->merge( new WP_Theme_JSON( $email_theme ) );
 		}
 		return $theme;
+	}
+
+	/**
+	 * Enqueue admin styles that are needed by the email editor.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_styles(): void {
+		// Calling action that loads registered blockTypes.
+		do_action( 'enqueue_block_editor_assets' );
 	}
 
 	/**

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/admin-library",
 	"private": true,
 	"version": "3.3.0",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"author": "Automattic",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/admin/README.md",
 	"repository": {

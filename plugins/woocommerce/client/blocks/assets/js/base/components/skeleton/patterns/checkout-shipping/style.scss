@@ -1,0 +1,9 @@
+.wc-block-components-skeleton.wc-block-components-skeleton--checkout-shipping {
+	border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+	border-radius: $universal-border-radius;
+	padding: 0.875em;
+	display: grid;
+	grid-template-columns: 20px 1fr 50px;
+	gap: $gap;
+	align-items: center;
+}
