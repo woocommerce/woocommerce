@@ -82,7 +82,7 @@ type UseProductDataContextProps = {
  * Hook that provides product data context for WooCommerce blocks.
  *
  * This hook serves as a unified interface for accessing product data across different environments for WooCommerce blocks that have the JS version for the frontend.
- * - Frontend: Returns the React context data from ProductDataContext (e.g., from server-side rendering)
+ * - Frontend: Returns the React context data from ProductDataContext
  * - Admin/Editor: Uses the new entity-based data fetching system via WordPress Core Data API
  *
  * The dual behavior ensures blocks work consistently in both frontend display and admin editing
