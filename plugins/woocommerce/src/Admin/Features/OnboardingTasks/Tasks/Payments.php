@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -315,11 +314,11 @@ class Payments extends Task {
 		$providers = $this->get_payments_providers();
 
 		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not an offline payment method or WooPayments.
+			// Check if the provider is enabled and is not an offline payment method.
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
-				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WooPaymentsService::GATEWAY_ID ), true )
+				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true )
 			) {
 				return true;
 			}
