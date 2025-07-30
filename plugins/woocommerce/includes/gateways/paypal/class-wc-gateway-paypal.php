@@ -128,6 +128,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
+		// Hide action buttons for pending orders as they take a while to be captured with orders v2.
+		add_filter( 'woocommerce_my_account_my_orders_actions', [ $this, 'filter_my_account_my_orders_actions' ], 10, 2 );
+		
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
@@ -203,6 +206,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			self::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
 			return;
 		}
+	}
+
+	/**
+	 * Hide "Pay" and "Cancel" action buttons for pending orders as orders v2 takes a while to be captured.
+	 *
+	 * @param $actions array An array with the default actions.
+	 * @param $order WC_Order The order.
+	 * @return array
+	 */
+	public function filter_my_account_my_orders_actions( $actions, $order ) {
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+			unset( $actions['pay'], $actions['cancel'] );
+		}
+		return $actions;
 	}
 
 	/**
