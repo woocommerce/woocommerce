@@ -11,10 +11,6 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class for managing taxonomy hierarchy data with performance optimization.
  *
- * Provides a tiered architecture approach:
- * - Small taxonomies: Full hierarchy map for maximum performance
- * - Large taxonomies: Adjacency list with on-demand computation
- *
  * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class TaxonomyHierarchyData {
@@ -97,18 +93,11 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get the threshold for strategy selection.
-	 * Small taxonomies (<1000 terms) use full hierarchy map for maximum performance.
-	 * Large taxonomies (1000+ terms) use adjacency list with on-demand computation.
+	 * Determine the optimal strategy for taxonomy hierarchy caching.
 	 *
-	 * @return int The threshold value.
-	 */
-	protected function get_threshold(): int {
-		return 1000;
-	}
-
-	/**
-	 * Determine the optimal strategy based on taxonomy size.
+	 * Defaults to 'full_map' which pre-computes all descendants for maximum query speed.
+	 * With 30-day caching, this is optimal for most use cases. Developers can override
+	 * via the 'woocommerce_taxonomy_hierarchy_build_strategy' filter for specific needs.
 	 *
 	 * @param string $taxonomy The taxonomy name.
 	 * @return string The optimal strategy ('full_map' or 'adjacency_map').
@@ -116,11 +105,30 @@ class TaxonomyHierarchyData {
 	private function get_optimal_strategy( string $taxonomy ): string {
 		$term_count = wp_count_terms( array( 'taxonomy' => $taxonomy ) );
 
-		if ( $term_count >= $this->get_threshold() ) {
-			return 'adjacency_map';
-		} else {
-			return 'full_map';
-		}
+		/**
+		 * Filters the hierarchy caching strategy for taxonomies.
+		 *
+		 * WooCommerce uses two strategies for caching taxonomy hierarchies:
+		 *
+		 * - 'full_map': Pre-computes all descendants for maximum query speed (default)
+		 * - 'adjacency_map': Stores only parent-child relationships to save memory
+		 *
+		 * With 30-day caching, full_map is usually optimal unless you have memory constraints
+		 * or extremely large taxonomies (5000+ terms).
+		 *
+		 * @since 10.2
+		 *
+		 * @param string $strategy   Default strategy ('full_map').
+		 * @param string $taxonomy   Taxonomy name (e.g., 'product_cat', 'pa_color').
+		 * @param int    $term_count Number of terms in this taxonomy.
+		 * @return string Either 'full_map' or 'adjacency_map'.
+		 */
+		return apply_filters(
+			'woocommerce_taxonomy_hierarchy_build_strategy',
+			'full_map',
+			$taxonomy,
+			$term_count
+		);
 	}
 
 	/**
