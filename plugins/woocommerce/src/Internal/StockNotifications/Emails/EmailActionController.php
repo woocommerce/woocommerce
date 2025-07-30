@@ -61,7 +61,7 @@ class EmailActionController {
 		}
 
 		$action_key = $notification->get_meta( 'email_link_action_key' );
-		if ( str_contains( $action_key, ':' ) ) {
+		if ( strpos( $action_key, ':' ) !== false ) {
 			$this->process_verification_action( $notification, $email_link_action_key );
 		} else {
 			$this->process_unsubscribe_action( $notification, $email_link_action_key );
