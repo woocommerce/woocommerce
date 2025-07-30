@@ -14,6 +14,13 @@ import type { BlockAlignment } from '@wordpress/blocks';
  */
 import Block from './block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
+import { useProduct } from '@woocommerce/entities';
+import {
+	isExperimentalAPIFlagEnabled,
+	isExperimentalBlocksEnabled,
+	isExperimentalFlagEnabled,
+	isExperimentalWcRestApiEnabled,
+} from '@woocommerce/block-settings';
 
 type UnsupportedAligments = 'wide' | 'full';
 type AllowedAlignments = Exclude< BlockAlignment, UnsupportedAligments >;
@@ -73,6 +80,8 @@ const PriceEdit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<>
 			<BlockControls>
@@ -84,7 +93,15 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				<Block
+					{ ...blockAttrs }
+					isAdmin={ true }
+					product={ product }
+					isExperimentalFlagEnabled={
+						isExperimentalBlocksEnabled() &&
+						isExperimentalWcRestApiEnabled()
+					}
+				/>
 			</div>
 		</>
 	);

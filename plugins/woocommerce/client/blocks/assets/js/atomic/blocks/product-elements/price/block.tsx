@@ -12,13 +12,20 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
+import type { ProductResponseItem } from '@woocommerce/types';
+import { SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
 
-type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+type Props = BlockAttributes &
+	HTMLAttributes< HTMLDivElement > & {
+		isAdmin: boolean;
+		product: ProductResponseItem;
+		isExperimentalFlagEnabled: boolean;
+	};
 
 interface PriceProps {
 	currency_code: CurrencyCode;
@@ -35,10 +42,20 @@ interface PriceProps {
 }
 
 export const Block = ( props: Props ): JSX.Element | null => {
-	const { className, textAlign, isDescendentOfSingleProductTemplate } = props;
+	const {
+		className,
+		textAlign,
+		isDescendentOfSingleProductTemplate,
+		isAdmin,
+		product: productData,
+		isExperimentalFlagEnabled,
+	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext();
+	const { product } = useProductDataContext( {
+		isAdmin,
+		product: productData,
+	} );
 
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
@@ -59,7 +76,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		}
 	);
 
-	if ( ! product.id && ! isDescendentOfSingleProductTemplate ) {
+	if ( ! product?.id && ! isDescendentOfSingleProductTemplate ) {
 		const productPriceComponent = (
 			<ProductPrice align={ textAlign } className={ wrapperClassName } />
 		);
@@ -73,7 +90,25 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		return productPriceComponent;
 	}
 
-	const prices: PriceProps = product.prices;
+	let prices: PriceProps = product?.prices;
+
+	if ( isExperimentalFlagEnabled ) {
+		prices = {
+			price: product?.price * 100,
+			sale_price: product?.sale_price * 100,
+			regular_price: product?.regular_price * 100,
+			currency_minor_unit: SITE_CURRENCY.minorUnit,
+			price_range:
+				product?.__experimental_max_price &&
+				product?.__experimental_min_price
+					? {
+							min_amount: product.__experimental_min_price,
+							max_amount: product.__experimental_max_price,
+					  }
+					: null,
+		};
+	}
+
 	const currency = showPricePreview
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
