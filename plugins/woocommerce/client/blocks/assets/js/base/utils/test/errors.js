@@ -21,7 +21,9 @@ describe( 'formatError', () => {
 	} );
 
 	test( 'should format API errors', async () => {
-		const mockResponse = new Response( mockResponseBody, { status: 400 } );
+		const mockResponse = new Response( mockResponseBody, {
+			status: 400,
+		} );
 
 		const error = await formatError( mockResponse );
 		const expectedError = {
@@ -39,7 +41,7 @@ describe( 'formatError', () => {
 		const error = await formatError( mockResponse );
 
 		expect( error.message ).toContain(
-			'invalid json response body at  reason:'
+			"Expected ',' or '}' after property value in JSON at position 26"
 		);
 		expect( error.type ).toEqual( 'general' );
 	} );

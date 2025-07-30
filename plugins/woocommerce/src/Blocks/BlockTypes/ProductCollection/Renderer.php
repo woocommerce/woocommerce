@@ -58,9 +58,7 @@ class Renderer {
 			1
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
-
-		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 1 );
 	}
 
 	/**
@@ -129,7 +127,14 @@ class Renderer {
 
 			$collection                     = $block['attrs']['collection'] ?? '';
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
-			$context                        = array( 'notices' => array() );
+			$context                        = array(
+				'notices'            => array(),
+				// Next/Previous Buttons block context.
+				'isDisabledPrevious' => false,
+				'isDisabledNext'     => false,
+				'ariaLabelPrevious'  => __( 'Scroll products left', 'woocommerce' ),
+				'ariaLabelNext'      => __( 'Scroll products right', 'woocommerce' ),
+			);
 
 			if ( $collection ) {
 				$context['collection'] = $collection;
@@ -329,12 +334,15 @@ class Renderer {
 	 *     }
 	 * }
 	 */
-	public function provide_location_context_for_inner_blocks( $context ) {
+	public function extend_context_for_inner_blocks( $context ) {
 		// Run only on frontend.
 		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
 		if ( is_admin() || \WC()->is_rest_api_request() ) {
 			return $context;
 		}
+
+		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
+		$context['iapi/provider'] = 'woocommerce/product-collection';
 
 		// Target only product collection's inner blocks that use the 'query' context.
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {

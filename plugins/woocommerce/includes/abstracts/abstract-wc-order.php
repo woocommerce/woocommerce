@@ -226,11 +226,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
-			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
-				$order_cache = wc_get_container()->get( OrderCache::class );
-				$order_cache->remove( $this->get_id() );
-			}
-
 			/**
 			 * Trigger action after saving to the DB.
 			 *

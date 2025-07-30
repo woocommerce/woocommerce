@@ -2,6 +2,18 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/woocommerce/email-editor/releases/tag/1.3.0) - 2025-07-24 
+
+-   Patch - Integrate the convert class from the external HTML to Text library and remove the library dependency from the Email Editor package. [#59859]
+-   Minor - Add functionality to sync block theme styles to the email editor. [#59757]
+-   Minor - Add licensing and security policy. [#59859]
+
+## [1.2.0](https://github.com/woocommerce/email-editor/releases/tag/1.2.0) - 2025-07-23 
+
+-   Patch - Fix color inheritance in Paragraph and Heading blocks. [#59732]
+-   Patch - Add documentation for block registration in the WooCommerce Email Editor [#59541]
+-   Minor - Add `Styles_Helper` methods to generate inline styles from block attributes, and refactor blocks to utilize them. [#59678]
+
 ## [1.1.0](https://github.com/woocommerce/email-editor/releases/tag/1.1.0) - 2025-07-16 
 
 -   Minor - Add Table_Wrapper_Helper utility class. [#59264]
@@ -38,6 +50,3 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Implement logging support in the email editor [#58607]
 -   Minor - Add support for a block custom callback render_email_callback and remove Blocks_Registry class. [#59070]
 -   Minor - Update package for publishing to Packagist [#59058]
--   Updated post type for theme from `mailpoet_email_theme` to `woocommerce_email_theme` for consistency with WooCommerce naming conventions. [#55938]
--   Updated user theme post name from `wp-global-styles-mailpoet` to `wp-global-styles-woocommerce-email` to align with WooCommerce naming standards. [#55938]
--   Update minimum supported WordPress version to 6.7 [#58246]

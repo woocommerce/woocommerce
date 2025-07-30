@@ -74,7 +74,6 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 		// Start fresh - remove existing filters.
 		remove_all_filters( 'woocommerce_migrator_platforms' );
 
-		// Test empty state.
 		$registry  = new PlatformRegistry();
 		$platforms = $registry->get_platforms();
 		$this->assertArrayNotHasKey( 'shopify', $platforms, 'Shopify should not be registered before init.' );

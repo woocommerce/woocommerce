@@ -53,14 +53,15 @@ final class ProductFilterStatus extends AbstractBlock {
 		}
 
 		$active_statuses = array_filter(
-			explode( ',', $params[ self::STOCK_STATUS_QUERY_VAR ] )
+			array_map( 'trim', explode( ',', $params[ self::STOCK_STATUS_QUERY_VAR ] ) ),
+			function ( $status ) use ( $status_options ) {
+				return array_key_exists( $status, $status_options );
+			}
 		);
 
 		if ( empty( $active_statuses ) ) {
 			return $items;
 		}
-
-		$action_namespace = $this->get_full_block_name();
 
 		foreach ( $active_statuses as $status ) {
 			$items[] = array(
