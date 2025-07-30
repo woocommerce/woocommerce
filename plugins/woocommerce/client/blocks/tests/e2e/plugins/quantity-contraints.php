@@ -8,6 +8,8 @@
  * @package woocommerce-blocks-test-quantity-constraints
  */
 
+declare(strict_types=1);
+
 add_action(
 	'woocommerce_init',
 	function () {
