@@ -7,8 +7,13 @@ $dialog-padding: 20px;
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
-	aspect-ratio: 1 / 1;
 	overflow: hidden;
+
+	//When Product Image aspect ratio is auto, we are setting constraints
+	//on the large image container and display full images in square container.
+	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+		aspect-ratio: 1/1;
+	}
 
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
@@ -19,14 +24,15 @@ $dialog-padding: 20px;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
-		aspect-ratio: 1 / 1;
 		flex-shrink: 0;
 		max-width: 100%;
-		width: 100%;
 		display: flex;
-		overflow: hidden;
 		align-items: center;
 		justify-content: center;
+
+		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+			aspect-ratio: 1/1;
+		}
 	}
 
 	// These rules are overriding styles from WooCommerce core, that's why we
@@ -41,9 +47,12 @@ $dialog-padding: 20px;
 
 		img {
 			height: 100%;
-			// There's inline style object-fit: cover; that we need to override.
+		}
+
+		&.wc-block-components-product-image--aspect-ratio-auto img {
 			object-fit: contain !important;
 		}
+
 	}
 
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
@@ -95,80 +104,54 @@ $dialog-padding: 20px;
 	}
 }
 
-:where(.wc-block-product-gallery-large-image-next-previous) {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	height: 100%;
-
-	&:where(.alignleft) {
-		justify-content: flex-start;
-		gap: 0;
-	}
-
-	&:where(.alignright) {
-		justify-content: flex-end;
-		gap: 0;
-	}
-
-	&:where(.aligncenter) {
-		justify-content: center;
-		gap: 0;
-	}
-
-	&:where(.aligntop) {
-		align-items: flex-start;
-	}
-
-	&:where(.alignbottom) {
-		align-items: flex-end;
-	}
-}
-
-
-:where(.wc-block-product-gallery-large-image-next-previous__icon) {
-	color: inherit;
-}
-
-// Icons are centred but they are perceived off hence adjusting with padding.
-:where(.wc-block-product-gallery-large-image-next-previous__icon--left) {
-	padding: 2px 2px 0 0;
-}
-
-:where(.wc-block-product-gallery-large-image-next-previous__icon--right) {
-	padding: 2px 0 0 2px;
-}
-
-:where(.wc-block-product-gallery-large-image-next-previous__button) {
-	cursor: pointer;
-	z-index: 3;
-	pointer-events: all;
-	border: none;
-	width: 40px;
-	height: 40px;
-	font-size: 12px;
-	padding: 0;
-	background: #fff;
-	outline-offset: -2px;
-}
-
-:where(.wc-block-product-gallery-large-image-next-previous__button[aria-disabled="true"]) {
-	:where(.wc-block-product-gallery-large-image-next-previous__icon) {
-		opacity: 30%;
-	}
-	cursor: not-allowed;
-}
-
-@mixin vertical-thumbnails {
-	:where(.wc-block-product-gallery-thumbnails__scrollable) {
-		flex-direction: column;
-	}
-
-	@for $i from 10 through 50 {
-		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-			flex-basis: calc($i * 1%);
-			aspect-ratio: 1 / calc(100 / $i);
+// Vertical thumbnails
+.wc-block-product-gallery:not(.is-vertical):not(:has(.is-vertical)) {
+	@include breakpoint(">600px") {
+		:where(.wc-block-product-gallery-thumbnails__scrollable) {
+			flex-direction: column;
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-auto),
+		&:has(.wc-block-components-product-image--aspect-ratio-1) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 1 / calc(100 / var(--wc-block-product-gallery-thumbnails-size));
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 4 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 4);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 2);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 2 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 16 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 9);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 9 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 16);
+			}
 		}
 	}
 }
@@ -194,10 +177,6 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails) {
 	position: relative;
-
-	// Use the vertical thumbnails as a default. The default layout attributes from block.json are not set
-	// until manipulated hence the need for the mixin.
-	@include vertical-thumbnails;
 
 	$gradient-size: 14%;
 	$gradient-mid-step-size: 6%;
@@ -261,21 +240,14 @@ $dialog-padding: 20px;
 	filter: brightness(0.8);
 }
 
-// Percentage width
-:where(.is-horizontal .wc-block-product-gallery-thumbnails) {
-	@include vertical-thumbnails;
-}
-
 :where(.is-vertical .wc-block-product-gallery-thumbnails) {
 	@include horizontal-thumbnails;
 
 	// These are min - max range values for thumbnails size.
-	@for $i from 10 through 50 {
-		&:where(.wc-block-product-gallery-thumbnails--thumbnails-size-#{$i}) {
-			width: 100%;
-			height: calc($i * 1%);
-			aspect-ratio: calc(100 / $i) / 1;
-		}
+	&:where(.wc-block-product-gallery-thumbnails) {
+		width: 100%;
+		height: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+		aspect-ratio: calc(100 / var(--wc-block-product-gallery-thumbnails-size)) / 1;
 	}
 }
 
@@ -364,7 +336,7 @@ $dialog-padding: 20px;
 
 		// This rule is overriding a `display: flex` from WordPress core, that's
 		// why it needs a higher specificity.
-		.wc-block-product-gallery-large-image-next-previous.wc-block-product-gallery-large-image-next-previous {
+		.wc-block-next-previous-buttons.wc-block-next-previous-buttons {
 			display: none;
 		}
 

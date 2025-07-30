@@ -11,40 +11,87 @@ import '../../../cart-checkout/cart-line-items-table/style.scss';
 import '../../../../../blocks/cart/style.scss';
 import './style.scss';
 
-export const CartLineItemsSkeleton = ( { rows = 2 }: { rows?: number } ) => {
+export const CartLineItemsCartSkeleton = ( {
+	rows = 2,
+}: {
+	rows?: number;
+} ) => {
+	return (
+		<>
+			{ Array.from( { length: rows } ).map( ( _, index ) => (
+				<tr
+					className="wc-block-cart-items__row"
+					key={ index }
+					aria-label={ __(
+						'Loading products in cart…',
+						'woocommerce'
+					) }
+				>
+					<td className="wc-block-cart-item__image">
+						<Skeleton height="0" />
+					</td>
+					<td className="wc-block-cart-item__product">
+						<div className="wc-block-cart-item__wrap">
+							<Skeleton
+								width="90%"
+								maxWidth="173px"
+								height=".875em"
+							/>
+							<Skeleton
+								width="50%"
+								maxWidth="85px"
+								height=".875em"
+							/>
+						</div>
+					</td>
+					<td className="wc-block-cart-item__total">
+						<Skeleton height=".875em" maxWidth="45px" />
+					</td>
+				</tr>
+			) ) }
+		</>
+	);
+};
+
+export const CartLineItemsCheckoutSkeleton = ( {
+	rows = 2,
+}: {
+	rows?: number;
+} ) => {
 	return (
 		<div
-			className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items wc-block-cart is-large"
+			className="wc-block-components-order-summary"
 			aria-live="polite"
-			aria-label={ __( 'Loading your cart…', 'woocommerce' ) }
+			aria-label={ __( 'Loading products in cart…', 'woocommerce' ) }
 		>
-			<table className="wc-block-cart-items wp-block-woocommerce-cart-line-items-block">
-				<thead>
-					<tr className="wc-block-cart-items__header">
-						<th className="wc-block-cart-items__header-image"></th>
-						<th className="wc-block-cart-items__header-product"></th>
-						<th className="wc-block-cart-items__header-total"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{ Array.from( { length: rows } ).map( ( _, index ) => (
-						<tr className="wc-block-cart-items__row" key={ index }>
-							<td className="wc-block-cart-item__image">
-								<Skeleton width="78px" height="78px" />
-							</td>
-							<td className="wc-block-cart-item__product">
-								<div className="wc-block-cart-item__wrap">
-									<Skeleton maxWidth="173px" />
-									<Skeleton width="78px" />
-								</div>
-							</td>
-							<td className="wc-block-cart-item__total">
-								<Skeleton />
-							</td>
-						</tr>
-					) ) }
-				</tbody>
-			</table>
+			<div className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items-checkout wc-block-components-order-summary__content">
+				{ Array.from( { length: rows } ).map( ( _, index ) => (
+					<div
+						className="wc-block-components-order-summary-item"
+						key={ index }
+					>
+						<div className="wc-block-components-order-summary-item__image">
+							<Skeleton width="48px" height="48px" />
+						</div>
+						<div className="wc-block-components-order-summary-item__description">
+							<Skeleton
+								width="90%"
+								maxWidth="173px"
+								height=".875em"
+							/>
+
+							<Skeleton
+								width="50%"
+								maxWidth="85px"
+								height=".875em"
+							/>
+						</div>
+						<div className="wc-block-components-order-summary-item__total-price">
+							<Skeleton width="45px" height=".875em" />
+						</div>
+					</div>
+				) ) }
+			</div>
 		</div>
 	);
 };

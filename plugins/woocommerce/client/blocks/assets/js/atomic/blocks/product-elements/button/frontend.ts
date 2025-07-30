@@ -2,15 +2,12 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import type {
-	OptimisticCartItem,
-	SelectedAttributes,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
+import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -56,41 +53,6 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const isCartItemMatched = (
-	cartItem: OptimisticCartItem,
-	selectedItem: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedItem )
-	) {
-		return false;
-	}
-
-	// In case the attributes list length is different in both the objects.
-	if ( cartItem.variation.length !== selectedItem.length ) {
-		return false;
-	}
-
-	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedItem.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
-					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
-				);
-			} )
-	);
-};
-
 const productButtonStore = {
 	state: {
 		get quantity(): number {
@@ -106,7 +68,7 @@ const productButtonStore = {
 			const selectedAttributes =
 				addToCartWithOptionsState?.selectedAttributes;
 			const selectedVariableProduct = products.find( ( item ) =>
-				isCartItemMatched( item, selectedAttributes )
+				doesCartItemMatchAttributes( item, selectedAttributes )
 			);
 
 			return selectedVariableProduct?.quantity || 0;

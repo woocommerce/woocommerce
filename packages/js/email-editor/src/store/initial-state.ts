@@ -42,5 +42,6 @@ export function getInitialState(): State {
 			list: [],
 			isFetching: false,
 		},
+		contentValidation: undefined,
 	};
 }
