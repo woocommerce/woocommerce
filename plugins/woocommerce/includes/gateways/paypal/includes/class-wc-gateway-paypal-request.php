@@ -262,7 +262,7 @@ class WC_Gateway_Paypal_Request {
 				'headers' => array(
 					'Content-Type' => 'application/json',
 				),
-				'body'    => wp_json_encode( array() ),
+				'body'    => wp_json_encode( array( 'testmode' => $this->gateway->testmode ) ),
 				'timeout' => 60,
 			)
 		);
