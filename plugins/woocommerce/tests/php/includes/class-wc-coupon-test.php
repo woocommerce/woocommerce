@@ -74,7 +74,7 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$initial_shipping_total = $order->get_shipping_total();
 		$initial_order_total = $order->get_total();
 
-		// The helper creates an order with $10 shipping and $40 product total (4 x $10)
+		// The helper creates an order with $40 product total (4 x $10) + $10 shipping = $50 total
 		$this->assertEquals( 10.00, floatval( $initial_shipping_total ), 'Initial shipping cost should be $10.00' );
 		$this->assertEquals( 50.00, floatval( $initial_order_total ), 'Initial order total should be $50.00' );
 
