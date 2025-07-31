@@ -75,6 +75,26 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/authorize-payment',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'authorize_payment' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/capture-authorized-payment/(?P<authorization_id>[a-zA-Z0-9]+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'capture_authorized_payment' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -220,6 +240,149 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		} else {
 			error_log( '(Proxy) Failed to capture PayPal order. ' . wc_print_r( $response_data, true ) );
+			return new WP_REST_Response(
+				$response_data,
+				500
+			);
+		}
+	}
+
+	/**
+	 * Capture the PayPal payment using Orders v2 API.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
+	 */
+	public function authorize_payment( WP_REST_Request $request ) {
+		$request_data = $request->get_json_params();
+
+		$required_params = array( 'testmode', 'authorize_url', 'paypal_order_id' );
+		foreach ( $required_params as $param ) {
+			if ( ! isset( $request_data[ $param ] ) ) {
+				error_log( '(Proxy) PayPal authorize payment request missing required param: ' . $param . '.' );
+				return new WP_REST_Response(
+					array( 'error' => 'PayPal authorize payment request missing required param: ' . $param . '.' ),
+					400
+				);
+			}
+		}
+
+		error_log( '(Proxy) PayPal authorize payment request received: ' . wc_print_r( $request_data, true ) );
+
+		$testmode        = $request_data['testmode'];
+		$authorize_url   = $request_data['authorize_url'];
+		$paypal_order_id = $request_data['paypal_order_id'];
+
+		$access_token = $this->get_paypal_access_token( $testmode );
+		if ( ! $access_token ) {
+			error_log( '(Proxy) Failed to get PayPal access token. Cannot authorize payment.' );
+			return new WP_REST_Response(
+				array(
+					'status'  => 'error',
+					'message' => 'Failed to get PayPal access token.',
+				),
+				500
+			);
+		}
+
+		$args = array(
+			'method'  => 'POST',
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . $access_token,
+			),
+			'body'    => wp_json_encode( array( 'id' => $paypal_order_id ) ),
+		);
+
+		$response      = wp_remote_post( $authorize_url, $args );
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $body, true );
+		error_log( '(Proxy) PayPal authorize payment response: ' . wc_print_r( $response_data, true ) );
+
+		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
+			return new WP_REST_Response(
+				$response_data,
+				200
+			);
+		} else {
+			error_log( '(Proxy) Failed to authorize PayPal order. ' . wc_print_r( $response_data, true ) );
+			return new WP_REST_Response(
+				$response_data,
+				500
+			);
+		}
+	}
+
+	/**
+	 * Capture the PayPal payment that has been authorized.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
+	 */
+	public function capture_authorized_payment( WP_REST_Request $request ) {
+		$authorization_id = $request->get_param( 'authorization_id' );
+		$request_data     = $request->get_json_params();
+
+		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
+		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment request received for request data: ' . wc_print_r( $request_data, true ) );
+
+		error_log( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
+
+		if ( empty( $authorization_id ) || ! isset( $request_data['testmode'] ) ) {
+			error_log( '(Proxy) Authorization ID missing. Cannot capture authorized payment.' );
+			return new WP_REST_Response(
+				array(
+					'status'  => 'error',
+					'message' => 'Authorization ID missing.',
+				),
+				400
+			);
+		}
+
+		if ( ! isset( $request_data['testmode'] ) ) {
+			error_log( '(Proxy) PayPal authorize payment request missing required param: ' . $param . '.' );
+			return new WP_REST_Response(
+				array( 'error' => 'PayPal capture authorized payment request missing required param: ' . $param . '.' ),
+				400
+			);
+		}
+
+		$access_token = $this->get_paypal_access_token( $request_data['testmode'] );
+		if ( ! $access_token ) {
+			error_log( '(Proxy) Failed to get PayPal access token. Cannot authorize payment.' );
+			return new WP_REST_Response(
+				array(
+					'status'  => 'error',
+					'message' => 'Failed to get PayPal access token.',
+				),
+				500
+			);
+		}
+
+		$args = array(
+			'method'  => 'POST',
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer ' . $access_token,
+			),
+		);
+
+		$response      = wp_remote_post( $this->get_paypal_api_request_url( $request_data['testmode'] ) . '/v2/payments/authorizations/' . $authorization_id . '/capture', $args );
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $body, true );
+		error_log( '(Proxy) PayPal capture authorized payment response: ' . wc_print_r( $response_data, true ) );
+
+		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment response: ' . wc_print_r( $response_data, true ) );
+
+		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
+			return new WP_REST_Response(
+				$response_data,
+				200
+			);
+		} else {
+			error_log( '(Proxy) Failed to capture authorized PayPal payment. ' . wc_print_r( $response_data, true ) );
 			return new WP_REST_Response(
 				$response_data,
 				500
