@@ -653,15 +653,13 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test for issue #23802: Validate that the fix prevents double tax subtraction.
+	 * Test that coupon discounts are calculated correctly for admin orders with tax-inclusive pricing.
 	 * 
-	 * This test validates that our fix in set_coupon_discount_amounts() prevents
-	 * the double tax subtraction that was causing incorrect coupon calculations
-	 * when prices include tax.
-	 * 
-	 * @see https://github.com/woocommerce/woocommerce/issues/23802
+	 * When creating orders manually in the admin with tax-inclusive pricing enabled,
+	 * coupon discounts should be calculated based on the tax-exclusive amount without
+	 * double-subtracting the tax amount.
 	 */
-	public function test_issue_23802_fix_prevents_double_tax_subtraction() {
+	public function test_admin_order_coupon_discount_with_tax_inclusive_pricing() {
 		// Set up WooCommerce settings
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -689,28 +687,29 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$product->set_regular_price( 39.00 );
 		$product->save();
 
-		// Create admin order
+		// Create admin order (manual order creation, not frontend checkout)
 		$order = wc_create_order();
 		$order->add_product( $product, 1 );
 		$order->apply_coupon( 'test_coupon' );
 
 		// Get the coupon items to validate the discount amounts directly
 		$coupon_items = $order->get_items( 'coupon' );
-		$this->assertCount( 1, $coupon_items, 'Coupon should be applied to order' );
+		$this->assertCount( 1, $coupon_items, 'Coupon should be applied to admin order' );
 		
 		$coupon_item = current( $coupon_items );
 		$coupon_discount = $coupon_item->get_discount();
 		
-		// Before the fix, this would be ~2.53 due to double tax subtraction
-		// After the fix, this should be higher (the correct discount amount)
-		// The exact value may vary due to WooCommerce's complex calculation flow,
-		// but it should be significantly higher than the broken value
-		$this->assertGreaterThan( 2.8, $coupon_discount, 
-			'Fix validation: Coupon discount should be greater than broken value, indicating fix prevents double tax subtraction' );
+		// For a 39€ product with 24% tax included and a 10% coupon:
+		// Tax-exclusive price: 39 / 1.24 ≈ 31.45
+		// Expected discount: 31.45 * 0.10 ≈ 3.14
+		// The discount should be calculated on the tax-exclusive amount
+		$expected_min_discount = 3.0; // Allow for rounding
+		$expected_max_discount = 3.3; // Allow for calculation variations
+		
+		$this->assertGreaterThan( $expected_min_discount, $coupon_discount, 
+			'Admin order coupon discount should be calculated on tax-exclusive price' );
 			
-		// Also verify it's reasonable (should be around 10% of tax-exclusive price)
-		// Tax-exclusive price: 39 / 1.24 ≈ 31.45, so 10% ≈ 3.14
-		$this->assertLessThan( 3.5, $coupon_discount, 
-			'Coupon discount should be reasonable (close to 10% of tax-exclusive price)' );
+		$this->assertLessThan( $expected_max_discount, $coupon_discount, 
+			'Admin order coupon discount should not exceed reasonable bounds' );
 	}
 }
