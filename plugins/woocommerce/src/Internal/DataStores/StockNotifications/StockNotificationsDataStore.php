@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\StockNotifications;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -73,7 +74,7 @@ class StockNotificationsDataStore implements \WC_Object_Data_Store_Interface {
 	 */
 	public function get_database_schema(): string {
 
-		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) || ! WOOCOMMERCE_BIS_ALPHA_ENABLED ) {
+		if ( ! Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
 			return '';
 		}
 

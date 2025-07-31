@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
+use Automattic\Jetpack\Constants;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -219,12 +220,10 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
+		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
-
-		// Handle Back-in-Stock Notifications alpha feature flag.
-		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
