@@ -309,28 +309,9 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array|\WP_Error Hierarchically ordered terms or error.
 	 */
 	private function get_hierarchical_terms( string $taxonomy, array $taxonomy_counts, bool $hide_empty, string $orderby, string $order ) {
-		// For non-hierarchical taxonomies, use standard ordering.
-		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-			$args = array(
-				'taxonomy' => $taxonomy,
-				'orderby'  => $orderby,
-				'order'    => $order,
-			);
-
-			if ( $hide_empty ) {
-				$args['include'] = array_keys( $taxonomy_counts );
-			} else {
-				$args['hide_empty'] = false;
-			}
-
-			return get_terms( $args );
-		}
-
-		// Get all terms without specific ordering - we'll apply our own sorting.
 		$args = array(
 			'taxonomy'   => $taxonomy,
 			'hide_empty' => false,
-			'fields'     => 'all',
 		);
 
 		if ( $hide_empty ) {
@@ -340,7 +321,11 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		$terms = get_terms( $args );
 
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return $terms;
+			return array();
+		}
+
+		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
 		}
 
 		// Use TaxonomyHierarchyData for hierarchy operations.
