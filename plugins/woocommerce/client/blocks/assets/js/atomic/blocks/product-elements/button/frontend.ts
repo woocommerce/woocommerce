@@ -143,6 +143,8 @@ const productButtonStore = {
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
+			productButtonStore.actions.handlePressedState();
+
 			const context = getContext< Context >();
 
 			// Todo: Use the module exports instead of `store()` once the
@@ -197,6 +199,7 @@ const productButtonStore = {
 				addToCartWithOptionsState?.isFormValid
 			) {
 				context.hasPressedButton = true;
+				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
 		},
 	},
@@ -212,19 +215,6 @@ const productButtonStore = {
 				context.tempQuantity = state.quantity;
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			}, [] );
-		},
-		startAnimation() {
-			const context = getContext< Context >();
-			// We start the animation if the temporary quantity is out of
-			// sync with the quantity in the cart and the animation hasn't
-			// started yet.
-			// We skip the animation altogether if the Add to Cart + Options form is invalid.
-			if (
-				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE
-			) {
-				context.animationStatus = AnimationStatus.SLIDE_OUT;
-			}
 		},
 	},
 };
