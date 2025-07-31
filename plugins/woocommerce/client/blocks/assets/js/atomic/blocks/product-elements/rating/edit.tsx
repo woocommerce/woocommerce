@@ -9,6 +9,7 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { BlockAttributes } from './types';
 import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
-import { useProduct } from '@woocommerce/entities';
 
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
