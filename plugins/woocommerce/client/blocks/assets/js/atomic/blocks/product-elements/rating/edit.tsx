@@ -18,6 +18,7 @@ import { BlockAttributes } from './types';
 import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
+import { useProduct } from '@woocommerce/entities';
 
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
@@ -56,6 +57,8 @@ const Edit = (
 		isDescendentOfSingleProductTemplate,
 	] );
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<>
 			<BlockControls>
@@ -67,7 +70,7 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				<Block isAdmin={ true } { ...blockAttrs } product={ product } />
 			</div>
 		</>
 	);
