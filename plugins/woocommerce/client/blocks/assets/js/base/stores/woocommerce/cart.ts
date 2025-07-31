@@ -425,25 +425,25 @@ const { state, actions } = store< Store >(
 
 					const json: BatchResponse = yield res.json();
 
-					// Checks if any of the responses contain an error.
-					json.responses?.forEach( ( response ) => {
-						if ( isApiErrorResponse( res, response ) )
-							throw generateError( response );
-					} );
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					if ( errorResponses.length > 0 ) {
+						throw generateError(
+							errorResponses[ 0 ].body as ApiErrorResponse
+						);
+					}
 
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
 									response.status >= 200 &&
 									response.status < 300
-						  )
-						: [];
-
-					const errorResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status < 200 ||
-									response.status >= 300
 						  )
 						: [];
 
