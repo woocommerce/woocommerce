@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
