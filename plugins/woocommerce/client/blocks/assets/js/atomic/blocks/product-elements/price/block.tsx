@@ -2,6 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import { ProductEntityResponse } from '@woocommerce/entities';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -23,7 +24,7 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		product: ProductResponseItem;
+		product: ProductResponseItem | ProductEntityResponse;
 		areExperimentalFlagsEnabled: boolean;
 	};
 
