@@ -70,14 +70,12 @@ class TaxonomyHierarchyData {
 
 
 	/**
-	 * Build complete hierarchy map with all relationships pre-computed.
+	 * Build hierarchy map for FilterData and ProductFilterTaxonomy.
 	 *
-	 * Pre-computes all descendants for maximum query speed, which is essential
-	 * for product filtering where parent category filters must include all
-	 * subcategory products regardless of hierarchy depth.
+	 * Pre-computes descendants and ancestor chains for maximum query speed.
 	 *
 	 * @param string $taxonomy The taxonomy name.
-	 * @return array Complete hierarchy map with parents, children, and descendants.
+	 * @return array Complete hierarchy map with descendants and ancestor chains.
 	 */
 	private function build_full_hierarchy_map( string $taxonomy ): array {
 		$terms = get_terms(
@@ -93,24 +91,27 @@ class TaxonomyHierarchyData {
 		}
 
 		$map = array(
-			'parents'     => array(),
-			'children'    => array(),
-			'descendants' => array(),
+			'descendants' => array(), // term_id => [descendant_ids]
+			'ancestors'   => array(), // term_id => [ancestor_ids]
 		);
 
-		// Build basic parent-child relationships.
-		foreach ( $terms as $term_id => $parent_id ) {
-			$map['parents'][ $term_id ] = $parent_id;
+		// Build core lookups and temporary structures
+		$temp_children = array();
+		$temp_parents  = array();
 
-			if ( ! isset( $map['children'][ $parent_id ] ) ) {
-				$map['children'][ $parent_id ] = array();
+		foreach ( $terms as $term_id => $parent_id ) {
+			$temp_parents[ $term_id ] = $parent_id;
+
+			if ( ! isset( $temp_children[ $parent_id ] ) ) {
+				$temp_children[ $parent_id ] = array();
 			}
-			$map['children'][ $parent_id ][] = $term_id;
+			$temp_children[ $parent_id ][] = $term_id;
 		}
 
-		// Pre-compute all descendants for each term.
-		foreach ( array_keys( $map['parents'] ) as $term_id ) {
-			$map['descendants'][ $term_id ] = $this->compute_descendants( $term_id, $map['children'] );
+		// Pre-compute descendants and ancestors
+		foreach ( array_keys( $temp_parents ) as $term_id ) {
+			$map['descendants'][ $term_id ] = $this->compute_descendants( $term_id, $temp_children );
+			$map['ancestors'][ $term_id ]   = $this->compute_ancestors( $term_id, $temp_parents );
 		}
 
 		return $map;
@@ -140,15 +141,23 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get parent term ID for a given term.
+	 * Compute ancestor chain for a term.
 	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return int The parent term ID (0 if root level).
+	 * @param int   $term_id The term ID.
+	 * @param array $parent_lookup Parent relationships.
+	 * @return array Array of ancestor term IDs (bottom-up).
 	 */
-	public function get_parent( int $term_id, string $taxonomy ): int {
-		$map = $this->get_hierarchy_map( $taxonomy );
-		return $map['parents'][ $term_id ] ?? 0;
+	private function compute_ancestors( int $term_id, array $parent_lookup ): array {
+		$ancestors  = array();
+		$current_id = $term_id;
+
+		while ( isset( $parent_lookup[ $current_id ] ) && $parent_lookup[ $current_id ] > 0 ) {
+			$parent_id   = $parent_lookup[ $current_id ];
+			$ancestors[] = $parent_id;
+			$current_id  = $parent_id;
+		}
+
+		return $ancestors;
 	}
 
 	/**
@@ -162,6 +171,19 @@ class TaxonomyHierarchyData {
 		$map = $this->get_hierarchy_map( $taxonomy );
 		return $map['descendants'][ $term_id ] ?? array();
 	}
+
+	/**
+	 * Get ancestor chain for efficient batch processing.
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of ancestor term IDs (bottom-up).
+	 */
+	public function get_ancestors( int $term_id, string $taxonomy ): array {
+		$map = $this->get_hierarchy_map( $taxonomy );
+		return $map['ancestors'][ $term_id ] ?? array();
+	}
+
 
 	/**
 	 * Clear hierarchy cache for a taxonomy.
