@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -2881,8 +2883,18 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
+		$template = 'order/order-details.php';
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+			if ( ! empty( $fulfillments ) ) {
+				$template = 'order/order-details-fulfillments.php';
+			}
+		}
+
 		wc_get_template(
-			'order/order-details.php',
+			$template,
 			array(
 				'order_id'       => $order_id,
 				/**
@@ -3612,6 +3624,107 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		);
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
+	}
+}
+
+if ( ! function_exists( 'wc_get_email_fulfillment_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param Fulfillment $fulfillment Fulfillment object.
+	 * @param array       $args Arguments.
+	 *
+	 * @since 3.0.0
+	 * @return string
+	 */
+	function wc_get_email_fulfillment_items( $order, $fulfillment, $args = array() ) {
+		ob_start();
+
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$image_size                 = $email_improvements_enabled ? 48 : 32;
+
+		$defaults = array(
+			'show_sku'      => false,
+			'show_image'    => $email_improvements_enabled,
+			'image_size'    => array( $image_size, $image_size ),
+			'plain_text'    => false,
+			'sent_to_admin' => false,
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-fulfillment-items.php' : 'emails/email-fulfillment-items.php';
+
+		$fulfillment_items = $fulfillment->get_items();
+		if ( empty( $fulfillment_items ) ) {
+			// If there are no fulfillment items, we return an empty string.
+			return '';
+		}
+
+		$order_items = $order->get_items();
+		if ( empty( $order_items ) ) {
+			// If there are no order items, we return an empty string.
+			return '';
+		}
+
+		$order_items_filtered = array();
+		foreach ( $fulfillment_items as $fulfillment_item ) {
+			// Filter order items to only include those that are part of the fulfillment.
+			foreach ( $order_items as $order_item ) {
+				if ( $order_item->get_id() === $fulfillment_item['item_id'] ) {
+					if ( method_exists( $order_item, 'get_subtotal' )
+						&& method_exists( $order_item, 'set_subtotal' )
+						&& method_exists( $order_item, 'get_quantity' ) ) {
+						$order_item->set_subtotal(
+							$order_item->get_subtotal() * $fulfillment_item['qty'] / $order_item->get_quantity()
+						);
+					}
+					$order_items_filtered[] = (object) array(
+						'item_id' => $order_item->get_id(),
+						'qty'     => $fulfillment_item['qty'],
+						'item'    => $order_item,
+					);
+					break;
+				}
+			}
+		}
+
+		wc_get_template(
+			$template,
+			/**
+			 * Filter to modify the arguments for the email fulfillment items.
+			 *
+			 * @since 10.1.0
+			 *
+			 * @param array $args The arguments for the email fulfillment items.
+			 */
+			apply_filters(
+				'woocommerce_email_fulfillment_items_args',
+				array(
+					'order'               => $order,
+					'fulfillment'         => $fulfillment,
+					'items'               => $order_items_filtered,
+					'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
+					'show_sku'            => $args['show_sku'],
+					'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
+					'show_image'          => $args['show_image'],
+					'image_size'          => $args['image_size'],
+					'plain_text'          => $args['plain_text'],
+					'sent_to_admin'       => $args['sent_to_admin'],
+				)
+			)
+		);
+
+		/**
+		 * Filter to modify the email fulfillment items table HTML.
+		 *
+		 * @since 10.1.0
+		 *
+		 * @param string   $html The HTML output of the fulfillment items table.
+		 * @param WC_Order $order The order object.
+		 * @param Fulfillment $fulfillment The fulfillment object.
+		 */
+		return apply_filters( 'woocommerce_get_email_fulfillment_items_table', ob_get_clean(), $order, $fulfillment );
 	}
 }
 

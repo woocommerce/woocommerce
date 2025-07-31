@@ -5,7 +5,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
 /**
@@ -73,13 +73,13 @@ const CartBlock = ( {
 
 describe( 'Testing cart', () => {
 	beforeEach( () => {
+		// Set up MSW handlers for cart requests
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
 		act( () => {
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
 			// need to clear the store resolution state between tests.
 			dispatch( storeKey ).invalidateResolutionForStore();
 			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
@@ -87,19 +87,21 @@ describe( 'Testing cart', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		server.resetHandlers();
 	} );
 
 	it( 'renders cart if there are items in the cart', async () => {
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByText( /Proceed to Checkout/i )
+			).toBeInTheDocument()
+		);
 
 		expect(
 			screen.getByText( /Proceed to Checkout/i )
 		).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'Contains a Taxes section if Core options are set to show it', async () => {
@@ -108,21 +110,27 @@ describe( 'Testing cart', () => {
 		// Display prices during basket and checkout: 'Excluding tax'.
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Tax/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
 	} );
 
 	it( 'Contains a Order summary header', async () => {
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument();
 	} );
 
 	it( 'Contains a Order summary Subtotal section', async () => {
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument();
 	} );
 
@@ -133,7 +141,9 @@ describe( 'Testing cart', () => {
 		// Display prices during basket and checkout: 'Excluding tax'.
 		// Display tax totals: 'Itemized';
 		render( <CartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument();
 	} );
 
@@ -147,93 +157,110 @@ describe( 'Testing cart', () => {
 			<CartBlock
 				attributes={ {
 					showRateAfterTaxName: true,
+					checkoutPageId: 0,
 				} }
 			/>
 		);
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Sales tax 20%/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Sales tax 20%/i ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
-		act( () => {
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve(
-						JSON.stringify( defaultCartState.cartData )
-					);
-				}
-				return Promise.resolve( '' );
-			} );
-		} );
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( defaultCartState.cartData );
+			} )
+		);
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument()
+		);
 		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-				const cart = {
-					...previewCart,
-					// Make it so there is only one item to simplify things.
-					items: [
-						{
-							...previewCart.items[ 0 ],
-							totals: {
-								...previewCart.items[ 0 ].totals,
-								// Change price format so there are no decimals.
-								currency_minor_unit: 0,
-								currency_prefix: '',
-								currency_suffix: '€',
-								line_subtotal: '16',
-								line_total: '18',
-							},
-						},
-					],
-				};
-
-				return Promise.resolve( JSON.stringify( cart ) );
-			}
-		} );
-		render( <CartBlock /> );
-
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent( '16€' );
-	} );
-
-	it( 'updates quantity when changed in server', async () => {
 		const cart = {
 			...previewCart,
 			// Make it so there is only one item to simplify things.
 			items: [
 				{
 					...previewCart.items[ 0 ],
+					totals: {
+						...previewCart.items[ 0 ].totals,
+						// Change price format so there are no decimals.
+						currency_minor_unit: 0,
+						currency_prefix: '',
+						currency_suffix: '€',
+						line_subtotal: '16',
+						line_total: '18',
+					},
+				},
+			],
+			items_count: 2,
+		};
+
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( cart );
+			} )
+		);
+
+		render( <CartBlock /> );
+
+		await waitFor( () =>
+			expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent(
+				'16€'
+			)
+		);
+	} );
+
+	it( 'updates quantity when changed in server', async () => {
+		render( <CartBlock /> );
+
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText(
+					`Quantity of ${ previewCart.items[ 1 ].name } in your cart.`
+				)
+			).toHaveValue( 1 )
+		);
+
+		// Update the quantity of the second item to 5
+		const cart = {
+			...previewCart,
+			items: [
+				{
+					...previewCart.items[ 0 ],
+				},
+				{
+					...previewCart.items[ 1 ],
 					quantity: 5,
 				},
 			],
+			items_count: 7,
 		};
-		const itemName = cart.items[ 0 ].name;
-		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		const quantityInput = screen.getByLabelText(
-			`Quantity of ${ itemName } in your cart.`
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( cart );
+			} )
 		);
-
-		await waitFor( () => {
-			expect( quantityInput.value ).toBe( '2' );
-		} );
 
 		act( () => {
 			dispatch( storeKey ).receiveCart( cart );
 		} );
 
-		await waitFor( () => {
-			expect( quantityInput.value ).toBe( '5' );
-		} );
+		// Check that quantity was updated to 5
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText(
+					`Quantity of ${ cart.items[ 1 ].name } in your cart.`
+				)
+			).toHaveValue( 5 )
+		);
 
 		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
 		expect( console ).toHaveErrored();
@@ -250,25 +277,21 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'does not show the remove item button when a filter prevents this', async () => {
-		const cart = {
-			...previewCart,
-			// Make it so there is only one item to simplify things.
-			items: [ previewCart.items[ 0 ] ],
-		};
-
+		// We're removing the link for the first previewCart item
 		registerCheckoutFilters( 'woo-blocks-test-extension', {
 			showRemoveItemLink: ( value, extensions, { cartItem } ) => {
-				return cartItem.id !== cart.items[ 0 ].id;
+				return cartItem.id !== previewCart.items[ 0 ].id;
 			},
 		} );
+
 		render( <CartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		act( () => {
-			dispatch( storeKey ).receiveCart( cart );
+		await waitFor( () => {
+			expect(
+				screen.getByText( /Proceed to Checkout/i )
+			).toBeInTheDocument();
 		} );
 
-		expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 0 );
+		expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 1 );
 	} );
 } );

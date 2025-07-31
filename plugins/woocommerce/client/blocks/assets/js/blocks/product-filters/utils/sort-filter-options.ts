@@ -4,6 +4,22 @@
 import type { FilterOptionItem } from '../types';
 
 /**
+ * Gets the sortable text from a filter option item.
+ * For string labels, returns the label directly.
+ * For ReactNode labels, returns the ariaLabel.
+ *
+ * @param item - Filter option item
+ * @return Sortable text string
+ */
+function getSortableText( item: FilterOptionItem ): string {
+	if ( typeof item.label === 'string' ) {
+		return item.label;
+	}
+	// When label is ReactNode, ariaLabel is guaranteed to exist by our type definition
+	return ( item as { ariaLabel: string } ).ariaLabel;
+}
+
+/**
  * Sorts filter options based on the specified sort order
  *
  * @param options   - Array of filter option items to sort
@@ -17,9 +33,13 @@ export function sortFilterOptions(
 	return options.sort( ( a, b ) => {
 		switch ( sortOrder ) {
 			case 'name-asc':
-				return a.label.localeCompare( b.label );
+				return getSortableText( a ).localeCompare(
+					getSortableText( b )
+				);
 			case 'name-desc':
-				return b.label.localeCompare( a.label );
+				return getSortableText( b ).localeCompare(
+					getSortableText( a )
+				);
 			case 'count-asc':
 				return a.count - b.count;
 			default: // count-desc

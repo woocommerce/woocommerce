@@ -47,6 +47,7 @@ export interface ProductCollectionAttributes {
 export enum LayoutOptions {
 	GRID = 'flex',
 	STACK = 'list',
+	CAROUSEL = 'carousel',
 }
 
 export enum WidthOptions {

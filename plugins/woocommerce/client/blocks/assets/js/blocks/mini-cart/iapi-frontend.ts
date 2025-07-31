@@ -26,7 +26,7 @@ import { CartItem, Currency } from '../../types';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency } = getConfig( 'woocommerce' );
+const { currency, placeholderImgSrc } = getConfig( 'woocommerce' );
 const {
 	addToCartBehaviour,
 	onCartClickBehaviour,
@@ -75,6 +75,14 @@ type MiniCart = {
 
 type CartItemContext = {
 	cartItem: CartItem;
+};
+
+const trimWords = ( html: string, maxWords = 15 ): string => {
+	const words = html.trim().split( /\s+/ );
+	if ( words.length <= maxWords ) {
+		return html;
+	}
+	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
@@ -440,7 +448,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemThumbnail(): string {
-				return cartItemState.cartItem.images[ 0 ]?.thumbnail || '';
+				return (
+					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
+					placeholderImgSrc
+				);
 			},
 
 			get priceWithoutDiscount(): string {
@@ -665,8 +676,9 @@ const { state: cartItemState } = store(
 
 					// A workaround for the lack of dangerous set HTML directive in interactivity API
 					if ( innerEl ) {
-						innerEl.innerHTML =
-							cartItemState.cartItem.short_description;
+						innerEl.innerHTML = trimWords(
+							cartItemState.cartItem.short_description
+						);
 					}
 				}
 			},

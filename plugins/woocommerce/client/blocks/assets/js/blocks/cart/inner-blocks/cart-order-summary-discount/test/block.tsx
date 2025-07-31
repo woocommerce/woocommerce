@@ -17,6 +17,11 @@ import Block from '../block';
 jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	useStoreCart: jest.fn(),
 	useStoreCartCoupons: jest.fn(),
+	useOrderSummaryLoadingState: jest.fn( () => {
+		return {
+			isLoading: false,
+		};
+	} ),
 } ) );
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered

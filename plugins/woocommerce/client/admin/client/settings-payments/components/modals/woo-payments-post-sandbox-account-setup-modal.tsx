@@ -128,7 +128,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 						<div className="woocommerce-woopayments-modal__content__item-flex">
 							<img
 								src={ WC_ASSET_URL + 'images/icons/store.svg' }
-								alt="store icon"
+								alt=""
+								role="presentation"
 							/>
 							<div className="woocommerce-woopayments-modal__content__item-flex__description">
 								<h3>
@@ -151,7 +152,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 									src={
 										WC_ASSET_URL + 'images/icons/dollar.svg'
 									}
-									alt="dollar icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>

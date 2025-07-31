@@ -1148,6 +1148,7 @@ class WC_Email extends WC_Settings_API {
 				wp_safe_redirect( $redirect );
 				exit;
 			}
+			wc_clear_template_cache();
 		}
 	}
 

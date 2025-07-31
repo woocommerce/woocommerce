@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -44,7 +45,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.1.0';
+	public $version = '10.2.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -336,6 +337,7 @@ final class WooCommerce {
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
+		$container->get( AddressProviderController::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -349,6 +351,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
