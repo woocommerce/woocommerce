@@ -90,7 +90,7 @@ $settings = array(
 		'title'       => __( 'Address override', 'woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Prevent buyers from changing the shipping address.', 'woocommerce' ),
-		'description' => __( 'When enabled, PayPal will use the address provided by your store and prevent the buyer from changing it during checkout. Disable this to let buyers choose a shipping address from their PayPal account. PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
+		'description' => __( 'When enabled, PayPal will use the address provided by the checkout form, and prevent the buyer from changing it inside the PayPal payment page. Disable this to let buyers choose a shipping address from their PayPal account. PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 		'default'     => 'no',
 	),
 	'debug'            => array(
