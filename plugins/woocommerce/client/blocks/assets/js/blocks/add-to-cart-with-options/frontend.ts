@@ -99,7 +99,9 @@ const getProductData = (
 	const min =
 		typeof productData.min === 'number' ? productData.min : defaultMinValue;
 	const max =
-		productData.max && productData.max >= 1 ? productData.max : Infinity;
+		typeof productData.max === 'number' && productData.max >= 1
+			? productData.max
+			: Infinity;
 	const step = productData.step || 1;
 
 	return {

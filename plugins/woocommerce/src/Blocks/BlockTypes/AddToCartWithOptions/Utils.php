@@ -180,4 +180,22 @@ class Utils {
 		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
 		return $min_purchase_quantity === $max_purchase_quantity;
 	}
+
+	/**
+	 * Get the quantity constraints for a product.
+	 *
+	 * @param \WC_Product $product The product to get the quantity constraints for.
+	 * @return array The quantity constraints.
+	 */
+	public static function get_product_quantity_constraints( $product ) {
+		$min  = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
+		$max  = is_numeric( $product->get_max_purchase_quantity() ) ? $product->get_max_purchase_quantity() : -1;
+		$step = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
+
+		return array(
+			'min'  => $min,
+			'max'  => $max,
+			'step' => $step,
+		);
+	}
 }

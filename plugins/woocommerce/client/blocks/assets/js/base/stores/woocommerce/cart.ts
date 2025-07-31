@@ -42,7 +42,7 @@ export type ProductData = {
 	weight?: string;
 	dimensions?: string;
 	min?: number;
-	max?: number | null;
+	max?: number;
 	step?: number;
 	variations?: {
 		[ variationId: number ]: {

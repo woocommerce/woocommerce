@@ -253,35 +253,12 @@ class AddToCartWithOptions extends AbstractBlock {
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
-						/**
-						 * Filter the minimum quantity value allowed for the product.
-						 *
-						 * @since 10.2.0
-						 * @param int        $min_value Minimum quantity value.
-						 * @param WC_Product $product   Product object.
-						 */
-						$min = apply_filters( 'woocommerce_quantity_input_min', $child_product->get_min_purchase_quantity(), $child_product );
-						/**
-						 * Filter the maximum quantity value allowed for the product.
-						 *
-						 * @since 10.2.0
-						 * @param int        $max_value Maximum quantity value.
-						 * @param WC_Product $product   Product object.
-						 */
-						$max = apply_filters( 'woocommerce_quantity_input_max', $child_product->get_max_purchase_quantity(), $child_product );
-						/**
-						 * Filter the step quantity value allowed for the product.
-						 *
-						 * @since 10.2.0
-						 * @param int        $step_value Step quantity value.
-						 * @param WC_Product $product     Product object.
-						 */
-						$step = apply_filters( 'woocommerce_quantity_input_step', 1, $child_product );
+						$child_product_quantity_constraints = Utils::get_product_quantity_constraints( $child_product );
 
 						$children_product_data[ $child_product_id ] = array(
-							'min'  => $min,
-							'max'  => $max,
-							'step' => $step,
+							'min'  => $child_product_quantity_constraints['min'],
+							'max'  => $child_product_quantity_constraints['max'],
+							'step' => $child_product_quantity_constraints['step'],
 						);
 					}
 				}
@@ -316,39 +293,16 @@ class AddToCartWithOptions extends AbstractBlock {
 					}
 				}
 			} else {
-				/**
-				 * Filter the minimum quantity value allowed for the product.
-				 *
-				 * @since 10.2.0
-				 * @param int        $min_value Minimum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				$min = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
-				/**
-				 * Filter the maximum quantity value allowed for the product.
-				 *
-				 * @since 10.2.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				$max = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
-				/**
-				 * Filter the step quantity value allowed for the product.
-				 *
-				 * @since 10.2.0
-				 * @param int        $step_value Step quantity value.
-				 * @param WC_Product $product    Product object.
-				 */
-				$step = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
+				$product_quantity_constraints = Utils::get_product_quantity_constraints( $product );
 
 				wp_interactivity_state(
 					'woocommerce',
 					array(
 						'products' => array(
 							$product->get_id() => array(
-								'min'  => $min,
-								'max'  => $max,
-								'step' => $step,
+								'min'  => $product_quantity_constraints['min'],
+								'max'  => $product_quantity_constraints['max'],
+								'step' => $product_quantity_constraints['step'],
 							),
 						),
 					)
