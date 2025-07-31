@@ -4,6 +4,12 @@
 import { EditorSettings, EditorColor } from '@wordpress/block-editor/index';
 import { BlockInstance } from '@wordpress/blocks/index';
 import { Post } from '@wordpress/core-data/build-types/entity-types/post';
+import type { WpTemplate } from '@wordpress/core-data';
+
+export interface EmailTemplate extends Omit< WpTemplate, 'title' > {
+	post_types: string[];
+	title: string;
+}
 
 export enum SendingPreviewStatus {
 	SUCCESS = 'success',
@@ -29,7 +35,10 @@ export type ExperimentalSettings = {
 	};
 };
 
-export type EmailEditorSettings = EditorSettings & ExperimentalSettings;
+export type EmailEditorSettings = EditorSettings &
+	ExperimentalSettings & {
+		isPreviewMode: boolean;
+	};
 
 export type EmailTheme = {
 	version?: number;
@@ -190,8 +199,8 @@ export type ContentValidation = {
 };
 
 export type State = {
-	postId: number | string; // Template use strings
-	postType: string;
+	postId?: number | string; // Template use strings
+	postType?: string;
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	styles: {
@@ -210,15 +219,6 @@ export type State = {
 		isFetching: boolean;
 	};
 	contentValidation?: ContentValidation;
-};
-
-export type EmailTemplate = {
-	id: string;
-	slug: string;
-	content: string;
-	title: string;
-	type: string;
-	post_types: string[];
 };
 
 export type EmailTemplatePreview = Omit<
