@@ -320,8 +320,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'has_next_page' => true,
-					'endCursor'     => 'cursor2',
+					'hasNextPage' => true,
+					'endCursor'   => 'cursor2',
 				),
 			),
 		);
@@ -372,8 +372,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'has_next_page' => false,
-					'endCursor'     => 'cursor3',
+					'hasNextPage' => false,
+					'endCursor'   => 'cursor3',
 				),
 			),
 		);
@@ -450,8 +450,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			'products' => (object) array(
 				'edges'    => array(),
 				'pageInfo' => (object) array(
-					'has_next_page' => false,
-					'endCursor'     => null,
+					'hasNextPage' => false,
+					'endCursor'   => null,
 				),
 			),
 		);
@@ -548,8 +548,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					)
 				),
 				'pageInfo' => (object) array(
-					'has_next_page' => true,
-					'endCursor'     => 'cursor_50',
+					'hasNextPage' => true,
+					'endCursor'   => 'cursor_50',
 				),
 			),
 		);
@@ -588,8 +588,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 					),
 				),
 				'pageInfo' => (object) array(
-					'has_next_page' => false,
-					'endCursor'     => 'cursor1',
+					'hasNextPage' => false,
+					'endCursor'   => 'cursor1',
 				),
 			),
 		);

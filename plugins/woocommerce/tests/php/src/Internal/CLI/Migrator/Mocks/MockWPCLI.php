@@ -118,6 +118,8 @@ class MockWPCLI {
 	 * @return string
 	 */
 	public static function readline( $prompt ): string {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		unset( $prompt );
 		// For testing, return a mock input.
 		return 'test_input';
 	}
@@ -126,10 +128,12 @@ class MockWPCLI {
 	 * Mock add_command method.
 	 *
 	 * @param string $name Command name.
-	 * @param mixed  $callable Command callable.
+	 * @param mixed  $command_callable Command callable.
 	 * @param array  $args Command arguments.
 	 */
-	public static function add_command( $name, $callable, $args = array() ): void {
+	public static function add_command( $name, $command_callable, $args = array() ): void {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		unset( $name, $command_callable, $args );
 		// Mock implementation - do nothing for tests.
 	}
 }
