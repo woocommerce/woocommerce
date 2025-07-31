@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Product Filter: Taxonomy Block.
@@ -147,19 +148,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		$orderby         = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
 		$order           = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
 
-		$args = array(
-			'taxonomy' => $taxonomy,
-			'orderby'  => $orderby,
-			'order'    => $order,
-		);
-
-		if ( $hide_empty ) {
-			$args['include'] = array_keys( $taxonomy_counts );
-		} else {
-			$args['hide_empty'] = false;
-		}
-
-		$taxonomy_terms = get_terms( $args );
+		$taxonomy_terms = $this->get_hierarchical_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order );
 
 		if ( is_wp_error( $taxonomy_terms ) ) {
 			return '';
@@ -307,5 +296,121 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		return $taxonomy_data;
+	}
+
+	/**
+	 * Get taxonomy terms ordered hierarchically.
+	 *
+	 * @param string $taxonomy        Taxonomy slug.
+	 * @param array  $taxonomy_counts Term counts with term_id as key.
+	 * @param bool   $hide_empty      Whether to hide empty terms.
+	 * @param string $orderby         Sort field for siblings (name, count, menu_order).
+	 * @param string $order           Sort direction (ASC, DESC).
+	 * @return array|\WP_Error Hierarchically ordered terms or error.
+	 */
+	private function get_hierarchical_terms( string $taxonomy, array $taxonomy_counts, bool $hide_empty, string $orderby, string $order ) {
+		$args = array(
+			'taxonomy'   => $taxonomy,
+			'hide_empty' => false,
+		);
+
+		if ( $hide_empty ) {
+			$args['include'] = array_keys( $taxonomy_counts );
+		}
+
+		$terms = get_terms( $args );
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return array();
+		}
+
+		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
+		}
+
+		// Use TaxonomyHierarchyData for hierarchy operations.
+		$container      = wc_get_container();
+		$hierarchy_data = $container->get( TaxonomyHierarchyData::class );
+
+		// Group terms by parent for hierarchy building.
+		$terms_by_id     = array();
+		$terms_by_parent = array();
+
+		foreach ( $terms as $term ) {
+			$terms_by_id[ $term->term_id ] = $term;
+			$parent_id                     = $hierarchy_data->get_parent( $term->term_id, $taxonomy );
+
+			if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
+				$terms_by_parent[ $parent_id ] = array();
+			}
+			$terms_by_parent[ $parent_id ][] = $term;
+		}
+
+		// Sort siblings at each hierarchy level.
+		foreach ( $terms_by_parent as $parent_id => $siblings ) {
+			$terms_by_parent[ $parent_id ] = $this->sort_terms_by_criteria( $siblings, $orderby, $order, $taxonomy_counts );
+		}
+
+		// Build hierarchical list with sorted siblings.
+		$hierarchical_terms = array();
+		$this->build_hierarchical_list( 0, $hierarchical_terms, $terms_by_parent );
+
+		return $hierarchical_terms;
+	}
+
+	/**
+	 * Sort terms by the specified criteria (name or count).
+	 *
+	 * @param array  $terms           Array of term objects to sort.
+	 * @param string $orderby         Sort field (name, count, menu_order).
+	 * @param string $order           Sort direction (ASC, DESC).
+	 * @param array  $taxonomy_counts Context-aware term counts.
+	 * @return array Sorted terms.
+	 */
+	private function sort_terms_by_criteria( array $terms, string $orderby, string $order, array $taxonomy_counts ): array {
+		$sort_order = 'DESC' === strtoupper( $order ) ? -1 : 1;
+
+		usort(
+			$terms,
+			function ( $a, $b ) use ( $orderby, $sort_order, $taxonomy_counts ) {
+				switch ( $orderby ) {
+					case 'count':
+						$count_a    = $taxonomy_counts[ $a->term_id ] ?? 0;
+						$count_b    = $taxonomy_counts[ $b->term_id ] ?? 0;
+						$comparison = $count_a <=> $count_b;
+						break;
+
+					case 'name':
+					default:
+						$comparison = strcasecmp( $a->name, $b->name );
+						break;
+				}
+
+				return $comparison * $sort_order;
+			}
+		);
+
+		return $terms;
+	}
+
+	/**
+	 * Build hierarchical list in depth-first order with pre-sorted siblings.
+	 *
+	 * @param int   $parent_id        Current parent ID.
+	 * @param array &$result          Reference to result array.
+	 * @param array $terms_by_parent  Terms grouped and sorted by parent ID.
+	 */
+	private function build_hierarchical_list( int $parent_id, array &$result, array $terms_by_parent ): void {
+		if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
+			return;
+		}
+
+		foreach ( $terms_by_parent[ $parent_id ] as $term ) {
+			// Add current term.
+			$result[] = $term;
+
+			// Recursively add its children.
+			$this->build_hierarchical_list( $term->term_id, $result, $terms_by_parent );
+		}
 	}
 }

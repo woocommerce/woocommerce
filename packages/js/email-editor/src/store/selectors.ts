@@ -362,11 +362,36 @@ export function getPersonalizationTagsState(
 	return state.personalizationTags;
 }
 
-export function getPersonalizationTagsList(
-	state: State
-): State[ 'personalizationTags' ][ 'list' ] {
-	return state.personalizationTags.list;
-}
+export const getPersonalizationTagsList = createRegistrySelector(
+	( select ) => ( state: State ) => {
+		const tags = state.personalizationTags.list;
+		const postType = select( storeName ).getEmailPostType();
+
+		if ( ! postType ) {
+			return tags;
+		}
+
+		// When postType is template, we filter tags by registered template postTypes.
+		if ( postType === 'wp_template' ) {
+			const postTemplate = select( storeName ).getCurrentTemplate();
+			return tags.filter( ( tag ) => {
+				return (
+					tag.postTypes.length === 0 ||
+					( Array.isArray( postTemplate.post_types ) &&
+						postTemplate.post_types.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						) )
+				);
+			} );
+		}
+
+		return tags.filter( ( tag ) => {
+			return (
+				tag.postTypes.length === 0 || tag.postTypes.includes( postType )
+			);
+		} );
+	}
+);
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
 	return state.theme.styles;
