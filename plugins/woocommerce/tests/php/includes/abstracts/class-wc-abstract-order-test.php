@@ -651,4 +651,66 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		remove_action( 'woocommerce_before_order_item_object_save', $callback );
 		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
 	}
+
+	/**
+	 * Test for issue #23802: Validate that the fix prevents double tax subtraction.
+	 * 
+	 * This test validates that our fix in set_coupon_discount_amounts() prevents
+	 * the double tax subtraction that was causing incorrect coupon calculations
+	 * when prices include tax.
+	 * 
+	 * @see https://github.com/woocommerce/woocommerce/issues/23802
+	 */
+	public function test_issue_23802_fix_prevents_double_tax_subtraction() {
+		// Set up WooCommerce settings
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Create 24% tax rate
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '24.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create 10% percentage discount coupon
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'test_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// Create product with 39€ price (inclusive of tax)
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 39.00 );
+		$product->save();
+
+		// Create admin order
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->apply_coupon( 'test_coupon' );
+
+		// Get the coupon items to validate the discount amounts directly
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items, 'Coupon should be applied to order' );
+		
+		$coupon_item = current( $coupon_items );
+		$coupon_discount = $coupon_item->get_discount();
+		
+		// Before the fix, this would be ~2.53 due to double tax subtraction
+		// After the fix, this should be higher (the correct discount amount)
+		// The exact value may vary due to WooCommerce's complex calculation flow,
+		// but it should be significantly higher than the broken value
+		$this->assertGreaterThan( 2.8, $coupon_discount, 
+			'Fix validation: Coupon discount should be greater than broken value, indicating fix prevents double tax subtraction' );
+			
+		// Also verify it's reasonable (should be around 10% of tax-exclusive price)
+		// Tax-exclusive price: 39 / 1.24 ≈ 31.45, so 10% ≈ 3.14
+		$this->assertLessThan( 3.5, $coupon_discount, 
+			'Coupon discount should be reasonable (close to 10% of tax-exclusive price)' );
+	}
 }
