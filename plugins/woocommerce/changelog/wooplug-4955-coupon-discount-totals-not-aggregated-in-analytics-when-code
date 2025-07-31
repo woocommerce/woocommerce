@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a tool to repair coupons lookup table with zero discount amounts
