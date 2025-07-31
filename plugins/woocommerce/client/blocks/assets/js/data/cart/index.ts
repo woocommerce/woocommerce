@@ -9,6 +9,8 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
+import { isEditor } from '../utils';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -65,10 +67,14 @@ window.addEventListener( 'load', () => {
 
 	if (
 		( ! hasCartSession() || hasItemsInCachedCart ) &&
-		! isAddingToCart()
+		! isAddingToCart() &&
+		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {
-		// Prevent the API request from being made.
 		wpDispatch( store ).finishResolution( 'getCartData' );
+	}
+
+	if ( isEditor() ) {
+		wpDispatch( store ).receiveCart( previewCart );
 	}
 } );
 
