@@ -36,37 +36,43 @@ export function useIsEmailEditor(): boolean {
 		const currentPostId = select( editorStore ).getCurrentPostId();
 		const currentPostType = select( editorStore ).getCurrentPostType();
 
-		// For non-template posts, check if the current post matches the email editor post
-		if ( currentPostType !== 'wp_template' ) {
-			return (
-				String( currentPostId ) === String( emailPostId ) &&
-				String( currentPostType ) === String( emailPostType )
-			);
+		// Check if the current post matches the email editor post
+		const currentPostMatch =
+			String( currentPostId ) === String( emailPostId ) &&
+			String( currentPostType ) === String( emailPostType );
+
+		// If the current post matches the email editor post, we are in the email editor context
+		if ( currentPostMatch ) {
+			return true;
 		}
 
 		// If we're editing a template, check if it's associated with the email editor post
-		// Get the current template being edited
-		const currentTemplate = emailEditorStore.getCurrentTemplate();
-		if ( ! currentTemplate ) {
-			return false;
-		}
+		if ( currentPostType === 'wp_template' ) {
+			// If we're editing a template, check if it's associated with the email editor post
+			// Get the current template being edited
+			const currentTemplate = emailEditorStore.getCurrentTemplate();
+			if ( ! currentTemplate ) {
+				return false;
+			}
 
-		// Check if this template is associated with the email editor post
-		// We need to check if the template is used by the email post type
-		const emailTemplates =
-			emailEditorStore.getEmailTemplates() as EmailTemplate[];
-		if ( ! emailTemplates ) {
-			return false;
-		}
+			// Check if this template is associated with the email editor post
+			// We need to check if the template is used by the email post type
+			const emailTemplates =
+				emailEditorStore.getEmailTemplates() as EmailTemplate[];
+			if ( ! emailTemplates ) {
+				return false;
+			}
 
-		// Check if the current template is in the list of email templates
-		// and if it's associated with the email post type
-		const isEmailTemplate = emailTemplates.some( ( template ) => {
-			return (
-				template.id === currentTemplate.id &&
-				template.post_types?.includes( emailPostType )
-			);
-		} );
-		return isEmailTemplate;
+			// Check if the current template is in the list of email templates
+			// and if it's associated with the email post type
+			const isEmailTemplate = emailTemplates.some( ( template ) => {
+				return (
+					template.id === currentTemplate.id &&
+					template.post_types?.includes( emailPostType )
+				);
+			} );
+			return isEmailTemplate;
+		}
+		return false;
 	}, [] );
 }
