@@ -67,12 +67,11 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				const productData =
+				return (
 					wooState?.products?.[ productDataState.productId ]
 						?.variations?.[ productDataState?.variationId || 0 ] ||
-					wooState?.products?.[ productDataState.productId ];
-
-				return productData;
+					wooState?.products?.[ productDataState.productId ]
+				);
 			},
 		},
 		callbacks: {
