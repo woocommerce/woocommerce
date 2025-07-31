@@ -301,13 +301,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$request_url  = $this->get_paypal_refund_payment_request_url( $transaction_id );
-		$request_body = array(
-			'amount'        => array(
-				'currency_code' => $order->get_currency(),
-				'value'         => $amount,	
-			),
-			'note_to_payer' => $reason,
-		);
+		$request_body = $this->get_paypal_refund_payment_request_body( $order, $amount, $reason );
 
 		$response = wp_remote_post(
 			$request_url,
@@ -478,6 +472,32 @@ class WC_Gateway_Paypal_Request {
 				// phpcs:ignore Generic.Commenting.Todo.TaskFound,Squiz.PHP.CommentedOutCode.Found
 				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
+		);
+	}
+
+	/**
+	 * Build the request body for the PayPal refund-payment request.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param float    $amount Refund amount.
+	 * @param string   $reason Refund reason.
+	 * @return array
+	 */
+	private function get_paypal_refund_payment_request_body( $order, $amount, $reason ) {
+		$refund_data = array(
+			'amount' => array(
+				'currency_code' => $order->get_currency(),
+				'value'         => $amount,
+			),
+		);
+
+		if ( ! empty( $reason ) ) {
+			$refund_data['note_to_payer'] = $reason;
+		}
+
+		return array(
+			'testmode'    => $this->gateway->testmode,
+			'refund_data' => $refund_data,
 		);
 	}
 
