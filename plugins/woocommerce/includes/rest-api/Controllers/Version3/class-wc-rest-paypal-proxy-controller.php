@@ -324,9 +324,6 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		$authorization_id = $request->get_param( 'authorization_id' );
 		$request_data     = $request->get_json_params();
 
-		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
-		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment request received for request data: ' . wc_print_r( $request_data, true ) );
-
 		error_log( '(Proxy) PayPal capture authorized payment request received for auth ID: ' . $authorization_id );
 
 		if ( empty( $authorization_id ) || ! isset( $request_data['testmode'] ) ) {
@@ -340,12 +337,15 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		}
 
-		if ( ! isset( $request_data['testmode'] ) ) {
-			error_log( '(Proxy) PayPal authorize payment request missing required param: ' . $param . '.' );
-			return new WP_REST_Response(
-				array( 'error' => 'PayPal capture authorized payment request missing required param: ' . $param . '.' ),
-				400
-			);
+		$required_params = array( 'testmode' );
+		foreach ( $required_params as $param ) {
+			if ( ! isset( $request_data[ $param ] ) ) {
+				error_log( '(Proxy) PayPal capture authorized payment request missing required param: ' . $param . '.' );
+				return new WP_REST_Response(
+					array( 'error' => 'PayPal capture authorized payment request missing required param: ' . $param . '.' ),
+					400
+				);
+			}
 		}
 
 		$access_token = $this->get_paypal_access_token( $request_data['testmode'] );
@@ -373,8 +373,6 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
 		error_log( '(Proxy) PayPal capture authorized payment response: ' . wc_print_r( $response_data, true ) );
-
-		wc_get_logger()->info( '(Proxy) PayPal capture authorized payment response: ' . wc_print_r( $response_data, true ) );
 
 		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
 			return new WP_REST_Response(
