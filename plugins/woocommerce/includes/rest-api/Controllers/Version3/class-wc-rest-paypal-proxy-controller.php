@@ -340,7 +340,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		}
 
-		if ( ! isset( $request_data[ 'testmode' ] ) ) {
+		if ( ! isset( $request_data['testmode'] ) ) {
 			error_log( '(Proxy) PayPal authorize payment request missing required param: ' . $param . '.' );
 			return new WP_REST_Response(
 				array( 'error' => 'PayPal capture authorized payment request missing required param: ' . $param . '.' ),
@@ -348,7 +348,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			);
 		}
 
-		$access_token = $this->get_paypal_access_token( $request_data[ 'testmode' ] );
+		$access_token = $this->get_paypal_access_token( $request_data['testmode'] );
 		if ( ! $access_token ) {
 			error_log( '(Proxy) Failed to get PayPal access token. Cannot authorize payment.' );
 			return new WP_REST_Response(
@@ -368,7 +368,7 @@ class WC_REST_Paypal_Proxy_Controller extends WC_REST_Controller {
 			),
 		);
 
-		$response      = wp_remote_post( $this->get_paypal_api_request_url( $request_data[ 'testmode' ] ) . '/v2/payments/authorizations/' . $authorization_id . '/capture', $args );
+		$response      = wp_remote_post( $this->get_paypal_api_request_url( $request_data['testmode'] ) . '/v2/payments/authorizations/' . $authorization_id . '/capture', $args );
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
