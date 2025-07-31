@@ -407,32 +407,24 @@ class FilterData {
 			$term_id = (int) $term->term_id;
 
 			// Count for the term itself and all its descendants.
-			if ( ! isset( $hierarchy_counts[ $term->term_taxonomy_id ] ) ) {
-				$descendants                                 = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
-				$descendants[]                               = $term_id; // Include the term itself.
-				$hierarchy_counts[ $term->term_taxonomy_id ] = $descendants;
+			if ( ! isset( $hierarchy_counts[ $term_id ] ) ) {
+				$descendants                  = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
+				$descendants[]                = $term_id; // Include the term itself.
+				$hierarchy_counts[ $term_id ] = $descendants;
 			}
 
 			// Get ancestors using hierarchy data.
-			$current_id = $term_id;
-			while ( $current_id > 0 ) {
-				$parent_id = $this->taxonomy_hierarchy_data->get_parent( $current_id, $taxonomy_name );
-				if ( $parent_id <= 0 ) {
-					break;
-				}
-
-				if ( in_array( $parent_id, $processed_terms, true ) ) {
-					$current_id = $parent_id;
+			$ancestors = $this->taxonomy_hierarchy_data->get_ancestors( $term_id, $taxonomy_name );
+			foreach ( $ancestors as $ancestor_id ) {
+				if ( in_array( $ancestor_id, $processed_terms, true ) ) {
 					continue;
 				}
 
-				// Get all descendants for this ancestor using optimized hierarchy data.
-				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $parent_id, $taxonomy_name );
-				$descendants[] = $parent_id; // Include the ancestor term itself.
+				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $ancestor_id, $taxonomy_name );
+				$descendants[] = $ancestor_id; // Include the ancestor term itself.
 
-				$hierarchy_counts[ $parent_id ] = $descendants;
-				$processed_terms[]              = $parent_id;
-				$current_id                     = $parent_id;
+				$hierarchy_counts[ $ancestor_id ] = $descendants;
+				$processed_terms[]                = $ancestor_id;
 			}
 		}
 
@@ -442,9 +434,9 @@ class FilterData {
 
 		// Step 3: Execute batch counting using a single query with CASE statements.
 		$count_cases = array();
-		foreach ( $hierarchy_counts as $term_taxonomy_id => $term_ids ) {
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
 			$term_ids_str  = implode( ',', array_map( 'absint', $term_ids ) );
-			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_taxonomy_id}";
+			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_id}";
 		}
 
 		$batch_count_sql = '
