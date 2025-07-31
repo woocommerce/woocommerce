@@ -49,6 +49,13 @@ class MockWPCLI {
 	public static $last_success_message = '';
 
 	/**
+	 * Last error message logged.
+	 *
+	 * @var string
+	 */
+	public static $last_error_message = '';
+
+	/**
 	 * Mock debug method.
 	 *
 	 * @param string $message Debug message.
@@ -83,7 +90,6 @@ class MockWPCLI {
 	 */
 	public static function success( $message ): void {
 		self::$last_success_message = $message;
-		self::$last_log_message = $message;
 	}
 
 	/**
@@ -93,6 +99,38 @@ class MockWPCLI {
 	 */
 	public static function error( $message ): void {
 		self::$last_error_message = $message;
+	}
+
+	/**
+	 * Mock line method.
+	 *
+	 * @param string $message Line message.
+	 */
+	public static function line( $message ): void {
+		// For testing, we can just log it like a regular message.
+		self::$last_log_message = $message;
+	}
+
+	/**
+	 * Mock readline method.
+	 *
+	 * @param string $prompt Prompt message.
+	 * @return string
+	 */
+	public static function readline( $prompt ): string {
+		// For testing, return a mock input.
+		return 'test_input';
+	}
+
+	/**
+	 * Mock add_command method.
+	 *
+	 * @param string $name Command name.
+	 * @param mixed  $callable Command callable.
+	 * @param array  $args Command arguments.
+	 */
+	public static function add_command( $name, $callable, $args = array() ): void {
+		// Mock implementation - do nothing for tests.
 	}
 }
 
