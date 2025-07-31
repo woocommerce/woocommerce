@@ -99,8 +99,10 @@ $min-product-width: 150px;
 
 	.wc-block-product {
 		scroll-snap-align: center;
+		flex-basis: 0;
 		// Show 2 products in 90% of available space.
 		min-width: 45%;
+		max-width: 400px;
 
 		@container carousel (min-width: 600px) {
 			// Show 3 products in 90% of available space.
@@ -111,7 +113,6 @@ $min-product-width: 150px;
 			// Show 3 products in 91.5% of available space.
 			min-width: 30.5%;
 		}
-
 
 		@container carousel (min-width: 1280px) {
 			// Show 5 products in 92.5% of available space.
