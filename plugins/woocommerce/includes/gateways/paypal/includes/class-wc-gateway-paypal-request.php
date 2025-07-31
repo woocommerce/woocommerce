@@ -280,8 +280,10 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 		}
 
-		$order->update_meta_data( '_paypal_status', strtolower( $response_data['status'] ) );
-		$order->save();
+		if ( isset( $response_data['status'] ) ) {
+			$order->update_meta_data( '_paypal_status', strtolower( $response_data['status'] ) );
+			$order->save();
+		}
 	}
 
 	/**
