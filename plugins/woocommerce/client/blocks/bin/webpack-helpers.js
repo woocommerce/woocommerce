@@ -97,6 +97,10 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/templates/`
 		),
+		'@woocommerce/entities': path.resolve(
+			__dirname,
+			`../assets/js/entities/`
+		),
 		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
 		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 	};
