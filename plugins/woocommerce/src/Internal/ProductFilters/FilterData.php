@@ -413,7 +413,7 @@ class FilterData {
 				$hierarchy_counts[ $term->term_taxonomy_id ] = $descendants;
 			}
 
-			// Get ancestors using optimized hierarchy data.
+			// Get ancestors using hierarchy data.
 			$current_id = $term_id;
 			while ( $current_id > 0 ) {
 				$parent_id = $this->taxonomy_hierarchy_data->get_parent( $current_id, $taxonomy_name );
@@ -426,15 +426,13 @@ class FilterData {
 					continue;
 				}
 
-				$ancestor_term_taxonomy_id = $this->get_term_taxonomy_id_from_term_id( $parent_id, $taxonomy_escaped );
-
 				// Get all descendants for this ancestor using optimized hierarchy data.
 				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $parent_id, $taxonomy_name );
 				$descendants[] = $parent_id; // Include the ancestor term itself.
 
-				$hierarchy_counts[ $ancestor_term_taxonomy_id ] = $descendants;
-				$processed_terms[]                              = $parent_id;
-				$current_id                                     = $parent_id;
+				$hierarchy_counts[ $parent_id ] = $descendants;
+				$processed_terms[]              = $parent_id;
+				$current_id                     = $parent_id;
 			}
 		}
 
@@ -474,28 +472,6 @@ class FilterData {
 		}
 
 		return $final_counts;
-	}
-
-	/**
-	 * Get term_taxonomy_id from term_id.
-	 *
-	 * @param int    $term_id  Term ID.
-	 * @param string $taxonomy Taxonomy name.
-	 * @return int Term taxonomy ID.
-	 */
-	private function get_term_taxonomy_id_from_term_id( int $term_id, string $taxonomy ) {
-		global $wpdb;
-
-		$cache_key        = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'term_taxonomy_id_' . $term_id . '_' . $taxonomy;
-		$term_taxonomy_id = wp_cache_get( $cache_key );
-
-		if ( false === $term_taxonomy_id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$term_taxonomy_id = $wpdb->get_var( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d AND taxonomy = %s", $term_id, $taxonomy ) );
-			wp_cache_set( $cache_key, $term_taxonomy_id, '', HOUR_IN_SECONDS );
-		}
-
-		return absint( $term_taxonomy_id );
 	}
 
 	/**
