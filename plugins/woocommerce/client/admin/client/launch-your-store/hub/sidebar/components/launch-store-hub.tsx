@@ -106,6 +106,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 			<SidebarContainer
 				title={ sidebarTitle }
 				description={ sidebarDescription }
+				onMobileClose={ props.onMobileClose }
 			>
 				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
 					<Heading level={ 2 }>

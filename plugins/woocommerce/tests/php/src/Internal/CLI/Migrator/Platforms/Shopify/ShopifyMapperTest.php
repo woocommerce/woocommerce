@@ -55,7 +55,6 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	public function test_map_product_data_returns_stub_value() {
 		$platform_data = (object) array( 'id' => 'test_id' );
 		$result        = $this->mapper->map_product_data( $platform_data );
-
 		$this->assertEquals( array(), $result );
 	}
 

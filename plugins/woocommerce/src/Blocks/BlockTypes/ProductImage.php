@@ -194,6 +194,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
+		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
 	}
 
 	/**
@@ -210,12 +211,15 @@ class ProductImage extends AbstractBlock {
 		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product            = wc_get_product( $post_id );
+		$aspect_ratio       = $parsed_attributes['aspectRatio'] ?? $parsed_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
+		$aspect_ratio_class = 'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio );
 
 		$classes = implode(
 			' ',
 			array_filter(
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
+					$aspect_ratio_class,
 					esc_attr( $classes_and_styles['classes'] ),
 				)
 			)
@@ -223,7 +227,7 @@ class ProductImage extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => $classes,
+				'class' => esc_attr( $classes ),
 				'style' => esc_attr( $classes_and_styles['styles'] ),
 			)
 		);

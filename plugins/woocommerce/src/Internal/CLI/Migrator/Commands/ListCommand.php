@@ -37,8 +37,8 @@ class ListCommand {
 	 *
 	 *     $ wp wc migrate list
 	 *
-	 * @param array $args       The positional arguments.
-	 * @param array $assoc_args The associative arguments.
+	 * @param array $args       The positional arguments (unused).
+	 * @param array $assoc_args The associative arguments (unused).
 	 *
 	 * @return void
 	 */

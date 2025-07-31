@@ -3,7 +3,7 @@
  */
 import type { BlockAttributes } from '@wordpress/blocks';
 import '@testing-library/jest-dom';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -30,10 +30,16 @@ describe( 'Product Specifications block', () => {
 			await setup( {} );
 			await selectBlock( /Block: Product Specifications/i );
 
-			// Open display settings panel
-			const displaySettings = screen.getByRole( 'button', {
-				name: /Display Settings/i,
+			await waitFor( () => {
+				expect(
+					screen.getByRole( 'button', { name: /display settings/i } )
+				).toBeVisible();
 			} );
+
+			const displaySettings = screen.getByRole( 'button', {
+				name: /display settings/i,
+			} );
+
 			if ( displaySettings.getAttribute( 'aria-expanded' ) !== 'true' ) {
 				fireEvent.click( displaySettings );
 			}

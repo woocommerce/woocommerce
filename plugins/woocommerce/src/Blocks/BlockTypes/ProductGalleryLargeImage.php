@@ -117,11 +117,22 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				// Product Image requires special handling because we need to render it once for each image.
 				$images_html .= $this->get_main_images_html( $block->context, $product, $inner_block );
 			} else {
+				// For Next/Previous Buttons block, check if we have more than one image, otherwise don't render it.
+				if ( 'woocommerce/product-gallery-large-image-next-previous' === $inner_block->name ) {
+					$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
+					if ( $product_gallery_image_count <= 1 ) {
+						continue;
+					}
+				}
+
 				// Render all the inner blocks once each.
 				$inner_block_html = (
 					new WP_Block(
 						$inner_block->parsed_block,
-						$block->context
+						array_merge(
+							(array) $block->context,
+							array( 'iapi/provider' => 'woocommerce/product-gallery' )
+						),
 					)
 				)->render( array( 'dynamic' => true ) );
 

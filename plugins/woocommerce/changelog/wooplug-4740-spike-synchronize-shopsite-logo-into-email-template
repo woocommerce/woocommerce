@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+The block email template now checks for a site logo and uses it when available; otherwise, it defaults to the site title.

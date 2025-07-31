@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix JavaScript error in admin settings when using shortcode checkout by adding null check before addEventListener call.

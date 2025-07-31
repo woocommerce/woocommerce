@@ -1,37 +1,3 @@
-@mixin skeleton-animation {
-	background: color-mix(in srgb, currentColor 5%, transparent);
-	border-radius: $universal-border-radius;
-	position: relative;
-	overflow: hidden;
-	border: none;
-	&::after {
-		content: "";
-		position: absolute;
-		inset: 0;
-		transform: translateX(-100%);
-		/* stylelint-disable declaration-colon-newline-after, function-parentheses-space-inside, function-comma-space-after */
-		background: linear-gradient(
-			90deg,
-			transparent 0%,
-			color-mix(in srgb, currentColor 5%, transparent) 50%,
-			transparent 100%
-		);
-		/* stylelint-enable */
-		animation: wc-skeleton-shimmer 1.25s infinite;
-	}
-
-	&--static {
-		&::after {
-			display: none;
-		}
-	}
-}
-
-@keyframes wc-skeleton-shimmer {
-	100% {
-		transform: translateX(100%);
-	}
-}
 .wp-block-woocommerce-checkout {
 	margin: 0;
 	padding-top: $gap-large;
@@ -172,7 +138,7 @@
 	}
 }
 
-.theme-twentytwenty .wp-block-woocommerce-checkout, 
+.theme-twentytwenty .wp-block-woocommerce-checkout,
 .theme-twentytwentyone .wp-block-woocommerce-checkout {
 	margin: 0 auto;
 }

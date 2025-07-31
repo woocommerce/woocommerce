@@ -292,31 +292,61 @@ export default function PaymentMethodsSelection() {
 									} );
 								} )
 								.then( () => {
+									const displayedPaymentMethodsIds =
+										Object.keys(
+											initialVisibilityMap || {}
+										);
+									const paymentMethodsIds =
+										Object.keys( paymentMethodsState );
+
 									const eventProps = {
+										// This is the entire list of payment methods that are available to the user,
+										// regardless of whether they are enabled or not, shown by default or hidden behind a Show more section.
 										displayed_payment_methods:
-											Object.keys(
-												paymentMethodsState
-											).join( ', ' ),
-										selected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										deselected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													! paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
+											displayedPaymentMethodsIds.join(
+												', '
+											),
+										// This is the list of payment methods that were initially displayed to the user
+										// when the step became visible, regardless of whether they were enabled or not.
+										default_displayed_pms:
+											displayedPaymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														initialVisibilityMap?.[
+															paymentMethod
+														] !== false
+												)
+												.join( ', ' ),
+										// This is the list of payment methods that were enabled by default
+										// when the step became visible, regardless of whether they ended up selected or not.
+										default_selected_pms:
+											recommendedPaymentMethods
+												.filter(
+													( paymentMethod ) =>
+														paymentMethod.enabled
+												)
+												.map( ( method ) => method.id )
+												.join( ', ' ),
+										// This is the list of payment methods that ended up enabled (either by user selection or default).
+										selected_payment_methods:
+											paymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														paymentMethodsState[
+															paymentMethod
+														]
+												)
+												.join( ', ' ),
+										// This is the list of payment methods that ended up disabled (either by user selection or default).
+										deselected_payment_methods:
+											paymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														! paymentMethodsState[
+															paymentMethod
+														]
+												)
+												.join( ', ' ),
 										business_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
@@ -328,7 +358,7 @@ export default function PaymentMethodsSelection() {
 									recordPaymentsOnboardingEvent(
 										'woopayments_onboarding_modal_click',
 										{
-											step: 'payment_methods',
+											step: currentStep?.id || 'unknown',
 											action: 'continue',
 											...eventProps,
 										}

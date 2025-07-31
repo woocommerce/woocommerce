@@ -167,11 +167,11 @@ test.describe( 'registerProductBlockType registers', () => {
 		}
 	} );
 
-	test( 'block unavailable on posts, e.g. Product Details', async ( {
+	test( 'block unavailable on posts, e.g. Product Image Gallery', async ( {
 		admin,
 		editor,
 	} ) => {
-		const blockName = 'woocommerce/product-details';
+		const blockName = 'woocommerce/product-image-gallery';
 
 		await test.step( 'Unavailable in post, also within Single Product block', async () => {
 			await admin.createNewPost();
@@ -186,8 +186,8 @@ test.describe( 'registerProductBlockType registers', () => {
 				.fill( blockName );
 
 			await expect(
-				editor.page.getByText( 'No results found' )
-			).toBeVisible();
+				editor.page.getByText( 'Product Image Gallery' )
+			).toBeHidden();
 		} );
 
 		await test.step( 'Available in Single Product template globally', async () => {

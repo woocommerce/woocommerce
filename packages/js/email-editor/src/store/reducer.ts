@@ -42,6 +42,11 @@ export function reducer( state: State, action ): State {
 					...action.state,
 				},
 			};
+		case 'SET_CONTENT_VALIDATION':
+			return {
+				...state,
+				contentValidation: action.validation,
+			};
 		default:
 			return state;
 	}

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad87c6420b6229cce07b993a5f9fc4c6",
+    "content-hash": "415523b374a6f594b6e768def2d56e1b",
     "packages": [
         {
             "name": "pelago/emogrifier",
@@ -153,61 +153,6 @@
                 "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v8.9.0"
             },
             "time": "2025-07-11T13:20:48+00:00"
-        },
-        {
-            "name": "soundasleep/html2text",
-            "version": "2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/soundasleep/html2text.git",
-                "reference": "83502b6f8f1aaef8e2e238897199d64f284b4af3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/soundasleep/html2text/zipball/83502b6f8f1aaef8e2e238897199d64f284b4af3",
-                "reference": "83502b6f8f1aaef8e2e238897199d64f284b4af3",
-                "shasum": ""
-            },
-            "require": {
-                "ext-dom": "*",
-                "ext-libxml": "*",
-                "php": "^7.3|^8.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^1.9",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Soundasleep\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jevon Wright",
-                    "homepage": "https://jevon.org",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A PHP script to convert HTML into a plain text format",
-            "homepage": "https://github.com/soundasleep/html2text",
-            "keywords": [
-                "email",
-                "html",
-                "php",
-                "text"
-            ],
-            "support": {
-                "email": "support@jevon.org",
-                "issues": "https://github.com/soundasleep/html2text/issues",
-                "source": "https://github.com/soundasleep/html2text/tree/2.1.0"
-            },
-            "time": "2023-01-06T09:28:15+00:00"
         },
         {
             "name": "symfony/css-selector",
@@ -416,16 +361,16 @@
         },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
-            "version": "v1.1.1",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/composer-installer.git",
-                "reference": "6e0fa428497bf560152ee73ffbb8af5c6a56b0dd"
+                "reference": "e9cf5e4bbf7eeaf9ef5db34938942602838fc2b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/composer-installer/zipball/6e0fa428497bf560152ee73ffbb8af5c6a56b0dd",
-                "reference": "6e0fa428497bf560152ee73ffbb8af5c6a56b0dd",
+                "url": "https://api.github.com/repos/PHPCSStandards/composer-installer/zipball/e9cf5e4bbf7eeaf9ef5db34938942602838fc2b1",
+                "reference": "e9cf5e4bbf7eeaf9ef5db34938942602838fc2b1",
                 "shasum": ""
             },
             "require": {
@@ -508,7 +453,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-06-27T17:24:01+00:00"
+            "time": "2025-07-17T20:45:56+00:00"
         },
         {
             "name": "doctrine/instantiator",

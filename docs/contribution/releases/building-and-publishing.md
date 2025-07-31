@@ -20,13 +20,15 @@ sidebar_label: Building and Publishing
 
 ## Building WooCommerce
 
-1. **Run the [“Release: Compile changelog” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml).**
-   - Run from trunk and enter the major version number.
+1. **Run the ["Release: Bump version number" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-bump-version.yml).**
+   - Run from `trunk`.
+   - Choose the type of version you're releasing (`rc` or `stable`).
+   - Enter as _Release branch_ the branch you are about to release from (e.g. `release/10.0`).
+   - Review and merge the PR created.
+2. **Run the [“Release: Compile changelog” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml).**
+   - Run from `trunk` and enter the major version number and the intended release date.
    - Review and merge the two PRs created (one for trunk, one for the release branch).
    - Ensure the changelog date is correct.
-2. **(Skip for `-rc.1`) Run the version-bump workflow.**
-   - Update the WooCommerce version in relevant files on the release branch.
-   - Review and merge the PR after CI passes.
 3. **Build the release ZIP file.**
    - Run the [“Release: Build ZIP file” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml) from the release branch.
    - Set "Create a draft GitHub release" to `true`.

@@ -83,6 +83,16 @@ class MockWPCLI {
 	 */
 	public static function success( $message ): void {
 		self::$last_success_message = $message;
+		self::$last_log_message = $message;
+	}
+
+	/**
+	 * Mock error method.
+	 *
+	 * @param string $message Error message.
+	 */
+	public static function error( $message ): void {
+		self::$last_error_message = $message;
 	}
 }
 
