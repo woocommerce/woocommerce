@@ -213,37 +213,37 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate | null => {
-		const currentTemplate =
-			select( editorStore ).getEditedPostAttribute( 'template' );
+	( select ) =>
+		( _state, templateSlug?: string ): EmailTemplate | null => {
+			const currentTemplate =
+				templateSlug ||
+				select( editorStore ).getEditedPostAttribute( 'template' );
 
-		if ( currentTemplate ) {
-			const templateWithSameSlug = select( coreDataStore )
-				.getEntityRecords( 'postType', 'wp_template', {
-					per_page: -1,
-					context: 'view',
-				} )
-				// @ts-expect-error Missing property in type
-				?.find( ( template ) => template.slug === currentTemplate );
+			if ( currentTemplate ) {
+				const templateWithSameSlug = select( coreDataStore )
+					.getEntityRecords( 'postType', 'wp_template', {
+						per_page: -1,
+						context: 'view',
+					} )
+					// @ts-expect-error Missing property in type
+					?.find( ( template ) => template.slug === currentTemplate );
 
-			if ( ! templateWithSameSlug ) {
-				return regularizedGetEntityRecord(
-					templateWithSameSlug
-				) as EmailTemplate;
+				if ( ! templateWithSameSlug ) {
+					return null;
+				}
+
+				// @ts-expect-error getEditedPostAttribute
+				return getTemplate( select, templateWithSameSlug.id );
 			}
 
-			// @ts-expect-error getEditedPostAttribute
-			return getTemplate( select, templateWithSameSlug.id );
-		}
-
-		const defaultTemplateId = select( coreDataStore ).getDefaultTemplateId(
-			{
+			const defaultTemplateId = select(
+				coreDataStore
+			).getDefaultTemplateId( {
 				slug: 'email-general',
-			}
-		);
+			} );
 
-		return getTemplate( select, defaultTemplateId );
-	}
+			return getTemplate( select, defaultTemplateId );
+		}
 );
 
 export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
@@ -260,7 +260,7 @@ export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
 			templateId
 		) as unknown as EmailTemplate;
 	}
-	return getEditedPostTemplate();
+	return select( storeName ).getEditedPostTemplate();
 } );
 
 export const getCurrentTemplateContent = () => {
