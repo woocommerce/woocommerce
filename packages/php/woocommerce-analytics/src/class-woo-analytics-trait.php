@@ -7,6 +7,7 @@
 
 namespace Automattic\Woocommerce_Analytics;
 
+use Automattic\Block_Scanner;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
 use WC_Order_Item;
 use WC_Order_Item_Product;
@@ -442,7 +443,6 @@ trait Woo_Analytics_Trait {
 	 * @return array All inner blocks on the page.
 	 */
 	public function get_additional_blocks_on_page( $cart_or_checkout = 'cart' ) {
-
 		$additional_blocks_on_page_transient_name = 'jetpack_woocommerce_analytics_additional_blocks_on_' . $cart_or_checkout . '_page';
 		$additional_blocks_on_page                = get_transient( $additional_blocks_on_page_transient_name );
 
@@ -456,54 +456,56 @@ trait Woo_Analytics_Trait {
 			$content = $this->checkout_content_source;
 		}
 
-		$parsed_blocks = parse_blocks( $content );
-		$other_blocks  = array_filter(
-			$parsed_blocks,
-			function ( $block ) use ( $cart_or_checkout ) {
-				if ( ! isset( $block['blockName'] ) ) {
-					return false;
-				}
-
-				if ( 'woocommerce/classic-shortcode' === $block['blockName'] ) {
-					return false;
-				}
-
-				if ( 'core/shortcode' === $block['blockName'] ) {
-					return false;
-				}
-
-				if ( 'checkout' === $cart_or_checkout && 'woocommerce/checkout' !== $block['blockName'] ) {
-					return true;
-				}
-
-				if ( 'cart' === $cart_or_checkout && 'woocommerce/cart' !== $block['blockName'] ) {
-					return true;
-				}
-
-				return false;
-			}
+		$blocks_to_ignore = array(
+			'woocommerce/classic-shortcode',
+			'core/shortcode',
+			'checkout' === $cart_or_checkout ? 'woocommerce/checkout' : 'woocommerce/cart',
 		);
 
-		$all_inner_blocks = array();
+		$scanner = Block_Scanner::create( $content );
+		if ( ! $scanner ) {
+			return array();
+		}
 
-		// Loop over each "block group". In templates the blocks are grouped up.
-		foreach ( $other_blocks as $block ) {
+		$found_blocks        = array();
+		$ignored_block_depth = 0; // Count how many ignored blocks we're nested inside.
 
-			// This check is necessary because sometimes this is null when using templates.
-			if ( ! empty( $block['blockName'] ) ) {
-				$all_inner_blocks[] = $block['blockName'];
-			}
+		while ( $scanner->next_delimiter() ) {
+			$type             = $scanner->get_delimiter_type();
+			$block_type       = $scanner->get_block_type();
+			$is_ignored_block = in_array( $block_type, $blocks_to_ignore, true );
 
-			if ( ! isset( $block['innerBlocks'] ) || ! is_array( $block['innerBlocks'] ) || 0 === count( $block['innerBlocks'] ) ) {
-				continue;
-			}
+			switch ( $type ) {
+				case Block_Scanner::OPENER:
+					// If this is an ignored block, increase our nesting depth.
+					if ( $is_ignored_block ) {
+						++$ignored_block_depth;
+					}
 
-			foreach ( $block['innerBlocks'] as $inner_content ) {
-				$all_inner_blocks = array_merge( $all_inner_blocks, $this->get_inner_blocks( $inner_content ) );
+					// Only collect blocks that are not inside any ignored block.
+					if ( 0 === $ignored_block_depth ) {
+						$found_blocks[] = $block_type;
+					}
+					break;
+
+				case Block_Scanner::CLOSER:
+					// If this closes an ignored block, decrease our nesting depth.
+					if ( $is_ignored_block && $ignored_block_depth > 0 ) {
+						--$ignored_block_depth;
+					}
+					break;
+
+				case Block_Scanner::VOID:
+					// Void blocks: only collect if we're not inside an ignored block and this isn't an ignored block itself.
+					if ( 0 === $ignored_block_depth && ! $is_ignored_block ) {
+						$found_blocks[] = $block_type;
+					}
+					break;
 			}
 		}
-		set_transient( $additional_blocks_on_page_transient_name, $all_inner_blocks, DAY_IN_SECONDS );
-		return $all_inner_blocks;
+
+		set_transient( $additional_blocks_on_page_transient_name, $found_blocks, DAY_IN_SECONDS );
+		return $found_blocks;
 	}
 
 	/**

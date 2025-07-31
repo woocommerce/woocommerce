@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Performance: improve processing of blocks during Analytics gathering

@@ -6,7 +6,8 @@
 	"require": {
 		"php": ">=7.2",
 		"automattic/jetpack-connection": "@dev",
-		"automattic/jetpack-constants": "@dev"
+		"automattic/jetpack-constants": "@dev",
+		"automattic/block-delimiter": "@dev"
 	},
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",
