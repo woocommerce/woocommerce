@@ -70,10 +70,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext( {
-		isAdmin,
-		product: productData,
-	} );
+	const { product } = useProductDataContext(
+		areExperimentalFlagsEnabled
+			? {
+					isAdmin,
+					product: productData,
+			  }
+			: undefined
+	);
 
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
@@ -113,12 +117,20 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	if ( areExperimentalFlagsEnabled ) {
 		prices = {
 			price: convertAdminPriceToStoreApiFormat( product?.price ),
-			sale_price: convertAdminPriceToStoreApiFormat(
-				product?.sale_price
-			),
-			regular_price: convertAdminPriceToStoreApiFormat(
-				product?.regular_price
-			),
+			...( product?.sale_price
+				? {
+						sale_price: convertAdminPriceToStoreApiFormat(
+							product?.sale_price
+						),
+				  }
+				: {} ),
+			...( product?.regular_price
+				? {
+						regular_price: convertAdminPriceToStoreApiFormat(
+							product?.regular_price
+						),
+				  }
+				: {} ),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
 				product?.__experimental_max_price &&
