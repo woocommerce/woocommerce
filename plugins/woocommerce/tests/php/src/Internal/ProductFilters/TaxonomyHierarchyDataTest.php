@@ -88,9 +88,9 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_hierarchy_map with small taxonomy uses full map strategy.
+	 * Test get_hierarchy_map builds complete hierarchy with pre-computed descendants.
 	 */
-	public function test_get_hierarchy_map_small_taxonomy_full_map(): void {
+	public function test_get_hierarchy_map_builds_complete_hierarchy(): void {
 		// Create test hierarchy.
 		$electronics_id = $this->create_test_term( 'Electronics' );
 		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
@@ -204,30 +204,5 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 
 		// Clean up.
 		unregister_taxonomy( $empty_taxonomy );
-	}
-
-	/**
-	 * Test adjacency strategy for large taxonomies.
-	 */
-	public function test_adjacency_strategy(): void {
-		$adjacency_filter = function () {
-			return 'adjacency_map';
-		};
-		add_filter( 'woocommerce_taxonomy_hierarchy_build_strategy', $adjacency_filter );
-		$electronics_id = $this->create_test_term( 'Electronics' );
-		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
-
-		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
-
-		// Adjacency map should NOT have pre-computed descendants.
-		$this->assertArrayHasKey( 'parents', $map );
-		$this->assertArrayHasKey( 'children', $map );
-		$this->assertArrayNotHasKey( 'descendants', $map );
-
-		// But get_descendants should still work (computed on-demand).
-		$descendants = $this->sut->get_descendants( $electronics_id, $this->taxonomy );
-		$this->assertContains( $laptops_id, $descendants );
-
-		remove_filter( 'woocommerce_taxonomy_hierarchy_build_strategy', $adjacency_filter );
 	}
 }

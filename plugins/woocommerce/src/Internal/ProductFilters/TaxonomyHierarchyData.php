@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,21 +42,12 @@ class TaxonomyHierarchyData {
 			return $this->hierarchy_data[ $taxonomy ];
 		}
 
-		// Check transient cache.
+		// Check option cache.
 		$cache_key  = self::CACHE_GROUP . '_' . $taxonomy;
 		$cached_map = null;
 
 		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
-			$cache             = get_transient( $cache_key );
-			$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
-
-			if ( ! empty( $cache['version'] ) &&
-				is_array( $cache['value'] ) &&
-				! empty( $cache['value'] ) &&
-				$transient_version === $cache['version']
-			) {
-				$cached_map = $cache['value'];
-			}
+			$cached_map = get_option( $cache_key );
 		}
 
 		if ( ! empty( $cached_map ) ) {
@@ -66,25 +56,12 @@ class TaxonomyHierarchyData {
 			return $cached_map;
 		}
 
-		// Build the map based on current strategy.
-		$strategy = $this->get_optimal_strategy( $taxonomy );
-		switch ( $strategy ) {
-			case 'full_map':
-				$map = $this->build_full_hierarchy_map( $taxonomy );
-				break;
-			default:
-				$map = $this->build_adjacency_hierarchy_map( $taxonomy );
-				break;
-		}
+		// Build the complete hierarchy map with all descendants pre-computed.
+		$map = $this->build_full_hierarchy_map( $taxonomy );
 
-		// Cache the map in transient and memory.
+		// Cache the map in options and memory.
 		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
-			$transient_version = WC_Cache_Helper::get_transient_version( self::CACHE_GROUP );
-			$transient_value   = array(
-				'version' => $transient_version,
-				'value'   => $map,
-			);
-			set_transient( $cache_key, $transient_value, MONTH_IN_SECONDS );
+			update_option( $cache_key, $map, false );
 		}
 
 		$this->hierarchy_data[ $taxonomy ] = $map;
@@ -92,57 +69,23 @@ class TaxonomyHierarchyData {
 		return $map;
 	}
 
-	/**
-	 * Determine the optimal strategy for taxonomy hierarchy caching.
-	 *
-	 * Defaults to 'full_map' which pre-computes all descendants for maximum query speed.
-	 * With 30-day caching, this is optimal for most use cases. Developers can override
-	 * via the 'woocommerce_taxonomy_hierarchy_build_strategy' filter for specific needs.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return string The optimal strategy ('full_map' or 'adjacency_map').
-	 */
-	private function get_optimal_strategy( string $taxonomy ): string {
-		$term_count = wp_count_terms( array( 'taxonomy' => $taxonomy ) );
-
-		/**
-		 * Filters the hierarchy caching strategy for taxonomies.
-		 *
-		 * WooCommerce uses two strategies for caching taxonomy hierarchies:
-		 *
-		 * - 'full_map': Pre-computes all descendants for maximum query speed (default)
-		 * - 'adjacency_map': Stores only parent-child relationships to save memory
-		 *
-		 * With 30-day caching, full_map is usually optimal unless you have memory constraints
-		 * or extremely large taxonomies (5000+ terms).
-		 *
-		 * @since 10.2
-		 *
-		 * @param string $strategy   Default strategy ('full_map').
-		 * @param string $taxonomy   Taxonomy name (e.g., 'product_cat', 'pa_color').
-		 * @param int    $term_count Number of terms in this taxonomy.
-		 * @return string Either 'full_map' or 'adjacency_map'.
-		 */
-		return apply_filters(
-			'woocommerce_taxonomy_hierarchy_build_strategy',
-			'full_map',
-			$taxonomy,
-			$term_count
-		);
-	}
 
 	/**
-	 * Build full hierarchy map with all relationships pre-computed.
+	 * Build complete hierarchy map with all relationships pre-computed.
+	 *
+	 * Pre-computes all descendants for maximum query speed, which is essential
+	 * for product filtering where parent category filters must include all
+	 * subcategory products regardless of hierarchy depth.
 	 *
 	 * @param string $taxonomy The taxonomy name.
-	 * @return array Complete hierarchy map.
+	 * @return array Complete hierarchy map with parents, children, and descendants.
 	 */
 	private function build_full_hierarchy_map( string $taxonomy ): array {
 		$terms = get_terms(
 			array(
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => false,
-				'fields'     => 'all',
+				'fields'     => 'id=>parent',
 			)
 		);
 
@@ -157,10 +100,7 @@ class TaxonomyHierarchyData {
 		);
 
 		// Build basic parent-child relationships.
-		foreach ( $terms as $term ) {
-			$term_id   = $term->term_id;
-			$parent_id = $term->parent;
-
+		foreach ( $terms as $term_id => $parent_id ) {
 			$map['parents'][ $term_id ] = $parent_id;
 
 			if ( ! isset( $map['children'][ $parent_id ] ) ) {
@@ -177,44 +117,6 @@ class TaxonomyHierarchyData {
 		return $map;
 	}
 
-	/**
-	 * Build adjacency list hierarchy map.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Adjacency list hierarchy map.
-	 */
-	private function build_adjacency_hierarchy_map( string $taxonomy ): array {
-		$terms = get_terms(
-			array(
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => false,
-				'fields'     => 'all',
-			)
-		);
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return array();
-		}
-
-		$map = array(
-			'children' => array(),
-			'parents'  => array(),
-		);
-
-		foreach ( $terms as $term ) {
-			$term_id   = $term->term_id;
-			$parent_id = $term->parent;
-
-			$map['parents'][ $term_id ] = $parent_id;
-
-			if ( ! isset( $map['children'][ $parent_id ] ) ) {
-				$map['children'][ $parent_id ] = array();
-			}
-			$map['children'][ $parent_id ][] = $term_id;
-		}
-
-		return $map;
-	}
 
 	/**
 	 * Compute all descendants of a term.
@@ -259,14 +161,7 @@ class TaxonomyHierarchyData {
 	 */
 	public function get_descendants( int $term_id, string $taxonomy ): array {
 		$map = $this->get_hierarchy_map( $taxonomy );
-
-		// Full map has pre-computed descendants.
-		if ( isset( $map['descendants'] ) ) {
-			return $map['descendants'][ $term_id ] ?? array();
-		}
-
-		// Adjacency map requires computation.
-		return $this->compute_descendants( $term_id, $map['children'] ?? array() );
+		return $map['descendants'][ $term_id ] ?? array();
 	}
 
 	/**
@@ -278,8 +173,8 @@ class TaxonomyHierarchyData {
 		// Clear in-memory cache for this taxonomy.
 		unset( $this->hierarchy_data[ $taxonomy ] );
 
-		// Clear only the specific taxonomy's transient cache.
+		// Clear only the specific taxonomy's option cache.
 		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
-		delete_transient( $cache_key );
+		delete_option( $cache_key );
 	}
 }
