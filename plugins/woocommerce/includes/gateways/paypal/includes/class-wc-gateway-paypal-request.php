@@ -272,12 +272,16 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-		$body      = wp_remote_retrieve_body( $response );
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $body, true );
 
 		if ( 200 !== $http_code ) {
 			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 		}
+
+		$order->update_meta_data( '_paypal_status', $response_data['status'] );
+		$order->save();
 	}
 
 	/**
