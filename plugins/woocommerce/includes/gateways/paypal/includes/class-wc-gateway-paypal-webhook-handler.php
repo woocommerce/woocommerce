@@ -75,11 +75,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			);
 
 			// Authorize or capture the payment after approval.
-			if ( 'CAPTURE' === $event['resource']['intent'] ) {
-				$this->authorize_or_capture_payment( $order, $event['resource']['links'], 'capture' );
-			} else {
-				$this->authorize_or_capture_payment( $order, $event['resource']['links'], 'authorize' );
-			}
+			$action = 'CAPTURE' === $event['resource']['intent'] ? 'capture' : 'authorize';
+			$this->authorize_or_capture_payment( $order, $event['resource']['links'], $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
