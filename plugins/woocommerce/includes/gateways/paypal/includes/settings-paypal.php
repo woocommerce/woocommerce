@@ -195,7 +195,7 @@ if ( ! $should_use_orders_v2 ) {
 			'placeholder' => __( 'Optional', 'woocommerce' ),
 		),
 	);
-	$settings = array_merge( $settings, $legacy_settings );
+	$settings        = array_merge( $settings, $legacy_settings );
 }
 
 return $settings;
