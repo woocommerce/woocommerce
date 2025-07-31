@@ -134,7 +134,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
-				__( 'PayPal payment authorized. Transaction ID: %1$s.\nChange payment status to processing or complete to capture funds.', 'woocommerce' ),
+				__( 'PayPal payment authorized. Transaction ID: %1$s.<\br>Change payment status to processing or complete to capture funds.', 'woocommerce' ),
 				$event['resource']['id']
 			)
 		);
@@ -178,6 +178,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ) {
+		wc_get_logger()->info( 'called from webhook handler: ' . $action );
 		$action_url = null;
 		foreach ( $links as $link ) {
 			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
