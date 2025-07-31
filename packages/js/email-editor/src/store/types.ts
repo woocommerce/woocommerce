@@ -182,6 +182,7 @@ export type PersonalizationTag = {
 	category: string;
 	attributes: string[];
 	valueToInsert: string;
+	postTypes: string[];
 };
 
 export type ContentValidation = {
@@ -217,6 +218,7 @@ export type EmailTemplate = {
 	content: string;
 	title: string;
 	type: string;
+	post_types: string[];
 };
 
 export type EmailTemplatePreview = Omit<

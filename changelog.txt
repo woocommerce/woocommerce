@@ -1,5 +1,20 @@
 == Changelog ==
 
+= 10.0.4 2025-07-23 =
+
+**WooCommerce**
+
+* Fix - Possible fatal error with Gutenberg 21.2.0, in particular in Analytics reports. [#59846](https://github.com/woocommerce/woocommerce/pull/59846)
+
+
+= 10.0.3 2025-07-21 =
+
+**WooCommerce**
+
+* Fix - Product Details: prevent the default template to be auto applied for existing blocks. [#59698](https://github.com/woocommerce/woocommerce/pull/59698)
+* Tweak - Filter tooltip content in jQuery tipTip tooltips [#59830](https://github.com/woocommerce/woocommerce/pull/59830)
+
+
 = 10.0.2 2025-07-14 =
 
 **WooCommerce**
