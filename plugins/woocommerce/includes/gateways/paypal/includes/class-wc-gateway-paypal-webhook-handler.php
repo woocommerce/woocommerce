@@ -65,7 +65,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
-			$order->update_meta_data( '_paypal_status', $status );
+			$order->update_meta_data( '_paypal_status', strtolower( $status ) );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -106,7 +106,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		$order->set_transaction_id( $event['resource']['id'] );
-		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
+		$order->update_meta_data( '_paypal_status', strtolower( $event['resource']['status'] ) );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(

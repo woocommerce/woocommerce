@@ -248,7 +248,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Skip if the payment is already captured.
-		if ( 'COMPLETED' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
@@ -280,7 +280,7 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 		}
 
-		$order->update_meta_data( '_paypal_status', $response_data['status'] );
+		$order->update_meta_data( '_paypal_status', strtolower( $response_data['status'] ) );
 		$order->save();
 	}
 
