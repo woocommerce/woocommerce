@@ -64,8 +64,8 @@ window.addEventListener( 'load', () => {
 	const hasItemsInCachedCart = cachedCart?.itemsCount > 0;
 
 	if (
-		( ! hasCartSession() || hasItemsInCachedCart ) &&
-		! isAddingToCart()
+		( ! hasCartSession() || persistenceLayer.get() ) &&
+		! isAddingToCart
 	) {
 		// Prevent the API request from being made.
 		wpDispatch( store ).finishResolution( 'getCartData' );
