@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { useProductDataContext } from '@woocommerce/shared-context';
-import { useRef, useState, useEffect } from '@wordpress/element';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import type { ProductResponseImageItem } from '@woocommerce/types';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { useEffect, useRef, useState } from '@wordpress/element';
+import { useProduct } from '@woocommerce/entities';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import { checkOverflow } from '../../utils';
+import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
 const MAX_THUMBNAILS = 10;
@@ -39,21 +39,23 @@ const prepareProductImages = (
 export const Edit = ( {
 	attributes,
 	setAttributes,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
+	context,
+}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > & {
+	context: {
+		postId?: string;
+	};
+} ) => {
 	const { thumbnailSize, aspectRatio } = attributes;
 
-	const productContext = useProductDataContext();
-	const product = productContext?.product;
+	const { product } = useProduct( context.postId );
 
-	// If the product is not loaded, the default product object is returned.
-	// That's why we're checking if product id is truthy as by default it's 0.
-	const isProductContext = Boolean( product?.id );
-	const productThumbnails = isProductContext
-		? prepareProductImages( product?.images )
-		: Array( MAX_THUMBNAILS ).fill( {
-				src: PLACEHOLDER_IMG_SRC,
-				alt: '',
-		  } );
+	const productThumbnails =
+		product && product.images && product.images.length > 0
+			? prepareProductImages( product.images )
+			: Array( MAX_THUMBNAILS ).fill( {
+					src: PLACEHOLDER_IMG_SRC,
+					alt: '',
+			  } );
 
 	const renderThumbnails = productThumbnails.length > 1;
 
