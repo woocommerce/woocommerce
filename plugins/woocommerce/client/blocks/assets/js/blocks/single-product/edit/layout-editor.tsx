@@ -42,7 +42,7 @@ const LayoutEditor = ( {
 	clientId,
 }: LayoutEditorProps ) => {
 	const baseClassName =
-		'.wc-block-editor-single-product .wc-block-editor-layout';
+		'wc-block-editor-single-product wc-block-editor-layout';
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
 	const resetInnerBlocks = useCallback( () => {
