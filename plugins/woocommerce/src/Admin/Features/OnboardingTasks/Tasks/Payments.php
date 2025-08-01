@@ -115,7 +115,12 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	public function is_in_progress() {
-		return ( $this->has_woopayments_live_account_in_progress() || $this->has_woopayments_test_account() ) && ! $this->is_complete();
+		// If the task is already complete, it's not in progress.
+		if ( $this->is_complete() ) {
+			return false;
+		}
+
+		return ( $this->has_woopayments_live_account_in_progress() || $this->has_woopayments_test_account() );
 	}
 
 	/**
