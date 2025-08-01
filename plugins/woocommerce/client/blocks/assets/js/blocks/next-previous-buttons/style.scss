@@ -35,14 +35,22 @@
 }
 
 // Icons are centred but they are perceived off hence adjusting with padding.
-:where(.wc-block-next-previous-buttons__icon--left),
-:where(.rtl):where(.wc-block-next-previous-buttons__icon--right) {
+:where(.wc-block-next-previous-buttons__icon--left) {
 	padding: 2px 2px 0 0;
 }
 
-:where(.wc-block-next-previous-buttons__icon--right),
-:where(.rtl):where(.wc-block-next-previous-buttons__icon--left) {
+:where(.wc-block-next-previous-buttons__icon--right) {
 	padding: 2px 0 0 2px;
+}
+
+:where(.rtl) {
+	:where(.wc-block-next-previous-buttons__icon--left) {
+		padding: 2px 0 0 2px;
+	}
+
+	:where(.wc-block-next-previous-buttons__icon--right) {
+		padding: 2px 2px 0 0;
+	}
 }
 
 :where(.wc-block-next-previous-buttons__button) {
