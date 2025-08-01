@@ -245,11 +245,13 @@ class Payments extends Task {
 			return false;
 		}
 
+		// If we have a test account, we are not in live account onboarding.
+		if ( this->has_woopayments_test_account() ) {
+			return false;
+		}
+
 		// Check the provider's state to determine if a live account onboarding is in progress.
-		if ( ! empty( $woopayments_provider['onboarding']['state']['started'] ) &&
-			empty( $woopayments_provider['onboarding']['state']['completed'] ) &&
-			empty( $woopayments_provider['onboarding']['state']['test_drive_account'] )
-		) {
+		if ( ! empty( $woopayments_provider['onboarding']['state']['started'] ) ) {
 			return true;
 		}
 
