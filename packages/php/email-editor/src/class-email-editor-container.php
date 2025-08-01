@@ -88,12 +88,6 @@ class Email_Editor_Container {
 			}
 		);
 		$container->set(
-			Assets_Manager::class,
-			function () {
-				return new Assets_Manager();
-			}
-		);
-		$container->set(
 			User_Theme::class,
 			function () {
 				return new User_Theme();
@@ -169,6 +163,16 @@ class Email_Editor_Container {
 			Border_Style_Postprocessor::class,
 			function () {
 				return new Border_Style_Postprocessor();
+			}
+		);
+		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+				);
 			}
 		);
 		$container->set(

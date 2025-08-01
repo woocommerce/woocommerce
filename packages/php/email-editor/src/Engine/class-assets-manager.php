@@ -13,6 +13,78 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
  */
 class Assets_Manager {
 	/**
+	 * Settings controller instance.
+	 *
+	 * @var Settings_Controller
+	 */
+	private Settings_Controller $settings_controller;
+
+	/**
+	 * Theme controller instance.
+	 *
+	 * @var Theme_Controller
+	 */
+	private Theme_Controller $theme_controller;
+
+	/**
+	 * User theme instance.
+	 *
+	 * @var User_Theme
+	 */
+	private User_Theme $user_theme;
+
+	/**
+	 * Email editor assets path.
+	 *
+	 * @var string
+	 */
+	private string $assets_path;
+
+	/**
+	 * Email editor assets URL.
+	 *
+	 * @var string
+	 */
+	private string $assets_url;
+
+	/**
+	 * Assets Manager constructor with all dependencies.
+	 *
+	 * @param Settings_Controller $settings_controller Settings controller instance.
+	 * @param Theme_Controller    $theme_controller Theme controller instance.
+	 * @param User_Theme          $user_theme User theme instance.
+	 */
+	public function __construct(
+		Settings_Controller $settings_controller,
+		Theme_Controller $theme_controller,
+		User_Theme $user_theme
+	) {
+		$this->settings_controller = $settings_controller;
+		$this->theme_controller    = $theme_controller;
+		$this->user_theme          = $user_theme;
+	}
+
+	/**
+	 * Sets the path for the email editor assets.
+	 *
+	 * @param string $assets_path The path to the email editor assets directory.
+	 * @return void
+	 */
+	public function set_assets_path( string $assets_path ): void {
+		$this->assets_path = $assets_path;
+	}
+
+	/**
+	 *  Sets the URL for the email editor assets.
+	 *
+	 * @param string $assets_url The URL to the email editor assets directory.
+	 * @return void
+	 */
+	public function set_assets_url( string $assets_url ): void {
+		$this->assets_url = $assets_url;
+	}
+
+	/**
 	 * Initialize the assets manager.
 	 */
 	public function initialize(): void {
@@ -35,5 +107,86 @@ class Assets_Manager {
 
 		// Enqueue media library scripts.
 		wp_enqueue_media();
+	}
+
+	/**
+	 * Load editor assets.
+	 *
+	 * @param \WP_Post|\WP_Block_Template $edited_item  The edited post or template.
+	 */
+	public function load_editor_assets( $edited_item ): void {
+		$post_type = $edited_item instanceof \WP_Post ? $edited_item->post_type : 'wp_template';
+		$post_id   = $edited_item instanceof \WP_Post ? $edited_item->ID : $edited_item->id;
+
+		$email_editor_assets_path = rtrim( $this->assets_path, '/' ) . '/email-editor/';
+		$email_editor_assets_url  = rtrim( $this->assets_url, '/' ) . '/email-editor/';
+
+		// Email editor rich text JS - Because the Personalization Tags depend on Gutenberg 19.8.0 and higher
+		// the following code replaces used Rich Text for the version containing the necessary changes.
+		$rich_text_assets_params = require $email_editor_assets_path . 'assets/rich-text.asset.php';
+		wp_deregister_script( 'wp-rich-text' );
+		wp_enqueue_script(
+			'wp-rich-text',
+			$email_editor_assets_url . 'assets/rich-text.js',
+			$rich_text_assets_params['dependencies'],
+			$rich_text_assets_params['version'],
+			true
+		);
+		// End of replacing Rich Text package.
+
+		$assets_params = require $email_editor_assets_path . 'index.asset.php';
+		wp_enqueue_style(
+			'wc-admin-email-editor-integration',
+			$email_editor_assets_url . 'style.css',
+			array(),
+			$assets_params['version']
+		);
+
+		// The get_block_categories() function expects a WP_Post or WP_Block_Editor_Context object.
+		// Therefore, we need to create an instance of WP_Block_Editor_Context when $edited_item is an instance of WP_Block_Template.
+		if ( $edited_item instanceof \WP_Block_Template ) {
+			$context = new \WP_Block_Editor_Context(
+				array(
+					'post' => $edited_item,
+				)
+			);
+		} else {
+			$context = $edited_item;
+		}
+		// The email editor needs to load block categories to avoid warning and missing category names.
+		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L116-L120.
+		wp_add_inline_script(
+			'wp-blocks',
+			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $context ) ) ),
+			'after'
+		);
+
+		// Preload server-registered block schemas to avoid warning about missing block titles.
+		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L144C1-L148C3.
+		wp_add_inline_script(
+			'wp-blocks',
+			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings() ) )
+		);
+
+		$localization_data = array(
+			'current_post_type'     => esc_js( $post_type ),
+			'current_post_id'       => $post_id,
+			'current_wp_user_email' => esc_js( wp_get_current_user()->user_email ),
+			'editor_settings'       => $this->settings_controller->get_settings(),
+			'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
+			'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
+			'urls'                  => array(
+				'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+			),
+			'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
+		);
+
+		wp_localize_script(
+			'wc-admin-email-editor-integration',
+			'WooCommerceEmailEditor',
+			apply_filters( 'woocommerce_email_editor_script_localization_data', $localization_data )
+		);
 	}
 }
