@@ -435,6 +435,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				),
 			),
 		);
+		$schema['properties']['line_items']['items']['properties']['line_discount'] = array(
+			'description' => __( 'Line discount (total discount for this line item).', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true
+		);
 
 		return $schema;
 	}
@@ -492,6 +498,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 						$line_item_data['cost_of_goods_sold']['value'] = $line_item_data['cogs_value'];
 					}
 					unset( $line_item_data['cogs_value'] );
+				}
+				if ( isset( $line_item_data['id'] ) ) {
+					$order_item = $order->get_item( $line_item_data['id'] );
+					if ( $order_item && method_exists( $order_item, 'get_line_discount' ) ) {
+						$line_item_data['line_discount'] = $order_item->get_line_discount();
+					}
 				}
 			}
 		}

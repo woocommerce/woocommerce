@@ -685,9 +685,19 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$this->cart->cart_contents[ $item_key ]['line_tax_data']['total'] = wc_remove_number_precision_deep( $item->taxes );
-			$this->cart->cart_contents[ $item_key ]['line_total']             = wc_remove_number_precision( $item->total );
-			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
+			   $this->cart->cart_contents[ $item_key ]['line_tax_data']['total'] = wc_remove_number_precision_deep( $item->taxes );
+			   $this->cart->cart_contents[ $item_key ]['line_total']             = wc_remove_number_precision( $item->total );
+			   $this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
+			   
+			   if ( isset( $item->product ) ) {
+				   $regular_price = $item->product->get_regular_price();
+				   $quantity = $item->quantity;
+				   $regular_total = $regular_price * $quantity;
+				   $actual_total = wc_remove_number_precision( $item->total );
+				   
+				   $line_discount = $regular_total - $actual_total;
+				   $this->cart->cart_contents[ $item_key ]['line_discount'] = max( 0, $line_discount );
+			   }
 		}
 
 		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
@@ -758,7 +768,7 @@ final class WC_Cart_Totals {
 
 		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
 		$this->set_total( 'items_subtotal', $items_subtotal );
-		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ) );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );

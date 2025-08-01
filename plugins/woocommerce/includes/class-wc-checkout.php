@@ -538,28 +538,29 @@ class WC_Checkout {
 			$product                    = $values['data'];
 			$item->legacy_values        = $values; // @deprecated 4.4.0 For legacy actions.
 			$item->legacy_cart_item_key = $cart_item_key; // @deprecated 4.4.0 For legacy actions.
-			$item->set_props(
-				array(
-					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
-					'subtotal'     => $values['line_subtotal'],
-					'total'        => $values['line_total'],
-					'subtotal_tax' => $values['line_subtotal_tax'],
-					'total_tax'    => $values['line_tax'],
-					'taxes'        => $values['line_tax_data'],
-				)
-			);
+		   $item->set_props(
+			   array(
+				   'quantity'     => $values['quantity'],
+				   'variation'    => $values['variation'],
+				   'subtotal'     => $values['line_subtotal'],
+				   'total'        => $values['line_total'],
+				   'subtotal_tax' => $values['line_subtotal_tax'],
+				   'total_tax'    => $values['line_tax'],
+				   'taxes'        => $values['line_tax_data'],
+				   'line_discount'=> isset($values['line_discount']) ? $values['line_discount'] : 0,
+			   )
+		   );
 
-			if ( $product ) {
-				$item->set_props(
-					array(
-						'name'         => $product->get_name(),
-						'tax_class'    => $product->get_tax_class(),
-						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
-						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
-					)
-				);
-			}
+		   if ( $product ) {
+			   $item->set_props(
+				   array(
+					   'name'         => $product->get_name(),
+					   'tax_class'    => $product->get_tax_class(),
+					   'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
+					   'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
+				   )
+			   );
+		   }
 
 			$item->set_backorder_meta();
 

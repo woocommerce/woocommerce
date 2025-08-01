@@ -50,6 +50,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		'subtotal_tax' => 0,
 		'total'        => 0,
 		'total_tax'    => 0,
+		'line_discount' => 0,
 		'taxes'        => array(
 			'subtotal' => array(),
 			'total'    => array(),
@@ -158,6 +159,30 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_total_tax( $value ) {
 		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+	}
+
+	 /**
+	 * Get line discount (total discount for this line item).
+	 *
+	 * @param string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+
+   public function get_line_discount( $context = 'view' ) {
+	   $discount = $this->get_prop( 'line_discount', $context );
+	   if ( $discount !== '' && $discount !== null ) {
+		   return wc_format_decimal( $discount );
+	   }
+	   return 0;
+   }
+
+	/**
+	 * Set line discount (total discount for this line item).
+	 *
+	 * @param string $value Line discount amount.
+	 */
+	public function set_line_discount( $value ) {
+		$this->set_prop( 'line_discount', wc_format_decimal( $value ) );
 	}
 
 	/**
@@ -500,6 +525,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$offset = 'total_tax';
 		} elseif ( 'line_tax_data' === $offset ) {
 			$offset = 'taxes';
+		} elseif ( 'line_discount' === $offset ) {
+			$offset = 'line_discount';
 		} elseif ( 'qty' === $offset ) {
 			$offset = 'quantity';
 		}
@@ -526,6 +553,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$offset = 'total_tax';
 		} elseif ( 'line_tax_data' === $offset ) {
 			$offset = 'taxes';
+		} elseif ( 'line_discount' === $offset ) {
+			$offset = 'line_discount';
 		} elseif ( 'qty' === $offset ) {
 			$offset = 'quantity';
 		}
@@ -540,7 +569,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'item_meta_array', 'item_meta', 'qty' ), true ) ) {
+		if ( in_array( $offset, array( 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data', 'line_discount', 'item_meta_array', 'item_meta', 'qty' ), true ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );
