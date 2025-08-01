@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove withProductSelector HOC from product element blocks.

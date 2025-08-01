@@ -35,6 +35,23 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 	variation?: SelectedAttributes[];
 };
 
+export type ProductData = {
+	price_html?: string;
+	availability?: string;
+	sku?: string;
+	weight?: string;
+	dimensions?: string;
+	variations?: {
+		[ variationId: number ]: {
+			price_html?: string;
+			availability?: string;
+			sku?: string;
+			weight?: string;
+			dimensions?: string;
+		};
+	};
+};
+
 export type Store = {
 	state: {
 		errorMessages?: {
@@ -47,16 +64,7 @@ export type Store = {
 			totals: CartResponseTotals;
 		};
 		products?: {
-			[ productId: number ]: {
-				price_html?: string;
-				availability?: string;
-				variations?: {
-					[ variationId: number ]: {
-						price_html?: string;
-						availability: string;
-					};
-				};
-			};
+			[ productId: number ]: ProductData;
 		};
 	};
 	actions: {
