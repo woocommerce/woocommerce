@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix backward compatibility when personalization tag post types are not set.
