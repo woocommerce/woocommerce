@@ -151,6 +151,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
 			),
+			'repair_coupons_lookup_table'          => array(
+				'name'   => __( 'Coupons lookup table', 'woocommerce' ),
+				'button' => __( 'Repair', 'woocommerce' ),
+				'desc'   => __( 'This tool will repair the coupons lookup table data with missing discount amounts. This process may take a while.', 'woocommerce' ),
+			),
 			'recount_terms'                        => array(
 				'name'   => __( 'Term counts', 'woocommerce' ),
 				'button' => __( 'Recount terms', 'woocommerce' ),
@@ -523,6 +528,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					wc_update_product_lookup_tables();
 				}
 				$message = __( 'Lookup tables are regenerating', 'woocommerce' );
+				break;
+
+			case 'repair_coupons_lookup_table':
+				$result  = wc_repair_zero_discount_coupons_lookup_table();
+				$message = $result['message'];
 				break;
 			case 'reset_roles':
 				// Remove then re-add caps and roles.

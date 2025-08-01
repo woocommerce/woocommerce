@@ -8,10 +8,7 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
-import {
-	isExperimentalBlocksEnabled,
-	isExperimentalWcRestApiEnabled,
-} from '@woocommerce/block-settings';
+import { isExperimentalWcRestApiEnabled } from '@woocommerce/block-settings';
 import { useProduct } from '@woocommerce/entities';
 
 /**
@@ -96,10 +93,7 @@ const PriceEdit = ( {
 						{ ...blockAttrs }
 						isAdmin={ true }
 						product={ product }
-						areExperimentalFlagsEnabled={
-							isExperimentalBlocksEnabled() &&
-							isExperimentalWcRestApiEnabled()
-						}
+						isExperimentalWcRestApiEnabled={ isExperimentalWcRestApiEnabled() }
 					/>
 				) }
 			</div>

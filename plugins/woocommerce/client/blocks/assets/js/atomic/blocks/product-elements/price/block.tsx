@@ -13,7 +13,7 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type { Currency, ProductResponseItem } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
@@ -25,7 +25,7 @@ type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
 		product: ProductResponseItem | ProductEntityResponse;
-		areExperimentalFlagsEnabled: boolean;
+		isExperimentalWcRestApiEnabled: boolean;
 	};
 
 interface PriceProps {
@@ -50,14 +50,19 @@ interface PriceProps {
  * This function multiplies the price by 100 to convert from decimal to minor units.
  *
  * @param priceString The price as a string from the Admin API (e.g., "12.99")
+ * @param currency    The currency object
  * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
  * @return The price converted to minor units as a string (e.g., "1299")
  */
 const convertAdminPriceToStoreApiFormat = (
 	priceString: string | null | undefined,
+	currency: Currency,
 	fallback = '0'
 ) => {
-	return ( Number.parseFloat( priceString ?? fallback ) * 100 ).toString();
+	const multiplier = 10 ** currency.minorUnit;
+	return (
+		Number.parseFloat( priceString ?? fallback ) * multiplier
+	).toString();
 };
 
 export const Block = ( props: Props ): JSX.Element | null => {
@@ -67,12 +72,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
 		product: productData,
-		areExperimentalFlagsEnabled,
+		isExperimentalWcRestApiEnabled,
 	} = props;
+
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
-		areExperimentalFlagsEnabled
+		/**
+		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
+		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
+		 */
+		isExperimentalWcRestApiEnabled
 			? {
 					isAdmin,
 					product: productData,
@@ -114,21 +124,29 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	}
 
 	let prices: PriceProps = product?.prices ?? {};
+	const currency = showPricePreview
+		? getCurrencyFromPriceResponse()
+		: getCurrencyFromPriceResponse( prices );
 
-	if ( areExperimentalFlagsEnabled ) {
+	if ( isExperimentalWcRestApiEnabled ) {
 		prices = {
-			price: convertAdminPriceToStoreApiFormat( product?.price ),
+			price: convertAdminPriceToStoreApiFormat(
+				product?.price,
+				currency
+			),
 			...( product?.sale_price
 				? {
 						sale_price: convertAdminPriceToStoreApiFormat(
-							product?.sale_price
+							product?.sale_price,
+							currency
 						),
 				  }
 				: {} ),
 			...( product?.regular_price
 				? {
 						regular_price: convertAdminPriceToStoreApiFormat(
-							product?.regular_price
+							product?.regular_price,
+							currency
 						),
 				  }
 				: {} ),
@@ -138,19 +156,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				product?.__experimental_min_price
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_min_price
+								product.__experimental_min_price,
+								currency
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_max_price
+								product.__experimental_max_price,
+								currency
 							),
 					  }
 					: null,
 		};
 	}
-
-	const currency = showPricePreview
-		? getCurrencyFromPriceResponse()
-		: getCurrencyFromPriceResponse( prices );
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;
