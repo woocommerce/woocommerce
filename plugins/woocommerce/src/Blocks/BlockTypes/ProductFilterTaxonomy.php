@@ -21,33 +21,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	protected $block_name = 'product-filter-taxonomy';
 
 	/**
-	 * Initialize this block type.
-	 *
-	 * - Hook into WP lifecycle.
-	 * - Register the block with WordPress.
-	 */
-	protected function initialize() {
-		parent::initialize();
-
-		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
-	}
-
-	/**
-	 * Extra data passed through from server to client for block.
-	 *
-	 * @param array $attributes  Any attributes that currently are available from the block.
-	 *                           Note, this will be empty in the editor context when the block is
-	 *                           not in the post content on editor load.
-	 */
-	protected function enqueue_data( array $attributes = array() ) {
-		parent::enqueue_data( $attributes );
-
-		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
-		}
-	}
-
-	/**
 	 * Prepare the active filter items.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
@@ -103,6 +76,33 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
+		}
 	}
 
 	/**

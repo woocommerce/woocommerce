@@ -69,6 +69,44 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
+	 * Get all descendants for a term.
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of all descendant term IDs.
+	 */
+	public function get_descendants( int $term_id, string $taxonomy ): array {
+		$map = $this->get_hierarchy_map( $taxonomy );
+		return $map['descendants'][ $term_id ] ?? array();
+	}
+
+	/**
+	 * Get ancestor chain for efficient batch processing.
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy name.
+	 * @return array Array of ancestor term IDs (bottom-up).
+	 */
+	public function get_ancestors( int $term_id, string $taxonomy ): array {
+		$map = $this->get_hierarchy_map( $taxonomy );
+		return $map['ancestors'][ $term_id ] ?? array();
+	}
+
+	/**
+	 * Clear hierarchy cache for a taxonomy.
+	 *
+	 * @param string $taxonomy The taxonomy name.
+	 */
+	public function clear_cache( string $taxonomy ): void {
+		// Clear in-memory cache for this taxonomy.
+		unset( $this->hierarchy_data[ $taxonomy ] );
+
+		// Clear only the specific taxonomy's option cache.
+		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
+		delete_option( $cache_key );
+	}
+
+	/**
 	 * Check if the cache is valid.
 	 *
 	 * @param array $data Cache data
@@ -210,43 +248,5 @@ class TaxonomyHierarchyData {
 		}
 
 		return $ancestors;
-	}
-
-	/**
-	 * Get all descendants for a term.
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array of all descendant term IDs.
-	 */
-	public function get_descendants( int $term_id, string $taxonomy ): array {
-		$map = $this->get_hierarchy_map( $taxonomy );
-		return $map['descendants'][ $term_id ] ?? array();
-	}
-
-	/**
-	 * Get ancestor chain for efficient batch processing.
-	 *
-	 * @param int    $term_id  The term ID.
-	 * @param string $taxonomy The taxonomy name.
-	 * @return array Array of ancestor term IDs (bottom-up).
-	 */
-	public function get_ancestors( int $term_id, string $taxonomy ): array {
-		$map = $this->get_hierarchy_map( $taxonomy );
-		return $map['ancestors'][ $term_id ] ?? array();
-	}
-
-	/**
-	 * Clear hierarchy cache for a taxonomy.
-	 *
-	 * @param string $taxonomy The taxonomy name.
-	 */
-	public function clear_cache( string $taxonomy ): void {
-		// Clear in-memory cache for this taxonomy.
-		unset( $this->hierarchy_data[ $taxonomy ] );
-
-		// Clear only the specific taxonomy's option cache.
-		$cache_key = self::CACHE_GROUP . '_' . $taxonomy;
-		delete_option( $cache_key );
 	}
 }
