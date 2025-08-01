@@ -13,6 +13,16 @@ require_once WC_ABSPATH . '/includes/class-wc-brands.php';
  * WC Brands test
  */
 class WC_Brands_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Tear down test data.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Clear term cache to prevent interference between tests.
+		clean_term_cache( array(), 'product_brand' );
+	}
 	/**
 	 * Test that `product_brand_thumbnails` shortcode's `show_empty` argument works as expected.
 	 * This test prevents regression of the issue where double filtering caused no brands to be displayed.
@@ -72,6 +82,95 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Both brands are shown.
 		$this->assertStringContainsString( 'Full Brand', $output );
 		$this->assertStringContainsString( 'Empty Brand', $output );
+	}
+
+	/**
+	 * Test that brand counts are correctly calculated and cached.
+	 */
+	public function test_brand_count_calculation_and_caching() {
+		$data = $this->setup_brand_test_data();
+
+		// Get the brand term.
+		clean_term_cache( $data['brand_with_products']['term_id'], 'product_brand' );
+		$brand_terms = get_terms(
+			array(
+				'taxonomy'   => 'product_brand',
+				'include'    => array( $data['brand_with_products']['term_id'] ),
+				'hide_empty' => false,
+			)
+		);
+		$brand_term  = $brand_terms[0];
+
+		// Test that the count is correctly calculated.
+		$this->assertEquals( 1, $brand_term->count, 'Brand should have 1 product' );
+
+		// Test that the count is cached in term meta.
+		$cached_count = get_term_meta( $brand_term->term_id, 'product_count_product_brand', true );
+		$this->assertEquals( '1', $cached_count, 'Brand count should be cached in term meta' );
+	}
+
+	/**
+	 * Test that brand counts respect product visibility settings.
+	 */
+	public function test_brand_count_respects_product_visibility() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Enable hide out of stock setting FIRST.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		// THEN set product to out of stock (hook will fire with correct setting).
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		// Set current screen to frontend to ensure wc_change_term_counts applies its logic.
+		$this->go_to( home_url( '/' ) );
+
+		// Get the brand term.
+		$brand_terms = get_terms(
+			array(
+				'taxonomy'   => 'product_brand',
+				'include'    => array( $data['brand_with_products']['term_id'] ),
+				'hide_empty' => false,
+			)
+		);
+		$brand_term  = $brand_terms[0];
+
+		// Test that the count is 0 when product is out of stock and hidden.
+		$this->assertEquals( 0, $brand_term->count, 'Brand count should be 0 when product is out of stock and hidden' );
+
+		// Test that the count is cached correctly.
+		$cached_count = get_term_meta( $brand_term->term_id, 'product_count_product_brand', true );
+		$this->assertEquals( '0', $cached_count, 'Brand count should be cached as 0 when product is out of stock' );
+
+		// Reset the setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+	}
+
+	/**
+	 * Test that brand counts are updated when products are added/removed.
+	 */
+	public function test_brand_count_updates_when_products_change() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Initially should have 1 product.
+		$brand_term = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 1, $brand_term->count, 'Brand should initially have 1 product' );
+
+		// Remove the product from the brand.
+		wp_set_object_terms( $product->get_id(), array(), 'product_brand' );
+
+		// Count should be updated to 0.
+		$brand_term_updated = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 0, $brand_term_updated->count, 'Brand should have 0 products after removal' );
+
+		// Add the product back.
+		wp_set_object_terms( $product->get_id(), array( $data['brand_with_products']['term_id'] ), 'product_brand' );
+
+		// Count should be updated back to 1.
+		$brand_term_final = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
+		$this->assertEquals( 1, $brand_term_final->count, 'Brand should have 1 product after re-adding' );
 	}
 
 	/**
