@@ -96,10 +96,7 @@ const PriceEdit = ( {
 						{ ...blockAttrs }
 						isAdmin={ true }
 						product={ product }
-						areExperimentalFlagsEnabled={
-							isExperimentalBlocksEnabled() &&
-							isExperimentalWcRestApiEnabled()
-						}
+						isExperimentalWcRestApiEnabled={ isExperimentalWcRestApiEnabled() }
 					/>
 				) }
 			</div>

@@ -25,7 +25,7 @@ type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
 		product: ProductResponseItem | ProductEntityResponse;
-		areExperimentalFlagsEnabled: boolean;
+		isExperimentalWcRestApiEnabled: boolean;
 	};
 
 interface PriceProps {
@@ -71,12 +71,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
 		product: productData,
-		areExperimentalFlagsEnabled,
+		isExperimentalWcRestApiEnabled,
 	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
-		areExperimentalFlagsEnabled
+		isExperimentalWcRestApiEnabled
 			? {
 					isAdmin,
 					product: productData,
@@ -119,7 +119,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	let prices: PriceProps = product?.prices ?? {};
 
-	if ( areExperimentalFlagsEnabled ) {
+	if ( isExperimentalWcRestApiEnabled ) {
 		prices = {
 			price: convertAdminPriceToStoreApiFormat( product?.price, prices ),
 			...( product?.sale_price
