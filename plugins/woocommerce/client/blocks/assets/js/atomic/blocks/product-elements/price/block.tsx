@@ -55,9 +55,13 @@ interface PriceProps {
  */
 const convertAdminPriceToStoreApiFormat = (
 	priceString: string | null | undefined,
+	priceProps: PriceProps,
 	fallback = '0'
 ) => {
-	return ( Number.parseFloat( priceString ?? fallback ) * 100 ).toString();
+	const multiplier = 10 ** priceProps.currency_minor_unit;
+	return (
+		Number.parseFloat( priceString ?? fallback ) * multiplier
+	).toString();
 };
 
 export const Block = ( props: Props ): JSX.Element | null => {
@@ -117,18 +121,20 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	if ( areExperimentalFlagsEnabled ) {
 		prices = {
-			price: convertAdminPriceToStoreApiFormat( product?.price ),
+			price: convertAdminPriceToStoreApiFormat( product?.price, prices ),
 			...( product?.sale_price
 				? {
 						sale_price: convertAdminPriceToStoreApiFormat(
-							product?.sale_price
+							product?.sale_price,
+							prices
 						),
 				  }
 				: {} ),
 			...( product?.regular_price
 				? {
 						regular_price: convertAdminPriceToStoreApiFormat(
-							product?.regular_price
+							product?.regular_price,
+							prices
 						),
 				  }
 				: {} ),
@@ -138,10 +144,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				product?.__experimental_min_price
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_min_price
+								product.__experimental_min_price,
+								prices
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_max_price
+								product.__experimental_max_price,
+								prices
 							),
 					  }
 					: null,
