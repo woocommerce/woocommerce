@@ -70,8 +70,8 @@ Authorization: Basic <base64_encoded_credentials>
 				},
 				{
 					"id": 3,
-					"key": "shipping_provider",
-					"value": "UPS"
+					"key": "_shipping_provider",
+					"value": "ups"
 				}
 			]
 		}
@@ -171,8 +171,8 @@ Authorization: Basic <base64_encoded_credentials>
 			},
 			{
 				"id": 5,
-				"key": "shipping_provider",
-				"value": "UPS"
+				"key": "_shipping_provider",
+				"value": "ups"
 			},
 			{
 				"id": 6,
@@ -226,8 +226,8 @@ Authorization: Basic <base64_encoded_credentials>
 			},
 			{
 				"id": 4,
-				"key": "shipping_provider",
-				"value": "UPS"
+				"key": "_shipping_provider",
+				"value": "ups"
 			}
 		]
 	}
@@ -327,8 +327,8 @@ Authorization: Basic <base64_encoded_credentials>
 			},
 			{
 				"id": 5,
-				"key": "shipping_provider",
-				"value": "UPS"
+				"key": "_shipping_provider",
+				"value": "ups"
 			},
 			{
 				"id": 6,
@@ -659,7 +659,7 @@ Metadata objects have the following structure:
 
 ### Required Metadata
 
--   `_items` - **REQUIRED** - JSON string containing array of items being fulfilled
+-   `_items` - **REQUIRED** - Array of objects representing items being fulfilled
 
 ### Optional Private Metadata Keys
 
