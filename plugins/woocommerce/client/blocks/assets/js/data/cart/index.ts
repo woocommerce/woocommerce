@@ -9,7 +9,6 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
-import { isEditor } from '../utils';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**
@@ -33,6 +32,7 @@ import {
 import { defaultCartState } from './default-state';
 import { getTriggerStoreSyncEvent } from './utils';
 import type { QuantityChanges } from './notify-quantity-changes';
+import { isEditor } from '../utils';
 
 export const config = {
 	reducer,
