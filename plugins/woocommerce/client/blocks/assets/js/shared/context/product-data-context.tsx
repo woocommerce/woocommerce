@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { ProductEntityResponse } from '@woocommerce/entities';
 import { ProductResponseItem } from '@woocommerce/types';
 import { createContext, useContext } from '@wordpress/element';
 
@@ -66,7 +67,11 @@ const defaultProductData: ProductResponseItem = {
  *
  * @member {Object} ProductDataContext A react context object
  */
-const ProductDataContext = createContext( {
+const ProductDataContext = createContext< {
+	product: ProductResponseItem | ProductEntityResponse;
+	hasContext: boolean;
+	isLoading: boolean;
+} >( {
 	product: defaultProductData,
 	hasContext: false,
 	isLoading: false,
@@ -74,7 +79,7 @@ const ProductDataContext = createContext( {
 
 type UseProductDataContextProps = {
 	isAdmin?: boolean | undefined;
-	product?: ProductResponseItem | undefined;
+	product?: ProductResponseItem | ProductEntityResponse | undefined;
 	isResolving?: boolean | undefined;
 };
 
@@ -113,7 +118,7 @@ export const useProductDataContext = (
 };
 
 interface ProductDataContextProviderProps {
-	product: ProductResponseItem | null;
+	product: ProductResponseItem | ProductEntityResponse | null;
 	children: JSX.Element | JSX.Element[];
 	isLoading: boolean;
 }
