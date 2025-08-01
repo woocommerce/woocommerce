@@ -186,7 +186,7 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Recursively build hierarchical term tree with depth and parent slug.
+	 * Recursively build hierarchical term tree with depth and parent.
 	 *
 	 * @param array $tree       Reference to tree array being built.
 	 * @param int   $term_id    Current term ID.
@@ -198,9 +198,7 @@ class TaxonomyHierarchyData {
 	private function build_term_tree( &$tree, $term_id, $children, $temp_terms, $parent_id = 0, $depth = 0 ) {
 		$tree[ $term_id ]          = $temp_terms[ $term_id ];
 		$tree[ $term_id ]['depth'] = $depth;
-		if ( isset( $temp_terms[ $parent_id ] ) ) {
-			$tree[ $term_id ]['parent'] = $temp_terms[ $parent_id ]['slug'];
-		}
+
 		if ( ! empty( $children[ $term_id ] ) ) {
 			foreach ( $children[ $term_id ] as $child_id ) {
 				$this->build_term_tree( $tree[ $term_id ]['children'], $child_id, $children, $temp_terms, $term_id, $depth + 1 );

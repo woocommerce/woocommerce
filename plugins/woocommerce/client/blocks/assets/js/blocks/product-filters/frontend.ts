@@ -52,7 +52,8 @@ type FilterItem = {
 	count: number;
 	type: string;
 	attributeQueryType?: 'and' | 'or' | undefined;
-	parent?: string;
+	id?: number;
+	parent?: number;
 	depth?: number;
 };
 

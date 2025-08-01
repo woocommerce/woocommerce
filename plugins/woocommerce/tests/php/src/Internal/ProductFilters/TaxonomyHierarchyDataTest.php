@@ -234,12 +234,12 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 		// Check second level term.
 		$laptops_tree = $map['tree'][ $electronics_id ]['children'][ $laptops_id ];
 		$this->assertEquals( 1, $laptops_tree['depth'] );
-		$this->assertEquals( $map['tree'][ $electronics_id ]['slug'], $laptops_tree['parent'] );
+		$this->assertEquals( $electronics_id, $laptops_tree['parent'] );
 
 		// Check third level term.
 		$gaming_tree = $laptops_tree['children'][ $gaming_id ];
 		$this->assertEquals( 2, $gaming_tree['depth'] );
-		$this->assertEquals( $laptops_tree['slug'], $gaming_tree['parent'] );
+		$this->assertEquals( $laptops_id, $gaming_tree['parent'] );
 	}
 }
 

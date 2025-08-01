@@ -183,10 +183,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 					);
 
 					if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-						if ( isset( $term['depth'] ) ) {
+						$option['id'] = $term['term_id'];
+
+						if ( isset( $term['depth'] ) && $term['depth'] > 0 ) {
 							$option['depth'] = $term['depth'];
 						}
-						if ( isset( $term['parent'] ) ) {
+						if ( isset( $term['parent'] ) && $term['parent'] > 0 ) {
 							$option['parent'] = $term['parent'];
 						}
 					}
