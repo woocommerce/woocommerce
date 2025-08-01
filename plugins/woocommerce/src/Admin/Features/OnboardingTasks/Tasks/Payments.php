@@ -246,7 +246,7 @@ class Payments extends Task {
 		}
 
 		// If we have a test account, we are not in live account onboarding.
-		if ( this->has_woopayments_test_account() ) {
+		if ( $this->has_woopayments_test_account() ) {
 			return false;
 		}
 
