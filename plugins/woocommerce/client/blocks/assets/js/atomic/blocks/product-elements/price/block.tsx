@@ -13,7 +13,7 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { CurrencyCode } from '@woocommerce/type-defs/currency';
 import type { HTMLAttributes } from 'react';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type { Currency, ProductResponseItem } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
@@ -55,10 +55,10 @@ interface PriceProps {
  */
 const convertAdminPriceToStoreApiFormat = (
 	priceString: string | null | undefined,
-	priceProps: PriceProps,
+	currency: Currency,
 	fallback = '0'
 ) => {
-	const multiplier = 10 ** priceProps.currency_minor_unit;
+	const multiplier = 10 ** currency.minorUnit;
 	return (
 		Number.parseFloat( priceString ?? fallback ) * multiplier
 	).toString();
@@ -73,6 +73,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		product: productData,
 		isExperimentalWcRestApiEnabled,
 	} = props;
+
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
@@ -118,15 +119,21 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	}
 
 	let prices: PriceProps = product?.prices ?? {};
+	const currency = showPricePreview
+		? getCurrencyFromPriceResponse()
+		: getCurrencyFromPriceResponse( prices );
 
 	if ( isExperimentalWcRestApiEnabled ) {
 		prices = {
-			price: convertAdminPriceToStoreApiFormat( product?.price, prices ),
+			price: convertAdminPriceToStoreApiFormat(
+				product?.price,
+				currency
+			),
 			...( product?.sale_price
 				? {
 						sale_price: convertAdminPriceToStoreApiFormat(
 							product?.sale_price,
-							prices
+							currency
 						),
 				  }
 				: {} ),
@@ -134,7 +141,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				? {
 						regular_price: convertAdminPriceToStoreApiFormat(
 							product?.regular_price,
-							prices
+							currency
 						),
 				  }
 				: {} ),
@@ -145,20 +152,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
 								product.__experimental_min_price,
-								prices
+								currency
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
 								product.__experimental_max_price,
-								prices
+								currency
 							),
 					  }
 					: null,
 		};
 	}
-
-	const currency = showPricePreview
-		? getCurrencyFromPriceResponse()
-		: getCurrencyFromPriceResponse( prices );
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;
