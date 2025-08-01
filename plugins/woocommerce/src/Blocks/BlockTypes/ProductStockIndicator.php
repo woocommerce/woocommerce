@@ -150,11 +150,7 @@ class ProductStockIndicator extends AbstractBlock {
 
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-			$context                                   = array(
-				'productElementKey' => 'availability',
-			);
-			$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-			$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
+			$wrapper_attributes['data-wp-text']        = 'state.productData.availability';
 		}
 
 		$output_text = $low_stock_text ?? $availability['availability'];
@@ -164,7 +160,6 @@ class ProductStockIndicator extends AbstractBlock {
 		$output .= isset( $classes_and_styles['styles'] ) ? ' style="' . esc_attr( $classes_and_styles['styles'] ) . '"' : '';
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
 			$output .= ' ' . get_block_wrapper_attributes( $wrapper_attributes );
-			$output .= ' ' . $watch_attribute;
 		}
 		$output .= '>';
 		$output .= wp_kses_post( $output_text );
