@@ -28,6 +28,46 @@ import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
+// Create hierarchical structure: parents followed by their children
+function createHierarchicalList(
+	terms: FilterOptionItem[],
+	sortOrder: string
+) {
+	const children = new Map();
+
+	// First: categorize terms
+	terms.forEach( ( term ) => {
+		if ( ! children.has( term.parent ) ) {
+			children.set( term.parent, [] );
+		}
+		children.get( term.parent ).push( term );
+	} );
+
+	// Next: sort them
+	children.keys().forEach( ( key ) => {
+		children.set(
+			key,
+			sortFilterOptions( children.get( key ), sortOrder )
+		);
+	} );
+
+	// Last: build hierarchical list
+	const result: FilterOptionItem[] = [];
+	function addTermsRecursively( termList: FilterOptionItem[] ) {
+		termList.forEach( ( term ) => {
+			result.push( term );
+			const termChildren = children.get( term.id ) || [];
+			if ( termChildren.length > 0 ) {
+				addTermsRecursively( termChildren );
+				addTermsRecursively( termChildren, depth + 1 );
+			}
+		} );
+	}
+
+	addTermsRecursively( children.get( 0 ) );
+	return result;
+}
+
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
 
@@ -58,23 +98,21 @@ const Edit = ( props: EditProps ) => {
 
 			const { getEntityRecords, hasFinishedResolution } =
 				select( coreStore );
-			const selectorArgs = [
-				'taxonomy',
-				taxonomy,
-				{
-					per_page: 15,
-					hide_empty: hideEmpty,
-					orderby: 'name',
-					order: 'asc',
-				},
-			];
 
+			const selectArgs = {
+				per_page: 15,
+				hide_empty: hideEmpty,
+				orderby: 'name',
+				order: 'asc',
+			};
 			return {
-				taxonomyTerms: getEntityRecords( ...selectorArgs ) || [],
-				isTermsLoading: ! hasFinishedResolution(
-					'getEntityRecords',
-					selectorArgs
-				),
+				taxonomyTerms:
+					getEntityRecords( 'taxonomy', taxonomy, selectArgs ) || [],
+				isTermsLoading: ! hasFinishedResolution( 'getEntityRecords', [
+					'taxonomy',
+					taxonomy,
+					selectArgs,
+				] ),
 			};
 		},
 		[ taxonomy, hideEmpty, isPreview ]
@@ -132,6 +170,8 @@ const Edit = ( props: EditProps ) => {
 					value: term.slug,
 					selected: false,
 					count,
+					id: term.id,
+					parent: term.parent || 0,
 				} );
 
 				return acc;
@@ -139,8 +179,12 @@ const Edit = ( props: EditProps ) => {
 			[]
 		);
 
-		// Sort the processed terms
-		setTermOptions( sortFilterOptions( processedTerms, sortOrder ) );
+		// Create hierarchical structure then apply sorting
+		const hierarchicalTerms = createHierarchicalList(
+			processedTerms,
+			sortOrder
+		);
+		setTermOptions( hierarchicalTerms );
 		setIsOptionsLoading( false );
 	}, [
 		taxonomy,
