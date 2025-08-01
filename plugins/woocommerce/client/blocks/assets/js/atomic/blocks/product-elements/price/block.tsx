@@ -50,6 +50,7 @@ interface PriceProps {
  * This function multiplies the price by 100 to convert from decimal to minor units.
  *
  * @param priceString The price as a string from the Admin API (e.g., "12.99")
+ * @param currency    The currency object
  * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
  * @return The price converted to minor units as a string (e.g., "1299")
  */
