@@ -652,7 +652,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Retrieve a customer ID by email address
+	 * Retrieve a customer ID by email address, regardless of user registration status.
+	 * Prioritizes registered customers over guest customers when both exist.
 	 *
 	 * @param string $email Email address.
 	 * @return false|int Customer ID if found, boolean false if not.
@@ -668,7 +669,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$customer_id = $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT customer_id FROM {$table_name} WHERE email = %s LIMIT 1",
+				"SELECT customer_id FROM {$table_name} WHERE email = %s ORDER BY user_id IS NOT NULL DESC LIMIT 1",
 				$email
 			)
 		);
