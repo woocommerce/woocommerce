@@ -4,7 +4,7 @@
 import { act, screen } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getAllByRole, getByLabelText } from '@testing-library/dom';
+import { getAllByRole, getByLabelText, waitFor } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
@@ -175,16 +175,6 @@ describe( 'Cart block editor integration', () => {
 		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-
-<<<<<<< HEAD
-		await selectBlock( /Block: Filled Cart/i );
-=======
-		await waitFor( () => {
-			expect(
-				screen.getByLabelText( /Block: Filled Cart$/i )
-			).toBeVisible();
-		} );
->>>>>>> 41b84fc202 (Preview cart updates (#60138))
 
 		const selectParentBlockButton = screen.getByRole( 'button', {
 			name: /Select parent block: Cart/i,
