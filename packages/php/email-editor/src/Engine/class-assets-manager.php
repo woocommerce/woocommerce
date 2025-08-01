@@ -188,5 +188,52 @@ class Assets_Manager {
 			'WooCommerceEmailEditor',
 			apply_filters( 'woocommerce_email_editor_script_localization_data', $localization_data )
 		);
+
+		$this->preload_rest_api_data( $post_id, $post_type );
+	}
+
+	/**
+	 * Preload REST API data for the email editor.
+	 *
+	 * @param int|string $post_id  The post ID.
+	 * @param string     $post_type The post type.
+	 */
+	private function preload_rest_api_data( $post_id, string $post_type ): void {
+		$email_post_type    = $post_type;
+		$user_theme_post_id = $this->user_theme->get_user_theme_post()->ID;
+		$template_slug      = get_post_meta( (int) $post_id, '_wp_page_template', true );
+		$routes             = array(
+			"/wp/v2/{$email_post_type}/" . intval( $post_id ) . '?context=edit',
+			"/wp/v2/types/{$email_post_type}?context=edit",
+			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=view', // Global email styles.
+			'/wp/v2/block-patterns/patterns',
+			'/wp/v2/templates?context=view',
+			'/wp/v2/block-patterns/categories',
+			'/wp/v2/settings',
+			'/wp/v2/types?context=view',
+			'/wp/v2/taxonomies?context=view',
+		);
+
+		if ( is_string( $template_slug ) ) {
+			$routes[] = '/wp/v2/templates/lookup?slug=' . $template_slug;
+		} else {
+			$routes[] = "/wp/v2/{$email_post_type}?context=edit&per_page=30&status=publish,sent";
+		}
+
+		// Preload the data for the specified routes.
+		$preload_data = array_reduce(
+			$routes,
+			'rest_preload_api_request',
+			array()
+		);
+
+		// Add inline script to set up preloading middleware.
+		wp_add_inline_script(
+			'wp-blocks',
+			sprintf(
+				'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
+				wp_json_encode( $preload_data )
+			)
+		);
 	}
 }
