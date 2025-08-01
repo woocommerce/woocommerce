@@ -109,7 +109,7 @@ class TaxonomyHierarchyData {
 	/**
 	 * Check if the cache is valid.
 	 *
-	 * @param array $data Cache data
+	 * @param array $data Cache data.
 	 *
 	 * @return boolean
 	 */
@@ -142,12 +142,12 @@ class TaxonomyHierarchyData {
 		}
 
 		$map = array(
-			'descendants' => array(), // term_id => [descendant_ids]
-			'ancestors'   => array(), // term_id => [ancestor_ids]
+			'descendants' => array(), // term_id => [descendant_ids].
+			'ancestors'   => array(), // term_id => [ancestor_ids].
 			'tree'        => array(),
 		);
 
-		// Build core lookups and temporary structures
+		// Build core lookups and temporary structures.
 		$temp_children = array();
 		$temp_parents  = array();
 		$temp_terms    = array();
@@ -172,7 +172,7 @@ class TaxonomyHierarchyData {
 			);
 		}
 
-		// Pre-compute descendants and ancestors
+		// Pre-compute descendants and ancestors.
 		foreach ( array_keys( $temp_parents ) as $term_id ) {
 			$map['descendants'][ $term_id ] = $this->compute_descendants( $term_id, $temp_children );
 			$map['ancestors'][ $term_id ]   = $this->compute_ancestors( $term_id, $temp_parents );
