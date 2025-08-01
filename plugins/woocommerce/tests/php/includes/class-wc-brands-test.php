@@ -123,9 +123,6 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		$product->set_stock_status( 'outofstock' );
 		$product->save();
 
-		// Set current screen to frontend to ensure wc_change_term_counts applies its logic.
-		$this->go_to( home_url( '/' ) );
-
 		// Get the brand term.
 		$brand_terms = get_terms(
 			array(
@@ -171,6 +168,40 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Count should be updated back to 1.
 		$brand_term_final = get_term( $data['brand_with_products']['term_id'], 'product_brand' );
 		$this->assertEquals( 1, $brand_term_final->count, 'Brand should have 1 product after re-adding' );
+	}
+
+	/**
+	 * Test that brand counts ignore product visibility in admin context.
+	 */
+	public function test_brand_count_ignores_product_visibility_in_admin_context() {
+		$data    = $this->setup_brand_test_data();
+		$product = $data['product'];
+
+		// Enable hide out of stock setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		// Set product to out of stock.
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		// Set admin context.
+		set_current_screen( 'edit-post' );
+
+		// Get the brand term using get_terms() to see what happens.
+		$brand_terms = get_terms(
+			array(
+				'taxonomy'   => 'product_brand',
+				'include'    => array( $data['brand_with_products']['term_id'] ),
+				'hide_empty' => false,
+			)
+		);
+		$brand_term  = $brand_terms[0];
+
+		// Test that the count is 1 (ignores out of stock setting in admin context).
+		$this->assertEquals( 1, $brand_term->count, 'Brand count should be 1 in admin context, ignoring out of stock setting' );
+
+		// Reset the setting.
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
 	}
 
 	/**
