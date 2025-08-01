@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { ProductResponseItem } from '@woocommerce/types';
 import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { ProductEntityResponse } from './types';
 
 export const useProduct = ( postId: number | string | undefined ) => {
 	return useSelect(
@@ -22,7 +26,7 @@ export const useProduct = ( postId: number | string | undefined ) => {
 				'root',
 				'product',
 				parsedPostId
-			) as unknown as ProductResponseItem | undefined;
+			) as unknown as ProductEntityResponse | undefined;
 
 			const isResolving = select( coreStore ).isResolving(
 				'getEditedEntityRecord',
