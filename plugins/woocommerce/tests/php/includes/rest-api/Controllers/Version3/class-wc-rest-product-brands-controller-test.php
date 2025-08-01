@@ -11,12 +11,7 @@ declare( strict_types = 1 );
 /**
  * WC_REST_Product_Brands_Controller_Test class.
  */
-class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
-
-	/**
-	 * @var WP_REST_Server
-	 */
-	protected $server;
+class WC_REST_Product_Brands_Controller_Test extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @var int
@@ -28,26 +23,9 @@ class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		global $wp_rest_server;
-		$wp_rest_server = new WP_Test_Spy_REST_Server();
-		$this->server   = $wp_rest_server;
-		do_action( 'rest_api_init' );
 
 		$this->user = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->user );
-
-		// Initialize the brands taxonomy.
-		WC_Brands::init_taxonomy();
-	}
-
-	/**
-	 * Tear down test data.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		global $wp_rest_server;
-		unset( $this->server );
-		$wp_rest_server = null;
 	}
 
 	/**
