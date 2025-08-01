@@ -77,6 +77,10 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
+		/**
+		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
+		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
+		 */
 		isExperimentalWcRestApiEnabled
 			? {
 					isAdmin,
