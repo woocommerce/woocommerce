@@ -376,7 +376,7 @@ class FilterData {
 	 *
 	 * @param string $product_ids   Comma-separated list of product IDs.
 	 * @param string $taxonomy_name Original taxonomy name for hierarchy methods.
-	 * @return array Array of term_taxonomy_id => count pairs.
+	 * @return array Array of term_id => count pairs.
 	 */
 	private function get_hierarchical_taxonomy_counts( string $product_ids, string $taxonomy_name ) {
 		global $wpdb;
@@ -454,12 +454,12 @@ class FilterData {
 			return array();
 		}
 
-		// Parse results back to term_taxonomy_id => count format.
+		// Parse results back to term_id => count format.
 		$final_counts = array();
-		foreach ( $hierarchy_counts as $term_taxonomy_id => $term_ids ) {
-			$count_key = "count_{$term_taxonomy_id}";
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
+			$count_key = "count_{$term_id}";
 			if ( isset( $count_result[ $count_key ] ) && $count_result[ $count_key ] > 0 ) {
-				$final_counts[ $term_taxonomy_id ] = absint( $count_result[ $count_key ] );
+				$final_counts[ $term_id ] = absint( $count_result[ $count_key ] );
 			}
 		}
 
