@@ -147,7 +147,10 @@ $registry->register( new Personalization_Tag(
     'Customer',
     function( $context ) {
         return $context['custom_value'] ?? '';
-    }
+    },
+    array(),
+    null,
+    array( 'my-post-type' )
 ));
 ```
 
@@ -165,6 +168,7 @@ new Personalization_Tag(
     callable $callback,     // Function to generate value
     array $attributes = [], // Default attributes
     ?string $value_to_insert = null // Custom insert value
+    array $post_types       // List of supported post types
 );
 ```
 
@@ -176,6 +180,7 @@ new Personalization_Tag(
 -   `execute_callback($context, $args)`: Execute the callback function
 -   `get_attributes()`: Get default attributes
 -   `get_value_to_insert()`: Get the value to insert in UI
+-   `get_post_types()`: Get the list of post types
 
 ### Personalizer
 

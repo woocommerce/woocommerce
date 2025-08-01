@@ -4,7 +4,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
+import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu } from '@wordpress/commands';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -65,11 +65,11 @@ export function InnerEditor( {
 				'postType',
 				currentPost.postType,
 				currentPost.postId
-			);
+			) as Post | null;
 			return {
 				template:
-					currentPost.postType !== 'wp_template'
-						? getEditedPostTemplate()
+					postObject && currentPost.postType !== 'wp_template'
+						? getEditedPostTemplate( postObject.template )
 						: null,
 				post: postObject,
 				isFullscreenEnabled:
@@ -107,8 +107,13 @@ export function InnerEditor( {
 			currentPost.postType,
 		]
 	);
+	const canRenderEditor =
+		post &&
+		( currentPost.postType === 'wp_template' ||
+			post.template === template?.slug || // If the post has a template, check proper template is loaded.
+			( ! post.template && template ) ); // If the post has no template, we render with the default template.
 
-	if ( ! post || ( currentPost.postType !== 'wp_template' && ! template ) ) {
+	if ( ! canRenderEditor ) {
 		return (
 			<div className="spinner-container">
 				<Spinner style={ { width: '80px', height: '80px' } } />

@@ -31,14 +31,9 @@ wp wc product update $beanie_product_id --tags="[ { \"id\": $tag_id } ]" --user=
 cap_product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
 wp post meta update $beanie_product_id _crosssell_ids "$cap_product_id"
 
-# Set a product out of stock
+# Set a product out of stock.
 tshirt_with_logo_product_id=$(wp post list --post_type=product --field=ID --name="T-Shirt with Logo" --format=ids)
 wp wc product update $tshirt_with_logo_product_id --in_stock=false --user=1
-
-# Set a variable product as having 100 in stock and one of its variations as out of stock
-hoodie_product_variation_id=$(wp post list --post_type=product_variation --field=ID --name="Hoodie - Blue, No" --format=ids)
-wp wc product update $hoodie_product_id --manage_stock=true --stock_quantity=100 --user=1
-wp wc product_variation update $hoodie_product_id $hoodie_product_variation_id --manage_stock=true --in_stock=false --user=1
 
 # Make a product visible only with password.
 sunglasses_product_id=$(wp post list --post_type=product --field=ID --name="Sunglasses" --format=ids)
