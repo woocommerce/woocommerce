@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -75,13 +75,38 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
+		// This way we can test that sibling blocks update with the variation data.
+		let cliOutput = await wpCLI(
+			`post list --post_type=product --field=ID --name="Hoodie" --format=ids`
+		);
+		const hoodieProductId = cliOutput.stdout.match( /\d+/g )?.pop();
+		cliOutput = await wpCLI(
+			'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, No" --format=ids'
+		);
+		const hoodieProductVariationId = cliOutput.stdout
+			.match( /\d+/g )
+			?.pop();
+		await wpCLI(
+			`wc product update ${ hoodieProductId } --manage_stock=true --stock_quantity=100 --user=1`
+		);
+		await wpCLI(
+			`wc product_variation update ${ hoodieProductId } ${ hoodieProductVariationId } --manage_stock=true --in_stock=false --weight=2 --user=1`
+		);
+
 		await pageObject.updateSingleProductTemplate();
+
+		// We insert the blockified Product Details block to test that it updates
+		// with the correct variation data.
+		await editor.insertBlock( {
+			name: 'woocommerce/product-details',
+		} );
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		// The radio input is visually hidden and, thus, not clickable. That's
 		// why we need to select the <label> instead.
@@ -105,14 +130,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
+			// Open additional information accordion so we can check the weight.
+			await page
+				.getByRole( 'button', { name: 'Additional Information' } )
+				.click();
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
+			await expect(
+				page
+					.getByLabel( 'Additional Information', { exact: true } )
+					.getByText( '1.5 lbs' )
+			).toBeVisible();
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
 
-			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
 			await expect( productPrice ).toHaveText( '$45.00' );
+			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect(
+				page.getByText( 'SKU: woo-hoodie-blue' )
+			).toBeVisible();
+			await expect(
+				page
+					.getByLabel( 'Additional Information', { exact: true } )
+					.getByText( '2 lbs' )
+			).toBeVisible();
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
@@ -193,7 +236,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		// The radio input is visually hidden and, thus, not clickable. That's
 		// why we need to select the <label> instead.
@@ -236,7 +279,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( '/hoodie' );
+		await page.goto( '/product/hoodie/' );
 
 		let colorGreenOption = page.getByRole( 'option', {
 			name: 'Green',
@@ -257,5 +300,184 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await page.getByLabel( 'Logo', { exact: true } ).selectOption( 'Yes' );
 
 		await expect( colorGreenOption ).toBeDisabled();
+	} );
+
+	test( 'respects quantity constraints', async ( {
+		page,
+		pageObject,
+		editor,
+		requestUtils,
+	} ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-quantity-constraints'
+		);
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await test.step( 'in simple products', async () => {
+			await page.goto( '/product/t-shirt/' );
+
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+			await expect( reduceQuantityButton ).toBeDisabled();
+
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '6' );
+
+			await quantityInput.fill( '8' );
+
+			await expect( increaseQuantityButton ).toBeDisabled();
+		} );
+
+		await test.step( 'in grouped products', async () => {
+			await page.goto( '/product/logo-collection/' );
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'T-Shirt',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '' );
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+			await expect( reduceQuantityButton ).toBeDisabled();
+			await increaseQuantityButton.click();
+
+			await quantityInput.fill( '8' );
+
+			await expect( increaseQuantityButton ).toBeDisabled();
+		} );
+	} );
+
+	test( "allows adding products to cart when the 'Enable AJAX add to cart buttons' setting is disabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/t-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+
+	test( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/t-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+		).toHaveValue( '1' );
+	} );
+
+	test( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/hoodie' );
+
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+
+		await colorBlueOption.click();
+		await logoYesOption.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of Hoodie in your cart.' )
+		).toHaveValue( '1' );
+	} );
+
+	test( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of T-Shirt'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+		).toHaveValue( '1' );
 	} );
 } );

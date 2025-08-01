@@ -19,6 +19,7 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
+
 // @ts-expect-error lock-unlock exists but is not typed
 import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-disable-line
 
@@ -26,6 +27,7 @@ import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-d
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
+import { registerProductEntity } from '../../../assets/js/entities/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis
@@ -78,6 +80,8 @@ export async function initializeEditor(
 		registerCoreBlocks();
 		areCoreBlocksRegistered = true;
 	}
+
+	registerProductEntity();
 
 	const blocks: BlockAttributes[] = Array.isArray( testBlocks )
 		? testBlocks

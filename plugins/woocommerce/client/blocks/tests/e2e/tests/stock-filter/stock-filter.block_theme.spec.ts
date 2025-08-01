@@ -117,6 +117,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 
+		// Refresh the page to ensure the wpCLI changes take effect
+		await page.reload();
+
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',

@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { StrictMode, createRoot } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	StrictMode,
+	createRoot,
+	useEffect,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
@@ -23,41 +29,55 @@ import {
 import { initContentValidationMiddleware } from './middleware/content-validation';
 import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
-function Editor() {
-	const { postId, postType, settings } = useSelect(
+function Editor( {
+	postId,
+	postType,
+	isPreview = false,
+}: {
+	postId: number | string;
+	postType: string;
+	isPreview?: boolean;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
+	const { settings } = useSelect(
 		( select ) => ( {
-			postId: select( storeName ).getEmailPostId(),
-			postType: select( storeName ).getEmailPostType(),
 			settings: select( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
+
 	useContentValidation();
 	useRemoveSavingFailedNotices();
 
-	// Set allowed blockTypes to the editor settings.
-	settings.allowedBlockTypes = getAllowedBlockNames();
+	const { setEmailPost } = useDispatch( storeName );
+	useEffect( () => {
+		setEmailPost( postId, postType );
+		setIsInitialized( true );
+	}, [ postId, postType, setEmailPost ] );
+
+	if ( ! isInitialized ) {
+		return null;
+	}
+
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = {
+		...settings,
+		allowedBlockTypes: getAllowedBlockNames(),
+		isPreviewMode: isPreview,
+	};
 
 	return (
 		<StrictMode>
 			<InnerEditor
 				postId={ postId }
 				postType={ postType }
-				settings={ settings }
+				settings={ editorSettings }
 			/>
 		</StrictMode>
 	);
 }
 
-export function initialize( elementId: string ) {
-	const container = document.getElementById( elementId );
-	if ( ! container ) {
-		return;
-	}
-	const WrappedEditor = applyFilters(
-		'woocommerce_email_editor_wrap_editor_component',
-		Editor
-	) as typeof Editor;
+function onInit() {
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -67,6 +87,68 @@ export function initialize( elementId: string ) {
 	initBlocks();
 	initHooks();
 	initTextHooks();
+}
+
+export function initialize( elementId: string ) {
+	const container = document.getElementById( elementId );
+	if ( ! container ) {
+		return;
+	}
+	const { current_post_id, current_post_type } =
+		window.WooCommerceEmailEditor;
+
+	if ( current_post_id === undefined || current_post_id === null ) {
+		throw new Error( 'current_post_id is required but not provided.' );
+	}
+
+	if ( ! current_post_type ) {
+		throw new Error( 'current_post_type is required but not provided.' );
+	}
+
+	const WrappedEditor = applyFilters(
+		'woocommerce_email_editor_wrap_editor_component',
+		Editor
+	) as typeof Editor;
+	onInit();
 	const root = createRoot( container );
-	root.render( <WrappedEditor /> );
+	root.render(
+		<WrappedEditor
+			postId={ current_post_id }
+			postType={ current_post_type }
+		/>
+	);
+}
+
+export function ExperimentalEmailEditor( {
+	postId,
+	postType,
+	isPreview = false,
+}: {
+	postId: string;
+	postType: string;
+	isPreview?: boolean;
+} ) {
+	const [ isInitialized, setIsInitialized ] = useState( false );
+
+	useLayoutEffect( () => {
+		onInit();
+		setIsInitialized( true );
+	}, [] );
+
+	const WrappedEditor = applyFilters(
+		'woocommerce_email_editor_wrap_editor_component',
+		Editor
+	) as typeof Editor;
+
+	if ( ! isInitialized ) {
+		return null;
+	}
+
+	return (
+		<WrappedEditor
+			postId={ postId }
+			postType={ postType }
+			isPreview={ isPreview }
+		/>
+	);
 }
