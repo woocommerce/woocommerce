@@ -274,7 +274,7 @@ class WC_Brands {
 				'register_taxonomy_product_brand',
 				array(
 					'hierarchical'          => true,
-					'update_count_callback' => '_update_post_term_count',
+					'update_count_callback' => '_wc_term_recount',
 					'label'                 => __( 'Brands', 'woocommerce' ),
 					'labels'                => array(
 						'name'              => __( 'Brands', 'woocommerce' ),
