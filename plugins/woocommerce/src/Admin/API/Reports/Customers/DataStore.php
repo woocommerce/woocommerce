@@ -660,6 +660,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function get_customer_id_by_email( $email ) {
 		global $wpdb;
 
+		if ( empty( $email ) || ! is_email( $email ) ) {
+			return false;
+		}
+
 		$table_name  = self::get_db_table_name();
 		$customer_id = $wpdb->get_var(
 			$wpdb->prepare(
