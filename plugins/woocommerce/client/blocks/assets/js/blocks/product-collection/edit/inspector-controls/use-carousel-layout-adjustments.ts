@@ -66,17 +66,23 @@ const handleTransitionToCarouselLayout = (
 	} );
 
 	// 2. Create and insert the next/previous buttons block
-	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName );
+	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName, {
+		layout: { justifyContent: 'flex-end' },
+	} );
 
 	if ( headingBlock ) {
 		// @ts-expect-error getBlockIndex is not typed.
 		const headingBlockIndex = selectData( blockEditorStore ).getBlockIndex(
 			headingBlock.clientId
 		);
-		const groupBlock = createBlock( 'core/group', {}, [
-			headingBlock,
-			nextPrevArrowsBlock,
-		] );
+		const groupBlock = createBlock(
+			'core/group',
+			// Row variation of the group block
+			{
+				layout: { type: 'flex', flexWrap: 'nowrap' },
+			},
+			[ headingBlock, nextPrevArrowsBlock ]
+		);
 
 		// We cannot use replaceBlock directly because it crashes the editor
 		// when replacing the product template block with the group block that
@@ -94,9 +100,12 @@ const handleTransitionToCarouselLayout = (
 			// @ts-expect-error getBlockIndex is not typed.
 		).getBlockIndex( productTemplateClientId );
 
-		const groupBlock = createBlock( 'core/group', {}, [
-			nextPrevArrowsBlock,
-		] );
+		const groupBlock = createBlock(
+			'core/group',
+			// Row variation of the group block
+			{ layout: { type: 'flex', flexWrap: 'nowrap' } },
+			[ nextPrevArrowsBlock ]
+		);
 
 		insertBlock(
 			groupBlock,
