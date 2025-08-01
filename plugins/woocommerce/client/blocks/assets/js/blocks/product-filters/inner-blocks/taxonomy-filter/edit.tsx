@@ -53,12 +53,12 @@ function createHierarchicalList(
 
 	// Last: build hierarchical list
 	const result: FilterOptionItem[] = [];
-	function addTermsRecursively( termList: FilterOptionItem[] ) {
+	function addTermsRecursively( termList: FilterOptionItem[], depth = 0 ) {
 		termList.forEach( ( term ) => {
+			term.depth = depth;
 			result.push( term );
 			const termChildren = children.get( term.id ) || [];
 			if ( termChildren.length > 0 ) {
-				addTermsRecursively( termChildren );
 				addTermsRecursively( termChildren, depth + 1 );
 			}
 		} );
