@@ -242,4 +242,3 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 		$this->assertEquals( $laptops_id, $gaming_tree['parent'] );
 	}
 }
-

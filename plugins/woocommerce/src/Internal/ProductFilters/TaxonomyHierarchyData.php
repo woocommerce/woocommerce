@@ -81,7 +81,7 @@ class TaxonomyHierarchyData {
 	}
 
 	/**
-	 * Get ancestor chain for efficient batch processing.
+	 * Get ancestor chain for batch processing.
 	 *
 	 * @param int    $term_id  The term ID.
 	 * @param string $taxonomy The taxonomy name.
@@ -114,9 +114,10 @@ class TaxonomyHierarchyData {
 	 * @return boolean
 	 */
 	private function validate_cache( $data ) {
-		return array_key_exists( 'descendants', $data ) &&
-		array_key_exists( 'ancestors', $data ) &&
-		array_key_exists( 'tree', $data );
+		return is_array( $data ) &&
+			array_key_exists( 'descendants', $data ) &&
+			array_key_exists( 'ancestors', $data ) &&
+			array_key_exists( 'tree', $data );
 	}
 
 	/**
