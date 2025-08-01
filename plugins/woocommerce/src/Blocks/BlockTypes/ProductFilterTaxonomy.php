@@ -366,13 +366,38 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 *
 	 * @param array $terms  Hierarchical terms with children structure.
 	 * @param array $result Reference to result array being built.
+	 * @param array $visited_ids Reference to array tracking visited term IDs to prevent circular references.
+	 * @param int   $depth Current recursion depth for bounds checking.
 	 */
-	private function flatten_terms_list( $terms, &$result ) {
+	private function flatten_terms_list( $terms, &$result, &$visited_ids = array(), $depth = 0 ) {
+		// Prevent excessive recursion depth (taxonomies shouldn't be this deep).
+		if ( $depth > 10 ) {
+			return;
+		}
+
+		if ( ! is_array( $terms ) ) {
+			return;
+		}
+
 		foreach ( $terms as $term ) {
-			$result[ $term['term_id'] ] = $term;
-			if ( ! empty( $term['children'] ) ) {
-				$this->flatten_terms_list( $term['children'], $result );
-				unset( $result[ $term['term_id'] ]['children'] );
+			// Validate term structure.
+			if ( ! is_array( $term ) || ! isset( $term['term_id'] ) ) {
+				continue;
+			}
+
+			$term_id = $term['term_id'];
+
+			// Prevent circular references.
+			if ( isset( $visited_ids[ $term_id ] ) ) {
+				continue;
+			}
+
+			$visited_ids[ $term_id ] = true;
+			$result[ $term_id ]      = $term;
+
+			if ( ! empty( $term['children'] ) && is_array( $term['children'] ) ) {
+				$this->flatten_terms_list( $term['children'], $result, $visited_ids, $depth + 1 );
+				unset( $result[ $term_id ]['children'] );
 			}
 		}
 	}
