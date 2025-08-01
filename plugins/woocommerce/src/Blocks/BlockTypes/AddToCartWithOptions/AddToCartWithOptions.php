@@ -183,7 +183,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			 *
 			 * @since 10.0.0
 			 * @param number $default_quantity The default quantity.
-			 * @param number $product_id The product id.
+			 * @param \WC_Product $product The product object.
 			 */
 			$default_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
 
@@ -221,53 +221,55 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			$context = array(
-				'productId'           => $product->get_id(),
-				'productType'         => $product->get_type(),
-				'quantity'            => array( $product->get_id() => $default_quantity ),
-				'quantityConstraints' => array(),
+				'productId'   => $product->get_id(),
+				'productType' => $product->get_type(),
+				'quantity'    => array( $product->get_id() => $default_quantity ),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
-				$context['selectedAttributes']  = array();
-				$available_variations           = $product->get_available_variations();
-				$available_variations_data      = array_map(
-					function ( $variation ) {
-						return array(
-							'variation_id' => $variation['variation_id'],
-							'attributes'   => $variation['attributes'],
-							'is_in_stock'  => $variation['is_in_stock'],
-						);
-					},
-					$available_variations
-				);
-				$context['availableVariations'] = $available_variations_data;
+				$context['selectedAttributes'] = array();
+				$available_variations          = $product->get_available_variations( 'objects' );
+				foreach ( $available_variations as $variation ) {
+					/**
+					 * Filter the default quantity to add to cart.
+					 *
+					 * @since 10.1.0
+					 * @param number $default_variation_quantity The default quantity.
+					 * @param WC_Variation_Product $variation The variation object.
+					 */
+					$default_variation_quantity                  = apply_filters( 'woocommerce_quantity_input_min', $variation->get_min_purchase_quantity(), $variation );
+					$context['quantity'][ $variation->get_id() ] = $default_variation_quantity;
+					$context['availableVariations'][]            = array(
+						'variation_id' => $variation->get_id(),
+						'attributes'   => $variation->get_variation_attributes(),
+						'is_in_stock'  => $variation->is_in_stock(),
+					);
+				}
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
 				// Add context for purchasable child products.
-				$context['groupedProductIds'] = array();
+				$children_product_data = array();
 				foreach ( $product->get_children() as $child_product_id ) {
 					$child_product = wc_get_product( $child_product_id );
 					if ( $child_product && $this->is_child_product_purchasable( $child_product ) ) {
-						$context['groupedProductIds'][] = $child_product_id;
+						$child_product_quantity_constraints = Utils::get_product_quantity_constraints( $child_product );
 
-						$args = Utils::get_quantity_input_args( $child_product );
-						$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 0;
-						// For grouped children, if min is 1 (the default), set to 0 unless a filter sets otherwise.
-						if ( 1 === $min ) {
-							$min = 0;
-						}
-						$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
-							? (int) $args['max_value']
-							: null;
-						$step = isset( $args['step'] ) ? (int) $args['step'] : 1;
-						$context['quantityConstraints'][ $child_product_id ] = array(
-							'min'  => $min,
-							'max'  => $max,
-							'step' => $step,
+						$children_product_data[ $child_product_id ] = array(
+							'min'  => $child_product_quantity_constraints['min'],
+							'max'  => $child_product_quantity_constraints['max'],
+							'step' => $child_product_quantity_constraints['step'],
 						);
 					}
 				}
+
+				$context['groupedProductIds'] = array_keys( $children_product_data );
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'products' => $children_product_data,
+					)
+				);
 
 				// Add quantity context for purchasable child products.
 				$context['quantity'] = array_fill_keys(
@@ -291,18 +293,19 @@ class AddToCartWithOptions extends AbstractBlock {
 					}
 				}
 			} else {
-				// Not grouped: just add constraints for the main product.
-				$args = Utils::get_quantity_input_args( $product );
-				$min  = isset( $args['min_value'] ) ? (int) $args['min_value'] : 1;
-				$max  = ( isset( $args['max_value'] ) && '' !== $args['max_value'] && -1 !== $args['max_value'] )
-				? (int) $args['max_value']
-				: null;
-				$step = isset( $args['step'] ) ? (int) $args['step'] : 1;
+				$product_quantity_constraints = Utils::get_product_quantity_constraints( $product );
 
-				$context['quantityConstraints'][ $product->get_id() ] = array(
-					'min'  => $min,
-					'max'  => $max,
-					'step' => $step,
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'min'  => $product_quantity_constraints['min'],
+								'max'  => $product_quantity_constraints['max'],
+								'step' => $product_quantity_constraints['step'],
+							),
+						),
+					)
 				);
 			}
 
@@ -486,7 +489,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				'style'                     => esc_attr( $classes_and_styles['styles'] ),
 				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
 				'data-wp-class--is-invalid' => '!state.isFormValid',
-				'data-wp-watch'             => 'callbacks.setSelectedVariationId',
 				'data-wp-context'           => wp_json_encode(
 					$context,
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP

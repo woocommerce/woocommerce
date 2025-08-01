@@ -30,6 +30,8 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import { PaymentsSidebar } from './components/payments-sidebar';
+import { LaunchStoreHubMobileHeader } from './components/mobile-header';
+import { PaymentsMobileHeader } from './components/payments-mobile-header';
 import type {
 	LaunchYourStoreComponentProps,
 	LaunchYourStoreQueryParams,
@@ -64,6 +66,9 @@ export type SidebarMachineContext = {
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
+	onMobileClose?: () => void;
+	onToggle?: () => void;
+	isMobileSidebarOpen?: boolean;
 };
 export type SidebarMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
@@ -464,6 +469,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					on: {
 						LAUNCH_STORE: {
@@ -483,6 +489,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: [
 						{
@@ -512,6 +519,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: {
 						src: 'getWooPaymentsStatus',
@@ -538,6 +546,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					always: [
 						{
@@ -553,6 +562,7 @@ export const sidebarMachine = setup( {
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
+						mobileHeader: LaunchStoreHubMobileHeader,
 					},
 					invoke: {
 						src: 'getTestOrderCount',
@@ -681,6 +691,7 @@ export const sidebarMachine = setup( {
 			id: 'payments',
 			meta: {
 				component: PaymentsSidebar,
+				mobileHeader: PaymentsMobileHeader,
 			},
 			entry: [
 				'showPaymentsContent',

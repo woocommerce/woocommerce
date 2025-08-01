@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Remove check for aria-haspopup in 'Save' button in Add to Cart + Options e2e test
+
+

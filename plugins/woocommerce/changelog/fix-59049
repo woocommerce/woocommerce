@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update cached block resource asset hints when the site URL is updated

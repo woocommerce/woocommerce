@@ -54,6 +54,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/customer-name]',
 				category: 'Customer',
 				attributes: [],
+				postTypes: [ 'woo_mail' ],
 			},
 			{
 				name: 'Customer Email',
@@ -61,6 +62,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/customer-email]',
 				category: 'Customer',
 				attributes: [],
+				postTypes: [ 'woo_mail' ],
 			},
 		],
 		Link: [
@@ -70,6 +72,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/profile-url]',
 				category: 'Link',
 				attributes: [],
+				postTypes: [ 'woo_mail' ],
 			},
 		],
 	};
