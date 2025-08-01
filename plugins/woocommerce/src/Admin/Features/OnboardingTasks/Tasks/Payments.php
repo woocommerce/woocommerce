@@ -124,6 +124,11 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function in_progress_label() {
+		// If WooPayments live account onboarding is in progress, show "Action needed" label.
+		if ( $this->has_woopayments_live_account_in_progress() ) {
+			return esc_html__( 'Action needed', 'woocommerce' );
+		}
+
 		return esc_html__( 'Test account', 'woocommerce' );
 	}
 
