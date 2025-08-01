@@ -5,7 +5,8 @@ This document describes the REST API endpoints for managing order fulfillments i
 ## Base URL
 
 All endpoints use the WooCommerce REST API v3 namespace:
-```
+
+```http
 /wp-json/wc/v3/orders/{order_id}/fulfillments
 ```
 
@@ -23,9 +24,9 @@ Retrieve all fulfillments for a specific order.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
+| Parameter  | Type    | Required | Description                     |
+| ---------- | ------- | -------- | ------------------------------- |
+| `order_id` | integer | Yes      | Unique identifier for the order |
 
 #### Example Request
 
@@ -38,43 +39,43 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "fulfillments": [
-    {
-      "fulfillment_id": 1,
-      "entity_type": "WC_Order",
-      "entity_id": "123",
-      "status": "fulfilled",
-      "is_fulfilled": true,
-      "date_updated": "2024-01-15T10:30:00",
-      "date_deleted": null,
-      "meta_data": [
-        {
-          "id": 1,
-          "key": "_items",
-          "value": [
-            {
-              "item_id": 456,
-              "qty": 2
-            },
-            {
-              "item_id": 789,
-              "qty": 1
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "key": "_tracking_number",
-          "value": "1Z999AA1234567890"
-        },
-        {
-          "id": 3,
-          "key": "shipping_provider",
-          "value": "UPS"
-        }
-      ]
-    }
-  ]
+	"fulfillments": [
+		{
+			"fulfillment_id": 1,
+			"entity_type": "WC_Order",
+			"entity_id": "123",
+			"status": "fulfilled",
+			"is_fulfilled": true,
+			"date_updated": "2024-01-15T10:30:00",
+			"date_deleted": null,
+			"meta_data": [
+				{
+					"id": 1,
+					"key": "_items",
+					"value": [
+						{
+							"item_id": 456,
+							"qty": 2
+						},
+						{
+							"item_id": 789,
+							"qty": 1
+						}
+					]
+				},
+				{
+					"id": 2,
+					"key": "_tracking_number",
+					"value": "1Z999AA1234567890"
+				},
+				{
+					"id": 3,
+					"key": "shipping_provider",
+					"value": "UPS"
+				}
+			]
+		}
+	]
 }
 ```
 
@@ -88,13 +89,13 @@ Create a new fulfillment for a specific order.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `status` | string | No | Status of the fulfillment (`fulfilled` or `unfulfilled`) |
-| `is_fulfilled` | boolean | No | Whether the fulfillment is fulfilled |
-| `meta_data` | array | Yes | Array of metadata objects |
-| `notify_customer` | boolean | No | Whether to notify customer (query parameter) |
+| Parameter         | Type    | Required | Description                                              |
+| ----------------- | ------- | -------- | -------------------------------------------------------- |
+| `order_id`        | integer | Yes      | Unique identifier for the order                          |
+| `status`          | string  | No       | Status of the fulfillment (`fulfilled` or `unfulfilled`) |
+| `is_fulfilled`    | boolean | No       | Whether the fulfillment is fulfilled                     |
+| `meta_data`       | array   | Yes      | Array of metadata objects                                |
+| `notify_customer` | boolean | No       | Whether to notify customer (query parameter)             |
 
 #### Example Request
 
@@ -140,46 +141,46 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "fulfillment": {
-    "fulfillment_id": 2,
-    "entity_type": "WC_Order",
-    "entity_id": "123",
-    "status": "fulfilled",
-    "is_fulfilled": true,
-    "date_updated": "2024-01-15T11:45:00",
-    "date_deleted": null,
-    "meta_data": [
-      {
-        "id": 3,
-        "key": "_items",
-        "value": [
-          {
-            "item_id": 456,
-            "qty": 2
-          },
-          {
-            "item_id": 789,
-            "qty": 1
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "key": "_tracking_number",
-        "value": "1Z999AA1234567890"
-      },
-      {
-        "id": 5,
-        "key": "shipping_provider",
-        "value": "UPS"
-      },
-      {
-        "id": 6,
-        "key": "_tracking_url",
-        "value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-      }
-    ]
-  }
+	"fulfillment": {
+		"fulfillment_id": 2,
+		"entity_type": "WC_Order",
+		"entity_id": "123",
+		"status": "fulfilled",
+		"is_fulfilled": true,
+		"date_updated": "2024-01-15T11:45:00",
+		"date_deleted": null,
+		"meta_data": [
+			{
+				"id": 3,
+				"key": "_items",
+				"value": [
+					{
+						"item_id": 456,
+						"qty": 2
+					},
+					{
+						"item_id": 789,
+						"qty": 1
+					}
+				]
+			},
+			{
+				"id": 4,
+				"key": "_tracking_number",
+				"value": "1Z999AA1234567890"
+			},
+			{
+				"id": 5,
+				"key": "shipping_provider",
+				"value": "UPS"
+			},
+			{
+				"id": 6,
+				"key": "_tracking_url",
+				"value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+			}
+		]
+	}
 }
 ```
 
@@ -193,10 +194,10 @@ Retrieve a specific fulfillment by ID.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
+| Parameter        | Type    | Required | Description                           |
+| ---------------- | ------- | -------- | ------------------------------------- |
+| `order_id`       | integer | Yes      | Unique identifier for the order       |
+| `fulfillment_id` | integer | Yes      | Unique identifier for the fulfillment |
 
 #### Example Request
 
@@ -209,27 +210,27 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "fulfillment": {
-    "fulfillment_id": 2,
-    "entity_type": "WC_Order",
-    "entity_id": "123",
-    "status": "fulfilled",
-    "is_fulfilled": true,
-    "date_updated": "2024-01-15T11:45:00",
-    "date_deleted": null,
-    "meta_data": [
-      {
-        "id": 3,
-        "key": "_tracking_number",
-        "value": "1Z999AA1234567890"
-      },
-      {
-        "id": 4,
-        "key": "shipping_provider",
-        "value": "UPS"
-      }
-    ]
-  }
+	"fulfillment": {
+		"fulfillment_id": 2,
+		"entity_type": "WC_Order",
+		"entity_id": "123",
+		"status": "fulfilled",
+		"is_fulfilled": true,
+		"date_updated": "2024-01-15T11:45:00",
+		"date_deleted": null,
+		"meta_data": [
+			{
+				"id": 3,
+				"key": "_tracking_number",
+				"value": "1Z999AA1234567890"
+			},
+			{
+				"id": 4,
+				"key": "shipping_provider",
+				"value": "UPS"
+			}
+		]
+	}
 }
 ```
 
@@ -243,14 +244,14 @@ Update an existing fulfillment.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
-| `status` | string | No | Status of the fulfillment (`fulfilled` or `unfulfilled`) |
-| `is_fulfilled` | boolean | No | Whether the fulfillment is fulfilled |
-| `meta_data` | array | No | Array of metadata objects |
-| `notify_customer` | boolean | No | Whether to notify customer (query parameter) |
+| Parameter         | Type    | Required | Description                                              |
+| ----------------- | ------- | -------- | -------------------------------------------------------- |
+| `order_id`        | integer | Yes      | Unique identifier for the order                          |
+| `fulfillment_id`  | integer | Yes      | Unique identifier for the fulfillment                    |
+| `status`          | string  | No       | Status of the fulfillment (`fulfilled` or `unfulfilled`) |
+| `is_fulfilled`    | boolean | No       | Whether the fulfillment is fulfilled                     |
+| `meta_data`       | array   | No       | Array of metadata objects                                |
+| `notify_customer` | boolean | No       | Whether to notify customer (query parameter)             |
 
 #### Example Request
 
@@ -296,46 +297,46 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "fulfillment": {
-    "fulfillment_id": 2,
-    "entity_type": "WC_Order",
-    "entity_id": "123",
-    "status": "fulfilled",
-    "is_fulfilled": true,
-    "date_updated": "2024-01-16T09:30:00",
-    "date_deleted": null,
-    "meta_data": [
-      {
-        "id": 3,
-        "key": "_items",
-        "value": [
-          {
-            "item_id": 456,
-            "qty": 2
-          },
-          {
-            "item_id": 789,
-            "qty": 1
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "key": "_tracking_number",
-        "value": "1Z999AA1234567890"
-      },
-      {
-        "id": 5,
-        "key": "shipping_provider",
-        "value": "UPS"
-      },
-      {
-        "id": 6,
-        "key": "_delivery_date",
-        "value": "2024-01-16"
-      }
-    ]
-  }
+	"fulfillment": {
+		"fulfillment_id": 2,
+		"entity_type": "WC_Order",
+		"entity_id": "123",
+		"status": "fulfilled",
+		"is_fulfilled": true,
+		"date_updated": "2024-01-16T09:30:00",
+		"date_deleted": null,
+		"meta_data": [
+			{
+				"id": 3,
+				"key": "_items",
+				"value": [
+					{
+						"item_id": 456,
+						"qty": 2
+					},
+					{
+						"item_id": 789,
+						"qty": 1
+					}
+				]
+			},
+			{
+				"id": 4,
+				"key": "_tracking_number",
+				"value": "1Z999AA1234567890"
+			},
+			{
+				"id": 5,
+				"key": "shipping_provider",
+				"value": "UPS"
+			},
+			{
+				"id": 6,
+				"key": "_delivery_date",
+				"value": "2024-01-16"
+			}
+		]
+	}
 }
 ```
 
@@ -349,11 +350,11 @@ Delete a specific fulfillment.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
-| `notify_customer` | boolean | No | Whether to notify customer (default: false) |
+| Parameter         | Type    | Required | Description                                 |
+| ----------------- | ------- | -------- | ------------------------------------------- |
+| `order_id`        | integer | Yes      | Unique identifier for the order             |
+| `fulfillment_id`  | integer | Yes      | Unique identifier for the fulfillment       |
+| `notify_customer` | boolean | No       | Whether to notify customer (default: false) |
 
 #### Example Request
 
@@ -366,7 +367,7 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "message": "Fulfillment deleted successfully."
+	"message": "Fulfillment deleted successfully."
 }
 ```
 
@@ -380,10 +381,10 @@ Retrieve metadata for a specific fulfillment.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
+| Parameter        | Type    | Required | Description                           |
+| ---------------- | ------- | -------- | ------------------------------------- |
+| `order_id`       | integer | Yes      | Unique identifier for the order       |
+| `fulfillment_id` | integer | Yes      | Unique identifier for the fulfillment |
 
 #### Example Request
 
@@ -396,37 +397,37 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "meta_data": [
-    {
-      "id": 3,
-      "key": "_items",
-      "value": [
-        {
-          "item_id": 456,
-          "qty": 2
-        },
-        {
-          "item_id": 789,
-          "qty": 1
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "key": "_tracking_number",
-      "value": "1Z999AA1234567890"
-    },
-    {
-      "id": 5,
-      "key": "_shipping_provider",
-      "value": "ups"
-    },
-    {
-      "id": 6,
-      "key": "_tracking_url",
-      "value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-    }
-  ]
+	"meta_data": [
+		{
+			"id": 3,
+			"key": "_items",
+			"value": [
+				{
+					"item_id": 456,
+					"qty": 2
+				},
+				{
+					"item_id": 789,
+					"qty": 1
+				}
+			]
+		},
+		{
+			"id": 4,
+			"key": "_tracking_number",
+			"value": "1Z999AA1234567890"
+		},
+		{
+			"id": 5,
+			"key": "_shipping_provider",
+			"value": "ups"
+		},
+		{
+			"id": 6,
+			"key": "_tracking_url",
+			"value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+		}
+	]
 }
 ```
 
@@ -440,11 +441,11 @@ Update metadata for a specific fulfillment.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
-| `meta_data` | array | Yes | Array of metadata objects to update |
+| Parameter        | Type    | Required | Description                           |
+| ---------------- | ------- | -------- | ------------------------------------- |
+| `order_id`       | integer | Yes      | Unique identifier for the order       |
+| `fulfillment_id` | integer | Yes      | Unique identifier for the fulfillment |
+| `meta_data`      | array   | Yes      | Array of metadata objects to update   |
 
 #### Example Request
 
@@ -488,37 +489,37 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "meta_data": [
-    {
-      "id": 3,
-      "key": "_items",
-      "value": [
-        {
-          "item_id": 456,
-          "qty": 2
-        },
-        {
-          "item_id": 789,
-          "qty": 1
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "key": "_tracking_number",
-      "value": "1Z999AA9876543210"
-    },
-    {
-      "id": 5,
-      "key": "_shipping_provider",
-      "value": "fedex"
-    },
-    {
-      "id": 7,
-      "key": "_estimated_delivery",
-      "value": "2024-01-18"
-    }
-  ]
+	"meta_data": [
+		{
+			"id": 3,
+			"key": "_items",
+			"value": [
+				{
+					"item_id": 456,
+					"qty": 2
+				},
+				{
+					"item_id": 789,
+					"qty": 1
+				}
+			]
+		},
+		{
+			"id": 4,
+			"key": "_tracking_number",
+			"value": "1Z999AA9876543210"
+		},
+		{
+			"id": 5,
+			"key": "_shipping_provider",
+			"value": "fedex"
+		},
+		{
+			"id": 7,
+			"key": "_estimated_delivery",
+			"value": "2024-01-18"
+		}
+	]
 }
 ```
 
@@ -532,11 +533,11 @@ Delete specific metadata from a fulfillment.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `fulfillment_id` | integer | Yes | Unique identifier for the fulfillment |
-| `meta_key` | string | Yes | The metadata key to delete |
+| Parameter        | Type    | Required | Description                           |
+| ---------------- | ------- | -------- | ------------------------------------- |
+| `order_id`       | integer | Yes      | Unique identifier for the order       |
+| `fulfillment_id` | integer | Yes      | Unique identifier for the fulfillment |
+| `meta_key`       | string  | Yes      | The metadata key to delete            |
 
 #### Example Request
 
@@ -549,6 +550,7 @@ Authorization: Basic <base64_encoded_credentials>
 ```
 
 #### Example Response
+
 Empty response with 204 HTTP Header if successful, otherwise an error message is delivered.
 
 ---
@@ -561,10 +563,10 @@ Get tracking information for a tracking number.
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `order_id` | integer | Yes | Unique identifier for the order |
-| `tracking_number` | string | Yes | The tracking number to lookup |
+| Parameter         | Type    | Required | Description                     |
+| ----------------- | ------- | -------- | ------------------------------- |
+| `order_id`        | integer | Yes      | Unique identifier for the order |
+| `tracking_number` | string  | Yes      | The tracking number to lookup   |
 
 #### Example Request
 
@@ -577,25 +579,25 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "tracking_number_details": {
-    "tracking_number": "1234567890123456",
-    "shipping_provider": "fedex",
-    "tracking_url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
-    "possibilities": {
-      "fedex": {
-        "url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
-        "ambiguity_score": 95
-      },
-      "ups": {
-        "url": "https://www.ups.com/track?tracknum=1234567890123456",
-        "ambiguity_score": 85
-      },
-      "dhl": {
-        "url": "https://www.dhl.com/track?tracknum=1234567890123456",
-        "ambiguity_score": 75
-      }
-    }
-  }
+	"tracking_number_details": {
+		"tracking_number": "1234567890123456",
+		"shipping_provider": "fedex",
+		"tracking_url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+		"possibilities": {
+			"fedex": {
+				"url": "https://www.fedex.com/fedextrack/?tracknum=1234567890123456",
+				"ambiguity_score": 95
+			},
+			"ups": {
+				"url": "https://www.ups.com/track?tracknum=1234567890123456",
+				"ambiguity_score": 85
+			},
+			"dhl": {
+				"url": "https://www.dhl.com/track?tracknum=1234567890123456",
+				"ambiguity_score": 75
+			}
+		}
+	}
 }
 ```
 
@@ -603,11 +605,11 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-  "tracking_number_details": {
-    "tracking_number": "1Z999AA1234567890",
-    "shipping_provider": "ups",
-    "tracking_url": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
-  }
+	"tracking_number_details": {
+		"tracking_number": "1Z999AA1234567890",
+		"shipping_provider": "ups",
+		"tracking_url": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
+	}
 }
 ```
 
@@ -619,53 +621,53 @@ All endpoints may return error responses in the following format:
 
 ```json
 {
-  "code": "error_code",
-  "message": "Error message description",
-  "data": {
-    "status": 400
-  }
+	"code": "error_code",
+	"message": "Error message description",
+	"data": {
+		"status": 400
+	}
 }
 ```
 
 ### Common Error Codes
 
-- `woocommerce_rest_order_invalid_id` - Invalid order ID
-- `woocommerce_rest_tracking_number_missing` - Tracking number is required
-- `woocommerce_rest_order_id_missing` - Order ID is required
-- Authentication errors for insufficient permissions
+-   `woocommerce_rest_order_invalid_id` - Invalid order ID
+-   `woocommerce_rest_tracking_number_missing` - Tracking number is required
+-   `woocommerce_rest_order_id_missing` - Order ID is required
+-   Authentication errors for insufficient permissions
 
 ### HTTP Status Codes
 
-- `200` - Success
-- `201` - Created
-- `204` - No Content (for DELETE metadata)
-- `400` - Bad Request
-- `401` - Unauthorized
-- `404` - Not Found
+-   `200` - Success
+-   `201` - Created
+-   `204` - No Content (for DELETE metadata)
+-   `400` - Bad Request
+-   `401` - Unauthorized
+-   `404` - Not Found
 
 ## Metadata Structure
 
 Metadata objects have the following structure:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | integer | Unique identifier for the metadata (0 for new records) |
-| `key` | string | The metadata key |
-| `value` | string | The metadata value |
+| Field   | Type    | Description                                            |
+| ------- | ------- | ------------------------------------------------------ |
+| `id`    | integer | Unique identifier for the metadata (0 for new records) |
+| `key`   | string  | The metadata key                                       |
+| `value` | string  | The metadata value                                     |
 
 **Note:** The metadata keys prefixed with underscore (`_`) are private and for internal use only. You can add as many as your application needs. The unprefixed ones will be shown to the merchant on the fulfillment metadata box, and to the customer on the fulfillment emails.
 
 ### Required Metadata
 
-- `_items` - **REQUIRED** - JSON string containing array of items being fulfilled
+-   `_items` - **REQUIRED** - JSON string containing array of items being fulfilled
 
 ### Optional Private Metadata Keys
 
-- `_tracking_number` - Shipment tracking number
-- `_shipping_provider` - Shipping provider key (ups, fedex, dhl, etc.)
-- `_tracking_url` - URL to track the shipment
-- `_is_locked` - Whether the fulfillment is locked for merchant modification
-- `_lock_message` - What to show as the lock message for a locked fulfillment
+-   `_tracking_number` - Shipment tracking number
+-   `_shipping_provider` - Shipping provider key (ups, fedex, dhl, etc.)
+-   `_tracking_url` - URL to track the shipment
+-   `_is_locked` - Whether the fulfillment is locked for merchant modification
+-   `_lock_message` - What to show as the lock message for a locked fulfillment
 
 ### Items Structure
 
@@ -673,28 +675,28 @@ The `_items` metadata must be an array of objects with the following structure:
 
 ```json
 [
-  {
-    "item_id": 456,
-    "qty": 2
-  },
-  {
-    "item_id": 789,
-    "qty": 1
-  }
+	{
+		"item_id": 456,
+		"qty": 2
+	},
+	{
+		"item_id": 789,
+		"qty": 1
+	}
 ]
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `item_id` | integer | The order line item ID |
-| `qty` | integer | Quantity of the item being fulfilled |
+| Field     | Type    | Description                          |
+| --------- | ------- | ------------------------------------ |
+| `item_id` | integer | The order line item ID               |
+| `qty`     | integer | Quantity of the item being fulfilled |
 
 **Note:** The `_items` value is stored as a native array object in the metadata.
 
 ## Notifications
 
 When `notify_customer` is set to `true`, WooCommerce will trigger appropriate action hooks:
-- `woocommerce_fulfillment_created_notification` - When a fulfillment is created or marked fulfilled
-- `woocommerce_fulfillment_updated_notification` - When a fulfilled fulfillment is updated
-- `woocommerce_fulfillment_deleted_notification` - When a fulfilled fulfillment is deleted
 
+-   `woocommerce_fulfillment_created_notification` - When a fulfillment is created or marked fulfilled
+-   `woocommerce_fulfillment_updated_notification` - When a fulfilled fulfillment is updated
+-   `woocommerce_fulfillment_deleted_notification` - When a fulfilled fulfillment is deleted

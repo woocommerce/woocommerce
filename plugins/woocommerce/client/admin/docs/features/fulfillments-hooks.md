@@ -15,7 +15,8 @@ Fired after a fulfillment is successfully created in the database.
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:122`
 
 **Parameters:**
-- `$data` (Fulfillment) - The created fulfillment object
+
+-   `$data` (Fulfillment) - The created fulfillment object
 
 **Purpose:** Allows plugins to perform actions after a fulfillment is created, such as updating order fulfillment status, syncing to external systems, or logging.
 
@@ -34,7 +35,8 @@ Fired after a fulfillment is marked as fulfilled (both during create and update 
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:131` and `273`
 
 **Parameters:**
-- `$data` (Fulfillment) - The fulfilled fulfillment object
+
+-   `$data` (Fulfillment) - The fulfilled fulfillment object
 
 **Purpose:** Triggered when a fulfillment transitions to fulfilled status, useful for inventory updates or external system notifications.
 
@@ -54,7 +56,8 @@ Fired after a fulfillment is successfully updated in the database.
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:262`
 
 **Parameters:**
-- `$data` (Fulfillment) - The updated fulfillment object
+
+-   `$data` (Fulfillment) - The updated fulfillment object
 
 **Purpose:** Allows plugins to perform actions after a fulfillment is updated.
 
@@ -73,7 +76,8 @@ Fired after a fulfillment is soft-deleted from the database.
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:331`
 
 **Parameters:**
-- `$data` (Fulfillment) - The deleted fulfillment object
+
+-   `$data` (Fulfillment) - The deleted fulfillment object
 
 **Purpose:** Allows plugins to perform cleanup actions after a fulfillment is deleted.
 
@@ -94,9 +98,10 @@ Fired when customer notification should be sent for a new fulfilled fulfillment.
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:268` and `370`
 
 **Parameters:**
-- `$order_id` (int) - The order ID
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$order` (WC_Order) - The order object
+
+-   `$order_id` (int) - The order ID
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$order` (WC_Order) - The order object
 
 **Purpose:** Triggers customer notification emails when a fulfillment is created as fulfilled.
 
@@ -110,7 +115,7 @@ add_action( 'woocommerce_fulfillment_created_notification', 'send_sms_notificati
 function send_sms_notification( $order_id, $fulfillment, $order ) {
     $phone = $order->get_billing_phone();
     $tracking = $fulfillment->get_meta( '_tracking_number', true );
-    
+
     if ( $phone && $tracking ) {
         // Send SMS notification
     }
@@ -124,9 +129,10 @@ Fired when customer notification should be sent for an updated fulfillment. This
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:377`
 
 **Parameters:**
-- `$order_id` (int) - The order ID
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$order` (WC_Order) - The order object
+
+-   `$order_id` (int) - The order ID
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$order` (WC_Order) - The order object
 
 **Purpose:** Triggers customer notification emails when a fulfillment is updated.
 
@@ -149,9 +155,10 @@ Fired when customer notification should be sent for a deleted fulfillment. This 
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:437`
 
 **Parameters:**
-- `$order_id` (int) - The order ID
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$order` (WC_Order) - The order object
+
+-   `$order_id` (int) - The order ID
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$order` (WC_Order) - The order object
 
 **Purpose:** Triggers customer notification emails when a fulfillment is deleted.
 
@@ -176,11 +183,12 @@ Called in email templates to display fulfillment details.
 **Files:** Various email templates (`customer-fulfillment-created.php`, `customer-fulfillment-updated.php`, `customer-fulfillment-deleted.php`)
 
 **Parameters:**
-- `$order` (WC_Order) - The order object
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$sent_to_admin` (bool) - Whether email is sent to admin
-- `$plain_text` (bool) - Whether email is plain text
-- `$email` (WC_Email) - The email object
+
+-   `$order` (WC_Order) - The order object
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$sent_to_admin` (bool) - Whether email is sent to admin
+-   `$plain_text` (bool) - Whether email is plain text
+-   `$email` (WC_Email) - The email object
 
 **Purpose:** Allows customization of fulfillment details display in emails.
 
@@ -201,11 +209,12 @@ Called in email templates to display fulfillment metadata.
 **Files:** Various email templates
 
 **Parameters:**
-- `$order` (WC_Order) - The order object
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$sent_to_admin` (bool) - Whether email is sent to admin
-- `$plain_text` (bool) - Whether email is plain text
-- `$email` (WC_Email) - The email object
+
+-   `$order` (WC_Order) - The order object
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$sent_to_admin` (bool) - Whether email is sent to admin
+-   `$plain_text` (bool) - Whether email is plain text
+-   `$email` (WC_Email) - The email object
 
 **Purpose:** Allows customization of fulfillment meta data display in emails.
 
@@ -227,11 +236,12 @@ Called before the fulfillment items table in emails.
 **File:** `templates/emails/email-fulfillment-details.php:58`
 
 **Parameters:**
-- `$order` (WC_Order) - The order object
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$sent_to_admin` (bool) - Whether email is sent to admin
-- `$plain_text` (bool) - Whether email is plain text
-- `$email` (WC_Email) - The email object
+
+-   `$order` (WC_Order) - The order object
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$sent_to_admin` (bool) - Whether email is sent to admin
+-   `$plain_text` (bool) - Whether email is plain text
+-   `$email` (WC_Email) - The email object
 
 **Purpose:** Allows adding content before the fulfillment table.
 
@@ -250,11 +260,12 @@ Called after the fulfillment items table in emails.
 **File:** `templates/emails/email-fulfillment-details.php:110`
 
 **Parameters:**
-- `$order` (WC_Order) - The order object
-- `$fulfillment` (Fulfillment) - The fulfillment object
-- `$sent_to_admin` (bool) - Whether email is sent to admin
-- `$plain_text` (bool) - Whether email is plain text
-- `$email` (WC_Email) - The email object
+
+-   `$order` (WC_Order) - The order object
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+-   `$sent_to_admin` (bool) - Whether email is sent to admin
+-   `$plain_text` (bool) - Whether email is plain text
+-   `$email` (WC_Email) - The email object
 
 **Purpose:** Allows adding content after the fulfillment table.
 
@@ -282,7 +293,8 @@ Filters arguments passed to the fulfillment items template.
 **File:** `includes/wc-template-functions.php:3702`
 
 **Parameters:**
-- `$args` (array) - Array with order, fulfillment, items, and display settings
+
+-   `$args` (array) - Array with order, fulfillment, items, and display settings
 
 **Return Value:** Modified array of arguments for fulfillment items display
 
@@ -305,9 +317,10 @@ Filters the complete HTML output of the fulfillment items table.
 **File:** `includes/wc-template-functions.php:3727`
 
 **Parameters:**
-- `$html` (string) - The HTML table content
-- `$order` (WC_Order) - The order object
-- `$fulfillment` (Fulfillment) - The fulfillment object
+
+-   `$html` (string) - The HTML table content
+-   `$order` (WC_Order) - The order object
+-   `$fulfillment` (Fulfillment) - The fulfillment object
 
 **Return Value:** Modified HTML string for the fulfillment items table
 
@@ -331,7 +344,8 @@ Allows modification of fulfillment data before it's created in the database. If 
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:59`
 
 **Parameters:**
-- `$data` (Fulfillment) - The fulfillment object to be created
+
+-   `$data` (Fulfillment) - The fulfillment object to be created
 
 **Return Value:** Modified Fulfillment object
 
@@ -359,7 +373,8 @@ Allows modification of fulfillment data before it's updated in the database.
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:197`
 
 **Parameters:**
-- `$data` (Fulfillment) - The fulfillment object to be updated
+
+-   `$data` (Fulfillment) - The fulfillment object to be updated
 
 **Return Value:** Modified Fulfillment object
 
@@ -374,19 +389,19 @@ function log_fulfillment_changes( $fulfillment ) {
     return $fulfillment;
 
     // Or, prevent the update action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment is missing the required item. Please add it to the fulfillment and try again.', 'woocommerce' ) ); 
+    throw new FulfillmentException( __( 'The fulfillment is missing the required item. Please add it to the fulfillment and try again.', 'woocommerce' ) );
 }
 ```
 
 #### `woocommerce_fulfillment_before_fulfill`
 
-Allows modification of fulfillment data before it's marked as fulfilled.  If you want to cancel the fulfilling, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
-
+Allows modification of fulfillment data before it's marked as fulfilled. If you want to cancel the fulfilling, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:72` and `213`
 
 **Parameters:**
-- `$data` (Fulfillment) - The fulfillment object to be fulfilled
+
+-   `$data` (Fulfillment) - The fulfillment object to be fulfilled
 
 **Return Value:** Modified Fulfillment object
 
@@ -400,7 +415,7 @@ function set_fulfillment_timestamp( $fulfillment ) {
     return $fulfillment;
 
     // Or, prevent the fulfill action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment is missing the tracking number and shipping provider information. Please  add these information and try again.', 'woocommerce' ) ); 
+    throw new FulfillmentException( __( 'The fulfillment is missing the tracking number and shipping provider information. Please  add these information and try again.', 'woocommerce' ) );
 }
 ```
 
@@ -411,7 +426,8 @@ Allows modification of fulfillment data before it's deleted. If you want to canc
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:298`
 
 **Parameters:**
-- `$data` (Fulfillment) - The fulfillment object to be deleted
+
+-   `$data` (Fulfillment) - The fulfillment object to be deleted
 
 **Return Value:** Modified Fulfillment object
 
@@ -425,7 +441,7 @@ function log_fulfillment_deletion( $fulfillment ) {
     return $fulfillment;
 
 	// Or, prevent the delete action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment can`t be deleted because it is being processed by a 3rd party plugin.', 'woocommerce' ) ); 
+    throw new FulfillmentException( __( 'The fulfillment can`t be deleted because it is being processed by a 3rd party plugin.', 'woocommerce' ) );
 }
 ```
 
@@ -438,9 +454,10 @@ Allows customization of how order fulfillment status is calculated.
 **File:** `src/Internal/Fulfillments/FulfillmentUtils.php:174`
 
 **Parameters:**
-- `$status` (string) - The calculated fulfillment status
-- `$order` (WC_Order) - The order object
-- `$fulfillments` (array) - Array of fulfillments for the order
+
+-   `$status` (string) - The calculated fulfillment status
+-   `$order` (WC_Order) - The order object
+-   `$fulfillments` (array) - Array of fulfillments for the order
 
 **Return Value:** Modified fulfillment status string
 
@@ -470,9 +487,10 @@ Allows customization of fulfillment status text display on the customer order de
 **File:** `src/Internal/Fulfillments/FulfillmentUtils.php:268`
 
 **Parameters:**
-- `$fulfillment_status_text` (string) - The status text to display
-- `$fulfillment_status` (string) - The fulfillment status
-- `$order` (WC_Order) - The order object
+
+-   `$fulfillment_status_text` (string) - The status text to display
+-   `$fulfillment_status` (string) - The fulfillment status
+-   `$order` (WC_Order) - The order object
 
 **Return Value:** Modified status text string
 
@@ -496,7 +514,8 @@ Allows adding/modifying available order fulfillment statuses.
 **File:** `src/Internal/Fulfillments/FulfillmentUtils.php:325`
 
 **Parameters:**
-- `$order_fulfillment_statuses` (array) - Array of available order fulfillment statuses
+
+-   `$order_fulfillment_statuses` (array) - Array of available order fulfillment statuses
 
 **Return Value:** Modified array of order fulfillment statuses
 
@@ -519,7 +538,8 @@ Allows adding/modifying available fulfillment statuses.
 **File:** `src/Internal/Fulfillments/FulfillmentUtils.php:350`
 
 **Parameters:**
-- `$fulfillment_statuses` (array) - Array of available fulfillment statuses
+
+-   `$fulfillment_statuses` (array) - Array of available fulfillment statuses
 
 **Return Value:** Modified array of fulfillment statuses
 
@@ -544,7 +564,8 @@ Allows translation of fulfillment meta keys for display purposes.
 **File:** `src/Internal/Fulfillments/FulfillmentsManager.php:75`
 
 **Parameters:**
-- `$meta_key_translations` (array) - Array of meta key translations
+
+-   `$meta_key_translations` (array) - Array of meta key translations
 
 **Return Value:** Modified array of meta key translations
 
@@ -567,7 +588,8 @@ Translates individual fulfillment meta keys for user-friendly display.
 **File:** `src/Internal/Fulfillments/FulfillmentsManager.php:29`
 
 **Parameters:**
-- `$meta_key` (string) - The meta key to translate
+
+-   `$meta_key` (string) - The meta key to translate
 
 **Return Value:** Translated meta key string
 
@@ -589,8 +611,9 @@ Allows specifying which products should be automatically fulfilled.
 **File:** `src/Internal/Fulfillments/FulfillmentsSettings.php:121`
 
 **Parameters:**
-- `$auto_fulfill_product_ids` (array) - Array of product IDs to auto-fulfill
-- `$order` (WC_Order) - The order object
+
+-   `$auto_fulfill_product_ids` (array) - Array of product IDs to auto-fulfill
+-   `$order` (WC_Order) - The order object
 
 **Return Value:** Array of product IDs to auto-fulfill
 
@@ -604,7 +627,7 @@ function custom_auto_fulfill_logic( $product_ids, $order ) {
 	$products = wc_get_products([
    		'category' => get_term($category_id, 'gift-cards')->slug
 	]);
-	
+
 	$product_ids = array_map( function( $product ) {
         return $product->get_id();
     }, $products );
@@ -622,7 +645,8 @@ Allows adding/modifying available shipping providers.
 **File:** `src/Internal/Fulfillments/FulfillmentUtils.php:374`
 
 **Parameters:**
-- `$shipping_providers` (array) - Array of shipping provider class names
+
+-   `$shipping_providers` (array) - Array of shipping provider class names
 
 **Return Value:** Modified array of shipping provider class map.
 
@@ -638,6 +662,7 @@ function add_custom_providers( $providers ) {
 ```
 
 **Note:** `My_Custom_Shipping_Provider` class needs to extend `Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider` class to be able to run tracking number parsing.
+
 ## Best Practices
 
 ### Hook Priority and Execution Order
@@ -672,7 +697,7 @@ function sync_to_external_system( $fulfillment ) {
             ) ),
             'headers' => array( 'Content-Type' => 'application/json' )
         ) );
-        
+
         if ( is_wp_error( $response ) ) {
             error_log( 'Fulfillment sync failed: ' . $response->get_error_message() );
         }
@@ -692,12 +717,12 @@ add_filter( 'woocommerce_fulfillment_before_create', 'optimize_fulfillment_data'
 function optimize_fulfillment_data( $fulfillment ) {
     // Cache expensive operations
     static $warehouse_cache = array();
-    
+
     $order_id = $fulfillment->get_entity_id();
     if ( ! isset( $warehouse_cache[ $order_id ] ) ) {
         $warehouse_cache[ $order_id ] = determine_warehouse( $order_id );
     }
-    
+
     $fulfillment->update_meta_data( '_warehouse_location', $warehouse_cache[ $order_id ] );
     return $fulfillment;
 }
