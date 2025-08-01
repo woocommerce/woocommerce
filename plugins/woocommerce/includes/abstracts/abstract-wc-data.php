@@ -19,7 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Implemented by classes using the same CRUD(s) pattern.
  *
- * @version  x.x.x
+ * @since    2.6.0
+ * @version  10.2.0
  * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
