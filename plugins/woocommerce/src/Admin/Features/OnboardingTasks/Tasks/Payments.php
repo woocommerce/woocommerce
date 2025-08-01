@@ -250,7 +250,7 @@ class Payments extends Task {
 			return false;
 		}
 
-		// Check the provider's state to determine if a live account onboarding is in progress.
+		// Check the provider's state to determine if a live account onboarding is started.
 		if ( ! empty( $woopayments_provider['onboarding']['state']['started'] ) ) {
 			return true;
 		}
