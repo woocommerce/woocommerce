@@ -49,7 +49,7 @@ class TaxonomyHierarchyData {
 			$cached_map = get_option( $cache_key );
 		}
 
-		if ( ! empty( $cached_map ) ) {
+		if ( ! empty( $cached_map ) && $this->validate_cache( $cached_map ) ) {
 			// Cache in memory and return.
 			$this->hierarchy_data[ $taxonomy ] = $cached_map;
 			return $cached_map;
@@ -68,6 +68,18 @@ class TaxonomyHierarchyData {
 		return $map;
 	}
 
+	/**
+	 * Check if the cache is valid.
+	 *
+	 * @param array $data Cache data
+	 *
+	 * @return boolean
+	 */
+	private function validate_cache( $data ) {
+		return array_key_exists( 'descendants', $data ) &&
+		array_key_exists( 'ancestors', $data ) &&
+		array_key_exists( 'tree', $data );
+	}
 
 	/**
 	 * Build hierarchy map for FilterData and ProductFilterTaxonomy.
@@ -82,7 +94,8 @@ class TaxonomyHierarchyData {
 			array(
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => false,
-				'fields'     => 'id=>parent',
+				'orderby'    => 'name',
+				'order'      => 'ASC',
 			)
 		);
 
@@ -93,19 +106,32 @@ class TaxonomyHierarchyData {
 		$map = array(
 			'descendants' => array(), // term_id => [descendant_ids]
 			'ancestors'   => array(), // term_id => [ancestor_ids]
+			'tree'        => array(),
 		);
 
 		// Build core lookups and temporary structures
 		$temp_children = array();
 		$temp_parents  = array();
+		$temp_terms    = array();
 
-		foreach ( $terms as $term_id => $parent_id ) {
+		foreach ( $terms as $term ) {
+			$term_id   = $term->term_id;
+			$parent_id = $term->parent;
+
 			$temp_parents[ $term_id ] = $parent_id;
 
 			if ( ! isset( $temp_children[ $parent_id ] ) ) {
 				$temp_children[ $parent_id ] = array();
 			}
+
 			$temp_children[ $parent_id ][] = $term_id;
+
+			$temp_terms[ $term_id ] = array(
+				'slug'    => $term->slug,
+				'name'    => $term->name,
+				'parent'  => $parent_id,
+				'term_id' => $term->term_id,
+			);
 		}
 
 		// Pre-compute descendants and ancestors
@@ -114,9 +140,35 @@ class TaxonomyHierarchyData {
 			$map['ancestors'][ $term_id ]   = $this->compute_ancestors( $term_id, $temp_parents );
 		}
 
+		foreach ( $temp_children[0] as $term_id ) {
+			$this->build_term_tree( $map['tree'], $term_id, $temp_children, $temp_terms );
+		}
+
 		return $map;
 	}
 
+	/**
+	 * Recursively build hierarchical term tree with depth and parent slug.
+	 *
+	 * @param array $tree       Reference to tree array being built.
+	 * @param int   $term_id    Current term ID.
+	 * @param array $children   Children relationships map (parent_id => [child_ids]).
+	 * @param array $temp_terms Term data indexed by term_id.
+	 * @param int   $parent_id  Current parent term ID.
+	 * @param int   $depth      Current depth level in hierarchy.
+	 */
+	private function build_term_tree( &$tree, $term_id, $children, $temp_terms, $parent_id = 0, $depth = 0 ) {
+		$tree[ $term_id ]          = $temp_terms[ $term_id ];
+		$tree[ $term_id ]['depth'] = $depth;
+		if ( isset( $temp_terms[ $parent_id ] ) ) {
+			$tree[ $term_id ]['parent'] = $temp_terms[ $parent_id ]['slug'];
+		}
+		if ( ! empty( $children[ $term_id ] ) ) {
+			foreach ( $children[ $term_id ] as $child_id ) {
+				$this->build_term_tree( $tree[ $term_id ]['children'], $child_id, $children, $temp_terms, $term_id, $depth + 1 );
+			}
+		}
+	}
 
 	/**
 	 * Compute all descendants of a term.
@@ -183,7 +235,6 @@ class TaxonomyHierarchyData {
 		$map = $this->get_hierarchy_map( $taxonomy );
 		return $map['ancestors'][ $term_id ] ?? array();
 	}
-
 
 	/**
 	 * Clear hierarchy cache for a taxonomy.
