@@ -656,7 +656,7 @@ Allows adding/modifying available shipping providers.
 add_filter( 'woocommerce_fulfillment_shipping_providers', 'add_custom_providers' );
 
 function add_custom_providers( $providers ) {
-    $providers['custom_provider] = My_Custom_Shipping_Provider::class;
+    $providers['custom_provider'] = My_Custom_Shipping_Provider::class;
     return $providers;
 }
 ```
