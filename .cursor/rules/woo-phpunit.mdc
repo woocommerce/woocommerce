@@ -1,3 +1,8 @@
+---
+description:
+globs: plugins/woocommerce/tests/**/*.php
+alwaysApply: false
+---
 
 # WooCommerce PHPUnit Tests
 
@@ -58,7 +63,7 @@ Ensure proper test file structure (the below is an example):
 declare( strict_types = 1 );
 
 /**
- * Test class description
+ * Test class description (this is an exmample)
  */
 class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
     // test methods
@@ -77,62 +82,5 @@ class WC_REST_Product_Brands_Controller_Test extends WC_Unit_Test_Case {
 -   Tests run in a Docker container via wp-env
 -   Node version warnings can be ignored (tests still work)
 -   Memory usage is typically 150-200MB for test suites
-
-### Admin vs Frontend Context Issues
-
-Some WooCommerce functions behave differently in admin vs frontend contexts. If tests are failing due to context issues:
-
-#### Common Context-Dependent Functions
-
--   `wc_change_term_counts()` - Only applies custom count logic in frontend context
--   `is_admin()` - Returns true in test environment, causing early returns in some functions
-
-#### Solutions
-
-1. **Use `$this->go_to( home_url( '/' ) )`** to simulate frontend context:
-   ```php
-   public function test_frontend_functionality() {
-       $this->go_to( home_url( '/' ) );
-       // Test logic here
-   }
-   ```
-
-2. **Use `get_terms()` instead of `get_term()`** to trigger filters:
-   ```php
-   // Instead of: get_term( $term_id, 'taxonomy' )
-   $terms = get_terms( array(
-       'taxonomy' => 'taxonomy_name',
-       'include'  => array( $term_id ),
-   ) );
-   $term = $terms[0];
-   ```
-
-3. **Clear term cache** when needed:
-   ```php
-   clean_term_cache( $term_id, 'taxonomy_name' );
-   ```
-
-#### Example: Brand Count Test
-
-When testing brand counts that respect product visibility:
-
-```php
-public function test_brand_count_respects_product_visibility() {
-    $this->go_to( home_url( '/' ) );
-    
-    // Setup test data...
-    
-    $terms = get_terms( array(
-        'taxonomy'   => 'product_brand',
-        'include'    => array( $term_id ),
-        'hide_empty' => false,
-    ) );
-    $term = $terms[0];
-    
-    $this->assertEquals( 0, $term->count );
-}
-```
-
-And the command must be run in the `plugins/woocommerce` directory.
 
 And the command must be run in the `plugins/woocommerce` directory.
