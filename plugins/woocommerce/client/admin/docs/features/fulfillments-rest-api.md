@@ -89,13 +89,13 @@ Create a new fulfillment for a specific order.
 
 #### Parameters
 
-| Parameter         | Type    | Required | Description                                              |
-| ----------------- | ------- | -------- | -------------------------------------------------------- |
-| `order_id`        | integer | Yes      | Unique identifier for the order                          |
-| `status`          | string  | No       | Status of the fulfillment (`fulfilled` or `unfulfilled`) |
-| `is_fulfilled`    | boolean | No       | Whether the fulfillment is fulfilled                     |
-| `meta_data`       | array   | Yes      | Array of metadata objects                                |
-| `notify_customer` | boolean | No       | Whether to notify customer (query parameter)             |
+| Parameter         | Type    | Required | Description                                                                                                                                                                                                      |
+| ----------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `order_id`        | integer | Yes      | Unique identifier for the order                                                                                                                                                                                  |
+| `status`          | string  | No       | Status of the fulfillment (`fulfilled` or `unfulfilled`, or any other custom status that has been added, doesn't indicate that the fulfillment is fulfilled, but that's what's going to be shown on the screen.) |
+| `is_fulfilled`    | boolean | No       | Whether the fulfillment is fulfilled                                                                                                                                                                             |
+| `meta_data`       | array   | Yes      | Array of metadata objects                                                                                                                                                                                        |
+| `notify_customer` | boolean | No       | Whether to notify customer (query parameter)                                                                                                                                                                     |
 
 #### Example Request
 
@@ -651,9 +651,9 @@ Metadata objects have the following structure:
 
 | Field   | Type    | Description                                            |
 | ------- | ------- | ------------------------------------------------------ |
-| `id`    | integer | Unique identifier for the metadata (0 for new records) |
+| `id`    | integer | Unique identifier for the metadata (0 for new entries) |
 | `key`   | string  | The metadata key                                       |
-| `value` | string  | The metadata value                                     |
+| `value` | string  | The metadata value (string, number, array, or object)  |
 
 **Note:** The metadata keys prefixed with underscore (`_`) are private and for internal use only. You can add as many as your application needs. The unprefixed ones will be shown to the merchant on the fulfillment metadata box, and to the customer on the fulfillment emails.
 

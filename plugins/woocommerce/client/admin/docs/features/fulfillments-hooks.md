@@ -441,7 +441,7 @@ function log_fulfillment_deletion( $fulfillment ) {
     return $fulfillment;
 
 	// Or, prevent the delete action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment can`t be deleted because it is being processed by a 3rd party plugin.', 'woocommerce' ) );
+    throw new FulfillmentException( __( 'The fulfillment can\'t be deleted because it is being processed by a 3rd party plugin.', 'woocommerce' ) );
 }
 ```
 
@@ -624,9 +624,12 @@ add_filter( 'woocommerce_fulfillments_auto_fulfill_products', 'custom_auto_fulfi
 
 function custom_auto_fulfill_logic( $product_ids, $order ) {
     // Auto-fulfill products in a specific category
-	$products = wc_get_products([
-   		'category' => get_term($category_id, 'gift-cards')->slug
-	]);
+	$gift_cards = get_term_by( 'slug', 'gift-cards', 'product_cat' );
+    $products   = wc_get_products(
+      array(
+        'category' => $gift_cards ? $gift_cards->slug : '',
+      )
+    );
 
 	$product_ids = array_map( function( $product ) {
         return $product->get_id();
