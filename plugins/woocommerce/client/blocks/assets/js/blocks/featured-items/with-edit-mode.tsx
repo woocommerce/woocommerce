@@ -15,7 +15,6 @@ import {
 	Placeholder,
 	Icon,
 	Button,
-	Spinner,
 	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
 	// @ts-expect-error Using experimental features
@@ -77,9 +76,9 @@ export const withEditMode =
 		} >();
 
 		const onDone = () => {
-			if (selectedOptions) {
-				setAttributes(selectedOptions);
-				debouncedSpeak(editLabel);
+			if ( selectedOptions ) {
+				setAttributes( selectedOptions );
+				debouncedSpeak( editLabel );
 			}
 		};
 
