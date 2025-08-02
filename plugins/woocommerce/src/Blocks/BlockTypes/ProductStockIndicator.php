@@ -152,6 +152,7 @@ class ProductStockIndicator extends AbstractBlock {
 			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
 			$wrapper_attributes['data-wp-text']        = 'state.productData.availability';
 			$wrapper_attributes['aria-live']           = 'assertive';
+			$wrapper_attributes['aria-atomic']         = 'true';
 		}
 
 		$output_text = $low_stock_text ?? $availability['availability'];
