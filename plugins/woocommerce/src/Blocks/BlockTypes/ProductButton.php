@@ -228,6 +228,7 @@ class ProductButton extends AbstractBlock {
 			data-wp-class--wc-block-slide-in="state.slideInAnimation"
 			data-wp-class--wc-block-slide-out="state.slideOutAnimation"
 			data-wp-on--animationend="actions.handleAnimationEnd"
+			data-wp-watch="callbacks.startAnimation"
 			data-wp-run="callbacks.syncTempQuantityOnLoad"
 		';
 
