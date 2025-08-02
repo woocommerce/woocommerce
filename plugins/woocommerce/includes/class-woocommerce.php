@@ -143,6 +143,14 @@ final class WooCommerce {
 	 */
 	public $deprecated_hook_handlers = array();
 
+	private const DEFINED_TABLES = array(
+		'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+		'order_itemmeta'         => 'woocommerce_order_itemmeta',
+		'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+		'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+		'wc_reserved_stock'      => 'wc_reserved_stock',
+	);
+
 	/**
 	 * Main WooCommerce Instance.
 	 *
@@ -300,7 +308,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		}
-		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
+		add_action( 'switch_blog', array( $this, 'update_tables' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
@@ -489,16 +497,7 @@ final class WooCommerce {
 	private function define_tables() {
 		global $wpdb;
 
-		// List of tables without prefixes.
-		$tables = array(
-			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
-			'order_itemmeta'         => 'woocommerce_order_itemmeta',
-			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
-			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
-			'wc_reserved_stock'      => 'wc_reserved_stock',
-		);
-
-		foreach ( $tables as $name => $table ) {
+		foreach ( self::DEFINED_TABLES as $name => $table ) {
 			$wpdb->$name    = $wpdb->prefix . $table;
 			$wpdb->tables[] = $table;
 		}
@@ -1125,7 +1124,11 @@ final class WooCommerce {
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		$this->define_tables();
+		global $wpdb;
+
+		foreach ( self::DEFINED_TABLES as $name => $table ) {
+			$wpdb->$name = $wpdb->prefix . $table;
+		}
 	}
 
 	/**
