@@ -53,10 +53,6 @@
 	margin-top: $header-height;
 }
 
-#wpfooter {
-	display: none;
-}
-
 .woocommerce_page_wc-admin {
 	.woocommerce-filters-date__content:not(.is-mobile) {
 		z-index: 2; /* below of woocommerce-layout__header */
