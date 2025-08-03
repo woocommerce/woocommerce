@@ -9106,7 +9106,8 @@ body.woocommerce_page_wc-settings-advanced-blueprint {
  * Hide screen meta links on Advanced Keys settings page.
  */ 
 body.woocommerce_page_wc-settings-advanced-keys,
-body.woocommerce_page_wc-settings-advanced-webhooks {
+body.woocommerce_page_wc-settings-advanced-webhooks,
+body.woocommerce-admin-page__extensions {
 	#screen-meta-links {
 		display:none;
 	}
