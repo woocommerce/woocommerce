@@ -9074,13 +9074,40 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
+	/**
+	 * Default for footer on WooCommerce settings pages.
+	 */ 
 	#wpfooter {
 		position: relative;
 	}
 }
 
-.woocommerce-admin-page__customers {
+/**
+ * Fix for footer on various settings pages.
+ */ 
+body.woocommerce-admin-page__customers,
+body.woocommerce-settings-payments-tab,
+body.woocommerce_page_wc-settings-shipping-options,
+body.woocommerce_page_wc-settings-shipping-classes,
+body.woocommerce_page_wc-settings-integration,
+body.woocommerce_page_wc-settings-site-visibility,
+body.woocommerce_page_wc-settings-point-of-sale,
+body.woocommerce_page_wc-settings-advanced-keys,
+body.woocommerce_page_wc-settings-advanced-webhooks,
+body.woocommerce_page_wc-settings-advanced-legacy_api,
+body.woocommerce_page_wc-settings-advanced-woocommerce_com,
+body.woocommerce_page_wc-settings-advanced-blueprint {
 	#wpfooter {
-		bottom: 20px;
+		position: absolute;
+	}
+}
+
+/**
+ * Hide screen meta links on Advanced Keys settings page.
+ */ 
+body.woocommerce_page_wc-settings-advanced-keys,
+body.woocommerce_page_wc-settings-advanced-webhooks {
+	#screen-meta-links {
+		display:none;
 	}
 }
