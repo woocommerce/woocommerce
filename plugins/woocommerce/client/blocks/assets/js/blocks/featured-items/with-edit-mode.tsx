@@ -103,7 +103,7 @@ export const withEditMode =
 					setAttributes( { editMode: currEditModeValue } );
 				}
 			}
-		}, [ status, isDeleted, name, setAttributes ] );
+		}, [ status, isDeleted, name, setAttributes, isLoading ] );
 
 		if ( attributes.editMode ) {
 			return (
