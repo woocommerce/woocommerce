@@ -210,6 +210,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'woocommerce'
 						),
 						'variableProductOutOfStock' => sprintf(
+							/* translators: %s: product name */
 							esc_html__(
 								'You cannot add &quot;%s&quot; to the cart because the product is out of stock.',
 								'woocommerce'
