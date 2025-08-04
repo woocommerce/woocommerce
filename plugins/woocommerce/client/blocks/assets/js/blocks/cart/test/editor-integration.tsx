@@ -131,7 +131,9 @@ describe( 'Cart block editor integration', () => {
 		const filledCartTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( filledCartTableOption ).toBeVisible();
+		await waitFor( () => {
+			expect( filledCartTableOption ).toBeVisible();
+		} );
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
 		const filledCartAudioOption = screen.queryByRole( 'option', {

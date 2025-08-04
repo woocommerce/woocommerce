@@ -112,7 +112,9 @@ describe( 'Checkout block editor integration', () => {
 		const contactInformationTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( contactInformationTableOption ).toBeVisible();
+		await waitFor( () => {
+			expect( contactInformationTableOption ).toBeVisible();
+		} );
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Checkout Totals).
 		const ContactInformationAudioOption = screen.queryByRole( 'option', {
