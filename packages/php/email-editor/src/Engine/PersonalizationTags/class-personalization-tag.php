@@ -50,6 +50,12 @@ class Personalization_Tag {
 	 * @var string
 	 */
 	private string $value_to_insert;
+	/**
+	 * The list of supported post types.
+	 *
+	 * @var string[]
+	 */
+	private array $post_types;
 
 	/**
 	 * Personalization_Tag constructor.
@@ -72,6 +78,7 @@ class Personalization_Tag {
 	 * @param callable    $callback The callback function which returns the value of the personalization tag.
 	 * @param array       $attributes The attributes which are used in the Personalization Tag UI.
 	 * @param string|null $value_to_insert The value that is inserted via the UI. When the value is null the token is generated based on $token attribute and $attributes.
+	 * @param string[]    $post_types The list of supported post types.
 	 */
 	public function __construct(
 		string $name,
@@ -79,7 +86,8 @@ class Personalization_Tag {
 		string $category,
 		callable $callback,
 		array $attributes = array(),
-		?string $value_to_insert = null
+		?string $value_to_insert = null,
+		array $post_types = array()
 	) {
 		$this->name = $name;
 		// Because Gutenberg does not wrap the token with square brackets, we need to add them here.
@@ -105,6 +113,7 @@ class Personalization_Tag {
 			}
 		}
 		$this->value_to_insert = $value_to_insert;
+		$this->post_types      = $post_types;
 	}
 
 	/**
@@ -150,6 +159,15 @@ class Personalization_Tag {
 	 */
 	public function get_value_to_insert(): string {
 		return $this->value_to_insert;
+	}
+
+	/**
+	 * Returns the list of supported post types.
+	 *
+	 * @return array|string[]
+	 */
+	public function get_post_types(): array {
+		return $this->post_types;
 	}
 
 	/**

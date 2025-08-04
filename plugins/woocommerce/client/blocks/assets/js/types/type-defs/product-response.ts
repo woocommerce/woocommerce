@@ -97,4 +97,7 @@ export interface ProductResponseItem {
 	};
 	slug: string;
 	grouped_products: Array< number >;
+	price: string;
+	regular_price: string;
+	sale_price: string;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,12 +24,21 @@ class FilterData {
 	private $query_clauses;
 
 	/**
+	 * Instance of TaxonomyHierarchyData.
+	 *
+	 * @var TaxonomyHierarchyData
+	 */
+	private $taxonomy_hierarchy_data;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
+	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses ) {
-		$this->query_clauses = $query_clauses;
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
+		$this->query_clauses           = $query_clauses;
+		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
 	}
 
 	/**
@@ -326,7 +336,7 @@ class FilterData {
 			$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $taxonomy_to_count ) );
 
 			if ( is_taxonomy_hierarchical( $taxonomy_to_count ) ) {
-				$results = $this->get_hierarchical_taxonomy_counts( $product_ids, $taxonomy_escaped );
+				$results = $this->get_hierarchical_taxonomy_counts( $product_ids, $taxonomy_to_count );
 			} else {
 				$taxonomy_count_sql = "
 					SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, term_taxonomy.term_taxonomy_id as term_count_id
@@ -362,17 +372,18 @@ class FilterData {
 	}
 
 	/**
-	 * Get hierarchical taxonomy counts with minimal query optimization.
+	 * Get hierarchical taxonomy counts using optimized hierarchy data.
 	 *
-	 * @param string $product_ids      Comma-separated list of product IDs.
-	 * @param string $taxonomy_escaped Escaped taxonomy name.
+	 * @param string $product_ids   Comma-separated list of product IDs.
+	 * @param string $taxonomy_name Original taxonomy name for hierarchy methods.
 	 * @return array Array of term_taxonomy_id => count pairs.
 	 */
-	private function get_hierarchical_taxonomy_counts( string $product_ids, string $taxonomy_escaped ) {
+	private function get_hierarchical_taxonomy_counts( string $product_ids, string $taxonomy_name ) {
 		global $wpdb;
 
 		// Step 1: Get all terms that have products in the filtered set (1 query).
-		$base_terms_sql = "
+		$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $taxonomy_name ) );
+		$base_terms_sql   = "
 			SELECT DISTINCT tt.term_id, tt.term_taxonomy_id
 			FROM {$wpdb->term_relationships} tr
 			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
@@ -387,37 +398,43 @@ class FilterData {
 			return array();
 		}
 
-		// Step 2: Build hierarchy relationships using cached WordPress functions.
+		// Step 2: Build hierarchy relationships using TaxonomyHierarchyData.
 		$hierarchy_counts = array();
 		$processed_terms  = array();
 
 		// Process each base term and its ancestors.
 		foreach ( $base_terms as $term ) {
-			// Count for the term itself.
+			$term_id = (int) $term->term_id;
+
+			// Count for the term itself and all its descendants.
 			if ( ! isset( $hierarchy_counts[ $term->term_taxonomy_id ] ) ) {
-				$hierarchy_counts[ $term->term_taxonomy_id ] = array( $term->term_id );
+				$descendants                                 = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
+				$descendants[]                               = $term_id; // Include the term itself.
+				$hierarchy_counts[ $term->term_taxonomy_id ] = $descendants;
 			}
 
-			// Get ancestors and add this term's descendants to each ancestor.
-			$ancestors = get_ancestors( $term->term_id, $taxonomy_escaped );
-			foreach ( $ancestors as $ancestor_term_id ) {
-				if ( in_array( $ancestor_term_id, $processed_terms, true ) ) {
+			// Get ancestors using optimized hierarchy data.
+			$current_id = $term_id;
+			while ( $current_id > 0 ) {
+				$parent_id = $this->taxonomy_hierarchy_data->get_parent( $current_id, $taxonomy_name );
+				if ( $parent_id <= 0 ) {
+					break;
+				}
+
+				if ( in_array( $parent_id, $processed_terms, true ) ) {
+					$current_id = $parent_id;
 					continue;
 				}
 
-				$ancestor_term_taxonomy_id = $this->get_term_taxonomy_id_from_term_id( $ancestor_term_id, $taxonomy_escaped );
+				$ancestor_term_taxonomy_id = $this->get_term_taxonomy_id_from_term_id( $parent_id, $taxonomy_escaped );
 
-				// Get all descendants for this ancestor (WordPress handles caching internally).
-				$descendants = get_term_children( $ancestor_term_id, $taxonomy_escaped );
-
-				if ( ! is_wp_error( $descendants ) ) {
-					$descendants[] = $ancestor_term_id; // Include the ancestor term itself.
-				} else {
-					$descendants = array( $ancestor_term_id );
-				}
+				// Get all descendants for this ancestor using optimized hierarchy data.
+				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $parent_id, $taxonomy_name );
+				$descendants[] = $parent_id; // Include the ancestor term itself.
 
 				$hierarchy_counts[ $ancestor_term_taxonomy_id ] = $descendants;
-				$processed_terms[]                              = $ancestor_term_id;
+				$processed_terms[]                              = $parent_id;
+				$current_id                                     = $parent_id;
 			}
 		}
 
