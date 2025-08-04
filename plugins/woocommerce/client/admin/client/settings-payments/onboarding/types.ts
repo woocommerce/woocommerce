@@ -53,6 +53,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
+	subSteps?: WooPaymentsProviderOnboardingStep[];
 	actions?: {
 		save?: {
 			type?: string;
@@ -134,6 +135,7 @@ export interface OnboardingContextType {
 	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
+	currentTopLevelStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
 	navigateToNextStep: () => void;
 	getStepByKey: (
@@ -144,4 +146,16 @@ export interface OnboardingContextType {
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
 	sessionEntryPoint: string;
+	snackbar: {
+		show: boolean;
+		message: string;
+		className?: string;
+		duration?: number;
+	};
+	setSnackbar: ( snackbar: {
+		show: boolean;
+		message: string;
+		duration?: number;
+		className?: string;
+	} ) => void;
 }

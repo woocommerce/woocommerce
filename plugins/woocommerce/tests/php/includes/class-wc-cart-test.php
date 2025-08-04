@@ -388,4 +388,203 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $notices['error'] );
 		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
 	}
+
+	/**
+	 * Test case sensitivity fix for coupon discount amounts.
+	 *
+	 * This test verifies that the fix for issue #58864 works correctly.
+	 * It creates a coupon with uppercase code in the database, applies it with lowercase code,
+	 * and ensures that get_coupon_discount_amount and get_coupon_discount_tax_amount
+	 * return the correct values regardless of case.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/58864
+	 */
+	public function test_coupon_discount_amount_case_sensitivity() {
+		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX20',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Create a coupon with uppercase code.
+		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// Add product to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// Apply the coupon using lowercase code.
+		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+
+		// Verify the coupon is in applied coupons (should be stored in original case).
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
+
+		// Test get_coupon_discount_amount with lowercase code.
+		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+
+		// Test get_coupon_discount_amount with uppercase code.
+		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+
+		// Test get_coupon_discount_tax_amount with lowercase code.
+		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+
+		// Test get_coupon_discount_tax_amount with uppercase code.
+		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$coupon->delete( true );
+
+		// Restore global state.
+		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
+		if ( $tax_rate_id ) {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+		}
+	}
+
+		/**
+		 * Test coupon codes with special characters (ampersands, quotes, etc.).
+		 *
+		 * This test verifies that coupon codes containing special characters work correctly
+		 * when users input them in various formats (raw, HTML-encoded, etc.).
+		 * It tests the html_entity_decode() functionality in wc_format_coupon_code().
+		 */
+	public function test_coupon_codes_with_special_characters() {
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Test cases with various special character scenarios.
+		$test_cases = array(
+			// Ampersand test cases.
+			array(
+				'coupon_code' => 'TEST&COUPON-SPECIAL',
+				'user_inputs' => array( 'TEST&COUPON-SPECIAL', 'TEST&amp;COUPON-SPECIAL', 'test&coupon-special' ),
+				'discount'    => 15,
+				'description' => 'Coupon with ampersand',
+			),
+			// Quote test cases.
+			array(
+				'coupon_code' => 'TEST&COUPON\'S',
+				'user_inputs' => array( 'TEST&COUPON\'S', 'TEST&amp;COUPON\'S', 'test&coupon\'s' ),
+				'discount'    => 20,
+				'description' => 'Coupon with ampersand and apostrophe',
+			),
+			// Quote characters test.
+			array(
+				'coupon_code' => 'TEST"2024"',
+				'user_inputs' => array( 'TEST"2024"', 'TEST&quot;2024&quot;', 'test"2024"' ),
+				'discount'    => 25,
+				'description' => 'Coupon with quote characters',
+			),
+		);
+
+		foreach ( $test_cases as $test_case ) {
+			$coupon_code = $test_case['coupon_code'];
+			$user_inputs = $test_case['user_inputs'];
+			$discount    = $test_case['discount'];
+			$description = $test_case['description'];
+
+			// Create coupon with special characters.
+			$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
+			$coupon->set_discount_type( 'fixed_cart' );
+			$coupon->set_amount( $discount );
+			$coupon->save();
+
+			foreach ( $user_inputs as $user_input ) {
+				// Add product to cart and clear any previously applied coupons.
+				WC()->cart->add_to_cart( $product->get_id(), 1 );
+				WC()->cart->remove_coupons();
+				WC()->cart->calculate_totals();
+
+				// Apply coupon with user input variation.
+				$applied = WC()->cart->apply_coupon( $user_input );
+				$this->assertTrue(
+					$applied,
+					sprintf(
+						'%s: Coupon should be applied successfully with user input "%s"',
+						$description,
+						$user_input
+					)
+				);
+
+				// Verify discount amount is correct.
+				$applied_coupons = WC()->cart->get_applied_coupons();
+				$this->assertNotEmpty( $applied_coupons, sprintf( '%s: Should have applied coupons', $description ) );
+
+				// Get the applied coupon code and verify discount amount.
+				$applied_coupon_code = reset( $applied_coupons );
+				$discount_amount     = WC()->cart->get_coupon_discount_amount( $applied_coupon_code );
+				$this->assertEquals(
+					(float) $discount,
+					$discount_amount,
+					sprintf(
+						'%s: Discount amount should be %s for user input "%s"',
+						$description,
+						$discount,
+						$user_input
+					)
+				);
+
+				WC()->cart->empty_cart();
+			}
+
+			$coupon->delete( true );
+		}
+
+		// Test edge case: Double-encoded input (simulating form submission issues).
+		$coupon = WC_Helper_Coupon::create_coupon( 'COMPANY&CO' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 30 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// Test with double-encoded input (what might come from a problematic form).
+		$double_encoded_input = 'COMPANY&amp;amp;CO';
+		$applied              = WC()->cart->apply_coupon( $double_encoded_input );
+		$this->assertTrue(
+			$applied,
+			'Double-encoded coupon input should still be applied successfully'
+		);
+
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$applied_coupon  = reset( $applied_coupons );
+		$discount_amount = WC()->cart->get_coupon_discount_amount( $applied_coupon );
+		$this->assertEquals( 30.0, $discount_amount, 'Double-encoded input should produce correct discount' );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
 }

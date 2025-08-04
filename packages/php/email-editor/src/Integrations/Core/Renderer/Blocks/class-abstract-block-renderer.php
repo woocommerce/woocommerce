@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -24,15 +26,7 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return array
 	 */
 	protected function get_styles_from_block( array $block_styles, $skip_convert_vars = false ) {
-		$styles = wp_style_engine_get_styles( $block_styles, array( 'convert_vars_to_classnames' => $skip_convert_vars ) );
-		return wp_parse_args(
-			$styles,
-			array(
-				'css'          => '',
-				'declarations' => array(),
-				'classnames'   => '',
-			)
-		);
+		return Styles_Helper::get_styles_from_block( $block_styles, $skip_convert_vars );
 	}
 
 	/**
@@ -53,21 +47,27 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	protected function add_spacer( $content, $email_attrs ): string {
-		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' );
-		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' );
+		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' ) ?? '';
+		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
 
-		if ( ! $gap_style && ! $padding_style ) {
-			return $content;
-		}
-
-		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%2$s"><tr><td style="%3$s"><![endif]-->
-      <div class="email-block-layout" style="%2$s %3$s">%1$s</div>
-      <!--[if mso | IE]></td></tr></table><![endif]-->',
-			$content,
-			esc_attr( $gap_style ),
-			esc_attr( $padding_style )
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+			'style' => $gap_style,
 		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			esc_attr( $gap_style ),
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**

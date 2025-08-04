@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Updated persistent cart functionality to use the sessions table instead of usermeta. Fixes edge cases that prevented cart from being restored.

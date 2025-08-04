@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tiny rendering issues with image borders, list padding when the background color is set, and top margin for cite in the quote block.

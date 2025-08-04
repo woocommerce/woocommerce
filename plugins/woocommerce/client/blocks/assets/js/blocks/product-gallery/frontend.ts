@@ -18,8 +18,8 @@ const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
 const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
-	disableLeft: imageIndex === 0,
-	disableRight: imageIndex === totalImages - 1,
+	isDisabledPrevious: imageIndex === 0,
+	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
 /**
@@ -44,7 +44,6 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the closest gallery container
 	const galleryContainer = element.closest(
 		'.wp-block-woocommerce-product-gallery'
 	);
@@ -53,15 +52,34 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const imageElement = galleryContainer.querySelector(
-		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
+	// Find the scrollable container for the large image gallery
+	const scrollableContainer = galleryContainer.querySelector(
+		'.wc-block-product-gallery-large-image__container'
+	);
+
+	if ( ! scrollableContainer ) {
+		return;
+	}
+
+	const imageElement = scrollableContainer.querySelector(
+		`img[data-image-id="${ imageId }"]`
 	);
 
 	if ( imageElement ) {
-		imageElement.scrollIntoView( {
+		// Calculate the scroll position to center the image horizontally
+		const containerRect = scrollableContainer.getBoundingClientRect();
+		const imageRect = imageElement.getBoundingClientRect();
+
+		const scrollLeft =
+			scrollableContainer.scrollLeft +
+			( imageRect.left - containerRect.left ) -
+			( containerRect.width - imageRect.width ) / 2;
+
+		// Use scrollTo as scrollIntoView with inline: 'center'
+		// is not supported in iOS (Safari and Chrome).
+		scrollableContainer.scrollTo( {
+			left: scrollLeft,
 			behavior: 'smooth',
-			block: 'nearest',
-			inline: 'center',
 		} );
 	}
 };
@@ -157,13 +175,13 @@ const productGallery = {
 			const { imageData } = context;
 
 			const imageId = imageData[ newImageIndex ];
-			const { disableLeft, disableRight } = getArrowsState(
+			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
 				newImageIndex,
 				imageData.length
 			);
 
-			context.disableLeft = disableLeft;
-			context.disableRight = disableRight;
+			context.isDisabledPrevious = isDisabledPrevious;
+			context.isDisabledNext = isDisabledNext;
 			context.selectedImageId = imageId;
 
 			if ( imageId !== -1 ) {
@@ -329,9 +347,9 @@ const productGallery = {
 
 			// Only trigger swipe actions if there was significant movement
 			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.disableLeft ) {
+				if ( delta > 0 && ! context.isDisabledPrevious ) {
 					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.disableRight ) {
+				} else if ( delta < 0 && ! context.isDisabledNext ) {
 					actions.selectNextImage();
 				}
 			}
@@ -382,6 +400,19 @@ const productGallery = {
 					}
 				}
 			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: ( event?: MouseEvent ) => {
+			actions.selectPreviousImage( event );
+		},
+		onClickNext: ( event?: MouseEvent ) => {
+			actions.selectNextImage( event );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
 		},
 	},
 	callbacks: {

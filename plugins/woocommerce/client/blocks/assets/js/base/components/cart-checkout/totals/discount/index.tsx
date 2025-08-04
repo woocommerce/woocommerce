@@ -30,6 +30,7 @@ export interface TotalsDiscountProps {
 		CartTotalsItem,
 		'total_discount' | 'total_discount_tax'
 	>;
+	isLoading?: boolean;
 }
 
 const filteredCartCouponsFilterArg = {
@@ -42,6 +43,7 @@ const TotalsDiscount = ( {
 	isRemovingCoupon,
 	removeCoupon,
 	values,
+	isLoading,
 }: TotalsDiscountProps ): JSX.Element | null => {
 	const {
 		total_discount: totalDiscount,
@@ -119,6 +121,7 @@ const TotalsDiscount = ( {
 					: __( 'Coupons', 'woocommerce' )
 			}
 			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
+			showSkeleton={ isLoading }
 		/>
 	);
 };

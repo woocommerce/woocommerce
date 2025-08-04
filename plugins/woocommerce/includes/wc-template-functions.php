@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -1442,6 +1444,22 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
+		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
+		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
+
+		// The template is using an anchor instead of a button. For AJAX
+		// add-to-cart, it needs to be a button for accessibility reasons.
+		// See https://github.com/woocommerce/woocommerce/issues/59382.
+		if (
+			! $cart_redirect_after_add &&
+			$ajax_add_to_cart_enabled &&
+			$product->supports( 'ajax_add_to_cart' ) &&
+			$product->is_purchasable() &&
+			$product->is_in_stock()
+		) {
+			$args['attributes']['role'] = 'button';
+		}
+
 		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }
@@ -2008,56 +2026,8 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 	 * @return string
 	 */
 	function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
-		if ( is_null( $product ) ) {
-			$product = $GLOBALS['product'];
-		}
-
-		$defaults = array(
-			'input_id'     => uniqid( 'quantity_' ),
-			'input_name'   => 'quantity',
-			'input_value'  => '1',
-			'classes'      => apply_filters( 'woocommerce_quantity_input_classes', array( 'input-text', 'qty', 'text' ), $product ),
-			'max_value'    => apply_filters( 'woocommerce_quantity_input_max', -1, $product ),
-			'min_value'    => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
-			'step'         => apply_filters( 'woocommerce_quantity_input_step', 1, $product ),
-			'pattern'      => apply_filters( 'woocommerce_quantity_input_pattern', has_filter( 'woocommerce_stock_amount', 'intval' ) ? '[0-9]*' : '' ),
-			'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'numeric' : '' ),
-			'product_name' => $product ? $product->get_title() : '',
-			'placeholder'  => apply_filters( 'woocommerce_quantity_input_placeholder', '', $product ),
-			// When autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
-			// See @link https://github.com/woocommerce/woocommerce/issues/30733.
-			'autocomplete' => apply_filters( 'woocommerce_quantity_input_autocomplete', 'off', $product ),
-			'readonly'     => false,
-		);
-
-		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
-
-		// Apply sanity to min/max args - min cannot be lower than 0.
-		$args['min_value'] = max( $args['min_value'], 0 );
-		$args['max_value'] = 0 < $args['max_value'] ? $args['max_value'] : '';
-
-		// Max cannot be lower than min if defined.
-		if ( '' !== $args['max_value'] && $args['max_value'] < $args['min_value'] ) {
-			$args['max_value'] = $args['min_value'];
-		}
-
-		/**
-		 * The input type attribute will generally be 'number' unless the quantity cannot be changed, in which case
-		 * it will be set to 'hidden'. An exception is made for non-hidden readonly inputs: in this case we set the
-		 * type to 'text' (this prevents most browsers from rendering increment/decrement arrows, which are useless
-		 * and/or confusing in this context).
-		 */
-		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
-		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
-
-		/**
-		 * Controls the quantity input's type attribute.
-		 *
-		 * @since 7.4.0
-		 *
-		 * @param string $type A valid input type attribute value, usually 'number' or 'hidden'.
-		 */
-		$args['type'] = apply_filters( 'woocommerce_quantity_input_type', $type );
+		$product = is_null( $product ) ? $GLOBALS['product'] : $product;
+		$args    = wc_get_quantity_input_args( $args, $product );
 
 		ob_start();
 		wc_get_template( 'global/quantity-input.php', $args );
@@ -2913,8 +2883,18 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
+		$template = 'order/order-details.php';
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+			if ( ! empty( $fulfillments ) ) {
+				$template = 'order/order-details-fulfillments.php';
+			}
+		}
+
 		wc_get_template(
-			'order/order-details.php',
+			$template,
 			array(
 				'order_id'       => $order_id,
 				/**
@@ -3647,6 +3627,107 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wc_get_email_fulfillment_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param Fulfillment $fulfillment Fulfillment object.
+	 * @param array       $args Arguments.
+	 *
+	 * @since 3.0.0
+	 * @return string
+	 */
+	function wc_get_email_fulfillment_items( $order, $fulfillment, $args = array() ) {
+		ob_start();
+
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$image_size                 = $email_improvements_enabled ? 48 : 32;
+
+		$defaults = array(
+			'show_sku'      => false,
+			'show_image'    => $email_improvements_enabled,
+			'image_size'    => array( $image_size, $image_size ),
+			'plain_text'    => false,
+			'sent_to_admin' => false,
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-fulfillment-items.php' : 'emails/email-fulfillment-items.php';
+
+		$fulfillment_items = $fulfillment->get_items();
+		if ( empty( $fulfillment_items ) ) {
+			// If there are no fulfillment items, we return an empty string.
+			return '';
+		}
+
+		$order_items = $order->get_items();
+		if ( empty( $order_items ) ) {
+			// If there are no order items, we return an empty string.
+			return '';
+		}
+
+		$order_items_filtered = array();
+		foreach ( $fulfillment_items as $fulfillment_item ) {
+			// Filter order items to only include those that are part of the fulfillment.
+			foreach ( $order_items as $order_item ) {
+				if ( $order_item->get_id() === $fulfillment_item['item_id'] ) {
+					if ( method_exists( $order_item, 'get_subtotal' )
+						&& method_exists( $order_item, 'set_subtotal' )
+						&& method_exists( $order_item, 'get_quantity' ) ) {
+						$order_item->set_subtotal(
+							$order_item->get_subtotal() * $fulfillment_item['qty'] / $order_item->get_quantity()
+						);
+					}
+					$order_items_filtered[] = (object) array(
+						'item_id' => $order_item->get_id(),
+						'qty'     => $fulfillment_item['qty'],
+						'item'    => $order_item,
+					);
+					break;
+				}
+			}
+		}
+
+		wc_get_template(
+			$template,
+			/**
+			 * Filter to modify the arguments for the email fulfillment items.
+			 *
+			 * @since 10.1.0
+			 *
+			 * @param array $args The arguments for the email fulfillment items.
+			 */
+			apply_filters(
+				'woocommerce_email_fulfillment_items_args',
+				array(
+					'order'               => $order,
+					'fulfillment'         => $fulfillment,
+					'items'               => $order_items_filtered,
+					'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
+					'show_sku'            => $args['show_sku'],
+					'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
+					'show_image'          => $args['show_image'],
+					'image_size'          => $args['image_size'],
+					'plain_text'          => $args['plain_text'],
+					'sent_to_admin'       => $args['sent_to_admin'],
+				)
+			)
+		);
+
+		/**
+		 * Filter to modify the email fulfillment items table HTML.
+		 *
+		 * @since 10.1.0
+		 *
+		 * @param string   $html The HTML output of the fulfillment items table.
+		 * @param WC_Order $order The order object.
+		 * @param Fulfillment $fulfillment The fulfillment object.
+		 */
+		return apply_filters( 'woocommerce_get_email_fulfillment_items_table', ob_get_clean(), $order, $fulfillment );
+	}
+}
+
 if ( ! function_exists( 'wc_display_item_meta' ) ) {
 	/**
 	 * Display item meta data.
@@ -4345,3 +4426,84 @@ function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
 	return $html;
 }
 add_filter( 'paginate_links_output', 'wc_add_aria_label_to_pagination_numbers', 10, 2 );
+
+/**
+ * Get the quantity input args.
+ *
+ * Note, when autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
+ * See @link https://github.com/woocommerce/woocommerce/issues/30733.
+ *
+ * @param array            $args The arguments.
+ * @param \WC_Product|null $product The product.
+ *
+ * @return array
+ */
+function wc_get_quantity_input_args( $args, $product = null ) {
+	// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+	$defaults = array(
+		'input_id'     => uniqid( 'quantity_' ),
+		'input_name'   => 'quantity',
+		'classes'      => apply_filters( 'woocommerce_quantity_input_classes', array( 'input-text', 'qty', 'text' ), $product ),
+		'pattern'      => apply_filters( 'woocommerce_quantity_input_pattern', wc_is_stock_amount_integer() ? '[0-9]*' : '' ),
+		'inputmode'    => apply_filters( 'woocommerce_quantity_input_inputmode', wc_is_stock_amount_integer() ? 'numeric' : 'decimal' ),
+		'placeholder'  => apply_filters( 'woocommerce_quantity_input_placeholder', '', $product ),
+		'autocomplete' => apply_filters( 'woocommerce_quantity_input_autocomplete', 'off', $product ),
+		'readonly'     => false,
+	);
+
+	if ( $product ) {
+		$defaults['min_value']    = $product->get_min_purchase_quantity();
+		$defaults['max_value']    = $product->get_max_purchase_quantity();
+		$defaults['step']         = $product->get_purchase_quantity_step();
+		$defaults['product_name'] = $product->get_title();
+	} else {
+		$defaults['min_value']    = apply_filters( 'woocommerce_quantity_input_min', 1, $product );
+		$defaults['max_value']    = apply_filters( 'woocommerce_quantity_input_max', -1, $product );
+		$defaults['step']         = apply_filters( 'woocommerce_quantity_input_step', 1, $product );
+		$defaults['product_name'] = '';
+	}
+
+	// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+	/**
+	 * Filters all quantity input args.
+	 *
+	 * @since 2.5.0
+	 * @param array            $args The arguments.
+	 * @param \WC_Product|null $product The product.
+	 *
+	 * @return array
+	 */
+	$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
+
+	// Apply correction to min/max args - min cannot be lower than 0.
+	$args['min_value'] = max( $args['min_value'], 0 );
+	$args['max_value'] = 0 < $args['max_value'] ? $args['max_value'] : '';
+
+	// Max cannot be lower than min if defined.
+	if ( '' !== $args['max_value'] && $args['max_value'] < $args['min_value'] ) {
+		$args['max_value'] = $args['min_value'];
+	}
+
+	// Default value should be the min value unless defined.
+	$args['input_value'] = isset( $args['input_value'] ) ? $args['input_value'] : $defaults['min_value'];
+
+	/**
+	 * The input type attribute will generally be 'number' unless the quantity cannot be changed, in which case
+	 * it will be set to 'hidden'. An exception is made for non-hidden readonly inputs: in this case we set the
+	 * type to 'text' (this prevents most browsers from rendering increment/decrement arrows, which are useless
+	 * and/or confusing in this context).
+	 */
+	$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
+	$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
+
+	/**
+	 * Controls the quantity input's type attribute.
+	 *
+	 * @since 7.4.0
+	 *
+	 * @param string $type A valid input type attribute value, usually 'number' or 'hidden'.
+	 */
+	$args['type'] = apply_filters( 'woocommerce_quantity_input_type', $type );
+
+	return $args;
+}

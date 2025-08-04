@@ -485,4 +485,13 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		return $this->locale;
 
 	}
+
+	/**
+	 * Get the settings URL for the gateway.
+	 *
+	 * @return string
+	 */
+	public function get_settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/bacs' );
+	}
 }

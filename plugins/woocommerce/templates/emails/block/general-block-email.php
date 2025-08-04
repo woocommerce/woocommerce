@@ -6,10 +6,13 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.0.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
@@ -19,8 +22,7 @@ if ( 'customer_invoice' === $email->id ) :
 	// We are keeping this here until we have a better way to handle conditional content in the email editor.
 	?>
 	<?php if ( $order->needs_payment() ) { ?>
-		<p>
-		<?php
+		<p><?php
 		if ( $order->has_status( OrderStatus::FAILED ) ) {
 			printf(
 				wp_kses(
@@ -50,16 +52,13 @@ if ( 'customer_invoice' === $email->id ) :
 				'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
 			);
 		}
-		?>
-		</p>
+		?></p>
 
 	<?php } else { ?>
-		<p>
-		<?php
+		<p><?php
 		/* translators: %s Order date */
 		printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
-		?>
-		</p>
+		?></p>
 		<?php
 	}
 endif;

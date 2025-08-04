@@ -62,6 +62,30 @@ class HandlerRegistry {
 		);
 
 		$this->register_collection_handlers(
+			'woocommerce/product-collection/by-category',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Products by Category collection, if no category is selected, we should return an empty result set.
+				if ( empty( $query['taxonomies_query'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/by-tag',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Products by Tag collection, if no tag is selected, we should return an empty result set.
+				if ( empty( $query['taxonomies_query'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
 				// No products should be shown if no related product reference is set.

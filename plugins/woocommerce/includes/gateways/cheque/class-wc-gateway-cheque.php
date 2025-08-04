@@ -169,4 +169,13 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 			'redirect' => $this->get_return_url( $order ),
 		);
 	}
+
+	/**
+	 * Get the settings URL for the gateway.
+	 *
+	 * @return string
+	 */
+	public function get_settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/cheque' );
+	}
 }

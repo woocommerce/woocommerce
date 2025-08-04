@@ -5,6 +5,7 @@ import { button } from '@wordpress/icons';
 import { getPlugin, registerPlugin } from '@wordpress/plugins';
 import { registerProductBlockType } from '@woocommerce/atomic-utils';
 import type { BlockConfiguration } from '@wordpress/blocks';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -43,5 +44,32 @@ registerProductBlockType< Attributes >(
 	},
 	{
 		isAvailableOnPostEditor: true,
+	}
+);
+
+// Remove the Add to Cart + Options template part from the block inserter.
+addFilter(
+	'blocks.registerBlockType',
+	'woocommerce/area_add-to-cart-with-options',
+	function ( blockSettings, blockName ) {
+		if ( blockName === 'core/template-part' ) {
+			return {
+				...blockSettings,
+				variations: blockSettings.variations.map(
+					( variation: { name: string } ) => {
+						if (
+							variation.name === 'area_add-to-cart-with-options'
+						) {
+							return {
+								...variation,
+								scope: [],
+							};
+						}
+						return variation;
+					}
+				),
+			};
+		}
+		return blockSettings;
 	}
 );

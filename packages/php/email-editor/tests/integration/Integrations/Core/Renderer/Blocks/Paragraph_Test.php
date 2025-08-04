@@ -155,4 +155,21 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'font-size:20px;', $rendered );
 		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
 	}
+
+	/**
+	 * Test it uses inherited color from email_attrs when no color is specified
+	 */
+	public function testItUsesInheritedColorFromEmailAttrs(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+
+		unset( $parsed_paragraph['attrs']['style']['color'] );
+		unset( $parsed_paragraph['attrs']['textColor'] );
+
+		$parsed_paragraph['email_attrs'] = array(
+			'color' => '#ff0000',
+		);
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
 }

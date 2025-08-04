@@ -983,7 +983,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 						),
 					),
 				),
@@ -1019,7 +1019,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 						),
 					),
 				),
@@ -1055,7 +1055,7 @@ class PaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+							'href' => 'http://localhost:8888/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 						),
 					),
 				),

@@ -69,6 +69,23 @@ export const renderBlock = <
 			}
 		}, [] );
 
+		const isCheckoutBlock = container.classList.contains(
+			'wp-block-woocommerce-checkout'
+		);
+		const isCartBlock = container.classList.contains(
+			'wp-block-woocommerce-cart'
+		);
+
+		// These blocks have progressive loading enabled
+		if ( isCheckoutBlock || isCartBlock ) {
+			return (
+				<BlockErrorBoundary { ...errorBoundaryProps }>
+					<Block { ...props } attributes={ attributes } />
+				</BlockErrorBoundary>
+			);
+		}
+
+		// For all other blocks, use Suspense
 		return (
 			<BlockErrorBoundary { ...errorBoundaryProps }>
 				<Suspense

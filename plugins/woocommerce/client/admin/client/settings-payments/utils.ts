@@ -9,12 +9,14 @@ import {
 import { getAdminLink } from '@woocommerce/settings';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
+import { parseAdminUrl } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
+	WC_SETTINGS_PAYMENTS_NAMESPACE,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -129,7 +131,9 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 export const resetWooPaymentsAccount = async () => {
 	try {
 		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
+			path:
+				WC_SETTINGS_PAYMENTS_NAMESPACE +
+				'/woopayments/onboarding/reset',
 			method: 'POST',
 		} );
 	} catch ( error ) {
@@ -143,7 +147,9 @@ export const resetWooPaymentsAccount = async () => {
 export const disableWooPaymentsTestAccount = async () => {
 	try {
 		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
+			path:
+				WC_SETTINGS_PAYMENTS_NAMESPACE +
+				'/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
 	} catch ( error ) {
@@ -436,16 +442,31 @@ export const recordPaymentsOnboardingEvent = (
 				?.business_country_code ?? 'unknown';
 	}
 
-	// Capture the onboarding flow `source` and `from` from the URL parameters, if not provided.
+	// Capture the onboarding flow `source` from the URL parameters, if not provided.
 	const urlParams = new URLSearchParams( window.location.search );
 	if ( ! data.source ) {
 		data.source =
 			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
 	}
-	if ( ! data.from ) {
-		data.from =
-			urlParams.get( 'from' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
-	}
+	// We should not carry over the `from` parameter from the URL,
+	// as it meant to indicate the immediate source of the action that triggered the event.
 
 	recordEvent( eventName, data );
+};
+
+/**
+ * Strips the origin from a URL. This is used for front-end navigation using react-router-dom.
+ *
+ * @example
+ * ```
+ * removeOriginFromURL( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline' )
+ * // returns '/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline'
+ * ```
+ *
+ * @param url The URL to strip the origin from.
+ * @return The URL with the origin stripped.
+ */
+export const removeOriginFromURL = ( url: string ) => {
+	const parsedUrl = parseAdminUrl( url );
+	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
 };

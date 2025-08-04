@@ -452,6 +452,7 @@ function wc_save_order_items( $order_id, $items ) {
 	}
 
 	$order->update_taxes();
+	$order->recalculate_coupons();
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved.
