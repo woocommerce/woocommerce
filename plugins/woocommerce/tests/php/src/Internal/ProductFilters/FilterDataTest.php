@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Tests related to Counts service.
@@ -18,13 +19,22 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
+	 * TaxonomyHierarchyData instance for clearing the cache.
+	 *
+	 * @var TaxonomyHierarchyData
+	 */
+	private $taxonomy_hierarchy_data;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$container = wc_get_container();
-		$this->sut = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
+
+		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
+		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
 
 		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
 		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
@@ -322,6 +332,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
 
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
+
 		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
 		$query_vars = array_filter( $wp_query->query_vars );
 
@@ -356,6 +368,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
 		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
+
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
 
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'max_price', 15 );

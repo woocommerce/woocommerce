@@ -20,21 +20,12 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify\ShopifyPlatfo
 class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Shared PlatformRegistry instance for all tests.
-	 *
-	 * @var PlatformRegistry
-	 */
-	private PlatformRegistry $registry;
-
-	/**
 	 * Set up each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		// Initialize the Shopify platform (simulating what Runner does).
 		ShopifyPlatform::init();
-		// Create single registry instance for all tests.
-		$this->registry = new PlatformRegistry();
 	}
 
 	/**
@@ -50,7 +41,8 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 	 * Test that the Shopify platform is registered correctly.
 	 */
 	public function test_shopify_platform_is_registered() {
-		$platforms = $this->registry->get_platforms();
+		$registry  = new PlatformRegistry();
+		$platforms = $registry->get_platforms();
 
 		$this->assertArrayHasKey( 'shopify', $platforms, 'Shopify platform should be registered.' );
 
@@ -66,10 +58,13 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 	 * Test that the Shopify platform can be retrieved individually.
 	 */
 	public function test_get_shopify_platform() {
-		$platform = $this->registry->get_platform( 'shopify' );
+		$registry = new PlatformRegistry();
+		$platform = $registry->get_platform( 'shopify' );
 
 		$this->assertNotNull( $platform, 'Shopify platform should be retrievable.' );
-		$this->assertIsArray( $platform, 'Retrieved platform should be an array.' );
+		$this->assertEquals( 'Shopify', $platform['name'] );
+		$this->assertEquals( ShopifyFetcher::class, $platform['fetcher'] );
+		$this->assertEquals( ShopifyMapper::class, $platform['mapper'] );
 	}
 
 	/**
@@ -79,15 +74,14 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 		// Start fresh - remove existing filters.
 		remove_all_filters( 'woocommerce_migrator_platforms' );
 
-		// Test empty state.
-		$empty_registry = new PlatformRegistry();
-		$platforms      = $empty_registry->get_platforms();
+		$registry  = new PlatformRegistry();
+		$platforms = $registry->get_platforms();
 		$this->assertArrayNotHasKey( 'shopify', $platforms, 'Shopify should not be registered before init.' );
 
 		// Initialize and test.
 		ShopifyPlatform::init();
-		$initialized_registry = new PlatformRegistry();
-		$platforms            = $initialized_registry->get_platforms();
+		$registry  = new PlatformRegistry();
+		$platforms = $registry->get_platforms();
 		$this->assertArrayHasKey( 'shopify', $platforms, 'Shopify should be registered after init.' );
 	}
 
@@ -95,7 +89,8 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 	 * Test that the registered platform has the expected structure.
 	 */
 	public function test_shopify_platform_structure() {
-		$platform = $this->registry->get_platform( 'shopify' );
+		$registry = new PlatformRegistry();
+		$platform = $registry->get_platform( 'shopify' );
 
 		$this->assertIsArray( $platform, 'Platform should be an array.' );
 		$this->assertArrayHasKey( 'name', $platform, 'Platform should have a name.' );
@@ -112,14 +107,15 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 	 * Test that multiple calls to init() don't create duplicate registrations.
 	 */
 	public function test_multiple_init_calls_safe() {
-		// Call init multiple times (on top of the one already called in setUp).
+		// Call init multiple times.
 		ShopifyPlatform::init();
 		ShopifyPlatform::init();
 		ShopifyPlatform::init();
 
-		$platforms = $this->registry->get_platforms();
+		$registry  = new PlatformRegistry();
+		$platforms = $registry->get_platforms();
 
-		// Should still only have one shopify platform using shared registry instance.
+		// Should still only have one shopify platform.
 		$this->assertCount( 1, $platforms, 'Should only have one platform registered despite multiple init calls.' );
 		$this->assertArrayHasKey( 'shopify', $platforms );
 	}
@@ -142,9 +138,8 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 			5 // Lower priority to run before Shopify.
 		);
 
-		// Create new registry after adding the filter to see both platforms.
-		$test_registry = new PlatformRegistry();
-		$platforms     = $test_registry->get_platforms();
+		$registry  = new PlatformRegistry();
+		$platforms = $registry->get_platforms();
 
 		$this->assertCount( 2, $platforms, 'Should have both existing and Shopify platforms.' );
 		$this->assertArrayHasKey( 'existing-platform', $platforms );

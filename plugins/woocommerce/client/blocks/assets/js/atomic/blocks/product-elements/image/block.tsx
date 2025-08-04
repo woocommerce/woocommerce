@@ -20,6 +20,7 @@ import {
 	isEmpty,
 	ProductResponseItem,
 } from '@woocommerce/types';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -143,7 +144,7 @@ type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin?: boolean;
-		product?: ProductResponseItem;
+		product?: ProductResponseItem | ProductEntityResponse;
 		isResolving?: boolean;
 	};
 
