@@ -276,13 +276,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			validateVariation() {
 
-				const { actions: addToCartWithOptionsActions } = store<AddToCartWithOptionsStore>(
-						'woocommerce/add-to-cart-with-options',
-						{},
-						{ lock: universalLock }
-					);
-
-				addToCartWithOptionsActions.clearErrors( 'variable-product' );
+				actions.clearErrors( 'variable-product' );
 
 				const { availableVariations, selectedAttributes } = getContext<Context>();
 				const matchedVariation = getMatchedVariation(
