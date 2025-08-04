@@ -8975,11 +8975,11 @@ body.woocommerce_page_wc-settings {
 		nav {
 			margin: 0 -30px 24px -30px;
 		}
-		padding: 0 30px;
+		padding: 0 30px 40px;
 		background: #f0f0f1;
 
 		.subsubsub {
-			margin-bottom: 24px;
+			margin-bottom: 0;
 			li {
 				color: #2271b1;
 				&:first-child a{
@@ -9072,35 +9072,6 @@ body.woocommerce_page_wc-settings {
 		.woocommerce-dismissable-list {
 			margin-bottom: 0;
 		}
-	}
-
-	/**
-	 * Default for footer on WooCommerce settings pages.
-	 */ 
-	#wpfooter {
-		position: relative;
-	}
-}
-
-/**
- * Fix for footer on various settings pages.
- */ 
-body.woocommerce-admin-page__customers,
-body.woocommerce-settings-payments-tab,
-body.woocommerce_page_wc-settings-shipping-options,
-body.woocommerce_page_wc-settings-shipping-classes,
-body.woocommerce_page_wc-settings-integration,
-body.woocommerce_page_wc-settings-site-visibility,
-body.woocommerce_page_wc-settings-point-of-sale,
-body.woocommerce_page_wc-settings-advanced-keys,
-body.woocommerce_page_wc-settings-advanced-webhooks,
-body.woocommerce_page_wc-settings-advanced-legacy_api,
-body.woocommerce_page_wc-settings-advanced-woocommerce_com,
-body.woocommerce_page_wc-settings-advanced-blueprint,
-body.woocommerce_page_wc-settings-products-download_urls,
-body.woocommerce_page_wc-settings-products-advanced {
-	#wpfooter {
-		position: absolute;
 	}
 }
 
