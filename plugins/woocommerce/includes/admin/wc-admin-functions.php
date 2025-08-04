@@ -40,6 +40,7 @@ function wc_get_screen_ids() {
 		'shop_coupon',
 		'edit-product_cat',
 		'edit-product_tag',
+		'edit-product-brand',
 		'profile',
 		'user-edit',
 	);
