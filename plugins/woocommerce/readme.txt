@@ -335,6 +335,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Improve initial load for the checkout block [#58782](https://github.com/woocommerce/woocommerce/pull/58782)
 * Enhancement - Only include WordPress.org themes in the Blueprint export steps. [#57888](https://github.com/woocommerce/woocommerce/pull/57888)
 * Enhancement - Order-pay page can also use the session choosen gateway [#47100](https://github.com/woocommerce/woocommerce/pull/47100)
-
+* Fix - Fix missing cart preview data in the site editor [#60160](https://github.com/woocommerce/woocommerce/pull/60160)
+* Fix - Fix Payments Settings WooPayments test-to-live flow when site is installed in a subdirectory. [#60166](https://github.com/woocommerce/woocommerce/pull/60166)
+* Fix - Prevent added to cart notice to appear when adding variable products to cart via the Add to Cart + Options block [#60058](https://github.com/woocommerce/woocommerce/pull/60058)
+* Add - Add a tool to repair coupons lookup table with zero discount amounts [#60145](https://github.com/woocommerce/woocommerce/pull/60145)
+* Tweak - Fix background mismatch between Embedded KYC and LYS container. [#60148](https://github.com/woocommerce/woocommerce/pull/60148)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
