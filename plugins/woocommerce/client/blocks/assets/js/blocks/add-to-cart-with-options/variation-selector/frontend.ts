@@ -290,28 +290,25 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const variationId = matchedVariation?.variation_id;
-				const inStock = matchedVariation?.is_in_stock;
-
-				if (!variationId || !Boolean(inStock)) {
-					const { errorMessages } = getConfig();
-					
-					const error = {
+				if ( ! matchedVariation?.variation_id ) {
+					actions.addError( {
 						code: 'variableProductMissingAttributes',
-						message: errorMessages?.variableProductMissingAttributes || '',
+						message:
+							errorMessages?.variableProductMissingAttributes ||
+							'',
 						group: 'variable-product',
-					};
-
-					if ( variationId && !Boolean(inStock) ) {
-						error.code = 'variableProductOutOfStock';
-						error.message = errorMessages?.variableProductOutOfStock || '';
-					}
-
-					if ( error?.message ) {
-						addToCartWithOptionsActions.addError( error );
-					}
+					} );
+					return;
 				}
 
+				if ( ! matchedVariation?.is_in_stock ) {
+					actions.addError( {
+						code: 'variableProductOutOfStock',
+						message: errorMessages?.variableProductOutOfStock || '',
+						group: 'variable-product',
+					} );
+					return;
+				}
 			}
 
 		},
