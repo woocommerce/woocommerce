@@ -29,6 +29,7 @@ export type OptimisticCartItem = {
 	variation?: CartVariationItem[];
 	name: string;
 	type: string;
+	updateOptimistically?: boolean;
 };
 
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
@@ -271,7 +272,12 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
+			*addCartItem( {
+				id,
+				quantity,
+				variation,
+				updateOptimistically = true,
+			}: OptimisticCartItem ) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -300,13 +306,22 @@ const { state, actions } = store< Store >(
 
 				// Optimistically updates the number of items in the cart.
 				if ( item ) {
-					item.quantity = quantity;
-					if ( item.key )
+					if ( item.key ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
+					}
+					if ( updateOptimistically ) {
+						item.quantity = quantity;
+					}
 				} else {
-					item = { id, quantity, variation } as OptimisticCartItem;
-					state.cart.items.push( item );
+					item = {
+						id,
+						quantity,
+						variation,
+					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
+					if ( updateOptimistically ) {
+						state.cart.items.push( item );
+					}
 				}
 
 				// Updates the database.
@@ -431,25 +446,25 @@ const { state, actions } = store< Store >(
 
 					const json: BatchResponse = yield res.json();
 
-					// Checks if any of the responses contain an error.
-					json.responses?.forEach( ( response ) => {
-						if ( isApiErrorResponse( res, response ) )
-							throw generateError( response );
-					} );
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					if ( errorResponses.length > 0 ) {
+						throw generateError(
+							errorResponses[ 0 ].body as ApiErrorResponse
+						);
+					}
 
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
 									response.status >= 200 &&
 									response.status < 300
-						  )
-						: [];
-
-					const errorResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status < 200 ||
-									response.status >= 300
 						  )
 						: [];
 

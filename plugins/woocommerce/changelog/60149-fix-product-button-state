@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Product Button: Using `wp_interactivity_get_context` insdie state callback to ensure the serverside directive processing work as expected.
+
