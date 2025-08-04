@@ -29,7 +29,6 @@ import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
  * - Remove Pagination block (if exists)
  *
  * @param {BlockInstance} productCollectionBlock - The product collection block.
- * @param {number} productTemplateIndex - The index of the product template block.
  * @param {ReturnType<typeof useDispatch>} actions - The actions to use.
  */
 const handleTransitionToCarouselLayout = (
