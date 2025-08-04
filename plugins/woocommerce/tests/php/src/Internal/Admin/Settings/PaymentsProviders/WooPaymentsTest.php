@@ -168,7 +168,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						'onboard' => array(
 							'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 						),
-						'reset' => array(
+						'reset'   => array(
 							'href' => rest_url( '/some/rest/path' ),
 						),
 					),
