@@ -113,7 +113,7 @@ export const withEditMode =
 					className={ className }
 				>
 					<HStack alignment="center">
-						{ attributes.productId || attributes.categoryId ? (
+						{ isDeleted ? (
 							<Icon
 								icon={ info }
 								className="wc-blocks-featured-items__orange-info-icon"
@@ -122,7 +122,7 @@ export const withEditMode =
 							<Icon icon={ info } />
 						) }
 						<Text>
-							{ attributes.productId || attributes.categoryId
+							{ isDeleted
 								? getInvalidItemDescription( name )
 								: description }
 						</Text>

@@ -30,7 +30,7 @@ export const useFeaturedItemStatus = ( {
 			if ( ! itemId ) {
 				return {
 					status: null,
-					isDeleted: true,
+					isDeleted: false,
 					isLoading: false,
 				};
 			}
