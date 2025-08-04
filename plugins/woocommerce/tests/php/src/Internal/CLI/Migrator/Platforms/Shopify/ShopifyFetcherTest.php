@@ -227,10 +227,10 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'items', $result );
 		$this->assertArrayHasKey( 'cursor', $result );
-		$this->assertArrayHasKey( 'hasNextPage', $result );
+		$this->assertArrayHasKey( 'has_next_page', $result );
 		$this->assertEquals( array(), $result['items'] );
 		$this->assertNull( $result['cursor'] );
-		$this->assertFalse( $result['hasNextPage'] );
+		$this->assertFalse( $result['has_next_page'] );
 	}
 
 	/**
@@ -238,7 +238,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 	 */
 	public function test_status_filter_conversion(): void {
 		$mock_response = (object) array( 'count' => 5 );
-
 		$this->mock_shopify_client->expects( $this->once() )
 			->method( 'rest_request' )
 			->with(
@@ -280,5 +279,335 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$result = $this->fetcher->fetch_total_count( $filter_args );
 
 		$this->assertEquals( 100, $result );
+	}
+
+	/**
+	 * Test successful product batch fetching with GraphQL.
+	 */
+	public function test_fetch_batch_success(): void {
+		$mock_response_data = (object) array(
+			'products' => (object) array(
+				'edges'    => array(
+					(object) array(
+						'cursor' => 'cursor1',
+						'node'   => (object) array(
+							'id'       => 'gid://shopify/Product/123',
+							'title'    => 'Test Product 1',
+							'status'   => 'ACTIVE',
+							'variants' => (object) array(
+								'edges' => array(
+									(object) array(
+										'node' => (object) array(
+											'id'    => 'gid://shopify/ProductVariant/456',
+											'title' => 'Default Title',
+										),
+									),
+								),
+							),
+						),
+					),
+					(object) array(
+						'cursor' => 'cursor2',
+						'node'   => (object) array(
+							'id'       => 'gid://shopify/Product/124',
+							'title'    => 'Test Product 2',
+							'status'   => 'DRAFT',
+							'variants' => (object) array(
+								'edges' => array(),
+							),
+						),
+					),
+				),
+				'pageInfo' => (object) array(
+					'hasNextPage' => true,
+					'endCursor'   => 'cursor2',
+				),
+			),
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->with(
+				$this->stringContains( 'query GetShopifyProducts' ),
+				array(
+					'first'         => 5,
+					'query'         => '',
+					'variantsFirst' => 100,
+				)
+			)
+			->willReturn( $mock_response_data );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 5 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'items', $result );
+		$this->assertArrayHasKey( 'has_next_page', $result );
+		$this->assertArrayHasKey( 'cursor', $result );
+
+		$this->assertCount( 2, $result['items'] );
+		$this->assertTrue( $result['has_next_page'] );
+		$this->assertEquals( 'cursor2', $result['cursor'] );
+
+		// Verify product data structure.
+		$first_product = $result['items'][0];
+		$this->assertEquals( 'Test Product 1', $first_product->node->title );
+		$this->assertEquals( 'ACTIVE', $first_product->node->status );
+		$this->assertCount( 1, $first_product->node->variants->edges );
+	}
+
+	/**
+	 * Test product batch fetching with cursor pagination.
+	 */
+	public function test_fetch_batch_with_cursor(): void {
+		$mock_response_data = (object) array(
+			'products' => (object) array(
+				'edges'    => array(
+					(object) array(
+						'cursor' => 'cursor3',
+						'node'   => (object) array(
+							'id'    => 'gid://shopify/Product/125',
+							'title' => 'Test Product 3',
+						),
+					),
+				),
+				'pageInfo' => (object) array(
+					'hasNextPage' => false,
+					'endCursor'   => 'cursor3',
+				),
+			),
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->with(
+				$this->stringContains( 'query GetShopifyProducts' ),
+				array(
+					'first'         => 3,
+					'after'         => 'cursor2',
+					'query'         => '',
+					'variantsFirst' => 100,
+				)
+			)
+			->willReturn( $mock_response_data );
+
+		$result = $this->fetcher->fetch_batch(
+			array(
+				'limit'        => 3,
+				'after_cursor' => 'cursor2',
+			)
+		);
+
+		$this->assertCount( 1, $result['items'] );
+		$this->assertFalse( $result['has_next_page'] );
+		$this->assertEquals( 'cursor3', $result['cursor'] );
+	}
+
+	/**
+	 * Test product batch fetching with GraphQL error.
+	 */
+	public function test_fetch_batch_graphql_error(): void {
+		$error_response = new WP_Error( 'graphql_error', 'GraphQL query failed: Syntax error' );
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->willReturn( $error_response );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 5 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 0, $result['items'] );
+		$this->assertFalse( $result['has_next_page'] );
+		$this->assertNull( $result['cursor'] );
+	}
+
+	/**
+	 * Test product batch fetching with invalid response structure.
+	 */
+	public function test_fetch_batch_invalid_response_structure(): void {
+		// Mock response missing expected data structure.
+		$invalid_response = (object) array(
+			'invalidField' => 'unexpected',
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->willReturn( $invalid_response );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 5 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 0, $result['items'] );
+		$this->assertFalse( $result['has_next_page'] );
+		$this->assertNull( $result['cursor'] );
+	}
+
+	/**
+	 * Test product batch fetching with empty results.
+	 */
+	public function test_fetch_batch_empty_results(): void {
+		$mock_response_data = (object) array(
+			'products' => (object) array(
+				'edges'    => array(),
+				'pageInfo' => (object) array(
+					'hasNextPage' => false,
+					'endCursor'   => null,
+				),
+			),
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->willReturn( $mock_response_data );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 5 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 0, $result['items'] );
+		$this->assertFalse( $result['has_next_page'] );
+		$this->assertNull( $result['cursor'] );
+	}
+
+	/**
+	 * Test GraphQL variables building helper method.
+	 */
+	public function test_build_graphql_variables(): void {
+		$reflection = new \ReflectionClass( $this->fetcher );
+		$method     = $reflection->getMethod( 'build_graphql_variables' );
+		$method->setAccessible( true );
+
+		// Test with all parameters.
+		$variables = array(
+			'first'         => 10,
+			'after'         => 'cursor123',
+			'query'         => '',
+			'variantsFirst' => 100,
+		);
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 10,
+					'after_cursor' => 'cursor123',
+				)
+			)
+		);
+
+		// Test with null cursor (should filter out null values).
+		$variables = array(
+			'first'         => 5,
+			'query'         => '',
+			'variantsFirst' => 100,
+		);
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 5,
+					'after_cursor' => null,
+				)
+			)
+		);
+
+		// Test with empty cursor (empty strings are not filtered out).
+		$variables = array(
+			'first'         => 15,
+			'after'         => '',
+			'query'         => '',
+			'variantsFirst' => 100,
+		);
+		$this->assertEquals(
+			$variables,
+			$method->invoke(
+				$this->fetcher,
+				array(
+					'limit'        => 15,
+					'after_cursor' => '',
+				)
+			)
+		);
+	}
+
+	/**
+	 * Test product batch fetching with large limit.
+	 */
+	public function test_fetch_batch_large_limit(): void {
+		$mock_response_data = (object) array(
+			'products' => (object) array(
+				'edges'    => array_fill(
+					0,
+					50,
+					(object) array(
+						'cursor' => 'cursor_n',
+						'node'   => (object) array(
+							'id'    => 'gid://shopify/Product/n',
+							'title' => 'Product N',
+						),
+					)
+				),
+				'pageInfo' => (object) array(
+					'hasNextPage' => true,
+					'endCursor'   => 'cursor_50',
+				),
+			),
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->with(
+				$this->stringContains( 'query GetShopifyProducts' ),
+				array(
+					'first'         => 50,
+					'query'         => '',
+					'variantsFirst' => 100,
+				)
+			)
+			->willReturn( $mock_response_data );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 50 ) );
+
+		$this->assertCount( 50, $result['items'] );
+		$this->assertTrue( $result['has_next_page'] );
+	}
+
+	/**
+	 * Test product batch fetching validates minimum limit.
+	 */
+	public function test_fetch_batch_minimum_limit(): void {
+		$mock_response_data = (object) array(
+			'products' => (object) array(
+				'edges'    => array(
+					(object) array(
+						'cursor' => 'cursor1',
+						'node'   => (object) array(
+							'id'    => 'gid://shopify/Product/1',
+							'title' => 'Single Product',
+						),
+					),
+				),
+				'pageInfo' => (object) array(
+					'hasNextPage' => false,
+					'endCursor'   => 'cursor1',
+				),
+			),
+		);
+
+		$this->mock_shopify_client->expects( $this->once() )
+			->method( 'graphql_request' )
+			->with(
+				$this->stringContains( 'query GetShopifyProducts' ),
+				array(
+					'first'         => 1,
+					'query'         => '',
+					'variantsFirst' => 100,
+				)
+			)
+			->willReturn( $mock_response_data );
+
+		$result = $this->fetcher->fetch_batch( array( 'limit' => 1 ) );
+
+		$this->assertCount( 1, $result['items'] );
+		$this->assertFalse( $result['has_next_page'] );
 	}
 }

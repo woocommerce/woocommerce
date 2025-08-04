@@ -42,6 +42,20 @@ class MockWPCLI {
 	public static $last_error_message = '';
 
 	/**
+	 * Last success message logged.
+	 *
+	 * @var string
+	 */
+	public static $last_success_message = '';
+
+	/**
+	 * All log messages collected.
+	 *
+	 * @var array
+	 */
+	public static $all_log_messages = array();
+
+	/**
 	 * Mock debug method.
 	 *
 	 * @param string $message Debug message.
@@ -65,7 +79,8 @@ class MockWPCLI {
 	 * @param string $message Log message.
 	 */
 	public static function log( $message ): void {
-		self::$last_log_message = $message;
+		self::$last_log_message   = $message;
+		self::$all_log_messages[] = $message;
 	}
 
 	/**
@@ -75,6 +90,15 @@ class MockWPCLI {
 	 */
 	public static function error( $message ): void {
 		self::$last_error_message = $message;
+	}
+
+	/**
+	 * Mock success method.
+	 *
+	 * @param string $message Success message.
+	 */
+	public static function success( $message ): void {
+		self::$last_success_message = $message;
 	}
 }
 

@@ -23,6 +23,127 @@ defined( 'ABSPATH' ) || exit;
 class ShopifyFetcher implements PlatformFetcherInterface {
 
 	/**
+	 * Comprehensive GraphQL query for fetching Shopify products.
+	 *
+	 * This query fetches all necessary product data including variants, images,
+	 * collections, and metadata for migration to WooCommerce.
+	 */
+	const SHOPIFY_PRODUCT_QUERY = <<<'GRAPHQL'
+	query GetShopifyProducts(
+		$first: Int!,
+		$after: String,
+		$query: String,
+		$variantsFirst: Int = 100
+	) {
+		products(first: $first, after: $after, query: $query) {
+			edges {
+				cursor
+				node {
+					id
+					title
+					handle
+					descriptionHtml
+					status
+					createdAt
+					vendor
+					tags
+					onlineStoreUrl
+					options(first: 10) {
+						id
+						name
+						position
+						values
+					}
+					featuredMedia {
+						... on MediaImage {
+							id
+							image {
+								url
+								altText
+							}
+						}
+					}
+					media(first: 50) {
+						edges {
+							node {
+								... on MediaImage {
+									id
+									image {
+										url
+										altText
+									}
+								}
+							}
+						}
+					}
+					variants(first: $variantsFirst) {
+						edges {
+							node {
+								id
+								product { id }
+								price
+								compareAtPrice
+								sku
+								inventoryPolicy
+								inventoryQuantity
+								position
+								inventoryItem {
+									tracked
+									measurement {
+										weight {
+											value
+											unit
+										}
+									}
+								}
+								media(first: 1) {
+									edges {
+										node {
+											... on MediaImage {
+												id
+												image {
+													url
+													altText
+												}
+											}
+										}
+									}
+								}
+								selectedOptions {
+									name
+									value
+								}
+							}
+						}
+					}
+					collections(first: 20) {
+						edges {
+							node {
+								id
+								handle
+								title
+							}
+						}
+					}
+					metafields(first: 20, namespace: "global") {
+						edges {
+							node {
+								namespace
+								key
+								value
+							}
+						}
+					}
+				}
+			}
+			pageInfo {
+				hasNextPage
+			}
+		}
+	}
+	GRAPHQL;
+
+	/**
 	 * The Shopify client instance.
 	 *
 	 * @var ShopifyClient
@@ -45,21 +166,79 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 	}
 
 	/**
-	 * Fetches a batch of items from the Shopify platform.
+	 * Fetches a batch of products from the Shopify GraphQL API.
 	 *
-	 * @param array $args Arguments for fetching (e.g., limit, cursor, filters).
+	 * @param array $args Arguments for fetching. Supported keys:
+	 *                    - 'limit': Max number of items per batch (default: 50).
+	 *                    - 'after_cursor': Cursor for pagination (optional).
+	 *                    - 'query_filter': GraphQL query filter string (optional).
+	 *                    - 'variants_per_product': Max variants per product (default: 100).
 	 *
 	 * @return array An array containing:
-	 *               'items'       => array Raw items fetched from the platform.
+	 *               'items'       => array Raw product edges fetched from Shopify.
 	 *               'cursor'      => ?string The cursor for the next page, or null if no more pages.
-	 *               'hasNextPage' => bool Indicates if there are more pages to fetch.
+	 *               'has_next_page' => bool Indicates if there are more pages to fetch.
 	 */
 	public function fetch_batch( array $args ): array {
-		// Stub implementation - will be replaced with actual Shopify GraphQL API calls.
+		$variables = $this->build_graphql_variables( $args );
+
+		$response_data = $this->shopify_client->graphql_request( self::SHOPIFY_PRODUCT_QUERY, $variables );
+
+		if ( is_wp_error( $response_data ) ) {
+			\WP_CLI::warning( 'Failed to fetch products via GraphQL: ' . $response_data->get_error_message() );
+			return array(
+				'items'         => array(),
+				'cursor'        => null,
+				'has_next_page' => false,
+			);
+		}
+
+		if ( ! isset( $response_data->products->edges ) ) {
+			\WP_CLI::warning( 'Invalid GraphQL response structure - missing products.edges field.' );
+			return array(
+				'items'         => array(),
+				'cursor'        => null,
+				'has_next_page' => false,
+			);
+		}
+
+		$items       = $response_data->products->edges;
+		$page_info   = $response_data->products->pageInfo ?? null;
+		$last_cursor = null;
+
+		if ( ! empty( $items ) ) {
+			$last_edge   = end( $items );
+			$last_cursor = $last_edge->cursor ?? null;
+		}
+
 		return array(
-			'items'       => array(),
-			'cursor'      => null,
-			'hasNextPage' => false,
+			'items'         => $items,
+			'cursor'        => $last_cursor,
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL response property
+			'has_next_page' => $page_info ? $page_info->hasNextPage : false,
+		);
+	}
+
+	/**
+	 * Build GraphQL variables from fetch arguments.
+	 *
+	 * @param array $args The fetch arguments.
+	 * @return array The GraphQL variables.
+	 */
+	private function build_graphql_variables( array $args ): array {
+		$variables = array(
+			'first'         => $args['limit'] ?? 50,
+			'after'         => $args['after_cursor'] ?? null,
+			'query'         => $args['query_filter'] ?? '',
+			'variantsFirst' => $args['variants_per_product'] ?? 100,
+		);
+
+		// Remove null values to avoid GraphQL issues.
+		return array_filter(
+			$variables,
+			function ( $value ) {
+				return null !== $value;
+			}
 		);
 	}
 
