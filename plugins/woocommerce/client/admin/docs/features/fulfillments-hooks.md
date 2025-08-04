@@ -93,7 +93,7 @@ function cleanup_fulfillment_data( $fulfillment ) {
 
 #### `woocommerce_fulfillment_created_notification`
 
-Fired when customer notification should be sent for a new fulfilled fulfillment. This only should be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when created.
+Fired when customer notification should be sent for a new fulfilled fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when created.
 
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:268` and `370`
 
@@ -124,7 +124,7 @@ function send_sms_notification( $order_id, $fulfillment, $order ) {
 
 #### `woocommerce_fulfillment_updated_notification`
 
-Fired when customer notification should be sent for an updated fulfillment. This only should be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when updated.
+Fired when customer notification should be sent for an updated fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when updated.
 
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:377`
 
@@ -150,7 +150,7 @@ function notify_fulfillment_update( $order_id, $fulfillment, $order ) {
 
 #### `woocommerce_fulfillment_deleted_notification`
 
-Fired when customer notification should be sent for a deleted fulfillment. This only should be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when deleted.
+Fired when customer notification should be sent for a deleted fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when deleted.
 
 **File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:437`
 
@@ -415,7 +415,7 @@ function set_fulfillment_timestamp( $fulfillment ) {
     return $fulfillment;
 
     // Or, prevent the fulfill action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment is missing the tracking number and shipping provider information. Please  add these information and try again.', 'woocommerce' ) );
+    throw new FulfillmentException( __( 'The fulfillment is missing the tracking number and shipping provider information. Please add these information and try again.', 'woocommerce' ) );
 }
 ```
 
