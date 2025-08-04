@@ -16,6 +16,8 @@ if ( ! class_exists( 'WC_Gateway_PayPal_Helper' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
 }
 
+$should_use_orders_v2 = WC_Gateway_Paypal_Helper::should_use_orders_v2();
+
 $settings = array(
 	'enabled'          => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
@@ -58,40 +60,17 @@ $settings = array(
 		/* translators: %s: URL */
 		'description' => sprintf( __( 'PayPal sandbox can be used to test payments. Sign up for a <a href="%s">developer account</a>.', 'woocommerce' ), 'https://developer.paypal.com/' ),
 	),
-	'debug'            => array(
-		'title'       => __( 'Debug log', 'woocommerce' ),
-		'type'        => 'checkbox',
-		'label'       => __( 'Enable logging', 'woocommerce' ),
-		'default'     => 'no',
-		/* translators: %s: URL */
-		'description' => sprintf(
-			// translators: %s is a placeholder for a URL.
-			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
-			esc_url( LoggingUtil::get_logs_tab_url() )
+	'paymentaction'    => array(
+		'title'       => __( 'Payment action', 'woocommerce' ),
+		'type'        => 'select',
+		'class'       => 'wc-enhanced-select',
+		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
+		'default'     => 'sale',
+		'desc_tip'    => true,
+		'options'     => array(
+			'sale'          => __( 'Capture', 'woocommerce' ),
+			'authorization' => __( 'Authorize', 'woocommerce' ),
 		),
-	),
-	'ipn_notification' => array(
-		'title'       => __( 'IPN email notifications', 'woocommerce' ),
-		'type'        => 'checkbox',
-		'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
-		'default'     => 'yes',
-		'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
-	),
-	'receiver_email'   => array(
-		'title'       => __( 'Receiver email', 'woocommerce' ),
-		'type'        => 'email',
-		'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
-		'default'     => '',
-		'desc_tip'    => true,
-		'placeholder' => 'you@youremail.com',
-	),
-	'identity_token'   => array(
-		'title'       => __( 'PayPal identity token', 'woocommerce' ),
-		'type'        => 'text',
-		'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
-		'default'     => '',
-		'desc_tip'    => true,
-		'placeholder' => '',
 	),
 	'invoice_prefix'   => array(
 		'title'       => __( 'Invoice prefix', 'woocommerce' ),
@@ -110,34 +89,57 @@ $settings = array(
 	'address_override' => array(
 		'title'       => __( 'Address override', 'woocommerce' ),
 		'type'        => 'checkbox',
-		'label'       => __( 'Enable "address_override" to prevent address information from being changed.', 'woocommerce' ),
-		'description' => __( 'PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
+		'label'       => __( 'Prevent buyers from changing the shipping address.', 'woocommerce' ),
+		'description' => __( 'When enabled, PayPal will use the address provided by the checkout form, and prevent the buyer from changing it inside the PayPal payment page. Disable this to let buyers choose a shipping address from their PayPal account. PayPal verifies addresses therefore this setting can cause errors (we recommend keeping it disabled).', 'woocommerce' ),
 		'default'     => 'no',
 	),
-	'paymentaction'    => array(
-		'title'       => __( 'Payment action', 'woocommerce' ),
-		'type'        => 'select',
-		'class'       => 'wc-enhanced-select',
-		'description' => __( 'Choose whether you wish to capture funds immediately or authorize payment only.', 'woocommerce' ),
-		'default'     => 'sale',
-		'desc_tip'    => true,
-		'options'     => array(
-			'sale'          => __( 'Capture', 'woocommerce' ),
-			'authorization' => __( 'Authorize', 'woocommerce' ),
+	'debug'            => array(
+		'title'       => __( 'Debug log', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable logging', 'woocommerce' ),
+		'default'     => 'no',
+		/* translators: %s: URL */
+		'description' => sprintf(
+			// translators: %s is a placeholder for a URL.
+			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
+			esc_url( LoggingUtil::get_logs_tab_url() )
 		),
-	),
-	'image_url'        => array(
-		'title'       => __( 'Image url', 'woocommerce' ),
-		'type'        => 'text',
-		'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
-		'default'     => '',
-		'desc_tip'    => true,
-		'placeholder' => __( 'Optional', 'woocommerce' ),
 	),
 );
 
-if ( ! WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
-	$api_settings = array(
+if ( ! $should_use_orders_v2 ) {
+	$legacy_settings = array(
+		'image_url'             => array(
+			'title'       => __( 'Image url', 'woocommerce' ),
+			'type'        => 'text',
+			'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
+			'default'     => '',
+			'desc_tip'    => true,
+			'placeholder' => __( 'Optional', 'woocommerce' ),
+		),
+		'ipn_notification'      => array(
+			'title'       => __( 'IPN email notifications', 'woocommerce' ),
+			'type'        => 'checkbox',
+			'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
+			'default'     => 'yes',
+			'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
+		),
+		'receiver_email'        => array(
+			'title'       => __( 'Receiver email', 'woocommerce' ),
+			'type'        => 'email',
+			'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
+			'default'     => '',
+			'desc_tip'    => true,
+			'placeholder' => 'you@youremail.com',
+		),
+		'identity_token'        => array(
+			'title'       => __( 'PayPal identity token', 'woocommerce' ),
+			'type'        => 'text',
+			'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
+			'default'     => '',
+			'desc_tip'    => true,
+			'placeholder' => '',
+		),
 		'api_details'           => array(
 			'title'       => __( 'API credentials', 'woocommerce' ),
 			'type'        => 'title',
@@ -193,7 +195,7 @@ if ( ! WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
 			'placeholder' => __( 'Optional', 'woocommerce' ),
 		),
 	);
-	$settings     = array_merge( $settings, $api_settings );
+	$settings        = array_merge( $settings, $legacy_settings );
 }
 
 return $settings;

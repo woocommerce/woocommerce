@@ -147,6 +147,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
 		}
 
+		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
+
 		$this->maybe_register_site_with_wpcom();
 	}
 
@@ -418,6 +420,21 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Filter to remove fields for Orders v2.
+	 *
+	 * @param array $form_fields Form fields.
+	 * @return array
+	 */
+	public function maybe_remove_fields( $form_fields ) {
+		// Additional details are added to the receiver email when subscriptions are enabled.
+		// We don't need this for Orders v2.
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+			unset( $form_fields['receiver_email'] );
+		}
+		return $form_fields;
+	}
+
+	/**
 	 * Get the transaction URL.
 	 *
 	 * @param  WC_Order $order Order object.
@@ -544,6 +561,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request->capture_authorized_payment( $order );
+			return;
+		}
 
 		if ( self::ID === $order->get_payment_method() && 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
