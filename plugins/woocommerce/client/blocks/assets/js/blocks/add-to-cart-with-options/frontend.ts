@@ -327,14 +327,7 @@ const { actions, state } = store<
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
 
-				// Prevent adding an extra error with the same message.
-				const existingError = validationErrors.find(
-					( n ) => n.code === error.code
-				);
-
-				if ( ! existingError ) {
-					validationErrors.push( error);
-				}
+				validationErrors.push( error );
 
 				return error.code;
 			},
