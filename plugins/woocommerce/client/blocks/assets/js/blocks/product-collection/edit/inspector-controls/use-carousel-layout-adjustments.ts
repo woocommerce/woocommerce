@@ -78,7 +78,11 @@ const handleTransitionToCarouselLayout = (
 			'core/group',
 			// Row variation of the group block
 			{
-				layout: { type: 'flex', flexWrap: 'nowrap' },
+				layout: {
+					type: 'flex',
+					flexWrap: 'nowrap',
+					justifyContent: 'space-between',
+				},
 			},
 			[ headingBlock, nextPrevArrowsBlock ]
 		);
