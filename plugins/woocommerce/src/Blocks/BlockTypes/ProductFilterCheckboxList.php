@@ -76,7 +76,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
 						<div
 							data-wp-key="<?php echo esc_attr( $item_id ); ?>"
-							class="wc-block-product-filter-checkbox-list__item <?php echo isset( $item['depth'] ) ? esc_attr( 'depth-' . $item['depth'] ) : ''; ?>"
+							class="wc-block-product-filter-checkbox-list__item <?php echo isset( $item['depth'] ) ? esc_attr( 'has-depth-' . $item['depth'] ) : ''; ?>"
 							<?php if ( ! $item['selected'] ) : ?>
 								<?php if ( $count >= $remaining_initial_unchecked ) : ?>
 									data-wp-bind--hidden="!context.showAll"

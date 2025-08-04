@@ -370,7 +370,13 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @param int   $depth Current recursion depth for bounds checking.
 	 */
 	private function flatten_terms_list( $terms, &$result, &$visited_ids = array(), $depth = 0 ) {
-		// Prevent excessive recursion depth (taxonomies shouldn't be this deep).
+		/**
+		 * This is the safeguard to prevent the memory limit issue. We choose 10 as it
+		 * should cover most of the cases. Typical e-commerce stores have two or three
+		 * levels of category. Extreme cases like Amazon has about 7 levels.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/pull/60142/files#r2250287050
+		 */
 		if ( $depth > 10 ) {
 			return;
 		}
