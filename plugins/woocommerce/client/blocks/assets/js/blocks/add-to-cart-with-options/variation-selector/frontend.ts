@@ -276,7 +276,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			validateVariation() {
 
-				const { state: testState, actions: addToCartWithOptionsActions } = store<AddToCartWithOptionsStore>(
+				const { actions: addToCartWithOptionsActions } = store<AddToCartWithOptionsStore>(
 						'woocommerce/add-to-cart-with-options',
 						{},
 						{ lock: universalLock }
