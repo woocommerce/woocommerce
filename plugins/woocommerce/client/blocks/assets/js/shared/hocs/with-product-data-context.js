@@ -58,10 +58,16 @@ const OriginalComponentWithContext = ( props ) => {
  */
 export const withProductDataContext = ( OriginalComponent ) => {
 	return ( props ) => {
-		const productDataContext = useProductDataContext();
+		const productDataContext = useProductDataContext( {
+			isAdmin: props.isAdmin,
+			product: props.product,
+		} );
 
 		// If a product prop was provided, use this as the context for the tree.
-		if ( !! props.product || ! productDataContext.hasContext ) {
+		if (
+			( !! props.product || ! productDataContext.hasContext ) &&
+			! props.isAdmin
+		) {
 			return (
 				<OriginalComponentWithContext
 					{ ...props }

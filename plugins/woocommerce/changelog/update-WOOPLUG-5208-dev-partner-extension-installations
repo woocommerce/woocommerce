@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Improve detection of active partner payments extensions when installed under test slugs.
+
+

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Filters: Prevent product filter queries when no products are found.

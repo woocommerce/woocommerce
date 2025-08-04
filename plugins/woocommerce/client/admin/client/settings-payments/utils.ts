@@ -16,6 +16,7 @@ import { parseAdminUrl } from '@woocommerce/navigation';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
+	WC_SETTINGS_PAYMENTS_NAMESPACE,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -130,7 +131,9 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 export const resetWooPaymentsAccount = async () => {
 	try {
 		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
+			path:
+				WC_SETTINGS_PAYMENTS_NAMESPACE +
+				'/woopayments/onboarding/reset',
 			method: 'POST',
 		} );
 	} catch ( error ) {
@@ -144,7 +147,9 @@ export const resetWooPaymentsAccount = async () => {
 export const disableWooPaymentsTestAccount = async () => {
 	try {
 		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
+			path:
+				WC_SETTINGS_PAYMENTS_NAMESPACE +
+				'/woopayments/onboarding/test_account/disable',
 			method: 'POST',
 		} );
 	} catch ( error ) {

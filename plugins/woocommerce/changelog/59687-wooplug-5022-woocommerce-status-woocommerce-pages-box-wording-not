@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Fix inconsistent shortcode display in WooCommerce Status pages section. This improvement ensures consistent formatting of shortcode display in the WooCommerce Status "WooCommerce pages" box, making all shortcodes appear with square brackets for better clarity and consistency.

@@ -6,7 +6,7 @@
 	"description": "Display next and previous buttons.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId" ],
+	"usesContext": [ "iapi/provider" ],
 	"textdomain": "woocommerce",
 	"supports": {
 		"interactivity": true,
