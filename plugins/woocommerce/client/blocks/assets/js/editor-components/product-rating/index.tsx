@@ -5,6 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { CSSProperties } from 'react';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 type RatingProps = {
 	className: string;
@@ -14,21 +15,37 @@ type RatingProps = {
 };
 
 export const getAverageRating = (
-	product: Omit< ProductResponseItem, 'average_rating' > & {
-		average_rating: string;
-	}
+	product:
+		| ( Omit< ProductResponseItem, 'average_rating' > & {
+				average_rating: string;
+		  } )
+		| ProductEntityResponse
 ) => {
 	const rating = parseFloat( product.average_rating );
 
 	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
 };
 
-export const getRatingCount = ( product: ProductResponseItem ) => {
-	const count = isNumber( product.review_count )
-		? product.review_count
-		: parseInt( product.review_count, 10 );
+export const getRatingCount = (
+	product: ProductResponseItem | ProductEntityResponse
+) => {
+	if ( 'review_count' in product ) {
+		const count = isNumber( product.review_count )
+			? product.review_count
+			: parseInt( product.review_count, 10 );
 
-	return Number.isFinite( count ) && count > 0 ? count : 0;
+		return Number.isFinite( count ) && count > 0 ? count : 0;
+	}
+
+	if ( 'rating_count' in product ) {
+		const count = isNumber( product.rating_count )
+			? product.rating_count
+			: parseInt( product.rating_count, 10 );
+
+		return Number.isFinite( count ) && count > 0 ? count : 0;
+	}
+
+	return 0;
 };
 
 const getStarStyle = ( rating: number ) => ( {

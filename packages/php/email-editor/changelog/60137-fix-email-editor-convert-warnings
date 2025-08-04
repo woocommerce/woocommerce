@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Email Editor: Suppress HTML5 warnings when converting content using html2text class.
+

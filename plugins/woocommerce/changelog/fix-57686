@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed 'Open drawer when adding' option not working on first try when there are multiple mini cart blocks on a page with conflicting opwn drawer setting.

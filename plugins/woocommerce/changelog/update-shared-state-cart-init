@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Improve block performance by avoiding unnecessary REST API initialization when fetching cart data

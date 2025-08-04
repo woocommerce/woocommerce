@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Fix `manage_stock` type to allow boolean and string values for product variations.

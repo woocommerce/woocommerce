@@ -230,4 +230,103 @@ class Styles_Helper {
 
 		return self::extend_block_styles( $styles, $additional_css_declarations );
 	}
+
+	/**
+	 * Convert a CSS value to a static px value for email clients.
+	 *
+	 * This is mostly for use in font size, spacing, etc.
+	 *
+	 * @param string $input The CSS value to convert.
+	 * @param bool   $use_fallback Whether to use the fallback value if the input is not a valid CSS value.
+	 * @param ?int   $base_font_size The base font size to use for conversion.
+	 * @return ?string The static pixel value (e.g., 30px).
+	 */
+	public static function convert_to_px( string $input, bool $use_fallback = true, ?int $base_font_size = 16 ): ?string {
+		$fallback = $use_fallback ? $base_font_size . 'px' : null;
+
+		if ( ! $input ) {
+			return $fallback;
+		}
+
+		$input = trim( $input );
+
+		// Validate input against potentially malicious values.
+		if ( preg_match( '/[<>"\']/', $input ) ) {
+			return $fallback;
+		}
+
+		if ( str_ends_with( $input, 'px' ) ) {
+			// If already in px, return as is.
+			return $input;
+		}
+		if ( str_ends_with( $input, 'rem' ) || str_ends_with( $input, 'em' ) ) {
+			// Convert rem/em to px (assuming 16px base).
+			$value = (float) str_replace( array( 'rem', 'em' ), '', $input );
+			return round( $value * $base_font_size ) . 'px';
+		}
+		if ( str_ends_with( $input, '%' ) ) {
+			// Convert percentage to px (assuming 16px base).
+			$value = (float) str_replace( '%', '', $input );
+			return round( ( $value / 100 ) * $base_font_size ) . 'px';
+		}
+		if ( is_numeric( $input ) ) {
+			// If it's just a number, assume px.
+			return $input . 'px';
+		}
+
+		return $fallback;
+	}
+
+	/**
+	 * Remove the CSS unit from a string.
+	 *
+	 * @param string $input The string to remove the unit from.
+	 * @return string The string without the unit.
+	 */
+	public static function remove_css_unit( string $input ): string {
+		$units = array( 'px', 'pt', 'pc', 'rem', 'em', 'vmin', 'vmax', '%', 'vh', 'vw', 'ex', 'ch', 'fr' );
+		return str_ireplace( $units, '', $input );
+	}
+
+	/**
+	 * Convert a CSS clamp() value to a static px value for email clients.
+	 *
+	 * @param string $clamp_str The clamp() CSS string (e.g., "clamp(30px, 5vw, 50px)").
+	 * @param string $strategy "min"|"max"|"avg" — which strategy to use.
+	 * @return ?string The static pixel value (e.g., 30px).
+	 */
+	public static function clamp_to_static_px( $clamp_str, $strategy = 'min' ): ?string {
+		if ( stripos( $clamp_str, 'clamp(' ) === false ) {
+			return $clamp_str;
+		}
+
+		$value_array = explode( ',', $clamp_str );
+
+		if ( count( $value_array ) < 2 ) {
+			return $clamp_str; // Invalid clamp format.
+		}
+
+		$first_element = $value_array[0];
+		$min           = trim( str_ireplace( array( 'clamp(', 'min(', 'max(' ), '', $first_element ) );
+
+		$last_element = $value_array[ count( $value_array ) - 1 ];
+		$max          = trim( rtrim( $last_element, ')' ) );
+
+		$min_px = self::convert_to_px( $min, false );
+		$max_px = self::convert_to_px( $max, false );
+
+		// Determine which value to use.
+		if ( 'min' === $strategy && ! is_null( $min_px ) ) {
+			return $min_px;
+		}
+		if ( 'max' === $strategy && ! is_null( $max_px ) ) {
+			return $max_px;
+		}
+		if ( 'avg' === $strategy && ! is_null( $min_px ) && ! is_null( $max_px ) ) {
+			$avg = ( self::parse_value( $min_px ) + self::parse_value( $max_px ) ) / 2;
+			return $avg . 'px';
+		}
+		// Default.
+		return $min_px ?? $max_px ?? $clamp_str;
+	}
 }

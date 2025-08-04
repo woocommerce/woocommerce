@@ -393,4 +393,55 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( productGalleryBlock ).toBeVisible();
 	} );
+
+	test( 'block has opinionated layout on mobile', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+
+		await page.setViewportSize( {
+			height: 667,
+			width: 390, // iPhone 12 Pro
+		} );
+
+		const galleryBlock = page.locator( '.wc-block-product-gallery' );
+		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
+		const navigationArrowsBlock =
+			await pageObject.getNextPreviousButtonsBlock( {
+				page: 'frontend',
+			} );
+
+		// Verifying mobile layout
+		// - Navigation arrows are hidden
+		await expect( navigationArrowsBlock ).toBeHidden();
+
+		// - Thumbnails are below large image
+		const galleryDirection = await galleryBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'flex-direction' )
+		);
+		expect( galleryDirection ).toBe( 'column' );
+		const thumbnailsOrder = await thumbnailsBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'order' )
+		);
+		expect( thumbnailsOrder ).toBe( '1' );
+
+		// - Thumbnails container is horizontal
+		const thumbnailsDirection = await thumbnailsBlock
+			.locator( '.wc-block-product-gallery-thumbnails__scrollable' )
+			.evaluate( ( el ) =>
+				window
+					.getComputedStyle( el )
+					.getPropertyValue( 'flex-direction' )
+			);
+		expect( thumbnailsDirection ).toBe( 'row' );
+	} );
 } );

@@ -45,6 +45,10 @@ const getSupportedCoreLocaleProps = (
 		);
 	}
 
+	if ( localeField.optionalLabel !== undefined ) {
+		fields.optionalLabel = localeField.optionalLabel;
+	}
+
 	if ( localeField.index ) {
 		if ( isNumber( localeField.index ) ) {
 			fields.index = localeField.index;

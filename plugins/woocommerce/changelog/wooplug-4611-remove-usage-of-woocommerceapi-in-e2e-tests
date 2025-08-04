@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: remove usage of @woocommerce/api package in favour of the module in e2e-utils-playwright package

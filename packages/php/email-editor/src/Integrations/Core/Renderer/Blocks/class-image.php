@@ -98,10 +98,19 @@ class Image extends Abstract_Block_Renderer {
 		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
 			$parsed_block['attrs']['width'] = '100%';
 		}
-		$max_width                      = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
-		$image_size                     = wp_getimagesize( $image_url );
-		$image_size                     = $image_size ? $image_size[0] : $max_width;
-		$width                          = min( $image_size, $max_width );
+		$max_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
+
+		if ( $image_url ) {
+			$upload_dir = wp_upload_dir();
+			$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
+			$image_size = wp_getimagesize( $image_path );
+
+			$image_size = $image_size ? $image_size[0] : $max_width;
+			$width      = min( $image_size, $max_width );
+		} else {
+			$width = $max_width;
+		}
+
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
 	}

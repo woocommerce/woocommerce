@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-This PR only refactors test file of ProductCollection for organization without changing any functionality, test logic, or user-facing features.
