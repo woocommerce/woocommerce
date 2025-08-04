@@ -216,7 +216,7 @@ Called in email templates to display fulfillment metadata.
 -   `$plain_text` (bool) - Whether email is plain text
 -   `$email` (WC_Email) - The email object
 
-**Purpose:** Allows customization of fulfillment meta data display in emails.
+**Purpose:** Allows customization of fulfillment metadata display in emails.
 
 ```php
 add_action( 'woocommerce_email_fulfillment_meta', 'display_custom_meta', 10, 5 );
@@ -359,10 +359,13 @@ function validate_fulfillment_data( $fulfillment ) {
     if ( ! $fulfillment->get_meta( '_warehouse_location', true ) ) {
         $fulfillment->update_meta_data( '_warehouse_location', 'Main Warehouse' );
     }
-    return $fulfillment;
 
     // Or, prevent the update action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment is missing the required item. Please add it to the fulfillment and try again.', 'woocommerce' ) );
+    if ( ! $fulfillment->get_meta( '_required_meta' ) ) {
+      throw new FulfillmentException( __( 'The fulfillment is missing the required item. Please add it to the fulfillment and try again.', 'woocommerce' ) );
+    }
+
+    return $fulfillment;
 }
 ```
 
@@ -385,8 +388,10 @@ add_filter( 'woocommerce_fulfillment_before_update', 'log_fulfillment_changes' )
 
 function log_fulfillment_changes( $fulfillment ) {
     // Log changes or perform validation
-    error_log( 'Updating fulfillment: ' . $fulfillment->get_id() );
-    return $fulfillment;
+    $logged = custom_error_logger( 'Updating fulfillment: ' . $fulfillment->get_id() );
+    if ( $logged ) {
+      return $fulfillment;
+    }
 
     // Or, prevent the update action if some checks of yours fail
     throw new FulfillmentException( __( 'The fulfillment is missing the required item. Please add it to the fulfillment and try again.', 'woocommerce' ) );
@@ -411,11 +416,13 @@ Allows modification of fulfillment data before it's marked as fulfilled. If you 
 add_filter( 'woocommerce_fulfillment_before_fulfill', 'set_fulfillment_timestamp' );
 
 function set_fulfillment_timestamp( $fulfillment ) {
-    $fulfillment->update_meta_data( '_fulfilled_timestamp', time() );
-    return $fulfillment;
+    if ( ! $fulfillment->get_meta( '_fulfillmed_timestamp', true )) {
+      $fulfillment->update_meta_data( '_fulfilled_timestamp', time() );
+      return $fulfillment;
+    }
 
     // Or, prevent the fulfill action if some checks of yours fail
-    throw new FulfillmentException( __( 'The fulfillment is missing the tracking number and shipping provider information. Please add these information and try again.', 'woocommerce' ) );
+    throw new FulfillmentException( __( 'The fulfillment already has a fulfilled timestamp. Please check.', 'woocommerce' ) );
 }
 ```
 
@@ -437,8 +444,11 @@ Allows modification of fulfillment data before it's deleted. If you want to canc
 add_filter( 'woocommerce_fulfillment_before_delete', 'log_fulfillment_deletion' );
 
 function log_fulfillment_deletion( $fulfillment ) {
-    error_log( 'Deleting fulfillment: ' . $fulfillment->get_id() );
-    return $fulfillment;
+
+    $logged = custom_error_log( 'Deleting fulfillment: ' . $fulfillment->get_id() );
+    if ( $logged ) {
+      return $fulfillment;
+    }
 
 	// Or, prevent the delete action if some checks of yours fail
     throw new FulfillmentException( __( 'The fulfillment can\'t be deleted because it is being processed by a 3rd party plugin.', 'woocommerce' ) );
@@ -501,7 +511,7 @@ add_filter( 'woocommerce_fulfillment_order_fulfillment_status_text', 'custom_sta
 
 function custom_status_text( $text, $status, $order ) {
     if ( $status === 'delivered' ) {
-        return __( 'All items have been <b>Delivered</b>.', 'woocommerce' );
+        return __( 'All items have been <strong>Delivered</strong>.', 'woocommerce' );
     }
     return $text;
 }
@@ -555,7 +565,7 @@ function add_custom_fulfillment_statuses( $statuses ) {
 }
 ```
 
-### Meta Data and Translation Filters
+### Metadata and Translation Filters
 
 #### `woocommerce_fulfillment_meta_key_translations`
 
@@ -694,7 +704,7 @@ function sync_to_external_system( $fulfillment ) {
     try {
         // API call to external system
         $response = wp_remote_post( 'https://api.example.com/fulfillments', array(
-            'body' => json_encode( array(
+            'body' => wp_json_encode( array(
                 'fulfillment_id' => $fulfillment->get_id(),
                 'items' => $fulfillment->get_meta( '_items', true )
             ) ),
