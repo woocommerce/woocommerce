@@ -49,6 +49,7 @@ interface EditModeRequiredProps< T > {
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
 	isLoading: boolean;
+	error?: Error | null;
 }
 
 type EditModeProps< T extends EditorBlock< T > > = T &
@@ -64,6 +65,7 @@ export const withEditMode =
 			name,
 			setAttributes,
 			triggerUrlUpdate = () => void null,
+			error,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
@@ -180,5 +182,11 @@ export const withEditMode =
 			);
 		}
 
-		return <Component { ...props } />;
+		return (
+			<Component
+				{ ...props }
+				isLoading={ isLoading }
+				error={ isLoading ? null : error }
+			/>
+		);
 	};
