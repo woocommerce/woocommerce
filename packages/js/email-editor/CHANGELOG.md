@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.2) - 2025-08-01 
+
+-   Patch - Fix backward compatibility when personalization tag post types are not set. [#60134]
+
 ## [1.0.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.1) - 2025-07-31 
 
 -   Patch - Email Editor: show “Send” button when editing a new (unsaved) email draft. [#59931]

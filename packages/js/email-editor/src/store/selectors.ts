@@ -376,6 +376,7 @@ export const getPersonalizationTagsList = createRegistrySelector(
 			const postTemplate = select( storeName ).getCurrentTemplate();
 			return tags.filter( ( tag ) => {
 				return (
+					tag.postTypes === undefined ||
 					tag.postTypes.length === 0 ||
 					( Array.isArray( postTemplate.post_types ) &&
 						postTemplate.post_types.some( ( pt ) =>
@@ -387,7 +388,9 @@ export const getPersonalizationTagsList = createRegistrySelector(
 
 		return tags.filter( ( tag ) => {
 			return (
-				tag.postTypes.length === 0 || tag.postTypes.includes( postType )
+				tag.postTypes === undefined ||
+				tag.postTypes.length === 0 ||
+				tag.postTypes.includes( postType )
 			);
 		} );
 	}
