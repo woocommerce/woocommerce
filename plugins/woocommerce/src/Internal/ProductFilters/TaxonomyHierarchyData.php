@@ -193,16 +193,15 @@ class TaxonomyHierarchyData {
 	 * @param int   $term_id    Current term ID.
 	 * @param array $children   Children relationships map (parent_id => [child_ids]).
 	 * @param array $temp_terms Term data indexed by term_id.
-	 * @param int   $parent_id  Current parent term ID.
 	 * @param int   $depth      Current depth level in hierarchy.
 	 */
-	private function build_term_tree( &$tree, $term_id, $children, $temp_terms, $parent_id = 0, $depth = 0 ) {
+	private function build_term_tree( &$tree, $term_id, $children, $temp_terms, $depth = 0 ) {
 		$tree[ $term_id ]          = $temp_terms[ $term_id ];
 		$tree[ $term_id ]['depth'] = $depth;
 
 		if ( ! empty( $children[ $term_id ] ) ) {
 			foreach ( $children[ $term_id ] as $child_id ) {
-				$this->build_term_tree( $tree[ $term_id ]['children'], $child_id, $children, $temp_terms, $term_id, $depth + 1 );
+				$this->build_term_tree( $tree[ $term_id ]['children'], $child_id, $children, $temp_terms, $depth + 1 );
 			}
 		}
 	}
