@@ -352,7 +352,7 @@ class WC_Admin {
 			return $footer_text;
 		}
 		$current_screen = get_current_screen();
-		$wc_pages       = wc_get_screen_ids();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
 
 		// Set only WC pages.
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
@@ -398,7 +398,7 @@ class WC_Admin {
 			return $version;
 		}
 		$current_screen = get_current_screen();
-		$wc_pages       = wc_get_screen_ids();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
 
 		// Set only WC pages.
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
