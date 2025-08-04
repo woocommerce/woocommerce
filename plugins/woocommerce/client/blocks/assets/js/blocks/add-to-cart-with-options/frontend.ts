@@ -338,17 +338,6 @@ const { actions, state } = store<
 
 				return error.code;
 			},
-			removeError: ( code: string ): void => {
-				const { validationErrors } = state;
-
-				const index = validationErrors.findIndex(
-					( error ) => error.code === code
-				);
-
-				if ( index !== -1 ) {
-					validationErrors.splice( index, 1 );
-				}
-			},
 			clearErrors: ( group?: string ): void => {
 				const { validationErrors } = state;
 
