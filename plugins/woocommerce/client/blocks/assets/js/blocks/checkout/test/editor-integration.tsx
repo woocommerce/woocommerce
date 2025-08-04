@@ -81,11 +81,13 @@ describe( 'Checkout block editor integration', () => {
 			( element ) => element.textContent === 'Audio'
 		);
 
-		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeInTheDocument();
+		await waitFor( () => {
+			// Verify Table option is available (should be available on all blocks).
+			expect( tableOption ).toBeInTheDocument();
 
-		// Verify Audio option is available (added only for checkout totals block).
-		expect( audioOption ).toBeInTheDocument();
+			// Verify Audio option is available (added only for checkout totals block).
+			expect( audioOption ).toBeInTheDocument();
+		} );
 
 		await act( async () => {
 			await userEvent.click(
