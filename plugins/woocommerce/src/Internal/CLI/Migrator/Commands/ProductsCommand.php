@@ -65,10 +65,10 @@ final class ProductsCommand {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc migrator products --count
-	 *     wp wc migrator products --count --status=active
-	 *     wp wc migrator products --fetch --limit=5
-	 *     wp wc migrator products --fetch --limit=10 --after=cursor123
+	 *     wp wc migrate products --count
+	 *     wp wc migrate products --count --status=active
+	 *     wp wc migrate products --fetch --limit=5
+	 *     wp wc migrate products --fetch --limit=10 --after=cursor123
 	 *
 	 * @param array $args       The positional arguments.
 	 * @param array $assoc_args The associative arguments.

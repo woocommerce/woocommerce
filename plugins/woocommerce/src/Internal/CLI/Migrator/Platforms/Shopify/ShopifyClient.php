@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Shopify Client
  *

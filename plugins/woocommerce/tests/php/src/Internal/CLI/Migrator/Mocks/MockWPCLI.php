@@ -35,20 +35,6 @@ class MockWPCLI {
 	public static $last_log_message = '';
 
 	/**
-	 * All log messages accumulated.
-	 *
-	 * @var array
-	 */
-	public static $all_log_messages = array();
-
-	/**
-	 * Last success message logged.
-	 *
-	 * @var string
-	 */
-	public static $last_success_message = '';
-
-	/**
 	 * Last error message logged.
 	 *
 	 * @var string
@@ -79,17 +65,7 @@ class MockWPCLI {
 	 * @param string $message Log message.
 	 */
 	public static function log( $message ): void {
-		self::$last_log_message   = $message;
-		self::$all_log_messages[] = $message;
-	}
-
-	/**
-	 * Mock success method.
-	 *
-	 * @param string $message Success message.
-	 */
-	public static function success( $message ): void {
-		self::$last_success_message = $message;
+		self::$last_log_message = $message;
 	}
 
 	/**
@@ -99,42 +75,6 @@ class MockWPCLI {
 	 */
 	public static function error( $message ): void {
 		self::$last_error_message = $message;
-	}
-
-	/**
-	 * Mock line method.
-	 *
-	 * @param string $message Line message.
-	 */
-	public static function line( $message ): void {
-		// For testing, we can just log it like a regular message.
-		self::$last_log_message = $message;
-	}
-
-	/**
-	 * Mock readline method.
-	 *
-	 * @param string $prompt Prompt message.
-	 * @return string
-	 */
-	public static function readline( $prompt ): string {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		unset( $prompt );
-		// For testing, return a mock input.
-		return 'test_input';
-	}
-
-	/**
-	 * Mock add_command method.
-	 *
-	 * @param string $name Command name.
-	 * @param mixed  $command_callable Command callable.
-	 * @param array  $args Command arguments.
-	 */
-	public static function add_command( $name, $command_callable, $args = array() ): void {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		unset( $name, $command_callable, $args );
-		// Mock implementation - do nothing for tests.
 	}
 }
 

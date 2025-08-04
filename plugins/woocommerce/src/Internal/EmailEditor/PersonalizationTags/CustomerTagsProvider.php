@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 
 /**
  * Provider for customer-related personalization tags.
@@ -31,6 +32,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return $context['recipient_email'] ?? '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -47,6 +51,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -63,6 +70,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -81,6 +91,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -95,6 +108,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -110,6 +126,9 @@ class CustomerTagsProvider extends AbstractTagProvider {
 					}
 					return '';
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 	}

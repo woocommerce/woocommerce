@@ -238,7 +238,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 	 */
 	public function test_status_filter_conversion(): void {
 		$mock_response = (object) array( 'count' => 5 );
-
 		$this->mock_shopify_client->expects( $this->once() )
 			->method( 'rest_request' )
 			->with(
