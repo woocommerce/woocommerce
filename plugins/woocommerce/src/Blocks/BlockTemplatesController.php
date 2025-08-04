@@ -26,7 +26,6 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_fallback_template_to_hierarchy' ), 10, 1 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
@@ -59,27 +58,6 @@ class BlockTemplatesController {
 			}
 		}
 		return function_exists( '\gutenberg_render_block_core_template_part' ) ? \gutenberg_render_block_core_template_part( $attributes ) : \render_block_core_template_part( $attributes );
-	}
-
-	/**
-	 * Adds the fallback template to the template hierarchy.
-	 *
-	 * @param array $template_hierarchy A list of template candidates, in descending order of priority.
-	 */
-	public function add_fallback_template_to_hierarchy( $template_hierarchy ) {
-		$template_slugs = array_map(
-			'_strip_template_file_suffix',
-			$template_hierarchy
-		);
-
-		foreach ( $template_slugs as $template_slug ) {
-			$template = BlockTemplateUtils::get_template( $template_slug );
-			if ( $template && isset( $template->fallback_template ) ) {
-				$template_hierarchy[] = $template->fallback_template;
-			}
-		}
-
-		return $template_hierarchy;
 	}
 
 	/**
