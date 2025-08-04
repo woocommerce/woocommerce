@@ -8,7 +8,6 @@ import { HOME_URL } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import './style.scss';
 
 /**

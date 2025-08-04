@@ -20,7 +20,6 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import './editor.scss';
 import { withProductSearchControls } from './inspector-controls';
 import Block from './block';
 import { SEARCH_BLOCK_NAME, SEARCH_VARIATION_NAME } from './constants';
