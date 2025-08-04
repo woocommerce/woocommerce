@@ -284,6 +284,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
+				const { errorMessages } = getConfig();
+
 				if ( ! matchedVariation?.variation_id ) {
 					actions.addError( {
 						code: 'variableProductMissingAttributes',
