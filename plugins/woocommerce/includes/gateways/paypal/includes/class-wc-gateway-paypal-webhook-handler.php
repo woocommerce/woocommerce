@@ -65,7 +65,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
-			$order->update_meta_data( '_paypal_status', $status );
+			$order->update_meta_data( '_paypal_status', strtolower( $status ) );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -73,6 +73,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 					$paypal_order_id
 				)
 			);
+			$order->save();
 
 			// Authorize or capture the payment after approval.
 			$action = 'CAPTURE' === $event['resource']['intent'] ? 'capture' : 'authorize';
@@ -105,7 +106,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		$order->set_transaction_id( $event['resource']['id'] );
-		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
+		$order->update_meta_data( '_paypal_status', strtolower( $event['resource']['status'] ) );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(
@@ -178,7 +179,6 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ) {
-		wc_get_logger()->info( 'called from webhook handler: ' . $action );
 		$action_url = null;
 		foreach ( $links as $link ) {
 			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
