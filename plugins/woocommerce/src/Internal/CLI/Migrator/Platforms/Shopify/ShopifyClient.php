@@ -1,4 +1,10 @@
 <?php
+/**
+ * Shopify Client
+ *
+ * @package Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify
+ */
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
@@ -53,6 +59,27 @@ class ShopifyClient {
 		$response = wp_remote_request( $rest_endpoint, $request_args );
 
 		return $this->process_response( $response, $path );
+	}
+
+	/**
+	 * Makes a request to the Shopify GraphQL API.
+	 *
+	 * @param string $query     The GraphQL query string.
+	 * @param array  $variables The variables for the query.
+	 * @return object|\WP_Error Decoded JSON response data or WP_Error on failure.
+	 */
+	public function graphql_request( string $query, array $variables = array() ) {
+		$credentials = $this->get_credentials();
+		if ( is_wp_error( $credentials ) ) {
+			return $credentials;
+		}
+
+		$graphql_endpoint = $this->build_graphql_url( $credentials['domain'] );
+		$request_args     = $this->build_graphql_request_args( $credentials['access_token'], $query, $variables );
+
+		$response = wp_remote_request( $graphql_endpoint, $request_args );
+
+		return $this->process_graphql_response( $response );
 	}
 
 	/**
@@ -159,5 +186,88 @@ class ShopifyClient {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Build the GraphQL API URL.
+	 *
+	 * @param string $domain The Shopify domain.
+	 * @return string The complete GraphQL API URL.
+	 */
+	private function build_graphql_url( string $domain ): string {
+		// Ensure the domain has the protocol.
+		if ( ! preg_match( '~^https?://~i', $domain ) ) {
+			$domain = 'https://' . $domain;
+		}
+
+		$shop_url = untrailingslashit( $domain );
+		// Use the same API version as REST.
+		$api_version = '2025-04';
+		return "{$shop_url}/admin/api/{$api_version}/graphql.json";
+	}
+
+	/**
+	 * Build the request arguments for GraphQL requests.
+	 *
+	 * @param string $access_token The Shopify access token.
+	 * @param string $query        The GraphQL query.
+	 * @param array  $variables    The GraphQL variables.
+	 * @return array Request arguments for wp_remote_request.
+	 *
+	 * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	 */
+	private function build_graphql_request_args( string $access_token, string $query, array $variables ): array {
+		$request_body = compact( 'query', 'variables' );
+
+		return array(
+			'method'  => 'POST',
+			'headers' => array(
+				'Content-Type'           => 'application/json',
+				'X-Shopify-Access-Token' => $access_token,
+			),
+			'body'    => wp_json_encode( $request_body ),
+			'timeout' => 60,
+		);
+	}
+
+	/**
+	 * Process the GraphQL API response.
+	 *
+	 * @param array|\WP_Error $response The HTTP response.
+	 * @return object|\WP_Error Decoded response data or WP_Error.
+	 */
+	private function process_graphql_response( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error( 'api_error', 'GraphQL request failed: ' . $response->get_error_message() );
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		if ( $response_code >= 300 ) {
+			$error_details = json_decode( $response_body );
+			$error_message = isset( $error_details->errors ) ? wp_json_encode( $error_details->errors ) : $response_body;
+			return new \WP_Error(
+				'api_error',
+				"GraphQL request failed with status code {$response_code}: " . $error_message
+			);
+		}
+
+		$data = json_decode( $response_body );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return new \WP_Error( 'api_error', 'Failed to decode GraphQL JSON response: ' . json_last_error_msg() );
+		}
+
+		// Check for GraphQL-specific errors.
+		if ( ! empty( $data->errors ) ) {
+			return new \WP_Error( 'graphql_error', 'GraphQL API returned errors: ' . wp_json_encode( $data->errors ) );
+		}
+
+		if ( empty( $data->data ) ) {
+			return new \WP_Error( 'api_error', 'GraphQL response missing "data" field.' );
+		}
+
+		return $data->data;
 	}
 }

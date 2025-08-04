@@ -1,4 +1,10 @@
 <?php
+/**
+ * Shopify Client Test
+ *
+ * @package Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify
+ */
+
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify;
@@ -316,5 +322,245 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 123, $result->product->id );
 
 		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test successful GraphQL request.
+	 */
+	public function test_graphql_request_success(): void {
+		// Mock credentials.
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->with( 'shopify' )
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
+
+		$mock_response_data = array(
+			'data' => array(
+				'products' => array(
+					'edges'    => array(
+						array(
+							'cursor' => 'cursor1',
+							'node'   => array(
+								'id'    => 'gid://shopify/Product/123',
+								'title' => 'Test Product',
+							),
+						),
+					),
+					'pageInfo' => array(
+						'hasNextPage' => false,
+						'endCursor'   => 'cursor1',
+					),
+				),
+			),
+		);
+
+		// Mock successful HTTP response.
+		$mock_response = array(
+			'response' => array( 'code' => 200 ),
+			'body'     => wp_json_encode( $mock_response_data ),
+		);
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args, $url ) use ( $mock_response ) {
+				// Verify the request URL is correct GraphQL endpoint.
+				$this->assertStringContainsString( 'test-store.myshopify.com/admin/api/2025-04/graphql.json', $url );
+				// Verify the authorization header.
+				$this->assertEquals( 'test-token-123', $parsed_args['headers']['X-Shopify-Access-Token'] );
+				// Verify it's a POST request.
+				$this->assertEquals( 'POST', $parsed_args['method'] );
+				// Verify content type.
+				$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
+				return $mock_response;
+			},
+			10,
+			3
+		);
+
+		$query  = 'query { products(first: 1) { edges { cursor node { id title } } pageInfo { hasNextPage endCursor } } }';
+		$result = $this->client->graphql_request( $query );
+
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+		$this->assertIsObject( $result );
+		$this->assertEquals( 1, count( $result->products->edges ) );
+		$this->assertEquals( 'Test Product', $result->products->edges[0]->node->title );
+
+		// Clean up filter.
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test GraphQL request with variables.
+	 */
+	public function test_graphql_request_with_variables(): void {
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
+
+		$variables = array(
+			'first' => 5,
+			'query' => 'status:active',
+		);
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $parsed_args ) use ( $variables ) {
+				// Verify variables are included in the request body.
+				$body = json_decode( $parsed_args['body'], true );
+				$this->assertArrayHasKey( 'variables', $body );
+				$this->assertEquals( $variables, $body['variables'] );
+
+				// Return mock response.
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array( 'data' => array( 'products' => array( 'edges' => array() ) ) ) ),
+				);
+			},
+			10,
+			3
+		);
+
+		$query  = 'query($first: Int, $query: String) { products(first: $first, query: $query) { edges { node { id } } } }';
+		$result = $this->client->graphql_request( $query, $variables );
+
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test GraphQL request with HTTP error.
+	 */
+	public function test_graphql_request_http_error(): void {
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
+
+		// Mock HTTP error response.
+		$mock_response = array(
+			'response' => array( 'code' => 500 ),
+			'body'     => 'Internal Server Error',
+		);
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $mock_response ) {
+				return $mock_response;
+			}
+		);
+
+		$query  = 'query { products { edges { node { id } } } }';
+		$result = $this->client->graphql_request( $query );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'api_error', $result->get_error_code() );
+		$this->assertStringContainsString( '500', $result->get_error_message() );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test GraphQL request with GraphQL errors.
+	 */
+	public function test_graphql_request_graphql_errors(): void {
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
+
+		$mock_response_data = array(
+			'errors' => array(
+				array(
+					'message' => 'Field "invalidField" doesn\'t exist on type "Product"',
+					'path'    => array( 'products', 'edges', 0, 'node', 'invalidField' ),
+				),
+			),
+		);
+
+		// Mock response with GraphQL errors.
+		$mock_response = array(
+			'response' => array( 'code' => 200 ),
+			'body'     => wp_json_encode( $mock_response_data ),
+		);
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $mock_response ) {
+				return $mock_response;
+			}
+		);
+
+		$query  = 'query { products { edges { node { id invalidField } } } }';
+		$result = $this->client->graphql_request( $query );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'graphql_error', $result->get_error_code() );
+		$this->assertStringContainsString( 'Field \\"invalidField\\"', $result->get_error_message() );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test GraphQL request with invalid JSON response.
+	 */
+	public function test_graphql_request_invalid_json(): void {
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->willReturn(
+				array(
+					'shop_url'     => 'test-store.myshopify.com',
+					'access_token' => 'test-token-123',
+				)
+			);
+
+		// Mock response with invalid JSON.
+		$mock_response = array(
+			'response' => array( 'code' => 200 ),
+			'body'     => 'invalid json response',
+		);
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $mock_response ) {
+				return $mock_response;
+			}
+		);
+
+		$query  = 'query { products { edges { node { id } } } }';
+		$result = $this->client->graphql_request( $query );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'api_error', $result->get_error_code() );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Test GraphQL request without credentials.
+	 */
+	public function test_graphql_request_no_credentials(): void {
+		$this->mock_credential_manager->method( 'get_credentials' )
+			->with( 'shopify' )
+			->willReturn( array() ); // Empty credentials array.
+
+		$query  = 'query { products { edges { node { id } } } }';
+		$result = $this->client->graphql_request( $query );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'api_error', $result->get_error_code() );
 	}
 }
