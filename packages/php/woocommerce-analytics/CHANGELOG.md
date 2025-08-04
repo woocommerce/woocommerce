@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.9] - 2025-08-04
+### Changed
+- Performance: improve processing of blocks during Analytics gathering. [#44544]
+
 ## [0.4.8] - 2025-06-16
 ### Fixed
 - Prevent PHP warning in checkout view. [#43890]
@@ -115,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.4.9]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.5...v0.4.6
