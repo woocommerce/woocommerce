@@ -99,7 +99,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 									className={ clsx(
 										'wc-block-product-filter-checkbox-list__item',
 										{
-											[ `depth-${ item?.depth }` ]:
+											[ `has-depth-${ item?.depth }` ]:
 												item?.depth,
 										}
 									) }
