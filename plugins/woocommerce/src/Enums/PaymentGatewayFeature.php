@@ -9,11 +9,11 @@ namespace Automattic\WooCommerce\Enums;
  */
 final class PaymentGatewayFeature {
 	/**
-	 * Payment gateway supports add payment methods.
+	 * Payment gateway supports add payment method.
 	 *
 	 * @var string
 	 */
-	public const ADD_PAYMENT_METHODS = 'add_payment_methods';
+	public const ADD_PAYMENT_METHOD = 'add_payment_method';
 
 	/**
 	 * Payment gateway supports credit card form on saved method.
