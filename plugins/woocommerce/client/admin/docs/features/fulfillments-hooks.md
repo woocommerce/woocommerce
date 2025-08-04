@@ -388,7 +388,7 @@ add_filter( 'woocommerce_fulfillment_before_update', 'log_fulfillment_changes' )
 
 function log_fulfillment_changes( $fulfillment ) {
     // Log changes or perform validation
-    $logged = custom_error_logger( 'Updating fulfillment: ' . $fulfillment->get_id() );
+    $logged = custom_error_log( 'Updating fulfillment: ' . $fulfillment->get_id() );
     if ( $logged ) {
       return $fulfillment;
     }
@@ -400,7 +400,7 @@ function log_fulfillment_changes( $fulfillment ) {
 
 #### `woocommerce_fulfillment_before_fulfill`
 
-Allows modification of fulfillment data before it's marked as fulfilled. If you want to cancel the fulfilling, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
+Allows modification of fulfillment data before it's marked as fulfilled. If you want to cancel the fulfillment, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
 **File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:72` and `213`
 
@@ -416,7 +416,7 @@ Allows modification of fulfillment data before it's marked as fulfilled. If you 
 add_filter( 'woocommerce_fulfillment_before_fulfill', 'set_fulfillment_timestamp' );
 
 function set_fulfillment_timestamp( $fulfillment ) {
-    if ( ! $fulfillment->get_meta( '_fulfillmed_timestamp', true )) {
+    if ( ! $fulfillment->get_meta( '_fulfilled_timestamp', true )) {
       $fulfillment->update_meta_data( '_fulfilled_timestamp', time() );
       return $fulfillment;
     }
