@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class ProductAttributeTemplate extends AbstractTemplate {
+class ProductAttributeTemplate extends AbstractTemplateWithFallback {
 
 	/**
 	 * The slug of the template.
@@ -20,12 +20,11 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	const SLUG = 'taxonomy-product_attribute';
 
 	/**
-	 * Initialization method.
+	 * The template used as a fallback if that one is customized.
+	 *
+	 * @var string
 	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
-	}
+	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Returns the title of the template.
@@ -73,10 +72,10 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @param array $templates Templates that match the product attributes taxonomy.
 	 */
-	public function update_taxonomy_template_hierarchy( $templates ) {
+	public function template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
 		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wp_is_block_theme() ) {
-			array_splice( $templates, count( $templates ) - 1, 0, self::SLUG );
+			array_splice( $templates, count( $templates ) - 1, 0, array( self::SLUG, $this->fallback_template ) );
 		}
 
 		return $templates;
