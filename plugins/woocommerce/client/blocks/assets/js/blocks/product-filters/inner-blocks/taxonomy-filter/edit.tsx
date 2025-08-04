@@ -53,13 +53,23 @@ function createHierarchicalList(
 
 	// Last: build hierarchical list
 	const result: FilterOptionItem[] = [];
-	function addTermsRecursively( termList: FilterOptionItem[], depth = 0 ) {
+	function addTermsRecursively(
+		termList: FilterOptionItem[],
+		depth = 0,
+		visited = new Set< number >()
+	) {
+		if ( depth > 10 ) {
+			return;
+		}
 		termList.forEach( ( term ) => {
-			term.depth = depth;
-			result.push( term );
+			if ( ! term.id || visited.has( term.id ) ) {
+				return;
+			}
+			visited.add( term.id );
+			result.push( { ...term, depth } );
 			const termChildren = children.get( term.id ) || [];
 			if ( termChildren.length > 0 ) {
-				addTermsRecursively( termChildren, depth + 1 );
+				addTermsRecursively( termChildren, depth + 1, visited );
 			}
 		} );
 	}
