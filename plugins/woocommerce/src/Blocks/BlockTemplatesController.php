@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -22,7 +23,6 @@ class BlockTemplatesController {
 	 * Initialization method.
 	 */
 	public function init() {
-		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
@@ -59,81 +59,6 @@ class BlockTemplatesController {
 			}
 		}
 		return function_exists( '\gutenberg_render_block_core_template_part' ) ? \gutenberg_render_block_core_template_part( $attributes ) : \render_block_core_template_part( $attributes );
-	}
-
-	/**
-	 * This function is used on the `pre_get_block_template` hook to return the fallback template from the db in case
-	 * the template is eligible for it.
-	 *
-	 * Currently, the Products by Category, Products by Tag and Products by Attribute templates fall back to the
-	 * Product Catalog template. That means that if there are customizations in the Product Catalog template,
-	 * they are also reflected in the other templates as long as they haven't been customized as well.
-	 *
-	 * @param \WP_Block_Template|null $template Block template object to short-circuit the default query,
-	 *                                          or null to allow WP to run its normal queries.
-	 * @param string                  $id Template unique identifier (example: theme_slug//template_slug).
-	 * @param string                  $template_type wp_template or wp_template_part.
-	 *
-	 * @return object|null
-	 */
-	public function get_block_template_fallback( $template, $id, $template_type ) {
-		// Add protection against invalid ids.
-		if ( ! is_string( $id ) || ! strstr( $id, '//' ) ) {
-			return null;
-		}
-		// Add protection against invalid template types.
-		if (
-			'wp_template' !== $template_type &&
-			'wp_template_part' !== $template_type
-		) {
-			return null;
-		}
-		$template_name_parts = explode( '//', $id );
-		$theme               = $template_name_parts[0] ?? '';
-		$slug                = $template_name_parts[1] ?? '';
-		$registered_template = BlockTemplateUtils::get_template( $slug );
-
-		if ( empty( $theme ) || empty( $slug ) || ! $registered_template || ! isset( $registered_template->fallback_template ) ) {
-			return null;
-		}
-
-		$wp_query_args  = array(
-			'post_name__in' => array( $registered_template->fallback_template, $slug ),
-			'post_type'     => $template_type,
-			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
-			'no_found_rows' => true,
-			'tax_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy' => 'wp_theme',
-					'field'    => 'name',
-					'terms'    => $theme,
-				),
-			),
-		);
-		$template_query = new \WP_Query( $wp_query_args );
-		$posts          = $template_query->posts;
-
-		// If we have more than one result from the query, it means that the current template is present in the db (has
-		// been customized by the user) and we should not return the fallback template.
-		if ( count( $posts ) > 1 ) {
-			return null;
-		}
-
-		if ( count( $posts ) > 0 && $registered_template->fallback_template === $posts[0]->post_name ) {
-			$template = _build_block_template_result_from_post( $posts[0] );
-
-			if ( ! is_wp_error( $template ) ) {
-				$template->id          = $theme . '//' . $slug;
-				$template->slug        = $slug;
-				$template->title       = BlockTemplateUtils::get_block_template_title( $slug );
-				$template->description = BlockTemplateUtils::get_block_template_description( $slug );
-				unset( $template->source );
-
-				return $template;
-			}
-		}
-
-		return $template;
 	}
 
 	/**
@@ -244,15 +169,6 @@ class BlockTemplatesController {
 
 		list( $template_id, $template_slug ) = $template_name_parts;
 
-		// If the template is not present in the theme but its fallback template is,
-		// let's use the theme's fallback template.
-		if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
-			$registered_template = BlockTemplateUtils::get_template( $template_slug );
-			$template_path       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
-			$template_object     = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
-			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
-		}
-
 		// This is a real edge-case, we are supporting users who have saved templates under the deprecated slug. See its definition for more information.
 		// You can likely ignore this code unless you're supporting/debugging early customised templates.
 		if ( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === strtolower( $template_id ) ) {
@@ -319,15 +235,15 @@ class BlockTemplatesController {
 
 		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
 		$template_files = $this->get_block_templates( $slugs, $template_type );
-		$theme_slug     = wp_get_theme()->get_stylesheet();
 
-		// @todo: Add apply_filters to _gutenberg_get_template_files() in Gutenberg to prevent duplication of logic.
+		$theme_slug = wp_get_theme()->get_stylesheet();
+
 		foreach ( $template_files as $template_file ) {
 
 			// If we have a template which is eligible for a fallback, we need to explicitly tell Gutenberg that
 			// it has a theme file (because it is using the fallback template file). And then `continue` to avoid
 			// adding duplicates.
-			if ( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) ) {
+			if ( BlockTemplateUtils::is_template_in_query_result( $query_result, $template_file ) ) {
 				continue;
 			}
 
@@ -345,6 +261,12 @@ class BlockTemplatesController {
 			// the filesystem.
 			if ( 'custom' === $template_file->source ) {
 				$query_result[] = $template_file;
+				continue;
+			}
+
+			// If the template has a fallback, we should not include it in the list of templates, unless it has been modified.
+			$template_data = BlockTemplateUtils::get_template( $template_file->slug );
+			if ( isset( $template_data->fallback_template ) ) {
 				continue;
 			}
 
@@ -399,19 +321,6 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Gets the templates saved in the database.
-	 *
-	 * @param array  $slugs An array of slugs to retrieve templates for.
-	 * @param string $template_type wp_template or wp_template_part.
-	 *
-	 * @return int[]|\WP_Post[] An array of found templates.
-	 */
-	public function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		wc_deprecated_function( 'BlockTemplatesController::get_block_templates_from_db()', '7.8', '\Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils::get_block_templates_from_db()' );
-		return BlockTemplateUtils::get_block_templates_from_db( $slugs, $template_type );
-	}
-
-	/**
 	 * Gets the templates from the WooCommerce blocks directory, skipping those for which a template already exists
 	 * in the theme directory.
 	 *
@@ -451,26 +360,6 @@ class BlockTemplatesController {
 						}
 					)
 				) > 0 ) {
-				continue;
-			}
-
-			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_db( $template_slug, $already_found_templates ) ) {
-				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $template_slug, $already_found_templates );
-				$template_id           = explode( '//', $template->id );
-				$template->id          = $template_id[0] . '//' . $template_slug;
-				$template->slug        = $template_slug;
-				$template->title       = BlockTemplateUtils::get_block_template_title( $template_slug );
-				$template->description = BlockTemplateUtils::get_block_template_description( $template_slug );
-				$templates[]           = $template;
-				continue;
-			}
-
-			// If the template is not present in the theme but its fallback template is,
-			// let's use the theme's fallback template.
-			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
-				$registered_template = BlockTemplateUtils::get_template( $template_slug );
-				$template_file       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
-				$templates[]         = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
 

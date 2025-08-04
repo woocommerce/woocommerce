@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class ProductBrandTemplate extends AbstractTemplate {
+class ProductBrandTemplate extends AbstractTemplateWithFallback {
 
 	/**
 	 * The slug of the template.
@@ -25,13 +25,6 @@ class ProductBrandTemplate extends AbstractTemplate {
 	 * @var string
 	 */
 	public $fallback_template = ProductCatalogTemplate::SLUG;
-
-	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-	}
 
 	/**
 	 * Returns the title of the template.

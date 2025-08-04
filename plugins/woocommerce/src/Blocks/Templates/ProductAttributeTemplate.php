@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
@@ -18,13 +18,6 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 * @var string
 	 */
 	const SLUG = 'taxonomy-product_attribute';
-
-	/**
-	 * The template used as a fallback if that one is customized.
-	 *
-	 * @var string
-	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Initialization method.

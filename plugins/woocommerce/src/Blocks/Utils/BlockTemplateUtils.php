@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use WP_Block_Patterns_Registry;
@@ -512,30 +514,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
-	 *
-	 * @param string $template_slug Slug to check for fallbacks.
-	 * @param array  $db_templates Templates that have already been found on the db.
-	 * @return boolean
-	 */
-	public static function template_is_eligible_for_fallback_from_db( $template_slug, $db_templates ) {
-		$registered_template = self::get_template( $template_slug );
-
-		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			$array_filter = array_filter(
-				$db_templates,
-				function ( $template ) use ( $registered_template ) {
-					return isset( $registered_template->fallback_template ) && $registered_template->fallback_template === $template->slug;
-				}
-			);
-
-			return count( $array_filter ) > 0;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Gets the `archive-product` fallback template stored on the db for a given slug.
 	 *
 	 * @param string $template_slug Slug to check for fallbacks.
@@ -557,53 +535,22 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fall back to the `archive-product` file template for a given slug in the current theme.
-	 *
-	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute` templates can
-	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
-	 *
-	 * @param string $template_slug Slug to check for fallbacks.
-	 * @return boolean
-	 */
-	public static function template_is_eligible_for_fallback_from_theme( $template_slug ) {
-		$registered_template = self::get_template( $template_slug );
-
-		return $registered_template && isset( $registered_template->fallback_template )
-			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( $registered_template->fallback_template );
-	}
-
-	/**
-	 * Sets the `has_theme_file` to `true` for templates with fallbacks
-	 *
-	 * There are cases (such as tags, categories and attributes) in which fallback templates
-	 * can be used; so, while *technically* the theme doesn't have a specific file
-	 * for them, it is important that we tell Gutenberg that we do, in fact,
-	 * have a theme file (i.e. the fallback one).
-	 *
-	 * **Note:** this function changes the array that has been passed.
-	 *
-	 * It returns `true` if anything was changed, `false` otherwise.
+	 * Returns `true` if the $template has been found in the $query_result.
 	 *
 	 * @param array  $query_result Array of template objects.
-	 * @param object $template A specific template object which could have a fallback.
+	 * @param object $template A specific template object.
 	 *
 	 * @return boolean
 	 */
-	public static function set_has_theme_file_if_fallback_is_available( $query_result, $template ) {
+	public static function is_template_in_query_result( $query_result, $template ) {
 		foreach ( $query_result as &$query_result_template ) {
 			if (
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				if ( self::template_is_eligible_for_fallback_from_theme( $template->slug ) ) {
-					$query_result_template->has_theme_file = true;
-				}
-
 				return true;
 			}
 		}
-
 		return false;
 	}
 
