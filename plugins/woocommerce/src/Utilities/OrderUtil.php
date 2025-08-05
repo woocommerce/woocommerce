@@ -233,9 +233,7 @@ final class OrderUtil {
 				$count_per_status
 			);
 
-			foreach ( $count_per_status as $order_status => $count ) {
-				$order_count_cache->set( $order_type, $order_status, $count );
-			}
+			$order_count_cache->set_multiple( $order_type, $count_per_status );
 		}
 
 		return $count_per_status;
