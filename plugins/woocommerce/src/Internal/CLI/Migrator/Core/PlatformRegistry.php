@@ -53,7 +53,10 @@ class PlatformRegistry {
 		}
 
 		foreach ( $platforms as $platform_id => $config ) {
-			if ( isset( $config['fetcher'], $config['mapper'] ) ) {
+			// Validate that required keys exist and have valid values.
+			if ( isset( $config['fetcher'], $config['mapper'] ) &&
+				is_string( $config['fetcher'] ) && ! empty( $config['fetcher'] ) &&
+				is_string( $config['mapper'] ) && ! empty( $config['mapper'] ) ) {
 				$this->platforms[ $platform_id ] = $config;
 			}
 		}
@@ -103,17 +106,43 @@ class PlatformRegistry {
 
 		$fetcher_class = $platform['fetcher'];
 
-		if ( ! class_exists( $fetcher_class ) || ! in_array( PlatformFetcherInterface::class, class_implements( $fetcher_class ), true ) ) {
+		// Validate that fetcher class is a non-empty string.
+		if ( ! is_string( $fetcher_class ) || empty( $fetcher_class ) ) {
 			throw new InvalidArgumentException(
 				sprintf(
 					/* translators: %s: Platform ID */
-					esc_html__( 'Invalid fetcher class for platform %s.', 'woocommerce' ),
+					esc_html__( 'Invalid fetcher class for platform %s. Fetcher must be a non-empty string.', 'woocommerce' ),
 					esc_html( $platform_id )
 				)
 			);
 		}
 
-		return new $fetcher_class();
+		if ( ! class_exists( $fetcher_class ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %1$s: Platform ID, %2$s: Class name */
+					esc_html__( 'Invalid fetcher class for platform %1$s. Class %2$s does not exist.', 'woocommerce' ),
+					esc_html( $platform_id ),
+					esc_html( $fetcher_class )
+				)
+			);
+		}
+
+		if ( ! in_array( PlatformFetcherInterface::class, class_implements( $fetcher_class ), true ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %1$s: Platform ID, %2$s: Class name, %3$s: Interface name */
+					esc_html__( 'Invalid fetcher class for platform %1$s. Class %2$s does not implement %3$s.', 'woocommerce' ),
+					esc_html( $platform_id ),
+					esc_html( $fetcher_class ),
+					esc_html( PlatformFetcherInterface::class )
+				)
+			);
+		}
+
+		// Use the WooCommerce DI container to properly inject dependencies.
+		$container = wc_get_container();
+		return $container->get( $fetcher_class );
 	}
 
 	/**
@@ -140,17 +169,43 @@ class PlatformRegistry {
 
 		$mapper_class = $platform['mapper'];
 
-		if ( ! class_exists( $mapper_class ) || ! in_array( PlatformMapperInterface::class, class_implements( $mapper_class ), true ) ) {
+		// Validate that mapper class is a non-empty string.
+		if ( ! is_string( $mapper_class ) || empty( $mapper_class ) ) {
 			throw new InvalidArgumentException(
 				sprintf(
 					/* translators: %s: Platform ID */
-					esc_html__( 'Invalid mapper class for platform %s.', 'woocommerce' ),
+					esc_html__( 'Invalid mapper class for platform %s. Mapper must be a non-empty string.', 'woocommerce' ),
 					esc_html( $platform_id )
 				)
 			);
 		}
 
-		return new $mapper_class();
+		if ( ! class_exists( $mapper_class ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %1$s: Platform ID, %2$s: Class name */
+					esc_html__( 'Invalid mapper class for platform %1$s. Class %2$s does not exist.', 'woocommerce' ),
+					esc_html( $platform_id ),
+					esc_html( $mapper_class )
+				)
+			);
+		}
+
+		if ( ! in_array( PlatformMapperInterface::class, class_implements( $mapper_class ), true ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %1$s: Platform ID, %2$s: Class name, %3$s: Interface name */
+					esc_html__( 'Invalid mapper class for platform %1$s. Class %2$s does not implement %3$s.', 'woocommerce' ),
+					esc_html( $platform_id ),
+					esc_html( $mapper_class ),
+					esc_html( PlatformMapperInterface::class )
+				)
+			);
+		}
+
+		// Use the WooCommerce DI container to properly inject dependencies.
+		$container = wc_get_container();
+		return $container->get( $mapper_class );
 	}
 
 	/**
