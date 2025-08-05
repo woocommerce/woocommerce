@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
