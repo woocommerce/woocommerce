@@ -129,7 +129,24 @@ const Table: React.VFC< TableProps > = ( {
 	const updateTableShadow = () => {
 		const table = container.current;
 
-		if ( table?.scrollWidth && table?.scrollHeight && table?.offsetWidth ) {
+		if ( table?.scrollWidth && table?.offsetWidth ) {
+			// Check if the table is actually scrollable based on current dimensions
+			// Only check width for horizontal scrolling
+			const isTableScrollable = table.scrollWidth > table.offsetWidth;
+
+			// If table is not scrollable, remove scroll indicators and reset scroll position
+			if ( ! isTableScrollable ) {
+				// Always remove scroll indicators when table is not scrollable
+				setIsScrollableRight( false );
+				setIsScrollableLeft( false );
+				// Reset scroll position when table is no longer scrollable
+				if ( table.scrollLeft !== 0 ) {
+					table.scrollLeft = 0;
+				}
+				return;
+			}
+
+			// Only check scroll position if the table is actually scrollable
 			const scrolledToEnd =
 				table.scrollWidth - table.scrollLeft <= table.offsetWidth;
 			if ( scrolledToEnd && isScrollableRight ) {
@@ -166,10 +183,21 @@ const Table: React.VFC< TableProps > = ( {
 		const scrollable = scrollWidth > clientWidth;
 		setTabIndex( scrollable ? 0 : undefined );
 		updateTableShadow();
-		window.addEventListener( 'resize', updateTableShadow );
+
+		const handleResize = () => {
+			// Use requestAnimationFrame to ensure DOM has updated
+			requestAnimationFrame( () => {
+				// Add a small delay to ensure the DOM has fully updated
+				setTimeout( () => {
+					updateTableShadow();
+				}, 10 );
+			} );
+		};
+
+		window.addEventListener( 'resize', handleResize );
 
 		return () => {
-			window.removeEventListener( 'resize', updateTableShadow );
+			window.removeEventListener( 'resize', handleResize );
 		};
 	}, [] );
 
