@@ -94,7 +94,14 @@ class OrderCountCache {
 		return $this->cache_prefix . '_' . $order_type . '_' . $order_status;
 	}
 
-	private function get_saved_statuses_cache_key( $order_type ) {
+	/**
+	 * Get the cache key saved statuses of the given order type.
+	 *
+	 * @param string $order_type
+	 *
+	 * @return string
+	 */
+	private function get_saved_statuses_cache_key( string $order_type ) {
 		return $this->cache_prefix . '_' . $order_type . 'statuses';
 	}
 
@@ -220,6 +227,7 @@ class OrderCountCache {
 	 * @return void
 	 */
 	public function flush( $order_type = 'shop_order', $order_statuses = array() ) {
+		$order_type = (string) $order_type;
 		$flush_saved_statuses = false;
 		if ( empty( $order_statuses ) ) {
 			$order_statuses = $this->get_saved_statuses_for_type( $order_type );

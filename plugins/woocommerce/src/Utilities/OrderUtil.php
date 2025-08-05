@@ -206,6 +206,8 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
+		$order_type = (string) $order_type;
+
 		$order_count_cache = new OrderCountCache();
 		$count_per_status  = $order_count_cache->get( $order_type );
 
