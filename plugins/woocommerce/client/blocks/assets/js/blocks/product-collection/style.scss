@@ -3,11 +3,11 @@
 		text-align: center;
 	}
 
-	:has(.is-product-collection-layout-carousel) {
+	&:has(.is-product-collection-layout-carousel) {
 		@include breakpoint("<600px") {
 			// This rule is overriding a `display: flex` from WordPress core, that's
 			// why it needs a higher specificity.
-			.wc-block-next-previous-buttons.wc-block-next-previous-buttons {
+			:where(.wc-block-next-previous-buttons.wc-block-next-previous-buttons) {
 				display: none;
 			}
 		}
