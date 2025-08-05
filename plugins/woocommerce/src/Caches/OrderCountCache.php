@@ -227,7 +227,7 @@ class OrderCountCache {
 	 * @return void
 	 */
 	public function flush( $order_type = 'shop_order', $order_statuses = array() ) {
-		$order_type = (string) $order_type;
+		$order_type           = (string) $order_type;
 		$flush_saved_statuses = false;
 		if ( empty( $order_statuses ) ) {
 			$order_statuses       = $this->get_saved_statuses_for_type( $order_type );
