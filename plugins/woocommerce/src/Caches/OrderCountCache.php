@@ -75,6 +75,8 @@ class OrderCountCache {
 	 * Get the default statuses.
 	 *
 	 * @return string[]
+	 *
+	 * @deprecated 10.0.0 This method will be removed in the future.
 	 */
 	public function get_default_statuses() {
 		return array_merge(
