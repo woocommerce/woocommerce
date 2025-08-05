@@ -76,8 +76,8 @@ sidebar_label: Building and Publishing
 
 ## Decision Table
 
-| Step   | Condition to Run                                                                 | Action if Condition Not Met         |
-|--------|---------------------------------------------------------------------------------|-------------------------------------|
-| Step 4 | Not a Release Candidate (RC)                                                    | Skip Step 4                        |
-| Step 5 | Not an RC **and** no major issues in Step 4                                     | Skip Step 5                        |
-| Step 6 | Always publish tag; mark as "latest" only if version was marked as stable in 5  | Do not mark as "latest" if not stable in 5 |
+| Step   | Condition to Run                                                               | Action if Condition Not Met         |
+|--------|--------------------------------------------------------------------------------|-------------------------------------|
+| Step 4 | Not a Stable **or** Release Candidate (RC)                                     | Skip Step 4                        |
+| Step 5 | Not a Stable release **and** no major issues in Step 4                         | Skip Step 5                        |
+| Step 6 | Always publish tag; mark as "latest" only if version was marked as stable in 5 | Do not mark as "latest" if not stable in 5 |
