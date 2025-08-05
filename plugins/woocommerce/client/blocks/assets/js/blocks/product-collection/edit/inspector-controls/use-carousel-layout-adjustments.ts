@@ -19,6 +19,45 @@ import {
 } from '../../constants';
 import { LayoutOptions, type ProductCollectionAttributes } from '../../types';
 
+const productTemplateOtherLayouts = { layout: {} };
+const productTemplateCarouselLayout = {
+	layout: {
+		type: 'flex',
+		justifyContent: 'left',
+		verticalAlignment: 'top',
+		flexWrap: 'nowrap',
+		orientation: 'horizontal',
+	},
+};
+
+const createGroupSpaceBetween = ( innerBlocks: BlockInstance[] ) =>
+	createBlock(
+		'core/group',
+		// Row variation of the group block
+		{
+			layout: {
+				type: 'flex',
+				flexWrap: 'nowrap',
+				justifyContent: 'space-between',
+			},
+		},
+		innerBlocks
+	);
+
+const createGroupRight = ( innerBlocks: BlockInstance[] ) =>
+	createBlock(
+		'core/group',
+		// Row variation of the group block
+		{
+			layout: {
+				type: 'flex',
+				flexWrap: 'nowrap',
+				justifyContent: 'right',
+			},
+		},
+		innerBlocks
+	);
+
 /**
  * Handles the transition to carousel layout:
  * - If there's heading before Product Template block:
@@ -54,15 +93,10 @@ const handleTransitionToCarouselLayout = (
 	const productTemplateClientId = productTemplateBlock?.clientId;
 
 	// 1. Change the layout of the product template block
-	updateBlockAttributes( productTemplateClientId, {
-		layout: {
-			type: 'flex',
-			justifyContent: 'left',
-			verticalAlignment: 'top',
-			flexWrap: 'nowrap',
-			orientation: 'horizontal',
-		},
-	} );
+	updateBlockAttributes(
+		productTemplateClientId,
+		productTemplateCarouselLayout
+	);
 
 	// 2. Create and insert the next/previous buttons block
 	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName, {
@@ -74,18 +108,10 @@ const handleTransitionToCarouselLayout = (
 		const headingBlockIndex = selectData( blockEditorStore ).getBlockIndex(
 			headingBlock.clientId
 		);
-		const groupBlock = createBlock(
-			'core/group',
-			// Row variation of the group block
-			{
-				layout: {
-					type: 'flex',
-					flexWrap: 'nowrap',
-					justifyContent: 'space-between',
-				},
-			},
-			[ headingBlock, nextPrevArrowsBlock ]
-		);
+		const groupBlock = createGroupSpaceBetween( [
+			headingBlock,
+			nextPrevArrowsBlock,
+		] );
 
 		// We cannot use replaceBlock directly because it crashes the editor
 		// when replacing the product template block with the group block that
@@ -103,18 +129,7 @@ const handleTransitionToCarouselLayout = (
 			// @ts-expect-error getBlockIndex is not typed.
 		).getBlockIndex( productTemplateClientId );
 
-		const groupBlock = createBlock(
-			'core/group',
-			// Row variation of the group block
-			{
-				layout: {
-					type: 'flex',
-					flexWrap: 'nowrap',
-					justifyContent: 'right',
-				},
-			},
-			[ nextPrevArrowsBlock ]
-		);
+		const groupBlock = createGroupRight( [ nextPrevArrowsBlock ] );
 
 		insertBlock(
 			groupBlock,
@@ -151,6 +166,14 @@ const handleTransitionFromCarouselLayout = (
 		productCollectionBlock,
 		productTemplateBlockName
 	);
+
+	// 1. Grid and List layouts are handled manually for now so we need to reset it to an empty object.
+	updateBlockAttributes(
+		productTemplateBlock?.clientId,
+		productTemplateOtherLayouts
+	);
+
+	// 2. Remove the next/previous buttons block or group block
 	// Find the group block containing the next/previous buttons block
 	const groupBlock = getInnerBlockBy( productCollectionBlock, ( block ) => {
 		return (
@@ -161,13 +184,6 @@ const handleTransitionFromCarouselLayout = (
 			)
 		);
 	} );
-
-	// 1. Grid and List layouts are handled manually for now so we need to reset it to an empty object.
-	updateBlockAttributes( productTemplateBlock?.clientId, {
-		layout: {},
-	} );
-
-	// 2. Remove the next/previous buttons block or group block
 	if ( groupBlock ) {
 		// If next/previous buttons block is the only block in the group block, remove it
 		if ( groupBlock.innerBlocks.length === 1 ) {
@@ -231,15 +247,11 @@ const useCarouselLayoutAdjustments = (
 	const actions = useDispatch( blockEditorStore );
 
 	const { productCollectionBlock } = useSelect(
-		( select ) => {
-			const selectProductCollectionBlock =
+		( select ) => ( {
+			productCollectionBlock:
 				// @ts-expect-error getBlock is not typed.
-				select( blockEditorStore ).getBlock( clientId );
-
-			return {
-				productCollectionBlock: selectProductCollectionBlock,
-			};
-		},
+				select( blockEditorStore ).getBlock( clientId ),
+		} ),
 		[ clientId ]
 	);
 
