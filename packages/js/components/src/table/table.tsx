@@ -129,39 +129,36 @@ const Table: React.VFC< TableProps > = ( {
 	const updateTableShadow = () => {
 		const table = container.current;
 
-		if ( table?.scrollWidth && table?.offsetWidth ) {
-			// Check if the table is actually scrollable based on current dimensions
-			// Only check width for horizontal scrolling
-			const isTableScrollable = table.scrollWidth > table.offsetWidth;
-
-			// If table is not scrollable, remove scroll indicators and reset scroll position
-			if ( ! isTableScrollable ) {
-				// Always remove scroll indicators when table is not scrollable
-				setIsScrollableRight( false );
-				setIsScrollableLeft( false );
-				// Reset scroll position when table is no longer scrollable
-				if ( table.scrollLeft !== 0 ) {
-					table.scrollLeft = 0;
-				}
-				return;
-			}
-
-			// Only check scroll position if the table is actually scrollable
-			const scrolledToEnd =
-				table.scrollWidth - table.scrollLeft <= table.offsetWidth;
-			if ( scrolledToEnd && isScrollableRight ) {
-				setIsScrollableRight( false );
-			} else if ( ! scrolledToEnd && ! isScrollableRight ) {
-				setIsScrollableRight( true );
-			}
-
-			const scrolledToStart = table.scrollLeft === 0;
-			if ( scrolledToStart && isScrollableLeft ) {
-				setIsScrollableLeft( false );
-			} else if ( ! scrolledToStart && ! isScrollableLeft ) {
-				setIsScrollableLeft( true );
-			}
+		if ( ! table ) {
+			return;
 		}
+
+		// Get current dimensions
+		const scrollWidth = table.scrollWidth;
+		const offsetWidth = table.offsetWidth;
+		const scrollLeft = table.scrollLeft;
+
+		// Check if the table is actually scrollable
+		const isTableScrollable = scrollWidth > offsetWidth;
+
+		// If table is not scrollable, remove all scroll indicators
+		if ( ! isTableScrollable ) {
+			setIsScrollableRight( false );
+			setIsScrollableLeft( false );
+			// Reset scroll position when table is no longer scrollable
+			if ( scrollLeft !== 0 ) {
+				table.scrollLeft = 0;
+			}
+			return;
+		}
+
+		// Calculate scroll states
+		const scrolledToEnd = scrollWidth - scrollLeft <= offsetWidth;
+		const scrolledToStart = scrollLeft === 0;
+
+		// Update scroll indicators based on current state
+		setIsScrollableRight( ! scrolledToEnd );
+		setIsScrollableLeft( ! scrolledToStart );
 	};
 
 	const sortedBy =
@@ -187,10 +184,7 @@ const Table: React.VFC< TableProps > = ( {
 		const handleResize = () => {
 			// Use requestAnimationFrame to ensure DOM has updated
 			requestAnimationFrame( () => {
-				// Add a small delay to ensure the DOM has fully updated
-				setTimeout( () => {
-					updateTableShadow();
-				}, 10 );
+				updateTableShadow();
 			} );
 		};
 
