@@ -58,237 +58,26 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @return array Standardized data array for WooCommerce_Product_Importer.
 	 */
 	public function map_product_data( object $shopify_product ): array {
-		$wc_data = array();
+		$is_variable = $this->is_variable_product( $shopify_product );
 
-		$is_variable                    = $this->is_variable_product( $shopify_product );
-		$wc_data['is_variable']         = $is_variable;
-		$wc_data['original_product_id'] = basename( $shopify_product->id );
+		// Map basic product fields.
+		$wc_data = $this->mapBasicProductFields( $shopify_product, $is_variable );
 
-		// Basic Product Fields.
-		$wc_data['name']             = $shopify_product->title;
-		$wc_data['slug']             = $shopify_product->handle;
-		$wc_data['description']      = $this->sanitize_product_description( $shopify_product->descriptionHtml ?? '' );
-		$wc_data['short_description'] = $shopify_product->descriptionPlainSummary ?? '';
-		$wc_data['status']           = $this->get_woo_product_status( $shopify_product );
-		$wc_data['date_created_gmt'] = $shopify_product->createdAt;
-
-		// Enhanced date handling.
-		if ( property_exists( $shopify_product, 'updatedAt' ) ) {
-			$wc_data['date_modified_gmt'] = $shopify_product->updatedAt;
+		// Map simple product data (for non-variable products).
+		if ( ! $is_variable ) {
+			$simple_data = $this->mapSimpleProductData( $shopify_product );
+			$wc_data     = array_merge( $wc_data, $simple_data );
 		}
 
-		// Catalog Visibility & Original URL.
-		$wc_data['catalog_visibility'] = 'visible';
-		$wc_data['original_url']       = null;
-		if ( property_exists( $shopify_product, 'onlineStoreUrl' ) ) {
-			if ( null === $shopify_product->onlineStoreUrl ) {
-				$wc_data['catalog_visibility'] = 'hidden';
-			} else {
-				$wc_data['original_url'] = $shopify_product->onlineStoreUrl;
-			}
-		}
+		// Map product images.
+		$wc_data['images'] = $this->mapProductImages( $shopify_product );
 
-		// Enhanced publication status.
-		$enhanced_status = $this->map_enhanced_status( $shopify_product );
-		$wc_data         = array_merge( $wc_data, $enhanced_status );
+		// Map metafields and SEO data.
+		$wc_data['metafields'] = $this->mapMetafields( $shopify_product );
 
-		// Taxonomies.
-		$wc_data['categories'] = $this->get_mapped_categories( $shopify_product );
-		$wc_data['tags']       = $this->get_mapped_tags( $shopify_product );
-
-		// Enhanced product classification.
-		$classification = $this->map_product_classification( $shopify_product );
-		$wc_data        = array_merge( $wc_data, $classification );
-
-		// Brand (Vendor).
-		$brand_name       = $shopify_product->vendor ?? null;
-		$wc_data['brand'] = $brand_name ? array(
-			'name' => $brand_name,
-			'slug' => sanitize_title( $brand_name ),
-		) : null;
-
-		// Simple Product Fields.
-		if ( ! $is_variable && ! empty( $shopify_product->variants->edges ) ) {
-			$variant_node = $shopify_product->variants->edges[0]->node;
-
-			// Price.
-			if ( $this->should_process( 'price' ) ) {
-				if ( $variant_node->compareAtPrice && $variant_node->compareAtPrice > $variant_node->price ) {
-					$wc_data['sale_price']    = $variant_node->price;
-					$wc_data['regular_price'] = $variant_node->compareAtPrice;
-				} else {
-					$wc_data['sale_price']    = null;
-					$wc_data['regular_price'] = $variant_node->price;
-				}
-			}
-
-			// SKU.
-			if ( $this->should_process( 'sku' ) ) {
-				$wc_data['sku'] = $variant_node->sku;
-			}
-
-			// Stock.
-			if ( $this->should_process( 'stock' ) ) {
-				$manage_stock              = property_exists( $variant_node, 'inventoryItem' ) && $variant_node->inventoryItem->tracked;
-				$wc_data['manage_stock']   = $manage_stock;
-				$stock_quantity            = $variant_node->inventoryQuantity ?? 0;
-				$allow_oversell            = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy;
-				$wc_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
-				$wc_data['stock_quantity'] = $stock_quantity;
-			}
-
-			// Weight.
-			if ( $this->should_process( 'weight' ) ) {
-				$weight_data = null;
-				if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) &&
-					property_exists( $variant_node->inventoryItem, 'measurement' ) && is_object( $variant_node->inventoryItem->measurement ) &&
-					property_exists( $variant_node->inventoryItem->measurement, 'weight' ) && is_object( $variant_node->inventoryItem->measurement->weight )
-				) {
-					$weight_data = $variant_node->inventoryItem->measurement->weight;
-				}
-				$weight            = $weight_data ? $weight_data->value : null;
-				$weight_unit       = $weight_data ? $weight_data->unit : null;
-				$wc_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
-			}
-
-			$wc_data['original_variant_id'] = basename( $variant_node->id );
-
-		} else {
-			// Defaults for variable or product with no variants.
-			$wc_data['sku']                 = null;
-			$wc_data['regular_price']       = null;
-			$wc_data['sale_price']          = null;
-			$wc_data['stock_quantity']      = null;
-			$wc_data['manage_stock']        = false;
-			$wc_data['stock_status']        = 'instock';
-			$wc_data['weight']              = null;
-			$wc_data['original_variant_id'] = null;
-		}
-
-		// Images.
-		$wc_data['images'] = array();
-		$featured_media_id = null;
-		if ( ! empty( $shopify_product->featuredMedia ) && is_object( $shopify_product->featuredMedia ) && ! empty( $shopify_product->featuredMedia->id ) ) {
-			$featured_media_id = $shopify_product->featuredMedia->id;
-		}
-
-		if ( ! empty( $shopify_product->media->edges ) ) {
-			foreach ( $shopify_product->media->edges as $media_edge ) {
-				$media_node = $media_edge->node;
-				if ( property_exists( $media_node, 'image' ) && is_object( $media_node->image ) && ! empty( $media_node->id ) && ! empty( $media_node->image->url ) ) {
-					$wc_data['images'][] = array(
-						'original_id' => $media_node->id,
-						'url'         => $media_node->image->url,
-						'alt'         => $media_node->image->altText ?? null,
-						'is_featured' => ( $media_node->id === $featured_media_id ),
-					);
-				}
-			}
-		}
-
-		// Metafields & SEO.
-		$wc_data['metafields'] = array();
-		if ( property_exists( $shopify_product, 'metafields' ) && ! empty( $shopify_product->metafields->edges ) ) {
-			foreach ( $shopify_product->metafields->edges as $edge ) {
-				$field_node                    = $edge->node;
-				$key                           = sprintf( '%s_%s', $field_node->namespace, $field_node->key );
-				$wc_data['metafields'][ $key ] = $field_node->value;
-			}
-		}
-
-		// Enhanced SEO mapping.
-		$seo_data              = $this->map_seo_fields( $shopify_product );
-		$wc_data['metafields'] = array_merge( $wc_data['metafields'], $seo_data );
-
-		// Attributes (Variable Only).
-		$wc_data['attributes'] = array();
-		if ( $is_variable && property_exists( $shopify_product, 'options' ) && ! empty( $shopify_product->options ) ) {
-			foreach ( $shopify_product->options as $option ) {
-				$wc_data['attributes'][] = array(
-					'name'         => $option->name,
-					'options'      => $option->values,
-					'position'     => $option->position,
-					'is_visible'   => true,
-					'is_variation' => true,
-				);
-			}
-		}
-
-		// Variations (Variable Only).
-		$wc_data['variations'] = array();
-		if ( $is_variable && property_exists( $shopify_product, 'variants' ) && ! empty( $shopify_product->variants->edges ) ) {
-			foreach ( $shopify_product->variants->edges as $variant_edge ) {
-				$variant_node                  = $variant_edge->node;
-				$variation_data                = array();
-				$variation_data['original_id'] = basename( $variant_node->id );
-
-				// Price.
-				if ( $this->should_process( 'price' ) ) {
-					if ( $variant_node->compareAtPrice && (float) $variant_node->compareAtPrice > (float) $variant_node->price ) {
-						$variation_data['regular_price'] = $variant_node->compareAtPrice;
-						$variation_data['sale_price']    = $variant_node->price;
-					} else {
-						$variation_data['regular_price'] = $variant_node->price;
-						$variation_data['sale_price']    = null;
-					}
-				}
-
-				// SKU.
-				if ( $this->should_process( 'sku' ) ) {
-					$variation_data['sku'] = $variant_node->sku ?? null;
-				}
-
-				// Stock.
-				if ( $this->should_process( 'stock' ) ) {
-					$manage_stock                     = property_exists( $variant_node, 'inventoryItem' ) && $variant_node->inventoryItem->tracked;
-					$variation_data['manage_stock']   = $manage_stock;
-					$stock_quantity                   = $variant_node->inventoryQuantity ?? 0;
-					$allow_oversell                   = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy;
-					$variation_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
-					$variation_data['stock_quantity'] = $stock_quantity;
-				}
-
-				// Weight.
-				if ( $this->should_process( 'weight' ) ) {
-					$weight_data = null;
-					if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) &&
-						property_exists( $variant_node->inventoryItem, 'measurement' ) && is_object( $variant_node->inventoryItem->measurement ) &&
-						property_exists( $variant_node->inventoryItem->measurement, 'weight' ) && is_object( $variant_node->inventoryItem->measurement->weight )
-					) {
-						$weight_data = $variant_node->inventoryItem->measurement->weight;
-					}
-					$weight                   = $weight_data ? $weight_data->value : null;
-					$weight_unit              = $weight_data ? $weight_data->unit : null;
-					$variation_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
-				}
-
-				// Mapped Attributes.
-				if ( $this->should_process( 'attributes' ) ) {
-					$variation_data['attributes'] = array();
-					if ( ! empty( $variant_node->selectedOptions ) ) {
-						foreach ( $variant_node->selectedOptions as $selectedOption ) {
-							$variation_data['attributes'][ $selectedOption->name ] = $selectedOption->value;
-						}
-					}
-				}
-
-				// Image Mapping.
-				if ( $this->should_process( 'images' ) ) {
-					$variation_data['image_original_id'] = null;
-					if ( ! empty( $variant_node->media->edges ) ) {
-						$variant_media_node = $variant_node->media->edges[0]->node ?? null;
-						if ( $variant_media_node && property_exists( $variant_media_node, 'image' ) && is_object( $variant_media_node->image ) && ! empty( $variant_media_node->id ) ) {
-							$variation_data['image_original_id'] = $variant_media_node->id;
-						}
-					}
-				}
-
-				// Menu Order / Position.
-				$variation_data['menu_order'] = $variant_node->position;
-
-				$wc_data['variations'][] = $variation_data;
-			}
-		}
+		// Map variable product data (attributes and variations).
+		$variable_data = $this->mapVariableProductData( $shopify_product, $is_variable );
+		$wc_data       = array_merge( $wc_data, $variable_data );
 
 		return $wc_data;
 	}
@@ -327,13 +116,13 @@ class ShopifyMapper implements PlatformMapperInterface {
 		$status_data = array();
 
 		// Publication date.
-		if ( property_exists( $shopify_product, 'publishedAt' ) && $shopify_product->publishedAt ) {
-			$status_data['date_published_gmt'] = $shopify_product->publishedAt;
+		if ( property_exists( $shopify_product, 'publishedAt' ) && $shopify_product->publishedAt ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			$status_data['date_published_gmt'] = $shopify_product->publishedAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		}
 
 		// Available for sale flag.
 		if ( property_exists( $shopify_product, 'availableForSale' ) ) {
-			$status_data['available_for_sale'] = $shopify_product->availableForSale;
+			$status_data['available_for_sale'] = $shopify_product->availableForSale; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		}
 
 		return $status_data;
@@ -348,11 +137,18 @@ class ShopifyMapper implements PlatformMapperInterface {
 	private function map_product_classification( object $shopify_product ): array {
 		$classification = array();
 
-		// Product type.
-		if ( property_exists( $shopify_product, 'productType' ) && $shopify_product->productType ) {
+		// Product type - check both camelCase and snake_case for compatibility.
+		$product_type = null;
+		if ( property_exists( $shopify_product, 'productType' ) && $shopify_product->productType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			$product_type = $shopify_product->productType; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		} elseif ( property_exists( $shopify_product, 'product_type' ) && $shopify_product->product_type ) {
+			$product_type = $shopify_product->product_type;
+		}
+
+		if ( $product_type ) {
 			$classification['product_type'] = array(
-				'name' => $shopify_product->productType,
-				'slug' => sanitize_title( $shopify_product->productType ),
+				'name' => $product_type,
+				'slug' => sanitize_title( $product_type ),
 			);
 		}
 
@@ -364,14 +160,18 @@ class ShopifyMapper implements PlatformMapperInterface {
 			);
 		}
 
-		// Gift card detection.
+		// Gift card detection - check both camelCase and snake_case for compatibility.
 		if ( property_exists( $shopify_product, 'isGiftCard' ) ) {
-			$classification['is_gift_card'] = $shopify_product->isGiftCard;
+			$classification['is_gift_card'] = $shopify_product->isGiftCard; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		} elseif ( property_exists( $shopify_product, 'is_gift_card' ) ) {
+			$classification['is_gift_card'] = $shopify_product->is_gift_card;
 		}
 
-		// Subscription product detection.
+		// Subscription product detection - check both camelCase and snake_case for compatibility.
 		if ( property_exists( $shopify_product, 'requiresSellingPlan' ) ) {
-			$classification['requires_subscription'] = $shopify_product->requiresSellingPlan;
+			$classification['requires_subscription'] = $shopify_product->requiresSellingPlan; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		} elseif ( property_exists( $shopify_product, 'requires_selling_plan' ) ) {
+			$classification['requires_subscription'] = $shopify_product->requires_selling_plan;
 		}
 
 		return $classification;
@@ -542,6 +342,292 @@ class ShopifyMapper implements PlatformMapperInterface {
 			return true;
 		}
 		return in_array( $field_key, $this->fields_to_process, true );
+	}
+
+	/**
+	 * Maps basic product fields from Shopify to WooCommerce format.
+	 *
+	 * @param object $shopify_product The Shopify product data.
+	 * @param bool   $is_variable     Whether this is a variable product.
+	 * @return array Basic product field mappings.
+	 */
+	private function mapBasicProductFields( object $shopify_product, bool $is_variable ): array {
+		$basic_data = array();
+
+		$basic_data['is_variable']         = $is_variable;
+		$basic_data['original_product_id'] = basename( $shopify_product->id );
+
+		// Basic Product Fields.
+		$basic_data['name']              = $shopify_product->title;
+		$basic_data['slug']              = $shopify_product->handle;
+		$basic_data['description']       = $this->sanitize_product_description( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['short_description'] = $shopify_product->descriptionPlainSummary ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['status']            = $this->get_woo_product_status( $shopify_product );
+		$basic_data['date_created_gmt']  = $shopify_product->createdAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+
+		// Enhanced date handling.
+		if ( property_exists( $shopify_product, 'updatedAt' ) ) {
+			$basic_data['date_modified_gmt'] = $shopify_product->updatedAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		}
+
+		// Catalog Visibility & Original URL.
+		$basic_data['catalog_visibility'] = 'visible';
+		$basic_data['original_url']       = null;
+		if ( property_exists( $shopify_product, 'onlineStoreUrl' ) ) {
+			if ( null === $shopify_product->onlineStoreUrl ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				$basic_data['catalog_visibility'] = 'hidden';
+			} else {
+				$basic_data['original_url'] = $shopify_product->onlineStoreUrl; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			}
+		}
+
+		// Enhanced publication status.
+		$enhanced_status = $this->map_enhanced_status( $shopify_product );
+		$basic_data      = array_merge( $basic_data, $enhanced_status );
+
+		// Taxonomies.
+		$basic_data['categories'] = $this->get_mapped_categories( $shopify_product );
+		$basic_data['tags']       = $this->get_mapped_tags( $shopify_product );
+
+		// Enhanced product classification.
+		$classification = $this->map_product_classification( $shopify_product );
+		$basic_data     = array_merge( $basic_data, $classification );
+
+		// Brand (Vendor).
+		$brand_name          = $shopify_product->vendor ?? null;
+		$basic_data['brand'] = $brand_name ? array(
+			'name' => $brand_name,
+			'slug' => sanitize_title( $brand_name ),
+		) : null;
+
+		return $basic_data;
+	}
+
+	/**
+	 * Maps simple product data (price, SKU, stock, weight) from Shopify variant.
+	 *
+	 * @param object $shopify_product The Shopify product data.
+	 * @return array Simple product data mappings.
+	 */
+	private function mapSimpleProductData( object $shopify_product ): array {
+		$simple_data = array();
+
+		if ( ! empty( $shopify_product->variants->edges ) ) {
+			$variant_node = $shopify_product->variants->edges[0]->node;
+
+			// Price.
+			if ( $this->should_process( 'price' ) ) {
+				if ( $variant_node->compareAtPrice && $variant_node->compareAtPrice > $variant_node->price ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					$simple_data['sale_price']    = $variant_node->price;
+					$simple_data['regular_price'] = $variant_node->compareAtPrice; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				} else {
+					$simple_data['sale_price']    = null;
+					$simple_data['regular_price'] = $variant_node->price;
+				}
+			}
+
+			// SKU.
+			if ( $this->should_process( 'sku' ) ) {
+				$simple_data['sku'] = $variant_node->sku;
+			}
+
+			// Stock.
+			if ( $this->should_process( 'stock' ) ) {
+				$manage_stock                  = property_exists( $variant_node, 'inventoryItem' ) && $variant_node->inventoryItem->tracked; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				$simple_data['manage_stock']   = $manage_stock;
+				$stock_quantity                = $variant_node->inventoryQuantity ?? 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				$allow_oversell                = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				$simple_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
+				$simple_data['stock_quantity'] = $stock_quantity;
+			}
+
+			// Weight.
+			if ( $this->should_process( 'weight' ) ) {
+				$weight_data = null;
+				if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					property_exists( $variant_node->inventoryItem, 'measurement' ) && is_object( $variant_node->inventoryItem->measurement ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					property_exists( $variant_node->inventoryItem->measurement, 'weight' ) && is_object( $variant_node->inventoryItem->measurement->weight ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				) {
+					$weight_data = $variant_node->inventoryItem->measurement->weight; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				}
+				$weight                = $weight_data ? $weight_data->value : null;
+				$weight_unit           = $weight_data ? $weight_data->unit : null;
+				$simple_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
+			}
+
+			$simple_data['original_variant_id'] = basename( $variant_node->id );
+
+		} else {
+			// Defaults for variable or product with no variants.
+			$simple_data['sku']                 = null;
+			$simple_data['regular_price']       = null;
+			$simple_data['sale_price']          = null;
+			$simple_data['stock_quantity']      = null;
+			$simple_data['manage_stock']        = false;
+			$simple_data['stock_status']        = 'instock';
+			$simple_data['weight']              = null;
+			$simple_data['original_variant_id'] = null;
+		}
+
+		return $simple_data;
+	}
+
+	/**
+	 * Maps variable product data (attributes and variations) from Shopify.
+	 *
+	 * @param object $shopify_product The Shopify product data.
+	 * @param bool   $is_variable     Whether this is a variable product.
+	 * @return array Variable product data mappings.
+	 */
+	private function mapVariableProductData( object $shopify_product, bool $is_variable ): array {
+		$variable_data = array();
+
+		// Attributes (Variable Only).
+		$variable_data['attributes'] = array();
+		if ( $is_variable && property_exists( $shopify_product, 'options' ) && ! empty( $shopify_product->options ) ) {
+			foreach ( $shopify_product->options as $option ) {
+				$variable_data['attributes'][] = array(
+					'name'         => $option->name,
+					'options'      => $option->values,
+					'position'     => $option->position,
+					'is_visible'   => true,
+					'is_variation' => true,
+				);
+			}
+		}
+
+		// Variations (Variable Only).
+		$variable_data['variations'] = array();
+		if ( $is_variable && property_exists( $shopify_product, 'variants' ) && ! empty( $shopify_product->variants->edges ) ) {
+			foreach ( $shopify_product->variants->edges as $variant_edge ) {
+				$variant_node                  = $variant_edge->node;
+				$variation_data                = array();
+				$variation_data['original_id'] = basename( $variant_node->id );
+
+				// Price.
+				if ( $this->should_process( 'price' ) ) {
+					if ( $variant_node->compareAtPrice && (float) $variant_node->compareAtPrice > (float) $variant_node->price ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+						$variation_data['regular_price'] = $variant_node->compareAtPrice; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+						$variation_data['sale_price']    = $variant_node->price;
+					} else {
+						$variation_data['regular_price'] = $variant_node->price;
+						$variation_data['sale_price']    = null;
+					}
+				}
+
+				// SKU.
+				if ( $this->should_process( 'sku' ) ) {
+					$variation_data['sku'] = $variant_node->sku ?? null;
+				}
+
+				// Stock.
+				if ( $this->should_process( 'stock' ) ) {
+					$manage_stock                     = property_exists( $variant_node, 'inventoryItem' ) && $variant_node->inventoryItem->tracked; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					$variation_data['manage_stock']   = $manage_stock;
+					$stock_quantity                   = $variant_node->inventoryQuantity ?? 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					$allow_oversell                   = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					$variation_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
+					$variation_data['stock_quantity'] = $stock_quantity;
+				}
+
+				// Weight.
+				if ( $this->should_process( 'weight' ) ) {
+					$weight_data = null;
+					if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+						property_exists( $variant_node->inventoryItem, 'measurement' ) && is_object( $variant_node->inventoryItem->measurement ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+						property_exists( $variant_node->inventoryItem->measurement, 'weight' ) && is_object( $variant_node->inventoryItem->measurement->weight ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					) {
+						$weight_data = $variant_node->inventoryItem->measurement->weight; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					}
+					$weight                   = $weight_data ? $weight_data->value : null;
+					$weight_unit              = $weight_data ? $weight_data->unit : null;
+					$variation_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
+				}
+
+				// Mapped Attributes.
+				if ( $this->should_process( 'attributes' ) ) {
+					$variation_data['attributes'] = array();
+					if ( ! empty( $variant_node->selectedOptions ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+						foreach ( $variant_node->selectedOptions as $selectedOption ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase,WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- GraphQL uses camelCase.
+							$variation_data['attributes'][ $selectedOption->name ] = $selectedOption->value; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- GraphQL uses camelCase.
+						}
+					}
+				}
+
+				// Image Mapping.
+				if ( $this->should_process( 'images' ) ) {
+					$variation_data['image_original_id'] = null;
+					if ( ! empty( $variant_node->media->edges ) ) {
+						$variant_media_node = $variant_node->media->edges[0]->node ?? null;
+						if ( $variant_media_node && property_exists( $variant_media_node, 'image' ) && is_object( $variant_media_node->image ) && ! empty( $variant_media_node->id ) ) {
+							$variation_data['image_original_id'] = $variant_media_node->id;
+						}
+					}
+				}
+
+				// Menu Order / Position.
+				$variation_data['menu_order'] = $variant_node->position;
+
+				$variable_data['variations'][] = $variation_data;
+			}
+		}
+
+		return $variable_data;
+	}
+
+	/**
+	 * Maps product images from Shopify media data.
+	 *
+	 * @param object $shopify_product The Shopify product data.
+	 * @return array Product images data.
+	 */
+	private function mapProductImages( object $shopify_product ): array {
+		$images_data       = array();
+		$featured_media_id = null;
+
+		if ( ! empty( $shopify_product->featuredMedia ) && is_object( $shopify_product->featuredMedia ) && ! empty( $shopify_product->featuredMedia->id ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			$featured_media_id = $shopify_product->featuredMedia->id; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		}
+
+		if ( ! empty( $shopify_product->media->edges ) ) {
+			foreach ( $shopify_product->media->edges as $media_edge ) {
+				$media_node = $media_edge->node;
+				if ( property_exists( $media_node, 'image' ) && is_object( $media_node->image ) && ! empty( $media_node->id ) && ! empty( $media_node->image->url ) ) {
+					$images_data[] = array(
+						'original_id' => $media_node->id,
+						'url'         => $media_node->image->url,
+						'alt'         => $media_node->image->altText ?? null,
+						'is_featured' => ( $media_node->id === $featured_media_id ),
+					);
+				}
+			}
+		}
+
+		return $images_data;
+	}
+
+	/**
+	 * Maps metafields and SEO data from Shopify product.
+	 *
+	 * @param object $shopify_product The Shopify product data.
+	 * @return array Metafields data.
+	 */
+	private function mapMetafields( object $shopify_product ): array {
+		$metafields_data = array();
+
+		if ( property_exists( $shopify_product, 'metafields' ) && ! empty( $shopify_product->metafields->edges ) ) {
+			foreach ( $shopify_product->metafields->edges as $edge ) {
+				$field_node              = $edge->node;
+				$key                     = sprintf( '%s_%s', $field_node->namespace, $field_node->key );
+				$metafields_data[ $key ] = $field_node->value;
+			}
+		}
+
+		// Enhanced SEO mapping.
+		$seo_data        = $this->map_seo_fields( $shopify_product );
+		$metafields_data = array_merge( $metafields_data, $seo_data );
+
+		return $metafields_data;
 	}
 
 	/**
