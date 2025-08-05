@@ -249,7 +249,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          IS_PRERELEASE: ${{ contains(steps.get_version.outputs.version, '-rc') }}
+          IS_PRERELEASE: ${{ contains( steps.get_version.outputs.version, '-dev' ) || contains( steps.get_version.outputs.version, '-beta' ) || contains( steps.get_version.outputs.version, '-rc' ) }}
         run: |
           FLAGS=""
           if [ "$IS_PRERELEASE" = "true" ]; then

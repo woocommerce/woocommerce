@@ -42,7 +42,8 @@ export const EllipsisMenuWrapper = ( {
 		provider._type === 'gateway' &&
 		provider.state?.account_connected &&
 		( provider.onboarding?.state?.test_mode ||
-			! provider.onboarding?.state?.completed );
+			! provider.onboarding?.state?.completed ) &&
+		!! provider.onboarding?._links?.reset?.href;
 
 	return (
 		<>
@@ -69,6 +70,7 @@ export const EllipsisMenuWrapper = ( {
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
 				isTestMode={ provider.onboarding?.state?.test_mode }
+				resetUrl={ provider.onboarding?._links?.reset?.href }
 			/>
 		</>
 	);
