@@ -84,15 +84,24 @@ export default function ConnectButton( props: ConnectProps ) {
 			} )
 			.catch( ( error ) => {
 				const errorMessage = error?.data?.message || '';
+				const errorCode = error?.data?.code || '';
+
+				let noticeMessage = sprintf(
+					// translators: %s is the product name.
+					__( '%s couldn’t be connected.', 'woocommerce' ),
+					props.subscription.product_name
+				);
+
+				if (
+					errorCode === 'maxed_out' ||
+					errorCode === 'invalid_product_key'
+				) {
+					noticeMessage = noticeMessage + ' ' + errorMessage;
+				}
 
 				addNotice(
 					props.subscription.product_key,
-					sprintf(
-						// translators: %s is the product name.
-						__( '%1$s couldn’t be connected. %2$s', 'woocommerce' ),
-						props.subscription.product_name,
-						errorMessage
-					),
+					noticeMessage,
 					NoticeStatus.Error,
 					{
 						actions: [
