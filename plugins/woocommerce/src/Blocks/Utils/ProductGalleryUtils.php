@@ -124,6 +124,7 @@ class ProductGalleryUtils {
 					if ( ! $variation_image_id ) {
 						$variation_image_id = $parent_image_id;
 					}
+					$variation_image_id = apply_filters( 'woocommerce_product_variation_get_image_id', $variation_image_id ); // Works, but doesn't pass the fully initialized product object as the second parameter - but is anything using this?
 					if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
 						$variation_image_ids[] = strval( $variation_image_id );
 					}
