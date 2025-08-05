@@ -116,6 +116,10 @@ const publicActions = {
 					path: `/wc/v3/orders/${ orderId }/fulfillments?notify_customer=${ notify_customer }`,
 					method: 'POST',
 					data: fulfillment,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				dispatch.setFulfillment(
 					orderId,
@@ -149,6 +153,10 @@ const publicActions = {
 					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }?notify_customer=${ notifyCustomer }`,
 					method: 'PUT',
 					data: fulfillment,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				dispatch.setFulfillment(
 					orderId,
@@ -177,6 +185,10 @@ const publicActions = {
 				await apiFetch( {
 					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }?notify_customer=${ notify_customer }`,
 					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
 			} catch ( error: unknown ) {

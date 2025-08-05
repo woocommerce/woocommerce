@@ -394,6 +394,14 @@ class FulfillmentsManager {
 			$results['possibilities'] = $possibilities; // Include all possibilities for reference.
 		}
 
+		if ( isset( $results['shipping_provider'] ) ) {
+			// Record the tracking lookup attempt.
+			FulfillmentsTracker::track_fulfillment_tracking_lookup_attempt( 'success', $results['shipping_provider'] );
+		} else {
+			// If no provider could parse the tracking number, record a failure.
+			FulfillmentsTracker::track_fulfillment_tracking_lookup_attempt( 'not_found', '' );
+		}
+
 		return $results;
 	}
 

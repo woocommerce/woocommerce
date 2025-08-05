@@ -266,6 +266,24 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Get the item count for the fulfillment.
+	 *
+	 * This method calculates the total quantity of items in the fulfillment.
+	 *
+	 * @return int Total quantity of items in the fulfillment.
+	 */
+	public function get_item_count(): int {
+		$items = $this->get_items();
+		return array_reduce(
+			$items,
+			function ( int $carry, array $item ) {
+				return $carry + (int) $item['qty'];
+			},
+			0
+		);
+	}
+
+	/**
 	 * Get the order associated with this fulfillment.
 	 *
 	 * This method retrieves the order based on the entity type and entity ID.

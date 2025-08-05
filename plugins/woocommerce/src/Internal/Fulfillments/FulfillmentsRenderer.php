@@ -257,6 +257,7 @@ class FulfillmentsRenderer {
 	 */
 	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
 		if ( 'fulfill' === $action ) {
+			FulfillmentsTracker::track_fulfillment_bulk_action_used( 'fulfill_orders', count( $post_ids ) );
 			foreach ( $post_ids as $post_id ) {
 				$order = wc_get_order( $post_id );
 				if ( ! $order ) {
@@ -467,6 +468,7 @@ class FulfillmentsRenderer {
 		if ( isset( $_GET['fulfillment_status'] ) && ! empty( $_GET['fulfillment_status'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification
 			$fulfillment_status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) );
+			FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $fulfillment_status );
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
