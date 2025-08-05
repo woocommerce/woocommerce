@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	Component,
@@ -333,6 +333,11 @@ class Chart extends Component {
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
+		// Items label is not defined for all the reports.
+		const totalLabel = itemsLabel
+			? sprintf( itemsLabel, orderedKeys.length )
+			: '';
+
 		const chartHeight = this.getChartHeight();
 		const legend =
 			legendPosition !== 'hidden' && isRequesting ? null : (
@@ -344,7 +349,7 @@ class Chart extends Component {
 					interactive={ interactiveLegend }
 					legendDirection={ legendDirection }
 					legendValueFormat={ tooltipValueFormat }
-					totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
+					totalLabel={ totalLabel }
 				/>
 			);
 		const margin = {
@@ -383,7 +388,7 @@ class Chart extends Component {
 							role="menubar"
 						>
 							<Button
-								className={ classNames(
+								className={ clsx(
 									'woocommerce-chart__type-button',
 									{
 										'woocommerce-chart__type-button-selected':
@@ -402,7 +407,7 @@ class Chart extends Component {
 								<LineGraphIcon />
 							</Button>
 							<Button
-								className={ classNames(
+								className={ clsx(
 									'woocommerce-chart__type-button',
 									{
 										'woocommerce-chart__type-button-selected':
@@ -425,7 +430,7 @@ class Chart extends Component {
 				) }
 				<Section component={ false }>
 					<div
-						className={ classNames(
+						className={ clsx(
 							'woocommerce-chart__body',
 							`woocommerce-chart__body-${ chartDirection }`
 						) }

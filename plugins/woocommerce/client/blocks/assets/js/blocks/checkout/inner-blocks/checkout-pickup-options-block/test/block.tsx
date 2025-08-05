@@ -212,3 +212,43 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 	expect( firstRate ).toBeChecked();
 	expect( secondRate ).not.toBeChecked();
 } );
+
+test( 'description is not shown if rate is not selected', async () => {
+	const packageData = generateShippingPackage( {
+		packageId: 0,
+		shippingRates: [
+			generateShippingRate( {
+				rateId: 'pickup_location:1',
+				name: 'Pickup New York City',
+				methodID: 'pickup_nyc',
+				price: '0',
+				instanceID: 0,
+				selected: false,
+				meta_data: [
+					{ key: 'pickup_details', value: 'Store 1 details.' },
+				],
+			} ),
+			generateShippingRate( {
+				rateId: 'pickup_location:2',
+				name: 'Pickup Los Angeles',
+				methodID: 'pickup_la',
+				price: '0',
+				instanceID: 1,
+				selected: true,
+				meta_data: [
+					{ key: 'pickup_details', value: 'Store 2 details.' },
+				],
+			} ),
+		],
+	} );
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ packageData ],
+		};
+	} );
+	render( <CheckoutPickupOptionsBlock /> );
+	expect( screen.queryByText( 'Store 1 details.' ) ).not.toBeInTheDocument();
+	expect( screen.getByText( 'Store 2 details.' ) ).toBeInTheDocument();
+} );

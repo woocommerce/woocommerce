@@ -49,7 +49,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect(
 			page.getByRole( 'button', {
-				name: getTestTranslation( 'Add a coupon' ),
+				name: getTestTranslation( 'Add coupons' ),
 			} )
 		).toBeVisible();
 

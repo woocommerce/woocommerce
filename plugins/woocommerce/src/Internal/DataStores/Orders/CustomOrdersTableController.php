@@ -273,7 +273,7 @@ class CustomOrdersTableController {
 		$tools_array = array_merge( $tools_array, $this->data_cleanup->get_tools_entries() );
 
 		// Delete HPOS tables tool.
-		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() || $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
 			$disabled = true;
 			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
 		} else {
@@ -289,7 +289,11 @@ class CustomOrdersTableController {
 				$message
 			),
 			'requires_refresh' => true,
-			'callback'         => function () {
+			'callback'         => function () use ( $disabled ) {
+				if ( $disabled ) {
+					return;
+				}
+
 				$this->features_controller->change_feature_enable( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 				$this->delete_custom_orders_tables();
 				return __( 'Custom orders tables have been deleted.', 'woocommerce' );
@@ -500,6 +504,13 @@ class CustomOrdersTableController {
 		$this->data_cleanup->toggle_flag( false );
 
 		if ( 'sync-now' === $action ) {
+			if ( ! $this->data_synchronizer->check_orders_table_exists() && ! $this->data_synchronizer->create_database_tables() ) {
+				WC_Admin_Settings::add_error(
+					__( 'Unable to create HPOS tables for synchronization.', 'woocommerce' )
+				);
+				return;
+			}
+
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );

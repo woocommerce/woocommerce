@@ -12,32 +12,30 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 9.9.0
+ * @version 10.1.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading">
-<?php
+<h2 class="wp-block-heading"><?php
 /* translators: %s: order number */
 printf( esc_html__( 'Order failed: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
-?>
-</h2>
+?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>
-<?php
+<p><?php
 	/* translators: %1$s: Order number. %2$s: Customer full name. */
 	$text = __( 'Unfortunately, the payment for order #%1$s from %2$s has failed. The order was as follows:', 'woocommerce' );
 	printf( esc_html( $text ), '<!--[woocommerce/order-number]-->', '<!--[woocommerce/customer-full-name]-->' );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
@@ -45,9 +43,7 @@ printf( esc_html__( 'Order failed: #%s,', 'woocommerce' ), '<!--[woocommerce/ord
 <!-- /wp:woo/email-content -->
 
 <!-- wp:paragraph -->
-<p>
-<?php
+<p><?php
 echo wp_kses_post( __( 'We hope they’ll be back soon! Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.', 'woocommerce' ) );
-?>
-</p>
+?></p>
 <!-- /wp:paragraph -->

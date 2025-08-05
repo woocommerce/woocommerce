@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { addFilter } from '@wordpress/hooks';
 import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
@@ -11,7 +11,8 @@ import { justifyLeft, justifyCenter, justifyRight } from '@wordpress/icons';
 import {
 	Flex,
 	FlexItem,
-	PanelBody,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
 } from '@wordpress/components';
@@ -112,19 +113,39 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		} );
 	};
 
+	const resetAll = () => {
+		const { justifyContent: _discarded, ...restLayout } =
+			attributes.layout || {};
+		setAttributes( {
+			layout: restLayout,
+		} );
+	};
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
-					<Flex>
-						<FlexItem>
-							<JustificationControls
-								justificationValue={ justifyContent }
-								onChange={ onJustificationChange }
-							/>
-						</FlexItem>
-					</Flex>
-				</PanelBody>
+				<ToolsPanel
+					label={ __( 'Layout', 'woocommerce' ) }
+					resetAll={ resetAll }
+				>
+					<ToolsPanelItem
+						isShownByDefault
+						onDeselect={ resetAll } // This attribute is usually used to reset the panel item value.
+						hasValue={ () =>
+							attributes.layout?.justifyContent || false
+						}
+						label={ __( 'Justification', 'woocommerce' ) }
+					>
+						<Flex>
+							<FlexItem>
+								<JustificationControls
+									justificationValue={ justifyContent }
+									onChange={ onJustificationChange }
+								/>
+							</FlexItem>
+						</Flex>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			{ /* @ts-expect-error No types for this exist yet. */ }
 			<BlockControls group="block" __experimentalShareWithChildBlocks>
@@ -188,7 +209,7 @@ function BlockWithLayoutStyles( { block: BlockListBlock, props } ) {
 	const justify = ( layout?.justifyContent as string ) || 'left';
 	const justificationClass = `is-content-justification-${ justify }`;
 
-	const layoutClassNames = classnames( justificationClass, layoutClasses );
+	const layoutClassNames = clsx( justificationClass, layoutClasses );
 	return <BlockListBlock { ...props } className={ layoutClassNames } />;
 }
 

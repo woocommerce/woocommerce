@@ -7,7 +7,7 @@
  */
 import reducer, { ShippingMethodsState } from '../reducer';
 import { ACTION_TYPES } from '../action-types';
-import { shippingMethodsStub } from '../test-helpers/stub';
+import { shippingMethodsStub } from './helpers/stub';
 import { Actions } from '../actions';
 
 const defaultState: ShippingMethodsState = {

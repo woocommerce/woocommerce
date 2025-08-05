@@ -44,9 +44,9 @@ export interface MccsDisplayTreeItem {
 }
 
 /**
- * Account session.
+ * Embedded KYC session.
  */
-export interface AccountKycSession {
+export interface EmbeddedKycSession {
 	clientSecret: string;
 	expiresAt: number;
 	accountId: string;
@@ -57,16 +57,16 @@ export interface AccountKycSession {
 }
 
 /**
- * Account KYC session result.
+ * Embedded KYC session result.
  */
-export interface AccountKycResult {
-	session: AccountKycSession;
+export interface EmbeddedKycSessionCreateResult {
+	session: EmbeddedKycSession;
 }
 
 /**
- * Finalize onboarding response.
+ * Finalize embedded KYC session response.
  */
-export interface FinalizeOnboardingResponse {
+export interface FinalizeEmbeddedKycSessionResponse {
 	success: boolean;
 	params: Record< string, string >;
 }

@@ -6,7 +6,7 @@ import { createElement, Fragment, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useInView } from 'react-intersection-observer';
 import moment from 'moment';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { H, Section } from '@woocommerce/components';
 import { sanitize } from 'dompurify';
 
@@ -157,7 +157,7 @@ const InboxNoteCard = ( {
 
 	const unread = is_read === false;
 	const hasImage = layout === 'thumbnail';
-	const cardClassName = classnames(
+	const cardClassName = clsx(
 		'woocommerce-inbox-message',
 		className,
 		layout,
@@ -166,12 +166,9 @@ const InboxNoteCard = ( {
 		}
 	);
 
-	const actionWrapperClassName = classnames(
-		'woocommerce-inbox-message__actions',
-		{
-			'has-multiple-actions': note.actions?.length > 1,
-		}
-	);
+	const actionWrapperClassName = clsx( 'woocommerce-inbox-message__actions', {
+		'has-multiple-actions': note.actions?.length > 1,
+	} );
 
 	return (
 		<section ref={ ref } className={ cardClassName }>

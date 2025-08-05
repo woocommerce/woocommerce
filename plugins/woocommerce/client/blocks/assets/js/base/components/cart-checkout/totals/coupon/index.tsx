@@ -87,7 +87,7 @@ export const TotalsCoupon = ( {
 			initialOpen={ isCouponFormVisible }
 			hasBorder={ false }
 			headingLevel={ 2 }
-			title={ __( 'Add a coupon', 'woocommerce' ) }
+			title={ __( 'Add coupons', 'woocommerce' ) }
 			state={ [ isCouponFormVisible, setIsCouponFormVisible ] }
 		>
 			<LoadingMask

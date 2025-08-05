@@ -11,9 +11,10 @@ import { Button } from '@wordpress/components';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import WooPaymentsStepHeader from '../../components/header';
 import './style.scss';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const FinishStep: React.FC = () => {
-	const { context, closeModal } = useOnboardingContext();
+	const { context, closeModal, sessionEntryPoint } = useOnboardingContext();
 
 	return (
 		<>
@@ -36,6 +37,16 @@ export const FinishStep: React.FC = () => {
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-finish-primary-button"
 						onClick={ () => {
+							// Record the event when the user clicks on the button.
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_click',
+								{
+									step: 'finish',
+									action: 'go_to_payments_overview',
+									source: sessionEntryPoint,
+								}
+							);
+
 							window.location.href =
 								context?.urls?.overview_page ?? '';
 						} }
@@ -52,7 +63,19 @@ export const FinishStep: React.FC = () => {
 					<Button
 						variant="secondary"
 						className="settings-payments-onboarding-modal__step--content-finish-secondary-button"
-						onClick={ closeModal }
+						onClick={ () => {
+							// Record the event when the user clicks on the button.
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_click',
+								{
+									step: 'finish',
+									action: 'close_window',
+									source: sessionEntryPoint,
+								}
+							);
+
+							closeModal();
+						} }
 					>
 						{ __( 'Close this window', 'woocommerce' ) }
 					</Button>

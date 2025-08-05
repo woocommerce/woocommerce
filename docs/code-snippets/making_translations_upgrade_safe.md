@@ -1,9 +1,11 @@
 ---
 post_title: Making your translation upgrade safe
-menu_title: Translation upgrade safety
-tags: code-snippet
+sidebar_label: Translation upgrade safety
+
 current wccom url: https://woocommerce.com/document/woocommerce-localization/#making-your-translation-upgrade-safe
 ---
+
+# Making your translation upgrade safe
 
 Like all other plugins, WooCommerce keeps translations in `wp-content/languages/plugins`. 
 

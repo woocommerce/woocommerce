@@ -9,7 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Integrations\MailPoet\Blocks\BlockTypesController;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
 require_once __DIR__ . '/Dummy_Block_Renderer.php';
 
@@ -80,15 +80,12 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test It Renders Block With Fallback Renderer
 	 */
 	public function testItRendersBlockWithFallbackRenderer(): void {
-		$fallback_renderer = $this->createMock( Block_Renderer::class );
+		$fallback_renderer = $this->createMock( Fallback::class );
 		$fallback_renderer->expects( $this->once() )->method( 'render' );
-		$blocks_registry = $this->createMock( Blocks_Registry::class );
-		$blocks_registry->expects( $this->once() )->method( 'get_block_renderer' )->willReturn( null );
-		$blocks_registry->expects( $this->once() )->method( 'get_fallback_renderer' )->willReturn( $fallback_renderer );
 		$renderer = $this->getServiceWithOverrides(
 			Content_Renderer::class,
 			array(
-				'blocks_registry' => $blocks_registry,
+				'fallback_renderer' => $fallback_renderer,
 			)
 		);
 
@@ -96,38 +93,21 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test It Renders Block With Block Renderer
+	 * Test It Renders Block and calls render_email_callback
 	 */
 	public function testItRendersBlockWithBlockRenderer(): void {
-		$renderer        = $this->createMock( Block_Renderer::class );
-		$blocks_registry = $this->createMock( Blocks_Registry::class );
-		$blocks_registry->expects( $this->once() )->method( 'get_block_renderer' )->willReturn( $renderer );
-		$blocks_registry->expects( $this->never() )->method( 'get_fallback_renderer' )->willReturn( null );
-		$renderer = $this->getServiceWithOverrides(
-			Content_Renderer::class,
+		register_block_type(
+			'test/block',
 			array(
-				'blocks_registry' => $blocks_registry,
+				'render_email_callback' => function () {
+					return '<p>rendered block</p>';
+				},
 			)
 		);
 
-		$renderer->render_block( 'content', array( 'blockName' => 'block' ) );
-	}
-
-	/**
-	 * Test It Renders Block When no Renderer available
-	 */
-	public function testItReturnsContentIfNoRendererAvailable(): void {
-		$blocks_registry = $this->createMock( Blocks_Registry::class );
-		$blocks_registry->expects( $this->once() )->method( 'get_block_renderer' )->willReturn( null );
-		$blocks_registry->expects( $this->once() )->method( 'get_fallback_renderer' )->willReturn( null );
-		$renderer = $this->getServiceWithOverrides(
-			Content_Renderer::class,
-			array(
-				'blocks_registry' => $blocks_registry,
-			)
-		);
-
-		$this->assertEquals( 'content', $renderer->render_block( 'content', array( 'blockName' => 'block' ) ) );
+		$result = $this->renderer->render_block( 'content', array( 'blockName' => 'test/block' ) );
+		$this->assertEquals( '<p>rendered block</p>', $result );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'test/block' );
 	}
 
 	/**

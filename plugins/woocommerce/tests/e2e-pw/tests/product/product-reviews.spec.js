@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 
@@ -61,7 +61,7 @@ const test = baseTest.extend( {
 				);
 			} catch ( error ) {
 				// Ignore 410 error - which is expected if the review was already trashed
-				if ( error.data?.data?.status !== 410 ) {
+				if ( error.status !== 410 ) {
 					throw error;
 				}
 			}

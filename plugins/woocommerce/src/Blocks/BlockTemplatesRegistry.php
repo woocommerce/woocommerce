@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductBrandTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
@@ -47,6 +48,7 @@ class BlockTemplatesRegistry {
 				ProductCategoryTemplate::SLUG      => new ProductCategoryTemplate(),
 				ProductTagTemplate::SLUG           => new ProductTagTemplate(),
 				ProductAttributeTemplate::SLUG     => new ProductAttributeTemplate(),
+				ProductBrandTemplate::SLUG         => new ProductBrandTemplate(),
 				ProductSearchResultsTemplate::SLUG => new ProductSearchResultsTemplate(),
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),
@@ -64,7 +66,7 @@ class BlockTemplatesRegistry {
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wp_is_block_theme() ) {
+			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
 				if ( count( $product_types ) > 0 ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );

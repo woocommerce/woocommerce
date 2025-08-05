@@ -13,6 +13,8 @@ export const generateShippingRate = ( {
 	instanceID,
 	methodID = name.toLowerCase().split( ' ' ).join( '_' ),
 	selected = false,
+	// eslint-disable-next-line @typescript-eslint/naming-convention -- meta_data comes from the API response.
+	meta_data = [],
 }: {
 	rateId: string;
 	name: string;
@@ -20,6 +22,7 @@ export const generateShippingRate = ( {
 	instanceID: number;
 	methodID?: string;
 	selected?: boolean;
+	meta_data?: { key: string; value: string }[];
 } ): CartShippingPackageShippingRate => {
 	return {
 		rate_id: rateId,
@@ -30,7 +33,7 @@ export const generateShippingRate = ( {
 		taxes: '0',
 		instance_id: instanceID,
 		method_id: methodID,
-		meta_data: [],
+		meta_data,
 		selected,
 		currency_code: 'USD',
 		currency_symbol: '$',

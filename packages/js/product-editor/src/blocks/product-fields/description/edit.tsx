@@ -9,7 +9,7 @@ import {
 } from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -118,7 +118,7 @@ export function DescriptionBlockEdit( {
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
 	const blockProps = useWooBlockProps( attributes, {
-		className: classNames( { 'has-blocks': !! description.length } ),
+		className: clsx( { 'has-blocks': !! description.length } ),
 		tabIndex: 0,
 	} );
 

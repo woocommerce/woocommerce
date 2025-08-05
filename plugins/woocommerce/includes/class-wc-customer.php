@@ -311,6 +311,16 @@ class WC_Customer extends WC_Legacy_Customer {
 				continue;
 			}
 
+			// If the field is hidden in the country-specific locale, we can skip it.
+			if ( isset( $country_locale[ $key ]['hidden'] ) && true === wc_string_to_bool( $country_locale[ $key ]['hidden'] ) ) {
+				continue;
+			}
+
+			// Check if the field is hidden in the default locale, if so, we can skip too (because it wasn't hidden in country-specific locale).
+			if ( isset( $default_locale[ $key ]['hidden'] ) && true === wc_string_to_bool( $default_locale[ $key ]['hidden'] ) ) {
+				continue;
+			}
+
 			$locale_to_check = isset( $country_locale[ $key ]['required'] ) ? $country_locale : $default_locale;
 
 			// If the locale requires the field return false.
@@ -840,7 +850,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $value Email.
 	 */
 	public function set_email( $value ) {
-		if ( $value && ! is_email( $value ) ) {
+		if ( $value && ! is_email( (string) $value ) ) {
 			$this->error( 'customer_invalid_email', __( 'Invalid email address', 'woocommerce' ) );
 		}
 		$this->set_prop( 'email', sanitize_email( $value ) );
@@ -1090,7 +1100,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $value Billing email.
 	 */
 	public function set_billing_email( $value ) {
-		if ( $value && ! is_email( $value ) ) {
+		if ( $value && ! is_email( (string) $value ) ) {
 			$this->error( 'customer_invalid_billing_email', __( 'Invalid billing email address', 'woocommerce' ) );
 		}
 		$this->set_address_prop( 'email', 'billing', sanitize_email( $value ) );

@@ -44,7 +44,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
 		$cogs_is_enabled = $cogs_controller->feature_is_enabled();
 	?>
-	<div class="options_group pricing show_if_simple show_if_external show_if_variable hidden<?php echo $cogs_is_enabled ? ' show_if_variable' : ''; ?>">
+	<div class="options_group pricing show_if_simple show_if_external hidden<?php echo $cogs_is_enabled ? ' show_if_variable' : ''; ?>">
 		<?php if ( $cogs_is_enabled ) : ?>
 			<span class="show_if_simple show_if_external">
 		<?php endif; ?>

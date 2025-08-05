@@ -57,6 +57,16 @@ class Validation {
 	}
 
 	/**
+	 * Check if the schema is unwrapped (has cart, checkout, customer, as top level keys).
+	 *
+	 * @param array $schema The schema to check.
+	 * @return bool
+	 */
+	private static function schema_is_unwrapped( $schema ) {
+		return isset( $schema['cart'] ) || isset( $schema['checkout'] ) || isset( $schema['customer'] );
+	}
+
+	/**
 	 * Validate the field rules.
 	 *
 	 * @param DocumentObject $document_object The document object to validate.
@@ -64,17 +74,26 @@ class Validation {
 	 * @return bool|WP_Error
 	 */
 	public static function validate_document_object( DocumentObject $document_object, $rules ) {
+		if ( self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'$schema'    => 'http://json-schema.org/draft-07/schema#',
+				'type'       => 'object',
+				'properties' => $rules,
+			];
+		} else {
+			if ( ! isset( $rules['$schema'] ) ) {
+				$rules['$schema'] = 'http://json-schema.org/draft-07/schema#';
+			}
+			if ( ! isset( $rules['type'] ) ) {
+				$rules['type'] = 'object';
+			}
+		}
+
 		try {
 			$validator = new Validator();
 			$result    = $validator->validate(
 				Helper::toJSON( $document_object->get_data() ),
-				Helper::toJSON(
-					[
-						'$schema'    => 'http://json-schema.org/draft-07/schema#',
-						'type'       => 'object',
-						'properties' => $rules,
-					]
-				)
+				Helper::toJSON( $rules )
 			);
 
 			if ( ! $result->hasError() ) {
@@ -124,6 +143,13 @@ class Validation {
 
 		if ( empty( $rules ) ) {
 			return true;
+		}
+
+		if ( self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'type'       => 'object',
+				'properties' => $rules,
+			];
 		}
 
 		if ( empty( self::$meta_schema_json ) ) {

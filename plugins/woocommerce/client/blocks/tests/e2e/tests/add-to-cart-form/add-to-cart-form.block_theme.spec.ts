@@ -493,11 +493,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		blockUtils,
 		admin,
-		requestUtils,
 	} ) => {
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
-
 		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 

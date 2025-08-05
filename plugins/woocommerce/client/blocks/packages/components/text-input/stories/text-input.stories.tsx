@@ -168,12 +168,24 @@ Default.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
 	value: 'Lorem ipsum',
+};
+
+export const WithError: StoryFn< TextInputProps > = Template.bind( {} );
+WithError.args = {
+	id: 'unique-id',
+	label: 'Enter your value',
+	value: 'Lorem ipsum',
 	feedback: (
 		<div className="wc-block-components-validation-error">
-			<p>
-				This is a feedback element, usually it would be used as an error
-				message.
-			</p>
+			<p>This is an error message.</p>
 		</div>
 	),
+};
+
+export const WithHelp: StoryFn< TextInputProps > = Template.bind( {} );
+WithHelp.args = {
+	id: 'unique-id',
+	label: 'Enter your value',
+	value: 'Lorem ipsum',
+	help: 'This is help text for the input.',
 };

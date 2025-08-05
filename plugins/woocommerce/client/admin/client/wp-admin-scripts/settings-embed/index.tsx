@@ -17,7 +17,7 @@ import {
 	SettingsPaymentsCodWrapper,
 	SettingsPaymentsMainWrapper,
 	SettingsPaymentsOfflineWrapper,
-	SettingsPaymentsWooCommercePaymentsWrapper,
+	SettingsPaymentsWooPaymentsWrapper,
 } from '~/settings-payments';
 
 import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
@@ -55,7 +55,7 @@ const renderPaymentsSettings = () => {
 		},
 		{
 			id: 'experimental_wc_settings_payments_woocommerce_payments',
-			component: <SettingsPaymentsWooCommercePaymentsWrapper />,
+			component: <SettingsPaymentsWooPaymentsWrapper />,
 		},
 	];
 

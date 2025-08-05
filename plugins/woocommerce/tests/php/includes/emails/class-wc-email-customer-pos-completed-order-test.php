@@ -226,6 +226,73 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS email replaces placeholders with POS store details in email footer HTML while regular email does not.
+	 */
+	public function test_pos_email_replaces_placeholders_with_pos_store_details_in_email_footer_while_regular_email_does_not() {
+		// Initialize WC_Emails to set up actions and filters for email header in regular emails.
+		$emails = new WC_Emails();
+
+		// Given POS store details.
+		update_option( 'woocommerce_pos_store_name', 'Physical Store' );
+		update_option( 'woocommerce_pos_store_email', 'pos@example.com' );
+		update_option( 'woocommerce_pos_store_address', '134 Main St, Anytown, USA' );
+		// Placeholders that are set in the regular email.
+		update_option( 'woocommerce_store_address', '606 2nd St, Anytown, USA' );
+		update_option( 'woocommerce_email_from_address', 'online@example.com' );
+		update_option( 'blogname', 'Online Store' );
+
+		// Footer text that includes placeholders that can be replaced with POS store details.
+		update_option( 'woocommerce_email_footer_text', 'footer_title: {site_title}; footer_address: {store_address}; footer_email: {store_email}' );
+
+		// When getting content from both email classes.
+		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
+		$regular_email = new WC_Email_Customer_Completed_Order();
+
+		// Set the order on both email classes.
+		$pos_email->object     = OrderHelper::create_order();
+		$regular_email->object = OrderHelper::create_order();
+
+		$pos_content     = $pos_email->get_content_html();
+		$regular_content = $regular_email->get_content_html();
+
+		// Then POS email should include POS store details.
+		$this->assertStringContainsString( 'footer_title: Physical Store; footer_address', $pos_content );
+		$this->assertStringNotContainsString( 'footer_title: Online Store; footer_address', $pos_content );
+		$this->assertStringContainsString( 'footer_address: 134 Main St, Anytown, USA', $pos_content );
+		$this->assertStringNotContainsString( 'footer_address: 606 2nd St, Anytown, USA', $pos_content );
+		$this->assertStringContainsString( 'footer_email: pos@example.com', $pos_content );
+		$this->assertStringNotContainsString( 'footer_email: online@example.com', $pos_content );
+
+		// And regular email should include details from WC/WP settings.
+		$this->assertStringNotContainsString( 'footer_title: Physical Store; footer_address', $regular_content );
+		$this->assertStringContainsString( 'footer_title: Online Store; footer_address', $regular_content );
+		$this->assertStringNotContainsString( 'footer_address: 134 Main St, Anytown, USA', $regular_content );
+		$this->assertStringContainsString( 'footer_address: 606 2nd St, Anytown, USA', $regular_content );
+		$this->assertStringNotContainsString( 'footer_email: pos@example.com', $regular_content );
+		$this->assertStringContainsString( 'footer_email: online@example.com', $regular_content );
+
+		// When generating plain text emails.
+		$pos_plain_text     = $pos_email->get_content_plain();
+		$regular_plain_text = $regular_email->get_content_plain();
+
+		// Then POS email should include additional rows.
+		$this->assertStringContainsString( 'footer_title: Physical Store; footer_address', $pos_plain_text );
+		$this->assertStringNotContainsString( 'footer_title: Online Store; footer_address', $pos_plain_text );
+		$this->assertStringContainsString( 'footer_address: 134 Main St, Anytown, USA', $pos_plain_text );
+		$this->assertStringNotContainsString( 'footer_address: 606 2nd St, Anytown, USA', $pos_plain_text );
+		$this->assertStringContainsString( 'footer_email: pos@example.com', $pos_plain_text );
+		$this->assertStringNotContainsString( 'footer_email: online@example.com', $pos_plain_text );
+
+		// And regular email should not include these rows.
+		$this->assertStringNotContainsString( 'footer_title: Physical Store; footer_address', $regular_plain_text );
+		$this->assertStringContainsString( 'footer_title: Online Store; footer_address', $regular_plain_text );
+		$this->assertStringNotContainsString( 'footer_address: 134 Main St, Anytown, USA', $regular_plain_text );
+		$this->assertStringContainsString( 'footer_address: 606 2nd St, Anytown, USA', $regular_plain_text );
+		$this->assertStringNotContainsString( 'footer_email: pos@example.com', $regular_plain_text );
+		$this->assertStringContainsString( 'footer_email: online@example.com', $regular_plain_text );
+	}
+
+	/**
 	 * @testdox POS email includes blog name in email header HTML when POS store name is not set.
 	 */
 	public function test_pos_email_header_html_includes_blog_name_when_pos_store_name_is_not_set() {

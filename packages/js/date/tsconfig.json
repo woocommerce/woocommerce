@@ -14,5 +14,8 @@
 	"include": [
 		"typings/**/*",
 		"src/**/*",
+	],
+	"exclude": [
+		"**/test/**",
 	]
 }

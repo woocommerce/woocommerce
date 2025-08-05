@@ -3,7 +3,10 @@
  */
 import { TotalsTaxes, TotalsWrapper } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
 
 const Block = ( {
@@ -12,8 +15,9 @@ const Block = ( {
 }: {
 	className: string;
 	showRateAfterTaxName: boolean;
-} ): JSX.Element | null => {
+} ) => {
 	const { cartTotals } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	const displayCartPricesIncludingTax = getSetting(
 		'displayCartPricesIncludingTax',
@@ -35,6 +39,7 @@ const Block = ( {
 				showRateAfterTaxName={ showRateAfterTaxName }
 				currency={ totalsCurrency }
 				values={ cartTotals }
+				showSkeleton={ isLoading }
 			/>
 		</TotalsWrapper>
 	);

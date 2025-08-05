@@ -48,7 +48,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Select who should be notified if an order that was previously processing or on-hold gets cancelled.', 'woocommerce' )
+				? __( 'Receive an email notification when an order that was processing or on hold gets cancelled', 'woocommerce' )
 				: __( 'Cancelled order emails are sent to chosen recipient(s) when orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 
 			// Other settings.

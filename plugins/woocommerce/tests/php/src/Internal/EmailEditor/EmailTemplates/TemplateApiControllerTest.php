@@ -107,9 +107,9 @@ class TemplateApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that saveTemplateData throws an exception for invalid email addresses.
+	 * Test that saveTemplateData returns an error for invalid email addresses.
 	 */
-	public function testItThrowsExceptionForInvalidEmailAddress(): void {
+	public function testItReturnsErrorForInvalidEmailAddress(): void {
 		$template       = new \WP_Block_Template();
 		$template->slug = WooEmailTemplate::TEMPLATE_SLUG;
 
@@ -120,9 +120,9 @@ class TemplateApiControllerTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid email address provided for sender settings' );
+		$result = $this->template_api_controller->save_template_data( $data, $template );
 
-		$this->template_api_controller->save_template_data( $data, $template );
+		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertEquals( $result->get_error_code(), 'invalid_email_address' );
 	}
 }

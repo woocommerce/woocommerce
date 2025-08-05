@@ -71,8 +71,8 @@ class OrderAttribution {
 		// No more details if there is only the origin value - this is for unknown source types.
 		$has_more_details = array( 'origin' ) !== array_keys( $meta );
 
-		// For direct, web admin, or mobile app orders, also don't show more details.
-		$simple_sources = array( 'typein', 'admin', 'mobile_app' );
+		// For direct, web admin, mobile app or pos orders, also don't show more details.
+		$simple_sources = array( 'typein', 'admin', 'mobile_app', 'pos' );
 		if ( isset( $meta['source_type'] ) && in_array( $meta['source_type'], $simple_sources, true ) ) {
 			$has_more_details = false;
 		}

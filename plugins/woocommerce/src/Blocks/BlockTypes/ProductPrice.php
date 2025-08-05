@@ -1,12 +1,17 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductPrice class.
  */
 class ProductPrice extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+	use BlocksSharedState;
+
 
 	/**
 	 * Block name.
@@ -70,13 +75,55 @@ class ProductPrice extends AbstractBlock {
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 
+			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
+			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
+			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
+
+			$wrapper_attributes = array();
+			$watch_attribute    = '';
+
+			if ( $is_interactive ) {
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				foreach ( $variations_data as $variation ) {
+					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) ) {
+							continue;
+					}
+					$formatted_variations_data[ $variation['variation_id'] ] = array(
+						'price_html' => $variation['price_html'],
+					);
+				}
+
+				wp_interactivity_state(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'price_html' => $product->get_price_html(),
+								'variations' => $formatted_variations_data,
+							),
+						),
+					)
+				);
+
+				wp_enqueue_script_module( 'woocommerce/product-elements' );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+				$context                                   = array(
+					'productElementKey' => 'price_html',
+				);
+				$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+				$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
+			}
+
 			return sprintf(
-				'<div class="wp-block-woocommerce-product-price"><div class="wc-block-components-product-price wc-block-grid__product-price %1$s %2$s" style="%3$s">
-					%4$s
+				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s" %5$s>
+					%6$s
 				</div></div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 				esc_attr( $styles_and_classes['classes'] ),
 				esc_attr( $styles_and_classes['styles'] ?? '' ),
+				$watch_attribute,
 				$product->get_price_html()
 			);
 		}

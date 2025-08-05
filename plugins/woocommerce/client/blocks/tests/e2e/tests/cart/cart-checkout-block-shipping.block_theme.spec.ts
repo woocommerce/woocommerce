@@ -20,19 +20,13 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Shipping', () => {
-	test( 'Merchant can enable shipping calculator and hide shipping costs before address is entered', async ( {
+	test( 'Merchant can hide shipping costs before address is entered', async ( {
 		page,
 		shippingUtils,
 		localPickupUtils,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
-
-		await shippingUtils.enableShippingCalculator();
 		await shippingUtils.enableShippingCostsRequireAddress();
-
-		await expect(
-			page.getByLabel( 'Enable the shipping calculator on the cart page' )
-		).toBeChecked();
 
 		await expect(
 			page.getByLabel( 'Hide shipping costs until an address is entered' )
@@ -109,8 +103,10 @@ test.describe( 'Shopper → Shipping', () => {
 	test( '1. With shipping methods for the default location, shipping methods for _any_ location, and local pickup enabled, the shopper sees shipping rates and pickup options - rates are selected default', async ( {
 		localPickupUtils,
 		frontendUtils,
+		shippingUtils,
 	} ) => {
 		await localPickupUtils.enableLocalPickup();
+		await shippingUtils.disableShippingCostsRequireAddress();
 		await localPickupUtils.addPickupLocation( {
 			location: {
 				name: 'Automattic, Inc.',
@@ -124,19 +120,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Pickup (Automattic, Inc.) Free',
-			} )
-		).toBeVisible();
-
 		await frontendUtils.goToCheckout();
 		await expect(
 			frontendUtils.page.getByRole( 'radio', {
@@ -160,21 +143,12 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		frontendUtils,
 		shippingUtils,
-		checkoutPageObject,
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
 		await shippingUtils.disableShippingCostsRequireAddress();
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-
 		await frontendUtils.goToCheckout();
 		await expect(
 			frontendUtils.page.getByRole( 'radio', {
@@ -215,20 +189,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter address to check delivery options'
-			)
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Flat rate shipping $',
-			} )
-		).toBeChecked();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -277,19 +237,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter address to check delivery options'
-			)
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Pickup (Automattic, Inc.) Free',
-			} )
-		).toBeHidden();
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -323,6 +270,7 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		admin,
 		frontendUtils,
+		shippingUtils,
 	} ) => {
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
@@ -332,6 +280,7 @@ test.describe( 'Shopper → Shipping', () => {
 		admin.page.off( 'dialog', acceptDialog );
 
 		await localPickupUtils.enableLocalPickup();
+		await shippingUtils.disableShippingCostsRequireAddress();
 		await localPickupUtils.addPickupLocation( {
 			location: {
 				name: 'Automattic, Inc.',
@@ -358,20 +307,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter address to check delivery options'
-			)
-		).toBeHidden();
-
-		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Pickup (Automattic, Inc.) Free',
-			} )
-		).toBeChecked();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -393,6 +328,7 @@ test.describe( 'Shopper → Shipping', () => {
 		localPickupUtils,
 		admin,
 		frontendUtils,
+		shippingUtils,
 	} ) => {
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 		// Accept the delete dialog, then remove the listener;
@@ -402,6 +338,7 @@ test.describe( 'Shopper → Shipping', () => {
 		admin.page.off( 'dialog', acceptDialog );
 
 		await localPickupUtils.disableLocalPickup();
+		await shippingUtils.disableShippingCostsRequireAddress();
 
 		await admin.visitAdminPage( 'admin.php?page=wc-settings&tab=shipping' );
 
@@ -418,8 +355,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -447,14 +382,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter address to check delivery options'
-			)
-		).toBeVisible();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -504,14 +431,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
-		await expect(
-			frontendUtils.page.getByText(
-				'Enter address to check delivery options'
-			)
-		).toBeVisible();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -563,8 +482,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -579,28 +496,6 @@ test.describe( 'Shopper → Shipping', () => {
 				name: 'Shipping options',
 			} )
 		).toBeHidden();
-	} );
-
-	test( 'Guest user can see shipping calculator on cart page', async ( {
-		requestUtils,
-		browser,
-	} ) => {
-		const guestContext = await browser.newContext( {
-			storageState: { cookies: [], origins: [] },
-		} );
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCart();
-
-		// Note that the default customer location is set to the shop country/region, which
-		// is why this label is pre-populated with the shop country/region.
-		await expect(
-			userPage.getByText( 'Enter address to check delivery options' )
-		).toBeVisible();
 	} );
 
 	test( 'Guest user does not see shipping rates until full address is entered', async ( {

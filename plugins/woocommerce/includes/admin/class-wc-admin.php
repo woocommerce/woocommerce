@@ -141,7 +141,9 @@ class WC_Admin {
 	}
 
 	/**
-	 * Handle redirects to setup/welcome page after install and updates.
+	 * Handle redirects:
+	 * 1. To setup/welcome page after install and updates.
+	 * 2. To offline payment gateway(s) new settings page.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
@@ -166,6 +168,37 @@ class WC_Admin {
 
 			wp_safe_redirect( $url );
 			exit;
+		}
+
+		// Check if we have a section parameter for offline payment gateways and redirect to the new path.
+		if ( ! empty( $_GET['section'] ) ) {
+			$section = wc_clean( wp_unslash( $_GET['section'] ) );
+
+			// Handle offline payment gateway(s) redirections.
+			if ( 'offline' === $section || WC_Gateway_BACS::ID === $section || WC_Gateway_COD::ID === $section || WC_Gateway_Cheque::ID === $section ) {
+				// Get current URL and remove source parameter.
+				$current_url = remove_query_arg( 'section' );
+
+				if ( 'offline' === $section ) {
+					$redirect_url = add_query_arg(
+						array(
+							'path' => '/offline',
+						),
+						$current_url,
+					);
+				} else {
+					$redirect_url = add_query_arg(
+						array(
+							'path' => '/offline/' . strtolower( $section ),
+						),
+						$current_url,
+					);
+				}
+
+				// Perform the redirect.
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended

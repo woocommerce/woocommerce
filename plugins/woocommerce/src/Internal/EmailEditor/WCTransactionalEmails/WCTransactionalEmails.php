@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Class WCTransactionalEmails
@@ -68,7 +68,7 @@ class WCTransactionalEmails {
 	public static function get_transactional_emails() {
 		$emails = self::$core_transactional_emails;
 
-		if ( Features::is_enabled( 'point-of-sale' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails[] = 'customer_pos_completed_order';
 			$emails[] = 'customer_pos_refunded_order';
 		}

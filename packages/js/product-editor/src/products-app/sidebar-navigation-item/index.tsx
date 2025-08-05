@@ -4,7 +4,7 @@
 import { isRTL } from '@wordpress/i18n';
 import { chevronRightSmall, chevronLeftSmall, Icon } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 import {
 	__experimentalItem as Item,
@@ -54,7 +54,7 @@ export default function SidebarNavigationItem( {
 
 	return (
 		<Item
-			className={ classNames(
+			className={ clsx(
 				'edit-site-sidebar-navigation-item',
 				{ 'with-suffix': ! withChevron && suffix },
 				className

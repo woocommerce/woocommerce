@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -34,7 +35,12 @@ export interface FormattedMonetaryAmountProps
  */
 const currencyToNumberFormat = ( currency: Currency ) => {
 	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
-	const hasDuplicateSeparator = thousandSeparator === decimalSeparator;
+	// Decode HTML entities in separators
+	const decodedThousandSeparator = decodeHtmlEntities( thousandSeparator );
+	const decodedDecimalSeparator = decodeHtmlEntities( decimalSeparator );
+
+	const hasDuplicateSeparator =
+		decodedThousandSeparator === decodedDecimalSeparator;
 	if ( hasDuplicateSeparator ) {
 		// eslint-disable-next-line no-console
 		console.warn(
@@ -42,11 +48,13 @@ const currencyToNumberFormat = ( currency: Currency ) => {
 		);
 	}
 	return {
-		thousandSeparator: hasDuplicateSeparator ? '' : thousandSeparator,
-		decimalSeparator,
+		thousandSeparator: hasDuplicateSeparator
+			? ''
+			: decodedThousandSeparator,
+		decimalSeparator: decodedDecimalSeparator,
 		fixedDecimalScale: true,
-		prefix,
-		suffix,
+		prefix: decodeHtmlEntities( prefix ),
+		suffix: decodeHtmlEntities( suffix ),
 		isNumericString: true,
 	};
 };
@@ -86,6 +94,16 @@ const FormattedMonetaryAmount = ( {
 		return null;
 	}
 
+	// If we have rtl character in the prefix, we need to set the direction to ltr
+	// to avoid the price being displayed in the wrong direction.
+	const rtlPrefixStyles =
+		currency?.prefix && currency.prefix !== ''
+			? {
+					unicodeBidi: 'bidi-override' as const,
+					direction: 'ltr' as const,
+			  }
+			: {};
+
 	const classes = clsx(
 		'wc-block-formatted-money-amount',
 		'wc-block-components-formatted-money-amount',
@@ -99,6 +117,10 @@ const FormattedMonetaryAmount = ( {
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
+		style: {
+			...props.style,
+			...rtlPrefixStyles,
+		},
 	};
 
 	// Wrapper for NumberFormat onValueChange which handles subunit conversion.
@@ -110,13 +132,15 @@ const FormattedMonetaryAmount = ( {
 		: () => void 0;
 
 	return (
-		<NumberFormat
-			className={ classes }
-			displayType={ displayType }
-			{ ...numberFormatProps }
-			value={ priceValue }
-			onValueChange={ onValueChangeWrapper }
-		/>
+		<span className="wc-block-number-format-container">
+			<NumberFormat
+				className={ classes }
+				displayType={ displayType }
+				{ ...numberFormatProps }
+				value={ priceValue }
+				onValueChange={ onValueChangeWrapper }
+			/>
+		</span>
 	);
 };
 

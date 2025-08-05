@@ -16,6 +16,15 @@
 		// All are prefixed by {WC_Tracks::PREFIX}.
 		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
 
+		// Helper function to construct admin URLs similar to getAdminLink from @woocommerce/settings
+		function getAdminLink( path ) {
+			if ( ! marketplace_suggestions.admin_base_url || ! path || typeof path !== 'string' ) {
+				return '';
+			}
+			var cleanPath = path.charAt(0) === '/' ? path.slice(1) : path;
+			return marketplace_suggestions.admin_base_url + cleanPath;
+		}
+
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
 		function dismissSuggestion( context, product, promoted, url, suggestionSlug ) {
 			// hide the suggestion in the UI
@@ -109,11 +118,13 @@
 		}
 
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( context, product, promoted, slug, url, text, isButton ) {
+		function renderLinkout( context, product, promoted, slug, url, iamUrl, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
-
 			var utmUrl = addURLParameters( context, url );
-			linkoutButton.setAttribute( 'href', utmUrl );
+			var isInternalLink = Boolean( iamUrl );
+			var targetUrl = isInternalLink ? getAdminLink( iamUrl ) : utmUrl;
+
+			linkoutButton.setAttribute( 'href', targetUrl );
 
 			// By default, CTA links should open in same tab (and feel integrated with Woo).
 			// Exception: when editing products, use new tab. User may have product edits
@@ -136,7 +147,7 @@
 					context: context,
 					product: product || '',
 					promoted: promoted || '',
-					target: url || ''
+					target: targetUrl || ''
 				} );
 			};
 
@@ -144,9 +155,11 @@
 				linkoutButton.classList.add( 'button' );
 			} else {
 				linkoutButton.classList.add( 'linkout' );
+				if ( !isInternalLink ) {
 				var linkoutIcon = document.createElement( 'span' );
-				linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
-				linkoutButton.appendChild( linkoutIcon );
+					linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
+					linkoutButton.appendChild( linkoutIcon );
+				}
 			}
 
 			return linkoutButton;
@@ -207,7 +220,7 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 
 			if ( ! linkText ) {
@@ -216,7 +229,7 @@
 
 			container.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( context, product, promoted, slug, url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton );
 				container.appendChild( linkoutElement );
 			}
 
@@ -229,7 +242,20 @@
 
 		// Render a "list item" style suggestion.
 		// These are used in onboarding style contexts, e.g. products list empty state.
-		function renderListItem( context, product, promoted, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem(
+			context,
+			product,
+			promoted,
+			slug,
+			iconUrl,
+			title,
+			copy,
+			url,
+			iamUrl,
+			linkText,
+			linkIsButton,
+			allowDismiss
+		) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
@@ -242,7 +268,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss )
 			);
 
 			return container;
@@ -349,6 +375,20 @@
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
 
+			// Extract recommendations count from the first element if it exists
+			var recommendationsCount = 5; // default fallback
+			if (
+				marketplace_suggestions.suggestions_data &&
+				marketplace_suggestions.suggestions_data[0] &&
+				marketplace_suggestions.suggestions_data[0]['recommendations-count']
+			) {
+				var apiCount = marketplace_suggestions.suggestions_data[0]['recommendations-count'];
+				// Validate that it's a positive number and within reasonable bounds
+				if ( typeof apiCount === 'number' && apiCount > 0 && apiCount <= 50 ) {
+					recommendationsCount = Math.floor( apiCount );
+				}
+			}
+
 			// iterate over all suggestions containers, rendering promos
 			$( '.marketplace-suggestions-container' ).each( function() {
 				// determine the context / placement we're populating
@@ -357,8 +397,8 @@
 				// find promotions that target this context
 				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
 
-				// shuffle/randomly select five suggestions to display
-				var suggestionsToDisplay = _.sample( promos, 5 );
+				// shuffle/randomly select suggestions to display based on API count
+				var suggestionsToDisplay = _.sample( promos, recommendationsCount );
 
 				// render the promo content
 				for ( var i in suggestionsToDisplay ) {
@@ -385,6 +425,7 @@
 						suggestionsToDisplay[ i ].title,
 						suggestionsToDisplay[ i ].copy,
 						suggestionsToDisplay[ i ].url,
+						suggestionsToDisplay[ i ]['iam-url'] || '',
 						linkText,
 						linkoutIsButton,
 						allowDismiss

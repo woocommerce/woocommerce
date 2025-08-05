@@ -50,14 +50,6 @@ class OrderCountCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that invalid statuses throw exceptions.
-	 */
-	public function test_invalid_order_status() {
-		$this->expectException( \Exception::class );
-		$this->order_cache->set( 'shop_order', 'bad-status', 1 );
-	}
-
-	/**
 	 * Test that the cache can be flushed.
 	 */
 	public function test_flush_cache() {

@@ -35,7 +35,7 @@ export const FontPairing = () => {
 	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 	const [ custom ] = useGlobalSetting( 'typography.fontFamilies.custom' ) as [
-		Array< FontFamily >
+		Array< FontFamily > | undefined
 	];
 
 	// theme.json file font families
@@ -100,11 +100,12 @@ export const FontPairing = () => {
 
 		const customFonts = FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
 			const fontFamilies = pair.settings.typography.fontFamilies;
-			const fonts = custom.filter( ( customFont ) =>
-				fontFamilies.theme.some(
-					( themeFont ) => themeFont.slug === customFont.slug
-				)
-			);
+			const fonts =
+				custom?.filter( ( customFont ) =>
+					fontFamilies.theme.some(
+						( themeFont ) => themeFont.slug === customFont.slug
+					)
+				) ?? [];
 
 			return {
 				...pair,

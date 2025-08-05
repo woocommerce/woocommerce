@@ -24,15 +24,10 @@
 	"usesContext": [ "postId" ],
 	"providesContext": {
 		"hoverZoom": "hoverZoom",
-		"fullScreenOnClick": "fullScreenOnClick",
-		"cropImages": "cropImages"
+		"fullScreenOnClick": "fullScreenOnClick"
 	},
 	"ancestor": [ "woocommerce/single-product" ],
 	"attributes": {
-		"cropImages": {
-			"type": "boolean",
-			"default": false
-		},
 		"hoverZoom": {
 			"type": "boolean",
 			"default": true

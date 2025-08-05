@@ -1,0 +1,241 @@
+name: 'Release: Upload release to WordPress.org'
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release tag to upload (can be a draft release).'
+        required: true
+        default: ''
+      confirm-update:
+        description: 'I confirm that I want to upload a release to WordPress.org.'
+        type: boolean
+        required: true
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: release-wporg-svn
+
+jobs:
+  get-and-validate-release-asset:
+    name: Get intended release details
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    permissions:
+      contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
+    outputs:
+      release_tag: ${{ steps.fetch-release.outputs.release_tag }}
+      release_asset: ${{ steps.fetch-release.outputs.release_asset }}
+      overwrite_trunk: ${{ steps.check-asset.outputs.overwrite_trunk }}
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
+            echo "::error::You must check the confirmation checkbox to proceed."
+            exit 1
+          fi
+      - name: Fetch release
+        id: fetch-release
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const tag = '${{ inputs.release }}';
+            let release = null;
+
+            // Try to get release by tag name.
+            try {
+              const response = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag
+              });
+
+              release = response.data;
+            } catch ( e ) {
+              // Not found, try to find in last 20 releases.
+              const releases = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 20
+              });
+
+              release = releases.data.find( r => r.tag_name === tag );
+            }
+
+            if ( ! release ) {
+              core.setFailed( 'No release found for the given tag.' );
+              return;
+            }
+
+            // Find asset.
+            const asset = release.assets.find( asset => 'woocommerce.zip' === asset.name );
+            if ( ! asset ) {
+              core.setFailed( `No 'woocommerce.zip' asset found for release '${ release.tag_name }'.` );
+              return;
+            }
+
+            console.log( `Tag to be committed: '${ release.tag_name }'` );
+            console.log( `Release asset URL: '${ asset.url }'` );
+
+            core.setOutput( 'release_tag', release.tag_name );
+            core.setOutput( 'release_asset', asset.url );
+      - name: Validate release asset
+        id: check-asset
+        env:
+          RELEASE_TAG: ${{ steps.fetch-release.outputs.release_tag }}
+          SVN_URL: ${{ secrets.wporg_svn_url }}
+          SVN_USERNAME: ${{ secrets.wporg_svn_username }}
+          SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
+
+          # GH CLI.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download "$RELEASE_TAG" --pattern "woocommerce.zip" --output woocommerce.zip
+
+          if [ ! -e "woocommerce.zip" ]; then
+            echo "::error::Could not download 'woocommerce.zip' for release '$RELEASE_TAG'."
+            exit 1
+          fi
+
+          # Unzip asset.
+          unzip -qq woocommerce.zip
+
+          # Check that asset matches the release tag name.
+          if [ ! -e "woocommerce/woocommerce.php" ]; then
+            echo "::error::Asset in release tag '$RELEASE_TAG' is not a valid WooCommerce build."
+            exit 1
+          fi
+
+          # Check that version in ZIP matches tag.
+          version_in_zip=$(cat woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1)
+          if [ "$version_in_zip" != "$RELEASE_TAG" ]; then
+            echo "::error::Version in ZIP ($version_in_zip) does not match release number ($RELEASE_TAG)."
+            exit 1
+          fi
+
+          # Install SVN.
+          sudo apt-get -qq install -y subversion
+
+          # Check that tag does not already exist on SVN repo.
+          # This might return a false negative due to connection errors, but the check is repeated later after checkout.
+          if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
+            echo "::error::Tag '$RELEASE_TAG' already exists in SVN."
+            exit 1
+          fi
+
+          # Check whether this release should replace trunk in SVN.
+          svn_plugin_version=$( svn cat "$SVN_URL/trunk/woocommerce.php" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" |  grep -oP '(?<=Version: )(.+)' | head -n1 )
+          if [ -z "$svn_plugin_version" ]; then
+            echo "::error::Could not determine current version number in SVN."
+            exit 1
+          fi
+
+          if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>' ) ? 0 : 1 );"; then
+            echo "overwrite_trunk=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "overwrite_trunk=0" >> "$GITHUB_OUTPUT"
+          fi
+
+  commit:
+    name: Commit release to WordPress.org
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [get-and-validate-release-asset]
+    permissions:
+      contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
+    env:
+      SVN_URL: ${{ secrets.wporg_svn_url }}
+      SVN_USERNAME: ${{ secrets.wporg_svn_username }}
+      SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
+      RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
+    steps:
+      - name: Download and unzip asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download "$RELEASE_TAG" --pattern "woocommerce.zip" --output woocommerce.zip
+
+          if [[ ! -e "woocommerce.zip" ]]; then
+            echo "::error::Could not download 'woocommerce.zip' for release '$RELEASE_TAG'."
+            exit 1
+          fi
+
+          # Unzip asset.
+          unzip -qq woocommerce.zip -d release/
+
+          # One last sanity check.
+          if [[ ! -e "release/woocommerce/woocommerce.php" ]]; then
+            echo "::error::Incorrect release asset."
+            exit 1
+          fi
+
+      - name: Install SVN
+        run: |
+          sudo apt-get -qq install -y subversion
+
+      - name: Shallow checkout SVN trunk and tags
+        run: |
+          svn checkout "$SVN_URL" \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --depth immediates \
+            svn/
+
+      - name: Commit to trunk and tag
+        if: ${{ needs.get-and-validate-release-asset.outputs.overwrite_trunk == 1 }}
+        working-directory: ./svn
+        run: |
+          # Fetch trunk completely.
+          svn update \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --set-depth infinity \
+            trunk/
+
+          # Remove previous trunk files.
+          rm -rf trunk/*
+          cp -a ../release/woocommerce/. trunk
+
+          # SVN add/delete new or removed files as needed.
+          svn status | grep '^?' | awk '{print $2}' | xargs -r svn add
+          svn status | grep '^!' | awk '{print $2}' | xargs -r svn delete
+
+          # Copy trunk to tag.
+          svn copy trunk "tags/$RELEASE_TAG"
+
+          # Commit.
+          svn commit \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --message "Tagging version $RELEASE_TAG." \
+            --no-auth-cache \
+            --non-interactive \
+            --config-option=servers:global:http-timeout=600
+
+      - name: Commit to tag only
+        if: ${{ needs.get-and-validate-release-asset.outputs.overwrite_trunk != 1 }}
+        working-directory: ./svn
+        run: |
+          # Fetch empty tags.
+          svn update \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --set-depth immediates \
+            tags/
+
+          # Bail out if tag already exists.
+          if [[ -e "tags/$RELEASE_TAG" ]]; then
+            echo "::error::Tag '$RELEASE_TAG' already exists in SVN."
+            exit 1
+          fi
+
+          svn import \
+            ../release/woocommerce \
+            "$SVN_URL/tags/$RELEASE_TAG" \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --message "Tagging version $RELEASE_TAG." \
+            --no-auth-cache \
+            --non-interactive \
+            --config-option=servers:global:http-timeout=600

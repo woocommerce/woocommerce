@@ -23,14 +23,6 @@ import { useProductTypeSelector } from '../../../shared/stores/product-type-temp
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 
-export type FeaturesKeys = 'isBlockifiedAddToCart';
-
-export type FeaturesProps = {
-	[ key in FeaturesKeys ]?: boolean;
-};
-
-export type UpdateFeaturesType = ( key: FeaturesKeys, value: boolean ) => void;
-
 const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { product } = useProductDataContext();
 

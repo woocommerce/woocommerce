@@ -11,6 +11,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -331,6 +333,15 @@ class WC_Frontend_Scripts {
 				'version' => '1.7.21-wc.' . $version,
 			),
 		);
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$register_scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'woocommerce' ),
+				'version' => $version,
+			);
+		}
+
 		foreach ( $register_scripts as $name => $props ) {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 		}
@@ -368,6 +379,16 @@ class WC_Frontend_Scripts {
 				'has_rtl' => true,
 			),
 		);
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
+
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
 		}
@@ -422,6 +443,16 @@ class WC_Frontend_Scripts {
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
+		}
+		if ( is_checkout() && Features::is_enabled( 'experimental-blocks' ) ) {
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+				$registered_providers = $address_provider_service->get_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
+				}
+			}
 		}
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method' );
@@ -584,8 +615,20 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
-
 				);
+				if ( Features::is_enabled( 'experimental-blocks' ) ) {
+					$providers                   = wc_get_container()->get( AddressProviderController::class )->get_providers();
+					$params['address_providers'] = array_map(
+						function ( $provider ) {
+							// Sanitize provider data before sending to frontend.
+							return array(
+								'id'   => sanitize_key( $provider->id ),
+								'name' => sanitize_text_field( $provider->name ),
+							);
+						},
+						$providers
+					);
+				}
 				break;
 			case 'wc-address-i18n':
 				$params = array(

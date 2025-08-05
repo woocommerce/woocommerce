@@ -2,11 +2,11 @@
  * Internal dependencies
  */
 import { ACTION_TYPES } from './action-types';
-import { PaymentSettingsState } from './types';
+import { PaymentsSettingsState } from './types';
 import { Actions } from './actions';
 
 const reducer = (
-	state: PaymentSettingsState = {
+	state: PaymentsSettingsState = {
 		providers: [],
 		offlinePaymentGateways: [],
 		suggestions: [],
@@ -16,7 +16,7 @@ const reducer = (
 		errors: {},
 	},
 	payload?: Actions
-): PaymentSettingsState => {
+): PaymentsSettingsState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case ACTION_TYPES.GET_PAYMENT_PROVIDERS_REQUEST:

@@ -9,9 +9,9 @@
 		"WooCommerce",
 		"Products (Beta)",
 		"all products",
+		"by attribute",
 		"by category",
-		"by tag",
-		"by attribute"
+		"by tag"
 	],
 	"textdomain": "woocommerce",
 	"attributes": {

@@ -76,6 +76,17 @@ export const hasShippingRate = (
 	);
 };
 
+export const hasSelectedShippingRate = (
+	shippingRates: CartShippingRate[]
+): boolean => {
+	if ( ! hasShippingRate( shippingRates ) ) {
+		return false;
+	}
+	return shippingRates.some( ( shippingRatesPackage ) =>
+		shippingRatesPackage.shipping_rates.some( ( rate ) => rate.selected )
+	);
+};
+
 /**
  * Filters an array of packages/rates based on the shopper's preference for collection.
  */
@@ -122,11 +133,16 @@ export const getTotalShippingValue = ( values: {
 export const getSelectedShippingRateNames = (
 	shippingRates: CartShippingRate[]
 ): string[] => {
-	return shippingRates.flatMap( ( shippingPackage ) => {
-		return shippingPackage.shipping_rates
-			.filter( ( rate ) => rate.selected )
-			.flatMap( ( rate ) => rate.name );
-	} );
+	// This is to ensure we don't have duplicate rate names in the array.
+	return Array.from(
+		new Set(
+			shippingRates.flatMap( ( shippingPackage ) => {
+				return shippingPackage.shipping_rates
+					.filter( ( rate ) => rate.selected )
+					.map( ( rate ) => rate.name );
+			} )
+		)
+	);
 };
 
 export const selectedRatesAreCollectable = (

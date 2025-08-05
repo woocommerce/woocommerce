@@ -12,7 +12,7 @@ import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sanitize } from 'dompurify';
 
 /**
@@ -39,6 +39,8 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
+	inProgress: boolean;
+	inProgressLabel: string;
 	onClick?: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
@@ -117,6 +119,8 @@ const OptionalExpansionWrapper = ( {
 
 export const TaskItem = ( {
 	completed,
+	inProgress,
+	inProgressLabel,
 	title,
 	badge,
 	onDelete,
@@ -141,7 +145,7 @@ export const TaskItem = ( {
 		setTaskExpanded( expanded );
 	}, [ expanded ] );
 
-	const className = classnames( 'woocommerce-task-list__item', {
+	const className = clsx( 'woocommerce-task-list__item', {
 		complete: completed,
 		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,
@@ -250,6 +254,11 @@ export const TaskItem = ( {
 						</div>
 					) }
 				</Text>
+				{ inProgress && inProgressLabel && (
+					<div className="woocommerce-task-list__item-progress">
+						{ inProgressLabel }
+					</div>
+				) }
 			</div>
 			{ showEllipsisMenu && (
 				<EllipsisMenu

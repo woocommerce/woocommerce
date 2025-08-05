@@ -73,9 +73,15 @@ body:
       description: |
         We use the [WooCommerce System Status Report](https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/) to help us evaluate the issue. 
         Without this report we won't be able to fully evaluate this issue.
-      placeholder: |
+      value: |
+        <details>
+
+        <summary>WordPress Environment</summary>
+
         The System Status Report is found in your WordPress admin under **WooCommerce > Status**. 
         Please select “Get system report”, then “Copy for GitHub”, and then paste it here.
+
+        </details>
     validations:
       required: true
   - type: checkboxes

@@ -1157,7 +1157,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'sizes'  => '(max-width: 250px) 100vw, 250px',
 		);
 		$expected_attr = array(
-			'src'    => WC()->plugin_url() . '/assets/images/placeholder.png',
+			'src'    => WC()->plugin_url() . '/assets/images/placeholder.webp',
 			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
 			'alt'    => '',
 			'srcset' => '',

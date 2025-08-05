@@ -49,7 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'This email is sent to customers when their orders are cancelled.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when their order has been cancelled', 'woocommerce' )
 				: __( 'Cancelled order emails are sent to customers when their orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 		}
 

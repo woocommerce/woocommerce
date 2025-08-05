@@ -502,9 +502,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						ELSE product_id
 					END
 				)
-			WHERE 1 = 1
-				AND order_id IN ({$included_order_ids})
-				AND product_qty > 0
+			WHERE
+				order_id IN ({$included_order_ids})
 			",
 			ARRAY_A
 		);

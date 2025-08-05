@@ -2,6 +2,9 @@
 	margin: 0;
 	padding-top: $gap-large;
 
+	// Don't remove this, it marks the container for container queries used in inner blocks.
+	container-type: inline-size;
+
 	.with-scroll-to-top__scroll-point {
 		top: -96px;
 	}
@@ -52,9 +55,13 @@
 		margin: 0;
 
 		> div {
-			@include placeholder();
+			// here
+			@include skeleton-animation();
 			margin: 0 0 1.5em 0;
 			display: none;
+		}
+		div {
+			border: none;
 		}
 		.wp-block-woocommerce-checkout-contact-information-block,
 		.wp-block-woocommerce-checkout-payment-block {
@@ -129,4 +136,9 @@
 		@include font-size(large);
 		@include reset-box();
 	}
+}
+
+.theme-twentytwenty .wp-block-woocommerce-checkout,
+.theme-twentytwentyone .wp-block-woocommerce-checkout {
+	margin: 0 auto;
 }

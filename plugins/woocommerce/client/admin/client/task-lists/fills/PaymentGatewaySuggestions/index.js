@@ -35,6 +35,7 @@ import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
 import { getPluginSlug } from '~/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
@@ -271,13 +272,22 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<TrackedLink
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
 					) }
 					onClickCallback={ trackSeeMore }
-					targetUrl={ getAdminLink(
-						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-					) }
+					targetUrl={
+						isFeatureEnabled( 'marketplace' )
+							? getAdminLink(
+									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+							  )
+							: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
+					}
+					linkType={
+						isFeatureEnabled( 'marketplace' )
+							? 'wc-admin'
+							: 'external'
+					}
 				/>
 			}
 		></List>

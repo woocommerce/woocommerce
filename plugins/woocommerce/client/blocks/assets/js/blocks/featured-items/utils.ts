@@ -1,7 +1,13 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { Coordinates, ImageFit } from './types';
+import { BgImageDimensions } from './use-background-image';
 
 /**
  * Given x and y coordinates between 0 and 1 returns a rounded percentage string.
@@ -91,3 +97,81 @@ export function dimRatioToClass( ratio: number ) {
 		? null
 		: `has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
 }
+
+/**
+ * Determines whether the background color behind an image will be visible,
+ * based on the image's transparency, repetition, fit, and container size.
+ */
+export const getBackgroundColorVisibilityStatus = ( {
+	isImageBgTransparent,
+	originalImgDimension,
+	parentContainerDimension,
+	isRepeated,
+	imageFit,
+}: {
+	isImageBgTransparent: boolean;
+	originalImgDimension: BgImageDimensions;
+	parentContainerDimension: BgImageDimensions;
+	isRepeated: boolean;
+	imageFit: 'cover' | 'none';
+} ) => {
+	if ( isImageBgTransparent ) {
+		return {
+			isBackgroundVisible: true,
+			message: null,
+		};
+	}
+
+	// Checks if bg-image is not transparent and repeated all-over parent div or covers available parent div space.
+	if ( ! isImageBgTransparent && ( isRepeated || imageFit === 'cover' ) ) {
+		if ( isRepeated ) {
+			return {
+				isBackgroundVisible: false,
+				message: __(
+					'You’ve set a background color behind an image set to repeat, the background color cannot be seen.',
+					'woocommerce'
+				),
+			};
+		}
+
+		return {
+			isBackgroundVisible: false,
+			message: __(
+				'You’ve set a background color behind an image set to cover, the background color cannot be seen.',
+				'woocommerce'
+			),
+		};
+	}
+
+	// Checks if bg-image is not transparent and original-bg-image size is bigger than parent container's available space.
+	if (
+		! isImageBgTransparent &&
+		originalImgDimension.height >= parentContainerDimension.height &&
+		originalImgDimension.width >= parentContainerDimension.width
+	) {
+		return {
+			isBackgroundVisible: false,
+			message: __(
+				"You've set background color to an opaque image, the background color cannot be seen.",
+				'woocommerce'
+			),
+		};
+	}
+
+	// Checks if original-bg-image is smaller than the parent container's available space.
+	if (
+		originalImgDimension.height < parentContainerDimension.height ||
+		originalImgDimension.width < parentContainerDimension.width
+	) {
+		return {
+			isBackgroundVisible: true,
+			message: null,
+		};
+	}
+
+	// default case
+	return {
+		isBackgroundVisible: true,
+		message: null,
+	};
+};

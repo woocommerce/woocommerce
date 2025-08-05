@@ -4,12 +4,13 @@
 import type { DocumentObject } from '@woocommerce/base-hooks';
 import type { JSONSchemaType } from 'ajv';
 import type { AllHTMLAttributes, AriaAttributes } from 'react';
+import { isFormFields } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { SelectOption } from '../../base/components';
-import { getSetting } from './utils';
+import { getSettingWithCoercion } from './utils';
 
 // A list of attributes that can be added to a custom field when registering it.
 type CustomFieldAttributes = Pick<
@@ -137,9 +138,130 @@ export interface BillingAddress extends AddressFormValues {
 export type CountryAddressFields = Record< string, FormFields >;
 
 /**
+ * Fallback FormFields object matching the server-side structure exactly.
+ * Based on CheckoutFields::get_core_fields() in PHP.
+ */
+const fallbackFormFields: FormFields = {
+	email: {
+		label: 'Email address',
+		optionalLabel: 'Email address (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'email',
+		autocapitalize: 'none',
+		type: 'email',
+		index: 0,
+		validation: [],
+	},
+	country: {
+		label: 'Country/Region',
+		optionalLabel: 'Country/Region (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'country',
+		index: 1,
+		validation: [],
+	},
+	first_name: {
+		label: 'First name',
+		optionalLabel: 'First name (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'given-name',
+		autocapitalize: 'sentences',
+		index: 10,
+		validation: [],
+	},
+	last_name: {
+		label: 'Last name',
+		optionalLabel: 'Last name (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'family-name',
+		autocapitalize: 'sentences',
+		index: 20,
+		validation: [],
+	},
+	company: {
+		label: 'Company',
+		optionalLabel: 'Company (optional)',
+		required: false,
+		hidden: true,
+		autocomplete: 'organization',
+		autocapitalize: 'sentences',
+		index: 30,
+		validation: [],
+	},
+	address_1: {
+		label: 'Address',
+		optionalLabel: 'Address (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'address-line1',
+		autocapitalize: 'sentences',
+		index: 40,
+		validation: [],
+	},
+	address_2: {
+		label: 'Apartment, suite, etc.',
+		optionalLabel: 'Apartment, suite, etc. (optional)',
+		required: false,
+		hidden: false,
+		autocomplete: 'address-line2',
+		autocapitalize: 'sentences',
+		index: 50,
+		validation: [],
+	},
+	city: {
+		label: 'City',
+		optionalLabel: 'City (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'address-level2',
+		autocapitalize: 'sentences',
+		index: 70,
+		validation: [],
+	},
+	state: {
+		label: 'State/County',
+		optionalLabel: 'State/County (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'address-level1',
+		autocapitalize: 'sentences',
+		index: 80,
+		validation: [],
+	},
+	postcode: {
+		label: 'Postal code',
+		optionalLabel: 'Postal code (optional)',
+		required: true,
+		hidden: false,
+		autocomplete: 'postal-code',
+		autocapitalize: 'characters',
+		index: 90,
+		validation: [],
+	},
+	phone: {
+		label: 'Phone',
+		optionalLabel: 'Phone (optional)',
+		required: true,
+		hidden: false,
+		type: 'tel',
+		autocomplete: 'tel',
+		autocapitalize: 'characters',
+		index: 100,
+		validation: [],
+	},
+};
+
+/**
  * Default field properties.
  */
-export const defaultFields: FormFields =
-	getSetting< FormFields >( 'defaultFields' );
+export const defaultFields: FormFields = getSettingWithCoercion< FormFields >(
+	'defaultFields',
+	fallbackFormFields,
+	isFormFields
+);
 
 export default defaultFields;

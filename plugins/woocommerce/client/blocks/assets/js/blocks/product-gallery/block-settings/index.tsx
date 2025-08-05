@@ -14,24 +14,10 @@ export const ProductGalleryBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGallerySettingsProps ) => {
-	const { cropImages, hoverZoom, fullScreenOnClick } = attributes;
+	const { hoverZoom, fullScreenOnClick } = attributes;
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'Media Settings', 'woocommerce' ) }>
-				<ToggleControl
-					label={ __( 'Crop images to fit', 'woocommerce' ) }
-					help={ __(
-						'Images will be cropped to fit within a square space.',
-						'woocommerce'
-					) }
-					checked={ cropImages }
-					onChange={ () =>
-						setAttributes( {
-							cropImages: ! cropImages,
-						} )
-					}
-					className="wc-block-product-gallery__crop-images"
-				/>
 				<ToggleControl
 					label={ __( 'Zoom while hovering', 'woocommerce' ) }
 					help={ __(

@@ -531,7 +531,7 @@ class WC_Template_Loader {
 	 * @param int|null $id ID of the post being filtered.
 	 * @return string
 	 */
-	public static function unsupported_theme_title_filter( $title, ?int $id = null ) {
+	public static function unsupported_theme_title_filter( $title, $id = null ) {
 		if ( is_null( $id ) || self::$theme_support || ! $id !== self::$shop_page_id ) {
 			return $title;
 		}

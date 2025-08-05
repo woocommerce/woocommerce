@@ -949,12 +949,3 @@ class WC_Shop_Customizer {
 		return strpos( $post->post_content, '<!-- wp:woocommerce/checkout' ) !== false;
 	}
 }
-
-global $pagenow;
-if (
-	'customize.php' === $pagenow ||
-	isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	! wp_is_block_theme()
-) {
-	new WC_Shop_Customizer();
-}

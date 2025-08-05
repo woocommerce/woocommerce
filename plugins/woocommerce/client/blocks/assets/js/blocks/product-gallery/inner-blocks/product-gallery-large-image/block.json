@@ -6,11 +6,17 @@
 	"description": "Display the Large Image of a product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick", "cropImages" ],
+	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick" ],
 	"supports": {
 		"interactivity": true
 	},
+	"allowedBlocks": [
+		"woocommerce/product-image",
+		"woocommerce/product-sale-badge",
+		"woocommerce/product-gallery-large-image-next-previous"
+	],
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],
-	"viewScriptModule": "woocommerce/product-gallery-large-image"
+	"viewScriptModule": "woocommerce/product-gallery-large-image",
+	"editorStyle": "file:../woocommerce/product-gallery-large-image-editor.css"
 }

@@ -35,6 +35,24 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<product_id>\d+)/state',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_product_install_state' ),
+					'permission_callback' => array( $this, 'check_permission' ),
+					'args'                => array(
+						'product_id' => array(
+							'required' => true,
+							'type'     => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base,
 			array(
 				array(
@@ -90,8 +108,37 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	 * @param WP_USER $user User object.
 	 * @return bool
 	 */
-	public function user_has_permission( $user ) : bool {
+	public function user_has_permission( $user ): bool {
 		return user_can( $user, 'install_plugins' ) && user_can( $user, 'install_themes' );
+	}
+
+	/**
+	 * Get installation state.
+	 *
+	 * @since 3.7.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function get_product_install_state( $request ) {
+		$product_id = (int) $request->get_param( 'product_id' );
+		if ( $product_id <= 0 ) {
+			return rest_ensure_response(
+				new WP_Error(
+					'missing_param',
+					'The product_id parameter is required.',
+					array( 'status' => 400 )
+				)
+			);
+		}
+
+		$installation_manager = new WC_WCCOM_Site_Installation_Manager( $product_id );
+
+		try {
+			$state = $installation_manager->get_installation_status();
+			return $this->success_response( $product_id, $state );
+		} catch ( Installer_Error $exception ) {
+			return $this->failure_response( $product_id, $exception );
+		}
 	}
 
 	/**
@@ -146,11 +193,12 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 	/**
 	 * Generate a standardized response for a successful request.
 	 *
-	 * @param int $product_id Product ID.
+	 * @param int                                   $product_id Product ID.
+	 * @param WC_WCCOM_Site_Installation_State|null $state Installation state object.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	protected function success_response( $product_id ) {
-		$state    = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
+	protected function success_response( $product_id, ?WC_WCCOM_Site_Installation_State $state = null ) {
+		$state    = $state ?? WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );
 		$response = rest_ensure_response(
 			array(
 				'success' => true,
@@ -202,4 +250,3 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_WCCOM_Site_Control
 		);
 	}
 }
-

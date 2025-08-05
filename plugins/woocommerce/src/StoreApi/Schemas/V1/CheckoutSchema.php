@@ -149,7 +149,7 @@ class CheckoutSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				// Validation may be based on cart contents which is not available here; this returns all enabled
 				// gateways. Further validation occurs during the request.
-				'enum'        => array_values( WC()->payment_gateways->get_payment_gateway_ids() ),
+				'enum'        => array_merge( [ '' ], array_values( WC()->payment_gateways->get_payment_gateway_ids() ) ),
 			],
 			'create_account'    => [
 				'description' => __( 'Whether to create a new user account as part of order processing.', 'woocommerce' ),

@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import clsx from 'clsx';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -52,7 +53,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBorder,
 	} = attributes;
 	const { filterData } = context;
-	const { isLoading, items } = filterData;
+	const { isLoading, items, showCounts } = filterData;
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
@@ -100,7 +101,16 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								aria-checked={ !! item.selected }
 							>
 								<span className="wc-block-product-filter-chips__label">
-									{ item.label }
+									<span className="wc-block-product-filter-chips__text">
+										{ typeof item.label === 'string'
+											? decodeHtmlEntities( item.label )
+											: item.label }
+									</span>
+									{ showCounts && (
+										<span className="wc-block-product-filter-chips__count">
+											{ ` (${ item.count })` }
+										</span>
+									) }
 								</span>
 							</div>
 						) ) }

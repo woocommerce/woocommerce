@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
 import { useState, useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
@@ -30,10 +29,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const { emails, total, updateEmailEnabledStatus } = useTransactionalEmails(
-		emailTypes,
-		view
-	);
+	const { emails, total, updateEmailEnabledStatus, recreateEmailPost } =
+		useTransactionalEmails( emailTypes, view );
 
 	const fields = useMemo( () => {
 		const recipientElements = Array.from(
@@ -166,8 +163,19 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					);
 				},
 			},
+			{
+				id: 'recreate-email-post',
+				label: __( 'Recreate email post', 'woocommerce' ),
+				disabled: false,
+				supportsBulk: false,
+				isEligible: ( item: EmailType ) => ! item?.post_id,
+				callback: ( items: EmailType[] ) => {
+					void recreateEmailPost( items[ 0 ].id );
+					return true;
+				},
+			},
 		],
-		[ updateEmailEnabledStatus ]
+		[ updateEmailEnabledStatus, recreateEmailPost ]
 	);
 
 	const form = {
@@ -193,7 +201,9 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 			} }
 			showLayoutSwitcher={ false }
-			getItemId={ ( item: Post ) => item.id }
+			getItemId={ ( item: EmailType ) =>
+				`${ item.id }_${ item?.email_key || '' }`
+			}
 		/>
 	);
 };

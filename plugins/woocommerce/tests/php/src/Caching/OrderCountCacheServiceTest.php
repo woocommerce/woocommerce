@@ -145,4 +145,19 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 		$order_count_cache_service->schedule_background_actions();
 		$this->assertTrue( as_has_scheduled_action( 'woocommerce_refresh_order_count_cache' ) );
 	}
+
+	/**
+	 * Test that refresh cache works.
+	 */
+	public function test_refresh_cache() {
+		$count         = OrderUtil::get_count_for_type( 'shop_order' );
+		$pending_count = $count[ OrderInternalStatus::PENDING ];
+		// Set the pending count to a higher value to ensure it is refreshed.
+		$this->order_cache->set( 'shop_order', OrderInternalStatus::PENDING, $pending_count + 10 );
+
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->refresh_cache( 'shop_order' );
+
+		$this->assertSame( $pending_count, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
+	}
 }

@@ -239,7 +239,7 @@ return array(
 	'TO' => __( 'Tonga', 'woocommerce' ),
 	'TT' => __( 'Trinidad and Tobago', 'woocommerce' ),
 	'TN' => __( 'Tunisia', 'woocommerce' ),
-	'TR' => __( 'Turkey', 'woocommerce' ),
+	'TR' => __( 'Türkiye', 'woocommerce' ),
 	'TM' => __( 'Turkmenistan', 'woocommerce' ),
 	'TC' => __( 'Turks and Caicos Islands', 'woocommerce' ),
 	'TV' => __( 'Tuvalu', 'woocommerce' ),

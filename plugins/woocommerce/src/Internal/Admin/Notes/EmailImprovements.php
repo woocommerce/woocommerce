@@ -48,14 +48,14 @@ class EmailImprovements {
 	 */
 	private static function get_email_improvements_enabled_note() {
 		$note = new Note();
-		$note->set_title( __( 'Your emails have a new look!', 'woocommerce' ) );
-		$note->set_content( __( 'We’re excited to introduce our refreshed email templates designed to enhance your customers shopping experience. Preview and customize your emails in Settings.', 'woocommerce' ) );
+		$note->set_title( __( 'Your store emails have had an upgrade!', 'woocommerce' ) );
+		$note->set_content( __( 'We’ve made some exciting improvements to your email templates, including modern, shopper-friendly designs and new customization options. And if you’re using a block theme, you can automatically sync your theme styles! Head to your email settings to explore the new changes.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
-			'manage-emails',
-			__( 'Manage emails', 'woocommerce' ),
+			'customize-your-emails',
+			__( 'Customize your emails', 'woocommerce' ),
 			'?page=wc-settings&tab=email'
 		);
 		return $note;
@@ -68,14 +68,14 @@ class EmailImprovements {
 	 */
 	private static function get_try_email_improvements_note() {
 		$note = new Note();
-		$note->set_title( __( 'Introducing new email templates for your store!', 'woocommerce' ) );
-		$note->set_content( __( 'We’re excited to introduce our refreshed email templates designed to enhance your customers shopping experience. Preview and customize your emails in Settings.', 'woocommerce' ) );
+		$note->set_title( __( 'Store emails have had an upgrade!', 'woocommerce' ) );
+		$note->set_content( __( 'We’ve made some exciting improvements to our email templates, including modern, shopper-friendly designs and new customization options. And if you’re using a block theme, you can automatically sync your theme styles! Head to your email settings to explore the new features.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
-			'try-new-templates',
-			__( 'Try new templates', 'woocommerce' ),
+			'try-the-new-templates',
+			__( 'Try the new templates', 'woocommerce' ),
 			'?page=wc-settings&tab=email&try-new-templates'
 		);
 		return $note;

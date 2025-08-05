@@ -5,7 +5,7 @@ import { MenuGroup, MenuItem } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -39,7 +39,7 @@ export function VariationActions( {
 
 	return (
 		<div
-			className={ classNames( {
+			className={ clsx( {
 				'components-dropdown-menu__menu': supportsMultipleSelection,
 			} ) }
 		>

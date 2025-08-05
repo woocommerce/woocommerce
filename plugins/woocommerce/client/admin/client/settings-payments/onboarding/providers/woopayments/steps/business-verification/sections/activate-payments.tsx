@@ -3,27 +3,47 @@
  */
 import React, { useState } from 'react';
 import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import { useStepperContext } from '../components/stepper';
-import { disableWooPaymentsTestMode } from '~/settings-payments/utils';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import strings from '../strings';
+import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 const ActivatePayments: React.FC = () => {
+	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
 
 	const handleContinue = () => {
-		// Set the continue button loading state to true.
+		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
+			step: currentStep?.id || 'unknown',
+			sub_step_id: 'activate',
+			action: 'activate_payments',
+			source: sessionEntryPoint,
+		} );
+
+		if ( ! currentStep?.actions?.test_account_disable?.href ) {
+			// If there is no test account disable URL, we can proceed to the next step directly.
+			return nextStep();
+		}
+
 		setIsContinueButtonLoading( true );
 
-		// Disable test mode and redirect to the live account setup link.
-		disableWooPaymentsTestMode()
+		// Disable test account and proceed to live KYC.
+		apiFetch( {
+			url: currentStep?.actions?.test_account_disable?.href,
+			method: 'POST',
+			data: {
+				from: 'step_' + ( currentStep?.id || 'unknown' ),
+				source: sessionEntryPoint,
+			},
+		} )
 			.then( () => {
-				// Set the continue button loading state to false.
 				setIsContinueButtonLoading( false );
 				// Navigate to the live account setup.
 				return nextStep();
@@ -31,6 +51,7 @@ const ActivatePayments: React.FC = () => {
 			.catch( () => {
 				// Handle any errors that occur during the process.
 				setIsContinueButtonLoading( false );
+				// Error tracking is handled on the backend, so we don't need to do anything here.
 			} );
 	};
 

@@ -567,13 +567,6 @@ class WC_Brands {
 		$alphabet       = apply_filters( 'woocommerce_brands_list_alphabet', range( 'a', 'z' ) );
 		$numbers        = apply_filters( 'woocommerce_brands_list_numbers', '0-9' );
 
-		/**
-		 * Check for empty brands and remove them from the list.
-		 */
-		if ( ! $show_empty_brands ) {
-			$terms = $this->remove_terms_with_empty_products( $terms );
-		}
-
 		foreach ( $terms as $term ) {
 			$term_letter = $this->get_brand_name_first_character( $term->name );
 
@@ -672,10 +665,6 @@ class WC_Brands {
 			return;
 		}
 
-		if ( $hide_empty ) {
-			$brands = $this->remove_terms_with_empty_products( $brands );
-		}
-
 		ob_start();
 
 		wc_get_template(
@@ -723,7 +712,7 @@ class WC_Brands {
 		$brands = get_terms(
 			'product_brand',
 			array(
-				'hide_empty' => $args['hide_empty'],
+				'hide_empty' => $hide_empty,
 				'orderby'    => $args['orderby'],
 				'exclude'    => $exclude,
 				'number'     => $args['number'],
@@ -733,10 +722,6 @@ class WC_Brands {
 
 		if ( ! $brands ) {
 			return;
-		}
-
-		if ( $hide_empty ) {
-			$brands = $this->remove_terms_with_empty_products( $brands );
 		}
 
 		ob_start();
@@ -1024,22 +1009,6 @@ class WC_Brands {
 		$term_taxonomy_ids = wp_set_object_terms( $product_id, $term_ids, 'product_brand' );
 		$product->delete_meta_data( 'duplicate_temp_brand_ids' );
 		$product->save();
-	}
-
-	/**
-	 * Remove terms with empty products.
-	 *
-	 * @param WP_Term[] $terms The terms array that needs to be removed of empty products.
-	 *
-	 * @return WP_Term[]
-	 */
-	private function remove_terms_with_empty_products( $terms ) {
-		return array_filter(
-			$terms,
-			function ( $term ) {
-				return $term->count > 0;
-			}
-		);
 	}
 
 	/**

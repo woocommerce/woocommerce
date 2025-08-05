@@ -203,10 +203,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	private function is_accessing_settings() {
 		if ( is_admin() ) {
-			// phpcs:disable WordPress.Security.NonceVerification
-			if ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) {
+			if ( ! is_wc_admin_settings_page() ) {
 				return false;
 			}
+			// phpcs:disable WordPress.Security.NonceVerification
 			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
 				return false;
 			}
@@ -366,5 +366,14 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
 			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
 		}
+	}
+
+	/**
+	 * Get the settings URL for the gateway.
+	 *
+	 * @return string
+	 */
+	public function get_settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/cod' );
 	}
 }

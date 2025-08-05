@@ -59,6 +59,13 @@ class FeaturesController {
 	private $compatibility_info_by_feature = array();
 
 	/**
+	 * Pending compatibility declarations. Format is [feature_id, plugin_file, positive_compatibility].
+	 *
+	 * @var array
+	 */
+	private $pending_declarations = array();
+
+	/**
 	 * The LegacyProxy instance to use.
 	 *
 	 * @var LegacyProxy
@@ -112,6 +119,13 @@ class FeaturesController {
 	private bool $registered_additional_features_via_class_calls = false;
 
 	/**
+	 * Flag indicating if we are currently delaying plugin normalization.
+	 *
+	 * @var bool
+	 */
+	private bool $lazy = true;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
@@ -149,6 +163,32 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
+		add_filter( 'woocommerce_admin_features', array( $this, 'sync_iapi_mini_cart_feature' ) );
+	}
+
+	/**
+	 * Synchronize the 'experimental-iapi-mini-cart' feature flag with the admin Features system.
+	 *
+	 * @param array $features The original list of features.
+	 * @return array The modified list of features.
+	 */
+	public function sync_iapi_mini_cart_feature( $features ) {
+		$option_name = 'woocommerce_feature_experimental-iapi-mini-cart_enabled';
+		$is_enabled  = 'yes' === get_option( $option_name, 'no' );
+
+		if ( $is_enabled ) {
+			if ( ! in_array( 'experimental-iapi-mini-cart', $features, true ) ) {
+				$features[] = 'experimental-iapi-mini-cart';
+			}
+		} else {
+			$features = array_filter(
+				$features,
+				function ( $feature ) {
+					return 'experimental-iapi-mini-cart' !== $feature;
+				}
+			);
+		}
+		return $features;
 	}
 
 	/**
@@ -244,7 +284,7 @@ class FeaturesController {
 		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
-			'analytics'              => array(
+			'analytics'                   => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'option_key'         => Analytics::TOGGLE_OPTION_NAME,
@@ -253,7 +293,7 @@ class FeaturesController {
 				'disable_ui'         => false,
 				'is_legacy'          => true,
 			),
-			'product_block_editor'   => array(
+			'product_block_editor'        => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
@@ -274,25 +314,25 @@ class FeaturesController {
 					return $string;
 				},
 			),
-			'cart_checkout_blocks'   => array(
+			'cart_checkout_blocks'        => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
-			'rate_limit_checkout'    => array(
+			'rate_limit_checkout'         => array(
 				'name'               => __( 'Rate limit Checkout', 'woocommerce' ),
 				'description'        => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
 					__( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ),
-					'https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/docs/rate-limiting.md'
+					'https://developer.woocommerce.com/docs/apis/store-api/rate-limiting/'
 				),
 				'is_experimental'    => false,
 				'disable_ui'         => false,
 				'enabled_by_default' => false,
 				'is_legacy'          => true,
 			),
-			'marketplace'            => array(
+			'marketplace'                 => array(
 				'name'               => __( 'Marketplace', 'woocommerce' ),
 				'description'        => __(
 					'New, faster way to find extensions and themes for your WooCommerce store',
@@ -305,7 +345,7 @@ class FeaturesController {
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-			'order_attribution'      => array(
+			'order_attribution'           => array(
 				'name'               => __( 'Order Attribution', 'woocommerce' ),
 				'description'        => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -316,7 +356,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
-			'site_visibility_badge'  => array(
+			'site_visibility_badge'       => array(
 				'name'               => __( 'Site visibility badge', 'woocommerce' ),
 				'description'        => __(
 					'Enable the site visibility badge in the WordPress admin bar',
@@ -328,7 +368,7 @@ class FeaturesController {
 				'is_experimental'    => false,
 				'disabled'           => false,
 			),
-			'hpos_fts_indexes'       => array(
+			'hpos_fts_indexes'            => array(
 				'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
 				'description'        => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -339,7 +379,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
-			'hpos_datastore_caching' => array(
+			'hpos_datastore_caching'      => array(
 				'name'               => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'        => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
@@ -351,7 +391,7 @@ class FeaturesController {
 				'disable_ui'         => false,
 				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
-			'remote_logging'         => array(
+			'remote_logging'              => array(
 				'name'               => __( 'Remote Logging', 'woocommerce' ),
 				'description'        => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
@@ -384,7 +424,7 @@ class FeaturesController {
 					},
 				),
 			),
-			'email_improvements'     => array(
+			'email_improvements'          => array(
 				'name'            => __( 'Email improvements', 'woocommerce' ),
 				'description'     => __(
 					'Enable modern email design for transactional emails',
@@ -403,7 +443,7 @@ class FeaturesController {
 				'is_legacy'       => true,
 				'is_experimental' => false,
 			),
-			'blueprint'              => array(
+			'blueprint'                   => array(
 				'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
 				'description'        => __(
 					'Enable blueprint to import and export settings in bulk',
@@ -423,7 +463,7 @@ class FeaturesController {
 				'is_legacy'          => true,
 				'is_experimental'    => false,
 			),
-			'block_email_editor'     => array(
+			'block_email_editor'          => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'        => __(
 					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
@@ -440,6 +480,41 @@ class FeaturesController {
 				*/
 				'is_legacy'          => true,
 				'enabled_by_default' => false,
+			),
+			'point_of_sale'               => array(
+				'name'               => __( 'Point of Sale', 'woocommerce' ),
+				'description'        => __(
+					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
+					'woocommerce'
+				),
+				'enabled_by_default' => true,
+				'disable_ui'         => false,
+
+				/*
+				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
+				* but we wish to handle compatibility checking in a similar fashion to legacy features. The
+				* rational for setting legacy to true is therefore similar to that of the 'order_attribution'
+				* feature.
+				*
+				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
+				*/
+				'is_legacy'          => true,
+				'is_experimental'    => true,
+			),
+			'fulfillments'                => array(
+				'name'               => __( 'Order Fulfillments', 'woocommerce' ),
+				'description'        => __(
+					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
+					'woocommerce'
+				),
+				'enabled_by_default' => false,
+				'disable_ui'         => true,
+				'is_experimental'    => false,
+			),
+			'experimental-iapi-mini-cart' => array(
+				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
+				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
+				'is_experimental' => true,
 			),
 		);
 
@@ -552,6 +627,14 @@ class FeaturesController {
 			}
 		}
 
+		// We're deprecating the product block editor feature in favor of a v3 coming out.
+		// We want to hide this setting in the UI for users that don't have it enabled.
+		// If users have it enabled, we won't hide it until they explicitly disable it.
+		if ( isset( $features['product_block_editor'] )
+			&& ! $this->feature_is_enabled( 'product_block_editor' ) ) {
+			$features['product_block_editor']['disable_ui'] = true;
+		}
+
 		return $features;
 	}
 
@@ -640,51 +723,119 @@ class FeaturesController {
 	 * FeaturesUtil::declare_compatibility instead, passing the full plugin file path instead of the plugin name.
 	 *
 	 * @param string $feature_id Unique feature id.
-	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
+	 * @param string $plugin_file Plugin file path, either full or in the form 'directory/file.php'.
 	 * @param bool   $positive_compatibility True if the plugin declares being compatible with the feature, false if it declares being incompatible.
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 * @throws \Exception A plugin attempted to declare itself as compatible and incompatible with a given feature at the same time.
 	 */
-	public function declare_compatibility( string $feature_id, string $plugin_name, bool $positive_compatibility = true ): bool {
+	public function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
 		if ( ! $this->proxy->call_function( 'doing_action', 'before_woocommerce_init' ) ) {
 			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
 			/* translators: 1: class::method 2: before_woocommerce_init */
 			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should be called inside the %2$s action.', 'woocommerce' ), $class_and_method, 'before_woocommerce_init' ), '7.0' );
 			return false;
 		}
-
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return false;
 		}
 
-		$plugin_name = str_replace( '\\', '/', $plugin_name );
+		if ( $this->lazy ) {
+			// Lazy mode: Queue to be normalized later.
+			$this->pending_declarations[] = array( $feature_id, $plugin_file, $positive_compatibility );
+			return true;
+		}
+
+		// Late call: Normalize and register immediately.
+		return $this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
+	}
+
+	/**
+	 * Registers compatibility information internally for a given feature and plugin file.
+	 *
+	 * This method normalizes the plugin file path to a plugin ID, handles validation and logging for invalid plugins,
+	 * and registers the compatibility data if valid.
+	 * It updates the internal compatibility arrays, checks for conflicts (e.g., a plugin declaring both
+	 * compatible and incompatible with the same feature), and throws an exception if a conflict is detected.
+	 * Duplicate declarations (same compatibility type) are ignored.
+	 *
+	 * This is an internal helper method and should not be called directly.
+	 *
+	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
+	 * @since 10.1.0
+	 *
+	 * @param string $feature_id Unique feature ID.
+	 * @param string $plugin_file Raw plugin file path (full or 'directory/file.php').
+	 * @param bool   $positive_compatibility True if declaring compatibility, false if declaring incompatibility.
+	 * @return bool True on successful registration, false if the feature does not exist.
+	 * @throws \Exception If the plugin attempts to declare both compatibility and incompatibility for the same feature.
+	 */
+	private function register_compatibility_internal( string $feature_id, string $plugin_file, bool $positive_compatibility ): bool {
+		if ( ! $this->feature_exists( $feature_id ) ) {
+			return false;
+		}
+
+		// Normalize and validate plugin file.
+		$plugin_id = $this->plugin_util->get_wp_plugin_id( $plugin_file );
+		if ( ! $plugin_id ) {
+			$logger = $this->proxy->call_function( 'wc_get_logger' );
+			$logger->error( "FeaturesController: Invalid plugin file '{$plugin_file}' for feature '{$feature_id}'." );
+			return false;
+		}
 
 		// Register compatibility by plugin.
-
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_name );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_id );
 
 		$key          = $positive_compatibility ? 'compatible' : 'incompatible';
 		$opposite_key = $positive_compatibility ? 'incompatible' : 'compatible';
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $key );
-		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $opposite_key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $key );
+		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $opposite_key );
 
-		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $opposite_key ], true ) ) {
-			throw new \Exception( esc_html( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
+		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_id ][ $opposite_key ], true ) ) {
+			throw new \Exception( esc_html( "Plugin $plugin_id is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
 		}
 
-		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $key ], true ) ) {
-			$this->compatibility_info_by_plugin[ $plugin_name ][ $key ][] = $feature_id;
+		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_id ][ $key ], true ) ) {
+			$this->compatibility_info_by_plugin[ $plugin_id ][ $key ][] = $feature_id;
 		}
 
 		// Register compatibility by feature.
 
 		$key = $positive_compatibility ? 'compatible' : 'incompatible';
 
-		if ( ! in_array( $plugin_name, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
-			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_name;
+		if ( ! in_array( $plugin_id, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
+			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_id;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Processes any pending compatibility declarations by normalizing plugin file paths
+	 * and registering them internally.
+	 *
+	 * This method is called lazily when compatibility information is queried (via
+	 * get_compatible_features_for_plugin() or get_compatible_plugins_for_feature()).
+	 * It resolves plugin IDs using PluginUtil and logs errors for unrecognized plugins.
+	 * Pending declarations are cleared after processing to avoid redundant work.
+	 *
+	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
+	 * @since 10.1.0
+	 * @return void
+	 */
+	private function process_pending_declarations(): void {
+		if ( empty( $this->pending_declarations ) ) {
+			return;
+		}
+
+		foreach ( $this->pending_declarations as $declaration ) {
+			[ $feature_id, $plugin_file, $positive_compatibility ] = $declaration;
+
+			// Register internally.
+			$this->register_compatibility_internal( $feature_id, $plugin_file, $positive_compatibility );
+		}
+
+		$this->pending_declarations = array();
+		$this->lazy                 = false;
 	}
 
 	/**
@@ -709,6 +860,7 @@ class FeaturesController {
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
 	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
+		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
@@ -744,6 +896,7 @@ class FeaturesController {
 	 * @return array An array having a 'compatible', an 'incompatible' and an 'uncertain' key, each holding an array of plugin names.
 	 */
 	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ): array {
+		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( $active_only );
@@ -1515,9 +1668,9 @@ class FeaturesController {
 
 		wc_enqueue_js(
 			"
-	    const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
-	    for(const warningRow of warningRows) {
-	    	const pluginName = warningRow.getAttribute('data-plugin');
+		const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
+		for(const warningRow of warningRows) {
+			const pluginName = warningRow.getAttribute('data-plugin');
 			const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
 			if(pluginInfoRow.classList.contains('update')) {
 				warningRow.classList.remove('plugin-update-tr');
@@ -1526,7 +1679,7 @@ class FeaturesController {
 			else {
 				pluginInfoRow.classList.add('update');
 			}
-	    }
+		}
 		"
 		);
 	}

@@ -8,9 +8,10 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
-use WP_Style_Engine;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a column block.
@@ -30,12 +31,12 @@ class Column extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$content = '';
 		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
 			$content .= render_block( $block );
@@ -44,24 +45,24 @@ class Column extends Abstract_Block_Renderer {
 		return str_replace(
 			'{column_content}',
 			$content,
-			$this->get_block_wrapper( $block_content, $parsed_block, $settings_controller )
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
 
 	/**
 	 * Based on MJML <mj-column>
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
-	private function get_block_wrapper( string $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	private function get_block_wrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 		$block_attributes           = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'verticalAlignment' => 'stretch',
-				'width'             => $settings_controller->get_layout_width_without_padding(),
+				'width'             => $rendering_context->get_layout_width_without_padding(),
 				'style'             => array(),
 			)
 		);
@@ -70,54 +71,56 @@ class Column extends Abstract_Block_Renderer {
 		// to create a feeling of a stretched column. This also needs to apply to CSS classnames which can also apply styles.
 		$is_stretched = empty( $block_attributes['verticalAlignment'] ) || 'stretch' === $block_attributes['verticalAlignment'];
 
-		$padding_css = $this->get_styles_from_block( array( 'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ) ) )['css'];
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'color'      => $block_attributes['style']['color'] ?? array(),
-				'background' => $block_attributes['style']['background'] ?? array(),
+		$padding_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
+		$padding_styles = Styles_Helper::extend_block_styles( $padding_styles, array( 'text-align' => 'left' ) );
+
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color' ) );
+		$cell_styles = Styles_Helper::extend_block_styles(
+			$cell_styles,
+			array_filter(
+				array(
+					'background-size' => ! empty( $cell_styles['background-image'] ) && empty( $cell_styles['background-size'] ) ? 'cover' : null,
+				)
 			)
-		)['declarations'];
-
-		$border_styles = $this->get_styles_from_block( array( 'border' => $block_attributes['style']['border'] ?? array() ) )['declarations'];
-
-		if ( ! empty( $border_styles ) ) {
-			$cell_styles = array_merge( $cell_styles, array( 'border-style' => 'solid' ), $border_styles );
-		}
-
-		if ( ! empty( $cell_styles['background-image'] ) && empty( $cell_styles['background-size'] ) ) {
-			$cell_styles['background-size'] = 'cover';
-		}
+		);
 
 		$wrapper_classname = 'block wp-block-column email-block-column';
 		$content_classname = 'email-block-column-content';
-		$wrapper_css       = WP_Style_Engine::compile_css(
-			array(
-				'vertical-align' => $is_stretched ? 'top' : $block_attributes['verticalAlignment'],
-			),
-			''
+		$wrapper_styles    = Styles_Helper::extend_block_styles(
+			Styles_Helper::$empty_block_styles,
+			array( 'vertical-align' => $is_stretched ? 'top' : $block_attributes['verticalAlignment'] ),
 		);
-		$content_css       = 'vertical-align: top;';
+		$content_styles    = Styles_Helper::extend_block_styles( Styles_Helper::$empty_block_styles, array( 'vertical-align' => 'top' ) );
 
 		if ( $is_stretched ) {
 			$wrapper_classname .= ' ' . $original_wrapper_classname;
-			$wrapper_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
+			$wrapper_styles     = Styles_Helper::extend_block_styles( $wrapper_styles, $cell_styles['declarations'] );
 		} else {
 			$content_classname .= ' ' . $original_wrapper_classname;
-			$content_css       .= ' ' . WP_Style_Engine::compile_css( $cell_styles, '' );
+			$content_styles     = Styles_Helper::extend_block_styles( $content_styles, $cell_styles['declarations'] );
 		}
 
-		return '
-      <td class="' . esc_attr( $wrapper_classname ) . '" style="' . esc_attr( $wrapper_css ) . '" width="' . esc_attr( $block_attributes['width'] ) . '">
-        <table class="' . esc_attr( $content_classname ) . '" style="' . esc_attr( $content_css ) . '" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-          <tbody>
-            <tr>
-              <td align="left" style="text-align:left;' . esc_attr( $padding_css ) . '">
-                {column_content}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    ';
+		// Create the inner table using the helper.
+		$inner_table_attrs = array(
+			'class' => $content_classname,
+			'style' => $content_styles['css'],
+			'width' => '100%',
+		);
+
+		$inner_cell_attrs = array(
+			'align' => 'left',
+			'style' => $padding_styles['css'],
+		);
+
+		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
+
+		// Create the outer td element (since this is meant to be used within a columns structure).
+		$wrapper_cell_attrs = array(
+			'class' => $wrapper_classname,
+			'style' => $wrapper_styles['css'],
+			'width' => Styles_Helper::parse_value( $block_attributes['width'] ),
+		);
+
+		return Table_Wrapper_Helper::render_table_cell( $inner_table, $wrapper_cell_attrs );
 	}
 }

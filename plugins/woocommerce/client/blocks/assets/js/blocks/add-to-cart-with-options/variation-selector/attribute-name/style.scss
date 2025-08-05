@@ -1,0 +1,4 @@
+/* Remove the default margin added by WooCommerce core stylesheets. */
+:where(.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name) {
+	margin-bottom: 0;
+}

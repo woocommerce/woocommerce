@@ -21,7 +21,7 @@ export default {
 		countries,
 		autoComplete: 'off',
 		id: 'country',
-		label: 'Countries: ',
+		label: 'Country: ',
 		required: false,
 	},
 	argTypes: {

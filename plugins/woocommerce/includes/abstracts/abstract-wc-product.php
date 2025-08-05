@@ -2004,20 +2004,54 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get min quantity which can be purchased at once.
 	 *
 	 * @since  3.0.0
-	 * @return int
+	 * @return int|float
 	 */
 	public function get_min_purchase_quantity() {
-		return 1;
+		/**
+		 * Filters the minimum quantity which can be purchased at once.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $quantity The minimum quantity.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The minimum quantity.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_min', 1, $this ) );
 	}
 
 	/**
 	 * Get max quantity which can be purchased at once.
 	 *
 	 * @since  3.0.0
-	 * @return int Quantity or -1 if unlimited.
+	 * @return int|float Quantity or -1 if unlimited.
 	 */
 	public function get_max_purchase_quantity() {
-		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() );
+		/**
+		 * Filters the maximum quantity which can be purchased at once.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $quantity The maximum quantity.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The maximum quantity.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_max', $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() ), $this ) );
+	}
+
+	/**
+	 * The step for the quantity input and the multiple_of by which the quantity can be purchased.
+	 *
+	 * @since 10.1.0
+	 * @return int|float
+	 */
+	public function get_purchase_quantity_step() {
+		/**
+		 * Filters the step for the quantity input for this product.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $step The step.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The step.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_step', 1, $this ) );
 	}
 
 	/**

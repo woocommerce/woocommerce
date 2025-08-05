@@ -44,7 +44,7 @@ describe( 'Checkout store', () => {
 					await wait();
 					throw new Error( 'test' );
 				} )
-			).rejects.toThrowError( 'test' );
+			).rejects.toThrow( 'test' );
 
 			expect( select( store ).isCalculating() ).toBe( false );
 		} );
