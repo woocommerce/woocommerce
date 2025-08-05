@@ -9,6 +9,8 @@ import {
 	type BlockAttributes,
 	type BlockInstance,
 	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Gutenberg
+	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 import '@wordpress/format-library';
 import {
@@ -90,7 +92,7 @@ export async function initializeEditor(
 		createBlock(
 			testBlock.name,
 			testBlock.attributes,
-			testBlock.innerBlocks
+			createBlocksFromInnerBlocksTemplate( testBlock.innerBlocks )
 		)
 	);
 	return waitForStoreResolvers( () =>
