@@ -9,15 +9,13 @@ import {
 	paymentSettingsStore,
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import './modals.scss';
-import {
-	recordPaymentsEvent,
-	resetWooPaymentsAccount,
-} from '~/settings-payments/utils';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 import {
 	wooPaymentsExtensionSlug,
 	wooPaymentsProviderId,
@@ -48,6 +46,11 @@ interface WooPaymentsResetAccountModalProps {
 	 * Indicate if the reset flow is embedded (ie inside NOX).
 	 */
 	isEmbeddedResetFlow?: boolean;
+
+	/**
+	 * URL for the reset account API endpoint.
+	 */
+	resetUrl?: string;
 }
 
 /**
@@ -59,6 +62,7 @@ export const WooPaymentsResetAccountModal = ( {
 	hasAccount,
 	isTestMode,
 	isEmbeddedResetFlow = false,
+	resetUrl,
 }: WooPaymentsResetAccountModalProps ) => {
 	const [ isResettingAccount, setIsResettingAccount ] = useState( false );
 	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
@@ -70,12 +74,14 @@ export const WooPaymentsResetAccountModal = ( {
 
 	/**
 	 * Handles the "Reset Account" action.
-	 * Redirects the user to the WooPayments reset account link.
 	 */
 	const handleResetAccount = () => {
 		setIsResettingAccount( true );
 
-		resetWooPaymentsAccount()
+		apiFetch( {
+			url: resetUrl,
+			method: 'POST',
+		} )
 			.then( () => {
 				recordPaymentsEvent( 'provider_reset_onboarding_success', {
 					provider_id: wooPaymentsProviderId,

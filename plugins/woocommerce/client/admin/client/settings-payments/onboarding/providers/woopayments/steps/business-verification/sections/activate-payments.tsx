@@ -3,15 +3,13 @@
  */
 import React, { useState } from 'react';
 import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import { useStepperContext } from '../components/stepper';
-import {
-	disableWooPaymentsTestAccount,
-	recordPaymentsOnboardingEvent,
-} from '~/settings-payments/utils';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import strings from '../strings';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
@@ -29,10 +27,22 @@ const ActivatePayments: React.FC = () => {
 			source: sessionEntryPoint,
 		} );
 
+		if ( ! currentStep?.actions?.test_account_disable?.href ) {
+			// If there is no test account disable URL, we can proceed to the next step directly.
+			return nextStep();
+		}
+
 		setIsContinueButtonLoading( true );
 
 		// Disable test account and proceed to live KYC.
-		disableWooPaymentsTestAccount()
+		apiFetch( {
+			url: currentStep?.actions?.test_account_disable?.href,
+			method: 'POST',
+			data: {
+				from: 'step_' + ( currentStep?.id || 'unknown' ),
+				source: sessionEntryPoint,
+			},
+		} )
 			.then( () => {
 				setIsContinueButtonLoading( false );
 				// Navigate to the live account setup.

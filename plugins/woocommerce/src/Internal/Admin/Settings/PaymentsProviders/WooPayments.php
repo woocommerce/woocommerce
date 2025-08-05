@@ -53,7 +53,7 @@ class WooPayments extends PaymentGateway {
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
 		// Add the test [drive] account details to the onboarding state.
-		$details['onboarding']['state']['test_drive_account'] = $this->has_test_drive_account();
+		$details['onboarding']['state']['test_drive_account'] = $has_test_account;
 
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );

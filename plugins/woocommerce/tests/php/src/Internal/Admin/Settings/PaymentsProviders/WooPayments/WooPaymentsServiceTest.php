@@ -468,6 +468,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
 					),
+					'reset'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/reset' ),
+					),
 				),
 			),
 			// The business verification step.
@@ -548,37 +552,41 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_test_account' => $account_state['has_account'] && $account_state['test_account'],
 				),
 				'actions'        => array(
-					'start'              => array(
+					'start'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
 					),
-					'save'               => array(
+					'save'                 => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
 					),
-					'kyc_session'        => array(
+					'kyc_session'          => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
 					),
-					'kyc_session_finish' => array(
+					'kyc_session_finish'   => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
 					),
-					'kyc_fallback'       => array(
+					'kyc_fallback'         => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
 						'href' => $kyc_fallback_url,
 					),
-					'finish'             => array(
+					'finish'               => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 					),
-					'check'              => array(
+					'check'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check' ),
 					),
-					'clean'              => array(
+					'clean'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/clean' ),
+					),
+					'test_account_disable' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/test_account/disable' ),
 					),
 				),
 			),
@@ -652,6 +660,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'clean' => array(
 					'type' => WooPaymentsService::ACTION_TYPE_REST,
 					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
+				),
+				'reset' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/reset' ),
 				),
 			);
 		}
