@@ -117,6 +117,23 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "selected_branch=${SELECTED_BRANCH}" >> $GITHUB_OUTPUT
 
+      - name: Validate input version matches current version in the selected branch
+        id: validate-selected-branch-version
+        env:
+          VERSION: ${{ steps.validate-version.outputs.version }}
+          SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
+        run: |
+          git checkout $SELECTED_BRANCH
+          current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          echo "Current version from woocommerce.php: '$current_version'"
+          echo "Input version: '$VERSION'"
+
+          if [[ "$current_version" != "$VERSION"* ]]; then
+            echo "::error::The version in the selected branch ($current_version) does not match the input version ($VERSION)."
+            exit 1
+          fi
+
       - name: Setup PNPM
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
@@ -142,6 +159,11 @@ jobs:
         run: |
           echo "Using branch: $SELECTED_BRANCH"
           echo "Generating changelog for version: $VERSION"
+
+          # Normalize the version by removing .0 patch if present, as the changelog command does not support it
+          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
+            VERSION=${VERSION%.0}
+          fi
 
           APPEND_CHANGELOG=""
           if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
