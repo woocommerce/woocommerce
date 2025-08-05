@@ -232,7 +232,7 @@ final class OrderUtil {
 
 			// Make sure all order statuses are included just in case.
 			$count_per_status = array_merge(
-				array_fill_keys( array_merge( array_keys( wc_get_order_statuses() ), [ OrderStatus::TRASH ] ), 0 ),
+				array_fill_keys( array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) ), 0 ),
 				$count_per_status
 			);
 
