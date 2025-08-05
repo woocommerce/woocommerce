@@ -82,13 +82,16 @@ export default function ConnectButton( props: ConnectProps ) {
 
 				refreshSubscriptionsList();
 			} )
-			.catch( () => {
+			.catch( ( error ) => {
+				const errorMessage = error?.data?.message || '';
+
 				addNotice(
 					props.subscription.product_key,
 					sprintf(
 						// translators: %s is the product name.
-						__( '%s couldn’t be connected.', 'woocommerce' ),
-						props.subscription.product_name
+						__( '%1$s couldn’t be connected. %2$s', 'woocommerce' ),
+						props.subscription.product_name,
+						errorMessage
 					),
 					NoticeStatus.Error,
 					{
