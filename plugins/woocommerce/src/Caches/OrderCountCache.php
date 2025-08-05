@@ -41,23 +41,6 @@ class OrderCountCache {
 	}
 
 	/**
-	 * Adds the given status to the cached statuses array for the order type to make sure it can be retrieved when all
-	 * statuses are requested.
-	 *
-	 * @param string $order_status The status to add.
-	 * @param string $order_type   The order type to save with.
-	 *
-	 * @return void
-	 */
-	private function ensure_status_for_type( string $order_status, string $order_type ) {
-		$statuses = $this->get_saved_statuses_for_type( $order_type );
-		if ( ! in_array( $order_status, $statuses, true ) ) {
-			$statuses[] = $order_status;
-			wp_cache_set( $this->get_saved_statuses_cache_key( $order_type ), $statuses, '', $this->expiration );
-		}
-	}
-
-	/**
 	 * Adds the given statuses to the cached statuses array for the order type if they are not already stored.
 	 *
 	 * @param string   $order_type     The order type to save with.
@@ -112,7 +95,7 @@ class OrderCountCache {
 	}
 
 	private function get_saved_statuses_cache_key( $order_type ) {
-		return $this->cache_prefix . '-statuses-' . $order_type;
+		return $this->cache_prefix . '_' . $order_type . 'statuses';
 	}
 
 	/**
@@ -136,7 +119,7 @@ class OrderCountCache {
 	 * @return bool True if the value was set, false otherwise.
 	 */
 	public function set( $order_type, $order_status, int $value ): bool {
-		$this->ensure_statuses_for_type( (string) $order_type, (string) $order_status );
+		$this->ensure_statuses_for_type( (string) $order_type, array( (string) $order_status ) );
 		$cache_key = $this->get_cache_key( $order_type, $order_status );
 		return wp_cache_set( $cache_key, $value, '', $this->expiration );
 	}
