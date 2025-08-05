@@ -117,7 +117,7 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
-				$variations = $product->get_children();
+				$variations      = $product->get_children();
 				$parent_image_id = $product->get_image_id();
 				foreach ( $variations as $variation_id ) {
 					$variation_image_id = get_post_meta( $variation_id, '_thumbnail_id', true );
