@@ -185,12 +185,18 @@ class WC_Helper_Subscriptions_API {
 		try {
 			$success = WC_Helper::activate_helper_subscription( $product_key );
 		} catch ( Exception $e ) {
-			wp_send_json_error(
-				array(
-					'message' => $e->getMessage(),
-				),
-				400
+			$error_data = array(
+				'message' => $e->getMessage(),
 			);
+
+			if ( $e instanceof WC_Data_Exception ) {
+				$error_data['code'] = $e->getErrorCode();
+				$status_code = $e->getCode();
+			} else {
+				$status_code = 400;
+			}
+
+			wp_send_json_error( $error_data, $status_code );
 		}
 		if ( $success ) {
 			wp_send_json_success(

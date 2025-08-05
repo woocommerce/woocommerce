@@ -1172,7 +1172,10 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
+			throw new WC_Data_Exception(
+				$body['code'] ?? 'unknown_error',
+				$body['message'] ?? __( 'Unknown error', 'woocommerce' ),
+			);
 		}
 
 		self::_flush_subscriptions_cache();
