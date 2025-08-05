@@ -97,9 +97,9 @@ class OrderCountCache {
 	/**
 	 * Get the cache key saved statuses of the given order type.
 	 *
-	 * @param string $order_type
+	 * @param string $order_type The type of order.
 	 *
-	 * @return string
+	 * @return string The cache key.
 	 */
 	private function get_saved_statuses_cache_key( string $order_type ) {
 		return $this->cache_prefix . '_' . $order_type . 'statuses';

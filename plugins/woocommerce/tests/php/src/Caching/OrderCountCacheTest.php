@@ -35,8 +35,8 @@ class OrderCountCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_cache_order_counts() {
 		$counts = array(
-			OrderInternalStatus::PENDING   => 5,
-			OrderInternalStatus::COMPLETED => 10,
+			OrderInternalStatus::PENDING      => 5,
+			OrderInternalStatus::COMPLETED    => 10,
 			'third-party-unregistered-status' => 20,
 		);
 
@@ -50,7 +50,7 @@ class OrderCountCacheTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 5, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
 		$this->assertEquals( 10, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::COMPLETED ) )[ OrderInternalStatus::COMPLETED ] );
-		$this->assertEquals( 20, $this->order_cache->get( 'shop_order', array( 'third-party-unregistered-status' ) )[ 'third-party-unregistered-status' ] );
+		$this->assertEquals( 20, $this->order_cache->get( 'shop_order', array( 'third-party-unregistered-status' ) )['third-party-unregistered-status'] );
 
 		// verify when a specific set of statuses isn't requested.
 		$this->assertEquals( 5, $this->order_cache->get( 'shop_order' )[ OrderInternalStatus::PENDING ] );
