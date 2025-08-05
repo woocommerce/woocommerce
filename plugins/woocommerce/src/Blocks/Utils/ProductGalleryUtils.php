@@ -119,17 +119,10 @@ class ProductGalleryUtils {
 			if ( $product->is_type( 'variable' ) ) {
 				$variations      = $product->get_children();
 				$parent_image_id = $product->get_image_id();
-				$has_filter      = has_filter( 'woocommerce_product_variation_get_image_id' );
 				foreach ( $variations as $variation_id ) {
 					$variation_image_id = get_post_meta( $variation_id, '_thumbnail_id', true );
 					if ( ! $variation_image_id ) {
-						if ( $has_filter ) {
-							// Rare case: Instantiate only if filter hooked, to apply it.
-							$variation = wc_get_product( $variation_id );
-							$variation_image_id = $variation ? $variation->get_image_id() : $parent_image_id;
-						} else {
-							$variation_image_id = $parent_image_id;
-						}
+						$variation_image_id = $parent_image_id;
 					}
 					if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
 						$variation_image_ids[] = strval( $variation_image_id );
