@@ -67,30 +67,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test template_is_eligible_for_fallback_from_db when the template is not eligible.
-	 */
-	public function test_template_is_eligible_for_fallback_from_db_no_eligible_template() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'single-product', array() ) );
-	}
-
-	/**
-	 * Test template_is_eligible_for_fallback_from_db when the template is eligible but not in the db.
-	 */
-	public function test_template_is_eligible_for_fallback_from_db_eligible_template_empty_db() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', array() ) );
-	}
-
-	/**
-	 * Test template_is_eligible_for_fallback_from_db when the template is eligible and in the db.
-	 */
-	public function test_template_is_eligible_for_fallback_from_db_eligible_template_custom_in_the_db() {
-		$db_templates = array(
-			(object) array( 'slug' => 'archive-product' ),
-		);
-		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
-	}
-
-	/**
 	 * Test build_template_result_from_post.
 	 */
 	public function test_build_template_result_from_post() {
@@ -159,33 +135,9 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test set_has_theme_file_if_fallback_is_available when the template file has no fallback.
+	 * Test the is_template_in_query_result method.
 	 */
-	public function test_set_has_theme_file_if_fallback_is_available_no_fallback() {
-		$query_result = array(
-			(object) array(
-				'slug'  => 'single-product',
-				'theme' => 'twentytwentytwo',
-			),
-		);
-
-		$template_file = (object) array(
-			'slug'  => 'archive-product',
-			'theme' => 'twentytwentytwo',
-		);
-
-		$this->assertFalse( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) );
-	}
-
-	/**
-	 * Test set_has_theme_file_if_fallback_is_available when the template file has a fallback.
-	 */
-	public function test_set_has_theme_file_if_fallback_is_available_with_fallback() {
-		$template_file = (object) array(
-			'slug'  => 'taxonomy-product_cat',
-			'theme' => 'twentytwentytwo',
-		);
-
+	public function test_is_template_in_query_result() {
 		$query_result = array(
 			(object) array(
 				'slug'  => 'taxonomy-product_cat',
@@ -193,7 +145,18 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			),
 		);
 
-		$this->assertTrue( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) );
+		$non_matching_template_file = (object) array(
+			'slug'  => 'archive-product',
+			'theme' => 'twentytwentytwo',
+		);
+
+		$matching_template_file = (object) array(
+			'slug'  => 'taxonomy-product_cat',
+			'theme' => 'twentytwentytwo',
+		);
+
+		$this->assertFalse( BlockTemplateUtils::is_template_in_query_result( $query_result, $non_matching_template_file ) );
+		$this->assertTrue( BlockTemplateUtils::is_template_in_query_result( $query_result, $matching_template_file ) );
 	}
 
 	/**
