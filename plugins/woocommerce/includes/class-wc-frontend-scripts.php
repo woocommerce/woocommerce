@@ -452,7 +452,9 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( 'photoswipe-default-skin' );
 				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
-			self::enqueue_script( 'wc-single-product' );
+			if ( ! wp_is_block_theme() ) {
+				self::enqueue_script( 'wc-single-product' );
+			}
 		}
 
 		// Only enqueue the geolocation script if the Default Current Address is set to "Geolocate

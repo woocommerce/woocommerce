@@ -84,6 +84,35 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	}
 
 	/**
+	 * Enqueue assets specific to this block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 */
+	protected function enqueue_assets( $attributes, $content, $block ) {
+		parent::enqueue_assets( $attributes, $content, $block );
+
+		if ( is_product() ) {
+			wp_enqueue_script( 'zoom' );
+			wp_enqueue_script( 'flexslider' );
+			wp_enqueue_script( 'photoswipe-ui-default' );
+			wp_enqueue_style( 'photoswipe-default-skin' );
+			wp_enqueue_script( 'wc-single-product' );
+
+			add_action(
+				'wp_footer',
+				function () {
+					wc_get_template( 'single-product/photoswipe.php' );
+				}
+			);
+			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+		}
+	}
+
+	/**
 	 * Render method for the Classic Template block. This method will determine which template to render.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -112,20 +141,6 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		}
 
 		if ( is_product() ) {
-			wp_enqueue_script( 'zoom' );
-			wp_enqueue_script( 'flexslider' );
-			wp_enqueue_script( 'photoswipe-ui-default' );
-			wp_enqueue_style( 'photoswipe-default-skin' );
-			add_action(
-				'wp_footer',
-				function () {
-					wc_get_template( 'single-product/photoswipe.php' );
-				}
-			);
-			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
-
 			return $this->render_single_product();
 		}
 
