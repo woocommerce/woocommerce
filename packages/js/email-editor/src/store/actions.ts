@@ -31,6 +31,19 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
+export function setEmailPost( postId: number | string, postType: string ) {
+	if ( ! postId || ! postType ) {
+		throw new Error(
+			'setEmailPost requires valid postId and postType parameters'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postId, postType } as Partial< State >,
+	} as const;
+}
+
 export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {

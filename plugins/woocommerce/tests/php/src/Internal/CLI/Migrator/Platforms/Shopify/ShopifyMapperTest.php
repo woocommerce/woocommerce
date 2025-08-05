@@ -40,13 +40,21 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test map_product_data method returns expected type and stub value.
+	 * Test map_product_data method returns expected type.
 	 */
-	public function test_map_product_data_returns_array_stub() {
+	public function test_map_product_data_returns_array() {
 		$platform_data = (object) array( 'id' => 'test_id' );
 		$result        = $this->mapper->map_product_data( $platform_data );
 
 		$this->assertIsArray( $result );
+	}
+
+	/**
+	 * Test map_product_data method returns stub value.
+	 */
+	public function test_map_product_data_returns_stub_value() {
+		$platform_data = (object) array( 'id' => 'test_id' );
+		$result        = $this->mapper->map_product_data( $platform_data );
 		$this->assertEquals( array(), $result );
 	}
 
@@ -79,6 +87,17 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test that method handles type declarations correctly.
+	 */
+	public function test_method_signature() {
+		$reflection = new \ReflectionClass( $this->mapper );
+		$method     = $reflection->getMethod( 'map_product_data' );
+
+		$params = $method->getParameters();
+		$this->assertEquals( 'object', (string) $params[0]->getType() );
+		$this->assertEquals( 'array', (string) $method->getReturnType() );
+	}
 
 	/**
 	 * Test that the mapper accepts various object types.
@@ -123,13 +142,13 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 		// Future PRs should replace this method with actual Shopify to WooCommerce data mapping.
 
 		$shopify_product = (object) array(
-			'id'           => 'gid://shopify/Product/123456789',
-			'title'        => 'Amazing T-Shirt',
-			'handle'       => 'amazing-t-shirt',
-			'description'  => 'A really amazing t-shirt',
-			'product_type' => 'Apparel',
-			'vendor'       => 'Cool Brand',
-			'variants'     => array(
+			'id'          => 'gid://shopify/Product/123456789',
+			'title'       => 'Amazing T-Shirt',
+			'handle'      => 'amazing-t-shirt',
+			'description' => 'A really amazing t-shirt',
+			'productType' => 'Apparel',
+			'vendor'      => 'Cool Brand',
+			'variants'    => array(
 				(object) array(
 					'id'                => 'gid://shopify/ProductVariant/987654321',
 					'price'             => '25.00',
@@ -137,7 +156,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 					'inventoryQuantity' => 100,
 				),
 			),
-			'images'       => array(
+			'images'      => array(
 				(object) array(
 					'url'     => 'https://example.com/image.jpg',
 					'altText' => 'Amazing T-Shirt',

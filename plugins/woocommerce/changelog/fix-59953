@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add id and aria-label attributes to Photoswipe dialog

@@ -125,4 +125,44 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
 	}
+
+	/**
+	 * Test it renders site title block.
+	 */
+	public function testItRendersSiteTitle(): void {
+		$parsed_heading = array(
+			'blockName'    => 'core/site-title',
+			'attrs'        => array(
+				'level'      => 5,
+				'textAlign'  => 'center',
+				'isLink'     => false,
+				'linkTarget' => '_blank',
+				'style'      => array(
+					'typography' => array(
+						'fontStyle'      => 'normal',
+						'fontWeight'     => '900',
+						'lineHeight'     => '2',
+						'letterSpacing'  => '1px',
+						'textDecoration' => 'none',
+						'textTransform'  => 'none',
+						'fontSize'       => '28px',
+					),
+				),
+				'fontSize'   => 'medium',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+			'email_attrs'  => array(
+				'font-size'       => '28px',
+				'text-decoration' => 'none',
+				'width'           => '580px',
+				'color'           => 'var(--wp--preset--color--accent-3)',
+			),
+		);
+		$rendered       = $this->heading_renderer->render( '<h3>My Site Title</h3>', $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'My Site Title', $rendered );
+		$this->assertStringContainsString( 'font-size:28px;', $rendered );
+		$this->assertStringContainsString( 'font-weight:900;', $rendered );
+	}
 }

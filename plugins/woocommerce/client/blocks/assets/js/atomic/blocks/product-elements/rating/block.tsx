@@ -12,6 +12,7 @@ import {
 	getAverageRating,
 	getRatingCount,
 } from '@woocommerce/editor-components/product-rating';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -21,24 +22,29 @@ import './style.scss';
 type ProductRatingProps = {
 	className?: string;
 	textAlign?: string;
-	isDescendentOfSingleProductBlock: boolean;
 	isDescendentOfQueryLoop: boolean;
 	postId: number;
 	productId: number;
 	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;
+	product: ProductEntityResponse;
+	isAdmin: boolean;
 };
 
 export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 	const {
 		textAlign = '',
-		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
+		isDescendentOfQueryLoop,
+		product: productEntity,
 	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext();
-	const rating = getAverageRating( product );
-	const reviews = getRatingCount( product );
+	const { product } = useProductDataContext( {
+		product: productEntity,
+		isAdmin: props.isAdmin,
+	} );
+	const rating = product ? getAverageRating( product ) : 0;
+	const reviews = product ? getRatingCount( product ) : 0;
 
 	const className = 'wc-block-components-product-rating';
 
@@ -46,7 +52,7 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 		return (
 			<ProductRating
 				className={ className }
-				showReviewCount={ isDescendentOfSingleProductBlock }
+				showReviewCount={ ! isDescendentOfQueryLoop }
 				showMockedReviews={
 					shouldDisplayMockedReviewsWhenProductHasNoReviews
 				}

@@ -65,16 +65,15 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
-		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
+		$thumbnail_size = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
 
 		$img_class = 'wc-block-product-gallery-thumbnails__thumbnail__image';
 
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-thumbnails <?php echo esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ); ?>"
-			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
+			class="wc-block-product-gallery-thumbnails <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+			style="<?php echo '--wc-block-product-gallery-thumbnails-size:' . absint( $thumbnail_size ) . ';' . esc_attr( $classes_and_styles['styles'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.thumbnailsOverflow.top"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.thumbnailsOverflow.bottom"
