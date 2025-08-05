@@ -34,6 +34,8 @@ interface ProductEntityResponseBase {
 	price: string;
 	regular_price: string;
 	sale_price: string;
+	rating_count: number;
+	average_rating: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	/**
 	 * Experimental price fields for grouped products

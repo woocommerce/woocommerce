@@ -205,7 +205,7 @@ class Renderer {
 						<path data-wp-bind--d="state.iconPath"></path>
 					</svg>
 					<div class="wc-block-components-notice-banner__content">
-						<span data-wp-init="callbacks.renderNoticeContent"></span>
+						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
 					</div>
 					<button
 						data-wp-bind--hidden="!context.notice.dismissible"

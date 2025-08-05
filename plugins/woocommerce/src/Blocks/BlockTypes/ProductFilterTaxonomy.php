@@ -21,33 +21,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	protected $block_name = 'product-filter-taxonomy';
 
 	/**
-	 * Initialize this block type.
-	 *
-	 * - Hook into WP lifecycle.
-	 * - Register the block with WordPress.
-	 */
-	protected function initialize() {
-		parent::initialize();
-
-		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
-	}
-
-	/**
-	 * Extra data passed through from server to client for block.
-	 *
-	 * @param array $attributes  Any attributes that currently are available from the block.
-	 *                           Note, this will be empty in the editor context when the block is
-	 *                           not in the post content on editor load.
-	 */
-	protected function enqueue_data( array $attributes = array() ) {
-		parent::enqueue_data( $attributes );
-
-		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
-		}
-	}
-
-	/**
 	 * Prepare the active filter items.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
@@ -106,6 +79,33 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	}
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+
+		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
+		}
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $block_attributes Block attributes.
@@ -143,45 +143,56 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			)
 		);
 
-		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
-		$hide_empty      = $block_attributes['hideEmpty'] ?? true;
-		$orderby         = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
-		$order           = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
-
-		$taxonomy_terms = $this->get_hierarchical_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order );
-
-		if ( is_wp_error( $taxonomy_terms ) ) {
-			return '';
-		}
-
-		// Get selected terms from filter params.
-		$filter_params  = $block->context['filterParams'] ?? array();
-		$selected_terms = array();
-		$param_key      = $taxonomy_params[ $taxonomy ];
-
-		if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
-			$selected_terms = array_filter( array_map( 'sanitize_title', explode( ',', $filter_params[ $param_key ] ) ) );
-		}
-
-		$filter_context = array(
+		$filter_context  = array(
 			'showCounts' => $block_attributes['showCounts'] ?? false,
 			'items'      => array(),
 			'groupLabel' => $taxonomy_object->labels->singular_name,
 		);
+		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
 
 		if ( ! empty( $taxonomy_counts ) ) {
+			$hide_empty     = $block_attributes['hideEmpty'] ?? true;
+			$orderby        = $block_attributes['sortOrder'] ? explode( '-', $block_attributes['sortOrder'] )[0] : 'name';
+			$order          = $block_attributes['sortOrder'] ? strtoupper( explode( '-', $block_attributes['sortOrder'] )[1] ) : 'DESC';
+			$taxonomy_terms = $this->get_sorted_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order );
+
+			if ( is_wp_error( $taxonomy_terms ) ) {
+				return '';
+			}
+
+			// Get selected terms from filter params.
+			$filter_params  = $block->context['filterParams'] ?? array();
+			$selected_terms = array();
+			$param_key      = $taxonomy_params[ $taxonomy ];
+
+			if ( $filter_params && ! empty( $filter_params[ $param_key ] ) && is_string( $filter_params[ $param_key ] ) ) {
+				$selected_terms = array_filter( array_map( 'sanitize_title', explode( ',', $filter_params[ $param_key ] ) ) );
+			}
+
 			$taxonomy_options = array_map(
 				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
 
-					return array(
+					$option = array(
 						'label'    => $term['name'],
 						'value'    => $term['slug'],
 						'selected' => in_array( $term['slug'], $selected_terms, true ),
 						'count'    => $term['count'],
 						'type'     => 'taxonomy/' . $taxonomy,
 					);
+
+					if ( is_taxonomy_hierarchical( $taxonomy ) ) {
+						$option['id'] = $term['term_id'];
+
+						if ( isset( $term['depth'] ) && $term['depth'] > 0 ) {
+							$option['depth'] = $term['depth'];
+						}
+						if ( isset( $term['parent'] ) && $term['parent'] > 0 ) {
+							$option['parent'] = $term['parent'];
+						}
+					}
+					return $option;
 				},
 				$taxonomy_terms
 			);
@@ -218,6 +229,39 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				''
 			)
 		);
+	}
+
+	/**
+	 * Get terms sorted based on taxonomy type (hierarchical vs flat).
+	 *
+	 * @param string $taxonomy        Taxonomy slug.
+	 * @param array  $taxonomy_counts Term counts with term_id as key.
+	 * @param bool   $hide_empty      Whether to hide empty terms.
+	 * @param string $orderby         Sort field (name, count, menu_order).
+	 * @param string $order           Sort direction (ASC, DESC).
+	 * @return array Sorted terms array.
+	 */
+	private function get_sorted_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order ) {
+		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			$args = array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+			);
+
+			if ( $hide_empty ) {
+				$args['include'] = array_keys( $taxonomy_counts );
+			}
+
+			$terms = get_terms( $args );
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				return array();
+			}
+
+			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
+		}
+
+		return $this->get_hierarchical_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order );
 	}
 
 	/**
@@ -299,6 +343,72 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	}
 
 	/**
+	 * Sort hierarchical terms recursively maintaining parent-child relationships.
+	 *
+	 * @param array  $terms           Hierarchical terms array with children.
+	 * @param string $orderby         Sort field (name, count, menu_order).
+	 * @param string $order           Sort direction (ASC, DESC).
+	 * @param array  $taxonomy_counts Context-aware term counts.
+	 * @return array Sorted hierarchical terms.
+	 */
+	private function sort_hierarchy_terms( $terms, $orderby, $order, $taxonomy_counts ) {
+		foreach ( $terms as $term ) {
+			if ( ! empty( $term['children'] ) ) {
+				$term['children'] = $this->sort_terms_by_criteria( $term['children'], $orderby, $order, $taxonomy_counts );
+			}
+		}
+		$sorted = $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
+		return $sorted;
+	}
+
+	/**
+	 * Flatten hierarchical term tree into flat array maintaining depth-first order.
+	 *
+	 * @param array $terms  Hierarchical terms with children structure.
+	 * @param array $result Reference to result array being built.
+	 * @param array $visited_ids Reference to array tracking visited term IDs to prevent circular references.
+	 * @param int   $depth Current recursion depth for bounds checking.
+	 */
+	private function flatten_terms_list( $terms, &$result, &$visited_ids = array(), $depth = 0 ) {
+		/**
+		 * This is the safeguard to prevent the memory limit issue. We choose 10 as it
+		 * should cover most of the cases. Typical e-commerce stores have two or three
+		 * levels of category. Extreme cases like Amazon has about 7 levels.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/pull/60142/files#r2250287050
+		 */
+		if ( $depth > 10 ) {
+			return;
+		}
+
+		if ( ! is_array( $terms ) ) {
+			return;
+		}
+
+		foreach ( $terms as $term ) {
+			// Validate term structure.
+			if ( ! is_array( $term ) || ! isset( $term['term_id'] ) ) {
+				continue;
+			}
+
+			$term_id = $term['term_id'];
+
+			// Prevent circular references.
+			if ( isset( $visited_ids[ $term_id ] ) ) {
+				continue;
+			}
+
+			$visited_ids[ $term_id ] = true;
+			$result[ $term_id ]      = $term;
+
+			if ( ! empty( $term['children'] ) && is_array( $term['children'] ) ) {
+				$this->flatten_terms_list( $term['children'], $result, $visited_ids, $depth + 1 );
+				unset( $result[ $term_id ]['children'] );
+			}
+		}
+	}
+
+	/**
 	 * Get taxonomy terms ordered hierarchically.
 	 *
 	 * @param string $taxonomy        Taxonomy slug.
@@ -309,53 +419,25 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array|\WP_Error Hierarchically ordered terms or error.
 	 */
 	private function get_hierarchical_terms( string $taxonomy, array $taxonomy_counts, bool $hide_empty, string $orderby, string $order ) {
-		$args = array(
-			'taxonomy'   => $taxonomy,
-			'hide_empty' => false,
-		);
-
-		if ( $hide_empty ) {
-			$args['include'] = array_keys( $taxonomy_counts );
-		}
-
-		$terms = get_terms( $args );
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return array();
-		}
-
-		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
-		}
-
 		// Use TaxonomyHierarchyData for hierarchy operations.
 		$container      = wc_get_container();
-		$hierarchy_data = $container->get( TaxonomyHierarchyData::class );
+		$hierarchy_data = $container->get( TaxonomyHierarchyData::class )->get_hierarchy_map( $taxonomy );
 
-		// Group terms by parent for hierarchy building.
-		$terms_by_id     = array();
-		$terms_by_parent = array();
+		$sorted_term = $this->sort_hierarchy_terms( $hierarchy_data['tree'], $orderby, $order, $taxonomy_counts );
 
-		foreach ( $terms as $term ) {
-			$terms_by_id[ $term->term_id ] = $term;
-			$parent_id                     = $hierarchy_data->get_parent( $term->term_id, $taxonomy );
+		$flat_list = array();
+		$this->flatten_terms_list( $sorted_term, $flat_list );
 
-			if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
-				$terms_by_parent[ $parent_id ] = array();
+		if ( ! $hide_empty ) {
+			return $flat_list;
+		}
+
+		return array_filter(
+			$flat_list,
+			function ( $term ) use ( $taxonomy_counts ) {
+				return ! empty( $taxonomy_counts[ $term['term_id'] ] );
 			}
-			$terms_by_parent[ $parent_id ][] = $term;
-		}
-
-		// Sort siblings at each hierarchy level.
-		foreach ( $terms_by_parent as $parent_id => $siblings ) {
-			$terms_by_parent[ $parent_id ] = $this->sort_terms_by_criteria( $siblings, $orderby, $order, $taxonomy_counts );
-		}
-
-		// Build hierarchical list with sorted siblings.
-		$hierarchical_terms = array();
-		$this->build_hierarchical_list( 0, $hierarchical_terms, $terms_by_parent );
-
-		return $hierarchical_terms;
+		);
 	}
 
 	/**
@@ -373,6 +455,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		usort(
 			$terms,
 			function ( $a, $b ) use ( $orderby, $sort_order, $taxonomy_counts ) {
+				$a = (object) $a;
+				$b = (object) $b;
 				switch ( $orderby ) {
 					case 'count':
 						$count_a    = $taxonomy_counts[ $a->term_id ] ?? 0;
@@ -391,26 +475,5 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		);
 
 		return $terms;
-	}
-
-	/**
-	 * Build hierarchical list in depth-first order with pre-sorted siblings.
-	 *
-	 * @param int   $parent_id        Current parent ID.
-	 * @param array &$result          Reference to result array.
-	 * @param array $terms_by_parent  Terms grouped and sorted by parent ID.
-	 */
-	private function build_hierarchical_list( int $parent_id, array &$result, array $terms_by_parent ): void {
-		if ( ! isset( $terms_by_parent[ $parent_id ] ) ) {
-			return;
-		}
-
-		foreach ( $terms_by_parent[ $parent_id ] as $term ) {
-			// Add current term.
-			$result[] = $term;
-
-			// Recursively add its children.
-			$this->build_hierarchical_list( $term->term_id, $result, $terms_by_parent );
-		}
 	}
 }

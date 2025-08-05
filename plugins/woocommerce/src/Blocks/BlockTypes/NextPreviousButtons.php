@@ -38,6 +38,9 @@ class NextPreviousButtons extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'align' ) );
 		$vertical_alignment = StyleAttributesUtils::get_align_class_and_style( $attributes );
 
+		$left_arrow_path  = 'M6.445 12.005.986 6 6.445-.005l1.11 1.01L3.014 6l4.54 4.995-1.109 1.01Z';
+		$right_arrow_path = 'M1.555-.004 7.014 6l-5.459 6.005-1.11-1.01L4.986 6 .446 1.005l1.109-1.01Z';
+
 		ob_start();
 		?>
 	<div
@@ -62,7 +65,7 @@ class NextPreviousButtons extends AbstractBlock {
 					<path
 						fill="currentColor"
 						fillRule="evenodd"
-						d="M6.445 12.005.986 6 6.445-.005l1.11 1.01L3.014 6l4.54 4.995-1.109 1.01Z"
+						d="<?php echo is_rtl() ? esc_attr( $right_arrow_path ) : esc_attr( $left_arrow_path ); ?>"
 						clipRule="evenodd"
 					/>
 				</svg>
@@ -85,7 +88,7 @@ class NextPreviousButtons extends AbstractBlock {
 					<path
 						fill="currentColor"
 						fillRule="evenodd"
-						d="M1.555-.004 7.014 6l-5.459 6.005-1.11-1.01L4.986 6 .446 1.005l1.109-1.01Z"
+						d="<?php echo is_rtl() ? esc_attr( $left_arrow_path ) : esc_attr( $right_arrow_path ); ?>"
 						clipRule="evenodd"
 					/>
 				</svg>
