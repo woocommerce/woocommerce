@@ -102,7 +102,7 @@ class OrderCountCache {
 	 * @return string The cache key.
 	 */
 	private function get_saved_statuses_cache_key( string $order_type ) {
-		return $this->cache_prefix . '_' . $order_type . 'statuses';
+		return $this->cache_prefix . '_' . $order_type . '_statuses';
 	}
 
 	/**
