@@ -55,10 +55,20 @@ class ProductImageGallery extends AbstractBlock {
 			return '';
 		}
 
-		if ( class_exists( 'WC_Frontend_Scripts' ) ) {
-			$frontend_scripts = new \WC_Frontend_Scripts();
-			$frontend_scripts::load_scripts();
-		}
+		// Enqueue legacy gallery scripts manually on render.
+		wp_enqueue_script( 'zoom' );
+		wp_enqueue_script( 'flexslider' );
+		wp_enqueue_script( 'photoswipe-ui-default' );
+		wp_enqueue_style( 'photoswipe-default-skin' );
+		add_action(
+			'wp_footer',
+			function () {
+				wc_get_template( 'single-product/photoswipe.php' );
+			}
+		);
+		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
 
 		ob_start();
 		woocommerce_show_product_sale_flash();
