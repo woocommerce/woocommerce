@@ -33,7 +33,10 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	 * @param array $templates Templates that match the taxonomy_template_hierarchy.
 	 */
 	public function template_hierarchy( $templates ) {
-		$index = array_search( static::SLUG, $templates, true ) !== false ? array_search( static::SLUG, $templates, true ) : array_search( static::SLUG . '.php', $templates, true );
+		$index = array_search( static::SLUG, $templates, true );
+		if ( false === $index ) {
+			$index = array_search( static::SLUG . '.php', $templates, true );
+		}
 
 		if (
 			false !== $index && (
