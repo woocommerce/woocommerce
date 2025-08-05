@@ -120,3 +120,4 @@ changes.json
 
 # Docusaurus
 .docusaurus
+.lnvim/

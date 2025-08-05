@@ -118,13 +118,14 @@ class ProductGalleryUtils {
 		try {
 			if ( $product->is_type( 'variable' ) ) {
 				$variations = $product->get_children();
+				$parent_image_id = $product->get_image_id();
 				foreach ( $variations as $variation_id ) {
-					$variation = wc_get_product( $variation_id );
-					if ( $variation ) {
-						$variation_image_id = $variation->get_image_id();
-						if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
-							$variation_image_ids[] = strval( $variation_image_id );
-						}
+					$variation_image_id = get_post_meta( $variation_id, '_thumbnail_id', true );
+					if ( ! $variation_image_id ) {
+						$variation_image_id = $parent_image_id;
+					}
+					if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
+						$variation_image_ids[] = strval( $variation_image_id );
 					}
 				}
 			}
