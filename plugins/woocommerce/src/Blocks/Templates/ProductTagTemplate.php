@@ -24,7 +24,7 @@ class ProductTagTemplate extends AbstractTemplateWithFallback {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	public string $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Returns the title of the template.

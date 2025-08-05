@@ -17,7 +17,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template;
+	public string $fallback_template;
 
 	/**
 	 * Initialization method.
