@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Product Filters: add `get_taxonomy_counts` method to FilterData class for taxonomy term counting.

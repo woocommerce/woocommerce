@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Payments Settings WooPayments test-to-live flow when site is installed in a subdirectory.

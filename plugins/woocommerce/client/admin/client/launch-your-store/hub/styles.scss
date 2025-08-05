@@ -39,6 +39,11 @@
 		min-width: unset;
 	}
 
+	@media screen and (max-width: 782px) {
+		min-width: unset;
+		overflow: visible;
+	}
+
 	.woocommerce-layout__primary {
 		margin: 0;
 		padding: 0;
@@ -53,6 +58,11 @@
 			background-color: #fcfcfc;
 			min-height: 100vh;
 
+			@media screen and (max-width: 782px) {
+				flex-direction: column;
+				min-height: 100vh;
+			}
+
 			.customize-your-store-edit-site-resizable-frame__inner-content {
 				height: 100%;
 			}
@@ -63,6 +73,26 @@
 
 				&.is-sidebar-hidden {
 					display: none;
+				}
+
+				@media screen and (min-width: 768px) and (max-width: 1024px) {
+					width: 280px;
+				}
+
+				// Hide sidebar on mobile by default
+				@media screen and (max-width: 782px) {
+					position: fixed;
+					left: -380px;
+					top: 0;
+					height: 100vh;
+					background: #fff;
+					box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+					transition: all 0.3s ease;
+
+					&.is-mobile-open {
+						left: 0;
+						z-index: 9999;
+					}
 				}
 
 				.launch-store-sidebar__container {
@@ -89,6 +119,21 @@
 						width: auto;
 					}
 
+					.woocommerce-lys-mobile-sidebar-close {
+						display: none;
+						padding: 4px;
+						min-width: 32px;
+						height: 32px;
+						color: $gray-900;
+						margin: $gap 0 $gap auto;
+
+						@media screen and (max-width: 782px) {
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						}
+					}
+
 					.woocommerce-edit-site-sidebar-navigation-screen__title-icon {
 						align-items: center;
 						background-color: transparent;
@@ -98,6 +143,10 @@
 						gap: 0;
 						width: 348px;
 						z-index: 2;
+
+						@media screen and (max-width: 782px) {
+							display: none;
+						}
 					}
 
 					.woocommerce-edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
@@ -184,6 +233,10 @@
 							font-weight: 400;
 							line-height: 20px; /* 153.846% */
 							margin-block: 0 32px;
+
+							@media screen and (max-width: 782px) {
+								display: none;
+							}
 
 							a {
 								text-decoration: none;
@@ -353,11 +406,94 @@
 
 			.launch-your-store-layout__content {
 				flex-grow: 1;
+
+				@media screen and (max-width: 782px) {
+					width: 100%;
+					min-width: 0;
+					overflow-x: hidden;
+				}
+
+				.mobile-header {
+					display: none;
+					margin-top: 16px;
+
+					&__title {
+						font-size: 13px;
+						font-style: normal;
+						font-weight: 500;
+						line-height: 20px;
+						padding: 8px 0 4px;
+					}
+
+					&__back-button {
+						display: flex;
+						margin-left: $gap;
+						justify-content: center;
+						align-items: center;
+					}
+
+					&__steps {
+						margin-left: auto;
+						margin-right: $gap;
+						background: $gray-100;
+						font-size: 12px;
+						font-style: normal;
+						line-height: 1; // Use relative line-height instead of fixed 20px
+						padding: 4px 8px;
+						border-radius: 2px;
+						font-weight: 700;
+						color: $gray-900;
+						display: flex;
+						align-items: center; // Center text vertically
+						box-sizing: border-box; // Ensure padding is included in height calculation
+						height: 24px;
+						margin-top: 5px;
+					}
+					@media screen and (max-width: 782px) {
+						display: flex;
+					}
+				}
+
+				// Mobile overlay
+				.mobile-sidebar-overlay {
+					display: none;
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100vw;
+					height: 100vh;
+					z-index: 2;
+					opacity: 0;
+					transition: opacity 0.3s ease;
+
+					@media screen and (max-width: 782px) {
+						display: block;
+
+						&.is-visible {
+							opacity: 1;
+						}
+					}
+				}
 			}
 		}
 	}
 
 	.woocommerce-edit-site-layout__header-container {
 		position: static;
+
+		@media screen and (max-width: 782px) {
+			display: none;
+		}
+	}
+
+	// Make payments content full height on mobile
+	.launch-your-store-payments-content {
+		@media screen and (max-width: 782px) {
+			height: calc(100vh - 56px); // Subtract mobile header height
+			min-height: calc(100vh - 56px);
+			display: flex;
+			flex-direction: column;
+			overflow-y: auto; // Allow scrolling within the content if needed
+		}
 	}
 }

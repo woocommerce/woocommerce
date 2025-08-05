@@ -8,6 +8,8 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
+import { isExperimentalWcRestApiEnabled } from '@woocommerce/block-settings';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -73,6 +75,8 @@ const PriceEdit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<>
 			<BlockControls>
@@ -84,7 +88,14 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				{ product && (
+					<Block
+						{ ...blockAttrs }
+						isAdmin={ true }
+						product={ product }
+						isExperimentalWcRestApiEnabled={ isExperimentalWcRestApiEnabled() }
+					/>
+				) }
 			</div>
 		</>
 	);

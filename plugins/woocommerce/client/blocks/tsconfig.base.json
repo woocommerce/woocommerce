@@ -150,7 +150,10 @@
 			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"
-			]
+			],
+			"@woocommerce/entities": [
+				"assets/js/entities"
+			],
 		}
 	}
 }

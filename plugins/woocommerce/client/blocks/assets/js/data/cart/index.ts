@@ -31,6 +31,7 @@ import {
 import { defaultCartState } from './default-state';
 import { getTriggerStoreSyncEvent } from './utils';
 import type { QuantityChanges } from './notify-quantity-changes';
+import { isEditor } from '../utils';
 
 export const config = {
 	reducer,
@@ -65,7 +66,8 @@ window.addEventListener( 'load', () => {
 
 	if (
 		( ! hasCartSession() || hasItemsInCachedCart ) &&
-		! isAddingToCart()
+		! isAddingToCart() &&
+		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {
 		// Prevent the API request from being made.
 		wpDispatch( store ).finishResolution( 'getCartData' );

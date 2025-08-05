@@ -48,7 +48,16 @@ final class ProductsCommand {
 	 * default: shopify
 	 * ---
 	 *
+	 * [--count]
+	 * : Only fetch and display the total product count.
+	 *
+	 * [--status=<status>]
+	 * : Filter products by status (active, archived, draft).
+	 *
 	 * ## EXAMPLES
+	 *
+	 *     wp wc migrator products --count
+	 *     wp wc migrator products --count --status=active
 	 *
 	 * @param array $args       The positional arguments.
 	 * @param array $assoc_args The associative arguments.
@@ -74,8 +83,45 @@ final class ProductsCommand {
 			return;
 		}
 
+		// Handle count request if specified.
+		if ( isset( $assoc_args['count'] ) ) {
+			$this->handle_count_request( $platform, $assoc_args );
+			return;
+		}
+
 		// The logic will be handled by the Products_Controller.
 		// For now, we just show a success message if credentials exist.
 		WP_CLI::success( 'Credentials found. Proceeding with migration...' );
+	}
+
+	/**
+	 * Handle the count request.
+	 *
+	 * @param string $platform    The platform name.
+	 * @param array  $assoc_args  The associative arguments.
+	 */
+	private function handle_count_request( string $platform, array $assoc_args ): void {
+		WP_CLI::log( "Fetching product count from {$platform}..." );
+
+		$fetcher = $this->platform_registry->get_fetcher( $platform );
+		if ( ! $fetcher ) {
+			WP_CLI::error( "Could not get fetcher for platform '{$platform}'" );
+			return;
+		}
+
+		// Build filter arguments.
+		$filter_args = array();
+		if ( isset( $assoc_args['status'] ) ) {
+			$filter_args['status'] = $assoc_args['status'];
+		}
+
+		$count = $fetcher->fetch_total_count( $filter_args );
+
+		if ( 0 === $count ) {
+			WP_CLI::log( 'No products found or unable to fetch count.' );
+		} else {
+			$status_filter = isset( $assoc_args['status'] ) ? " with status '{$assoc_args['status']}'" : '';
+			WP_CLI::success( "Found {$count} products{$status_filter} on {$platform}." );
+		}
 	}
 }
