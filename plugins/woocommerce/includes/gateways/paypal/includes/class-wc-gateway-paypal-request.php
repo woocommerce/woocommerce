@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,8 +55,29 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected $endpoint;
 
-
+	/**
+	 * The API version for the proxy endpoint.
+	 *
+	 * @var int
+	 */
 	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
+
+	/**
+	 * The base for the proxy REST endpoint.
+	 *
+	 * @var string
+	 */
+	private const WPCOM_PROXY_REST_BASE = 'transact/paypal_standard/proxy';
+
+	/**
+	 * Proxy REST endpoints.
+	 *
+	 * @var string
+	 */
+	private const WPCOM_PROXY_ORDER_ENDPOINT                = 'order';
+	private const WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT      = 'payment/capture';
+	private const WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT    = 'payment/authorize';
+	private const WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT = 'payment/capture_auth';
 
 	/**
 	 * Constructor.
@@ -112,24 +134,11 @@ class WC_Gateway_Paypal_Request {
 	 */
 	public function create_paypal_order( $order ) {
 		try {
-			$order_request_params = $this->get_paypal_create_order_request_params( $order );
-
-			$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
-				'/wc-gateway-paypal-proxy/create-order',
-				self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-				array(
-					'headers' => array( 'Content-Type' => 'application/json' ),
-					'method'  => 'POST',
-					'timeout' => 60,
-				),
-				wp_json_encode(
-					array(
-						'testmode' => $this->gateway->testmode,
-						'order'    => $order_request_params,
-					)
-				),
-				'wpcom'
+			$request_body = array(
+				'test_mode' => $this->gateway->testmode,
+				'order'     => $this->get_paypal_create_order_request_params( $order ),
 			);
+			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT, $request_body );
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
@@ -186,32 +195,22 @@ class WC_Gateway_Paypal_Request {
 
 		try {
 			if ( 'capture' === $action ) {
-				$endpoint     = 'payments/capture';
+				$endpoint     = self::WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT;
 				$request_body = array(
 					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
-					'testmode'        => $this->gateway->testmode,
+					'test_mode'       => $this->gateway->testmode,
 				);
 			} else {
-				$endpoint     = 'payments/authorize';
+				$endpoint     = self::WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT;
 				$request_body = array(
 					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
-					'testmode'        => $this->gateway->testmode,
+					'test_mode'       => $this->gateway->testmode,
 				);
 			}
 
-			$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
-				'/transact/paypal_standard/' . $endpoint,
-				self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-				array(
-					'headers' => array( 'Content-Type' => 'application/json' ),
-					'method'  => 'POST',
-					'timeout' => 60,
-				),
-				wp_json_encode( $request_body ),
-				'wpcom'
-			);
+			$response = $this->send_wpcom_proxy_request( 'POST', $endpoint, $request_body );
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
@@ -256,19 +255,11 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$request_url = $this->get_paypal_capture_authorized_payment_request_url( $order->get_transaction_id() );
-
-		$response = wp_remote_post(
-			$request_url,
-			array(
-				'method'  => 'POST',
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
-				'body'    => wp_json_encode( array( 'testmode' => $this->gateway->testmode ) ),
-				'timeout' => 60,
-			)
+		$request_body = array(
+			'test_mode'        => $this->gateway->testmode,
+			'authorization_id' => $order->get_transaction_id(),
 		);
+		$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
 		if ( is_wp_error( $response ) ) {
 			WC_Gateway_Paypal::log( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
@@ -544,6 +535,42 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Send a request to the API proxy.
+	 *
+	 * @param string $method The HTTP method to use.
+	 * @param string $endpoint The endpoint to request.
+	 * @param array  $request_body The request body.
+	 *
+	 * @return array|null The API response body, or null if the request fails.
+	 * @throws Exception If the site ID is not found.
+	 */
+	private function send_wpcom_proxy_request( $method, $endpoint, $request_body ) {
+		$site_id = \Jetpack_Options::get_option( 'id' );
+		if ( ! $site_id ) {
+			WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
+			throw new Exception( 'Site ID not found. Cannot send proxy request.' );
+		}
+
+		if ( 'GET' === $method ) {
+			$endpoint .= '?' . http_build_query( $request_body );
+		}
+
+		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+			sprintf( '/sites/%d/%s/%s', $site_id, self::WPCOM_PROXY_REST_BASE, $endpoint ),
+			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
+			array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'method'  => $method,
+				'timeout' => 60,
+			),
+			'GET' === $method ? null : wp_json_encode( $request_body ),
+			'wpcom'
+		);
+
+		return $response;
+	}
+
+	/**
 	 * Limit length of an arg.
 	 *
 	 * @param  string  $string Argument to limit.
@@ -556,10 +583,8 @@ class WC_Gateway_Paypal_Request {
 			if ( mb_strlen( $string ) > $limit ) {
 				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
 			}
-		} else {
-			if ( strlen( $string ) > $limit ) {
+		} elseif ( strlen( $string ) > $limit ) {
 				$string = substr( $string, 0, $str_limit ) . '...';
-			}
 		}
 		return $string;
 	}
@@ -635,7 +660,6 @@ class WC_Gateway_Paypal_Request {
 			),
 			$order
 		);
-
 	}
 
 	/**
