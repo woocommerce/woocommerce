@@ -893,6 +893,9 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'button', { name: 'Products by Category' } )
 				.click();
 			await page
+				.getByRole( 'button', { name: 'For a specific item' } )
+				.click();
+			await page
 				.getByRole( 'option', {
 					name: `Hoodies`,
 				} )
@@ -934,6 +937,9 @@ test.describe( 'Product Collection', () => {
 
 			await page
 				.getByRole( 'button', { name: 'Products by Tag' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'For a specific item' } )
 				.click();
 			await page
 				.getByRole( 'option', {
