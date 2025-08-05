@@ -10,5 +10,6 @@ interface Window {
 		editor_theme: unknown; // Can't import type in global.d.ts. Typed in getEditorTheme() in store/settings.ts
 		current_post_type: string;
 		current_post_id: string;
+		strip_post_status_on_save: boolean;
 	};
 }

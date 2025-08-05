@@ -30,5 +30,7 @@ export function getInitialState(): State {
 			isFetching: false,
 		},
 		contentValidation: undefined,
+		stripPostStatusOnSave:
+			window.WooCommerceEmailEditor?.strip_post_status_on_save,
 	};
 }

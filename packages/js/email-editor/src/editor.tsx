@@ -27,6 +27,7 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
+import { initStripPostStatusOnSaveMiddleware } from './middleware/strip-post-status-on-save';
 import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
 
 function Editor( {
@@ -83,6 +84,7 @@ function onInit() {
 	initDomTracking();
 	createStore();
 	initContentValidationMiddleware();
+	initStripPostStatusOnSaveMiddleware();
 	initializeLayout();
 	initBlocks();
 	initHooks();
