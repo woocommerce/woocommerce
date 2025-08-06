@@ -309,7 +309,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Onboard the merchant with the Transact platform.
 	 *
-	 * @return string|null The public ID of the merchant, or null if onboarding failed.
+	 * @return bool True if onboarding was successful, false otherwise.
 	 */
 	public function onboard_transact_merchant() {
 		$site_id      = \Jetpack_Options::get_option( 'id' );
@@ -337,25 +337,26 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return null;
+			return false;
 		}
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return null;
+			return false;
 		}
 
+		// TODO: Do we want to save any of the response data?
 		$response_data = json_decode( $response['body'], true );
 		if ( empty( $response_data['public_id'] ) ) {
-			return null;
+			return false;
 		}
 
-		return $response_data['public_id'];
+		return true;
 	}
 
 	/**
 	 * Onboard the provider with the Transact platform.
 	 *
-	 * @return string|null The public ID of the provider, or null if onboarding failed.
+	 * @return bool True if onboarding was successful, false otherwise.
 	 */
 	public function onboard_transact_provider() {
 		$site_id      = \Jetpack_Options::get_option( 'id' );
@@ -376,14 +377,14 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return null;
+			return false;
 		}
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return null;
+			return false;
 		}
 
-		// TODO: Handle the response.
+		return true;
 	}
 
 	/**

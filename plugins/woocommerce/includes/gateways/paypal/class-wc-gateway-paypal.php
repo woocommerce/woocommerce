@@ -230,7 +230,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		// TODO: If the merchant is already onboarded, nothing to do.
+		// If the merchant is already onboarded, nothing to do.
+		if ( $this->get_option( 'is_transact_onboarded', false ) ) {
+			return;
+		}
 
 		// Check if the merchant is eligible for onboarding.
 		if (
@@ -249,13 +252,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		// Save the Transact merchant public ID locally.
-		// TODO: Will we ever need this? If this will serve only as a flag to indicate that the merchant is onboarded,
-		// we can probably use a simple boolean flag instead.
-		$this->update_option( 'transact_merchant_public_id', $transact_merchant_public_id );
-
 		// Onboard the provider with the Transact platform.
-		$paypal_request->onboard_transact_provider();
+		$is_provider_onboarded = $paypal_request->onboard_transact_provider();
+		if ( ! $is_provider_onboarded ) {
+			self::log( 'Transact provider onboarding failed.', 'error' );
+			return;
+		}
+
+		// TODO: Do we need to save anything else, e.g. the merchant public ID?
+		$this->update_option( 'is_transact_onboarded', true );
+		self::log( 'Transact onboarding completed.', 'info' );
 	}
 
 	/**
@@ -774,7 +780,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	private function get_jetpack_connection_manager() {
 		if ( ! $this->jetpack_connection_manager ) {
-			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'paypal' );
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
 		}
 		return $this->jetpack_connection_manager;
 	}
