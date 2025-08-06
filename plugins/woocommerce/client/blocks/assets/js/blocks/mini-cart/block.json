@@ -16,8 +16,7 @@
 		"spacing": {
 			"margin": true,
 			"padding": true
-		},
-		"interactivity": true
+		}
 	},
 	"example": {
 		"attributes": {
