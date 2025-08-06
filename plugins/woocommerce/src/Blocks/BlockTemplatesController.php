@@ -214,7 +214,7 @@ class BlockTemplatesController {
 		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
 		$template_files = $this->get_block_templates( $slugs, $template_type );
 
-		$theme_slug = wp_get_theme()->get_stylesheet();
+		$theme_slug = get_stylesheet();
 
 		foreach ( $template_files as $template_file ) {
 
