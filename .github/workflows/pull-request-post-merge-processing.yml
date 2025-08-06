@@ -59,7 +59,7 @@ jobs:
 
     process-feature-freeze-exception:
         name: Log the merge of a Feature Freeze exception
-        if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) }}
+        if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
         runs-on: ubuntu-latest
         permissions:
             pull-requests: write
