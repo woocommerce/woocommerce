@@ -209,6 +209,7 @@ class WC_Admin_Exporters {
 				'nonce'    => wp_create_nonce( 'product-json' ),
 				'action'   => 'download_product_json',
 				'filename' => $exporter->get_filename(),
+				'compress' => ! empty( $_POST['compress'] ) ? 1 : 0,
 			)
 		);
 
@@ -288,6 +289,7 @@ class WC_Admin_Exporters {
 				'nonce'    => wp_create_nonce( 'product-csv' ),
 				'action'   => 'download_product_csv',
 				'filename' => $exporter->get_filename(),
+				'compress' => ! empty( $_POST['compress'] ) ? 1 : 0,
 			)
 		);
 

@@ -43,11 +43,12 @@
 	 */
 	productExportForm.prototype.processStep = function( step, data, columns, filename, format ) {
 		var $this              = this,
-			selected_columns   = $( '.woocommerce-exp\orter-columns' ).val(),
+			selected_columns   = $( '.woocommerce-exporter-columns' ).val(),
 			export_meta        = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
 			export_types       = $( '.woocommerce-exporter-types' ).val(),
 			export_category    = $( '.woocommerce-exporter-category' ).val(),
 			export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '',
+			export_compress    = $( '#woocommerce-exporter-compress:checked' ).length ? 1: 0,
 			format             = format || $( '.woocommerce-exporter-format' ).val() || 'csv',
 			ajax_action        = format === 'json' ? 'woocommerce_do_ajax_product_json_export' : 'woocommerce_do_ajax_product_export';
 
@@ -64,6 +65,7 @@
 				export_types       : export_types,
 				export_category    : export_category,
 				export_product_ids : export_product_ids,
+				compress           : export_compress,
 				filename           : filename,
 				security           : wc_product_export_params.export_nonce
 			},

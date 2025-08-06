@@ -182,8 +182,15 @@ abstract class WC_JSON_Exporter {
 		ignore_user_abort( true );
 		wc_set_time_limit( 0 );
 		wc_nocache_headers();
-		header( 'Content-Type: application/json; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=' . $this->get_filename() );
+		
+		$filename = $this->get_filename();
+		if ( strpos( $filename, '.zip' ) !== false ) {
+			header( 'Content-Type: application/zip' );
+		} else {
+			header( 'Content-Type: application/json; charset=utf-8' );
+		}
+		
+		header( 'Content-Disposition: attachment; filename=' . $filename );
 		header( 'Pragma: no-cache' );
 		header( 'Expires: 0' );
 	}

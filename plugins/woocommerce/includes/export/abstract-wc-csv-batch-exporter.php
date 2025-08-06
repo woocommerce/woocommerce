@@ -95,11 +95,76 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @since 3.1.0
 	 */
 	public function export() {
+		$file_content = $this->get_headers_row_file() . $this->get_file();
+		
+		// Check if compression is requested
+		if ( $this->should_compress() ) {
+			$file_content = $this->create_zip_file();
+			$this->filename = str_replace( array( '.json', '.csv' ), '.zip', $this->filename );
+		}
+		
 		$this->send_headers();
-		$this->send_content( $this->get_headers_row_file() . $this->get_file() );
+		$this->send_content( $file_content );
 		@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged
 		@unlink( $this->get_headers_row_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged
+		if ( $this->should_compress() ) {
+			@unlink( $this->get_zip_file_path() );
+		}
 		die();
+	}
+	
+	/**
+	 * Check if compression is requested.
+	 *
+	 * @return bool
+	 */
+	protected function should_compress() {
+		return ! empty( $_GET['compress'] ) || ! empty( $_POST['compress'] );
+	}
+	
+	/**
+	 * Create ZIP file and return its content.
+	 *
+	 * @return string|false
+	 */
+	protected function create_zip_file() {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			return $this->get_headers_row_file() . $this->get_file();
+		}
+		
+		$zip_file_path = $this->get_zip_file_path();
+		$original_file_path = $this->get_file_path();
+		
+		// Create a temporary complete file
+		$temp_complete_file = $original_file_path . '.complete';
+		file_put_contents( $temp_complete_file, $this->get_headers_row_file() . $this->get_file() );
+		
+		$zip = new ZipArchive();
+		if ( $zip->open( $zip_file_path, ZipArchive::CREATE ) !== TRUE ) {
+			@unlink( $temp_complete_file );
+			return $this->get_headers_row_file() . $this->get_file();
+		}
+		
+		$original_filename = basename( str_replace( '.complete', '', $temp_complete_file ) );
+		$zip->addFile( $temp_complete_file, $original_filename );
+		$zip->close();
+		
+		$zip_content = '';
+		if ( file_exists( $zip_file_path ) ) {
+			$zip_content = file_get_contents( $zip_file_path );
+		}
+		
+		@unlink( $temp_complete_file );
+		return $zip_content ? $zip_content : $this->get_headers_row_file() . $this->get_file();
+	}
+	
+	/**
+	 * Get ZIP file path.
+	 *
+	 * @return string
+	 */
+	protected function get_zip_file_path() {
+		return str_replace( array( '.json', '.csv' ), '.zip', $this->get_file_path() );
 	}
 
 	/**

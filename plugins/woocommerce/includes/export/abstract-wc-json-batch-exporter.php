@@ -73,10 +73,72 @@ abstract class WC_JSON_Batch_Exporter extends WC_JSON_Exporter {
 	public function export() {
 		$file_content = $this->get_file();
 		error_log( 'JSON Export: File content length for download: ' . strlen( $file_content ) );
+		
+		// Check if compression is requested
+		if ( $this->should_compress() ) {
+			$file_content = $this->create_zip_file();
+			$this->filename = str_replace( array( '.json', '.csv' ), '.zip', $this->filename );
+		}
+		
 		$this->send_headers();
 		$this->send_content( $file_content );
 		@unlink( $this->get_file_path() );
+		if ( $this->should_compress() ) {
+			@unlink( $this->get_zip_file_path() );
+		}
 		die();
+	}
+	
+	/**
+	 * Check if compression is requested.
+	 *
+	 * @return bool
+	 */
+	protected function should_compress() {
+		return ! empty( $_GET['compress'] ) || ! empty( $_POST['compress'] );
+	}
+	
+	/**
+	 * Create ZIP file and return its content.
+	 *
+	 * @return string|false
+	 */
+	protected function create_zip_file() {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			error_log( 'JSON Export: ZipArchive class not available' );
+			return $this->get_file();
+		}
+		
+		$zip_file_path = $this->get_zip_file_path();
+		$original_file_path = $this->get_file_path();
+		
+		$zip = new ZipArchive();
+		if ( $zip->open( $zip_file_path, ZipArchive::CREATE ) !== TRUE ) {
+			error_log( 'JSON Export: Could not create ZIP file: ' . $zip_file_path );
+			return $this->get_file();
+		}
+		
+		$original_filename = basename( $original_file_path );
+		$zip->addFile( $original_file_path, $original_filename );
+		$zip->close();
+		
+		if ( file_exists( $zip_file_path ) ) {
+			$zip_content = file_get_contents( $zip_file_path );
+			error_log( 'JSON Export: ZIP file created, size: ' . strlen( $zip_content ) . ' bytes' );
+			return $zip_content;
+		}
+		
+		error_log( 'JSON Export: ZIP file creation failed' );
+		return $this->get_file();
+	}
+	
+	/**
+	 * Get ZIP file path.
+	 *
+	 * @return string
+	 */
+	protected function get_zip_file_path() {
+		return str_replace( array( '.json', '.csv' ), '.zip', $this->get_file_path() );
 	}
 
 	/**

@@ -88,6 +88,16 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 						</tr>
 						<tr>
 							<th scope="row">
+								<label for="woocommerce-exporter-compress"><?php esc_html_e( 'Compress file', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<input type="checkbox" id="woocommerce-exporter-compress" class="woocommerce-exporter-compress" value="1" />
+								<label for="woocommerce-exporter-compress"><?php esc_html_e( 'Compress export file as ZIP', 'woocommerce' ); ?></label>
+								<p class="description"><?php esc_html_e( 'Creates a compressed ZIP file containing the export data.', 'woocommerce' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
 								<label for="woocommerce-exporter-columns"><?php esc_html_e( 'Which columns should be exported?', 'woocommerce' ); ?></label>
 							</th>
 							<td>
