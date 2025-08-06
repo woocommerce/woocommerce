@@ -33,6 +33,9 @@ class ProductImageGallery extends AbstractBlock {
 	/**
 	 * Enqueue assets specific to this block.
 	 *
+	 * Note: This enqueue logic is intentionally duplicated in ClassicTemplate.php
+	 * to keep legacy blocks independent and allow for separate deprecation paths.
+	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
@@ -41,6 +44,7 @@ class ProductImageGallery extends AbstractBlock {
 		parent::enqueue_assets( $attributes, $content, $block );
 
 		if ( is_product() ) {
+			// Legacy script dependencies for backward compatibility
 			wp_enqueue_script( 'zoom' );
 			wp_enqueue_script( 'flexslider' );
 			wp_enqueue_script( 'photoswipe-ui-default' );
