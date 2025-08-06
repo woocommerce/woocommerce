@@ -26,64 +26,57 @@ export const useFeaturedItemStatus = ( {
 	itemType,
 }: UseFeaturedItemProps ): UseFeaturedItemReturnType => {
 	const { product, isResolutionFinished } = useProduct( itemId );
-
-	{
-		return useSelect(
-			( selectFunc ) => {
-				if ( ! itemId ) {
-					return {
-						status: null,
-						isDeleted: false,
-						isLoading: false,
-					};
-				}
-
-				if ( itemType === BLOCK_NAMES.featuredProduct ) {
-					const isLoading = ! isResolutionFinished;
-
-					// An item is considered deleted if its status is 'trash' or if the
-					// API request has finished and returned no product.
-					const isDeleted =
-						product?.status === 'trash' ||
-						( ! isLoading && ! product );
-
-					return {
-						status: product?.status ?? null,
-						isDeleted,
-						isLoading,
-					};
-				}
-
-				if ( itemType === BLOCK_NAMES.featuredCategory ) {
-					const { getEntityRecords, hasFinishedResolution } =
-						selectFunc( coreDataStore );
-					const categoryArgs: [
-						string,
-						string,
-						{ include: number[] }
-					] = [ 'taxonomy', 'product_cat', { include: [ itemId ] } ];
-					const categories = getEntityRecords( ...categoryArgs );
-					const isResolved = hasFinishedResolution(
-						'getEntityRecords',
-						categoryArgs
-					);
-					const isDeleted = ! categories?.length;
-
-					return {
-						status: isDeleted ? 'deleted' : null,
-						isDeleted,
-						isLoading: ! isResolved,
-					};
-				}
-
-				// Default fallback (if itemType doesn't match any expected value)
+	return useSelect(
+		( selectFunc ) => {
+			if ( ! itemId ) {
 				return {
 					status: null,
-					isDeleted: true,
+					isDeleted: false,
 					isLoading: false,
 				};
-			},
-			[ itemId, itemType, product, isResolutionFinished ]
-		);
-	}
+			}
+
+			if ( itemType === BLOCK_NAMES.featuredProduct ) {
+				const isLoading = ! isResolutionFinished;
+
+				// An item is considered deleted if its status is 'trash' or if the
+				// API request has finished and returned no product.
+				const isDeleted =
+					product?.status === 'trash' || ( ! isLoading && ! product );
+
+				return {
+					status: product?.status ?? null,
+					isDeleted,
+					isLoading,
+				};
+			}
+
+			if ( itemType === BLOCK_NAMES.featuredCategory ) {
+				const { getEntityRecords, hasFinishedResolution } =
+					selectFunc( coreDataStore );
+				const categoryArgs: [ string, string, { include: number[] } ] =
+					[ 'taxonomy', 'product_cat', { include: [ itemId ] } ];
+				const categories = getEntityRecords( ...categoryArgs );
+				const isResolved = hasFinishedResolution(
+					'getEntityRecords',
+					categoryArgs
+				);
+				const isDeleted = ! categories?.length;
+
+				return {
+					status: isDeleted ? 'deleted' : null,
+					isDeleted,
+					isLoading: ! isResolved,
+				};
+			}
+
+			// Default fallback (if itemType doesn't match any expected value)
+			return {
+				status: null,
+				isDeleted: true,
+				isLoading: false,
+			};
+		},
+		[ itemId, itemType, product, isResolutionFinished ]
+	);
 };
