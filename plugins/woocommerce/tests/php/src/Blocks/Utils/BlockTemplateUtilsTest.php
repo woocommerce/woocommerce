@@ -40,7 +40,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 				return new BlockTemplatesRegistry();
 			}
 		);
-		$this->container->get( BlockTemplatesRegistry::class )->init();
 		$this->container->register(
 			TemplateOptions::class,
 			function () {
@@ -171,7 +170,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'theme'       => 'woocommerce/woocommerce',
 			'source'      => 'plugin',
 			'title'       => 'Single Product',
-			'description' => 'Displays a single product.',
+			'description' => '',
 			'post_types'  => array(),
 		);
 
