@@ -30,7 +30,6 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->mapper = new ShopifyMapper();
-		$this->mapper->init();
 	}
 
 	/**
@@ -490,7 +489,6 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_selective_field_processing() {
 		$mapper_limited = new ShopifyMapper( array( 'fields' => array( 'title', 'slug', 'price' ) ) );
-		$mapper_limited->init();
 
 		$shopify_product = $this->create_simple_shopify_product();
 		$result          = $mapper_limited->map_product_data( $shopify_product );

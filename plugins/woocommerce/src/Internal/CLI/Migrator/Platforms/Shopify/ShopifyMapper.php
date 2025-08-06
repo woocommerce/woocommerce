@@ -87,16 +87,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 	}
 
 	/**
-	 * Initialize dependencies via DI container.
-	 * Required for WooCommerce DI pattern compliance.
-	 *
-	 * @internal
-	 */
-	final public function init(): void {
-		// No dependencies currently needed, but method required for DI pattern.
-	}
-
-	/**
 	 * Maps raw Shopify product data to a standardized array format.
 	 *
 	 * @param object $shopify_product The raw Shopify product node from GraphQL.
@@ -106,22 +96,22 @@ class ShopifyMapper implements PlatformMapperInterface {
 		$is_variable = $this->is_variable_product( $shopify_product );
 
 		// Map basic product fields.
-		$wc_data = $this->mapBasicProductFields( $shopify_product, $is_variable );
+		$wc_data = $this->map_basic_product_fields( $shopify_product, $is_variable );
 
 		// Map simple product data (for non-variable products).
 		if ( ! $is_variable ) {
-			$simple_data = $this->mapSimpleProductData( $shopify_product );
+			$simple_data = $this->map_simple_product_data( $shopify_product );
 			$wc_data     = array_merge( $wc_data, $simple_data );
 		}
 
 		// Map product images.
-		$wc_data['images'] = $this->mapProductImages( $shopify_product );
+		$wc_data['images'] = $this->map_product_images( $shopify_product );
 
 		// Map metafields and SEO data.
-		$wc_data['metafields'] = $this->mapMetafields( $shopify_product );
+		$wc_data['metafields'] = $this->map_metafields( $shopify_product );
 
 		// Map variable product data (attributes and variations).
-		$variable_data = $this->mapVariableProductData( $shopify_product, $is_variable );
+		$variable_data = $this->map_variable_product_data( $shopify_product, $is_variable );
 		$wc_data       = array_merge( $wc_data, $variable_data );
 
 		return $wc_data;
@@ -362,7 +352,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @param bool   $is_variable     Whether this is a variable product.
 	 * @return array Basic product field mappings.
 	 */
-	private function mapBasicProductFields( object $shopify_product, bool $is_variable ): array {
+	private function map_basic_product_fields( object $shopify_product, bool $is_variable ): array {
 		$basic_data = array();
 
 		$basic_data['is_variable']         = $is_variable;
@@ -420,7 +410,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @param object $shopify_product The Shopify product data.
 	 * @return array Simple product data mappings.
 	 */
-	private function mapSimpleProductData( object $shopify_product ): array {
+	private function map_simple_product_data( object $shopify_product ): array {
 		$simple_data = array();
 
 		if ( ! empty( $shopify_product->variants->edges ) ) {
@@ -490,7 +480,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @param bool   $is_variable     Whether this is a variable product.
 	 * @return array Variable product data mappings.
 	 */
-	private function mapVariableProductData( object $shopify_product, bool $is_variable ): array {
+	private function map_variable_product_data( object $shopify_product, bool $is_variable ): array {
 		$variable_data = array();
 
 		// Attributes (Variable Only).
@@ -592,7 +582,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @param object $shopify_product The Shopify product data.
 	 * @return array Product images data.
 	 */
-	private function mapProductImages( object $shopify_product ): array {
+	private function map_product_images( object $shopify_product ): array {
 		$images_data       = array();
 		$featured_media_id = null;
 
@@ -623,7 +613,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 	 * @param object $shopify_product The Shopify product data.
 	 * @return array Metafields data.
 	 */
-	private function mapMetafields( object $shopify_product ): array {
+	private function map_metafields( object $shopify_product ): array {
 		$metafields_data = array();
 
 		if ( property_exists( $shopify_product, 'metafields' ) && ! empty( $shopify_product->metafields->edges ) ) {
