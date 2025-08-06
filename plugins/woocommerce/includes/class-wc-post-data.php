@@ -67,6 +67,7 @@ class WC_Post_Data {
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 
 		// Product Variations - Attributes.
+		// Priority 50 to make sure this runs after WooCommerce attribute migrations.
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
 		// Product Variations - Terms.
@@ -674,6 +675,11 @@ class WC_Post_Data {
 			if ( $new_summary === $current_excerpt ) {
 				return;
 			}
+
+			/**
+			* Update directly via $wpdb for performance: Avoid firing save_post hooks, loading full post objects,
+			* and creating revisions. This is safe here as we're only updating post_excerpt.
+			*/
 			$wpdb->update(
 				$wpdb->posts,
 				array( 'post_excerpt' => $new_summary ),
