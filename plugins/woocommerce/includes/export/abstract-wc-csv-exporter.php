@@ -34,7 +34,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @var integer
 	 */
-	protected $limit = 50;
+	protected $limit = 1000;
 
 	/**
 	 * Number exported.
