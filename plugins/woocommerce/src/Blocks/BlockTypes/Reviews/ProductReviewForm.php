@@ -133,7 +133,7 @@ class ProductReviewForm extends AbstractBlock {
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
 				'</label><input type="hidden" name="rating" id="rating-input" data-wp-bind--value="state.selectedStar">' .
 				'<p role="group" aria-labelledby="comment-form-rating-label" class="stars-wrapper">' . $this->render_stars() .
-				( wc_review_ratings_required() ? '<small data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError"></small>' : '' ) .
+				( wc_review_ratings_required() ? '<small data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError" aria-live="polite"></small>' : '' ) .
 				'</p></div>';
 		}
 
