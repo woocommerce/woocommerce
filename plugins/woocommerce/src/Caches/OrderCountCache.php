@@ -15,6 +15,13 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 class OrderCountCache {
 
 	/**
+	 * Cache prefix.
+	 *
+	 * @var string
+	 */
+	private $cache_prefix = 'order-count';
+
+	/**
 	 * Default value for the duration of the objects in the cache, in seconds
 	 * (may not be used depending on the cache engine used WordPress cache implementation).
 	 *
@@ -63,20 +70,12 @@ class OrderCountCache {
 		wp_cache_set( $this->get_saved_statuses_cache_key( $order_type ), $merged, '', $this->expiration );
 	}
 
-
-	/**
-	 * Cache prefix.
-	 *
-	 * @var string
-	 */
-	private $cache_prefix = 'order-count';
-
 	/**
 	 * Get the default statuses.
 	 *
 	 * @return string[]
 	 *
-	 * @deprecated 10.0.0 This method will be removed in the future.
+	 * @deprecated 10.1.0 This method will be removed in the future.
 	 */
 	public function get_default_statuses() {
 		return array_merge(
