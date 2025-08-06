@@ -42,12 +42,22 @@ class WC_Gateway_Paypal_Helper {
 			return false;
 		}
 
-		// This is a hard requirement, as we need to be able to send authenticated requests
-		// to the proxy. We do this last to avoid Jetpack connection checks if
-		// the other conditions are not yet met.
+		// This is a hard requirement, as we need to be able to send authenticated requests to the proxy.
 		$jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
 		$is_connected               = $jetpack_connection_manager->is_connected();
-		return $is_connected;
+
+		if ( ! $is_connected ) {
+			return false;
+		}
+
+		// This is another hard requirement, as we need the merchant to be onboarded to Transact
+		// to be able to use the proxy.
+		$settings = get_option( 'woocommerce_paypal_settings', array() );
+		if ( empty( $settings['transact_merchant_public_id'] ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,6 +55,12 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected $endpoint;
 
+	/**
+	 * The API version for the proxy endpoint.
+	 *
+	 * @var int
+	 */
+	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
 
 	/**
 	 * Constructor.
@@ -290,6 +297,45 @@ class WC_Gateway_Paypal_Request {
 			$order->update_meta_data( '_paypal_status', strtolower( $response_data['status'] ) );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Onboard the merchant with the Transact platform.
+	 *
+	 * @return string|null The public ID of the merchant, or null if onboarding failed.
+	 */
+	public function onboard_transact_merchant() {
+		$site_id      = \Jetpack_Options::get_option( 'id' );
+		$request_body = array(
+			'test_mode' => $this->gateway->testmode,
+			// TODO: Do we need to pass this?
+			// If yes, do we need to handle scenario where the store changes domain?
+			'store_url' => get_site_url(),
+		);
+		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+			sprintf( '/sites/%d/transact/account', $site_id ),
+			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
+			array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'method'  => 'POST',
+				'timeout' => 60,
+			),
+			wp_json_encode( $request_body ),
+			'wpcom'
+		);
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return null;
+		}
+
+		$response_data = json_decode( $response['body'], true );
+		if ( empty( $response_data['public_id'] ) ) {
+			return null;
+		}
+
+		return $response_data['public_id'];
 	}
 
 	/**
@@ -559,10 +605,8 @@ class WC_Gateway_Paypal_Request {
 			if ( mb_strlen( $string ) > $limit ) {
 				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
 			}
-		} else {
-			if ( strlen( $string ) > $limit ) {
+		} elseif ( strlen( $string ) > $limit ) {
 				$string = substr( $string, 0, $str_limit ) . '...';
-			}
 		}
 		return $string;
 	}
@@ -638,7 +682,6 @@ class WC_Gateway_Paypal_Request {
 			),
 			$order
 		);
-
 	}
 
 	/**

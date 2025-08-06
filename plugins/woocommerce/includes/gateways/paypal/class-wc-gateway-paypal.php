@@ -149,7 +149,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
 
+		// Jetpack connection.
 		$this->maybe_register_site_with_wpcom();
+
+		// Transact merchant onboarding.
+		$this->maybe_onboard_transact_merchant();
 	}
 
 	/**
@@ -158,10 +162,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_jetpack_connected() {
-		if ( ! isset( $this->jetpack_connection_manager ) ) {
-			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
+		if ( ! $jetpack_connection_manager ) {
+			return false;
 		}
-		return $this->jetpack_connection_manager->is_connected();
+
+		return $jetpack_connection_manager->is_connected();
 	}
 
 	/**
@@ -170,11 +176,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string|null The blog token, or null if the blog is not connected to Jetpack.
 	 */
 	public function get_blog_token() {
-		if ( ! isset( $this->jetpack_connection_manager ) ) {
-			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
+		if ( ! $jetpack_connection_manager ) {
+			return null;
 		}
 
-		$blog_token = $this->jetpack_connection_manager->get_tokens()->get_access_token();
+		$blog_token = $jetpack_connection_manager->get_tokens()->get_access_token();
 		if ( is_wp_error( $blog_token ) || empty( $blog_token ) ) {
 			return null;
 		}
@@ -195,18 +202,61 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
-		$is_connected                     = $this->jetpack_connection_manager->is_connected();
+		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
+		if ( ! $jetpack_connection_manager ) {
+			return;
+		}
 
+		$is_connected = $jetpack_connection_manager->is_connected();
 		if ( $is_connected ) {
 			return;
 		}
 
-		$result = $this->jetpack_connection_manager->try_registration();
+		$result = $jetpack_connection_manager->try_registration();
 		if ( is_wp_error( $result ) ) {
 			self::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
 			return;
 		}
+	}
+
+	/**
+	 * Onboard the merchant with the Transact platform.
+	 *
+	 * @return void
+	 */
+	private function maybe_onboard_transact_merchant() {
+		// Limit the trigger to admin pages only.
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		// If the merchant is already onboarded, nothing to do.
+		$transact_merchant_public_id = $this->get_option( 'transact_merchant_public_id' );
+		if ( $transact_merchant_public_id ) {
+			return;
+		}
+
+		// Check if the merchant is eligible for onboarding.
+		if (
+			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
+			! WC_Gateway_Paypal_Helper::is_tos_accepted() ||
+			! $this->is_jetpack_connected()
+		) {
+			return;
+		}
+
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+		$paypal_request              = new WC_Gateway_Paypal_Request( $this );
+		$transact_merchant_public_id = $paypal_request->onboard_transact_merchant();
+		if ( empty( $transact_merchant_public_id ) ) {
+			self::log( 'Transact merchant onboarding failed.', 'error' );
+			return;
+		}
+
+		// Save the Transact merchant public ID locally.
+		// TODO: Will we ever need this? If this will serve only as a flag to indicate that the merchant is onboarded,
+		// we can probably use a simple boolean flag instead.
+		$this->update_option( 'transact_merchant_public_id', $transact_merchant_public_id );
 	}
 
 	/**
@@ -716,5 +766,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'woocommerce_paypal_use_orders_v2',
 			'yes' === $this->get_option( 'use_orders_v2' )
 		);
+	}
+
+	/**
+	 * Get the Jetpack connection manager.
+	 *
+	 * @return Jetpack_Connection_Manager
+	 */
+	private function get_jetpack_connection_manager() {
+		if ( ! $this->jetpack_connection_manager ) {
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'paypal' );
+		}
+		return $this->jetpack_connection_manager;
 	}
 }
