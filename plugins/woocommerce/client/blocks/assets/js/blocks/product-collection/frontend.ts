@@ -26,6 +26,11 @@ export type ProductCollectionStoreContext = {
 	ariaLabelNext: string;
 };
 
+// @wordpress/i18n is not available on the frontend.
+function isRTL(): boolean {
+	return document.documentElement.dir === 'rtl';
+}
+
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	return (
 		ref !== null &&
@@ -52,6 +57,14 @@ const checkIfButtonsDisabled = (
 
 	const SCROLL_OFFSET = 5;
 	const { scrollWidth, clientWidth } = productTemplate;
+
+	if ( isRTL() ) {
+		return {
+			isDisabledPrevious: currentScroll > -SCROLL_OFFSET,
+			isDisabledNext:
+				currentScroll <= clientWidth - scrollWidth + SCROLL_OFFSET,
+		};
+	}
 
 	return {
 		isDisabledPrevious: currentScroll < SCROLL_OFFSET,
@@ -86,8 +99,10 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 		? 0.9 * productCollectionWidth
 		: 400;
 
+	const multiplier = isRTL() ? -1 : 1;
+
 	productTemplate?.scrollBy( {
-		left: direction === 'left' ? -scrollBy : scrollBy,
+		left: multiplier * ( direction === 'left' ? -scrollBy : scrollBy ),
 		behavior: 'smooth',
 	} );
 
@@ -95,7 +110,9 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 	const { scrollLeft } = productTemplate;
 	// scrollBy doesn't return the final position, so we need to calculate it.
 	const finalPosition =
-		direction === 'left' ? scrollLeft - scrollBy : scrollLeft + scrollBy;
+		direction === 'left'
+			? scrollLeft - multiplier * scrollBy
+			: scrollLeft + multiplier * scrollBy;
 
 	const { isDisabledPrevious, isDisabledNext } = checkIfButtonsDisabled(
 		productTemplate,
