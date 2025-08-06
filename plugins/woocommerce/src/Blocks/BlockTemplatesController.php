@@ -237,9 +237,15 @@ class BlockTemplatesController {
 
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if ( 'custom' === $template_file->source ) {
-				$query_result[] = $template_file;
-				continue;
+			if (
+				'custom' === $template_file->source &&
+				(
+					BlockTemplateUtils::PLUGIN_SLUG === $template_file->theme ||
+					BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === $template_file->theme
+				)
+			) {
+				array_unshift( $query_result, $template_file );
+				return $query_result;
 			}
 
 			// If the template has a fallback, we should not include it in the list of templates, unless it has been modified.

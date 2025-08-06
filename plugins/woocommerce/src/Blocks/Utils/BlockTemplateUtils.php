@@ -564,19 +564,15 @@ class BlockTemplateUtils {
 	public static function remove_theme_templates_with_custom_alternative( $templates ) {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
-		$customised_template_slugs = array_map(
-			function ( $template ) {
-				return $template->slug;
-			},
-			array_values(
-				array_filter(
-					$templates,
-					function ( $template ) {
-						// This template has been customised and saved as a post.
-						return 'custom' === $template->source;
-					}
-				)
-			)
+		$customised_template_slugs = array_column(
+			array_filter(
+				$templates,
+				function ( $template ) {
+					// This template has been customised and saved as a post.
+					return 'custom' === $template->source;
+				}
+			),
+			'slug'
 		);
 
 		// Remove theme (i.e. filesystem) templates that have the same slug as a customised one. We don't need to check

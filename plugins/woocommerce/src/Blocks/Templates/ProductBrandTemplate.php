@@ -27,6 +27,13 @@ class ProductBrandTemplate extends AbstractTemplateWithFallback {
 	public string $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
+	 * Whether this is a taxonomy template.
+	 *
+	 * @var bool
+	 */
+	public bool $is_taxonomy_template = true;
+
+	/**
 	 * Returns the title of the template.
 	 *
 	 * @return string

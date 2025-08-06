@@ -19,6 +19,13 @@ abstract class AbstractTemplate {
 	const SLUG = '';
 
 	/**
+	 * Whether this is a taxonomy template.
+	 *
+	 * @var bool
+	 */
+	public bool $is_taxonomy_template = false;
+
+	/**
 	 * Initialization method.
 	 */
 	abstract public function init();
