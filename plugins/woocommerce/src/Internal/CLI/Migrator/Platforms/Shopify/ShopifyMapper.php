@@ -26,6 +26,51 @@ defined( 'ABSPATH' ) || exit;
 class ShopifyMapper implements PlatformMapperInterface {
 
 	/**
+	 * Shopify weight unit to standard unit mapping.
+	 *
+	 * @var array
+	 */
+	private const WEIGHT_UNIT_MAP = array(
+		'GRAMS'     => 'g',
+		'KILOGRAMS' => 'kg',
+		'POUNDS'    => 'lb',
+		'OUNCES'    => 'oz',
+	);
+
+	/**
+	 * Weight conversion factors between units.
+	 * Structure: [from_unit][to_unit] = factor
+	 *
+	 * @var array
+	 */
+	private const WEIGHT_CONVERSION_FACTORS = array(
+		'kg' => array(
+			'kg' => 1,
+			'g'  => 1000,
+			'lb' => 2.20462,
+			'oz' => 35.274,
+		),
+		'g'  => array(
+			'kg' => 0.001,
+			'g'  => 1,
+			'lb' => 0.00220462,
+			'oz' => 0.035274,
+		),
+		'lb' => array(
+			'kg' => 0.453592,
+			'g'  => 453.592,
+			'lb' => 1,
+			'oz' => 16,
+		),
+		'oz' => array(
+			'kg' => 0.0283495,
+			'g'  => 28.3495,
+			'lb' => 0.0625,
+			'oz' => 1,
+		),
+	);
+
+	/**
 	 * Fields to process during mapping.
 	 *
 	 * @var array
@@ -257,14 +302,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 			return null;
 		}
 
-		$unit_map = array(
-			'GRAMS'     => 'g',
-			'KILOGRAMS' => 'kg',
-			'POUNDS'    => 'lb',
-			'OUNCES'    => 'oz',
-		);
-
-		$shopify_unit_key = $unit_map[ $weight_unit ] ?? null;
+		$shopify_unit_key = self::WEIGHT_UNIT_MAP[ $weight_unit ] ?? null;
 
 		if ( ! $shopify_unit_key ) {
 			return (float) $weight;
@@ -286,39 +324,12 @@ class ShopifyMapper implements PlatformMapperInterface {
 			return is_numeric( $converted ) ? (float) $converted : null;
 		}
 
-		// Fallback manual conversion.
-		$conversion_factors = array(
-			'kg' => array(
-				'kg' => 1,
-				'g'  => 1000,
-				'lb' => 2.20462,
-				'oz' => 35.274,
-			),
-			'g'  => array(
-				'kg' => 0.001,
-				'g'  => 1,
-				'lb' => 0.00220462,
-				'oz' => 0.035274,
-			),
-			'lb' => array(
-				'kg' => 0.453592,
-				'g'  => 453.592,
-				'lb' => 1,
-				'oz' => 16,
-			),
-			'oz' => array(
-				'kg' => 0.0283495,
-				'g'  => 28.3495,
-				'lb' => 0.0625,
-				'oz' => 1,
-			),
-		);
-
-		if ( ! isset( $conversion_factors[ $shopify_unit_key ][ $store_weight_unit ] ) ) {
+		// Fallback manual conversion using class constants.
+		if ( ! isset( self::WEIGHT_CONVERSION_FACTORS[ $shopify_unit_key ][ $store_weight_unit ] ) ) {
 			return (float) $weight;
 		}
 
-		return (float) $weight * $conversion_factors[ $shopify_unit_key ][ $store_weight_unit ];
+		return (float) $weight * self::WEIGHT_CONVERSION_FACTORS[ $shopify_unit_key ][ $store_weight_unit ];
 	}
 
 	/**
