@@ -11,6 +11,10 @@
  * Apply all changes in both projects until Woo consumes php-toolkit as a
  * composer dependency. Generic changes belong to this class. Anything
  * Woo-specific should be implemented as an extension point.
+ *
+ * MODIFICATION: Made this class standalone by replacing external StreamImporter 
+ * and AttachmentDownloaderEvent dependencies with internal constants to eliminate 
+ * external imports and make the class fully self-contained.
  */
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Lib;
@@ -28,6 +32,25 @@ use function is_wp_error;
  */
 class ImportSession {
 	const POST_TYPE = 'import_session';
+
+	// Import stage constants - replaces StreamImporter dependencies
+	const STAGE_INITIAL = 'initial';
+	const STAGE_FINISHED = 'finished';
+	
+	// Import stages in processing order
+	const STAGES_IN_ORDER = array(
+		self::STAGE_INITIAL,
+		'indexing',
+		'preparing',
+		'importing',
+		'finalizing',
+		self::STAGE_FINISHED,
+	);
+
+	// Event type constants - replaces AttachmentDownloaderEvent dependencies  
+	const EVENT_SUCCESS = 'success';
+	const EVENT_ALREADY_EXISTS = 'already_exists';
+	const EVENT_FAILURE = 'failure';
 
 	/**
 	 * @TODO: Make it extendable
@@ -545,14 +568,14 @@ class ImportSession {
 			$new_attempts = $attempts;
 			$new_status   = $placeholder->post_status;
 			switch ( $event->type ) {
-				case AttachmentDownloaderEvent::SUCCESS:
+				case self::EVENT_SUCCESS:
 					$new_status   = self::FRONTLOAD_STATUS_SUCCEEDED;
 					$new_attempts = $attempts + 1;
 					break;
-				case AttachmentDownloaderEvent::ALREADY_EXISTS:
+				case self::EVENT_ALREADY_EXISTS:
 					$new_status = self::FRONTLOAD_STATUS_SUCCEEDED;
 					break;
-				case AttachmentDownloaderEvent::FAILURE:
+				case self::EVENT_FAILURE:
 					$new_status   = self::FRONTLOAD_STATUS_ERROR;
 					$new_attempts = $attempts + 1;
 					break;
@@ -581,8 +604,8 @@ class ImportSession {
 
 	public function is_stage_completed( $stage ) {
 		$current_stage       = $this->get_stage();
-		$stage_index         = array_search( $stage, StreamImporter::STAGES_IN_ORDER, true );
-		$current_stage_index = array_search( $current_stage, StreamImporter::STAGES_IN_ORDER, true );
+		$stage_index         = array_search( $stage, self::STAGES_IN_ORDER, true );
+		$current_stage_index = array_search( $current_stage, self::STAGES_IN_ORDER, true );
 
 		return $current_stage_index > $stage_index;
 	}
@@ -595,7 +618,7 @@ class ImportSession {
 	public function get_stage() {
 		if ( ! isset( $this->cached_stage ) ) {
 			$meta               = get_post_meta( $this->post_id, 'current_stage', true );
-			$this->cached_stage = $meta ? $meta : StreamImporter::STAGE_INITIAL;
+			$this->cached_stage = $meta ? $meta : self::STAGE_INITIAL;
 		}
 
 		return $this->cached_stage;
@@ -610,7 +633,7 @@ class ImportSession {
 		if ( $stage === $this->get_stage() ) {
 			return;
 		}
-		if ( StreamImporter::STAGE_FINISHED === $stage ) {
+		if ( self::STAGE_FINISHED === $stage ) {
 			update_post_meta( $this->post_id, 'finished_at', time() );
 		}
 		update_post_meta( $this->post_id, 'current_stage', $stage );
