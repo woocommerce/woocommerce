@@ -185,9 +185,9 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test remove_theme_templates_with_custom_alternative.
+	 * Test remove_templates_with_custom_alternative.
 	 */
-	public function test_remove_theme_templates_with_custom_alternative() {
+	public function test_remove_templates_with_custom_alternative() {
 		$templates = array(
 			(object) array(
 				'slug'   => 'single-product',
@@ -222,7 +222,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			),
 		);
 
-		$this->assertEquals( $expected_templates, BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $templates ) );
+		$this->assertEquals( $expected_templates, BlockTemplateUtils::remove_templates_with_custom_alternative( $templates ) );
 	}
 
 	/**
