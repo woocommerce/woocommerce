@@ -582,7 +582,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
-			'maximum'           => 100,
+			'maximum'           => 10000,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
