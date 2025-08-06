@@ -786,6 +786,11 @@ class WC_Post_Data {
 				if ( ! $when ) {
 					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
 				}
+			} else {
+				wc_get_logger()->warning(
+					'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Attribute ID: ' . $attribute_id,
+					array( 'source' => 'woocommerce-variations' )
+				);
 			}
 		}
 	}
@@ -838,6 +843,11 @@ class WC_Post_Data {
 				if ( ! $when ) {
 					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
 				}
+			} else {
+				wc_get_logger()->warning(
+					'Action Scheduler unavailable for product variation summary regeneration. Product ID: ' . $product->get_id(),
+					array( 'source' => 'woocommerce-variations' )
+				);
 			}
 		}
 	}
@@ -908,6 +918,11 @@ class WC_Post_Data {
 			if ( ! $when ) {
 				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
 			}
+		} else {
+			wc_get_logger()->warning(
+				'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id,
+				array( 'source' => 'woocommerce-variations' )
+			);
 		}
 	}
 
@@ -957,6 +972,11 @@ class WC_Post_Data {
 			if ( ! $when ) {
 				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
 			}
+		} else {
+			wc_get_logger()->warning(
+				'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id,
+				array( 'source' => 'woocommerce-variations' )
+			);
 		}
 	}
 
