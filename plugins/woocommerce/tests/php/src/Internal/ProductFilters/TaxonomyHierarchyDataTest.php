@@ -49,7 +49,7 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	 * Clean up test environment.
 	 */
 	public function tearDown(): void {
-		// Clean up. test terms.
+		// Clean up test terms.
 		foreach ( $this->test_term_ids as $term_id ) {
 			wp_delete_term( $term_id, $this->taxonomy );
 		}
@@ -98,43 +98,28 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 
 		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
 
-		// Should have full map structure.
-		$this->assertArrayHasKey( 'parents', $map );
-		$this->assertArrayHasKey( 'children', $map );
+		// Should have new map structure.
 		$this->assertArrayHasKey( 'descendants', $map );
-
-		// Verify parents mapping.
-		$this->assertEquals( 0, $map['parents'][ $electronics_id ] );
-		$this->assertEquals( $electronics_id, $map['parents'][ $laptops_id ] );
-		$this->assertEquals( $laptops_id, $map['parents'][ $gaming_id ] );
-
-		// Verify children mapping.
-		$this->assertContains( $electronics_id, $map['children'][0] );
-		$this->assertContains( $laptops_id, $map['children'][ $electronics_id ] );
-		$this->assertContains( $gaming_id, $map['children'][ $laptops_id ] );
+		$this->assertArrayHasKey( 'ancestors', $map );
+		$this->assertArrayHasKey( 'tree', $map );
 
 		// Verify descendants are pre-computed.
 		$this->assertContains( $laptops_id, $map['descendants'][ $electronics_id ] );
 		$this->assertContains( $gaming_id, $map['descendants'][ $electronics_id ] );
 		$this->assertContains( $gaming_id, $map['descendants'][ $laptops_id ] );
+
+		// Verify ancestors are pre-computed.
+		$this->assertContains( $electronics_id, $map['ancestors'][ $laptops_id ] );
+		$this->assertContains( $electronics_id, $map['ancestors'][ $gaming_id ] );
+		$this->assertContains( $laptops_id, $map['ancestors'][ $gaming_id ] );
+
+		// Verify tree structure.
+		$this->assertArrayHasKey( $electronics_id, $map['tree'] );
+		$this->assertEquals( 'Electronics', $map['tree'][ $electronics_id ]['name'] );
+		$this->assertEquals( 0, $map['tree'][ $electronics_id ]['depth'] );
+		$this->assertArrayHasKey( 'children', $map['tree'][ $electronics_id ] );
+		$this->assertArrayHasKey( $laptops_id, $map['tree'][ $electronics_id ]['children'] );
 	}
-
-	/**
-	 * Test get_parent method.
-	 */
-	public function test_get_parent(): void {
-		$electronics_id = $this->create_test_term( 'Electronics' );
-		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
-		$gaming_id      = $this->create_test_term( 'Gaming Laptops', $laptops_id );
-
-		$this->assertEquals( 0, $this->sut->get_parent( $electronics_id, $this->taxonomy ) );
-		$this->assertEquals( $electronics_id, $this->sut->get_parent( $laptops_id, $this->taxonomy ) );
-		$this->assertEquals( $laptops_id, $this->sut->get_parent( $gaming_id, $this->taxonomy ) );
-
-		// Non-existent term should return 0.
-		$this->assertEquals( 0, $this->sut->get_parent( 99999, $this->taxonomy ) );
-	}
-
 
 	/**
 	 * Test get_descendants method.
@@ -162,6 +147,32 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 
 		// Non-existent term should return empty array.
 		$this->assertEmpty( $this->sut->get_descendants( 99999, $this->taxonomy ) );
+	}
+
+	/**
+	 * Test get_ancestors method.
+	 */
+	public function test_get_ancestors(): void {
+		$electronics_id = $this->create_test_term( 'Electronics' );
+		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
+		$gaming_id      = $this->create_test_term( 'Gaming Laptops', $laptops_id );
+
+		// Root term should have no ancestors.
+		$this->assertEmpty( $this->sut->get_ancestors( $electronics_id, $this->taxonomy ) );
+
+		// Second level should have one ancestor.
+		$laptops_ancestors = $this->sut->get_ancestors( $laptops_id, $this->taxonomy );
+		$this->assertContains( $electronics_id, $laptops_ancestors );
+		$this->assertCount( 1, $laptops_ancestors );
+
+		// Third level should have two ancestors.
+		$gaming_ancestors = $this->sut->get_ancestors( $gaming_id, $this->taxonomy );
+		$this->assertContains( $laptops_id, $gaming_ancestors );
+		$this->assertContains( $electronics_id, $gaming_ancestors );
+		$this->assertCount( 2, $gaming_ancestors );
+
+		// Non-existent term should return empty array.
+		$this->assertEmpty( $this->sut->get_ancestors( 99999, $this->taxonomy ) );
 	}
 
 	/**
@@ -200,9 +211,34 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 
 		// Should return empty arrays for all methods.
 		$this->assertEmpty( $this->sut->get_descendants( 1, $empty_taxonomy ) );
-		$this->assertEquals( 0, $this->sut->get_parent( 1, $empty_taxonomy ) );
+		$this->assertEmpty( $this->sut->get_ancestors( 1, $empty_taxonomy ) );
 
 		// Clean up.
 		unregister_taxonomy( $empty_taxonomy );
+	}
+
+	/**
+	 * Test tree structure includes depth and parent information.
+	 */
+	public function test_tree_structure_includes_depth_and_parent(): void {
+		$electronics_id = $this->create_test_term( 'Electronics' );
+		$laptops_id     = $this->create_test_term( 'Laptops', $electronics_id );
+		$gaming_id      = $this->create_test_term( 'Gaming Laptops', $laptops_id );
+
+		$map = $this->sut->get_hierarchy_map( $this->taxonomy );
+
+		// Check root level term.
+		$this->assertEquals( 0, $map['tree'][ $electronics_id ]['depth'] );
+		$this->assertEquals( 0, $map['tree'][ $electronics_id ]['parent'] );
+
+		// Check second level term.
+		$laptops_tree = $map['tree'][ $electronics_id ]['children'][ $laptops_id ];
+		$this->assertEquals( 1, $laptops_tree['depth'] );
+		$this->assertEquals( $electronics_id, $laptops_tree['parent'] );
+
+		// Check third level term.
+		$gaming_tree = $laptops_tree['children'][ $gaming_id ];
+		$this->assertEquals( 2, $gaming_tree['depth'] );
+		$this->assertEquals( $laptops_id, $gaming_tree['parent'] );
 	}
 }

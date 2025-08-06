@@ -134,6 +134,8 @@ jobs:
             exit 1
           fi
 
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
       - name: Setup PNPM
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
@@ -153,7 +155,7 @@ jobs:
       - name: Generate changelog changes and create PR
         id: changelog
         env:
-          VERSION: ${{ steps.validate-version.outputs.version }}
+          VERSION: ${{ steps.validate-selected-branch-version.outputs.current_version }}
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

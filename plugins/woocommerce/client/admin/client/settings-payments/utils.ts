@@ -7,7 +7,6 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
-import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
 
@@ -16,7 +15,6 @@ import { parseAdminUrl } from '@woocommerce/navigation';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
-	WC_SETTINGS_PAYMENTS_NAMESPACE,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -126,35 +124,6 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
 			'&test_drive=true&auto_start_test_drive_onboarding=true&redirect_to_settings_page=true'
 	);
-};
-
-export const resetWooPaymentsAccount = async () => {
-	try {
-		return await apiFetch( {
-			path:
-				WC_SETTINGS_PAYMENTS_NAMESPACE +
-				'/woopayments/onboarding/reset',
-			method: 'POST',
-		} );
-	} catch ( error ) {
-		throw error;
-	}
-};
-
-/**
- * Disables the WooPayments test account.
- */
-export const disableWooPaymentsTestAccount = async () => {
-	try {
-		return await apiFetch( {
-			path:
-				WC_SETTINGS_PAYMENTS_NAMESPACE +
-				'/woopayments/onboarding/test_account/disable',
-			method: 'POST',
-		} );
-	} catch ( error ) {
-		throw error;
-	}
 };
 
 export const getWooPaymentsSetupLiveAccountLink = () => {

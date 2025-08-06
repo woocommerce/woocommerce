@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add hierarchical data structure support to filter options of the Product Filters block, starting with List and Taxonomy filter options.
