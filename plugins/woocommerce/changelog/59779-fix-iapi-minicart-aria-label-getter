@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an issue in the `buttonAriaLabel` PHP getter in the `woocommerce/mini-cart` iAPI initial state.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent order discount above coupon amount when editing order in admin

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updated add-to-cart URLs to maintain current URL and arguments when AJAX mode is disabled.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Update footer link for marketplace suggestions on orders page and product editor to link to in-app Marketplace instead of to WooCommerce.com, if a in-app URL is provided via the suggestions endpoint.

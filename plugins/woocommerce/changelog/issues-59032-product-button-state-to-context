@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Move product button add to cart strings from interactivity state to context

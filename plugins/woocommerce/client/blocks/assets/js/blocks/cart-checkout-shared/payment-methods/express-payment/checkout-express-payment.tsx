@@ -4,10 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
 import { Title, StoreNoticesContainer } from '@woocommerce/blocks-components';
-import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -33,11 +34,12 @@ const CheckoutExpressPayment = () => {
 			isComplete: store.isComplete(),
 			hasError: store.hasError(),
 		};
-	} );
+	}, [] );
 	const {
 		availableExpressPaymentMethods,
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
+		registeredExpressPaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
 		return {
@@ -46,14 +48,29 @@ const CheckoutExpressPayment = () => {
 			expressPaymentMethodsInitialized:
 				store.expressPaymentMethodsInitialized(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
+			registeredExpressPaymentMethods:
+				store.getRegisteredExpressPaymentMethods(),
 		};
-	} );
+	}, [] );
 	const { isEditor } = useEditorContext();
 
+	const hasRegisteredExpressPaymentMethods =
+		Object.keys( registeredExpressPaymentMethods ).length > 0;
+
+	// The store has registered express payment methods but they are not initialized.
+	// We don't know if the methods pass the canMakePayment check.
+	const hasRegisteredNotInitializedExpressPayments =
+		! expressPaymentMethodsInitialized &&
+		hasRegisteredExpressPaymentMethods;
+
+	// The store has available express payment methods but they are not initialized.
+	const hasNoValidRegisteredExpressPayments =
+		expressPaymentMethodsInitialized &&
+		Object.keys( availableExpressPaymentMethods ).length === 0;
+
 	if (
-		! expressPaymentMethodsInitialized ||
-		( expressPaymentMethodsInitialized &&
-			Object.keys( availableExpressPaymentMethods ).length === 0 )
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPayments
 	) {
 		// Make sure errors are shown in the editor and for admins. For example,
 		// when a payment method fails to register.
@@ -76,30 +93,56 @@ const CheckoutExpressPayment = () => {
 
 	return (
 		<>
-			<LoadingMask
-				isLoading={
-					isCalculating ||
-					checkoutProcessing ||
-					isExpressPaymentMethodActive
+			<div
+				className={ clsx(
+					'wc-block-components-express-payment',
+					'wc-block-components-express-payment--checkout',
+					{
+						'wc-block-components-express-payment--disabled':
+							isExpressPaymentMethodActive || checkoutProcessing,
+					}
+				) }
+				aria-disabled={
+					isExpressPaymentMethodActive || checkoutProcessing
 				}
+				aria-busy={ checkoutProcessing }
+				aria-live="polite"
+				aria-label={ __(
+					'Processing express checkout',
+					'woocommerce'
+				) }
 			>
-				<div className="wc-block-components-express-payment wc-block-components-express-payment--checkout">
-					<div className="wc-block-components-express-payment__title-container">
-						<Title
-							className="wc-block-components-express-payment__title"
-							headingLevel="2"
-						>
-							{ __( 'Express Checkout', 'woocommerce' ) }
-						</Title>
-					</div>
-					<div className="wc-block-components-express-payment__content">
-						<StoreNoticesContainer
-							context={ noticeContexts.EXPRESS_PAYMENTS }
-						/>
-						<ExpressPaymentMethods />
-					</div>
+				<div className="wc-block-components-express-payment__title-container">
+					<Title
+						className="wc-block-components-express-payment__title"
+						headingLevel="2"
+					>
+						{ hasRegisteredNotInitializedExpressPayments ? (
+							<Skeleton width="127px" height="18px" />
+						) : (
+							__( ' Express Checkout', 'woocommerce' )
+						) }
+					</Title>
 				</div>
-			</LoadingMask>
+				<div className="wc-block-components-express-payment__content">
+					<StoreNoticesContainer
+						context={ noticeContexts.EXPRESS_PAYMENTS }
+					/>
+					{ isCalculating ||
+					hasRegisteredNotInitializedExpressPayments ? (
+						<ul className="wc-block-components-express-payment__event-buttons">
+							<li>
+								<Skeleton height="48px" />
+							</li>
+							<li>
+								<Skeleton height="48px" />
+							</li>
+						</ul>
+					) : (
+						<ExpressPaymentMethods />
+					) }
+				</div>
+			</div>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--checkout">
 				{ __( 'Or continue below', 'woocommerce' ) }
 			</div>

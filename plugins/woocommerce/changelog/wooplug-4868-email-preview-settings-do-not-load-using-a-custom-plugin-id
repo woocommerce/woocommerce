@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Ensure email previews uses the plugin_id for transients

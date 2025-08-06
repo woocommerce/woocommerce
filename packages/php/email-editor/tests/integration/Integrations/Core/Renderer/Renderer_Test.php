@@ -215,7 +215,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItInlinesColumnsColors(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
-				'post_content' => '<!-- wp:columns {"backgroundColor":"vivid-green-cyan", "textColor":"black"} -->
+				'post_content' => '<!-- wp:columns {"backgroundColor":"black", "textColor":"luminous-vivid-orange"} -->
         <div class="wp-block-columns has-black-background-color has-luminous-vivid-orange-color"><!-- wp:column --><!-- /wp:column --></div>
         <!-- /wp:columns -->',
 			)
@@ -235,7 +235,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersTextVersion(): void {
 		$email_post_id = $this->factory->post->create(
 			array(
-				'post_content' => '<!-- wp:columns {"backgroundColor":"vivid-green-cyan", "textColor":"black"} -->
+				'post_content' => '<!-- wp:columns {"backgroundColor":"black", "textColor":"luminous-vivid-orange"} -->
         <div class="wp-block-columns has-black-background-color has-luminous-vivid-orange-color"><!-- wp:column --><!-- /wp:column --></div>
         <!-- /wp:columns -->',
 			)

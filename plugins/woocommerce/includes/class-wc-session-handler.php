@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Handle data for the current customers session.
  * Implements the WC_Session abstract class.
@@ -7,9 +7,8 @@
  *
  * @class    WC_Session_Handler
  * @package  WooCommerce\Classes
+ * @internal "Missing required strict_types declaration" rule has been ignored to prevent errors with `StringUtil::starts_with` when used on a nonce action which could be -1 rather than a string.
  */
-
-declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -98,12 +97,11 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from either the request or the cookie. If neither are present, generate a new customer ID.
+	 * Initialize the session from either the request or the cookie.
 	 */
 	private function init_session() {
-		if ( ! $this->init_session_from_request() && ! $this->init_session_from_cookie() ) {
-			$this->_customer_id = $this->generate_customer_id();
-			$this->_data        = $this->get_session_data();
+		if ( ! $this->init_session_from_request() ) {
+			$this->init_session_cookie();
 		}
 	}
 
@@ -156,16 +154,6 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Initialize the session from the cookie.
-	 *
-	 * @return bool
-	 */
-	private function init_session_from_cookie() {
-		$this->init_session_cookie();
-		return null !== $this->_customer_id;
-	}
-
-	/**
 	 * Setup cookie and customer ID.
 	 *
 	 * @since 3.6.0
@@ -174,6 +162,9 @@ class WC_Session_Handler extends WC_Session {
 		$cookie = $this->get_session_cookie();
 
 		if ( ! $cookie ) {
+			// If there is no cookie, generate a new session/customer ID.
+			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 			return;
 		}
 
@@ -185,16 +176,16 @@ class WC_Session_Handler extends WC_Session {
 
 		$this->restore_session_data();
 
+		/**
+		 * This clears the session if the cookie is invalid.
+		 *
+		 * Previously this also cleared the session when $this->_data was empty, and the cart was not yet initialised,
+		 * however this caused a conflict with WooCommerce Payments session handler which overrides this class.
+		 *
+		 * Ref: https://github.com/woocommerce/woocommerce/pull/57652
+		 * See also: https://github.com/woocommerce/woocommerce/pull/59530
+		 */
 		if ( ! $this->is_session_cookie_valid() ) {
-			$this->destroy_session();
-		} elseif ( empty( $this->_data ) && ! isset( WC()->cart ) ) {
-			/**
-			 * Only destroy an empty session if the cart has not been previously initialized.
-			 * We cannot always safely remove the session cookie and destroy the session if the cart is already
-			 * initialized as $this->forget_session() calls `wc_empty_cart()` and can't be removed without potentially
-			 * breaking backward compatibility in cases where another extension already loaded and modified the cart
-			 * before the session.
-			 */
 			$this->destroy_session();
 		}
 
@@ -496,8 +487,11 @@ class WC_Session_Handler extends WC_Session {
 	 * For guests, sessions expire in 48 hours.
 	 */
 	public function set_session_expiration() {
-		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
+		$default_expiring_seconds   = DAY_IN_SECONDS;
+		$default_expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
+		$max_expiration_seconds     = MONTH_IN_SECONDS;
+		$max_expiring_seconds       = $max_expiration_seconds - DAY_IN_SECONDS;
+		$session_limit_exceeded     = false;
 
 		/**
 		 * Filters the session expiration.
@@ -505,15 +499,42 @@ class WC_Session_Handler extends WC_Session {
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiring = time() + intval( apply_filters( 'wc_session_expiring', $expiring_seconds ) );
+		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
+		if ( $expiring_seconds > $max_expiring_seconds ) {
+			$expiring_seconds       = $max_expiring_seconds;
+			$session_limit_exceeded = true;
+		}
 		/**
 		 * Filters the session expiration.
 		 *
 		 * @since 5.0.0
 		 * @param int $expiration_seconds The expiration time in seconds.
 		 */
-		$this->_session_expiration = time() + intval( apply_filters( 'wc_session_expiration', $expiration_seconds ) );
+		$expiration_seconds = intval( apply_filters( 'wc_session_expiration', $default_expiration_seconds ) ) ?: $default_expiration_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
+
+		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
+		if ( $expiration_seconds > $max_expiration_seconds ) {
+			$expiration_seconds     = $max_expiration_seconds;
+			$session_limit_exceeded = true;
+		}
+
+		if ( $session_limit_exceeded ) {
+			$transient_key = 'wc_session_handler_warning';
+			if ( false === get_transient( $transient_key ) ) {
+				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in performance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
+				set_transient( $transient_key, true, $max_expiration_seconds );
+			}
+		}
+
+		// If the expiring time is greater than the expiration time, set the expiring time to 90% of the expiration time.
+		if ( $expiring_seconds > $expiration_seconds ) {
+			$expiring_seconds = $expiration_seconds * 0.9;
+		}
+
+		$this->_session_expiring = time() + $expiring_seconds;
+
+		$this->_session_expiration = time() + $expiration_seconds;
 	}
 
 	/**

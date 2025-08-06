@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure custom tax classes are correctly exported and imported in Blueprints

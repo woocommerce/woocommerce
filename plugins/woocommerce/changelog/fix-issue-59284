@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Removed hard-coded right margin from Quantity Selector to resolve layout inconsistency.

@@ -44,7 +44,6 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the closest gallery container
 	const galleryContainer = element.closest(
 		'.wp-block-woocommerce-product-gallery'
 	);
@@ -53,15 +52,34 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const imageElement = galleryContainer.querySelector(
-		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
+	// Find the scrollable container for the large image gallery
+	const scrollableContainer = galleryContainer.querySelector(
+		'.wc-block-product-gallery-large-image__container'
+	);
+
+	if ( ! scrollableContainer ) {
+		return;
+	}
+
+	const imageElement = scrollableContainer.querySelector(
+		`img[data-image-id="${ imageId }"]`
 	);
 
 	if ( imageElement ) {
-		imageElement.scrollIntoView( {
+		// Calculate the scroll position to center the image horizontally
+		const containerRect = scrollableContainer.getBoundingClientRect();
+		const imageRect = imageElement.getBoundingClientRect();
+
+		const scrollLeft =
+			scrollableContainer.scrollLeft +
+			( imageRect.left - containerRect.left ) -
+			( containerRect.width - imageRect.width ) / 2;
+
+		// Use scrollTo as scrollIntoView with inline: 'center'
+		// is not supported in iOS (Safari and Chrome).
+		scrollableContainer.scrollTo( {
+			left: scrollLeft,
 			behavior: 'smooth',
-			block: 'nearest',
-			inline: 'center',
 		} );
 	}
 };

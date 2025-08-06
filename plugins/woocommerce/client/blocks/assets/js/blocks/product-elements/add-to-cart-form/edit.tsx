@@ -118,7 +118,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 									<>
 										<div className="quantity wc-block-components-quantity-selector">
 											<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
-												-
+												−
 											</button>
 											<input
 												style={

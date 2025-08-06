@@ -171,3 +171,8 @@
 		@include reset-box();
 	}
 }
+
+.theme-twentytwenty .wp-block-woocommerce-checkout, 
+.theme-twentytwentyone .wp-block-woocommerce-checkout {
+	margin: 0 auto;
+}

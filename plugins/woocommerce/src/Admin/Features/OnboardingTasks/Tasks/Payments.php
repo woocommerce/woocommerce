@@ -39,7 +39,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid', 'woocommerce' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
@@ -70,7 +70,13 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_gateways();
+			if ( $this->is_woopayments_active() ) {
+				// If WooPayments is active, check if it is fully onboarded with a live account.
+				$this->is_complete_result = $this->is_woopayments_onboarded() && ! $this->has_woopayments_test_account();
+			} else {
+				// If WooPayments is not active, check if there are any enabled gateways.
+				$this->is_complete_result = self::has_gateways();
+			}
 		}
 
 		return $this->is_complete_result;
@@ -290,7 +296,7 @@ class Payments extends Task {
 		$providers = $this->get_payments_providers();
 
 		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not WooPayments.
+			// Check if the provider is enabled and is not an offline payment method.
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
@@ -340,7 +346,9 @@ class Payments extends Task {
 			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
+			// Get the raw list of payment providers, including suggestions, but remove shells.
+			// This way we prevent shell gateways that are (wrongly) reported as enabled from affecting the task completion.
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false, true );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			return array();

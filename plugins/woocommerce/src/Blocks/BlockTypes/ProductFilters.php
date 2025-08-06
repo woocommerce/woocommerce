@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 
 /**
  * ProductFilters class.
@@ -226,17 +227,7 @@ class ProductFilters extends AbstractBlock {
 
 		parse_str( $parsed_url['query'], $url_query_params );
 
-		/**
-		 * Filters the active filter data provided by filter blocks.
-		 *
-		 * @since 11.7.0
-		 *
-		 * @param array $filter_param_keys The active filters data
-		 * @param array $url_param_keys    The query param parsed from the URL.
-		 *
-		 * @return array Active filters params.
-		 */
-		$filter_param_keys = array_unique( apply_filters( 'woocommerce_blocks_product_filters_param_keys', array(), array_keys( $url_query_params ) ) );
+		$filter_param_keys = wc_get_container()->get( Params::class )->get_param_keys();
 
 		return array_filter(
 			$url_query_params,

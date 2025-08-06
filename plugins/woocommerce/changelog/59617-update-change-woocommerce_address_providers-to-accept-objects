@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Support passing objects for woocommerce_address_providers filter.

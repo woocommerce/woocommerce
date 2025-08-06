@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Display notices when item quantities change without interaction.

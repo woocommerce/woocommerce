@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Product Filters: only query selected attributes for attribute query clauses.

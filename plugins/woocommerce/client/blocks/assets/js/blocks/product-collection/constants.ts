@@ -114,12 +114,17 @@ export const DEFAULT_FILTERS: Pick<
 	priceRange: DEFAULT_QUERY.priceRange,
 };
 
+export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const nextPreviousArrowsBlockName =
+	'woocommerce/product-gallery-large-image-next-previous';
+export const productTemplateBlockName = 'woocommerce/product-template';
+
 /**
  * Default inner block templates for the product collection block.
  * Exported for use in different collections, e.g., 'New Arrivals' collection.
  */
 export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
-	'woocommerce/product-template',
+	productTemplateBlockName,
 	{},
 	[
 		[
@@ -175,15 +180,16 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 	],
 ];
 
-export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const paginationDefaultAttributes = {
+	layout: {
+		type: 'flex',
+		justifyContent: 'center',
+	},
+};
+
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
 	coreQueryPaginationBlockName,
-	{
-		layout: {
-			type: 'flex',
-			justifyContent: 'center',
-		},
-	},
+	paginationDefaultAttributes,
 ];
 
 export const INNER_BLOCKS_NO_RESULTS_TEMPLATE: InnerBlockTemplate = [

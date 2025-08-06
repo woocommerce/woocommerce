@@ -228,7 +228,7 @@ class Renderer {
 	protected function get_list_styles( $fixed_width ) {
 		$style = '';
 
-		if ( isset( $fixed_width ) ) {
+		if ( isset( $fixed_width ) && ! empty( $fixed_width ) ) {
 			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
 			$style .= 'margin: 0 auto;';
 		}

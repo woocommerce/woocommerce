@@ -1,4 +1,4 @@
-# Cart Items API 
+# Cart Items API
 
 ## List Cart Items
 
@@ -129,10 +129,12 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 		],
 		"variation": [
 			{
+				"raw_attribute": "attribute_pa_color",
 				"attribute": "Color",
 				"value": "Red"
 			},
 			{
+				"raw_attribute": "attribute_logo",
 				"attribute": "Logo",
 				"value": "No"
 			}

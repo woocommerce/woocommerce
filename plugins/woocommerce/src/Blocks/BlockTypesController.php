@@ -397,6 +397,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterTaxonomy',
 
 			// Keep hidden legacy filter blocks for backward compatibility.
 			'ActiveFilters',
@@ -448,6 +449,7 @@ final class BlockTypesController {
 			'HandpickedProducts',
 			'MiniCart',
 			'StoreNotices',
+			'PaymentMethodIcons',
 			'PriceFilter',
 			'ProductBestSellers',
 			'ProductButton',
@@ -554,6 +556,10 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
+		}
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$block_types[] = 'ProductFilterTaxonomy';
 		}
 
 		/**

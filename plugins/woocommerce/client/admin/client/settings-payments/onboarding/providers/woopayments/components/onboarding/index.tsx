@@ -34,7 +34,7 @@ export default function WooPaymentsOnboarding( {
 	// Forces navigation to the current step only if the URL does not already match.
 	useEffect( () => {
 		if (
-			currentStep &&
+			currentStep?.path &&
 			! location.pathname.endsWith( currentStep?.path ?? '' )
 		) {
 			navigateToStep( currentStep.id );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Wrap most Add to Cart + Options CSS selectors in :where() to decrease specificity

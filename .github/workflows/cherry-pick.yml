@@ -40,7 +40,7 @@ jobs:
             - name: Fetch Pull Request Details
               if: github.event.issue.pull_request
               id: fetch_pr_details
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                 script: |
                   const issue = context.payload.issue;
@@ -52,7 +52,7 @@ jobs:
 
             - name: check
               id: check
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       const baseRef = process.env.BASE_REF;
@@ -88,7 +88,7 @@ jobs:
         steps:
             - name: Prep inputs
               id: prep-inputs
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       const event = ${{ toJSON( github.event ) }}
@@ -129,7 +129,7 @@ jobs:
         steps:
             - name: Check for release branch
               id: release-breanch-check
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
@@ -164,7 +164,7 @@ jobs:
 
             - name: Get commit sha from PR
               id: commit-sha
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       const pr = await github.rest.pulls.get({
@@ -181,7 +181,7 @@ jobs:
 
             - name: Generate changelog
               id: changelog
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       const fs = require( 'node:fs' );
@@ -293,7 +293,7 @@ jobs:
 
             - name: Create the PR for cherry pick branch
               id: cherry-pick-pr
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       let cherryPickPRBody = "This PR cherry-picks the following PRs into the release branch:\n";
@@ -343,7 +343,7 @@ jobs:
             - name: Create the PR for deletion branch
               id: deletion-pr
               if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-              uses: actions/github-script@v6
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
                       const pr = await github.rest.pulls.create({

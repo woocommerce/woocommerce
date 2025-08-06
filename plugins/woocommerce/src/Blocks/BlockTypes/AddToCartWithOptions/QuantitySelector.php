@@ -61,6 +61,11 @@ class QuantitySelector extends AbstractBlock {
 		$stock_quantity                      = $product->get_stock_quantity();
 		$allows_backorders                   = $product->backorders_allowed();
 
+		if ( AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ) {
+			$product = $previous_product;
+			return '';
+		}
+
 		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time || ( $managing_stock && $stock_quantity <= 1 && ! $allows_backorders ) ) {
 			$product = $previous_product;
 

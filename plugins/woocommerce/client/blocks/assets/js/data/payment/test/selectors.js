@@ -14,6 +14,7 @@ import {
 	registerExpressPaymentMethod,
 	__experimentalDeRegisterPaymentMethod,
 	__experimentalDeRegisterExpressPaymentMethod,
+	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
 import { default as fetchMock } from 'jest-fetch-mock';
 
@@ -25,6 +26,7 @@ import {
 	SavedPaymentMethodOptions,
 } from '../../../blocks/cart-checkout-shared/payment-methods';
 import { defaultCartState } from '../../cart/default-state';
+import { getRegisteredExpressPaymentMethods } from '../selectors';
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
@@ -143,6 +145,23 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 	wpDataFunctions
 		.dispatch( paymentStore )
 		.__internalUpdateAvailablePaymentMethods();
+
+	// Set registered express payment methods
+	const registeredExpressMethods = getExpressPaymentMethods();
+	const plainRegisteredMethods = {};
+	Object.keys( registeredExpressMethods ).forEach( ( methodName ) => {
+		const method = registeredExpressMethods[ methodName ];
+		plainRegisteredMethods[ methodName ] = {
+			name: method.name,
+			title: method.title,
+			description: method.description,
+			gatewayId: method.gatewayId,
+			supportsStyle: method.supports?.style || [],
+		};
+	} );
+	wpDataFunctions
+		.dispatch( paymentStore )
+		.__internalSetRegisteredExpressPaymentMethods( plainRegisteredMethods );
 };
 
 const resetMockPaymentMethods = () => {
@@ -335,6 +354,152 @@ describe( 'Testing Payment Methods work correctly with saved cards turned on', (
 		await waitFor( () => {
 			const creditCardToken = screen.queryByText( /credit-card token/ );
 			expect( creditCardToken ).not.toBeNull();
+		} );
+	} );
+} );
+
+describe( 'Payment Selectors Unit Tests', () => {
+	describe( 'getRegisteredExpressPaymentMethods', () => {
+		it( 'should return the registered express payment methods from state', () => {
+			const mockRegisteredMethods = {
+				'stripe-express': {
+					name: 'stripe-express',
+					title: 'Stripe Express',
+					description: 'Pay with Stripe express checkout',
+					gatewayId: 'stripe',
+					supportsStyle: [ 'height', 'borderRadius' ],
+				},
+				'paypal-express': {
+					name: 'paypal-express',
+					title: 'PayPal Express',
+					description: 'Pay with PayPal express checkout',
+					gatewayId: 'paypal',
+					supportsStyle: [],
+				},
+			};
+
+			const mockState = {
+				status: 'idle',
+				activePaymentMethod: 'stripe',
+				availablePaymentMethods: {},
+				availableExpressPaymentMethods: {},
+				registeredExpressPaymentMethods: mockRegisteredMethods,
+				savedPaymentMethods: {},
+				paymentMethodData: {},
+				paymentResult: null,
+				paymentMethodsInitialized: false,
+				expressPaymentMethodsInitialized: false,
+				shouldSavePaymentMethod: false,
+			};
+
+			const result = getRegisteredExpressPaymentMethods( mockState );
+
+			expect( result ).toEqual( mockRegisteredMethods );
+		} );
+
+		it( 'should return empty object when no registered express payment methods exist', () => {
+			const mockState = {
+				status: 'idle',
+				activePaymentMethod: 'stripe',
+				availablePaymentMethods: {},
+				availableExpressPaymentMethods: {},
+				registeredExpressPaymentMethods: {},
+				savedPaymentMethods: {},
+				paymentMethodData: {},
+				paymentResult: null,
+				paymentMethodsInitialized: false,
+				expressPaymentMethodsInitialized: false,
+				shouldSavePaymentMethod: false,
+			};
+
+			const result = getRegisteredExpressPaymentMethods( mockState );
+
+			expect( result ).toEqual( {} );
+		} );
+
+		it( 'should return the same reference when state does not change', () => {
+			const mockRegisteredMethods = {
+				'stripe-express': {
+					name: 'stripe-express',
+					title: 'Stripe Express',
+					description: 'Pay with Stripe express checkout',
+					gatewayId: 'stripe',
+					supportsStyle: [ 'height', 'borderRadius' ],
+				},
+			};
+
+			const mockState = {
+				status: 'idle',
+				activePaymentMethod: 'stripe',
+				availablePaymentMethods: {},
+				availableExpressPaymentMethods: {},
+				registeredExpressPaymentMethods: mockRegisteredMethods,
+				savedPaymentMethods: {},
+				paymentMethodData: {},
+				paymentResult: null,
+				paymentMethodsInitialized: false,
+				expressPaymentMethodsInitialized: false,
+				shouldSavePaymentMethod: false,
+			};
+
+			const result1 = getRegisteredExpressPaymentMethods( mockState );
+			const result2 = getRegisteredExpressPaymentMethods( mockState );
+
+			expect( result1 ).toBe( result2 );
+		} );
+
+		it( 'should handle state with partial registered methods', () => {
+			const mockRegisteredMethods = {
+				'apple-pay': {
+					name: 'apple-pay',
+					title: 'Apple Pay',
+					description: 'Pay with Apple Pay',
+					gatewayId: 'apple-pay',
+					supportsStyle: [ 'height' ],
+				},
+			};
+
+			const mockState = {
+				status: 'processing',
+				activePaymentMethod: 'apple-pay',
+				availablePaymentMethods: {
+					'credit-card': {
+						name: 'credit-card',
+						title: 'Credit Card',
+						description: 'Pay with credit card',
+						gatewayId: 'credit-card',
+						supportsStyle: [],
+					},
+				},
+				availableExpressPaymentMethods: {
+					'apple-pay': {
+						name: 'apple-pay',
+						title: 'Apple Pay',
+						description: 'Pay with Apple Pay',
+						gatewayId: 'apple-pay',
+						supportsStyle: [ 'height' ],
+					},
+				},
+				registeredExpressPaymentMethods: mockRegisteredMethods,
+				savedPaymentMethods: {},
+				paymentMethodData: { test: 'data' },
+				paymentResult: null,
+				paymentMethodsInitialized: true,
+				expressPaymentMethodsInitialized: true,
+				shouldSavePaymentMethod: true,
+			};
+
+			const result = getRegisteredExpressPaymentMethods( mockState );
+
+			expect( result ).toEqual( mockRegisteredMethods );
+			expect( result ).toHaveProperty( 'apple-pay' );
+			expect( result[ 'apple-pay' ] ).toEqual( {
+				name: 'apple-pay',
+				title: 'Apple Pay',
+				description: 'Pay with Apple Pay',
+				gatewayId: 'apple-pay',
+				supportsStyle: [ 'height' ],
+			} );
 		} );
 	} );
 } );

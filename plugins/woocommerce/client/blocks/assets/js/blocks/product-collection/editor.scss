@@ -153,6 +153,21 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	}
 }
 
+.wp-block-woocommerce-product-collection {
+	.wc-block-product-gallery-large-image-next-previous {
+		position: absolute;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+
+		.wc-block-product-gallery-large-image-next-previous__button {
+			// Since blocks are overlaping here, we need to override the pointer-events: none.
+			// This is the way to make the block selectable in editor.
+			pointer-events: auto;
+		}
+	}
+}
+
 // Preview mode
 .wc-block-product-collection__preview-button {
 	position: absolute;
@@ -237,5 +252,13 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	.woocommerce-search-list__search {
 		border: 0;
 		padding: 0;
+	}
+}
+
+.wc-block-editor-product-collection__carousel-warning {
+	margin-bottom: $gap-small;
+
+	.components-notice__content {
+		margin-right: 0;
 	}
 }

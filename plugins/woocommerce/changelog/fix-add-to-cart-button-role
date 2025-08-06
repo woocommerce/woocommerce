@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add role='button' to product grid Add to Cart anchors when they act as a button

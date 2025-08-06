@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Small improvement to prevent excessive session updates
+
+

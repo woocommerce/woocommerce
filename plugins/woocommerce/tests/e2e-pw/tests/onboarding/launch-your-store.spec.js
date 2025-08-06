@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
+import { WC_ADMIN_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import { expect, tags, test } from '../../fixtures/fixtures';
 import { setOption } from '../../utils/options';
 import { activateTheme, DEFAULT_THEME } from '../../utils/themes';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH } from '../../utils/api-client';
 
 test.describe(
 	'Launch Your Store - logged in',

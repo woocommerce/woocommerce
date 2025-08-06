@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Fix 'doesn't allow selecting invalid variations in dropdown mode' flaky test in Add to Cart + Options block (II)
+
+

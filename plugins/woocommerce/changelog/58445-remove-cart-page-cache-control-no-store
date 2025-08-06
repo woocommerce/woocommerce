@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove nocache headers from Cart page to enable bfcache

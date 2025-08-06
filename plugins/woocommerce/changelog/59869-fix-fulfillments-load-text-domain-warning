@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix load text domain warnings caused by fulfillments class loading features controller before fully initialized.
+
