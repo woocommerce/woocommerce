@@ -1,5 +1,5 @@
 ---
-sidebar_label: Checkout Store
+sidebar_label: Checkout Store 
 ---
 
 # Checkout Store (`wc/store/checkout`) 
@@ -394,13 +394,3 @@ Set the shipping address to editing state or collapsed state. Note that if the a
 const store = dispatch( checkoutStore );
 store.setEditingShippingAddress( true );
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/data-store/checkout.md)
-
-<!-- /FEEDBACK -->

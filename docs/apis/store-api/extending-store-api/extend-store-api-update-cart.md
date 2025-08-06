@@ -60,7 +60,7 @@ You may be wondering why it's not possible to just make a custom AJAX endpoint f
 
 ### Only one callback for a given namespace may be registered
 
-With this in mind, if your extension has several client-side interactions that result in different code paths being executed on the server-side, you may wish to pass additional data through in `extensionsCartUpdate`. For example if you have two actions the user can take, one to _add_ a discount, and the other to _remove_ it, you may wish to pass a key called `action` along with the other data to `extensionsCartUpdate`. Then in your callback, you can check this value to distinguish which code path you should execute.
+With this in mind, if your extension has several client-side interactions that result in different code paths being executed on the server-side, you may wish to pass additional data through in `extensionCartUpdate`. For example if you have two actions the user can take, one to _add_ a discount, and the other to _remove_ it, you may wish to pass a key called `action` along with the other data to `extensionCartUpdate`. Then in your callback, you can check this value to distinguish which code path you should execute.
 
 Example:
 
@@ -175,12 +175,3 @@ add_action('woocommerce_blocks_loaded', function() {
 
 Now that this is registered, when the button is pressed, the `cart/extensions` endpoint is hit, with a `namespace` of `super-coupons` our `redeem_points` function will be executed. After this has finished processing, the client-side cart will be updated by WooCommerce Blocks.
 
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-store-api-update-cart.md)
-
-<!-- /FEEDBACK -->

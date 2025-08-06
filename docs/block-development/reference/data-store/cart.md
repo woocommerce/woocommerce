@@ -939,7 +939,7 @@ By default, Store API considers the following shipping fields as essential for s
 
 ```js
 const store = select( cartStore );
-const isAddressFieldsForShippingRatesUpdating = store.isCustomerDataUpdating();
+const isAddressFieldsForShippingRatesUpdating = store.isAddressFieldsForShippingRatesUpdating();
 ```
 
 ### hasPendingItemsOperations
@@ -1001,13 +1001,3 @@ Retrieves the item keys for items that are currently being deleted.
 const store = select( cartStore );
 const itemsPendingDelete = store.getItemsPendingDelete();
 ```
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/data-store/cart.md)
-
-<!-- /FEEDBACK -->

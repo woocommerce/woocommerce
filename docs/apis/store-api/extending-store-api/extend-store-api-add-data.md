@@ -34,8 +34,8 @@ add_action('woocommerce_blocks_loaded', function() {
 
 function my_data_callback() {
 	return [
-		'custom-key' => 'custom-value';
-	]
+		'custom-key' => 'custom-value',
+	];
 }
 
 function my_schema_callback() {
@@ -58,8 +58,8 @@ $product = $cart_item['data'];
 	if ( is_my_custom_product_type( $product ) ) {
 		$custom_value = get_custom_value( $product );
 		return [
-			'custom-key' => $custom_value;
-		]
+			'custom-key' => $custom_value,
+		];
 	}
 }
 
@@ -314,14 +314,4 @@ class WC_Subscriptions_Extend_Store_Endpoint {
 ## Formatting your data
 
 You may wish to use our pre-existing Formatters to ensure your data is passed through the Store API in the correct format. More information on the Formatters can be found in the [StoreApi Formatters documentation](./extend-store-api-formatters.md).
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-store-api-add-data.md)
-
-<!-- /FEEDBACK -->
 

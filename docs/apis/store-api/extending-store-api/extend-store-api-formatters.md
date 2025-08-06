@@ -101,7 +101,7 @@ This formatter takes an array of prices, and returns the same array but with cur
 
 | Key                           | Type     | Description                                                                                       |
 | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `currency_code`               | `string` | The string representation of the currency, e.g. GPB or USD                                        |
+| `currency_code`               | `string` | The string representation of the currency, e.g. GBP or USD                                        |
 | `currency_symbol`             | `string` | The symbol of the currency, e.g. &pound; or \$                                                    |
 | `currency_minor_unit`         | `number` | How many decimal places will be shown in the currency                                             |
 | `currency_decimal_separator`  | `string` | The string used to separate the whole value and the decimal value in the currency.                |
@@ -173,12 +173,3 @@ alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
 
 This formatter should be used when returning HTML from the StoreAPI regardless of whether the HTML is user generated or not. This will ensure the consumer/client can display the HTML safely and without encoding issues.
 
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-store-api-formatters.md)
-
-<!-- /FEEDBACK -->

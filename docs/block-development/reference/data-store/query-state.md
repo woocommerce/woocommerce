@@ -47,12 +47,3 @@ This will set the query-state for a given context. Typically this is used to set
 -   _context_ `string`: The context for the query state being stored, eg. the block name so you can keep query-state specific per block.
 -   _value_ `object`: An object of key/value pairs for the query state being attached to the context.
 
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/blocks/feature-flags-and-experimental-interfaces.md)
-
-<!-- /FEEDBACK -->

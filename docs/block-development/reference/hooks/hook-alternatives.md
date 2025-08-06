@@ -25,7 +25,6 @@ These hooks run on every Woo page load, some affect the blocks, some don't, some
 |-----|-----|-|
 | `woocommerce_load_cart_from_session` | Fully supported ✅ | |
 | `woocommerce_cart_loaded_from_session` | Fully supported ✅ ||
-| `woocommerce_cart_updated` | Fully supported ✅ ||
 | `woocommerce_set_cart_cookies` | Fully supported ✅ ||
 | `woocommerce_shipping_zone_loaded` | Fully supported ✅ ||
 | `woocommerce_check_cart_items` | Fully supported ✅ | May be better to use `woocommerce_store_api_validate_cart_item` |
