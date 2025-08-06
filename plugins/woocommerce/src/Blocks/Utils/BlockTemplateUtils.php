@@ -692,6 +692,37 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Updates the title, description and area of a template to the correct values and to make them more user-friendly.
+	 * For example, instead of:
+	 * - Title: `Tag (product_tag)`
+	 * - Description: `Displays taxonomy: Tag.`
+	 * we display:
+	 * - Title: `Products by Tag`
+	 * - Description: `Displays products filtered by a tag.`.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 * @param string            $template_type wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template
+	 */
+	public static function update_template_data( $template, $template_type ) {
+		if ( ! $template ) {
+			return $template;
+		}
+		if ( empty( $template->title ) || $template->title === $template->slug ) {
+			$template->title = self::get_block_template_title( $template->slug );
+		}
+		if ( empty( $template->description ) ) {
+			$template->description = self::get_block_template_description( $template->slug );
+		}
+		if ( empty( $template->area ) || 'uncategorized' === $template->area ) {
+			$template->area = self::get_block_template_area( $template->slug, $template_type );
+		}
+
+		return $template;
+	}
+
+	/**
 	 * Gets the templates saved in the database.
 	 *
 	 * @param array  $slugs An array of slugs to retrieve templates for.

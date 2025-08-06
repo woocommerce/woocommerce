@@ -24,6 +24,7 @@ class BlockTemplatesController {
 	 */
 	public function init() {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
+		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
@@ -184,6 +185,18 @@ class BlockTemplatesController {
 	}
 
 	/**
+	 * Add the template title and description to WooCommerce templates.
+	 *
+	 * @param WP_Block_Template|null $block_template The found block template, or null if there isn't one.
+	 * @param string                 $id             Template unique identifier (example: 'theme_slug//template_slug').
+	 * @param array                  $template_type  Template type: 'wp_template' or 'wp_template_part'.
+	 * @return WP_Block_Template|null
+	 */
+	public function add_block_template_details( $block_template, $id, $template_type ) {
+		return BlockTemplateUtils::update_template_data( $block_template, $template_type );
+	}
+
+	/**
 	 * Add the block template objects to be used.
 	 *
 	 * @param array  $query_result Array of template objects.
@@ -276,6 +289,18 @@ class BlockTemplatesController {
 		// and customized that one as well. When that happens, duplicates might appear in the list.
 		// See: https://github.com/woocommerce/woocommerce/issues/42220.
 		$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result, $theme_slug );
+
+		/**
+		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
+		 * We need to do additional search through all templates file to update title and description for WC
+		 * templates that aren't listed in theme.json.
+		 */
+		$query_result = array_map(
+			function ( $template ) use ( $template_type ) {
+				return BlockTemplateUtils::update_template_data( $template, $template_type );
+			},
+			$query_result
+		);
 
 		return $query_result;
 	}
