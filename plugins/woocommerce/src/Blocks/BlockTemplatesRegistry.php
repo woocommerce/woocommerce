@@ -103,6 +103,7 @@ class BlockTemplatesRegistry {
 					array(
 						'title'       => $template->get_template_title(),
 						'description' => $template->get_template_description(),
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 						'content'     => file_get_contents( $template_file_path ),
 					)
 				);
