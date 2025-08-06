@@ -232,7 +232,7 @@ class BlockTemplatesController {
 				)
 			) {
 				array_unshift( $query_result, $template_file );
-				return $query_result;
+				continue;
 			}
 
 			// If the template has a fallback, we should not include it in the list of templates, unless it has been modified.
@@ -267,9 +267,10 @@ class BlockTemplatesController {
 			}
 		}
 
-		// We need to remove theme (i.e. filesystem) templates that have the same slug as a customised one.
-		// This only affects saved templates that were saved BEFORE a theme template with the same slug was added.
-		$query_result = BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $query_result );
+		// If there are certain templates that have been customised with the `woocommerce/woocommerce` slug,
+		// We prioritize them over the theme and WC templates. That is, we remove the theme and WC templates
+		// from the results and only keep the customised ones.
+		$query_result = BlockTemplateUtils::remove_templates_with_custom_alternative( $query_result );
 
 		// There is the chance that the user customized the default template, installed a theme with a custom template
 		// and customized that one as well. When that happens, duplicates might appear in the list.
