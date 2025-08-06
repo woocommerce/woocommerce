@@ -192,18 +192,22 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			(object) array(
 				'slug'   => 'single-product',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_tag',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'custom',
+				'theme'  => 'woocommerce/woocommerce',
 			),
 		);
 
@@ -211,14 +215,17 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			(object) array(
 				'slug'   => 'single-product',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_tag',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'custom',
+				'theme'  => 'woocommerce/woocommerce',
 			),
 		);
 
