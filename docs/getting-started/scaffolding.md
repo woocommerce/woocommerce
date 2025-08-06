@@ -31,13 +31,13 @@ For more information, check out our [Block Theme Development handbook](/docs/the
 
 ### @woocommerce/create-woo-extension
 
-Create Woo Extension is an NPX command that scaffolds an entire WooCommerce extension for your store. The generated extensions adds a React-based settings page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing, linting, and Prettier IDE configuration for WooCommerce and WordPress.
+[Create Woo Extension](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension/) is an NPX command that scaffolds an entire WooCommerce extension for your store. The generated extensions adds a React-based settings page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing, linting, and Prettier IDE configuration for WooCommerce and WordPress.
 
 Read our full tutorial on using the [create-woo-extension package](/docs/extensions/getting-started-extensions/building-your-first-extension).
 
 ### @woocommerce/extend-cart-checkout-block
 
-This is a template to be used with `@wordpress/create-block` to create a WooCommerce Blocks extension starting point. To install and use it, follow the instructions in [`@woocommerce/extend-cart-checkout-block`](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/extend-cart-checkout-block/README.md). Please note that this example contains multiple other examples of extensibility, not just inner blocks.
+This is a template to be used with `@wordpress/create-block` to create a WooCommerce Blocks extension starting point. To install and use it, follow the instructions in [`@woocommerce/extend-cart-checkout-block`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block/). Please note that this example contains multiple other examples of extensibility, not just inner blocks.
 
 ### WooCommerce admin extension examples
 
@@ -61,7 +61,7 @@ Read more about the [`wordpress/create-block` package](https://developer.wordpre
 
 ### Core Plugin Sample Data
 
-It may be helpful to load your local store with sample. In the WooCommerce core plugin, you can find CSV and XML files that can be imported directly into WooCommerce using the WordPress admin or via WC-CLI. The sample data is located in [`/plugins/woocommerce/sample-data/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-data).
+It may be helpful to load your local store with sample data. In the WooCommerce core plugin, you can find CSV and XML files that can be imported directly into WooCommerce using the WordPress admin or via WC-CLI. The sample data is located in [`/plugins/woocommerce/sample-data/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-data).
 
 ### Smooth Generator
 

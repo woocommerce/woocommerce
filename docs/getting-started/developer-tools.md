@@ -32,7 +32,7 @@ This is an [ESLint](https://eslint.org/) plugin including configurations and cus
 
 #### [WordPress Scripts](https://www.npmjs.com/package/@wordpress/scripts)
 
-The ⁠@wordpress/scripts package is a set of tools and scripts designed to streamline the development process of WordPress projects, particularly for block development and custom Gutenberg integrations. It includes a Webpack build process along, with configuration for tasks like linting, styling, and testing.
+The ⁠@wordpress/scripts package is a set of tools and scripts designed to streamline the development process of WordPress projects, particularly for block development and custom Gutenberg integrations. It includes a Webpack build process along with configuration for tasks like linting, styling, and testing.
 
 It also includes the [Dependency Extraction Webpack Plugin](https://www.npmjs.com/package/@wordpress/dependency-extraction-webpack-plugin), which allows JavaScript bundles produced by webpack to leverage WordPress style dependency sharing without an error-prone process of manually maintaining a dependency list.
 
@@ -68,7 +68,7 @@ In contrast to the WooCommerce REST API, the Store API is unauthenticated and do
 
 #### [wordpress/api-fetch](https://www.npmjs.com/package/@wordpress/api-fetch)
 
-The ⁠@wordpress/api-fetch package is a utility for making AJAX requests to the WordPress REST API, designed to simplify the process of fetching and sending data. It's a wrapper around `window.fetch` that provides a consistent interface for handling authentication, settings, and errors, allowing developers to easily interact with WordPress backend services.
+The `@wordpress/api-fetch` package is a utility that simplifies AJAX requests to the WordPress REST API. It's a wrapper around `window.fetch` that provides a consistent interface for handling authentication, settings, and errors, allowing developers to easily interact with WordPress backend services.
 
 ### Components
 
