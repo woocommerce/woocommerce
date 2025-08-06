@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD024 -->
+# Checkout Data Store Documentation
 
 > **⚠️ Document Moved**
 > 

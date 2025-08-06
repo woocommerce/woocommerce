@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD024 -->
+# Cart Data Store Documentation
 
 > **⚠️ Document Moved**
 > 
@@ -7,4 +7,3 @@
 > **[Cart Data Store Documentation](https://github.com/woocommerce/woocommerce/tree/trunk/docs/block-development/reference/data-store/cart.md)**
 > 
 > Please update your bookmarks and references to the new location.
-
