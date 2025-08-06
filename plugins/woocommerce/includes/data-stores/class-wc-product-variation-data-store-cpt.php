@@ -333,11 +333,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	* Get attribute summary for a product.
-	*
-	* @param WC_Product $product The product object.
-	* @return string The generated attribute summary.
-	*/
+	 * Get attribute summary for a product.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @return string The generated attribute summary.
+	 */
 	public function get_attribute_summary( $product ) {
 		return $this->generate_attribute_summary( $product );
 	}
@@ -626,6 +626,4 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		);
 		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
 	}
-
-
 }
