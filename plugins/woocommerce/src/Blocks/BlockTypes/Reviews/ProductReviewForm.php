@@ -184,7 +184,7 @@ class ProductReviewForm extends AbstractBlock {
 				data-wp-on--click="actions.selectStar"
 				data-wp-class--is-hovered="state.isStarHovered"
 				data-wp-class--is-selected="state.isStarSelected"
-				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); ?>
+				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 				<svg
 					width='24'
