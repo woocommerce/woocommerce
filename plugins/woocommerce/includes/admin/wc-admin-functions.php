@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Get all WooCommerce screen ids.
+ * Note, among other things, this is used to conditionally load some assets. See class-wc-admin-assets.php.
  *
  * @return array
  */
@@ -39,6 +40,7 @@ function wc_get_screen_ids() {
 		'shop_coupon',
 		'edit-product_cat',
 		'edit-product_tag',
+		'edit-product-brand',
 		'profile',
 		'user-edit',
 	);
