@@ -778,12 +778,14 @@ class WC_Post_Data {
 			$new_taxonomy = 'pa_' . $new_slug;
 
 			if ( function_exists( 'as_schedule_single_action' ) ) {
-				as_schedule_single_action(
-					time() + 1,
-					'wc_regenerate_attribute_variation_summaries',
-					array( $new_taxonomy ),
-					'woocommerce'
-				);
+				$name = 'wc_regenerate_attribute_variation_summaries';
+				$args = array( $new_taxonomy );
+
+				// Prevent duplicate scheduling of the action.
+				$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
+				if ( ! $when ) {
+					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
+				}
 			}
 		}
 	}
@@ -828,12 +830,14 @@ class WC_Post_Data {
 			if ( $count <= $threshold ) {
 				self::regenerate_variation_summaries( $variation_ids );
 			} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-				as_schedule_single_action(
-					time() + 1,
-					'wc_regenerate_product_variation_summaries',
-					array( $product->get_id() ),
-					'woocommerce'
-				);
+				$name = 'wc_regenerate_product_variation_summaries';
+				$args = array( $product->get_id() );
+
+				// Prevent duplicate scheduling of the action.
+				$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
+				if ( ! $when ) {
+					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
+				}
 			}
 		}
 	}
@@ -896,12 +900,14 @@ class WC_Post_Data {
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
 		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action(
-				time() + 1,
-				'wc_regenerate_term_variation_summaries',
-				array( $taxonomy, $new_term->slug ),
-				'woocommerce'
-			);
+			$name = 'wc_regenerate_term_variation_summaries';
+			$args = array( $taxonomy, $new_term->slug );
+
+			// Prevent duplicate scheduling of the action.
+			$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
+			if ( ! $when ) {
+				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
+			}
 		}
 	}
 
@@ -943,12 +949,14 @@ class WC_Post_Data {
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
 		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action(
-				time() + 1,
-				'wc_regenerate_term_variation_summaries',
-				array( $taxonomy, $deleted_term->slug ),
-				'woocommerce'
-			);
+			$name = 'wc_regenerate_term_variation_summaries';
+			$args = array( $taxonomy, $deleted_term->slug );
+
+			// Prevent duplicate scheduling of the action.
+			$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
+			if ( ! $when ) {
+				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
+			}
 		}
 	}
 
