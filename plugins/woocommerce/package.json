@@ -115,8 +115,8 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy --testdox",
+						"--testsuite=wc-phpunit-main --testdox"
 					],
 					"onlyForDependencies": [],
 					"changes": [
