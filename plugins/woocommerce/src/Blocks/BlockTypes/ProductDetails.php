@@ -412,6 +412,8 @@ class ProductDetails extends AbstractBlock {
 			return $content;
 		}
 
+		wp_enqueue_script( 'wc-single-product' );
+
 		$hide_tab_title = isset( $attributes['hideTabTitle'] ) ? $attributes['hideTabTitle'] : false;
 
 		if ( $hide_tab_title ) {
