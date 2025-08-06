@@ -77,10 +77,7 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 	) as HTMLElement;
 
 	if ( ! productTemplate ) {
-		return {
-			isDisabledPrevious: true,
-			isDisabledNext: true,
-		};
+		return;
 	}
 
 	const productCollectionWidth = productCollection?.clientWidth;
