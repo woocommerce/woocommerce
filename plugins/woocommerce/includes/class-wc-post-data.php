@@ -768,8 +768,9 @@ class WC_Post_Data {
 				}
 			);
 		} else {
-			$new_slug     = ! empty( $attribute['slug'] ) ? $attribute['slug'] : $old_slug;
+			$new_slug     = ! empty( $attribute['attribute_name'] ) ? $attribute['attribute_name'] : $old_slug;
 			$new_taxonomy = 'pa_' . $new_slug;
+
 			if ( function_exists( 'as_schedule_single_action' ) ) {
 				as_schedule_single_action(
 					time() + 1,
