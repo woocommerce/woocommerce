@@ -5,7 +5,7 @@
 
 	#wpcontent,
 	&.woocommerce_page_wc-admin #wpbody-content {
-		overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the faetures banner 'stick
+		overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the features banner stick.
 		position: relative;
 	}
 
