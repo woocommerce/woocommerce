@@ -60,13 +60,13 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 			?>
 			<header>
 				<span class="spinner is-active"></span>
-				<h2><?php esc_html_e( 'Export products to a CSV file', 'woocommerce' ); ?></h2>
+				<h2><?php esc_html_e( 'Export products', 'woocommerce' ); ?></h2>
 				<p>
 					<?php
 					if ( $is_exporting_product_ids ) {
-						esc_html_e( 'This tool allows you to generate and download a CSV file containing the selected products.', 'woocommerce' );
+						esc_html_e( 'This tool allows you to generate and download a file containing the selected products.', 'woocommerce' );
 					} else {
-						esc_html_e( 'This tool allows you to generate and download a CSV file containing a list of all products.', 'woocommerce' );
+						esc_html_e( 'This tool allows you to generate and download a file containing a list of all products.', 'woocommerce' );
 					}
 					?>
 				</p>
@@ -74,6 +74,18 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 			<section>
 				<table class="form-table woocommerce-exporter-options">
 					<tbody>
+						<tr>
+							<th scope="row">
+								<label for="woocommerce-exporter-format"><?php esc_html_e( 'Export format', 'woocommerce' ); ?></label>
+							</th>
+							<td>
+								<select id="woocommerce-exporter-format" class="woocommerce-exporter-format" style="width:200px;">
+									<option value="csv"><?php esc_html_e( 'CSV', 'woocommerce' ); ?></option>
+									<option value="json"><?php esc_html_e( 'JSON', 'woocommerce' ); ?></option>
+								</select>
+								<p class="description"><?php esc_html_e( 'Choose the file format for export.', 'woocommerce' ); ?></p>
+							</td>
+						</tr>
 						<tr>
 							<th scope="row">
 								<label for="woocommerce-exporter-columns"><?php esc_html_e( 'Which columns should be exported?', 'woocommerce' ); ?></label>
@@ -141,7 +153,7 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>
 			</section>
 			<div class="wc-actions">
-				<button type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>"><?php esc_html_e( 'Generate CSV', 'woocommerce' ); ?></button>
+				<button type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate Export', 'woocommerce' ); ?>"><?php esc_html_e( 'Generate Export', 'woocommerce' ); ?></button>
 			</div>
 		</form>
 	</div>

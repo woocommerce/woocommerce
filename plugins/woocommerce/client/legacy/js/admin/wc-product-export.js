@@ -29,31 +29,34 @@
 			month          = currentDate.getMonth() + 1,
 			year           = currentDate.getFullYear(),
 			timestamp      = currentDate.getTime(),
-			filename       = 'wc-product-export-' + day + '-' + month + '-' + year + '-' + timestamp + '.csv';
+			format         = $( '.woocommerce-exporter-format' ).val() || 'csv',
+			filename       = 'wc-product-export-' + day + '-' + month + '-' + year + '-' + timestamp + '.' + format;
 
 		event.data.productExportForm.$form.addClass( 'woocommerce-exporter__exporting' );
 		event.data.productExportForm.$form.find('.woocommerce-exporter-progress').val( 0 );
 		event.data.productExportForm.$form.find('.woocommerce-exporter-button').prop( 'disabled', true );
-		event.data.productExportForm.processStep( 1, $( this ).serialize(), '', filename );
+		event.data.productExportForm.processStep( 1, $( this ).serialize(), '', filename, format );
 	};
 
 	/**
 	 * Process the current export step.
 	 */
-	productExportForm.prototype.processStep = function( step, data, columns, filename ) {
+	productExportForm.prototype.processStep = function( step, data, columns, filename, format ) {
 		var $this              = this,
-			selected_columns   = $( '.woocommerce-exporter-columns' ).val(),
+			selected_columns   = $( '.woocommerce-exp\orter-columns' ).val(),
 			export_meta        = $( '#woocommerce-exporter-meta:checked' ).length ? 1: 0,
 			export_types       = $( '.woocommerce-exporter-types' ).val(),
 			export_category    = $( '.woocommerce-exporter-category' ).val(),
-			export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '';
+			export_product_ids = $this.$form.find('input[name="product_ids"]').val() || '',
+			format             = format || $( '.woocommerce-exporter-format' ).val() || 'csv',
+			ajax_action        = format === 'json' ? 'woocommerce_do_ajax_product_json_export' : 'woocommerce_do_ajax_product_export';
 
 		$.ajax( {
 			type: 'POST',
 			url: ajaxurl,
 			data: {
 				form               : data,
-				action             : 'woocommerce_do_ajax_product_export',
+				action             : ajax_action,
 				step               : step,
 				columns            : columns,
 				selected_columns   : selected_columns,
@@ -76,7 +79,7 @@
 						}, 2000 );
 					} else {
 						$this.$form.find('.woocommerce-exporter-progress').val( response.data.percentage );
-						$this.processStep( parseInt( response.data.step, 10 ), data, response.data.columns, filename );
+						$this.processStep( parseInt( response.data.step, 10 ), data, response.data.columns, filename, format );
 					}
 				}
 

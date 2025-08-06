@@ -1,0 +1,556 @@
+<?php
+/**
+ * Handles product JSON export.
+ *
+ * @package WooCommerce\Export
+ * @version 3.1.0
+ */
+
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Include dependencies.
+ */
+if ( ! class_exists( 'WC_JSON_Batch_Exporter', false ) ) {
+	include_once WC_ABSPATH . 'includes/export/abstract-wc-json-batch-exporter.php';
+}
+
+/**
+ * WC_Product_JSON_Exporter Class.
+ */
+class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
+
+	/**
+	 * Type of export used in filter names.
+	 *
+	 * @var string
+	 */
+	protected $export_type = 'product';
+
+	/**
+	 * Should meta be exported?
+	 *
+	 * @var boolean
+	 */
+	protected $enable_meta_export = false;
+
+	/**
+	 * Which product types are being exported.
+	 *
+	 * @var array
+	 */
+	protected $product_types_to_export = array();
+
+	/**
+	 * Products belonging to what category should be exported.
+	 *
+	 * @var array
+	 */
+	protected $product_category_to_export = array();
+
+	/**
+	 * Specific product IDs to export, overriding other filters if hook is not used.
+	 *
+	 * @var array
+	 */
+	protected $product_ids_to_export = array();
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		parent::__construct();
+		$this->set_product_types_to_export( array_keys( WC_Admin_Exporters::get_product_types() ) );
+	}
+
+	/**
+	 * Should meta be exported?
+	 *
+	 * @param bool $enable_meta_export Should meta be exported.
+	 *
+	 * @since 3.1.0
+	 */
+	public function enable_meta_export( $enable_meta_export ) {
+		$this->enable_meta_export = (bool) $enable_meta_export;
+	}
+
+	/**
+	 * Product types to export.
+	 *
+	 * @param array $product_types_to_export List of types to export.
+	 *
+	 * @since 3.1.0
+	 */
+	public function set_product_types_to_export( $product_types_to_export ) {
+		$this->product_types_to_export = array_map( 'wc_clean', $product_types_to_export );
+	}
+
+	/**
+	 * Product category to export
+	 *
+	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 *
+	 * @since  3.5.0
+	 * @return void
+	 */
+	public function set_product_category_to_export( $product_category_to_export ) {
+		$this->product_category_to_export = array_map( 'sanitize_title_with_dashes', $product_category_to_export );
+	}
+
+	/**
+	 * Specific product IDs to export.
+	 *
+	 * @param array $product_ids List of product IDs to export.
+	 * @since 9.9.0
+	 */
+	public function set_product_ids_to_export( $product_ids ) {
+		$this->product_ids_to_export = array_filter( array_map( 'absint', (array) $product_ids ) );
+	}
+
+	/**
+	 * Return an array of columns to export.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	public function get_default_column_names() {
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+
+		$default_columns = array(
+			'id'                 => __( 'ID', 'woocommerce' ),
+			'type'               => __( 'Type', 'woocommerce' ),
+			'sku'                => __( 'SKU', 'woocommerce' ),
+			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'name'               => __( 'Name', 'woocommerce' ),
+			'published'          => __( 'Published', 'woocommerce' ),
+			'featured'           => __( 'Is featured?', 'woocommerce' ),
+			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
+			'short_description'  => __( 'Short description', 'woocommerce' ),
+			'description'        => __( 'Description', 'woocommerce' ),
+			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
+			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'tax_status'         => __( 'Tax status', 'woocommerce' ),
+			'tax_class'          => __( 'Tax class', 'woocommerce' ),
+			'stock_status'       => __( 'In stock?', 'woocommerce' ),
+			'stock'              => __( 'Stock', 'woocommerce' ),
+			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
+			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			/* translators: %s: weight */
+			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
+			/* translators: %s: length */
+			'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ),
+			/* translators: %s: width */
+			'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ),
+			/* translators: %s: Height */
+			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
+			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
+			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
+			'sale_price'         => __( 'Sale price', 'woocommerce' ),
+			'regular_price'      => __( 'Regular price', 'woocommerce' ),
+			'category_ids'       => __( 'Categories', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
+			'images'             => __( 'Images', 'woocommerce' ),
+			'download_limit'     => __( 'Download limit', 'woocommerce' ),
+			'download_expiry'    => __( 'Download expiry days', 'woocommerce' ),
+			'parent_id'          => __( 'Parent', 'woocommerce' ),
+			'grouped_products'   => __( 'Grouped products', 'woocommerce' ),
+			'upsell_ids'         => __( 'Upsells', 'woocommerce' ),
+			'cross_sell_ids'     => __( 'Cross-sells', 'woocommerce' ),
+			'product_url'        => __( 'External URL', 'woocommerce' ),
+			'button_text'        => __( 'Button text', 'woocommerce' ),
+			'menu_order'         => __( 'Position', 'woocommerce' ),
+		);
+
+		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
+			$default_columns['cogs_value'] = __( 'Cost of goods', 'woocommerce' );
+		}
+
+		return apply_filters(
+			"woocommerce_product_export_{$this->export_type}_default_columns",
+			$default_columns
+		);
+	}
+
+	/**
+	 * Prepare data for export.
+	 *
+	 * @since 3.1.0
+	 */
+	public function prepare_data_to_export() {
+		// Memory logging - start
+		$start_memory = memory_get_usage();
+		$start_peak = memory_get_peak_usage();
+		error_log("WC JSON Export Memory - Start: " . round($start_memory / 1024 / 1024, 2) . " MB, Peak: " . round($start_peak / 1024 / 1024, 2) . " MB, Page: " . $this->get_page());
+
+		$args = array(
+			'status'   => array( ProductStatus::PRIVATE, ProductStatus::PUBLISH, ProductStatus::DRAFT, ProductStatus::FUTURE, ProductStatus::PENDING ),
+			'limit'    => $this->get_limit(),
+			'page'     => $this->get_page(),
+			'orderby'  => array(
+				'ID' => 'ASC',
+			),
+			'return'   => 'objects',
+			'paginate' => true,
+		);
+
+		// Set up query args based on whether specific IDs are being exported.
+		if ( ! empty( $this->product_ids_to_export ) ) {
+			$args['include'] = $this->product_ids_to_export;
+		} else {
+			$args['type'] = $this->product_types_to_export;
+			if ( ! empty( $this->product_category_to_export ) ) {
+				$args['category'] = $this->product_category_to_export;
+			}
+		}
+
+		$args = apply_filters( "woocommerce_product_export_{$this->export_type}_query_args", $args );
+
+		if ( ! empty( $args['include'] ) ) {
+			$args['include'] = array_map( 'absint', (array) $args['include'] );
+		}
+
+		$products = wc_get_products( $args );
+
+		// Memory logging - after query
+		$after_query_memory = memory_get_usage();
+		$after_query_peak = memory_get_peak_usage();
+		error_log("WC JSON Export Memory - After query: " . round($after_query_memory / 1024 / 1024, 2) . " MB, Peak: " . round($after_query_peak / 1024 / 1024, 2) . " MB, Products fetched: " . count($products->products));
+
+		$this->total_rows  = $products->total;
+		$this->row_data    = array();
+		$variable_products = array();
+
+		foreach ( $products->products as $product ) {
+			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+				$product->is_type( ProductType::VARIABLE ) &&
+				! in_array( $product->get_id(), $variable_products, true ) ) {
+				$variable_products[] = $product->get_id();
+			}
+
+			$this->row_data[] = $this->generate_row_data( $product );
+		}
+
+		// Memory logging - after main products processed
+		$after_main_memory = memory_get_usage();
+		$after_main_peak = memory_get_peak_usage();
+		error_log("WC JSON Export Memory - After main products: " . round($after_main_memory / 1024 / 1024, 2) . " MB, Peak: " . round($after_main_peak / 1024 / 1024, 2) . " MB, Variable products found: " . count($variable_products));
+
+		// Process variable product variations
+		if ( ! empty( $variable_products ) ) {
+			foreach ( $variable_products as $parent_id ) {
+				$products = wc_get_products(
+					array(
+						'parent' => $parent_id,
+						'type'   => array( ProductType::VARIATION ),
+						'return' => 'objects',
+						'limit'  => -1,
+					)
+				);
+
+				if ( ! $products ) {
+					continue;
+				}
+
+				foreach ( $products as $product ) {
+					$this->row_data[] = $this->generate_row_data( $product );
+				}
+			}
+		}
+
+		// Memory logging - final after variations processed
+		$final_memory = memory_get_usage();
+		$final_peak = memory_get_peak_usage();
+		error_log("WC JSON Export Memory - Final: " . round($final_memory / 1024 / 1024, 2) . " MB, Peak: " . round($final_peak / 1024 / 1024, 2) . " MB, Total rows: " . count($this->row_data));
+	}
+
+	/**
+	 * Take a product and generate row data from it for export.
+	 *
+	 * @param WC_Product $product WC_Product object.
+	 *
+	 * @return array
+	 */
+	protected function generate_row_data( $product ) {
+		$columns = $this->get_column_names();
+		$row     = array();
+
+		foreach ( $columns as $column_id => $column_name ) {
+			$column_id = strstr( $column_id, ':' ) ? current( explode( ':', $column_id ) ) : $column_id;
+			$value     = '';
+
+			if ( in_array( $column_id, array( 'downloads', 'attributes', 'meta' ), true ) || ! $this->is_column_exporting( $column_id ) ) {
+				continue;
+			}
+
+			if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+				$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
+			} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
+				$value = $this->{"get_column_value_{$column_id}"}( $product );
+			} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
+				$value = $product->{"get_{$column_id}"}( 'edit' );
+			}
+
+			$row[ $column_id ] = $value;
+		}
+
+		$this->prepare_downloads_for_export( $product, $row );
+		$this->prepare_attributes_for_export( $product, $row );
+		$this->prepare_meta_for_export( $product, $row );
+
+		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );
+	}
+
+	/**
+	 * Get published value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return int
+	 */
+	protected function get_column_value_published( $product ) {
+		$statuses = array(
+			ProductStatus::DRAFT   => -1,
+			ProductStatus::PRIVATE => 0,
+			ProductStatus::PUBLISH => 1,
+		);
+
+		if ( ProductType::VARIATION === $product->get_type() ) {
+			$parent = $product->get_parent_data();
+			$status = ProductStatus::DRAFT === $parent['status'] ? $parent['status'] : $product->get_status( 'edit' );
+		} else {
+			$status = $product->get_status( 'edit' );
+		}
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : -1;
+	}
+
+	/**
+	 * Get product_cat value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	protected function get_column_value_category_ids( $product ) {
+		$term_ids = $product->get_category_ids( 'edit' );
+		return $this->format_term_ids( $term_ids, 'product_cat' );
+	}
+
+	/**
+	 * Get product_tag value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	protected function get_column_value_tag_ids( $product ) {
+		$term_ids = $product->get_tag_ids( 'edit' );
+		return $this->format_term_ids( $term_ids, 'product_tag' );
+	}
+
+	/**
+	 * Get product_shipping_class value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	protected function get_column_value_shipping_class_id( $product ) {
+		$term_ids = $product->get_shipping_class_id( 'edit' );
+		return $this->format_term_ids( $term_ids, 'product_shipping_class' );
+	}
+
+	/**
+	 * Get images value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	protected function get_column_value_images( $product ) {
+		$image_ids = array_merge( array( $product->get_image_id( 'edit' ) ), $product->get_gallery_image_ids( 'edit' ) );
+		$images    = array();
+
+		foreach ( $image_ids as $image_id ) {
+			$image = wp_get_attachment_image_src( $image_id, 'full' );
+
+			if ( $image ) {
+				$images[] = $image[0];
+			}
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Get type value.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
+	 * @return array
+	 */
+	protected function get_column_value_type( $product ) {
+		$types   = array();
+		$types[] = $product->get_type();
+
+		if ( $product->is_downloadable() ) {
+			$types[] = 'downloadable';
+		}
+
+		if ( $product->is_virtual() ) {
+			$types[] = 'virtual';
+		}
+
+		return $types;
+	}
+
+	/**
+	 * Export downloads.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row     Row being exported.
+	 *
+	 * @since 3.1.0
+	 */
+	protected function prepare_downloads_for_export( $product, &$row ) {
+		if ( $product->is_downloadable() && $this->is_column_exporting( 'downloads' ) ) {
+			$downloads = $product->get_downloads( 'edit' );
+
+			if ( $downloads ) {
+				$download_data = array();
+				foreach ( $downloads as $download ) {
+					$download_data[] = array(
+						'id'   => $download->get_id(),
+						'name' => $download->get_name(),
+						'url'  => $download->get_file(),
+					);
+				}
+				$row['downloads'] = $download_data;
+			}
+		}
+	}
+
+	/**
+	 * Export attributes data.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row     Row being exported.
+	 *
+	 * @since 3.1.0
+	 */
+	protected function prepare_attributes_for_export( $product, &$row ) {
+		if ( $this->is_column_exporting( 'attributes' ) ) {
+			$attributes         = $product->get_attributes();
+			$default_attributes = $product->get_default_attributes();
+
+			if ( count( $attributes ) ) {
+				$attributes_data = array();
+				foreach ( $attributes as $attribute_name => $attribute ) {
+					$attribute_data = array();
+					
+					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
+						$attribute_data['name'] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
+
+						if ( $attribute->is_taxonomy() ) {
+							$terms  = $attribute->get_terms();
+							$values = array();
+
+							foreach ( $terms as $term ) {
+								$values[] = $term->name;
+							}
+
+							$attribute_data['value']    = $values;
+							$attribute_data['taxonomy'] = true;
+						} else {
+							$attribute_data['value']    = $attribute->get_options();
+							$attribute_data['taxonomy'] = false;
+						}
+
+						$attribute_data['visible'] = $attribute->get_visible();
+					} else {
+						$attribute_data['name'] = html_entity_decode( wc_attribute_label( $attribute_name, $product ), ENT_QUOTES );
+
+						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
+							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
+							$attribute_data['value']    = array( $option_term && ! is_wp_error( $option_term ) ? html_entity_decode( $option_term->name, ENT_QUOTES ) : html_entity_decode( $attribute, ENT_QUOTES ) );
+							$attribute_data['taxonomy'] = true;
+						} else {
+							$attribute_data['value']    = array( html_entity_decode( $attribute, ENT_QUOTES ) );
+							$attribute_data['taxonomy'] = false;
+						}
+
+						$attribute_data['visible'] = null;
+					}
+
+					if ( $product->is_type( ProductType::VARIABLE ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
+						$default_value = $default_attributes[ sanitize_title( $attribute_name ) ];
+
+						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
+							$option_term = get_term_by( 'slug', $default_value, $attribute_name );
+							$attribute_data['default'] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
+						} else {
+							$attribute_data['default'] = $default_value;
+						}
+					}
+
+					$attributes_data[] = $attribute_data;
+				}
+				$row['attributes'] = $attributes_data;
+			}
+		}
+	}
+
+	/**
+	 * Export meta data.
+	 *
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row Row data.
+	 *
+	 * @since 3.1.0
+	 */
+	protected function prepare_meta_for_export( $product, &$row ) {
+		if ( $this->enable_meta_export ) {
+			$meta_data = $product->get_meta_data();
+
+			if ( count( $meta_data ) ) {
+				$meta_keys_to_skip = apply_filters( 'woocommerce_product_export_skip_meta_keys', array(), $product );
+				$meta_export = array();
+
+				foreach ( $meta_data as $meta ) {
+					if ( in_array( $meta->key, $meta_keys_to_skip, true ) ) {
+						continue;
+					}
+
+					$meta_value = apply_filters( 'woocommerce_product_export_meta_value', $meta->value, $meta, $product, $row );
+
+					if ( ! is_scalar( $meta_value ) ) {
+						continue;
+					}
+
+					$meta_export[ $meta->key ] = $meta_value;
+				}
+				
+				if ( ! empty( $meta_export ) ) {
+					$row['meta'] = $meta_export;
+				}
+			}
+		}
+	}
+}
