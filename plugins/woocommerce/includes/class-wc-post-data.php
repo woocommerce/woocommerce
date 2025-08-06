@@ -66,15 +66,15 @@ class WC_Post_Data {
 		add_action( 'deleted_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 
-		// Attributes.
+		// Prouduct Variations - Attributes.
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
-		// Terms
+		// Product Variations - Terms.
 		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
-		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 5 );
-		// Parent Product Updates Attributes.
-		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
-
+		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 4 );
+		// Product Variations - Parent Product Updates Attributes.
+		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 1 );
+		// Product Variations - Action Scheduler.
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_term_variation_summaries', array( __CLASS__, 'regenerate_term_variation_summaries' ), 10, 2 );
@@ -669,7 +669,7 @@ class WC_Post_Data {
 
 		$data_store = WC_Data_Store::load( 'product-variation' );
 		if ( $data_store->has_callable( 'get_attribute_summary' ) ) {
-			$new_summary = $data_store->get_attribute_summary( $product );
+			$new_summary     = $data_store->get_attribute_summary( $product );
 			$current_excerpt = get_post_field( 'post_excerpt', $variation_id );
 			if ( $new_summary === $current_excerpt ) {
 				return;
@@ -763,7 +763,7 @@ class WC_Post_Data {
 			// if the slug of the attribute changed.
 			add_action(
 				'shutdown',
-				function() use ( $variation_ids ) {
+				function () use ( $variation_ids ) {
 					self::regenerate_variation_summaries( $variation_ids );
 				}
 			);
@@ -812,9 +812,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
-	 * @param bool       $force Whether the update was forced.
 	 */
-	public static function on_product_attributes_updated( $product, $force ) {
+	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
 			$threshold     = self::get_regen_threshold();
@@ -907,9 +906,8 @@ class WC_Post_Data {
 	 * @param int     $tt_id    Term taxonomy ID.
 	 * @param string  $taxonomy Taxonomy slug.
 	 * @param WP_Term $deleted_term Copy of the already-deleted term.
-	 * @param array   $object_ids List of term object IDs.
 	 */
-	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
+	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
 			return;
 		}
@@ -973,7 +971,6 @@ class WC_Post_Data {
 
 		self::regenerate_variation_summaries( $variation_ids );
 	}
-
 }
 
 WC_Post_Data::init();
