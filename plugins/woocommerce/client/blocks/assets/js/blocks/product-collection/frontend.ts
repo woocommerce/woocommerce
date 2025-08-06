@@ -28,7 +28,7 @@ export type ProductCollectionStoreContext = {
 
 // @wordpress/i18n is not available on the frontend.
 function isRTL(): boolean {
-	return document.documentElement.dir === 'rtl';
+	return document.documentElement?.dir === 'rtl';
 }
 
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
