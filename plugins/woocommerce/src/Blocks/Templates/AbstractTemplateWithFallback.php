@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  */
 abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	/**
-	 * The fallback template to render if the existing fallback is not available.
+	 * The fallback template to render if the existing template is not available.
 	 *
 	 * @var string
 	 */
