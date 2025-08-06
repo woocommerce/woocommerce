@@ -171,8 +171,9 @@ jobs:
               console.log('Successfully triggered upcoming release notification webhook');
 
               const responseBody = await response.json();
-              core.setOutput('release-lead', responseBody.release_lead);
               core.setOutput('release-team', responseBody.release_team);
+              core.setOutput('release-lead', responseBody.release_lead);
+              core.setOutput('release-lead-email', responseBody.release_lead_email);
               core.setOutput('post', responseBody.post);
             }
         env:
@@ -189,6 +190,7 @@ jobs:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     env:
       RELEASE_LEAD: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead }}
+      RELEASE_LEAD_EMAIL: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-email }}
       RELEASE_TEAM: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-team }}
       POST: ${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}
       RELEASE_VERSION: ${{ needs.check-upcoming-release-events.outputs.version }}
@@ -290,6 +292,15 @@ jobs:
               apiKey: '${{ secrets.LINEAR_API_KEY }}',
             });
 
+            const email = process.env.RELEASE_LEAD_EMAIL || '';
+            const users = await linearClient.users({
+              filter: {
+                email: { eq: email }
+              }
+            });
+
+            const userId = users.nodes.length ? users.nodes[0].id : null;
+
             const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
 
             let parentIssue;
@@ -300,7 +311,8 @@ jobs:
                 description: `${parent.body}`,
                 priority: 2,
                 stateId: '${{ secrets.LINEAR_IN_PROGRESS_STATE_ID }}',
-                labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
+                labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}'],
+                assigneeId: userId,
               });
 
               parentIssue = await parentResult.issue;
