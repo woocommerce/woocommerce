@@ -298,6 +298,9 @@ jobs:
                 teamId: '${{ secrets.LINEAR_TEAM_ID }}',
                 title: `${parent.title}`,
                 description: `${parent.body}`,
+                priority: 2,
+                stateId: '${{ secrets.LINEAR_IN_PROGRESS_STATE_ID }}',
+                labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
               });
 
               parentIssue = await parentResult.issue;
@@ -311,7 +314,9 @@ jobs:
                   teamId: `${{ secrets.LINEAR_TEAM_ID }}`,
                   title: subIssue.title,
                   description: subIssue.body,
-                  parentId: parentIssue.id
+                  parentId: parentIssue.id,
+                  priority: 2,
+                  labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
                 });
 
                 const createdSubIssue = await subIssueResult.issue;
