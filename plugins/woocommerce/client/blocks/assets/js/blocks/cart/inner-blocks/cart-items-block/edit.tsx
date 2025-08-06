@@ -20,6 +20,11 @@ interface Props {
 export const Edit = ( { clientId }: Props ): JSX.Element => {
 	const blockProps = useBlockProps( { className: 'wc-block-cart__main' } );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CART_ITEMS );
+	// Product collection is used for the Cross-Sells block.
+	// We don't want to set a parent on the product collection block
+	// so we add it here manually.
+	allowedBlocks.push( 'woocommerce/product-collection' );
+
 	const defaultTemplate = [
 		[ 'woocommerce/cart-line-items-block', {}, [] ],
 		[ 'woocommerce/cart-cross-sells-block', {}, [] ],
