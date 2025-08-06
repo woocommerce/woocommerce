@@ -66,7 +66,7 @@ class WC_Post_Data {
 		add_action( 'deleted_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 
-		// Prouduct Variations - Attributes.
+		// Product Variations - Attributes.
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
 		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
 		// Product Variations - Terms.
@@ -646,7 +646,7 @@ class WC_Post_Data {
 			return;
 		}
 
-		$variation_ids = array_unique( array_filter( $variation_ids ) );
+		$variation_ids = array_unique( array_filter( array_map( 'intval', $variation_ids ) ) );
 
 		foreach ( $variation_ids as $variation_id ) {
 			self::regenerate_variation_attribute_summary( $variation_id );
