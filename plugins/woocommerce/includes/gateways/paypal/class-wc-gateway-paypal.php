@@ -152,8 +152,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// Jetpack connection.
 		$this->maybe_register_site_with_wpcom();
 
-		// Transact merchant onboarding.
-		$this->maybe_onboard_transact_merchant();
+		// Transact merchant and provider onboarding.
+		$this->maybe_onboard_with_transact();
 	}
 
 	/**
@@ -224,17 +224,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	private function maybe_onboard_transact_merchant() {
+	private function maybe_onboard_with_transact() {
 		// Limit the trigger to admin pages only.
 		if ( ! is_admin() ) {
 			return;
 		}
 
-		// If the merchant is already onboarded, nothing to do.
-		$transact_merchant_public_id = $this->get_option( 'transact_merchant_public_id' );
-		if ( $transact_merchant_public_id ) {
-			return;
-		}
+		// TODO: If the merchant is already onboarded, nothing to do.
 
 		// Check if the merchant is eligible for onboarding.
 		if (
@@ -257,6 +253,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// TODO: Will we ever need this? If this will serve only as a flag to indicate that the merchant is onboarded,
 		// we can probably use a simple boolean flag instead.
 		$this->update_option( 'transact_merchant_public_id', $transact_merchant_public_id );
+
+		// Onboard the provider with the Transact platform.
+		$paypal_request->onboard_transact_provider();
 	}
 
 	/**

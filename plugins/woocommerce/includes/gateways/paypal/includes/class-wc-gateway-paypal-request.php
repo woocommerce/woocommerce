@@ -63,6 +63,13 @@ class WC_Gateway_Paypal_Request {
 	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
 
 	/**
+	 * Transact provider type, for provider onboarding.
+	 *
+	 * @var string
+	 */
+	private const TRANSACT_PROVIDER_TYPE = 'paypal_standard';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param WC_Gateway_Paypal $gateway Paypal gateway object.
@@ -311,6 +318,11 @@ class WC_Gateway_Paypal_Request {
 			// TODO: Do we need to pass this?
 			// If yes, do we need to handle scenario where the store changes domain?
 			'store_url' => get_site_url(),
+			// TODO: Merchant account creation requires a statement descriptor,
+			// but we are not using it anywhere.
+			'settings'  => array(
+				'statement_descriptor' => get_bloginfo( 'name' ),
+			),
 		);
 		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
 			sprintf( '/sites/%d/transact/account', $site_id ),
@@ -323,9 +335,11 @@ class WC_Gateway_Paypal_Request {
 			wp_json_encode( $request_body ),
 			'wpcom'
 		);
+
 		if ( is_wp_error( $response ) ) {
 			return null;
 		}
+
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return null;
 		}
@@ -336,6 +350,40 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $response_data['public_id'];
+	}
+
+	/**
+	 * Onboard the provider with the Transact platform.
+	 *
+	 * @return string|null The public ID of the provider, or null if onboarding failed.
+	 */
+	public function onboard_transact_provider() {
+		$site_id      = \Jetpack_Options::get_option( 'id' );
+		$request_body = array(
+			'test_mode'     => $this->gateway->testmode,
+			'provider_type' => self::TRANSACT_PROVIDER_TYPE,
+		);
+		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+			sprintf( '/sites/%d/transact/account/%s/onboard', $site_id, self::TRANSACT_PROVIDER_TYPE ),
+			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
+			array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'method'  => 'POST',
+				'timeout' => 60,
+			),
+			wp_json_encode( $request_body ),
+			'wpcom'
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return null;
+		}
+
+		// TODO: Handle the response.
 	}
 
 	/**
