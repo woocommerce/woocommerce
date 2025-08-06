@@ -11,20 +11,7 @@ export function getInitialState(): State {
 		);
 	}
 
-	const { current_post_id, current_post_type } =
-		window.WooCommerceEmailEditor;
-
-	if ( current_post_id === undefined || current_post_id === null ) {
-		throw new Error( 'current_post_id is required but not provided.' );
-	}
-
-	if ( ! current_post_type ) {
-		throw new Error( 'current_post_type is required but not provided.' );
-	}
-
 	return {
-		postId: current_post_id,
-		postType: current_post_type,
 		editorSettings: getEditorSettings(),
 		theme: getEditorTheme(),
 		styles: {
