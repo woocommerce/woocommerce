@@ -230,7 +230,7 @@ jobs:
           gh release create ${{ steps.get_version.outputs.version }} \
             './woocommerce.zip' \
             --title '${{ steps.get_version.outputs.version }}' \
-            --notes '' \
+            --notes '${{ steps.get_version.outputs.version }}' \
             --target '${{ needs.build.outputs.commit-hash }}' \
             --latest=false \
             --draft \
