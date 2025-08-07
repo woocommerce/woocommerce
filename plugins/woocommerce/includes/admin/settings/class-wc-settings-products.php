@@ -98,7 +98,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Enable AJAX add to cart buttons on product pages', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_ajax_add_to_cart_product_pages',
-					'default'       => 'no',
+					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
 				),
