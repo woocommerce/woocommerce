@@ -298,7 +298,7 @@ jobs:
             }
 
             core.setOutput('processed-templates', JSON.stringify(processedTemplates));
-            core.setOutput('userId', userId);
+            core.setOutput('userId', userId || '');
 
       - name: Create Release Kickoff Linear Issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
