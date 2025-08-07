@@ -33,9 +33,6 @@ class ProductImageGallery extends AbstractBlock {
 	/**
 	 * Enqueue assets specific to this block.
 	 *
-	 * Note: This enqueue logic is intentionally duplicated in ClassicTemplate.php
-	 * to keep legacy blocks independent and allow for separate deprecation paths.
-	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
 	 * @param WP_Block $block Block instance.
@@ -44,23 +41,35 @@ class ProductImageGallery extends AbstractBlock {
 		parent::enqueue_assets( $attributes, $content, $block );
 
 		if ( is_product() ) {
-			// Legacy script dependencies for backward compatibility
-			wp_enqueue_script( 'zoom' );
-			wp_enqueue_script( 'flexslider' );
-			wp_enqueue_script( 'photoswipe-ui-default' );
-			wp_enqueue_style( 'photoswipe-default-skin' );
-			wp_enqueue_script( 'wc-single-product' );
-
-			add_action(
-				'wp_footer',
-				function () {
-					wc_get_template( 'single-product/photoswipe.php' );
-				}
-			);
-			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
 		}
+	}
+
+	/**
+	 * Enqueue legacy assets when this block is used as we don't enqueue them for block themes anymore.
+	 *
+	 * Note: This enqueue logic is intentionally duplicated in ClassicTemplate.php
+	 * to keep legacy blocks independent and allow for separate deprecation paths.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/60223
+	 */
+	public function enqueue_legacy_assets() {
+		// Legacy script dependencies for backward compatibility.
+		wp_enqueue_script( 'zoom' );
+		wp_enqueue_script( 'flexslider' );
+		wp_enqueue_script( 'photoswipe-ui-default' );
+		wp_enqueue_style( 'photoswipe-default-skin' );
+		wp_enqueue_script( 'wc-single-product' );
+
+		add_action(
+			'wp_footer',
+			function () {
+				wc_get_template( 'single-product/photoswipe.php' );
+			}
+		);
+		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
 	}
 
 	/**
