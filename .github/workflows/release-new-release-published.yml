@@ -11,7 +11,7 @@ jobs:
   # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:
     name: 'Call release commits and contributors workflow'
-    if: ${{ github.event.action == 'prereleased' }}
+    if: ${{ ( github.event.action == 'prereleased' || ( github.event.action == 'published' && github.event.release.prerelease ) ) &&  contains( inputs.release_tag_name, '-beta' ) }}
     uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
     with:
       version: ${{ inputs.release_tag_name }}
@@ -21,7 +21,7 @@ jobs:
   notify-release-published:
     name: 'Notify in Slack when a new (pre)release is published'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    if: ${{ github.event.action == 'published' }}
+    if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
       - name: 'Notify to release channel'
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
@@ -36,7 +36,7 @@ jobs:
   update-global-changelog:
     name: 'Update changelog.txt after any stable release'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    if: ${{ github.event.action == 'published' && ! contains( inputs.release_tag_name, '-rc' ) }}
+    if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-beta' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
       - name: 'Fetch release readme.txt'
         env:
