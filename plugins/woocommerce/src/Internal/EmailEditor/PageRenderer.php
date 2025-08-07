@@ -65,9 +65,7 @@ class PageRenderer {
 		WCAdminAssets::register_style( 'email-editor-integration', 'style', true );
 
 		$this->assets_manager->load_editor_assets( $edited_item, 'wc-admin-email-editor-integration' );
-
-		require_once ABSPATH . 'wp-admin/admin-header.php';
-		echo '<div id="woocommerce-email-editor" class="block-editor block-editor__container hide-if-no-js"></div>';
+		$this->assets_manager->render_email_editor_html();
 	}
 
 	/**

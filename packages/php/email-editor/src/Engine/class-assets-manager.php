@@ -110,6 +110,17 @@ class Assets_Manager {
 	}
 
 	/**
+	 * Render the email editor's required HTML and admin header.
+	 *
+	 * @param string $element_id Optional. The ID of the main container element. Default is 'woocommerce-email-editor'.
+	 */
+	public function render_email_editor_html( string $element_id = 'woocommerce-email-editor' ): void {
+		// @phpstan-ignore-next-line -- PHPStan tried to check if the file exists.
+		require_once ABSPATH . 'wp-admin/admin-header.php';
+		echo '<div id="' . esc_attr( $element_id ) . '" class="block-editor block-editor__container hide-if-no-js"></div>';
+	}
+
+	/**
 	 * Load editor assets.
 	 *
 	 * @param \WP_Post|\WP_Block_Template $edited_item The edited post or template.
