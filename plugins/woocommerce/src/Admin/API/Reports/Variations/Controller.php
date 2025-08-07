@@ -392,11 +392,19 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$product_name = $item['extended_info']['name'];
-		$separator    = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
+		/**
+		 * Filter the separator used in the product variation title.
+		 *
+		 * @param string $separator The separator.
+		 * @param \WC_Product $product The product object.
+		 * @return string The separator.
+		*/
+		$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 		if ( ! empty( $item['extended_info']['attributes'] ) && strpos( $product_name, $separator ) === false ) {
 			$attributes = array();
 			foreach ( $item['extended_info']['attributes'] as $attribute ) {
 				if ( empty( $attribute['option'] ) ) {
+					// translators: %s: the attribute name.
 					$attributes[] = sprintf( __( 'Any %s', 'woocommerce' ), ucfirst( $attribute['name'] ) );
 				} else {
 					$attributes[] = $attribute['option'];
