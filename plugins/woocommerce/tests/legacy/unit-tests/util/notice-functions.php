@@ -119,7 +119,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		wc_add_notice( 'One True Notice', 'notice' );
 		wc_add_notice( 'Second True Notice', 'notice', array( 'id' => 'second_notice' ) );
 
-		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div><div class="woocommerce-info" data-id="second_notice">Second True Notice</div>' );
+		$this->expectOutputString( '<div class="woocommerce-info" role="status">One True Notice</div><div class="woocommerce-info" data-id="second_notice" role="status">Second True Notice</div>' );
 
 		wc_print_notices();
 
@@ -161,7 +161,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_info_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-info">Info!</div>' );
+		$this->expectOutputString( '<div class="woocommerce-info" role="status">Info!</div>' );
 
 		wc_print_notice( 'Info!', 'notice' );
 	}
