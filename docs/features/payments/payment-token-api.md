@@ -48,6 +48,15 @@ Add `tokenization` to this array.
 
 The form handler that is run when adding a new payment method from the "my accounts" section will call your gateway's `add_payment_method` method.
 
+Your `add_payment_method` is expected to return an array with two keys, a `result` string and a `redirect` url:
+
+```php
+array(
+   'result'   => 'success', // or 'failure'
+   'redirect' => wc_get_endpoint_url( 'payment-methods' ),
+);
+```
+
 After any validation (i.e. making sure the token and data you need is present from the payment provider), you can start building a new token by creating an instance of one of the following classes: `WC_Payment_Token_CC` or `WC_Payment_Token_eCheck`. Like gateways, you can also extend the abstract `WC_Payment_Token` class and define your own token type type if necessary. For more information on all three of these classes and their methods, see further down below in this doc.
 
 Since Simplify uses credit cards, we will use the credit card class.

@@ -114,6 +114,7 @@ export const DEFAULT_FILTERS: Pick<
 	priceRange: DEFAULT_QUERY.priceRange,
 };
 
+export const headingBlockName = 'core/heading';
 export const coreQueryPaginationBlockName = 'core/query-pagination';
 export const nextPreviousButtonsBlockName =
 	'woocommerce/product-gallery-large-image-next-previous';
