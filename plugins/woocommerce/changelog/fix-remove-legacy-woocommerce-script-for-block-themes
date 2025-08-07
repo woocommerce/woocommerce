@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove woocommerce.js script enqueueing for block themes.
