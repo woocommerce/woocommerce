@@ -26,6 +26,7 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		add_filter( 'rest_pre_insert_wp_template', array( $this, 'dont_load_templates_for_suggestions' ), 10, 1 );
 		add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
@@ -322,6 +323,20 @@ class BlockTemplatesController {
 		);
 
 		return $query_result;
+	}
+
+	/**
+	 * When creating a template from the WP suggestion, don't load the templates with the WooCommerce slug.
+	 * Otherwise they take precedence and the new template can't be created.
+	 *
+	 * @param stdClass $prepared_post An object representing a single post prepared
+	 *                                for inserting or updating the database.
+	 */
+	public function dont_load_templates_for_suggestions( $prepared_post ) {
+		if ( isset( $prepared_post->meta_input['is_wp_suggestion'] ) ) {
+			remove_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		}
+		return $prepared_post;
 	}
 
 	/**
