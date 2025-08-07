@@ -244,11 +244,10 @@ export const addLabelsToIssue = async (
 			owner,
 			repo: name,
 			issue_number: issueNumber,
-			labels
+			labels,
 		}
 	);
 };
-
 
 /**
  * Create a pull request from branches on Github.

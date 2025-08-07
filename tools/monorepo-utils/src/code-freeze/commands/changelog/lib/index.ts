@@ -12,7 +12,10 @@ import { readFileSync } from 'fs';
  */
 import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
-import { addLabelsToIssue, createPullRequest } from '../../../../core/github/repo';
+import {
+	addLabelsToIssue,
+	createPullRequest,
+} from '../../../../core/github/repo';
 import { Options } from '../types';
 import { getToday } from '../../get-version/lib';
 
@@ -181,7 +184,7 @@ export const updateReleaseBranchChangelogs = async (
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
 		try {
-			addLabelsToIssue( options, pullRequest.number, ["Release"] );
+			addLabelsToIssue( options, pullRequest.number, [ 'Release' ] );
 		} catch {
 			// Not a critical error.
 		}
@@ -261,7 +264,7 @@ export const updateBranchChangelog = async (
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
 		try {
-			addLabelsToIssue( options, pullRequest.number, ["Release"] );
+			addLabelsToIssue( options, pullRequest.number, [ 'Release' ] );
 		} catch {
 			// Not a critical error.
 		}
