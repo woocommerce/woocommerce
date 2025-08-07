@@ -9,7 +9,7 @@
 		"html": false,
 		"multiple": false,
 		"reusable": false,
-		"inserter": false
+		"inserter": true
 	},
 	"parent": [ "woocommerce/cart-items-block" ],
 	"textdomain": "woocommerce",

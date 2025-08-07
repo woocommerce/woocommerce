@@ -2837,15 +2837,22 @@ EOT;
 <div class="wp-block-woocommerce-cart-line-items-block"></div>
 <!-- /wp:woocommerce/cart-line-items-block -->
 
-<!-- wp:woocommerce/cart-cross-sells-block -->
-<div class="wp-block-woocommerce-cart-cross-sells-block"><!-- wp:heading {"fontSize":"large"} -->
-<h2 class="wp-block-heading has-large-font-size">' . __( 'You may be interested in…', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+	<!-- wp:woocommerce/product-collection {"query":{"perPage":3,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"collection":"woocommerce/product-collection/cross-sells","displayLayout":{"type":"flex","columns":3},"align":"wide"} -->
+	<div class="wp-block-woocommerce-product-collection alignwide">
+		<!-- wp:woocommerce/product-template -->
+		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"aspectRatio":"3/5","imageSizing":"single","isDescendentOfQueryLoop":true} -->
+			<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+		<!-- /wp:woocommerce/product-image -->
 
-<!-- wp:woocommerce/cart-cross-sells-products-block -->
-<div class="wp-block-woocommerce-cart-cross-sells-products-block"></div>
-<!-- /wp:woocommerce/cart-cross-sells-products-block --></div>
-<!-- /wp:woocommerce/cart-cross-sells-block --></div>
+		<!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"textAlign":"center"} /-->
+
+		<!-- wp:post-title {"textAlign":"center","level":2,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.4"}}} /-->
+
+		<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+		<!-- /wp:woocommerce/product-template -->
+	</div>
+	<!-- /wp:woocommerce/product-collection -->
+
 <!-- /wp:woocommerce/cart-items-block -->
 
 <!-- wp:woocommerce/cart-totals-block -->

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use WP_Query;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * Utility methods used for the Product Collection block.
@@ -120,7 +121,7 @@ class Utils {
 			$type        = 'order';
 			$source_data = array( 'orderId' => absint( $wp_query->query_vars['order-received'] ) );
 
-		} elseif ( ( is_cart() || is_checkout() ) && isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
+		} elseif ( self::is_cart_context() && isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
 
 			$type  = 'cart';
 			$items = array();
@@ -160,6 +161,21 @@ class Utils {
 		);
 
 		return $context;
+	}
+
+	/**
+	 * Check if we're in a cart block context.
+	 *
+	 * @return bool True if cart block context, false otherwise.
+	 */
+	private static function is_cart_context() {
+		// Check if current page has woocommerce/cart block
+		global $post;
+		if ( $post && \WC_Blocks_Utils::has_block_in_page( $post, 'woocommerce/cart' ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

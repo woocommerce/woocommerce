@@ -53,10 +53,6 @@ registerBlockType( 'woocommerce/cart-cross-sells-block', {
 						{
 							collection:
 								'woocommerce/product-collection/cross-sells',
-							query: {
-								perPage: columns,
-								pages: 1,
-							},
 						},
 						createBlocksFromInnerBlocksTemplate(
 							crossSells.innerBlocks
