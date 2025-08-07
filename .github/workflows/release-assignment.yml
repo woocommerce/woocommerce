@@ -119,6 +119,7 @@ jobs:
       post: ${{ steps.trigger-upcoming-code-freeze-events.outputs.post }}
       release-team: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-team }}
       release-lead: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead }}
+      release-lead-google-login: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
     steps:
       - uses: actions/github-script@v7
         id: trigger-upcoming-code-freeze-events
@@ -173,7 +174,7 @@ jobs:
               const responseBody = await response.json();
               core.setOutput('release-team', responseBody.release_team);
               core.setOutput('release-lead', responseBody.release_lead);
-              core.setOutput('release-lead-email', responseBody.release_lead_email);
+              core.setOutput('release-lead-google-login', responseBody.release_lead_google_login);
               core.setOutput('post', responseBody.post);
             }
         env:
@@ -189,8 +190,8 @@ jobs:
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     env:
+      RELEASE_LEAD_GOOGLE_LOGIN: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
       RELEASE_LEAD: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead }}
-      RELEASE_LEAD_EMAIL: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-email }}
       RELEASE_TEAM: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-team }}
       POST: ${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}
       RELEASE_VERSION: ${{ needs.check-upcoming-release-events.outputs.version }}
@@ -216,6 +217,7 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
+            const { LinearClient } = require("@linear/sdk");
             const fs = require('fs');
             const path = require('path');
 
@@ -241,10 +243,25 @@ jobs:
               templateContents[key] = templateContent;
             }
 
+            const linearClient = new LinearClient({
+              apiKey: '${{ secrets.LINEAR_API_KEY }}',
+            });
+
+            const email = process.env.RELEASE_LEAD_GOOGLE_LOGIN || '';
+            const users = await linearClient.users({
+              filter: {
+                email: { eq: email }
+              }
+            });
+
+            const userId = users.nodes.length ? users.nodes[0].id : null;
+            const displayName = users.nodes.length ? users.nodes[0].displayName : null;
+            const mention = displayName ? `https://linear.app/${{ secrets.LINEAR_WORKSPACE }}/profiles/${displayName}` : null;
+
             const replacements = {
               '{RELEASE_VERSION}': process.env.RELEASE_VERSION || '',
               '{MILESTONE_NUMBER}': process.env.MILESTONE_NUMBER || '',
-              '{RELEASE_LEAD}': process.env.RELEASE_LEAD || '',
+              '{RELEASE_LEAD}': mention || '',
               '{RELEASE_TEAM}': process.env.RELEASE_TEAM || '',
               '{BETA_1_RELEASE_DATE}': process.env.BETA_1_RELEASE_DATE || '',
               '{BETA_2_RELEASE_DATE}': process.env.BETA_2_RELEASE_DATE || '',
@@ -281,6 +298,7 @@ jobs:
             }
 
             core.setOutput('processed-templates', JSON.stringify(processedTemplates));
+            core.setOutput('userId', userId);
 
       - name: Create Release Kickoff Linear Issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -291,15 +309,6 @@ jobs:
             const linearClient = new LinearClient({
               apiKey: '${{ secrets.LINEAR_API_KEY }}',
             });
-
-            const email = process.env.RELEASE_LEAD_EMAIL || '';
-            const users = await linearClient.users({
-              filter: {
-                email: { eq: email }
-              }
-            });
-
-            const userId = users.nodes.length ? users.nodes[0].id : null;
 
             const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
 
@@ -312,7 +321,7 @@ jobs:
                 priority: 2,
                 stateId: '${{ secrets.LINEAR_IN_PROGRESS_STATE_ID }}',
                 labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}'],
-                assigneeId: userId,
+                assigneeId: `${{ steps.process-kickoff-templates.outputs.userId }}`,
               });
 
               parentIssue = await parentResult.issue;
