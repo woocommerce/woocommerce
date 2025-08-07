@@ -95,7 +95,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 	public function map_product_data( object $shopify_product ): array {
 		$is_variable = $this->is_variable_product( $shopify_product );
 
-		// Map basic product fields.
 		$wc_data = $this->map_basic_product_fields( $shopify_product, $is_variable );
 
 		// Map simple product data (for non-variable products).
@@ -382,7 +381,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 			}
 		}
 
-		// Enhanced publication status.
 		$enhanced_status = $this->map_enhanced_status( $shopify_product );
 		$basic_data      = array_merge( $basic_data, $enhanced_status );
 
@@ -416,7 +414,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 		if ( ! empty( $shopify_product->variants->edges ) ) {
 			$variant_node = $shopify_product->variants->edges[0]->node;
 
-			// Price.
 			if ( $this->should_process( 'price' ) ) {
 				if ( $variant_node->compareAtPrice && $variant_node->compareAtPrice > $variant_node->price ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 					$simple_data['sale_price']    = $variant_node->price;
@@ -427,7 +424,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 				}
 			}
 
-			// SKU.
 			if ( $this->should_process( 'sku' ) ) {
 				$simple_data['sku'] = $variant_node->sku;
 			}
@@ -505,7 +501,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$variation_data                = array();
 				$variation_data['original_id'] = basename( $variant_node->id );
 
-				// Price.
 				if ( $this->should_process( 'price' ) ) {
 					if ( $variant_node->compareAtPrice && (float) $variant_node->compareAtPrice > (float) $variant_node->price ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 						$variation_data['regular_price'] = $variant_node->compareAtPrice; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
@@ -516,7 +511,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 					}
 				}
 
-				// SKU.
 				if ( $this->should_process( 'sku' ) ) {
 					$variation_data['sku'] = $variant_node->sku ?? null;
 				}
