@@ -492,3 +492,19 @@ body.woocommerce-settings-payments-tab {
 		width: 256px;
 	}
 }
+
+.settings-payments-offline__container {
+	.settings-payments-offline__header {
+		display: flex;
+		padding: 8px 48px 24px;
+		align-items: center;
+
+		h1 {
+			padding-left: $gap-smaller * 2;
+			// This is the same as the Payments settings header.
+			// This is used to keep the UI consistent across when navigating to the offline payments settings page.
+			line-height: 38px;
+			color: #3c434a;
+		}
+	}
+}

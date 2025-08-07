@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use dynamically-generated URLs for resetting accounts and switching to live accounts in the Payments NOX.

@@ -193,7 +193,7 @@ class CheckoutLink {
 
 		// If the user is logged in, the session is tied to the user ID. Do not use a cart token.
 		if ( ! is_user_logged_in() ) {
-			$session_token = CartTokenUtils::get_cart_token( wc()->session->get_customer_id() );
+			$session_token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
 			$redirect_url  = add_query_arg( 'session', $session_token, $redirect_url );
 		}
 

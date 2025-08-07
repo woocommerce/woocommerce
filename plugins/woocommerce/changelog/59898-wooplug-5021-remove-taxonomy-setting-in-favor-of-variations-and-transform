@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Filters: Remove taxonomy/attribute selection controls from inspector settings and modernize UI with ToolsPanel components

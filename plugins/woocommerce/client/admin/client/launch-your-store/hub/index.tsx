@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
 import clsx from 'clsx';
@@ -12,6 +12,7 @@ import clsx from 'clsx';
  */
 import { useFullScreen } from '~/utils';
 import { useComponentFromXStateService } from '~/utils/xstate/useComponentFromService';
+import { useMobileHeaderFromXStateService } from '~/utils/xstate/useMobileHeaderFromService';
 
 import './styles.scss';
 import {
@@ -34,6 +35,7 @@ export type LaunchYourStoreComponentProps = {
 };
 import { SetUpPaymentsProvider } from '../data/setup-payments-context';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
 export type LaunchYourStoreQueryParams = {
 	sidebar?: 'hub' | 'launch-success';
@@ -48,6 +50,9 @@ const LaunchStoreController = () => {
 	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( onboardingStore );
+
+	// Mobile sidebar state
+	const [ isMobileSidebarOpen, setIsMobileSidebarOpen ] = useState( false );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
 		useMachine( mainContentMachine, {
@@ -66,8 +71,18 @@ const LaunchStoreController = () => {
 
 	const isSidebarVisible = ! sidebarState.hasTag( 'fullscreen' );
 
+	// Auto-close mobile sidebar when navigating to different states
+	useEffect( () => {
+		setIsMobileSidebarOpen( false );
+	}, [ sidebarState.value ] ); // Close sidebar whenever the state changes
+
 	const [ CurrentSidebarComponent ] =
 		useComponentFromXStateService< SidebarComponentProps >(
+			sidebarMachineService
+		);
+
+	const [ CurrentMobileHeaderComponent ] =
+		useMobileHeaderFromXStateService< SidebarComponentProps >(
 			sidebarMachineService
 		);
 
@@ -79,8 +94,8 @@ const LaunchStoreController = () => {
 	const handlePaymentsClose = () => {
 		// We are not actually closing a modal here, but we use the same event name for consistency.
 		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed', {
-			from: 'lys',
-			source: 'lys',
+			from: 'lys_modal_close_button',
+			source: wooPaymentsOnboardingSessionEntryLYS,
 		} );
 
 		// Clear session flag to prevent redirect back to payments setup
@@ -96,12 +111,21 @@ const LaunchStoreController = () => {
 		sendToSidebar( { type: 'RETURN_FROM_PAYMENTS' } );
 	};
 
+	const handleMobileSidebarToggle = () => {
+		setIsMobileSidebarOpen( ! isMobileSidebarOpen );
+	};
+
+	const handleClose = () => {
+		setIsMobileSidebarOpen( false );
+	};
+
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
 			<SetUpPaymentsProvider closeModal={ handlePaymentsClose }>
 				<SidebarContainer
 					className={ clsx( {
 						'is-sidebar-hidden': ! isSidebarVisible,
+						'is-mobile-open': isMobileSidebarOpen,
 					} ) }
 				>
 					{ CurrentSidebarComponent && (
@@ -109,10 +133,21 @@ const LaunchStoreController = () => {
 							sendEventToSidebar={ sendToSidebar }
 							sendEventToMainContent={ sendToMainContent }
 							context={ sidebarState.context }
+							onMobileClose={ handleClose }
 						/>
 					) }
 				</SidebarContainer>
 				<MainContentContainer>
+					{ CurrentMobileHeaderComponent && (
+						<CurrentMobileHeaderComponent
+							sendEventToSidebar={ sendToSidebar }
+							sendEventToMainContent={ sendToMainContent }
+							context={ sidebarState.context }
+							onMobileClose={ handleClose }
+							onToggle={ handleMobileSidebarToggle }
+							isMobileSidebarOpen={ isMobileSidebarOpen }
+						/>
+					) }
 					{ CurrentMainContentComponent && (
 						<CurrentMainContentComponent
 							key={ mainContentState.value.toString() }

@@ -34,9 +34,7 @@
 	padding-left: 0;
 	margin-bottom: $gap-largest;
 
-	.is-medium &,
-	.is-small &,
-	.is-mobile & {
+	@include cart-checkout-below-large-container {
 		border-bottom: 0;
 		padding-bottom: 0;
 	}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
@@ -25,6 +25,7 @@ const CustomerAddress = () => {
 		setEditingShippingAddress: setEditing,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
+	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
@@ -72,17 +73,21 @@ const CustomerAddress = () => {
 		]
 	);
 
+	const handleEditClick = useCallback( () => {
+		setShouldAnimate( true );
+		setEditing( true );
+	}, [ setEditing ] );
+
 	return (
 		<AddressWrapper
 			isEditing={ editing }
+			shouldAnimate={ shouldAnimate }
 			addressCard={
 				<AddressCard
 					address={ shippingAddress }
 					target="shipping"
-					onEdit={ () => {
-						setEditing( true );
-					} }
-					isExpanded={ editing }
+					onEdit={ handleEditClick }
+					isExpanded={ true }
 				/>
 			}
 			addressForm={

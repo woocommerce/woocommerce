@@ -5,6 +5,7 @@ import simpleGit from 'simple-git';
 import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
+import { readFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -18,9 +19,9 @@ import { getToday } from '../../get-version/lib';
 /**
  * Perform changelog adjustments after Jetpack Changelogger has run.
  *
- * @param {string} 	override    Time override.
+ * @param {string}  override        Time override.
  * @param {boolean} appendChangelog Whether to append the changelog or replace it.
- * @param {string} 	tmpRepoPath Path where the temporary repo is cloned.
+ * @param {string}  tmpRepoPath     Path where the temporary repo is cloned.
  */
 const updateReleaseChangelogs = async (
 	override: string,
@@ -188,7 +189,7 @@ export const updateReleaseBranchChangelogs = async (
 };
 
 /**
- * Perform changelog operations on trunk by submitting a pull request.
+ * Perform changelog operations on a given branch by submitting a pull request.
  *
  * @param {Object} options                                 CLI options
  * @param {string} tmpRepoPath                             temp repo path
@@ -197,7 +198,7 @@ export const updateReleaseBranchChangelogs = async (
  * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
  */
-export const updateTrunkChangelog = async (
+export const updateBranchChangelog = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranch: string,
@@ -212,8 +213,8 @@ export const updateTrunkChangelog = async (
 	} );
 
 	try {
-		await git.checkout( 'trunk' );
-		const branch = `delete/${ version }-changelog`;
+		await git.checkout( releaseBranch );
+		const branch = `delete/${ releaseBranch }-changelog-from-${ version }`;
 		Logger.notice(
 			`Committing deletions in ${ branch } on ${ tmpRepoPath }`
 		);
@@ -242,21 +243,182 @@ export const updateTrunkChangelog = async (
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
-			title: `Release: Remove ${ version } change files`,
+			title: `Release: Remove ${ version } change files from ${ releaseBranch }`,
 			body: `This pull request was automatically generated to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
 				prNumber > 0 ? `branch via #${ prNumber }` : ''
 			}`,
 			head: branch,
-			base: 'trunk',
+			base: releaseBranch,
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 	} catch ( e ) {
-		if ( e.message.includes( 'No commits between trunk' ) ) {
+		if ( e.message.includes( `No commits between ${ releaseBranch }` ) ) {
 			Logger.notice(
-				'No commits between trunk and the branch, skipping the PR.'
+				`No commits between ${ releaseBranch } and the branch, skipping the PR.`
+			);
+		} else if (
+			e.message.includes( 'did not match any file(s) known to git' )
+		) {
+			Logger.notice(
+				`Branch ${ releaseBranch } does not exist, skipping the PR.`
 			);
 		} else {
 			Logger.error( e );
+		}
+	}
+};
+
+/**
+ * Perform changelog operations on trunk by submitting a pull request.
+ *
+ * @param {Object} options                                 CLI options
+ * @param {string} tmpRepoPath                             temp repo path
+ * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ */
+export const updateTrunkChangelog = async (
+	options: Options,
+	tmpRepoPath: string,
+	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
+): Promise< void > => {
+	return await updateBranchChangelog(
+		options,
+		tmpRepoPath,
+		'trunk',
+		releaseBranchChanges
+	);
+};
+
+/**
+ * Retrieves the WooCommerce version from the trunk branch
+ *
+ * @param tmpRepoPath cloned repo path
+ * @return the WooCommerce version string if found, or `null` if not found.
+ */
+async function getTrunkWooCommerceVersion(
+	tmpRepoPath: string
+): Promise< string | null > {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	await git.checkout( 'trunk' );
+
+	const wooCommercePhpPath = path.join(
+		tmpRepoPath,
+		'plugins/woocommerce/woocommerce.php'
+	);
+	const fileContent = readFileSync( wooCommercePhpPath, 'utf8' );
+
+	const versionMatch = fileContent.match( /\*\s+Version:\s+(\d+\.\d+)/ );
+	const version = versionMatch ? versionMatch[ 1 ] : null;
+
+	Logger.notice( `WooCommerce trunk version is ${ version }` );
+
+	return version;
+}
+
+function getNextVersion( currentVersion: string ) {
+	const parts = currentVersion.split( '.' ).map( Number );
+	let major = parts[ 0 ];
+	let minor = parts[ 1 ];
+
+	minor++;
+
+	// If minor exceeds 9, reset to 0 and increment major
+	if ( minor > 9 ) {
+		major++;
+		minor = 0;
+	}
+
+	return `${ major }.${ minor }`;
+}
+
+/**
+ * Generates a list of release branch names between the target version and the trunk version.
+ * Each branch name follows the format `release/{major}.{minor}`.
+ *
+ * @param targetVersion the target version in the "major.minor" format (e.g., "9.5").
+ * @param trunkVersion  the current trunk version in the "major.minor" format (e.g., "8.7").
+ * @return An array of branch names representing all release branches between the target and trunk versions.
+ */
+function getTargetBranches(
+	targetVersion: string,
+	trunkVersion: string
+): string[] {
+	const [ currentMajor, currentMinor ] = trunkVersion
+		.split( '.' )
+		.map( Number );
+	const [ targetMajor, targetMinor ] = targetVersion
+		.split( '.' )
+		.map( Number );
+
+	// Check if the target is greater than the trunk version
+	if (
+		targetMajor < currentMajor ||
+		( targetMajor === currentMajor && targetMinor <= currentMinor )
+	) {
+		Logger.notice(
+			`Target version ${ targetVersion } is not greater than trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+		);
+		return [];
+	}
+
+	const branches = [];
+	let version = getNextVersion( trunkVersion );
+
+	while ( version !== targetVersion ) {
+		Logger.notice( `Adding intermediate branch for version ${ version }` );
+		branches.push( `release/${ version }` );
+		version = getNextVersion( version );
+	}
+
+	return branches;
+}
+
+/**
+ * Updates the changelogs for all intermediate branches between the trunk and the target release version.
+ *
+ * @param          options                                 a list of options
+ * @param          tmpRepoPath                             cloned repo path
+ * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ */
+export const updateIntermediateBranches = async (
+	options: Options,
+	tmpRepoPath: string,
+	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
+): Promise< void > => {
+	Logger.notice(
+		`Starting intermediate branches update for version ${ options.version }`
+	);
+
+	const trunkVersion = await getTrunkWooCommerceVersion( tmpRepoPath );
+	if ( ! trunkVersion ) {
+		Logger.error( 'Could not determine WooCommerce trunk version.' );
+		return;
+	}
+
+	const targetBranches = getTargetBranches( trunkVersion, options.version );
+	Logger.notice(
+		`Target branches to update: ${ targetBranches.join( ', ' ) }`
+	);
+
+	for ( const targetBranch of targetBranches ) {
+		try {
+			await updateBranchChangelog(
+				options,
+				tmpRepoPath,
+				targetBranch,
+				releaseBranchChanges
+			);
+		} catch ( error ) {
+			Logger.error(
+				`Failed to update ${ targetBranch }: ${ error.message }`
+			);
 		}
 	}
 };

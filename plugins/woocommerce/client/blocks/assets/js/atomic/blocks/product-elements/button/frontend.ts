@@ -7,6 +7,7 @@ import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart'
 /**
  * Internal dependencies
  */
+import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -23,6 +24,7 @@ interface Context {
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
+	inTheCartText: string;
 }
 
 enum AnimationStatus {
@@ -54,10 +56,26 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = wooState.cart?.items.find(
+			const products = wooState.cart?.items.filter(
 				( item ) => item.id === state.productId
 			);
-			return product?.quantity || 0;
+
+			if ( products.length === 0 ) {
+				return 0;
+			}
+
+			// Return the product quantity when the item is a non-variable product.
+			if ( products[ 0 ]?.type !== 'variation' ) {
+				return products[ 0 ]?.quantity || 0;
+			}
+
+			const selectedAttributes =
+				addToCartWithOptionsState?.selectedAttributes;
+			const selectedVariableProduct = products.find( ( item ) =>
+				doesCartItemMatchAttributes( item, selectedAttributes )
+			);
+
+			return selectedVariableProduct?.quantity || 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -75,6 +93,7 @@ const productButtonStore = {
 				productType,
 				groupedProductIds,
 				hasPressedButton,
+				inTheCartText,
 			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
@@ -99,16 +118,13 @@ const productButtonStore = {
 					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
 					hasPressedButton
 				) {
-					return state.inTheCartText;
+					return inTheCartText;
 				}
 				return addToCartText;
 			}
 
 			if ( quantity > 0 ) {
-				return state.inTheCartText.replace(
-					'###',
-					quantity.toString()
-				);
+				return inTheCartText.replace( '###', quantity.toString() );
 			}
 
 			return addToCartText;
@@ -142,6 +158,7 @@ const productButtonStore = {
 			yield actions.addCartItem( {
 				id: state.productId,
 				quantity: state.quantity + context.quantityToAdd,
+				type: context.productType,
 			} );
 
 			context.displayViewCart = true;
@@ -173,7 +190,15 @@ const productButtonStore = {
 		},
 		handlePressedState() {
 			const context = getContext< Context >();
-			context.hasPressedButton = true;
+
+			// Only handle the pressed state if the form is valid.
+			if (
+				addToCartWithOptionsState?.isFormValid === undefined ||
+				addToCartWithOptionsState?.isFormValid
+			) {
+				context.hasPressedButton = true;
+				context.animationStatus = AnimationStatus.SLIDE_OUT;
+			}
 		},
 	},
 	callbacks: {
@@ -194,6 +219,7 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
+			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE

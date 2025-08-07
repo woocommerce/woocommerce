@@ -1,5 +1,5 @@
 #payment_methods.settings-payments-onboarding-modal__step .settings-payments-onboarding-modal__step--content {
-	padding: 16px 32px 16px 0;
+	padding: 0;
 }
 
 .settings-payments-onboarding-modal__step--content {
@@ -42,7 +42,7 @@
 				}
 
 				@media screen and (max-width: $break-medium) {
-					padding: $gap-large;
+					padding: $gap;
 				}
 			}
 
@@ -124,36 +124,22 @@
 	}
 
 	.woocommerce-recommended-payment-methods {
-		// Width to fill available space.
-		width: 100% !important;
-		width: -webkit-fill-available !important; /* Mozilla-based browsers will ignore this. */
-		width: fill-available !important;
-		width: -moz-available !important; /* WebKit-based browsers will ignore this. */
-		margin-right: $gap-small + $gap-smallest;
 		display: flex;
 		flex-direction: column;
-		height: calc(100% - 60px); // Account for continue button
-		max-height: 100%; // Ensure it doesn't grow beyond parent
-		overflow: hidden; // Prevent content from spilling out
-		padding: 0 !important; // There is a padding on the parent container that we need to override.
-		border-bottom: none !important;
-		position: fixed;
+		height: 100%;
 
 		@media screen and (max-width: $break-medium) {
-			height: calc(100% - 100px); // Account for small screen content being longer on the page.
 			margin-top: -2px; // Compensate for the border on the header.
 		}
 
 		&__header {
 			// This is the padding for the header. Controlling each side to adapt to the content.
-			padding: calc($gap-large / 2) $gap-large $gap-large $gap-large * 1.5;
+			padding: $gap-large calc($gap * 2);
 			border-bottom: 1px solid $gray-200;
 			flex-shrink: 0;
 			background: $white;
 			position: relative;
 			z-index: 1;
-			min-height: 40px;
-			gap: 8px;
 			display: flex;
 			align-items: center;
 			flex-wrap: wrap;
@@ -163,15 +149,17 @@
 				justify-content: space-between;
 				align-items: center;
 				width: 100%;
+				min-height: 40px;
 
 				h1 {
 					padding: 0;
 					height: auto;
 					margin-top: 0;
 					margin-bottom: 0;
-					font-weight: 590;
-					font-size: 16px;
-					color: #070707;
+					font-weight: 500;
+					font-size: 15px;
+					color: $gray-900;
+					line-height: 20px;
 				}
 			}
 
@@ -179,12 +167,12 @@
 				font-size: 13px;
 				font-weight: 400;
 				line-height: 20px;
-				color: #757575;
+				color: $gray-700;
 				flex-basis: 100%;
 			}
 
 			@media screen and (max-width: $break-medium) {
-				padding: $gap $gap-large;
+				padding: $gap;
 			}
 
 			.woocommerce-settings-payments-header__title {
@@ -209,6 +197,12 @@
 					display: none;
 				}
 
+				.components-toggle-control {
+					.components-flex {
+						gap: 0;
+					}
+				}
+
 				@media screen and (max-width: $break-medium) {
 					padding: 0;
 				}
@@ -218,7 +212,7 @@
 		.woocommerce-recommended-payment-methods__list_footer {
 			display: flex;
 			justify-content: flex-end;
-			padding: $gap-large;
+			padding: $gap-large calc($gap * 2);
 			background: $white;
 			flex-shrink: 0;
 
@@ -227,7 +221,7 @@
 			}
 
 			@media screen and (max-width: $break-medium) {
-				padding: $gap;
+				padding: 18px $gap;
 			}
 		}
 	}

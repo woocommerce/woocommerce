@@ -44,10 +44,10 @@ add_filter(
 
 **Key points about this code:**
 
-- The filter targets `woocommerce/checkout-actions-block` which is the block containing the place order button
-- We use a priority of `999` to ensure our content is added after other modifications
-- The `data-sitekey` attribute stores your CAPTCHA configuration, but this may be different for your plugin
-- We append our protection element after the original block content.
+-   The filter targets `woocommerce/checkout-actions-block` which is the block containing the place order button
+-   We use a priority of `999` to ensure our content is added after other modifications
+-   The `data-sitekey` attribute stores your CAPTCHA configuration, but this may be different for your plugin
+-   We append our protection element after the original block content.
 
 ## Step 2: Client-Side Integration
 
@@ -60,33 +60,33 @@ The checkout block uses a data store to manage state. You can use the `setExtens
 ```js
 /* Woo Checkout Block */
 if ( wp && wp.data ) {
-  var unsubscribe = wp.data.subscribe( function () {
-    const turnstileItem = document.querySelector(".my-captcha-element");
+	var unsubscribe = wp.data.subscribe( function () {
+		const turnstileItem = document.querySelector( '.my-captcha-element' );
 
-    if ( turnstile && turnstileItem ) {
-      turnstile.render( turnstileItem, {
-        sitekey: turnstileItem.dataset.sitekey,
-        callback: function( data ) {
-          wp.data
-            .dispatch("wc/store/checkout")
-            .setExtensionData("plugin-namespace-turnstile", {
-              token: data,
-            });
-        },
-      });
+		if ( turnstile && turnstileItem ) {
+			turnstile.render( turnstileItem, {
+				sitekey: turnstileItem.dataset.sitekey,
+				callback: function ( data ) {
+					wp.data
+						.dispatch( 'wc/store/checkout' )
+						.setExtensionData( 'plugin-namespace-turnstile', {
+							token: data,
+						} );
+				},
+			} );
 
-      unsubscribe();
-    }
-  }, "wc/store/cart" );
+			unsubscribe();
+		}
+	}, 'wc/store/cart' );
 }
 ```
 
 **Key points about this JavaScript:**
 
-- We subscribe to the cart data store to detect when the checkout is ready
-- The `turnstile.render()` method initializes your CAPTCHA (replace with your specific implementation)
-- `setExtensionData()` stores the token in the checkout data store
-- The namespace should be unique to your plugin (e.g., `my-plugin-turnstile`)
+-   We subscribe to the cart data store to detect when the checkout is ready
+-   The `turnstile.render()` method initializes your CAPTCHA (replace with your specific implementation)
+-   `setExtensionData()` stores the token in the checkout data store
+-   The namespace should be unique to your plugin (e.g., `my-plugin-turnstile`)
 
 ### Data Store Integration
 
@@ -148,11 +148,11 @@ function plugin_check_turnstile_token( $result ) {
 
 **Key points about server-side validation:**
 
-- We check for POST requests to the checkout endpoint specifically
-- The protection token is accessed via `$request_body['extensions']['your-namespace']`
-- Always return the `$result` parameter to avoid interfering with other authentication checks
-- Return a `WP_Error` object if validation fails
-- Consider allowing certain payment methods to bypass protection (e.g., express payments)
+-   We check for POST requests to the checkout endpoint specifically
+-   The protection token is accessed via `$request_body['extensions']['your-namespace']`
+-   Always return the `$result` parameter to avoid interfering with other authentication checks
+-   Return a `WP_Error` object if validation fails
+-   Consider allowing certain payment methods to bypass protection (e.g., express payments)
 
 ## Important Notes
 

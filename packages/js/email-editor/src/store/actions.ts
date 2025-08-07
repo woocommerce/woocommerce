@@ -8,8 +8,13 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { storeName, editorCurrentPostType } from './constants';
-import { SendingPreviewStatus, State, PersonalizationTag } from './types';
+import { storeName } from './constants';
+import {
+	SendingPreviewStatus,
+	State,
+	PersonalizationTag,
+	ContentValidation,
+} from './types';
 import { recordEvent } from '../events';
 
 export function togglePreviewModal( isOpen: boolean ) {
@@ -26,13 +31,27 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
+export function setEmailPost( postId: number | string, postType: string ) {
+	if ( ! postId || ! postType ) {
+		throw new Error(
+			'setEmailPost requires valid postId and postType parameters'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postId, postType } as Partial< State >,
+	} as const;
+}
+
 export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {
 		const postId = registry.select( storeName ).getEmailPostId();
+		const postType = registry.select( storeName ).getEmailPostType();
 		registry
 			.dispatch( coreDataStore )
-			.editEntityRecord( 'postType', editorCurrentPostType, postId, {
+			.editEntityRecord( 'postType', postType, postId, {
 				template: templateSlug,
 			} );
 	};
@@ -101,5 +120,14 @@ export function setPersonalizationTagsList( list: PersonalizationTag[] ) {
 		state: {
 			list,
 		} as Partial< State[ 'personalizationTags' ] >,
+	} as const;
+}
+
+export function setContentValidation(
+	validation: ContentValidation | undefined
+) {
+	return {
+		type: 'SET_CONTENT_VALIDATION',
+		validation,
 	} as const;
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skip skip/test_json_search_customers test for now

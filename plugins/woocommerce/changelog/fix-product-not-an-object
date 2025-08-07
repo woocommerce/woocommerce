@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an issue when a product is not an object in html order item

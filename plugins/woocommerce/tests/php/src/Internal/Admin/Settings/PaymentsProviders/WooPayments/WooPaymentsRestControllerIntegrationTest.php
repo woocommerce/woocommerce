@@ -474,8 +474,11 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					$country_code => array(
 						'steps' => array(
 							$step_id => array(
-								'data' => array(
+								'data'     => array(
 									'payment_methods' => $request_params['payment_methods'],
+								),
+								'statuses' => array(
+									'started' => $this->current_time, // The step is auto-marked as started when saved.
 								),
 							),
 						),

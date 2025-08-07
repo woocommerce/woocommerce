@@ -10,8 +10,6 @@ import {
 } from '@woocommerce/base-context';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
-import { useSelect } from '@wordpress/data';
-import { cartStore } from '@woocommerce/block-data';
 import { ShippingAddress } from '@woocommerce/settings';
 
 /**
@@ -53,18 +51,11 @@ const Block = (): JSX.Element => {
 		? [ noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS ]
 		: [ noticeContexts.BILLING_ADDRESS ];
 
-	const { cartDataLoaded } = useSelect( ( select ) => {
-		const store = select( cartStore );
-		return {
-			cartDataLoaded: store.hasFinishedResolution( 'getCartData' ),
-		};
-	} );
-
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
 			<WrapperComponent>
-				{ cartDataLoaded ? <CustomerAddress /> : null }
+				<CustomerAddress />
 			</WrapperComponent>
 		</>
 	);

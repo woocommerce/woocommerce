@@ -55,9 +55,13 @@
 		margin: 0;
 
 		> div {
-			@include placeholder();
+			// here
+			@include skeleton-animation();
 			margin: 0 0 1.5em 0;
 			display: none;
+		}
+		div {
+			border: none;
 		}
 		.wp-block-woocommerce-checkout-contact-information-block,
 		.wp-block-woocommerce-checkout-payment-block {
@@ -132,4 +136,9 @@
 		@include font-size(large);
 		@include reset-box();
 	}
+}
+
+.theme-twentytwenty .wp-block-woocommerce-checkout,
+.theme-twentytwentyone .wp-block-woocommerce-checkout {
+	margin: 0 auto;
 }

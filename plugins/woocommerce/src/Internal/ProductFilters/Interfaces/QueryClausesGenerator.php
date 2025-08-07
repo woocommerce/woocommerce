@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * QueryClausesGenerator interface.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 interface QueryClausesGenerator {
 
@@ -21,5 +23,5 @@ interface QueryClausesGenerator {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( array $args, \WP_Query $wp_query );
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array;
 }

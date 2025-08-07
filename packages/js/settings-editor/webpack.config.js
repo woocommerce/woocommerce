@@ -3,6 +3,7 @@
  */
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const path = require( 'path' );
 
 /**
  * Internal dependencies
@@ -17,6 +18,13 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
 	mode: process.env.NODE_ENV || 'development',
+	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+		type: 'filesystem',
+		cacheDirectory: path.resolve(
+			__dirname,
+			'node_modules/.cache/webpack'
+		),
+	},
 	entry: {
 		'build-style': __dirname + '/src/style.scss',
 	},

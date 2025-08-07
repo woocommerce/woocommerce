@@ -3,6 +3,7 @@
  */
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent, screen } from '@testing-library/react';
+import { MemoryRouter as Router } from 'react-router-dom';
 
 /**
  * Internal dependencies
@@ -19,7 +20,11 @@ jest.mock( '~/utils/features', () => ( {
 
 describe( 'SettingsPaymentsMain', () => {
 	it( 'should record settings_payments_pageview event on load', () => {
-		render( <SettingsPaymentsMain /> );
+		render(
+			<Router>
+				<SettingsPaymentsMain />
+			</Router>
+		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_pageview',
@@ -30,7 +35,11 @@ describe( 'SettingsPaymentsMain', () => {
 	} );
 
 	it( 'should trigger event recommendations_other_options when clicking the WooCommerce Marketplace link', () => {
-		render( <SettingsPaymentsMain /> );
+		render(
+			<Router>
+				<SettingsPaymentsMain />
+			</Router>
+		);
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 
@@ -56,7 +65,11 @@ describe( 'SettingsPaymentsMain', () => {
 			value: mockLocation,
 		} );
 
-		render( <SettingsPaymentsMain /> );
+		render(
+			<Router>
+				<SettingsPaymentsMain />
+			</Router>
+		);
 
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 

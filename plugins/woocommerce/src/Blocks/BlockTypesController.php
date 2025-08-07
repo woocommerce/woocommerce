@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
@@ -397,6 +396,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterTaxonomy',
 
 			// Keep hidden legacy filter blocks for backward compatibility.
 			'ActiveFilters',
@@ -447,7 +447,9 @@ final class BlockTypesController {
 			'FilterWrapper',
 			'HandpickedProducts',
 			'MiniCart',
+			'NextPreviousButtons',
 			'StoreNotices',
+			'PaymentMethodIcons',
 			'PriceFilter',
 			'ProductBestSellers',
 			'ProductButton',
@@ -466,9 +468,9 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
-			'ProductGalleryLargeImageNextPrevious',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
@@ -577,7 +579,6 @@ final class BlockTypesController {
 					'CatalogSorting',
 					'ClassicTemplate',
 					'ProductResultsCount',
-					'ProductDetails',
 					'ProductReviews',
 					'OrderConfirmation\Status',
 					'OrderConfirmation\Summary',

@@ -61,6 +61,11 @@ class QuantitySelector extends AbstractBlock {
 		$stock_quantity                      = $product->get_stock_quantity();
 		$allows_backorders                   = $product->backorders_allowed();
 
+		if ( AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ) {
+			$product = $previous_product;
+			return '';
+		}
+
 		if ( $is_external_product_with_url || $can_only_be_purchased_one_at_a_time || ( $managing_stock && $stock_quantity <= 1 && ! $allows_backorders ) ) {
 			$product = $previous_product;
 
@@ -69,7 +74,13 @@ class QuantitySelector extends AbstractBlock {
 
 		ob_start();
 
-		woocommerce_quantity_input( AddToCartWithOptionsUtils::get_quantity_input_args( $product ) );
+		woocommerce_quantity_input(
+			array(
+				'min_value'   => $product->get_min_purchase_quantity(),
+				'max_value'   => $product->get_max_purchase_quantity(),
+				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			)
+		);
 
 		$product_html = ob_get_clean();
 

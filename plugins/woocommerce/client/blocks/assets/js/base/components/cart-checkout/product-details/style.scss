@@ -18,8 +18,10 @@
 	display: inline-block;
 }
 
-.is-large:not(.wc-block-checkout) {
-	.wc-block-components-product-details__name {
-		font-weight: bold;
+@include cart-checkout-large-container {
+	.wc-block-cart__main {
+		.wc-block-components-product-details__name {
+			font-weight: bold;
+		}
 	}
 }

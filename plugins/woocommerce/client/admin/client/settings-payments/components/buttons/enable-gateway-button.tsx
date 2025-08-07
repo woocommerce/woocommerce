@@ -21,6 +21,7 @@ import {
 	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 interface EnableGatewayButtonProps {
 	/**
@@ -116,7 +117,9 @@ export const EnableGatewayButton = ( {
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordPaymentsProviderEvent( 'enable_click', gatewayProvider );
+		recordPaymentsProviderEvent( 'enable_click', gatewayProvider, {
+			incentive_id: incentive ? incentive.promo_id : 'none',
+		} );
 
 		const gatewayToggleNonce =
 			window.woocommerce_admin.nonces?.gateway_toggle || '';
@@ -148,7 +151,11 @@ export const EnableGatewayButton = ( {
 							setOnboardingModalOpen
 						) {
 							recordPaymentsOnboardingEvent(
-								'woopayments_onboarding_modal_opened'
+								'woopayments_onboarding_modal_opened',
+								{
+									from: 'enable_gateway_button',
+									source: wooPaymentsOnboardingSessionEntrySettings,
+								}
 							);
 							setOnboardingModalOpen( true );
 						} else if ( gatewayHasRecommendedPaymentMethods ) {
@@ -186,23 +193,31 @@ export const EnableGatewayButton = ( {
 							gatewayProvider,
 							{
 								reason: 'needs_setup',
+								incentive_id: incentive
+									? incentive.promo_id
+									: 'none',
 							}
 						);
 					}
 				}
 
 				// If no redirect occurred, the data needs to be refreshed.
-				invalidateResolutionForStoreSelector(
-					isOffline
-						? 'getOfflinePaymentGateways'
-						: 'getPaymentProviders'
-				);
+				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+
+				if ( isOffline ) {
+					// We need to invalidate both selectors since they share the same data source and resolver chain.
+					invalidateResolutionForStoreSelector(
+						'getOfflinePaymentGateways'
+					);
+				}
+
 				setIsUpdating( false );
 			} )
 			.catch( () => {
 				// Record the event when the gateway could not be enabled.
 				recordPaymentsProviderEvent( 'enable_failed', gatewayProvider, {
 					reason: 'error',
+					incentive_id: incentive ? incentive.promo_id : 'none',
 				} );
 
 				// In case of errors, redirect to the gateway settings page.

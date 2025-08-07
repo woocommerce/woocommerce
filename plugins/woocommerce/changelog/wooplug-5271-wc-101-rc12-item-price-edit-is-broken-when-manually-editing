@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve manual discount when manually editing an order

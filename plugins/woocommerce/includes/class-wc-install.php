@@ -561,7 +561,7 @@ class WC_Install {
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
-		self::create_cron_jobs();
+		self::clear_cron_jobs();
 		self::delete_obsolete_notes();
 		self::create_files();
 		self::maybe_create_pages();
@@ -870,20 +870,20 @@ class WC_Install {
 	 */
 	public static function cron_schedules( $schedules ) {
 		$schedules['monthly']     = array(
-			'interval' => 2635200,
+			'interval' => MONTH_IN_SECONDS,
 			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
 		$schedules['fifteendays'] = array(
-			'interval' => 1296000,
+			'interval' => 15 * DAY_IN_SECONDS,
 			'display'  => __( 'Every 15 Days', 'woocommerce' ),
 		);
 		return $schedules;
 	}
 
 	/**
-	 * Create cron jobs (clear them first).
+	 * Removes old cron jobs now that we moved to Action Scheduler.
 	 */
-	private static function create_cron_jobs() {
+	private static function clear_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
@@ -892,44 +892,6 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
-
-		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
-
-		wp_schedule_event( strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' ), 'daily', 'woocommerce_scheduled_sales' );
-
-		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
-
-		if ( '' !== $held_duration ) {
-			/**
-			 * Determines the interval at which to cancel unpaid orders in minutes.
-			 *
-			 * @since 5.1.0
-			 */
-			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
-			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-		}
-
-		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
-		// so it doesn't occur in the same request. WooCommerce Admin also schedules
-		// a daily cron that gets lost due to a race condition. WC_Privacy's background
-		// processing instance updates the cron schedule from within a cron job.
-		wp_schedule_event( time() + 10, 'daily', 'woocommerce_cleanup_personal_data' );
-		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
-		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
-		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
-		/**
-		 * How frequent to schedule the tracker send event.
-		 *
-		 * @since 2.3.0
-		 */
-		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
-		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_rate_limits' );
-
-		if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
-			wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
-		}
-		// Note: this is potentially redundant when the core package exists.
-		wp_schedule_single_event( time() + 10, 'generate_category_lookup_table' );
 	}
 
 	/**
@@ -1642,6 +1604,13 @@ class WC_Install {
 			self::should_enable_hpos_for_new_shop();
 		$hpos_table_schema  = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
 
+		$mysql_version = wc_get_server_database_version()['number'];
+		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
+			$datetime_default = 'DEFAULT CURRENT_TIMESTAMP';
+		} else {
+			$datetime_default = "DEFAULT '1970-01-01 00:00:00'";
+		}
+
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -1898,7 +1867,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	product_id bigint(20) unsigned NOT NULL,
 	variation_id bigint(20) unsigned NOT NULL,
 	customer_id bigint(20) unsigned NULL,
-	date_created datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	date_created datetime $datetime_default NOT NULL,
 	product_qty int(11) NOT NULL,
 	product_net_revenue double DEFAULT 0 NOT NULL,
 	product_gross_revenue double DEFAULT 0 NOT NULL,
@@ -1989,7 +1958,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 	PRIMARY KEY (category_tree_id,category_id)
 ) $collate;
 $hpos_table_schema;
-		";
+";
 
 		return $tables;
 	}
@@ -2036,6 +2005,8 @@ $hpos_table_schema;
 			"{$wpdb->prefix}wc_admin_note_actions",
 			"{$wpdb->prefix}wc_customer_lookup",
 			"{$wpdb->prefix}wc_category_lookup",
+			"{$wpdb->prefix}wc_order_fulfillments",
+			"{$wpdb->prefix}wc_order_fulfillment_meta",
 
 			// HPOS.
 			"{$wpdb->prefix}wc_orders",

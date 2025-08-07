@@ -1,7 +1,6 @@
 ---
 post_title: CSS styling for themes
 sidebar_label: CSS styling for themes
-
 ---
 
 # CSS styling for themes
@@ -13,8 +12,8 @@ sidebar_label: CSS styling for themes
 
 WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/contributors/coding-guidelines.md). All classes start with one of these two prefixes:
 
-* `.wc-block-`: class names specific to a single block.
-* `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
+-   `.wc-block-`: class names specific to a single block.
+-   `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
 
 The combination of block class names and component class names allows themes to style each component either globally or only in specific blocks. As an example, you could style all prices to be italics with:
 
@@ -42,12 +41,12 @@ Some of our components have responsive classes depending on the container width.
 
 Those classes are:
 
-Container width | Class name
-----------------|------------
-\>700px         | `is-large`
-521px-700px     | `is-medium`
-401px-520px     | `is-small`
-\<=400px         | `is-mobile`
+| Container width | Class name  |
+| --------------- | ----------- |
+| \>700px         | `is-large`  |
+| 521px-700px     | `is-medium` |
+| 401px-520px     | `is-small`  |
+| \<=400px        | `is-mobile` |
 
 As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
 
@@ -55,6 +54,45 @@ As an example, if we wanted to do the Checkout font size 10% larger when the con
 .wc-block-checkout.is-medium,
 .wc-block-checkout.is-large {
 	font-size: 1.1em;
+}
+```
+
+### CSS Container Queries for Cart and Checkout blocks
+
+WooCommerce defines the top-level wrappers of Cart and Checkout blocks as CSS containers. These containers use `container-type: inline-size`:
+
+```css
+.wp-block-woocommerce-checkout {
+	container-type: inline-size;
+}
+```
+
+Developers can use CSS Container Queries (`@container`) to style child components based on parent width, eliminating the need for JS-added classes such as `.is-large` which are considered legacy. Legacy classes remain in place for backwards compatibility, but we recommend using the container approach for cleaner styling and fewer layout shifts.
+
+**Note:** Container queries work as long as there isn't another container in between the checkout blocks wrapper and the element being styled. If you define additional CSS containers in your theme or plugins, they may interfere with the container query behavior.
+
+There are SCSS mixins available as convenient helpers for targeting the same width breakpoints previously defined by classes like `.is-large`, `.is-medium`, `.is-small` and `.is-mobile`. These mixins make it easier to style inner content within the Cart and Checkout blocks based on the container width.
+
+```scss
+// Before, using JS generated CSS class
+.is-large {
+	.your-class {
+		padding: 2rem;
+	}
+}
+
+// After, using the container mixin
+@include cart-checkout-large-container {
+	.your-class {
+		padding: 2rem;
+	}
+}
+
+// After, using pure CSS
+@container (min-width: 700px) {
+	.your-class {
+		padding: 2rem;
+	}
 }
 ```
 

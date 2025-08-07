@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure address 1 inherits the correct label from locale
