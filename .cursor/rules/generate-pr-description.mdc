@@ -1,8 +1,7 @@
 ---
-description: When a PR description is asked for.
-globs: 
 alwaysApply: false
 ---
+
 # Generating a Pull Request Description
 
 This rule provides guidance for generating a pull request (PR) description in this repository.
@@ -13,13 +12,40 @@ The PR template is located at [`.github/PULL_REQUEST_TEMPLATE.md`](mdc:.github/P
 
 ## Best Practices
 
-- **Preserve Markdown Structure:** Do not remove or alter required markdown sections, especially those used by automation (e.g., changelog entry details and comments).
-- **Changelog Section:** The changelog section in the PR description must keep the markdown structure from the PR template exactly as-is, including all checkboxes, comments, and headings. Only the appropriate checkbox may be checked, and the changelog message must be placed under the `#### Comment` heading and before the closing `</details>` tag. Do not add, remove, or reformat any part of the changelog section except for checking the box and adding the message in the correct place.
-- **Be Concise and Clear:** Summarize the changes, testing steps, and rationale in a way that is easy for reviewers to understand.
-- **Remove Irrelevant Sections:** You may erase template sections that are not applicable to your PR, except for those required by automation. Do not remove any checkbox items.
-- **Testing Instructions:** Provide clear, step-by-step instructions for how to test the changes.
-- **Always Output Markdown:** When the user requests a PR description, always provide the output in markdown format, using the structure and sections from the PR template. The output should be copy-paste ready for a GitHub PR and must include all required sections unless the user specifies otherwise. Do not provide plain text or summary—always provide the markdown-formatted PR template filled out with the relevant details from the change, following these rules strictly.
+-   **Preserve Markdown Structure:** Do not remove or alter required markdown sections, especially those used by automation (e.g., changelog entry details and comments).
+-   **Changelog Section:** The changelog section in the PR description must keep the markdown structure from the PR template exactly as-is, including all checkboxes, comments, and headings. Only the appropriate checkbox may be checked, and the changelog message must be placed under the `#### Message` heading and before the closing `</details>` tag. Do not add, remove, or reformat any part of the changelog section except for checking the box and adding the message in the correct place.
+
+If the PR does not require a changelog message a comment can be left after the `#### Comment` heading and before the closing `</details>` tag.
+
+-   **Be Concise and Clear:** Summarize the changes, testing steps, and rationale in a way that is easy for reviewers to understand.
+-   **Remove Irrelevant Sections:** You may erase template sections that are not applicable to your PR, except for those required by automation. Do not remove any checkbox items.
+-   **Testing Instructions:** Provide clear, step-by-step instructions for how to test the changes.
+-   **Always Output Markdown:** When the user requests a PR description, always provide the output in markdown format, using the structure and sections from the PR template. The output should be copy-paste ready for a GitHub PR and must include all required sections unless the user specifies otherwise. Do not provide plain text or summary—always provide the markdown-formatted PR template filled out with the relevant details from the change, following these rules strictly.
 
 ## Example
 
-See the PR template for the required structure and sections. When generating a PR description, ensure that all required checkboxes and markdown details are preserved for automation compatibility, and that the changelog message is placed under the `#### Comment` heading as specified above.
+See the PR template for the required structure and sections. When generating a PR description, ensure that all required checkboxes and markdown details are preserved for automation compatibility, and that the changelog message is placed under the appropriate heading as specified above.
+
+# Generating a Pull Request Description
+
+This rule provides guidance for generating a pull request (PR) description in this repository.
+
+## Where to Find the Template
+
+The PR template is located at [`.github/PULL_REQUEST_TEMPLATE.md`](mdc:.github/PULL_REQUEST_TEMPLATE.md). Always use this template as the basis for your PR descriptions.
+
+## Best Practices
+
+-   **Preserve Markdown Structure:** Do not remove or alter required markdown sections, especially those used by automation (e.g., changelog entry details and comments).
+-   **Changelog Section:** The changelog section in the PR description must keep the markdown structure from the PR template exactly as-is, including all checkboxes, comments, and headings. Only the appropriate checkbox may be checked, and the changelog message must be placed under the `#### Message` heading and before the closing `</details>` tag. Do not add, remove, or reformat any part of the changelog section except for checking the box and adding the message in the correct place.
+
+If the PR does not require a changelog message a comment can be left after the `#### Comment` heading and before the closing `</details>` tag.
+
+-   **Be Concise and Clear:** Summarize the changes, testing steps, and rationale in a way that is easy for reviewers to understand.
+-   **Remove Irrelevant Sections:** You may erase template sections that are not applicable to your PR, except for those required by automation. Do not remove any checkbox items.
+-   **Testing Instructions:** Provide clear, step-by-step instructions for how to test the changes.
+-   **Always Output Markdown:** When the user requests a PR description, always provide the output in markdown format, using the structure and sections from the PR template. The output should be copy-paste ready for a GitHub PR and must include all required sections unless the user specifies otherwise. Do not provide plain text or summary—always provide the markdown-formatted PR template filled out with the relevant details from the change, following these rules strictly.
+
+## Example
+
+See the PR template for the required structure and sections. When generating a PR description, ensure that all required checkboxes and markdown details are preserved for automation compatibility, and that the changelog message is placed under the appropriate heading as specified above.
