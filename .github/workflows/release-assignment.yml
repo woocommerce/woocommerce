@@ -261,7 +261,7 @@ jobs:
             const replacements = {
               '{RELEASE_VERSION}': process.env.RELEASE_VERSION || '',
               '{MILESTONE_NUMBER}': process.env.MILESTONE_NUMBER || '',
-              '{RELEASE_LEAD}': mention || '',
+              '{RELEASE_LEAD}': mention || process.env.RELEASE_LEAD || '',
               '{RELEASE_TEAM}': process.env.RELEASE_TEAM || '',
               '{BETA_1_RELEASE_DATE}': process.env.BETA_1_RELEASE_DATE || '',
               '{BETA_2_RELEASE_DATE}': process.env.BETA_2_RELEASE_DATE || '',
@@ -327,18 +327,23 @@ jobs:
               parentIssue = await parentResult.issue;
             } catch (error) {
               core.setFailed(`Failed to create Linear issue: ${error.message}`);
+              return;
             }
 
             if (parentIssue) {
               for (const subIssue of Object.values(subIssues)) {
-                const subIssueResult = await linearClient.createIssue({
-                  teamId: `${{ secrets.LINEAR_TEAM_ID }}`,
-                  title: subIssue.title,
-                  description: subIssue.body,
-                  parentId: parentIssue.id,
-                  priority: 2,
-                  labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
-                });
+                try {
+                  const subIssueResult = await linearClient.createIssue({
+                    teamId: `${{ secrets.LINEAR_TEAM_ID }}`,
+                    title: subIssue.title,
+                    description: subIssue.body,
+                    parentId: parentIssue.id,
+                    priority: 2,
+                    labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
+                  });
+                } catch (error) {
+                  console.log(`Failed to create sub-issue in Linear: ${error.message}`);
+                }
 
                 const createdSubIssue = await subIssueResult.issue;
               }
