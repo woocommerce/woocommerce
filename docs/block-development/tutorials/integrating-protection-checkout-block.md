@@ -59,26 +59,30 @@ The checkout block uses a data store to manage state. You can use the `setExtens
 
 ```js
 /* Woo Checkout Block */
-if ( wp && wp.data ) {
-	var unsubscribe = wp.data.subscribe( function () {
-		const turnstileItem = document.querySelector( '.my-captcha-element' );
+document.addEventListener( 'DOMContentLoaded', function () {
+	if ( wp && wp.data ) {
+		var unsubscribe = wp.data.subscribe( function () {
+			const turnstileItem = document.querySelector(
+				'.my-captcha-element'
+			);
 
-		if ( turnstile && turnstileItem ) {
-			turnstile.render( turnstileItem, {
-				sitekey: turnstileItem.dataset.sitekey,
-				callback: function ( data ) {
-					wp.data
-						.dispatch( 'wc/store/checkout' )
-						.setExtensionData( 'plugin-namespace-turnstile', {
-							token: data,
-						} );
-				},
-			} );
+			if ( turnstile && turnstileItem ) {
+				turnstile.render( turnstileItem, {
+					sitekey: turnstileItem.dataset.sitekey,
+					callback: function ( data ) {
+						wp.data
+							.dispatch( 'wc/store/checkout' )
+							.setExtensionData( 'plugin-namespace-turnstile', {
+								token: data,
+							} );
+					},
+				} );
 
-			unsubscribe();
-		}
-	}, 'wc/store/cart' );
-}
+				unsubscribe();
+			}
+		}, 'wc/store/cart' );
+	}
+} );
 ```
 
 **Key points about this JavaScript:**
@@ -135,6 +139,11 @@ function plugin_check_turnstile_token( $result ) {
         return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
     }
     $token = sanitize_text_field( $extensions['plugin-namespace-turnstile']['token'] );
+
+    /**
+     * Note: The function `my_token_check_function` would include custom
+     * logic implemented by your plugin to handle token validation.
+     **/
     $check = my_token_check_function( $token );
     $success = $check['success'];
 
