@@ -2,6 +2,16 @@
 	.wc-block-components-product-stock-indicator {
 		text-align: center;
 	}
+
+	&:has(.is-product-collection-layout-carousel) {
+		@include breakpoint("<600px") {
+			// This rule is overriding a `display: flex` from WordPress core, that's
+			// why it needs a higher specificity.
+			:where(.wc-block-next-previous-buttons.wc-block-next-previous-buttons) {
+				display: none;
+			}
+		}
+	}
 }
 
 // Styles for the interactivity API store notices rendered top of block for client side errors.

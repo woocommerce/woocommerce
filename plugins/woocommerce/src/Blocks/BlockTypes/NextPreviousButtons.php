@@ -46,6 +46,7 @@ class NextPreviousButtons extends AbstractBlock {
 	<div
 			class="wc-block-next-previous-buttons <?php echo esc_attr( $vertical_alignment['class'] ); ?>"
 			data-wp-interactive="<?php echo esc_attr( $iapi_provider ); ?>"
+			data-wp-bind--hidden="context.hideNextPreviousButtons"
 		>
 			<button
 				class="wc-block-next-previous-buttons__button <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
