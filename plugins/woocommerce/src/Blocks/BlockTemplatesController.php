@@ -26,9 +26,28 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
+	}
+
+	/**
+	 * Run hooks on block templates.
+	 *
+	 * @param array $templates The block templates.
+	 * @return array The block templates.
+	 */
+	public function run_hooks_on_block_templates( $templates ) {
+		// There is a bug in the WordPress implementation that causes block hooks not to run in templates registered
+		// via the Template Registration API. Because of this, we run them manually.
+		foreach ( $templates as $template ) {
+			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
+				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );
+			}
+		}
+
+		return $templates;
 	}
 
 	/**
