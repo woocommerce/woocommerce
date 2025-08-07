@@ -196,11 +196,11 @@ class Server {
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// TODO: IMPORTANT Remove me before merging the feature branch.
-			'paypal-proxy'             => 'WC_REST_Paypal_Proxy_Controller',
+			// 'paypal-proxy'             => 'WC_REST_Paypal_Proxy_Controller',
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// TODO: IMPORTANT Remove me before merging the feature branch.
-			'paypal-webhooks-proxy'    => 'WC_REST_Paypal_Webhooks_Proxy_Controller',
-			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
+			// 'paypal-webhooks-proxy'    => 'WC_REST_Paypal_Webhooks_Proxy_Controller',
+			// 'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 		);
 	}
 

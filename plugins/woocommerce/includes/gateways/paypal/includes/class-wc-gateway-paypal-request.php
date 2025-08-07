@@ -315,16 +315,16 @@ class WC_Gateway_Paypal_Request {
 		$site_id      = \Jetpack_Options::get_option( 'id' );
 		$request_body = array(
 			'test_mode' => $this->gateway->testmode,
-			// TODO: Do we need to pass this?
-			// If yes, do we need to handle scenario where the store changes domain?
+			// TODO: Do we need to pass this? If yes, do we need to handle scenario where the store changes domain?
 			'store_url' => get_site_url(),
-			// TODO: Merchant account creation requires a statement descriptor,
-			// but we are not using it anywhere.
+			// TODO: Merchant account creation requires a statement descriptor, but we are not using it anywhere.
 			'settings'  => array(
 				'statement_descriptor' => get_bloginfo( 'name' ),
 			),
+			// TODO: Is this the best way to pass the PayPal account email?
+			'email'     => $this->gateway->get_option( 'email' ),
 		);
-		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
 			sprintf( '/sites/%d/transact/account', $site_id ),
 			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 			array(
