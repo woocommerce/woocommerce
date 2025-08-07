@@ -344,8 +344,6 @@ jobs:
                 } catch (error) {
                   console.log(`Failed to create sub-issue in Linear: ${error.message}`);
                 }
-
-                const createdSubIssue = await subIssueResult.issue;
               }
             }
 
