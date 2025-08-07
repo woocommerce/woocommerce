@@ -2,25 +2,7 @@
 sidebar_label: Validation Store
 ---
 
-# Validation Store (`wc/store/validation`) <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Overview](#overview)- [Overview](#overview)
--   [Usage](#usage)
--   [Example](#example)
--   [Actions](#actions)
-    -   [clearValidationError( errorId )](#clearvalidationerror-errorid-)
-    -   [clearValidationErrors( errors )](#clearvalidationerrors-errors-)
-    -   [setValidationErrors( errors )](#setvalidationerrors-errors-)
-    -   [hideValidationError( errorId )](#hidevalidationerror-errorid-)
-    -   [showValidationError( errorId )](#showvalidationerror-errorid-)
-    -   [showAllValidationErrors](#showallvalidationerrors)
-    -   [clearAllValidationErrors](#clearallvalidationerrors)
--   [Selectors](#selectors)
-    -   [getValidationError( errorId )](#getvalidationerror-errorid-)
-    -   [getValidationErrorId( errorId )](#getvalidationerrorid-errorid-)
-    -   [hasValidationErrors](#hasvalidationerrors)
+# Validation Store (`wc/store/validation`) 
 
 ## Overview
 
@@ -166,11 +148,11 @@ A simplified version of the code snippet above would be the following:
 
 Clears a validation error.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorId_ `string`: The error ID to clear validation errors for.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = dispatch( validationStore );
@@ -181,11 +163,11 @@ store.clearValidationError( 'billing-first-name' );
 
 Clears multiple validation errors at once. If no error IDs are passed, all validation errors will be cleared.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errors_ `string[]` or `undefined`: The error IDs to clear validation errors for. This can be undefined, and if it is, all validation errors will be cleared.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 1. This will clear only the validation errors passed in the array.
 
@@ -209,11 +191,11 @@ store.clearValidationErrors();
 
 Sets the validation errors. The entries in _errors_ will be _added_ to the list of validation errors. Any entries that already exist in the list will be _updated_ with the new values.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errors_ `object`: The new validation errors, the keys of the object are the validation error IDs, and the values should be objects containing _message_ `string` and _hidden_ `boolean`.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = wp.data;
@@ -235,11 +217,11 @@ setValidationErrors( {
 
 Hides a validation error by setting the `hidden` property to `true`. This will _not_ clear it from the data store!
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorId_ `string`: The error ID to hide.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = wp.data;
@@ -252,11 +234,11 @@ hideValidationError( 'billing-first-name' );
 
 Shows a validation error by setting the `hidden` property to `false`.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorId_ `string`: The error ID to show.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = wp.data;
@@ -269,7 +251,7 @@ showValidationError( 'billing-first-name' );
 
 Shows all validation errors by setting the `hidden` property to `false`.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = wp.data;
@@ -282,7 +264,7 @@ showAllValidationErrors();
 
 Clears all validation errors by removing them from the store.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { clearAllValidationErrors } = dispatch( validationStore );
@@ -295,15 +277,15 @@ clearAllValidationErrors();
 
 Returns the validation error.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorId_ `string`: The error ID to get validation errors for.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The validation error which is an object containing _message_ `string` and _hidden_ `boolean`.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( validationStore );
@@ -314,15 +296,15 @@ const billingFirstNameError = store.getValidationError( 'billing-first-name' );
 
 Gets a validation error ID for use in HTML which can be used as a CSS selector, or to reference an error message. This will return the error ID prefixed with `validate-error-`, unless the validation error has `hidden` set to true, or the validation error does not exist in the store.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorId_ `string`: The error ID to get the validation error ID for.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string`: The validation error ID for use in HTML.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( validationStore );
@@ -334,11 +316,11 @@ const billingFirstNameErrorId =
 
 Returns true if validation errors occurred, and false otherwise.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: Whether validation errors occurred.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( validationStore );

@@ -1,18 +1,7 @@
 ---
 sidebar_label: Store Notices Store
 ---
-# Store Notices Store (`wc/store/store-notices`) <!-- omit in toc -->
-
-## Table of contents <!-- omit in toc -->
-
--   [Overview](#overview)
--   [Usage](#usage)
--   [Example](#example)
--   [Actions](#actions)
-    -   [registerContainer( containerContext )](#registercontainer-containercontext-)
-    -   [unregisterContainer( containerContext )](#unregistercontainer-containercontext-)
--   [Selectors](#selectors)
-    -   [getRegisteredContainers](#getregisteredcontainers)
+# Store Notices Store (`wc/store/store-notices`) 
 
 ## Overview
 
@@ -67,17 +56,17 @@ Please note that this is a simple example. In practice, you will want to trigger
 
 This action will register a new container.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _containerContext_ `string`: The context or identifier of the container to be registered.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: An action object with the following properties:
     -   _type_ `string`: The type of the action.
     -   _containerContext_ `string`: The passed _containerContext_.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```javascript
 import { storeNoticesStore } from '@woocommerce/block-data';
@@ -89,17 +78,17 @@ dispatch( storeNoticesStore ).registerContainer( 'someContainerContext' );
 
 This action will unregister an existing container.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _containerContext_ `string`: The context or identifier of the container to be unregistered.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: An action object with the following properties:
     -   _type_ `string`: The type of the action.
     -   _containerContext_ `string`: The passed _containerContext_.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 import { storeNoticesStore } from '@woocommerce/block-data';
@@ -113,11 +102,11 @@ dispatch( storeNoticesStore ).unregisterContainer( 'someContainerContext' );
 
 Returns the list of currently registered containers from the state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string[]`: An array of strings with the registered container contexts.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 import { storeNoticesStore } from '@woocommerce/block-data';

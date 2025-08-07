@@ -2,15 +2,7 @@
 sidebar_label: Query State Store
 ---
 
-# Query State Store (`wc/store/query-state`) <!-- omit in toc -->
-
-## Table of contents <!-- omit in toc -->
-
--   [Overview](#overview)
--   [Usage](#usage)
--   [Actions](#actions)
-    -   [setQueryValue( context, queryKey, value )](#setqueryvalue-context-querykey-value-)
-    -   [setValueForQueryContext( context ,value )](#setvalueforquerycontext-context-value-)
+# Query State Store (`wc/store/query-state`) 
 
 ## Overview
 
@@ -32,7 +24,7 @@ const { QUERY_STATE_STORE_KEY } = window.wc.wcBlocksData;
 
 This will set a single query-state value for a given context.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _context_ `string`: The context for the query state being stored, eg. the block name so you can keep query-state specific per block.
 -   _queryKey_ `string`: The reference for the value being stored.
@@ -42,7 +34,7 @@ This will set a single query-state value for a given context.
 
 This will set the query-state for a given context. Typically this is used to set/replace the entire query-state for a given context rather than the individual keys for the context via `setQueryValue`.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _context_ `string`: The context for the query state being stored, eg. the block name so you can keep query-state specific per block.
 -   _value_ `object`: An object of key/value pairs for the query state being attached to the context.

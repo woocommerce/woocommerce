@@ -10,31 +10,6 @@ sidebar_label: Checkout Store
 >
 > The **Checkout Store (`wc/store/checkout`)** manages and retrieves data related to the checkout process, customer IDs, order IDs, and checkout status.
 
-## Table of Contents <!-- omit in toc -->
-
--   [Overview](#overview)
--   [Usage](#usage)
--   [Selectors](#selectors)
-    -   [getCustomerId](#getcustomerid)
-    -   [getOrderId](#getorderid)
-    -   [getOrderNotes](#getordernotes)
-    -   [getRedirectUrl](#getredirecturl)
-    -   [getExtensionData](#getextensiondata)
-    -   [getCheckoutStatus](#getcheckoutstatus)
-    -   [getShouldCreateAccount](#getshouldcreateaccount)
-    -   [getUseShippingAsBilling](#getuseshippingasbilling)
-    -   [hasError](#haserror)
-    -   [hasOrder](#hasorder)
-    -   [isIdle](#isidle)
-    -   [isBeforeProcessing](#isbeforeprocessing)
-    -   [isProcessing](#isprocessing)
-    -   [isAfterProcessing](#isafterprocessing)
-    -   [isComplete](#iscomplete)
-    -   [isCalculating](#iscalculating)
-    -   [prefersCollection](#preferscollection)
--   [Actions](#actions)
-    -   [setPrefersCollection](#setpreferscollection)
-
 ## Overview
 
 The Checkout Store provides a collection of selectors to access and manage data during the checkout process. These selectors enable developers to fetch key details such as customer information, order status, and other checkout-related data.

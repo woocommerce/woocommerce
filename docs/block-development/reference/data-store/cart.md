@@ -10,55 +10,6 @@ sidebar_label: Cart store
 >
 > The **Checkout Store (`wc/store/checkout`)** manages and retrieves data related to the checkout process, customer IDs, order IDs, and checkout status.
 
-## Table of Contents
-
--   [Overview](#overview)
--   [Usage](#usage)
--   [Actions](#actions)
-    -   [setCartData](#setcartdata)
-    -   [setErrorData](#seterrordata)
-    -   [receiveCartContents](#receivecartcontents)
-    -   [receiveApplyingCoupon](#receiveapplyingcoupon)
-    -   [receiveRemovingCoupon](#receiveremovingcoupon)
-    -   [receiveCartItem](#receivecartitem)
-    -   [itemIsPendingQuantity](#itemispendingquantity)
-    -   [itemIsPendingDelete](#itemispendingdelete)
-    -   [setIsCartDataStale](#setiscartdatastale)
-    -   [updatingCustomerData](#updatingcustomerdata)
-    -   [shippingRatesBeingSelected](#shippingratesbeingselected)
-    -   [applyExtensionCartUpdate](#applyextensioncartupdate)
-    -   [applyCoupon](#applycoupon)
-    -   [removeCoupon](#removecoupon)
-    -   [addItemToCart](#additemtocart)
-    -   [removeItemFromCart](#removeitemfromcart)
-    -   [changeCartItemQuantity](#changecartitemquantity)
-    -   [selectShippingRate](#selectshippingrate)
-    -   [setBillingAddress](#setbillingaddress)
-    -   [setShippingAddress](#setshippingaddress)
-    -   [updateCustomerData](#updatecustomerdata)
--   [Selectors](#selectors)
-    -   [getCartData](#getcartdata)
-    -   [getCustomerData](#getcustomerdata)
-    -   [getShippingRates](#getshippingrates)
-    -   [getNeedsShipping](#getneedsshipping)
-    -   [getHasCalculatedShipping](#gethascalculatedshipping)
-    -   [getCartTotals](#getcarttotals)
-    -   [getCartMeta](#getcartmeta)
-    -   [getCartErrors](#getcarterrors)
-    -   [isApplyingCoupon](#isapplyingcoupon)
-    -   [isCartDataStale](#iscartdatastale)
-    -   [getCouponBeingApplied](#getcouponbeingapplied)
-    -   [isRemovingCoupon](#isremovingcoupon)
-    -   [getCouponBeingRemoved](#getcouponbeingremoved)
-    -   [getCartItem( cartItemKey )](#getcartitem-cartitemkey-)
-    -   [isItemPendingQuantity( cartItemKey )](#isitempendingquantity-cartitemkey-)
-    -   [isItemPendingDelete( cartItemKey )](#isitempendingdelete-cartitemkey-)
-    -   [isCustomerDataUpdating](#iscustomerdataupdating)
-    -   [isAddressFieldsForShippingRatesUpdating](#isaddressfieldsforshippingratesupdating)
-    -   [hasPendingItemsOperations](#haspendingitemsoperations)
-    -   [isShippingRateBeingSelected](#isshippingratebeingselected)
-    -   [getItemsPendingQuantityUpdate](#getitemspendingquantityupdate)
-    -   [getItemsPendingDelete](#getitemspendingdelete)
 
 ## Overview
 
@@ -78,7 +29,7 @@ const { cartStore } = window.wc.wcBlocksData;
 
 This action is used to set the cart data in the store.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartData_ `object`: The current cart data with the following keys:
     -   _coupons_ `array`: The coupon items in the cart.
@@ -98,7 +49,7 @@ This action is used to set the cart data in the store.
     -   _paymentRequirements_ `object`: The payment requirements for the cart.
     -   _extensions_ `object`: The extensions data.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -109,7 +60,7 @@ dispatch( setCartData( newCartData ) );
 
 This action is used to set the error data in the store.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _errorData_ `object`: The error data that needs to be set in the store.
     -   _code_ `string`: The error code.
@@ -136,7 +87,7 @@ This action is used to set the error data in the store.
             -   _paymentRequirements_ `object`: The payment requirements for the cart.
             -   _extensions_ `object`: The extensions data.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -147,7 +98,7 @@ dispatch( setErrorData( newErrorData ) );
 
 This action returns an action object used in updating the store with the provided cart. It omits the customer addresses so that only updates to cart items and totals are received.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartContents_ `object`: A cart contents API response.
     -   _coupons_ `array`: The coupon items in the cart.
@@ -167,7 +118,7 @@ This action returns an action object used in updating the store with the provide
     -   _paymentRequirements_ `object`: The payment requirements for the cart.
     -   _extensions_ `object`: The extensions data.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
@@ -187,7 +138,7 @@ This action returns an action object used in updating the store with the provide
         -   _paymentRequirements_ `object`: The payment requirements for the cart.
         -   _extensions_ `object`: The extensions data.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -198,17 +149,17 @@ dispatch( receiveCartContents( newCartContents ) );
 
 This action returns an action object used to track when a coupon is applying.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _couponCode_ `string`: The code of the coupon being applied.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with following keys:
     -   _type_ `string`: The action type.
     -   _couponCode_ `string`: The code of the coupon being applied.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -219,17 +170,17 @@ dispatch( receiveApplyingCoupon( couponCode ) );
 
 This action returns an action object used to track when a coupon is removing.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _couponCode_ `string`: The code of the coupon being removed.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _couponCode_ `string`: The code of the coupon being removed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -240,18 +191,18 @@ dispatch( receiveRemovingCoupon( couponCode ) );
 
 This action is used to update a specific item in the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartResponseItem_ `object`: Cart response object with the following keys:
     -   _cartItem_ `object`: The cart item (see `getCartItem` selector).
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _cartItem_ `object`: The cart item (see `getCartItem` selector).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -262,19 +213,19 @@ dispatch( receiveCartItem( CartResponseItem ) );
 
 This action returns an action object to indicate if the specified cart item quantity is being updated.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: The key of the cart item.
 -   _isPending_ `boolean` (default: `true`): Whether the cart item quantity is being updated.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with following keys:
     -   _type_ `string`: The action type.
     -   _cartItemKey_ `string`: The key of the cart item.
     -   _isPending_ `boolean`: Whether the cart item quantity is being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -285,19 +236,19 @@ dispatch( itemIsPendingQuantity( cartItemKey, isPending ) );
 
 This action returns an action object to indicate if the specified cart item is being deleted.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: The key of the cart item.
 -   _isPending_ `boolean` (default: `true`): Whether the cart item is being deleted.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _cartItemKey_ `string`: The key of the cart item.
     -   _isPending_ `boolean`: Whether the cart item is being deleted.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -308,17 +259,17 @@ dispatch( itemIsPendingDelete( cartItemKey, isPending ) );
 
 This action returns an action object to indicate if the cart data is stale.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _isCartDataStale_ `boolean` (default: `true`): Flag to mark cart data as stale; true if `lastCartUpdate` timestamp is newer than the one in wcSettings.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _isCartDataStale_ `boolean`: Flag to mark cart data as stale; true if `lastCartUpdate` timestamp is newer than the one in wcSettings.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -329,17 +280,17 @@ dispatch( setIsCartDataStale( isCartDataStale ) );
 
 This action returns an action object to indicate if the customer data (billing and/or shipping address) is being updated.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _isResolving_ `boolean`: Whether the customer data is being updated.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _isResolving_ `boolean`: Whether the customer data is being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -350,17 +301,17 @@ dispatch( updatingCustomerData( isResolving ) );
 
 This action returns an action object to indicate if the shipping rates are being selected.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _isResolving_ `boolean`: True if shipping rate is being selected.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The action object with the following keys:
     -   _type_ `string`: The action type.
     -   _isResolving_ `boolean`: True if shipping rate is being selected.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -371,7 +322,7 @@ dispatch( shippingRatesBeingSelected( isResolving ) );
 
 This action is used to send POSTs request to the /cart/extensions endpoint with the data supplied by the extension.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _args_ `object`: The arguments for the request with the following keys:
     -   _extensionId_ `string`: The extension ID.
@@ -380,7 +331,7 @@ This action is used to send POSTs request to the /cart/extensions endpoint with 
         -   _value_ `string`: The value of the extension.
     -   _overwriteDirtyCustomerData_ `boolean`: Whether to overwrite the customer data in the client with the data returned from the server, even if it is dirty (i.e. it hasn't been pushed to the server yet).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -391,11 +342,11 @@ dispatch( applyExtensionCartUpdate( args ) );
 
 This action is used to apply a coupon to the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _couponCode_ `string`: The code of the coupon to apply.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -406,11 +357,11 @@ dispatch( applyCoupon( couponCode ) );
 
 This action is used to remove a coupon from the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _couponCode_ `string`: The code of the coupon to remove.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -421,12 +372,12 @@ dispatch( removeCoupon( couponCode ) );
 
 This action is used to add an item to the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _productId_ `number`: Product ID to add to cart.
 -   _quantity_ `number` (default: `1`): The quantity of the product to add.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -437,11 +388,11 @@ dispatch( addItemToCart( productId, quantity ) );
 
 This action is used to remove an item from the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: Cart item being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -452,12 +403,12 @@ dispatch( removeItemFromCart( cartItemKey ) );
 
 This action is used to change the quantity of an item in the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: Cart item being updated.
 -   _quantity_ `number`: Quantity of the item.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -468,12 +419,12 @@ dispatch( changeCartItemQuantity( cartItemKey, quantity ) );
 
 This action is used to select a shipping rate for the cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _rateId_ `string`: The ID of the shipping rate to select.
 -   _packageId_ `number | string` (default: `null`): The key of the packages that will select within the shipping rate.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -484,7 +435,7 @@ dispatch( selectShippingRate( rateId, packageId ) );
 
 This action is used to set the billing address for the cart locally, as opposed to updateCustomerData which sends it to the server.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _billingAddress_ `object`: Billing address that needs to be set. The keys are as following:
     -   _first_name_ `string`: The first name.
@@ -497,7 +448,7 @@ This action is used to set the billing address for the cart locally, as opposed 
     -   _postcode_ `string`: The postcode.
     -   _country_ `string`: The country name.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -508,7 +459,7 @@ dispatch( setBillingAddress( billingAddress ) );
 
 This action is used to set the shipping address for the cart locally, as opposed to updateCustomerData which sends it to the server.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _shippingAddress_ `object`: Shipping address that needs to be set. The keys are as following:
     -   _first_name_ `string`: The first name.
@@ -521,7 +472,7 @@ This action is used to set the shipping address for the cart locally, as opposed
     -   _postcode_ `string`: The postcode.
     -   _country_ `string`: The country name.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -532,7 +483,7 @@ dispatch( setShippingAddress( shippingAddress ) );
 
 This action is used to updates the shipping and/or billing address for the customer and returns an updated cart.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _customerData_ `object`: Customer billing and shipping address. The keys are as following:
     -   _shippingAddress_ `object`: The shipping address with the following keys:
@@ -548,7 +499,7 @@ This action is used to updates the shipping and/or billing address for the custo
     -   _billingAddress_ `object`: The billing address (same keys as shipping address).
 -   `editing: boolean` (default: `true`): If the address is being edited, we don't update the customer data in the store from the response.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( cartStore );
@@ -561,7 +512,7 @@ dispatch( updateCustomerData( customerData, editing ) );
 
 Returns the Cart data from the state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The current cart data with the following keys:
     -   _coupons_ `array`: The coupon items in the cart.
@@ -581,7 +532,7 @@ Returns the Cart data from the state.
     -   _paymentRequirements_ `object`: The payment requirements for the cart.
     -   _extensions_ `object`: The extensions data.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -592,7 +543,7 @@ const cartData = store.getCartData();
 
 Returns the shipping and billing address from the state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The current shipping and billing address with the following keys:
     -   _shippingAddress_ `object`: The shipping address with the following keys:
@@ -607,7 +558,7 @@ Returns the shipping and billing address from the state.
         -   _country_ `string`: The country name.
     -   _billingAddress_ `object`: The billing address (same keys as shipping address).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -618,7 +569,7 @@ const customerData = store.getCustomerData();
 
 Returns the shipping rates from the state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `array`: The shipping rates. They keys are as following:
     -   _id_ `string`: The shipping rate ID.
@@ -631,7 +582,7 @@ Returns the shipping rates from the state.
         -   _value_ `string`: The shipping rate meta data value.
     -   _taxes_ `array`: The shipping rate taxes.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -642,11 +593,11 @@ const shippingRates = store.getShippingRates();
 
 Queries whether the cart needs shipping.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the cart needs shipping.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -657,11 +608,11 @@ const needsShipping = store.getNeedsShipping();
 
 Queries whether the cart shipping has been calculated.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the shipping has been calculated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -672,7 +623,7 @@ const hasCalculatedShipping = store.getHasCalculatedShipping();
 
 Returns the cart totals from state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The current cart totals with the following keys:
     -   _total_items_ `string`: The sum total of items in the cart without discount, tax or shipping.
@@ -694,7 +645,7 @@ Returns the cart totals from state.
     -   _currency_prefix_ `string`: The currency prefix for the cart.
     -   _currency_suffix_ `string`: The currency suffix for the cart.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -705,7 +656,7 @@ const cartTotals = store.getCartTotals();
 
 Returns the cart meta from state.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The current cart meta with the following keys:
     -   _updatingCustomerData_ `boolean`: If the customer data (billing and/or shipping address) is being updated.
@@ -714,7 +665,7 @@ Returns the cart meta from state.
     -   _applyingCoupon_ `string`: The coupon code being applied.
     -   _removingCoupon_ `string`: The coupon code being removed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -725,14 +676,14 @@ const cartMeta = store.getCartMeta();
 
 Returns the cart errors from state if cart receives customer facing errors from the API.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `array`: The cart errors with the following keys:
     -   _code_ `string`: The error code.
     -   _message_ `string`: The error message.
     -   _data_ `object`: API response data.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -743,11 +694,11 @@ const cartErrors = store.getCartErrors();
 
 Queries whether a coupon is being applied.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if a coupon is being applied.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -758,11 +709,11 @@ const isApplyingCoupon = store.isApplyingCoupon();
 
 Queries whether the cart data is stale.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the cart data is stale.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -773,11 +724,11 @@ const isCartDataStale = store.isCartDataStale();
 
 Returns the coupon code being applied.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string`: The coupon code being applied.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -788,11 +739,11 @@ const couponBeingApplied = store.getCouponBeingApplied();
 
 Queries whether a coupon is being removed.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if a coupon is being removed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -803,11 +754,11 @@ const isRemovingCoupon = store.isRemovingCoupon();
 
 Returns the coupon code being removed.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string`: The coupon code being removed.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -818,11 +769,11 @@ const couponBeingRemoved = store.getCouponBeingRemoved();
 
 Returns a cart item from the state.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: The cart item key.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The cart item with the following keys:
     -   _key_ `string`: The cart item key.
@@ -866,7 +817,7 @@ Returns a cart item from the state.
         -   _line_total_ `string`: The cart item line total.
         -   _line_total_tax_ `string`: The cart item line total tax.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -877,15 +828,15 @@ const cartItem = store.getCartItem( cartItemKey );
 
 Queries whether a cart item is pending quantity.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: The cart item key.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the cart item is pending quantity.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -896,15 +847,15 @@ const isItemPendingQuantity = store.isItemPendingQuantity( cartItemKey );
 
 Queries whether a cart item is pending delete.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _cartItemKey_ `string`: The cart item key.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the cart item is pending delete.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -915,11 +866,11 @@ const isItemPendingDelete = store.isItemPendingDelete( cartItemKey );
 
 Queries whether the customer data is being updated.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if the customer data is being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -931,11 +882,11 @@ const isCustomerDataUpdating = store.isCustomerDataUpdating();
 Queries whether shipping address fields impacting the shipping rates are being updated.
 By default, Store API considers the following shipping fields as essential for shipping rate calculations: `state`, `country`, `postcode`, and `city`.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if shipping address fields impacting the shipping rates are being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -946,11 +897,11 @@ const isAddressFieldsForShippingRatesUpdating = store.isAddressFieldsForShipping
 
 Queries whether there are any pending cart operations (add, quantity update, or delete items).
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if there are pending cart operations (adding products, updating quantities, or deleting items).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -961,11 +912,11 @@ const hasPendingItemsOperations = store.hasPendingItemsOperations();
 
 Queries whether a shipping rate is being selected.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `boolean`: True if a shipping rate is being selected.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -976,11 +927,11 @@ const isShippingRateBeingSelected = store.isShippingRateBeingSelected();
 
 Retrieves the item keys for items whose quantity is currently being updated.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string[]`: An array with the item keys for items whose quantity is currently being updated.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );
@@ -991,11 +942,11 @@ const itemsPendingQuantityUpdate = store.getItemsPendingQuantityUpdate();
 
 Retrieves the item keys for items that are currently being deleted.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `string[]`: An array with the item keys for items that are currently being deleted.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( cartStore );

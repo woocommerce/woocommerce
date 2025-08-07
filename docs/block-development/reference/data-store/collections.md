@@ -2,23 +2,7 @@
 sidebar_label: Collections Store
 ---
 
-# Collections Store (`wc/store/collections`) <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Overview](#overview)
--   [Usage](#usage)
--   [Actions](#actions)
-    -   [receiveCollection( namespace, resourceName, queryString, ids = \[\], items = \[\], replace = false )](#receivecollection-namespace-resourcename-querystring-ids---items---replace--false-)
-    -   [receiveCollectionError](#receivecollectionerror)
-    -   [receiveLastModified](#receivelastmodified)
--   [Selectors](#selectors)
-   	-   [getFromState](#getfromstate)
-   	-   [getCollection](#getcollection)
-   	-   [getCollectionHeader](#getcollectionheader)
-   	-   [getCollectionHeaders](#getcollectionheaders)
-   	-   [getCollectionError](#getcollectionerror)
-   	-   [getCollectionLastModified](#getcollectionlastmodified)
+# Collections Store (`wc/store/collections`) 
 
 ## Overview
 
@@ -40,7 +24,7 @@ This will return an action object for the given arguments used in dispatching th
 
 > ⚠️ You should rarely have to dispatch this action directly as it is used by the resolver for the `getCollection` selector.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
 -   _resourceName_ `string`: The resource name for the collection (eg. `products/attributes`.
@@ -49,7 +33,7 @@ This will return an action object for the given arguments used in dispatching th
 -   _response_ `Object`: An object containing a `items` property with the collection items from the response (array), and a `headers` property that is matches the `window.Headers` interface containing the headers from the response.
 -   _replace_ `boolean`: Whether or not to replace any existing items in the store for the given indexes (namespace, resourceName, queryString) if there are already values in the store.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( COLLECTIONS_STORE_KEY );
@@ -60,7 +44,7 @@ dispatch( receiveCollection( namespace, resourceName, queryString, ids, response
 
 This will return an action object for the given arguments used in dispatching an error to the store.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
 -   _resourceName_ `string`: The resource name for the collection, eg. `products/attributes`.
@@ -74,7 +58,7 @@ This will return an action object for the given arguments used in dispatching an
       		-   _params_ `object`: The parameters for the error.
       		-   _headers_ `object`: The headers for the error.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( COLLECTIONS_STORE_KEY );
@@ -85,11 +69,11 @@ dispatch( receiveCollectionError( namespace, resourceName, queryString, ids, err
 
 This will return an action object for the given arguments used in dispatching the last modified date to the store.
 
-#### _Parameters_ <!-- omit in toc -->
+#### _Parameters_ 
 
 -   _timestamp_ `number`: The timestamp of the last modified date.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const { dispatch } = useDispatch( COLLECTIONS_STORE_KEY );
@@ -102,7 +86,7 @@ dispatch( receiveLastModified( timestamp ) );
 
 This selector will return the state from the collections store.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`: The state from the collections store with the following properties:
    	- _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
@@ -115,7 +99,7 @@ or
 
 - `array` | `null` | `undefined`: Returns a fallback value (specified as a parameter) when the collection lacks matching headers for the provided arguments.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( COLLECTIONS_STORE_KEY );
@@ -126,7 +110,7 @@ const state = store.getFromState( state, namespace, resourceName, queryString, i
 
 This selector will return the collection for the given arguments. It has a sibling resolver, so if the selector has never been resolved, the resolver will make a request to the server for the collection and dispatch results to the store.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
 
@@ -134,7 +118,7 @@ This selector will return the collection for the given arguments. It has a sibli
 
 This selector will return a header from the collection response using the given arguments. It has a sibling resolver that will resolve `getCollection` using the arguments if that has never been resolved.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `undefined`: If the collection has headers but not a matching header for the given `header` argument, then `undefined` will be returned.
 
@@ -155,11 +139,11 @@ or
 
 This selector will return the headers for a collection.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( COLLECTIONS_STORE_KEY );
@@ -170,11 +154,11 @@ const headers = store.getCollectionHeaders( state, namespace, resourceName, quer
 
 This selector will return any error that occurred while fetching a collection.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `object`:  Returns the `getFromState` object (see [`getFromState`](#getfromstate)).
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( COLLECTIONS_STORE_KEY );
@@ -185,11 +169,11 @@ const error = store.getCollectionError( state, namespace, resourceName, queryStr
 
 This selector will return the last modified date for a collection.
 
-#### _Returns_ <!-- omit in toc -->
+#### _Returns_ 
 
 -   `number`: The last modified date for the collection, or `0` if there was no last modified date.
 
-#### _Example_ <!-- omit in toc -->
+#### _Example_ 
 
 ```js
 const store = select( COLLECTIONS_STORE_KEY );
