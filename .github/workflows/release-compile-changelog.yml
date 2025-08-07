@@ -162,7 +162,9 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "Generating changelog for version: $VERSION"
 
-          # Normalize the version by removing .0 patch if present, as the changelog command does not support it
+          # Normalize version for use with changelog command.
+          VERSION=$(echo "$VERSION" | grep -oP '\d+\.\d+\.\d+')
+
           if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
             VERSION=${VERSION%.0}
           fi
