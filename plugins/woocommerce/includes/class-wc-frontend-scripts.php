@@ -469,7 +469,9 @@ class WC_Frontend_Scripts {
 		}
 
 		// Global frontend scripts.
-		self::enqueue_script( 'woocommerce' );
+		if ( ! wp_is_block_theme() ) {
+			self::enqueue_script( 'woocommerce' );
+		}
 
 		// CSS Styles.
 		$enqueue_styles = self::get_styles();
