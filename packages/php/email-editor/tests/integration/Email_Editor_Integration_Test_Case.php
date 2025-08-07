@@ -219,6 +219,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Settings_Controller::class ),
 					$container->get( Theme_Controller::class ),
 					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);

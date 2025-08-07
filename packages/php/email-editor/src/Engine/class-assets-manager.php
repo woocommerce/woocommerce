@@ -8,6 +8,8 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
+
 /**
  * Class responsible for managing email editor assets.
  */
@@ -38,14 +40,21 @@ class Assets_Manager {
 	 *
 	 * @var string
 	 */
-	private string $assets_path;
+	private string $assets_path = '';
 
 	/**
 	 * Email editor assets URL.
 	 *
 	 * @var string
 	 */
-	private string $assets_url;
+	private string $assets_url = '';
+
+	/**
+	 * Logger instance.
+	 *
+	 * @var Email_Editor_Logger
+	 */
+	private Email_Editor_Logger $logger;
 
 	/**
 	 * Assets Manager constructor with all dependencies.
@@ -53,15 +62,18 @@ class Assets_Manager {
 	 * @param Settings_Controller $settings_controller Settings controller instance.
 	 * @param Theme_Controller    $theme_controller Theme controller instance.
 	 * @param User_Theme          $user_theme User theme instance.
+	 * @param Email_Editor_Logger $logger Email editor logger instance.
 	 */
 	public function __construct(
 		Settings_Controller $settings_controller,
 		Theme_Controller $theme_controller,
-		User_Theme $user_theme
+		User_Theme $user_theme,
+		Email_Editor_Logger $logger
 	) {
 		$this->settings_controller = $settings_controller;
 		$this->theme_controller    = $theme_controller;
 		$this->user_theme          = $user_theme;
+		$this->logger              = $logger;
 	}
 
 	/**
@@ -135,24 +147,34 @@ class Assets_Manager {
 
 		// Email editor rich text JS - Because the Personalization Tags depend on Gutenberg 19.8.0 and higher
 		// the following code replaces used Rich Text for the version containing the necessary changes.
-		$rich_text_assets_params = require $email_editor_assets_path . 'assets/rich-text.asset.php';
-		wp_deregister_script( 'wp-rich-text' );
-		wp_enqueue_script(
-			'wp-rich-text',
-			$email_editor_assets_url . 'assets/rich-text.js',
-			$rich_text_assets_params['dependencies'],
-			$rich_text_assets_params['version'],
-			true
-		);
+		$rich_text_assets_file = $email_editor_assets_path . 'assets/rich-text.asset.php';
+		if ( ! file_exists( $rich_text_assets_file ) ) {
+			$this->logger->error( 'Rich Text assets file does not exist.', array( 'path' => $rich_text_assets_file ) );
+		} else {
+			$rich_text_assets = require $rich_text_assets_file;
+			wp_deregister_script( 'wp-rich-text' );
+			wp_enqueue_script(
+				'wp-rich-text',
+				$email_editor_assets_url . 'assets/rich-text.js',
+				$rich_text_assets['dependencies'],
+				$rich_text_assets['version'],
+				true
+			);
+		}
 		// End of replacing Rich Text package.
 
-		$assets_params = require $email_editor_assets_path . 'style.asset.php';
-		wp_enqueue_style(
-			'wc-admin-email-editor-integration',
-			$email_editor_assets_url . 'style.css',
-			array(),
-			$assets_params['version']
-		);
+		$assets_file = $email_editor_assets_path . 'style.asset.php';
+		if ( ! file_exists( $assets_file ) ) {
+			$this->logger->error( 'Email editor assets file does not exist.', array( 'path' => $assets_file ) );
+		} else {
+			$assets_file = require $assets_file;
+			wp_enqueue_style(
+				'wc-admin-email-editor-integration',
+				$email_editor_assets_url . 'style.css',
+				array(),
+				$assets_file['version']
+			);
+		}
 
 		// The get_block_categories() function expects a WP_Post or WP_Block_Editor_Context object.
 		// Therefore, we need to create an instance of WP_Block_Editor_Context when $edited_item is an instance of WP_Block_Template.

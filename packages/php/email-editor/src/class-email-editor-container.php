@@ -172,6 +172,7 @@ class Email_Editor_Container {
 					$container->get( Settings_Controller::class ),
 					$container->get( Theme_Controller::class ),
 					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);
