@@ -50,7 +50,12 @@ class WC_Gateway_Paypal_Helper {
 			return false;
 		}
 
-		// TODO: We need the merchant to be onboarded to Transact to be able to use the proxy.
+		// This is a hard requirement to be able to use the proxy.
+		$settings              = get_option( 'woocommerce_paypal_settings', array() );
+		$is_transact_onboarded = isset( $settings['is_transact_onboarded'] ) && 'yes' === $settings['is_transact_onboarded'];
+		if ( ! $is_transact_onboarded ) {
+			return false;
+		}
 
 		return true;
 	}
