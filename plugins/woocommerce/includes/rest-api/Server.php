@@ -42,6 +42,11 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
+				// Include the product export controller if it's being loaded
+				if ( 'WC_REST_Product_Export_Controller' === $controller_class && ! class_exists( $controller_class ) ) {
+					include_once WC_ABSPATH . 'includes/rest-api/Controllers/Version3/class-wc-rest-product-export-controller.php';
+				}
+				
 				$this->controllers[ $namespace ][ $controller_name ] =
 					$container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
@@ -168,6 +173,7 @@ class Server {
 			'product-shipping-classes' => 'WC_REST_Product_Shipping_Classes_Controller',
 			'product-tags'             => 'WC_REST_Product_Tags_Controller',
 			'products'                 => 'WC_REST_Products_Controller',
+			'product-export'           => 'WC_REST_Product_Export_Controller',
 			'product-variations'       => 'WC_REST_Product_Variations_Controller',
 			'refunds'                  => 'WC_REST_Refunds_Controller',
 			'reports-sales'            => 'WC_REST_Report_Sales_Controller',
