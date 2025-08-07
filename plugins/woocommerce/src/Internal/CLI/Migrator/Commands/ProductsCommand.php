@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\CLI\Migrator\Commands;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\ProductsController;
 use WP_CLI;
 
 /**
@@ -28,16 +29,25 @@ final class ProductsCommand {
 	private PlatformRegistry $platform_registry;
 
 	/**
+	 * The products controller.
+	 *
+	 * @var ProductsController
+	 */
+	private ProductsController $products_controller;
+
+	/**
 	 * Initialize the command with its dependencies.
 	 *
-	 * @param CredentialManager $credential_manager The credential manager.
-	 * @param PlatformRegistry  $platform_registry  The platform registry.
+	 * @param CredentialManager  $credential_manager The credential manager.
+	 * @param PlatformRegistry   $platform_registry  The platform registry.
+	 * @param ProductsController $products_controller The products controller.
 	 *
 	 * @internal
 	 */
-	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
-		$this->credential_manager = $credential_manager;
-		$this->platform_registry  = $platform_registry;
+	final public function init( CredentialManager $credential_manager, PlatformRegistry $platform_registry, ProductsController $products_controller ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
+		$this->credential_manager  = $credential_manager;
+		$this->platform_registry   = $platform_registry;
+		$this->products_controller = $products_controller;
 	}
 	/**
 	 * The main execution logic for the command.
@@ -63,12 +73,32 @@ final class ProductsCommand {
 	 * [--status=<status>]
 	 * : Filter products by status (active, archived, draft).
 	 *
+	 * [--batch-size=<size>]
+	 * : Number of products to process per batch (default: 20, max: 250).
+	 *
+	 * [--fields=<fields>]
+	 * : Comma-separated list of fields to migrate.
+	 *
+	 * [--exclude-fields=<fields>]
+	 * : Comma-separated list of fields to exclude from migration.
+	 *
+	 * [--resume]
+	 * : Resume from previous migration session without prompting.
+	 *
+	 * [--skip-existing]
+	 * : Skip products that already exist in WooCommerce.
+	 *
+	 * [--dry-run]
+	 * : Perform a dry run without creating products.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc migrate products --count
 	 *     wp wc migrate products --count --status=active
 	 *     wp wc migrate products --fetch --limit=5
 	 *     wp wc migrate products --fetch --limit=10 --after=cursor123
+	 *     wp wc migrate products --limit=100 --batch-size=25
+	 *     wp wc migrate products --fields=name,price,sku --resume
 	 *
 	 * @param array $args       The positional arguments.
 	 * @param array $assoc_args The associative arguments.
@@ -106,9 +136,8 @@ final class ProductsCommand {
 			return;
 		}
 
-		// The logic will be handled by the Products_Controller.
-		// For now, we just show a success message if credentials exist.
-		WP_CLI::success( 'Credentials found. Proceeding with migration...' );
+		// Delegate actual migration logic to ProductsController.
+		$this->products_controller->migrate_products( $assoc_args );
 	}
 
 	/**
