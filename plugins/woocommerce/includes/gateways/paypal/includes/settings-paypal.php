@@ -11,13 +11,6 @@ use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-// Include the helper if the class is not already loaded.
-if ( ! class_exists( 'WC_Gateway_PayPal_Helper' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
-}
-
-$should_use_orders_v2 = WC_Gateway_Paypal_Helper::should_use_orders_v2();
-
 $settings = array(
 	'enabled'          => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),
@@ -107,95 +100,104 @@ $settings = array(
 	),
 );
 
-if ( ! $should_use_orders_v2 ) {
-	$legacy_settings = array(
-		'image_url'             => array(
-			'title'       => __( 'Image url', 'woocommerce' ),
-			'type'        => 'text',
-			'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'ipn_notification'      => array(
-			'title'       => __( 'IPN email notifications', 'woocommerce' ),
-			'type'        => 'checkbox',
-			'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
-			'default'     => 'yes',
-			'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
-		),
-		'receiver_email'        => array(
-			'title'       => __( 'Receiver email', 'woocommerce' ),
-			'type'        => 'email',
-			'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => 'you@youremail.com',
-		),
-		'identity_token'        => array(
-			'title'       => __( 'PayPal identity token', 'woocommerce' ),
-			'type'        => 'text',
-			'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => '',
-		),
-		'api_details'           => array(
-			'title'       => __( 'API credentials', 'woocommerce' ),
-			'type'        => 'title',
-			/* translators: %s: URL */
-			'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#create-an-api-signature' ),
-		),
-		'api_username'          => array(
-			'title'       => __( 'Live API username', 'woocommerce' ),
-			'type'        => 'text',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'api_password'          => array(
-			'title'       => __( 'Live API password', 'woocommerce' ),
-			'type'        => 'password',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'api_signature'         => array(
-			'title'       => __( 'Live API signature', 'woocommerce' ),
-			'type'        => 'password',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'sandbox_api_username'  => array(
-			'title'       => __( 'Sandbox API username', 'woocommerce' ),
-			'type'        => 'text',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'sandbox_api_password'  => array(
-			'title'       => __( 'Sandbox API password', 'woocommerce' ),
-			'type'        => 'password',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-		'sandbox_api_signature' => array(
-			'title'       => __( 'Sandbox API signature', 'woocommerce' ),
-			'type'        => 'password',
-			'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
-			'default'     => '',
-			'desc_tip'    => true,
-			'placeholder' => __( 'Optional', 'woocommerce' ),
-		),
-	);
-	$settings        = array_merge( $settings, $legacy_settings );
+
+$legacy_settings = array(
+	'image_url'             => array(
+		'title'       => __( 'Image url', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Optionally enter the URL to a 150x50px image displayed as your logo in the upper left corner of the PayPal checkout pages.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'ipn_notification'      => array(
+		'title'       => __( 'IPN email notifications', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
+		'default'     => 'yes',
+		'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
+	),
+	'receiver_email'        => array(
+		'title'       => __( 'Receiver email', 'woocommerce' ),
+		'type'        => 'email',
+		'description' => __( 'If your main PayPal email differs from the PayPal email entered above, input your main receiver email for your PayPal account here. This is used to validate IPN requests.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => 'you@youremail.com',
+	),
+	'identity_token'        => array(
+		'title'       => __( 'PayPal identity token', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Optionally enable "Payment Data Transfer" (Profile > Profile and Settings > My Selling Tools > Website Preferences) and then copy your identity token here. This will allow payments to be verified without the need for PayPal IPN.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => '',
+	),
+	'api_details'           => array(
+		'title'       => __( 'API credentials', 'woocommerce' ),
+		'type'        => 'title',
+		/* translators: %s: URL */
+		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#create-an-api-signature' ),
+	),
+	'api_username'          => array(
+		'title'       => __( 'Live API username', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'api_password'          => array(
+		'title'       => __( 'Live API password', 'woocommerce' ),
+		'type'        => 'password',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'api_signature'         => array(
+		'title'       => __( 'Live API signature', 'woocommerce' ),
+		'type'        => 'password',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'sandbox_api_username'  => array(
+		'title'       => __( 'Sandbox API username', 'woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'sandbox_api_password'  => array(
+		'title'       => __( 'Sandbox API password', 'woocommerce' ),
+		'type'        => 'password',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+	'sandbox_api_signature' => array(
+		'title'       => __( 'Sandbox API signature', 'woocommerce' ),
+		'type'        => 'password',
+		'description' => __( 'Get your API credentials from PayPal.', 'woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+		'placeholder' => __( 'Optional', 'woocommerce' ),
+	),
+);
+
+/**
+ * Filters whether to show legacy settings.
+ *
+ * @param bool $show_legacy_settings Whether to show legacy settings.
+ * @since 10.2.0
+ */
+if ( apply_filters( 'woocommerce_paypal_show_legacy_settings', true ) ) {
+	$settings = array_merge( $settings, $legacy_settings );
 }
+
 
 return $settings;

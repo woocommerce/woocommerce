@@ -17,49 +17,6 @@ use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
  * Helper for PayPal gateway.
  */
 class WC_Gateway_Paypal_Helper {
-
-	/**
-	 * Check if the gateway should use Orders v2 API.
-	 *
-	 * @return bool
-	 */
-	public static function should_use_orders_v2() {
-		/**
-		 * Filters whether the gateway should use Orders v2 API.
-		 *
-		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
-		 *
-		 * @since 10.1.0
-		 */
-		$use_orders_v2 = apply_filters(
-			'woocommerce_paypal_use_orders_v2',
-			self::is_orders_v2_migration_eligible() && self::is_tos_accepted()
-		);
-
-		// If the conditions are met, but there is an override to not use Orders v2,
-		// respect the override.
-		if ( ! $use_orders_v2 ) {
-			return false;
-		}
-
-		// This is a hard requirement, as we need to be able to send authenticated requests to the proxy.
-		$jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
-		$is_connected               = $jetpack_connection_manager->is_connected();
-
-		if ( ! $is_connected ) {
-			return false;
-		}
-
-		// This is a hard requirement to be able to use the proxy.
-		$settings              = get_option( 'woocommerce_paypal_settings', array() );
-		$is_transact_onboarded = isset( $settings['is_transact_onboarded'] ) && 'yes' === $settings['is_transact_onboarded'];
-		if ( ! $is_transact_onboarded ) {
-			return false;
-		}
-
-		return true;
-	}
-
 	/**
 	 * Check if the merchant is eligible for migration from WPS to PPCP.
 	 *

@@ -63,13 +63,6 @@ class WC_Gateway_Paypal_Request {
 	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
 
 	/**
-	 * Transact provider type, for provider onboarding.
-	 *
-	 * @var string
-	 */
-	private const TRANSACT_PROVIDER_TYPE = 'paypal_standard';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param WC_Gateway_Paypal $gateway Paypal gateway object.
@@ -304,87 +297,6 @@ class WC_Gateway_Paypal_Request {
 			$order->update_meta_data( '_paypal_status', strtolower( $response_data['status'] ) );
 			$order->save();
 		}
-	}
-
-	/**
-	 * Onboard the merchant with the Transact platform.
-	 *
-	 * @return bool True if onboarding was successful, false otherwise.
-	 */
-	public function onboard_transact_merchant() {
-		$site_id      = \Jetpack_Options::get_option( 'id' );
-		$request_body = array(
-			'test_mode' => $this->gateway->testmode,
-			// TODO: Do we need to pass this? If yes, do we need to handle scenario where the store changes domain?
-			'store_url' => get_site_url(),
-			// TODO: Merchant account creation requires a statement descriptor, but we are not using it anywhere.
-			'settings'  => array(
-				'statement_descriptor' => get_bloginfo( 'name' ),
-			),
-			// TODO: Is this the best way to pass the PayPal account email?
-			'email'     => $this->gateway->get_option( 'email' ),
-		);
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
-			sprintf( '/sites/%d/transact/account', $site_id ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'POST',
-				'timeout' => 60,
-			),
-			wp_json_encode( $request_body ),
-			'wpcom'
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return false;
-		}
-
-		// TODO: Do we want to save any of the response data?
-		$response_data = json_decode( $response['body'], true );
-		if ( empty( $response_data['public_id'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Onboard the provider with the Transact platform.
-	 *
-	 * @return bool True if onboarding was successful, false otherwise.
-	 */
-	public function onboard_transact_provider() {
-		$site_id      = \Jetpack_Options::get_option( 'id' );
-		$request_body = array(
-			'test_mode'     => $this->gateway->testmode,
-			'provider_type' => self::TRANSACT_PROVIDER_TYPE,
-		);
-		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
-			sprintf( '/sites/%d/transact/account/%s/onboard', $site_id, self::TRANSACT_PROVIDER_TYPE ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'POST',
-				'timeout' => 60,
-			),
-			wp_json_encode( $request_body ),
-			'wpcom'
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
