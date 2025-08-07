@@ -33,6 +33,9 @@ class BlockTemplatesController {
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
 	}
 
+	/**
+	 * Dequeue legacy scripts that have no usage with block themes.
+	 */
 	public function dequeue_legacy_scripts() {
 		if ( is_product() ) {
 			wp_dequeue_script( 'wc-single-product' );
