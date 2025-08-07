@@ -231,7 +231,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the merchant is already onboarded, nothing to do.
-		if ( $this->get_option( 'is_transact_onboarded', false ) ) {
+		if ( $this->get_option( 'is_transact_onboarded', 'no' ) === 'yes' ) {
 			return;
 		}
 
@@ -260,7 +260,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// TODO: Do we need to save anything else, e.g. the merchant public ID?
-		$this->update_option( 'is_transact_onboarded', true );
+		$this->update_option( 'is_transact_onboarded', 'yes' );
 		self::log( 'Transact onboarding completed.', 'info' );
 	}
 
