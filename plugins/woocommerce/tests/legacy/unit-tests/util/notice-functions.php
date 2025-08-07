@@ -131,7 +131,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * when first parameter is set to true.
 	 */
 	public function test_wc_print_notices_should_return_notices() {
-		$expected_return = "\n	<div class=\"woocommerce-info\">\n		One True Notice	</div>\n";
+		$expected_return = "\n	<div class=\"woocommerce-info\" role=\"status\">\n		One True Notice	</div>\n";
 
 		wc_add_notice( 'One True Notice', 'notice' );
 
