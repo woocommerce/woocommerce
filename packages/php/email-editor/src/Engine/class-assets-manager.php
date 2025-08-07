@@ -112,14 +112,15 @@ class Assets_Manager {
 	/**
 	 * Load editor assets.
 	 *
-	 * @param \WP_Post|\WP_Block_Template $edited_item  The edited post or template.
+	 * @param \WP_Post|\WP_Block_Template $edited_item The edited post or template.
+	 * @param string                      $script_name The name of the registered script.
 	 */
-	public function load_editor_assets( $edited_item ): void {
+	public function load_editor_assets( $edited_item, string $script_name ): void {
 		$post_type = $edited_item instanceof \WP_Post ? $edited_item->post_type : 'wp_template';
 		$post_id   = $edited_item instanceof \WP_Post ? $edited_item->ID : $edited_item->id;
 
-		$email_editor_assets_path = rtrim( $this->assets_path, '/' ) . '/email-editor/';
-		$email_editor_assets_url  = rtrim( $this->assets_url, '/' ) . '/email-editor/';
+		$email_editor_assets_path = rtrim( $this->assets_path, '/' ) . '/';
+		$email_editor_assets_url  = rtrim( $this->assets_url, '/' ) . '/';
 
 		// Email editor rich text JS - Because the Personalization Tags depend on Gutenberg 19.8.0 and higher
 		// the following code replaces used Rich Text for the version containing the necessary changes.
@@ -134,7 +135,7 @@ class Assets_Manager {
 		);
 		// End of replacing Rich Text package.
 
-		$assets_params = require $email_editor_assets_path . 'index.asset.php';
+		$assets_params = require $email_editor_assets_path . 'style.asset.php';
 		wp_enqueue_style(
 			'wc-admin-email-editor-integration',
 			$email_editor_assets_url . 'style.css',
@@ -184,7 +185,7 @@ class Assets_Manager {
 		);
 
 		wp_localize_script(
-			'wc-admin-email-editor-integration',
+			$script_name,
 			'WooCommerceEmailEditor',
 			apply_filters( 'woocommerce_email_editor_script_localization_data', $localization_data )
 		);

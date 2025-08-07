@@ -38,8 +38,8 @@ class PageRenderer {
 		$this->template_registry = $editor_container->get( Templates_Registry::class );
 
 		$assets_manager = $editor_container->get( Assets_Manager::class );
-		$assets_manager->set_assets_path( WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER );
-		$assets_manager->set_assets_url( WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER );
+		$assets_manager->set_assets_path( WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . '/email-editor/' );
+		$assets_manager->set_assets_url( WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . '/email-editor/' );
 		$this->assets_manager = $assets_manager;
 	}
 
@@ -64,7 +64,7 @@ class PageRenderer {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'email-editor-integration', true );
 		WCAdminAssets::register_style( 'email-editor-integration', 'style', true );
 
-		$this->assets_manager->load_editor_assets( $edited_item );
+		$this->assets_manager->load_editor_assets( $edited_item, 'wc-admin-email-editor-integration' );
 
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 		echo '<div id="woocommerce-email-editor" class="block-editor block-editor__container hide-if-no-js"></div>';
