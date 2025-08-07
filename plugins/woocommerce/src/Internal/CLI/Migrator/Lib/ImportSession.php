@@ -1,7 +1,7 @@
 <?php
 
 /**
- * !! Do not apply make Woo-specific changes to this class !!
+ * !! Do not apply Woo-specific changes to this class !!
  *
  * This class is a part of the WordPress/php-toolkit project and is currently
  * duplicated between WordPress/php-toolkit and woocommerce/woocommerce:
