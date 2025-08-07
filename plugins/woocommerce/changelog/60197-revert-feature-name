@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Revert feature name to add_payment_method.

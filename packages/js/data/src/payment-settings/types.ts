@@ -110,6 +110,7 @@ export type PaymentsProvider = PaymentsEntity & {
 		state?: PaymentsProviderOnboardingState;
 		_links?: {
 			onboard?: LinkData; // For gateways, this is used to start the onboarding flow.
+			reset?: LinkData; // For gateways, this is used to reset the account/onboarding.
 		};
 		recommended_payment_methods?: RecommendedPaymentMethod[];
 		type?: string;
@@ -128,6 +129,8 @@ export type PaymentGatewayProvider = PaymentsProvider & {
 		state: PaymentsProviderOnboardingState;
 		_links: {
 			onboard: LinkData;
+			reset: LinkData;
+			disable_test_account?: LinkData; // URL to disable the test account before proceeding to live account setup.
 		};
 		recommended_payment_methods: RecommendedPaymentMethod[];
 		type: string;

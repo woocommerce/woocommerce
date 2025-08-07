@@ -52,6 +52,9 @@ type FilterItem = {
 	count: number;
 	type: string;
 	attributeQueryType?: 'and' | 'or' | undefined;
+	id?: number;
+	parent?: number;
+	depth?: number;
 };
 
 export type ActiveFilterItem = Pick<

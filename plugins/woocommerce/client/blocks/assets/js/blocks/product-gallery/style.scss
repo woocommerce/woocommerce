@@ -104,6 +104,37 @@ $dialog-padding: 20px;
 			margin-right: unset;
 		}
 	}
+
+	:where(.wc-block-next-previous-buttons) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		height: 100%;
+
+		&:where(.alignleft) {
+			justify-content: flex-start;
+			gap: 0;
+		}
+
+		&:where(.alignright) {
+			justify-content: flex-end;
+			gap: 0;
+		}
+
+		&:where(.aligncenter) {
+			justify-content: center;
+			gap: 0;
+		}
+
+		&:where(.aligntop) {
+			align-items: flex-start;
+		}
+
+		&:where(.alignbottom) {
+			align-items: flex-end;
+		}
+	}
 }
 
 // Vertical thumbnails
