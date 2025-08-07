@@ -395,6 +395,7 @@ class Controller extends GenericController implements ExportableInterface {
 		/**
 		 * Filter the separator used in the product variation title.
 		 *
+		 * @since 10.2.0
 		 * @param string $separator The separator.
 		 * @param \WC_Product $product The product object.
 		 * @return string The separator.
