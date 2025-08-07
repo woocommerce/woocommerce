@@ -25,6 +25,7 @@ export function elementShouldBeHidden( element: Element ) {
 		element.tagName === 'SCRIPT' ||
 		element.hasAttribute( 'aria-hidden' ) ||
 		element.hasAttribute( 'aria-live' ) ||
+		element.hasAttribute( 'data-keep-visible' ) ||
 		( role && LIVE_REGION_ARIA_ROLES.has( role ) )
 	);
 }

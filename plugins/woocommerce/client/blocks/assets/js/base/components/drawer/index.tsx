@@ -95,6 +95,12 @@ const UnforwardedDrawer = (
 
 	useEffect( () => {
 		if ( isOpen ) {
+			const a11yRegion = document.querySelector('[id^="a11y-speak"]')?.parentElement;
+
+			if ( a11yRegion ) {
+				a11yRegion.setAttribute( 'data-keep-visible', 'true' );
+			}
+
 			ariaHelper.hideApp( ref.current );
 			document.body.classList.add( bodyOpenClassName );
 		}
