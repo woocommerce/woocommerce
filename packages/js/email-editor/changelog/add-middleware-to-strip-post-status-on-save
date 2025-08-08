@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add middleware to strip the post status on save when strip_post_status_on_save setting is enabled.
