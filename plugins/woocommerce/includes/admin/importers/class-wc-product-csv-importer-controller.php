@@ -343,7 +343,7 @@ class WC_Product_CSV_Importer_Controller {
 				 *
 				 * @since 3.1.0
 				 */
-				'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
+				'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 100 ),
 				'parse'              => true,
 			);
 
