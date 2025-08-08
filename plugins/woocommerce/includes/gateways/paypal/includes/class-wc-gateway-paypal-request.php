@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -55,12 +54,6 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected $endpoint;
 
-	/**
-	 * The API version for the proxy endpoint.
-	 *
-	 * @var int
-	 */
-	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
 
 	/**
 	 * Constructor.
@@ -566,8 +559,10 @@ class WC_Gateway_Paypal_Request {
 			if ( mb_strlen( $string ) > $limit ) {
 				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
 			}
-		} elseif ( strlen( $string ) > $limit ) {
+		} else {
+			if ( strlen( $string ) > $limit ) {
 				$string = substr( $string, 0, $str_limit ) . '...';
+			}
 		}
 		return $string;
 	}
@@ -643,6 +638,7 @@ class WC_Gateway_Paypal_Request {
 			),
 			$order
 		);
+
 	}
 
 	/**
