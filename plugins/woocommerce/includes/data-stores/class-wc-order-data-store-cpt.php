@@ -615,8 +615,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'_billing_address_index',
 					'_shipping_address_index',
 					'_billing_last_name',
-					'_billing_email',
-					'_billing_phone',
+                    '_billing_first_name',
+                    '_billing_email',
+                    '_billing_phone',
+
 				)
 			)
 		);
