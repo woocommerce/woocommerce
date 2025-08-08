@@ -191,9 +191,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		// TODO: Remove me.
-		error_log( 'Merchant account fetched: ' . print_r( $response_data, true ) );
-
 		return array(
 			'public_id' => $response_data['public_id'],
 			'email'     => $response_data['metadata']['email'] ?? '',
@@ -231,9 +228,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
-
-		// TODO: Remove me.
-		error_log( 'Provider account fetched: ' . print_r( $response, true ) );
 
 		// Provider account response only returns an empty onboarding link,
 		// which we do not need.
@@ -278,9 +272,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		// TODO: Remove me.
-		error_log( 'Merchant account created: ' . print_r( $response_data, true ) );
-
 		return array(
 			'public_id' => $response_data['public_id'],
 			'email'     => $response_data['metadata']['email'] ?? '',
@@ -317,9 +308,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
-
-		// TODO: Remove me.
-		error_log( 'Provider account created: ' . print_r( $response, true ) );
 
 		// Provider account response only returns an empty onboarding link,
 		// which we do not need.
@@ -374,9 +362,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		// TODO: Remove me.
-		error_log( 'Merchant account from cache: ' . print_r( $merchant_account, true ) );
-
 		return $merchant_account;
 	}
 
@@ -393,9 +378,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		if ( empty( $provider_account ) || ( isset( $provider_account['expiry'] ) && $provider_account['expiry'] < time() ) ) {
 			return null;
 		}
-
-		// TODO: Remove me.
-		error_log( 'Provider account from cache: ' . print_r( $provider_account, true ) );
 
 		return $provider_account;
 	}
