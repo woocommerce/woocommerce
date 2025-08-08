@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles Transact account management.
  */
-class WC_Gateway_Paypal_Transact_Account_Manager {
+final class WC_Gateway_Paypal_Transact_Account_Manager {
 	/**
 	 * The API version for the proxy endpoint.
 	 *
@@ -170,16 +170,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			'test_mode' => $this->gateway->testmode,
 		);
 
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response = $this->send_transact_api_request(
+			'GET',
 			sprintf( '/sites/%d/transact/account', $site_id ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'GET',
-				'timeout' => 60,
-			),
-			$request_body,
-			'wpcom'
+			$request_body
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -213,16 +207,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			'provider_type' => self::TRANSACT_PROVIDER_TYPE,
 		);
 
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response = $this->send_transact_api_request(
+			'GET',
 			sprintf( '/sites/%d/transact/account/%s', $site_id, self::TRANSACT_PROVIDER_TYPE ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'GET',
-				'timeout' => 60,
-			),
-			$request_body,
-			'wpcom'
+			$request_body
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -250,16 +238,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			'email'     => $this->gateway->email,
 		);
 
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response = $this->send_transact_api_request(
+			'POST',
 			sprintf( '/sites/%d/transact/account', $site_id ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'POST',
-				'timeout' => 60,
-			),
-			wp_json_encode( $request_body ),
-			'wpcom'
+			$request_body
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -293,16 +275,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 			'test_mode'     => $this->gateway->testmode,
 			'provider_type' => self::TRANSACT_PROVIDER_TYPE,
 		);
-		$response     = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response     = $this->send_transact_api_request(
+			'POST',
 			sprintf( '/sites/%d/transact/account/%s/onboard', $site_id, self::TRANSACT_PROVIDER_TYPE ),
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'method'  => 'POST',
-				'timeout' => 60,
-			),
-			wp_json_encode( $request_body ),
-			'wpcom'
+			$request_body
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -380,5 +356,30 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		}
 
 		return $provider_account;
+	}
+
+	/**
+	 * Send a request to the Transact platform.
+	 *
+	 * @param string $method The HTTP method to use.
+	 * @param string $endpoint The endpoint to request.
+	 * @param array  $request_body The request body.
+	 *
+	 * @return array|null The API response body, or null if the request fails.
+	 */
+	private function send_transact_api_request( $method, $endpoint, $request_body ) {
+		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+			$endpoint,
+			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
+			array(
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'method'  => $method,
+				'timeout' => 60,
+			),
+			'GET' === $method ? $request_body : wp_json_encode( $request_body ),
+			'wpcom'
+		);
+
+		return $response;
 	}
 }
