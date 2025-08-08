@@ -178,6 +178,12 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
+		// Skip if the payment is already captured.
+		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		try {
 			if ( 'capture' === $action ) {
 				$request_url  = $this->get_paypal_capture_payment_request_url();
