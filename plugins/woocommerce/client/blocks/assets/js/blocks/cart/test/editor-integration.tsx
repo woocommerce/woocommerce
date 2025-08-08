@@ -10,6 +10,21 @@ import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
+// Mock problematic dependencies that cause SVG parsing issues
+jest.mock('@automattic/tour-kit', () => ({
+    __esModule: true,
+    default: () => null,
+    TourKit: () => null,
+}));
+
+jest.mock('gridicons/svg-sprite/gridicons.svg', () => 'mocked-svg', { virtual: true });
+
+jest.mock('@automattic/components', () => ({
+    __esModule: true,
+    Card: ({ children }: any) => children,
+    Gridicon: () => null,
+}));
+
 /**
  * Internal dependencies
  */
@@ -21,6 +36,13 @@ import '../index';
 import '../inner-blocks/index';
 import '../inner-blocks/cart-order-summary-coupon-form/index';
 import '../../product-new/index';
+import '../../../atomic/blocks/product-elements/sale-badge/index';
+import '../../../atomic/blocks/product-elements/image/index';
+import '../../../atomic/blocks/product-elements/price/index';
+import '../../../atomic/blocks/product-elements/button/index';
+import '../../../atomic/blocks/product-elements/title/index';
+import '../../product-template/index.tsx';
+import '../../product-collection/index.tsx';
 
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
