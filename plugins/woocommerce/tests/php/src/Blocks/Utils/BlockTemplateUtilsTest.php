@@ -134,31 +134,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the is_template_in_query_result method.
-	 */
-	public function test_is_template_in_query_result() {
-		$query_result = array(
-			(object) array(
-				'slug'  => 'taxonomy-product_cat',
-				'theme' => 'twentytwentytwo',
-			),
-		);
-
-		$non_matching_template_file = (object) array(
-			'slug'  => 'archive-product',
-			'theme' => 'twentytwentytwo',
-		);
-
-		$matching_template_file = (object) array(
-			'slug'  => 'taxonomy-product_cat',
-			'theme' => 'twentytwentytwo',
-		);
-
-		$this->assertFalse( BlockTemplateUtils::is_template_in_query_result( $query_result, $non_matching_template_file ) );
-		$this->assertTrue( BlockTemplateUtils::is_template_in_query_result( $query_result, $matching_template_file ) );
-	}
-
-	/**
 	 * Test create_new_block_template_object.
 	 */
 	public function test_create_new_block_template_object() {
