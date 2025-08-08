@@ -197,7 +197,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		return array(
 			'public_id' => $response_data['public_id'],
 			'email'     => $response_data['metadata']['email'] ?? '',
-			'store_url' => $response_data['metadata']['store_url'] ?? '',
 		);
 	}
 
@@ -255,13 +254,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		$request_body = array(
 			'test_mode' => $this->gateway->testmode,
 			'email'     => $this->gateway->email,
-			// TODO: Do we need to pass this? If yes, do we need to handle scenario where the store changes domain?
-			'store_url' => get_site_url(),
-			'settings'  => array(
-				// TODO: Merchant account creation requires a statement descriptor, but we are not using it anywhere.
-				'statement_descriptor' => get_bloginfo( 'name' ),
-			),
-
 		);
 
 		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
@@ -292,7 +284,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager {
 		return array(
 			'public_id' => $response_data['public_id'],
 			'email'     => $response_data['metadata']['email'] ?? '',
-			'store_url' => $response_data['metadata']['store_url'] ?? '',
 		);
 	}
 
