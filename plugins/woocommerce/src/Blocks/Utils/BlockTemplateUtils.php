@@ -576,11 +576,12 @@ class BlockTemplateUtils {
 	 * WooCommerce default template when there is a customized template based on the theme template.
 	 *
 	 * @param \WP_Block_Template[]|\stdClass[] $templates  List of templates to run the filter on.
-	 * @param string                           $theme_slug Slug of the theme currently active.
 	 *
 	 * @return array Filtered list of templates with only relevant templates available.
 	 */
-	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
+	public static function remove_duplicate_customized_templates( $templates ) {
+		$theme_slug = get_stylesheet();
+
 		$filtered_templates = array_filter(
 			$templates,
 			function ( $template ) use ( $templates, $theme_slug ) {
