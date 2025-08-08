@@ -2,18 +2,33 @@
  * External dependencies
  */
 import {
-	test,
+	test as base,
 	expect,
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
+/**
+ * Internal dependencies
+ */
+import TemplatesPage from './templates.page';
+
+const test = base.extend< { pageObject: TemplatesPage } >( {
+	pageObject: async ( { admin, editor }, use ) => {
+		const pageObject = new TemplatesPage( {
+			admin,
+			editor,
+		} );
+		await use( pageObject );
+	},
+} );
+
 test.describe( 'Template priority', () => {
 	// Templates might come from different sources, and they should have this order of priority:
 	// 1. Template from the database with the theme slug.
 	// 2. Template from the database with the WooCommerce slug.
-	// 3. Fallback template from the database with the theme BLOCK_THEME_SLUG.
-	// 4. Fallback template from the database with the WooCommerce BLOCK_THEME_SLUG.
+	// 3. Fallback template from the database with the theme slug.
+	// 4. Fallback template from the database with the WooCommerce slug.
 	// 5. Template from the theme.
 	// 6. Fallback template from the theme.
 	// 7. Template from WooCommerce.
@@ -44,29 +59,8 @@ test.describe( 'Template priority', () => {
 			editor,
 			page,
 			requestUtils,
+			pageObject,
 		} ) => {
-			const addParagraphToTemplate = async (
-				templateSlug: string,
-				content: string
-			) => {
-				await admin.visitSiteEditor( {
-					postId: templateSlug,
-					postType: 'wp_template',
-					canvas: 'edit',
-				} );
-
-				await editor.insertBlock( {
-					name: 'core/paragraph',
-					attributes: {
-						content,
-					},
-				} );
-
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
-				} );
-			};
-
 			await test.step( 'WooCommerce template', async () => {
 				await page.goto( testData.path );
 
@@ -95,7 +89,7 @@ test.describe( 'Template priority', () => {
 
 			if ( testData.fallbackTemplate ) {
 				await test.step( 'custom fallback template with WooCommerce slug', async () => {
-					await addParagraphToTemplate(
+					await pageObject.addParagraphToTemplate(
 						`woocommerce/woocommerce//${ testData.fallbackTemplate.templatePath }`,
 						'Custom fallback template with WooCommerce slug'
 					);
@@ -113,7 +107,7 @@ test.describe( 'Template priority', () => {
 				} );
 
 				await test.step( 'custom fallback template with theme slug', async () => {
-					await addParagraphToTemplate(
+					await pageObject.addParagraphToTemplate(
 						`${ BLOCK_THEME_SLUG }//${ testData.fallbackTemplate.templatePath }`,
 						'Custom fallback template with theme slug'
 					);
@@ -137,7 +131,7 @@ test.describe( 'Template priority', () => {
 			}
 
 			await test.step( 'custom template with WooCommerce slug', async () => {
-				await addParagraphToTemplate(
+				await pageObject.addParagraphToTemplate(
 					`woocommerce/woocommerce//${ testData.templatePath }`,
 					'Custom template with WooCommerce slug'
 				);
@@ -202,7 +196,7 @@ test.describe( 'Template priority', () => {
 						isOnlyCurrentEntityDirty: true,
 					} );
 				} else {
-					await addParagraphToTemplate(
+					await pageObject.addParagraphToTemplate(
 						`${ BLOCK_THEME_SLUG }//${ testData.templatePath }`,
 						'Custom template with theme slug'
 					);
