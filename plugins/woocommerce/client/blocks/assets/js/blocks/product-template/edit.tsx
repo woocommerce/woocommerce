@@ -391,7 +391,10 @@ const ProductTemplateEdit = (
 		...baseBlockProps,
 		style: {
 			...baseBlockProps.style,
-			...( hasLayoutFlex && gapValue ? { gap: gapValue } : {} ),
+			...( hasLayoutFlex && gapValue ? { 
+				gap: gapValue,
+				'--wc-product-template-gap': gapValue // Add CSS custom property for width calculations
+			} : {} ),
 		},
 	};
 

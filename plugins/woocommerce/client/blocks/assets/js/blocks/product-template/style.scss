@@ -25,7 +25,7 @@ $min-product-width: 150px;
 		flex-direction: row;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1.25em;
+		gap: var(--wc-product-template-gap, 1.25em);
 
 		> li {
 			margin: 0;
@@ -37,7 +37,8 @@ $min-product-width: 150px;
 		@include break-small {
 			@for $i from 2 through 6 {
 				&.is-flex-container.columns-#{ $i } > li {
-					width: calc((100% / #{$i}) - 1.25em + (1.25em / #{$i}));
+					// Use CSS custom property with fallback for dynamic width calculation
+					width: calc((100% / #{$i}) - var(--wc-product-template-gap, 1.25em) + (var(--wc-product-template-gap, 1.25em) / #{$i}));
 				}
 			}
 		}
