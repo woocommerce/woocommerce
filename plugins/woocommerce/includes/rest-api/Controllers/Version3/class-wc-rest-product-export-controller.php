@@ -49,8 +49,8 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function export_products_permissions_check( $request ) {
-		// Use the same permission check as AJAX export
-		if ( ! current_user_can( 'edit_products' ) || ! current_user_can( 'export' ) ) {
+		// Check if user can manage WooCommerce or edit products
+		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'edit_products' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_export', __( 'Sorry, you are not allowed to export products.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -71,7 +71,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		}
 
 		// If user is logged in, check capabilities
-		if ( ! current_user_can( 'edit_products' ) || ! current_user_can( 'export' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'edit_products' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_export', __( 'Sorry, you are not allowed to export products.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
