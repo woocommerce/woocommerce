@@ -15,9 +15,7 @@ import {
 	Placeholder,
 	Icon,
 	Button,
-	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
-	// @ts-expect-error Using experimental features
 	__experimentalText as Text,
 } from '@wordpress/components';
 
@@ -29,6 +27,7 @@ import { BLOCK_NAMES } from './constants';
 import { EditorBlock, GenericBlockUIConfig } from './types';
 import { getClassPrefixFromName, getInvalidItemDescription } from './utils';
 import { useFeaturedItemStatus } from './use-featured-item-status';
+import { ErrorObject } from '@woocommerce/base-utils';
 
 interface EditModeConfiguration extends GenericBlockUIConfig {
 	description: string;
@@ -49,7 +48,7 @@ interface EditModeRequiredProps< T > {
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
 	isLoading: boolean;
-	error?: Error | null;
+	error?: ErrorObject | null;
 }
 
 type EditModeProps< T extends EditorBlock< T > > = T &
