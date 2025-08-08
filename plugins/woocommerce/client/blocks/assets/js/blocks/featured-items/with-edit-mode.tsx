@@ -18,6 +18,7 @@ import {
 	__experimentalHStack as HStack,
 	__experimentalText as Text,
 } from '@wordpress/components';
+import { ErrorObject } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -27,7 +28,6 @@ import { BLOCK_NAMES } from './constants';
 import { EditorBlock, GenericBlockUIConfig } from './types';
 import { getClassPrefixFromName, getInvalidItemDescription } from './utils';
 import { useFeaturedItemStatus } from './use-featured-item-status';
-import { ErrorObject } from '@woocommerce/base-utils';
 
 interface EditModeConfiguration extends GenericBlockUIConfig {
 	description: string;
