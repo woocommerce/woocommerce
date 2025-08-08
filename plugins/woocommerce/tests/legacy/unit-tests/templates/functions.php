@@ -119,6 +119,23 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="Size for product" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'   => $product,
+				'attribute' => 'pa_size',
+				'aria-label' => 'Size for product',
+			)
+		);
+	}
+
+	/**
 	 * Test wc_query_string_form_fields.
 	 *
 	 * @return void
