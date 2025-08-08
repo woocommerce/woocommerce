@@ -702,7 +702,7 @@ class WC_Post_Data {
 	 * @since 10.2.0
 	 * @return int
 	 */
-	public static function get_regen_threshold() {
+	public static function get_variation_summaries_sync_threshold() {
 		/**
 		 * Filters the threshold for synchronous regeneration of variation attribute summaries.
 		 * If the number of variations affected by an update is below this threshold, the summaries
@@ -760,7 +760,7 @@ class WC_Post_Data {
 		);
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 
-		$threshold = self::get_regen_threshold();
+		$threshold = self::get_variation_summaries_sync_threshold();
 		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
@@ -829,7 +829,7 @@ class WC_Post_Data {
 	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
-			$threshold     = self::get_regen_threshold();
+			$threshold     = self::get_variation_summaries_sync_threshold();
 			$count         = count( $variation_ids );
 
 			if ( $count <= $threshold ) {
@@ -904,7 +904,7 @@ class WC_Post_Data {
 			return;
 		}
 
-		$threshold = self::get_regen_threshold();
+		$threshold = self::get_variation_summaries_sync_threshold();
 		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
@@ -958,7 +958,7 @@ class WC_Post_Data {
 			return;
 		}
 
-		$threshold = self::get_regen_threshold();
+		$threshold = self::get_variation_summaries_sync_threshold();
 		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
