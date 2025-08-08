@@ -642,7 +642,7 @@ class WC_Post_Data {
 	 * @since 10.2.0
 	 * @param array $variation_ids Array of variation IDs.
 	 */
-	public static function regenerate_variation_summaries( $variation_ids ) {
+	private static function regenerate_variation_summaries( $variation_ids ) {
 		if ( empty( $variation_ids ) ) {
 			return;
 		}
