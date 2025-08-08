@@ -9,10 +9,10 @@ on:
     branches: [trunk]
 
 env:
-  GIT_COMMITTER_NAME: 'WooCommerce Bot'
-  GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
-  GIT_AUTHOR_NAME: 'WooCommerce Bot'
-  GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+  GIT_COMMITTER_NAME: 'woocommercebot'
+  GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
+  GIT_AUTHOR_NAME: 'woocommercebot'
+  GIT_AUTHOR_EMAIL: 'woocommercebot@users.noreply.github.com'
 
 jobs:
   prepare:
@@ -52,7 +52,7 @@ jobs:
       # Identify release branches to cherry-pick to
       - name: Get release branches
         id: get-branches
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           BASE_VERSION: ${{ steps.extract-version.outputs.base_version }}
         with:
@@ -102,6 +102,7 @@ jobs:
     with:
       pr_number: ${{ needs.prepare.outputs.pr_number }}
       target_branch: ${{ needs.prepare.outputs.milestoned_branch }}
+    secrets: inherit
 
   # Cherry-pick to next branch
   cherry-pick-next:
@@ -111,6 +112,7 @@ jobs:
     with:
       pr_number: ${{ needs.prepare.outputs.pr_number }}
       target_branch: ${{ needs.prepare.outputs.next_branch }}
+    secrets: inherit
 
   # Handle successful cherry-pick to milestoned branch
   handle-success-milestoned:
@@ -120,8 +122,9 @@ jobs:
     steps:
       # Add original milestone to new PR
       - name: Add milestone
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.update({
               owner: context.repo.owner,
@@ -133,12 +136,13 @@ jobs:
       # Comment on original PR about cherry-pick success
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           TARGET_BRANCH: ${{ needs.prepare.outputs.milestoned_branch }}
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick-milestoned.outputs.cherry_pick_pr_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const cherryPickPrNumber = process.env.CHERRY_PICK_PR_NUMBER;
             const targetBranch = process.env.TARGET_BRANCH;
@@ -188,8 +192,9 @@ jobs:
     steps:
       # Add original milestone to new PR
       - name: Add milestone
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.update({
               owner: context.repo.owner,
@@ -201,12 +206,13 @@ jobs:
       # Comment on original PR about cherry-pick success
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           TARGET_BRANCH: ${{ needs.prepare.outputs.next_branch }}
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick-next.outputs.cherry_pick_pr_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const cherryPickPrNumber = process.env.CHERRY_PICK_PR_NUMBER;
             const targetBranch = process.env.TARGET_BRANCH;
@@ -260,8 +266,9 @@ jobs:
       # Label original PR with failure tag
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -273,12 +280,13 @@ jobs:
       # Comment on original PR about failure
       - name: Comment on original PR about cherry-pick failure
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-milestoned.outputs.error_message || 'Unknown error' }}
           TARGET_BRANCH: ${{ needs.prepare.outputs.milestoned_branch }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const pr = (await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -338,8 +346,9 @@ jobs:
       # Label original PR with failure tag
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -351,12 +360,13 @@ jobs:
       # Comment on original PR about failure
       - name: Comment on original PR
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick-next.outputs.error_message || 'Unknown error' }}
           TARGET_BRANCH: ${{ needs.prepare.outputs.next_branch }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const pr = (await github.rest.pulls.get({
               owner: context.repo.owner,
