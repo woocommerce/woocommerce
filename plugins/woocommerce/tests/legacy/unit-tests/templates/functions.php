@@ -153,9 +153,11 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_empty_string.
+	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @dataProvider data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values
 	 */
-	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_empty_string() {
+	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values( $attribute_value ) {
 		$product = WC_Helper_Product::create_variation_product();
 
 		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
@@ -164,8 +166,25 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			array(
 				'product'    => $product,
 				'attribute'  => 'pa_size',
-				'aria-label' => '',
+				'aria-label' => $attribute_value,
 			)
+		);
+	}
+
+	/**
+	 * Data provider for test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @return array[] Data provider
+	 */
+	public function data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values() {
+		return array(
+			'false'        => array( false ),
+			'null'         => array( null ),
+			'0 (int)'      => array( 0 ),
+			'0 (string)'   => array( '0' ),
+			'0.0 (float)'  => array( 0.0 ),
+			'empty string' => array( '' ),
+			'empty array'  => array( array() ),
 		);
 	}
 
