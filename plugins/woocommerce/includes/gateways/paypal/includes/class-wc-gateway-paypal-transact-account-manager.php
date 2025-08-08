@@ -72,8 +72,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * @return void
 	 */
 	public function do_onboarding() {
-		// Check that we have a PayPal email -- this is required for Transact onboarding
-		// and for payment processing (payee email).
+		// Check that we have a PayPal email. This is required for processing payments --
+		// used as the payee email. Only begin onboarding if this minimum requirement is met.
 		if ( empty( $this->gateway->email ) ) {
 			return;
 		}
@@ -185,10 +185,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		return array(
-			'public_id' => $response_data['public_id'],
-			'email'     => $response_data['metadata']['email'] ?? '',
-		);
+		return array( 'public_id' => $response_data['public_id'] );
 	}
 
 	/**
@@ -233,10 +230,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		$request_body = array(
-			'test_mode' => $this->gateway->testmode,
-			'email'     => $this->gateway->email,
-		);
+		$request_body = array( 'test_mode' => $this->gateway->testmode );
 
 		$response = $this->send_transact_api_request(
 			'POST',
@@ -254,10 +248,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		return array(
-			'public_id' => $response_data['public_id'],
-			'email'     => $response_data['metadata']['email'] ?? '',
-		);
+		return array( 'public_id' => $response_data['public_id'] );
 	}
 
 	/**

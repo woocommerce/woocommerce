@@ -85,8 +85,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 * Test do_onboarding when Jetpack registration fails.
 	 */
 	public function test_do_onboarding_when_jetpack_registration_fails() {
-		$this->gateway->email = 'test@example.com';
-
 		// Mock the gateway to return a mock Jetpack connection manager.
 		$jetpack_manager = $this->getMockBuilder( 'stdClass' )
 			->addMethods( array( 'is_connected', 'try_registration' ) )
@@ -251,10 +249,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 		// Check that it returns the data.
 		$response_data             = json_decode( $this->return_merchant_account_api_success()['body'], true );
-		$expected_merchant_account = array(
-			'public_id' => $response_data['public_id'],
-			'email'     => $response_data['metadata']['email'],
-		);
+		$expected_merchant_account = array( 'public_id' => $response_data['public_id'] );
 		$this->assertEquals( $expected_merchant_account, $result );
 
 		// Check that the cache was updated.
@@ -396,13 +391,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 		remove_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
-		$this->assertEquals(
-			array(
-				'public_id' => 'test_public_id',
-				'email'     => 'test@example.com',
-			),
-			$result
-		);
+		$this->assertEquals( array( 'public_id' => 'test_public_id' ), $result );
 	}
 
 	/**
@@ -524,13 +513,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		remove_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
 		// Check that it returns the data.
-		$this->assertEquals(
-			array(
-				'public_id' => 'test_public_id',
-				'email'     => 'test@example.com',
-			),
-			$result
-		);
+		$this->assertEquals( array( 'public_id' => 'test_public_id' ), $result );
 	}
 
 	/**
@@ -609,7 +592,6 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			'body'     => wp_json_encode(
 				array(
 					'public_id' => 'test_public_id',
-					'metadata'  => array( 'email' => 'test@example.com' ),
 				)
 			),
 		);
@@ -662,10 +644,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 */
 	public function return_expired_merchant_account_cache() {
 		return array(
-			'account' => array(
-				'public_id' => 'test_public_id',
-				'email'     => 'test@example.com',
-			),
+			'account' => array( 'public_id' => 'test_public_id' ),
 			'expiry'  => time() - 3600, // Expired 1 hour ago.
 		);
 	}
@@ -677,10 +656,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 */
 	public function return_valid_merchant_account_cache() {
 		return array(
-			'account' => array(
-				'public_id' => 'test_public_id',
-				'email'     => 'test@example.com',
-			),
+			'account' => array( 'public_id' => 'test_public_id' ),
 			'expiry'  => time() + 3600, // Expires in 1 hour.
 		);
 	}
