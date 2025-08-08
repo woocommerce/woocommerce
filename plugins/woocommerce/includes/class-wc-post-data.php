@@ -69,7 +69,7 @@ class WC_Post_Data {
 		// Product Variations - Attributes.
 		// Priority 50 to make sure this runs after WooCommerce attribute migrations.
 		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
-		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_deleted' ), 10, 3 );
+		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_updated' ), 10, 3 );
 		// Product Variations - Terms.
 		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
 		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 4 );
@@ -716,24 +716,6 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Handles deletion of a global attribute by triggering variation summary updates.
-	 *
-	 * @since 10.2.0
-	 * @param int    $attribute_id Attribute ID.
-	 * @param string $attribute    Attribute name.
-	 * @param string $old_slug     Old attribute slug.
-	 */
-	public static function handle_global_attribute_deleted( $attribute_id, $attribute, $old_slug ) {
-		// We can reuse the update function to trigger variation summary rebuilds.
-		// However, the handle_global_attribute_deleted includes the "pa_" prefix in $old_slug, and
-		// the handle_global_attribute_updated does not. Remove it to keep compatibility.
-		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
-			$old_slug = substr( $old_slug, 3 );
-		}
-		self::handle_global_attribute_updated( $attribute_id, $attribute, $old_slug );
-	}
-
-	/**
 	 * Handles updates to a global attribute by triggering variation summary regeneration.
 	 *
 	 * @since 10.2.0
@@ -742,6 +724,12 @@ class WC_Post_Data {
 	 * @param string $old_slug     Old attribute slug.
 	 */
 	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
+		// We use this trigger for both updates and deletions of global attributes.
+		// They pass different parameters to $old_slug - deleted attributes include the "pa_" prefix, while updated attributes do not.
+		// Remove it if existing for consistency.
+		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
+			$old_slug = substr( $old_slug, 3 );
+		}
 		$taxonomy = 'pa_' . $old_slug;
 
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
