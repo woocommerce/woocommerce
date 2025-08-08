@@ -321,19 +321,8 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		$total_exported = 0;
 
 		while ( $step <= $max_steps ) {
-			// Force garbage collection before each batch
-			if ( function_exists( 'gc_collect_cycles' ) ) {
-				gc_collect_cycles();
-			}
-
 			// Clear WordPress object cache like a new request would
 			wp_cache_flush();
-
-			// Clear any global variables that might be holding memory
-			global $wpdb;
-			if ( isset( $wpdb ) ) {
-				$wpdb->flush();
-			}
 
 			// Log memory usage before each batch
 			$memory_before = memory_get_usage();
