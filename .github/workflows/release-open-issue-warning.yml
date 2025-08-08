@@ -24,6 +24,7 @@ jobs:
 
             const now = new Date();
             const eventWindowInMs = 3 * 24 * 60 * 60 * 1000;  // 72 h window
+            // We exclude feature freezes for now since the release DRI does not need to build at this step.
             const pattern = /^WooCommerce \d+\.\d+\s+(?!Feature Freeze).*$/i;
 
             try {
