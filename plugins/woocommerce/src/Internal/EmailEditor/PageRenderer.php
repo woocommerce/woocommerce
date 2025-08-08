@@ -66,6 +66,12 @@ class PageRenderer {
 
 		$this->assets_manager->load_editor_assets( $edited_item, 'wc-admin-email-editor-integration' );
 		$this->assets_manager->render_email_editor_html();
+
+		remove_filter(
+			'woocommerce_email_editor_script_localization_data',
+			array( $this, 'update_localized_data' ),
+			10
+		);
 	}
 
 	/**
