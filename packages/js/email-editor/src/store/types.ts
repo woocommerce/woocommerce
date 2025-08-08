@@ -219,7 +219,6 @@ export type State = {
 		isFetching: boolean;
 	};
 	contentValidation?: ContentValidation;
-	stripPostStatusOnSave: boolean | undefined;
 };
 
 export type EmailTemplatePreview = Omit<

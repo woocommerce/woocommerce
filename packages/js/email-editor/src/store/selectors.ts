@@ -420,7 +420,3 @@ export function getContentValidation(
 ): State[ 'contentValidation' ] {
 	return state.contentValidation;
 }
-
-export function getStripPostStatusOnSave( state: State ): boolean | undefined {
-	return state.stripPostStatusOnSave;
-}
