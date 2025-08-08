@@ -76,7 +76,8 @@ function createWooCommerceTrustedTypesPolicy(): void {
 			);
 
 			// Set this as the default policy for DOMPurify
-			setConfig( {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( setConfig as any )( {
 				TRUSTED_TYPES_POLICY: policy,
 			} );
 		} catch ( error ) {
@@ -133,8 +134,8 @@ export function sanitizeHTML( html: string, config?: SanitizeConfig ): string {
 	const allowedAttr = config?.attr || DEFAULT_ALLOWED_ATTR;
 
 	return sanitize( html, {
-		ALLOWED_TAGS: allowedTags,
-		ALLOWED_ATTR: allowedAttr,
+		ALLOWED_TAGS: [ ...allowedTags ],
+		ALLOWED_ATTR: [ ...allowedAttr ],
 	} );
 }
 

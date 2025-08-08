@@ -41,7 +41,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "wp-scripts build",
+		"build": "wp-scripts build && tsc --emitDeclarationOnly",
 		"dev": "wp-scripts start",
 		"lint": "wp-scripts lint",
 		"start": "wp-scripts start"

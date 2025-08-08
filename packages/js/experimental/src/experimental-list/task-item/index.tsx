@@ -28,7 +28,7 @@ const sanitizeHTML = ( html: string ): { __html: string } => {
 	return {
 		__html: _sanitizeHTML( html, {
 			tags: ALLOWED_TAGS,
-			attrs: ALLOWED_ATTR,
+			attr: ALLOWED_ATTR,
 		} ),
 	};
 };

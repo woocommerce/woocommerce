@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import { sanitizeHTML } from '@woocommerce/sanitize';
+import { sanitizeHTML as sanitizeHTMLFromPackage } from '@woocommerce/sanitize';
 
 export function isGutenbergVersionAtLeast( version: number ) {
 	const adminSettings: { gutenberg_version?: string } = getSetting( 'admin' );
@@ -40,5 +40,5 @@ const ALLOWED_TAGS = [
  * @return Sanitized HTML content.
  */
 export function sanitizeHTML( html: string ) {
-	return sanitizeHTML( html, { tags: ALLOWED_TAGS } );
+	return sanitizeHTMLFromPackage( html, { tags: ALLOWED_TAGS } );
 }
