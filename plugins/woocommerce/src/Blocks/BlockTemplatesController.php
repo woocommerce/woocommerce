@@ -207,6 +207,7 @@ class BlockTemplatesController {
 	public function run_hooks_on_block_templates( $templates ) {
 		// There is a bug in the WordPress implementation that causes block hooks not to run in templates registered
 		// via the Template Registration API. Because of this, we run them manually.
+		// https://github.com/WordPress/gutenberg/issues/71139
 		foreach ( $templates as $template ) {
 			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
 				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );
