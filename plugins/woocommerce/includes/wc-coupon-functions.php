@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 
 /**
  * Get coupon types.
@@ -112,16 +113,105 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 	}
 
 	$data_store = WC_Data_Store::load( 'coupon' );
-	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
+	// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached).
+	$hashed_code = md5( $code );
+	$cache_key   = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+
+	$ids = wp_cache_get( $cache_key, 'coupons' );
 
 	if ( false === $ids ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
-			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
+			wp_cache_set( $cache_key, $ids, 'coupons' );
 		}
 	}
 
 	$ids = array_diff( array_filter( array_map( 'absint', (array) $ids ) ), array( $exclude ) );
 
 	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude );
+}
+
+/**
+ * Repair coupon lookup entries with zero discount_amount. A bug in WC 9.9 (fixed in 10.0)
+ * caused discount_amount to be set to zero when a coupon code was used with
+ * different case (e.g. "10-off" vs "10-OFF").
+ *
+ * @since 10.1.0
+ * @return array Array with 'success' boolean and 'message' string.
+ */
+function wc_repair_zero_discount_coupons_lookup_table() {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_order_coupon_lookup';
+
+	// Check if table exists.
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) !== $table_name ) {
+		return array(
+			'success' => false,
+			'message' => __( 'Coupons lookup table does not exist.', 'woocommerce' ),
+		);
+	}
+
+	// Get entries with zero discount_amount.
+	$zero_discount_entries = $wpdb->get_results(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT order_id, coupon_id FROM $table_name WHERE discount_amount = %f",
+			0.0
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $zero_discount_entries ) ) {
+		return array(
+			'success' => true,
+			'message' => __( 'No entries with zero discount amount found. Coupons lookup table is up to date.', 'woocommerce' ),
+		);
+	}
+
+	$processed_count = 0;
+	$error_count     = 0;
+
+	foreach ( $zero_discount_entries as $entry ) {
+		try {
+			$result = CouponsDataStore::sync_order_coupons( $entry['order_id'] );
+			if ( false !== $result ) {
+				++$processed_count;
+			} else {
+				++$error_count;
+			}
+		} catch ( Exception $e ) {
+			++$error_count;
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf(
+					'Error fixing coupon lookup entry for order %d: %s',
+					$entry['order_id'],
+					$e->getMessage()
+				),
+				array(
+					'source'   => 'coupons-lookup-fix',
+					'order_id' => $entry['order_id'],
+					'error'    => $e,
+				)
+			);
+		}
+	}
+
+	// Clear any related caches.
+	wp_cache_flush_group( 'coupons' );
+	WC_Cache_Helper::get_transient_version( 'woocommerce_reports', true );
+
+	$message = sprintf(
+		/* translators: %1$d: number of entries processed, %2$d: number of errors */
+		__( 'Coupons lookup table entries with zero discount amount repaired successfully. Processed %1$d entries with %2$d errors.', 'woocommerce' ),
+		$processed_count,
+		$error_count
+	);
+
+	return array(
+		'success' => true,
+		'message' => $message,
+	);
 }

@@ -92,11 +92,7 @@ const getBlockifiedTemplate = () =>
 		),
 	].filter( Boolean ) as BlockInstance[];
 
-const isConversionPossible = () => {
-	return true;
-};
-
-const getDescriptionAllowingConversion = ( templateTitle: string ) =>
+const getDescription = ( templateTitle: string ) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -105,24 +101,6 @@ const getDescriptionAllowingConversion = ( templateTitle: string ) =>
 		),
 		templateTitle
 	);
-
-const getDescriptionDisallowingConversion = ( templateTitle: string ) =>
-	sprintf(
-		/* translators: %s is the template title */
-		__(
-			'This block serves as a placeholder for your %s. It will display the actual product image, title, price in your store. You can move this placeholder around and add more blocks around to customize the template.',
-			'woocommerce'
-		),
-		templateTitle
-	);
-
-const getDescription = ( templateTitle: string, canConvert: boolean ) => {
-	if ( canConvert ) {
-		return getDescriptionAllowingConversion( templateTitle );
-	}
-
-	return getDescriptionDisallowingConversion( templateTitle );
-};
 
 const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
@@ -154,4 +132,4 @@ const blockifyConfig = {
 	getBlockifiedTemplate,
 };
 
-export { isConversionPossible, getDescription, blockifyConfig };
+export { getDescription, blockifyConfig };

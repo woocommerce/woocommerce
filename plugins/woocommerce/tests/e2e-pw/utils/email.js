@@ -1,8 +1,14 @@
 /**
+ * External dependencies
+ */
+import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect } from '../fixtures/fixtures';
-import ApiClient, { WP_API_PATH } from './api-client';
+import { admin } from '../test-data/data';
+import playwrightConfig from '../playwright.config';
 
 /**
  * Check that an email exists in the WP Mail Logging plugin Email Log page. WP Mail Logging plugin must be installed.
@@ -70,10 +76,14 @@ export async function expectEmailContent(
 }
 
 export async function getWooEmails( params ) {
-	const emails = await ApiClient.getInstance().get(
-		`${ WP_API_PATH }/woo_email`,
-		{ ...params }
-	);
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
+	const emails = await apiClient.get( `${ WP_API_PATH }/woo_email`, {
+		...params,
+	} );
 	return emails;
 }
 

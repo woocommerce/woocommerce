@@ -53,6 +53,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
+	subSteps?: WooPaymentsProviderOnboardingStep[];
 	actions?: {
 		save?: {
 			type?: string;
@@ -91,6 +92,14 @@ export interface WooPaymentsProviderOnboardingStep {
 			href?: string;
 		};
 		auth?: {
+			type?: string;
+			href?: string;
+		};
+		reset?: {
+			type?: string;
+			href?: string;
+		};
+		test_account_disable?: {
 			type?: string;
 			href?: string;
 		};
@@ -134,6 +143,7 @@ export interface OnboardingContextType {
 	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
+	currentTopLevelStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
 	navigateToNextStep: () => void;
 	getStepByKey: (

@@ -691,7 +691,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				'manage_stock'          => array(
 					'description' => __( 'Stock management at variation level.', 'woocommerce' ),
-					'type'        => 'boolean',
+					'type'        => array( 'boolean', 'string' ),
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),

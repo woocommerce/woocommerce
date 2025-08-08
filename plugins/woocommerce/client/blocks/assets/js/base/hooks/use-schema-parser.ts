@@ -8,7 +8,12 @@ import type {
 	OrderFormValues,
 	AddressFormValues,
 	FormType,
+	ContactFormValues,
 } from '@woocommerce/settings';
+import {
+	ORDER_FORM_KEYS,
+	CONTACT_FORM_KEYS,
+} from '@woocommerce/block-settings';
 import fastDeepEqual from 'fast-deep-equal/es6';
 import {
 	cartStore,
@@ -93,21 +98,46 @@ const useDocumentObject = < T extends FormType | 'global' >(
 						? prefersCollection
 						: false,
 				totals: {
-					totalPrice: Number( totals.total_price ),
-					totalTax: Number( totals.total_tax ),
+					total_price: Number( totals.total_price ),
+					total_tax: Number( totals.total_tax ),
 				},
 				extensions,
 			},
 			checkout: {
 				createAccount: shouldCreateAccount,
 				customerNote: orderNotes,
-				additionalFields,
+				additionalFields: Object.entries( additionalFields ).reduce(
+					( acc, [ key, value ] ) => {
+						if (
+							ORDER_FORM_KEYS.includes(
+								key as keyof OrderFormValues
+							)
+						) {
+							acc[ key as keyof OrderFormValues ] = value;
+						}
+						return acc;
+					},
+					{} as OrderFormValues
+				),
 				paymentMethod: activePaymentMethod,
 			},
 			customer: {
 				id: customerId,
 				billingAddress,
 				shippingAddress,
+				additionalFields: Object.entries( additionalFields ).reduce(
+					( acc, [ key, value ] ) => {
+						if (
+							CONTACT_FORM_KEYS.includes(
+								key as keyof ContactFormValues
+							)
+						) {
+							acc[ key as keyof ContactFormValues ] = value;
+						}
+						return acc;
+					},
+					{} as ContactFormValues
+				),
 				...( formType === 'billing' || formType === 'shipping'
 					? {
 							address:
@@ -201,6 +231,7 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				id: number;
 				billing_address: AddressFormValues;
 				shipping_address: AddressFormValues;
+				additional_fields: ContactFormValues;
 				address: T extends 'billing'
 					? AddressFormValues
 					: T extends 'shipping'

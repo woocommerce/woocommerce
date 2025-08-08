@@ -1,11 +1,18 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_API_PATH,
+	WC_ADMIN_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 import { toggleVariableProductTour } from '../../utils/tours';
-import { WC_API_PATH, WC_ADMIN_API_PATH } from '../../utils/api-client';
 
 const productAttributes = [
 	{
@@ -167,6 +174,15 @@ test( 'can add custom product attributes', async ( { page, product } ) => {
 			page.locator( '.notice-success', { name: 'Product updated' } )
 		).toBeVisible();
 	} );
+
+	// There is the chance we might click on the 'Attributes' tab too early. To
+	// prevent that, we wait until the 'Variations' tab is hidden, which means
+	// the tabs have been updated.
+	await expect(
+		page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Variations' } )
+	).toBeHidden();
 
 	await goToAttributesTab( page );
 

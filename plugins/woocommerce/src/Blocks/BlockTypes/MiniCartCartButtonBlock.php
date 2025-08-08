@@ -23,14 +23,32 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
-		$view_cart_text = __( 'View my cart', 'woocommerce' );
-		$cart_page_id   = wc_get_page_id( 'cart' );
-		$cart_page_url  = get_permalink( $cart_page_id );
+		$default_view_cart_text = __( 'View my cart', 'woocommerce' );
+		$view_cart_text         = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_view_cart_text;
+		$cart_page_id           = wc_get_page_id( 'cart' );
+		$cart_page_url          = get_permalink( $cart_page_id );
+		$classes                = implode(
+			' ',
+			array_filter(
+				array(
+					'wc-block-components-button',
+					'wp-element-button wc-block-mini-cart__footer-cart',
+					// Default style class is not added by default, so it needs to be added manually if it doesn't exist.
+					( ! isset( $attributes['className'] ) || strpos( $attributes['className'], 'is-style-' ) === false ) ? 'is-style-outline' : '',
+				)
+			)
+		);
+		$wrapper_attributes     = get_block_wrapper_attributes(
+			array(
+				'href'  => esc_url( $cart_page_url ),
+				'class' => $classes,
+			)
+		);
 
 		ob_start();
 
 		?>
-		<a href="<?php echo esc_url( $cart_page_url ); ?>" class="wc-block-components-button wp-element-button wp-block-woocommerce-mini-cart-cart-button-block wc-block-mini-cart__footer-cart outlined">
+		<a <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-button__text">
 				<?php echo esc_html( $view_cart_text ); ?>
 			</div>

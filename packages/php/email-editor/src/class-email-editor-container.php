@@ -33,6 +33,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 defined( 'ABSPATH' ) || exit;
@@ -197,6 +198,7 @@ class Email_Editor_Container {
 					$container->get( Templates::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Personalization_Tags_Registry::class ),
 				);
 			}
 		);
@@ -243,6 +245,12 @@ class Email_Editor_Container {
 			Email_Editor_Logger::class,
 			function () {
 				return new Email_Editor_Logger();
+			}
+		);
+		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
 			}
 		);
 		$container->set(

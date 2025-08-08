@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
-import { WP_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: CUSTOMER_STATE_PATH,

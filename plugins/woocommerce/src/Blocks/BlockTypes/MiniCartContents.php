@@ -64,9 +64,15 @@ class MiniCartContents extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wp-interactive' => 'woocommerce/mini-cart-contents',
+			)
+		);
+
 		ob_start();
 		?>
-		<div data-wp-interactive="woocommerce/mini-cart-contents" class="wp-block-woocommerce-mini-cart-contents">
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-drawer__close-wrapper">
 				<button data-wp-on--click="woocommerce/mini-cart::callbacks.closeDrawer" class="wc-block-components-button wp-element-button wc-block-components-drawer__close contained" aria-label="Close" type="button">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">

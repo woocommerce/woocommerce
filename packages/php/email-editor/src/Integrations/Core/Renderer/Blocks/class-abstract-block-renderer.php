@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
@@ -25,15 +26,7 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return array
 	 */
 	protected function get_styles_from_block( array $block_styles, $skip_convert_vars = false ) {
-		$styles = wp_style_engine_get_styles( $block_styles, array( 'convert_vars_to_classnames' => $skip_convert_vars ) );
-		return wp_parse_args(
-			$styles,
-			array(
-				'css'          => '',
-				'declarations' => array(),
-				'classnames'   => '',
-			)
-		);
+		return Styles_Helper::get_styles_from_block( $block_styles, $skip_convert_vars );
 	}
 
 	/**
@@ -54,12 +47,8 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	protected function add_spacer( $content, $email_attrs ): string {
-		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' );
-		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' );
-
-		if ( ! $gap_style && ! $padding_style ) {
-			return $content;
-		}
+		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' ) ?? '';
+		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
 
 		$table_attrs = array(
 			'align' => 'left',

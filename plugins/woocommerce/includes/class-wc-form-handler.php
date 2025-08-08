@@ -552,7 +552,7 @@ class WC_Form_Handler {
 			if ( isset( $available_gateways[ $payment_method_id ] ) ) {
 				$gateway = $available_gateways[ $payment_method_id ];
 
-				if ( ! $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) && ! $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
+				if ( ! $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) && ! $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					wc_add_notice( __( 'Invalid payment gateway.', 'woocommerce' ), 'error' );
 					return;
 				}

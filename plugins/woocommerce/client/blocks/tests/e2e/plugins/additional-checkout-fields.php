@@ -122,7 +122,7 @@ class Additional_Checkout_Fields_Test_Helper {
 							'properties' => array(
 								'totals' => array(
 									'properties' => array(
-										'totalPrice' => array(
+										'total_price' => array(
 											'maximum' => 4000,
 										),
 									),
@@ -137,7 +137,7 @@ class Additional_Checkout_Fields_Test_Helper {
 						'properties' => array(
 							'totals' => array(
 								'properties' => array(
-									'totalPrice' => array(
+									'total_price' => array(
 										'minimum' => 5900,
 									),
 								),

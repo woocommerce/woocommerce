@@ -14,6 +14,8 @@ use WP_REST_Response;
 
 /**
  * Controller for the WooPayments-specific REST endpoints to service the Payments settings page.
+ *
+ * @internal
  */
 class WooPaymentsRestController extends RestApiControllerBase {
 
@@ -126,6 +128,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
+						'source'   => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 			),
@@ -230,6 +238,33 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/reset',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_test_account_reset' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session',
 			array(
 				array(
@@ -270,6 +305,39 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'source'   => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/test_account/disable',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_test_account_disable' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'location' => array(
+							'description'       => esc_html__( 'ISO3166 alpha-2 country code. Defaults to the stored providers business location country code.', 'woocommerce' ),
+							'type'              => 'string',
+							'pattern'           => '[a-zA-Z]{2}', // Two alpha characters.
+							'required'          => false,
+							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
+						),
+						'from'     => array(
+							'description'       => esc_html__( 'Where from in the onboarding flow this request was triggered.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'source'   => array(
 							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
@@ -457,10 +525,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location, false, $source );
 
 			$response = array(
 				'success'         => true,
@@ -490,12 +560,14 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$this->woopayments->onboarding_step_save( $step_id, $location, $request->get_params() );
 
 			// If some step data was saved, we also ensure that the step is marked as started, if not already.
 			// This way we maintain onboarding state consistency if the frontend does not call the start endpoint.
-			$this->woopayments->mark_onboarding_step_started( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_started( $step_id, $location, false, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -547,10 +619,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			$previous_status = $this->woopayments->get_onboarding_step_status( $step_id, $location );
 
-			$this->woopayments->mark_onboarding_step_completed( $step_id, $location );
+			$this->woopayments->mark_onboarding_step_completed( $step_id, $location, false, $source );
 
 			$response = array(
 				'success'         => true,
@@ -611,11 +685,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
 			// Mark the step as started, if not already.
-			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+			$this->woopayments->mark_onboarding_step_started( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
 
-			$result = $this->woopayments->onboarding_test_account_init( $location, $request->get_param( 'source' ) ?? '' );
+			$result = $this->woopayments->onboarding_test_account_init( $location, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -626,6 +702,29 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				$result
 			)
 		);
+	}
+
+	/**
+	 * Handle the onboarding test account reset action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_test_account_reset( WP_REST_Request $request ) {
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the providers country if no location is provided.
+			$location = $this->payments->get_country();
+		}
+
+		$source = $request->get_param( 'source' );
+
+		// For now, just "forward" the request to the generic onboarding reset endpoint.
+		$request->set_param( 'location', $location );
+		$request->set_param( 'from', WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT );
+		$request->set_param( 'source', $source );
+		return $this->reset_onboarding( $request );
 	}
 
 	/**
@@ -645,8 +744,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
-			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment );
+			$account_session = $this->woopayments->get_onboarding_kyc_session( $location, $self_assessment, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -673,8 +774,10 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			$location = $this->payments->get_country();
 		}
 
+		$source = $request->get_param( 'source' );
+
 		try {
-			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $request->get_param( 'source' ) ?? '' );
+			$response = $this->woopayments->finish_onboarding_kyc_session( $location, $source );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -1002,72 +1105,86 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'properties'  => array(
-								'start'              => array(
+								'start'                => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step start.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'save'               => array(
+								'save'                 => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to save step information in the database.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'check'              => array(
+								'check'                => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to check the step status.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'finish'             => array(
+								'finish'               => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to signal the step completion.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'clean'              => array(
+								'clean'                => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to clean the step progress.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'auth'               => array(
+								'auth'                 => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to authorize the WPCOM connection.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'init'               => array(
+								'init'                 => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to initialize a test account.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'kyc_session'        => array(
+								'kyc_session'          => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to create or resume an embedded KYC session.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'kyc_session_finish' => array(
+								'kyc_session_finish'   => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to finish an embedded KYC session.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
 								),
-								'kyc_fallback'       => array(
+								'kyc_fallback'         => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to use as a fallback when dealing with errors with the embedded KYC.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'reset'                => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to reset the onboarding process, either partially, for a certain step, or fully.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'test_account_disable' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to disable the test account currently in use', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,

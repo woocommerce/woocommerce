@@ -110,7 +110,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										components: {
 											link: (
 												<Link
-													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
+													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
 													target="_blank"
 													rel="noreferrer"
 													type="external"
@@ -128,7 +128,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 						<div className="woocommerce-woopayments-modal__content__item-flex">
 							<img
 								src={ WC_ASSET_URL + 'images/icons/store.svg' }
-								alt="store icon"
+								alt=""
+								role="presentation"
 							/>
 							<div className="woocommerce-woopayments-modal__content__item-flex__description">
 								<h3>
@@ -151,7 +152,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 									src={
 										WC_ASSET_URL + 'images/icons/dollar.svg'
 									}
-									alt="dollar icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>

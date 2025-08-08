@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Update CLI Migrator test suite to match refactored architecture and fix coding standards violations.

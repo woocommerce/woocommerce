@@ -7,7 +7,7 @@ import {
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
-import { CartLineItemsSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 /**
  * Internal dependencies
  */
@@ -24,10 +24,12 @@ const OrderSummary = ( {
 	disableProductDescriptions = false,
 }: OrderSummaryProps ): null | JSX.Element => {
 	const { isLarge } = useContainerWidthContext();
-	const { cartIsLoading } = useStoreCart();
+	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 
-	if ( cartIsLoading ) {
-		return <CartLineItemsSkeleton />;
+	if ( cartIsLoading || hasPendingItemsOperations ) {
+		return (
+			<CartLineItemsCheckoutSkeleton rows={ cartItems?.length || 2 } />
+		);
 	}
 	return (
 		<div

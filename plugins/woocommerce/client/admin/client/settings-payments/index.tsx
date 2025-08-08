@@ -4,7 +4,7 @@
 import { Gridicon } from '@automattic/components';
 import { Button, Placeholder, SelectControl } from '@wordpress/components';
 import { paymentSettingsStore } from '@woocommerce/data';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import React, {
 	useState,
 	lazy,
@@ -19,7 +19,7 @@ import {
 	useLocation,
 } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -104,46 +104,20 @@ const OfflinePaymentGatewayWrapper = ( {
 	title,
 	chunkComponent: ChunkComponent,
 }: OfflinePaymentGatewayWrapperProps ) => {
-	const { invalidateResolution, invalidateResolutionForStoreSelector } =
-		useDispatch( paymentSettingsStore );
-
 	return (
 		<>
 			<div className="settings-payments-offline__container">
 				<div className="settings-payment-gateways">
 					<div className="settings-payments-offline__header">
-						<div
-							onClick={ () => {
-								// Invalidate the payment providers and offline payment gateways stores.
-								// This is to ensure that the data is refreshed when the user navigates back to the offline payment settings page.
-								invalidateResolution(
-									'getPaymentProviders',
-									[]
-								);
-								invalidateResolutionForStoreSelector(
-									'getOfflinePaymentGateways'
-								);
-							} }
-							role="button"
-							tabIndex={ 0 }
-							onKeyDown={ ( e ) => {
-								if ( e.key === 'Enter' ) {
-									invalidateResolutionForStoreSelector(
-										'getOfflinePaymentGateways'
-									);
-								}
-							} }
-						>
-							<BackButton
-								href={ getNewPath( {}, '/offline' ) }
-								title={ __(
-									'Return to payments settings',
-									'woocommerce'
-								) }
-								isRoute={ true }
-								from={ 'woopayments_payment_methods' }
-							/>
-						</div>
+						<BackButton
+							href={ getNewPath( {}, '/offline' ) }
+							title={ __(
+								'Return to payments settings',
+								'woocommerce'
+							) }
+							isRoute={ true }
+							from={ 'woopayments_payment_methods' }
+						/>
 						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
 							<span className="woocommerce-settings-payments-header__title">
 								{ title }
@@ -421,7 +395,17 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 				title={ __( 'Settings', 'woocommerce' ) }
 				context={ 'wc_settings_payments__woopayments' }
 			/>
-			<Suspense fallback={ <div>Loading WooPayments settings...</div> }>
+			<Suspense
+				fallback={
+					<div>
+						{ sprintf(
+							/* translators: %s: WooPayments */
+							__( 'Loading %s settings…', 'woocommerce' ),
+							'WooPayments'
+						) }
+					</div>
+				}
+			>
 				<SettingsPaymentsWooPaymentsChunk />
 			</Suspense>
 		</>
