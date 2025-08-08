@@ -8,11 +8,6 @@ import {
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
-
 test.describe( 'Template priority', () => {
 	// Templates might come from different sources, and they should have this order of priority:
 	// 1. Template from the database with the theme slug.
@@ -46,7 +41,6 @@ test.describe( 'Template priority', () => {
 	templatesToTest.forEach( ( testData ) => {
 		test( `priorities are applied correctly in the ${ testData.templateName } template`, async ( {
 			admin,
-			frontendUtils,
 			editor,
 			page,
 			requestUtils,
