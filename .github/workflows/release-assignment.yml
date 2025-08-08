@@ -244,7 +244,7 @@ jobs:
             }
 
             const linearClient = new LinearClient({
-              apiKey: '${{ secrets.LINEAR_API_KEY }}',
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
             });
 
             const email = process.env.RELEASE_LEAD_GOOGLE_LOGIN || '';
@@ -307,7 +307,7 @@ jobs:
             const { LinearClient } = require("@linear/sdk");
 
             const linearClient = new LinearClient({
-              apiKey: '${{ secrets.LINEAR_API_KEY }}',
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
             });
 
             const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
