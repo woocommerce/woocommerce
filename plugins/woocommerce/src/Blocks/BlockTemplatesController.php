@@ -265,38 +265,6 @@ class BlockTemplatesController {
 				)
 			) {
 				array_unshift( $query_result, $template_file );
-				continue;
-			}
-
-			// If the template has a fallback, we should not include it in the list of templates, unless it has been modified.
-			$template_data = BlockTemplateUtils::get_template( $template_file->slug );
-			if ( $template_data && isset( $template_data->fallback_template ) ) {
-				continue;
-			}
-
-			$possible_template_ids = [
-				$theme_slug . '//' . $template_file->slug,
-				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_file->slug,
-				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['DEPRECATED_TEMPLATE_PARTS'] . '/' . $template_file->slug,
-			];
-
-			$is_custom                 = false;
-			$query_result_template_ids = array_column( $query_result, 'id' );
-
-			foreach ( $possible_template_ids as $template_id ) {
-				if ( in_array( $template_id, $query_result_template_ids, true ) ) {
-					$is_custom = true;
-					break;
-				}
-			}
-			$fits_slug_query =
-				! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
-			$fits_area_query =
-				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-			$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
-			if ( $should_include ) {
-				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
-				$query_result[] = $template;
 			}
 		}
 
