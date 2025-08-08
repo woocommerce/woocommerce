@@ -87,6 +87,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	public function download_export_file( $request ) {
 		$filename = sanitize_file_name( $request->get_param( 'filename' ) );
 		$format = $request->get_param( 'format' );
+		$compress = $request->get_param( 'compress' ) ?: 'none';
 
 		if ( empty( $filename ) ) {
 			return new WP_Error( 'woocommerce_rest_export_invalid_filename', __( 'Invalid filename provided.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -99,12 +100,33 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_export_file_not_found', __( 'Export file not found.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		// Handle compression
+		if ( 'none' !== $compress ) {
+			$compressed_file_path = $this->compress_file( $file_path, $compress, $format );
+			if ( is_wp_error( $compressed_file_path ) ) {
+				return $compressed_file_path;
+			}
+			
+			// Update file path and filename for compressed file
+			$file_path = $compressed_file_path;
+			$filename = basename( $compressed_file_path );
+		}
+
 		$file_size = filesize( $file_path );
-		$mime_type = 'json' === $format ? 'application/json' : 'text/csv';
+		$mime_type = $this->get_mime_type( $format, $compress );
+		
+		// For GZIP files, suggest the original filename when decompressed
+		$download_filename = $filename;
+		if ( 'gzip' === $compress && substr( $filename, -3 ) === '.gz' ) {
+			$original_filename = substr( $filename, 0, -3 );
+			$download_filename = $filename;
+			// Add custom header to suggest original filename
+			header( 'X-Original-Filename: ' . $original_filename );
+		}
 
 		// Set headers for file download
 		header( 'Content-Type: ' . $mime_type );
-		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+		header( 'Content-Disposition: attachment; filename="' . $download_filename . '"' );
 		header( 'Content-Length: ' . $file_size );
 		header( 'Cache-Control: no-cache, must-revalidate' );
 		header( 'Expires: Sat, 26 Jul 1997 05:00:00 GMT' );
@@ -112,8 +134,16 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		// Output file content
 		readfile( $file_path );
 
-		// Clean up the file after download
+		// Clean up files after download
 		unlink( $file_path );
+		
+		// Also clean up original file if we created a compressed version
+		if ( 'none' !== $compress ) {
+			$original_file = trailingslashit( $upload_dir['basedir'] ) . $request->get_param( 'filename' );
+			if ( file_exists( $original_file ) ) {
+				unlink( $original_file );
+			}
+		}
 
 		exit;
 	}
@@ -189,6 +219,12 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 							'type'        => 'string',
 							'enum'        => array( 'json', 'csv' ),
 							'required'    => true,
+						),
+						'compress' => array(
+							'description' => __( 'Compression format (zip, gzip, or none).', 'woocommerce' ),
+							'type'        => 'string',
+							'enum'        => array( 'zip', 'gzip', 'none' ),
+							'default'     => 'none',
 						),
 					),
 				),
@@ -622,6 +658,89 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Compress a file using the specified compression method.
+	 *
+	 * @param string $file_path Path to the original file.
+	 * @param string $compress Compression method ('zip' or 'gzip').
+	 * @param string $format Original file format.
+	 * @return string|WP_Error Path to compressed file or error.
+	 */
+	private function compress_file( $file_path, $compress, $format ) {
+		if ( ! file_exists( $file_path ) ) {
+			return new WP_Error( 'woocommerce_rest_export_file_not_found', __( 'Source file not found for compression.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$upload_dir = wp_upload_dir();
+		$base_filename = pathinfo( $file_path, PATHINFO_FILENAME );
+		
+		if ( 'zip' === $compress ) {
+			if ( ! class_exists( 'ZipArchive' ) ) {
+				return new WP_Error( 'woocommerce_rest_export_zip_not_available', __( 'ZIP compression not available on this server.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+			
+			$zip_filename = $base_filename . '.zip';
+			$zip_path = trailingslashit( $upload_dir['basedir'] ) . $zip_filename;
+			
+			$zip = new ZipArchive();
+			if ( $zip->open( $zip_path, ZipArchive::CREATE ) === true ) {
+				$zip->addFile( $file_path, basename( $file_path ) );
+				$zip->close();
+				
+				if ( file_exists( $zip_path ) ) {
+					return $zip_path;
+				}
+			}
+			
+			return new WP_Error( 'woocommerce_rest_export_zip_failed', __( 'Failed to create ZIP archive.', 'woocommerce' ), array( 'status' => 500 ) );
+			
+		} elseif ( 'gzip' === $compress ) {
+			if ( ! function_exists( 'gzopen' ) ) {
+				return new WP_Error( 'woocommerce_rest_export_gzip_not_available', __( 'GZIP compression not available on this server.', 'woocommerce' ), array( 'status' => 500 ) );
+			}
+			
+			$original_filename = basename( $file_path );
+			$gzip_filename = $original_filename . '.gz';
+			$gzip_path = trailingslashit( $upload_dir['basedir'] ) . $gzip_filename;
+			
+			$source = fopen( $file_path, 'rb' );
+			$dest = gzopen( $gzip_path, 'wb9' );
+			
+			if ( $source && $dest ) {
+				while ( ! feof( $source ) ) {
+					gzwrite( $dest, fread( $source, 8192 ) );
+				}
+				fclose( $source );
+				gzclose( $dest );
+				
+				if ( file_exists( $gzip_path ) ) {
+					return $gzip_path;
+				}
+			}
+			
+			return new WP_Error( 'woocommerce_rest_export_gzip_failed', __( 'Failed to create GZIP archive.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		return new WP_Error( 'woocommerce_rest_export_invalid_compression', __( 'Invalid compression method specified.', 'woocommerce' ), array( 'status' => 400 ) );
+	}
+
+	/**
+	 * Get the appropriate MIME type based on format and compression.
+	 *
+	 * @param string $format Original file format ('json' or 'csv').
+	 * @param string $compress Compression method ('zip', 'gzip', or 'none').
+	 * @return string MIME type.
+	 */
+	private function get_mime_type( $format, $compress ) {
+		if ( 'zip' === $compress ) {
+			return 'application/zip';
+		} elseif ( 'gzip' === $compress ) {
+			return 'application/gzip';
+		}
+		
+		return 'json' === $format ? 'application/json' : 'text/csv';
 	}
 
 	/**
