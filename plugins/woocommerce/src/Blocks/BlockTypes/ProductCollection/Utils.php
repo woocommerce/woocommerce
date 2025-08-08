@@ -122,7 +122,7 @@ class Utils {
 			$source_data = array( 'orderId' => absint( $wp_query->query_vars['order-received'] ) );
 
 		} else {
-			// Check if we're in a cart context (traditional pages or pages with cart/checkout blocks).
+			// Check if we're in a cart block context.
 			$current_page      = $wp_query->get_queried_object();
 			$has_cart_block    = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
 			$is_cart_available = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
