@@ -96,15 +96,10 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 		$product_id = $product->get_id();
 
 		// Add a review to the product.
-		$review_id = ProductHelper::create_product_review( $product_id, 'Great product!', 5 );
+		$review_id = ProductHelper::create_product_review( $product_id, 'Great product!' );
 
-		// Ensure the review is approved.
-		wp_update_comment(
-			array(
-				'comment_ID'       => $review_id,
-				'comment_approved' => '1',
-			)
-		);
+		// Add rating meta to the review.
+		update_comment_meta( $review_id, 'rating', 5 );
 
 		// Clear transients and verify no fatal error occurs.
 		WC_Comments::clear_transients( $product_id );

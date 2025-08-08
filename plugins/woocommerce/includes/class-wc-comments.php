@@ -259,7 +259,7 @@ class WC_Comments {
 	 * @param int $post_id Post ID.
 	 */
 	public static function clear_transients( $post_id ) {
-		$product = $post_id && wc_get_product( $post_id );
+		$product = $post_id ? wc_get_product( $post_id ) : $post_id;
 		if ( $product instanceof WC_Product ) {
 			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
 			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
