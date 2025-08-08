@@ -535,26 +535,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns `true` if the $template has been found in the $query_result.
-	 *
-	 * @param array  $query_result Array of template objects.
-	 * @param object $template A specific template object.
-	 *
-	 * @return boolean
-	 */
-	public static function is_template_in_query_result( $query_result, $template ) {
-		foreach ( $query_result as &$query_result_template ) {
-			if (
-				$query_result_template->slug === $template->slug
-				&& $query_result_template->theme === $template->theme
-			) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Removes templates from the theme or WooCommerce which have the same slug
 	 * as template saved in the database with the `woocommerce/woocommerce` theme.
 	 * Before WC migrated to the Template Registration API from WordPress, templates

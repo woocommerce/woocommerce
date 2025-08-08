@@ -238,24 +238,6 @@ class BlockTemplatesController {
 		$theme_slug = get_stylesheet();
 
 		foreach ( $template_files as $template_file ) {
-
-			// If we have a template which is eligible for a fallback, we need to explicitly tell Gutenberg that
-			// it has a theme file (because it is using the fallback template file). And then `continue` to avoid
-			// adding duplicates.
-			if ( BlockTemplateUtils::is_template_in_query_result( $query_result, $template_file ) ) {
-				continue;
-			}
-
-			// If the current $post_type is set (e.g. on an Edit Post screen), and isn't included in the available post_types
-			// on the template file, then lets skip it so that it doesn't get added. This is typically used to hide templates
-			// in the template dropdown on the Edit Post page.
-			if ( $post_type &&
-				isset( $template_file->post_types ) &&
-				! in_array( $post_type, $template_file->post_types, true )
-			) {
-				continue;
-			}
-
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if (
@@ -278,18 +260,6 @@ class BlockTemplatesController {
 		// and customized that one as well. When that happens, duplicates might appear in the list.
 		// See: https://github.com/woocommerce/woocommerce/issues/42220.
 		$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result, $theme_slug );
-
-		/**
-		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
-		 * We need to do additional search through all templates file to update title and description for WC
-		 * templates that aren't listed in theme.json.
-		 */
-		$query_result = array_map(
-			function ( $template ) use ( $template_type ) {
-				return BlockTemplateUtils::update_template_data( $template, $template_type );
-			},
-			$query_result
-		);
 
 		return $query_result;
 	}
