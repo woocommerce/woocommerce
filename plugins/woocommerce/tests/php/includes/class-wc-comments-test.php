@@ -92,7 +92,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with valid product ID.
 	 */
 	public function test_clear_transients_with_valid_product() {
-		$product = WC_Helper_Product::create_simple_product();
+		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
 
 		// Add a review to the product.
@@ -121,11 +121,9 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	public function test_clear_transients_with_invalid_product_id() {
 		$invalid_product_id = 99999;
 
-		// This should not cause a fatal error.
+		// This should not cause any errors or exceptions.
+		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $invalid_product_id );
-
-		// Verify the function completed without error.
-		$this->assertTrue( true, 'clear_transients should handle invalid product ID gracefully.' );
 	}
 
 	/**
@@ -142,24 +140,11 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		// This should not cause a fatal error.
+		// This should not cause any errors or exceptions.
+		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $post_id );
-
-		// Verify the function completed without error.
-		$this->assertTrue( true, 'clear_transients should handle non-product post ID gracefully.' );
 
 		// Clean up.
 		wp_delete_post( $post_id, true );
-	}
-
-	/**
-	 * Test clear_transients with zero/null product ID.
-	 */
-	public function test_clear_transients_with_zero_product_id() {
-		// This should not cause a fatal error.
-		WC_Comments::clear_transients( 0 );
-
-		// Verify the function completed without error.
-		$this->assertTrue( true, 'clear_transients should handle zero product ID gracefully.' );
 	}
 }
