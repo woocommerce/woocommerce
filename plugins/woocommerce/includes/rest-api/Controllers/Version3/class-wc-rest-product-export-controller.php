@@ -49,8 +49,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function export_products_permissions_check( $request ) {
-		// Check if user can manage WooCommerce or edit products
-		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'edit_products' ) ) {
+		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_export', __( 'Sorry, you are not allowed to export products.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -64,14 +63,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function download_export_file_permissions_check( $request ) {
-		// For download endpoints, we'll be more lenient with authentication
-		// since the file itself provides security
-		if ( ! is_user_logged_in() ) {
-			return true;
-		}
-
-		// If user is logged in, check capabilities
-		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'edit_products' ) ) {
+		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_export', __( 'Sorry, you are not allowed to export products.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
