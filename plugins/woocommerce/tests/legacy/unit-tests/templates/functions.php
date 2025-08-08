@@ -128,8 +128,8 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 		wc_dropdown_variation_attribute_options(
 			array(
-				'product'   => $product,
-				'attribute' => 'pa_size',
+				'product'    => $product,
+				'attribute'  => 'pa_size',
 				'aria-label' => 'Size for product',
 			)
 		);
@@ -145,8 +145,8 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 		wc_dropdown_variation_attribute_options(
 			array(
-				'product'   => $product,
-				'attribute' => 'pa_size',
+				'product'    => $product,
+				'attribute'  => 'pa_size',
 				'aria-label' => '" onload="alert(\'XSS\')"',
 			)
 		);
@@ -162,8 +162,8 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 		wc_dropdown_variation_attribute_options(
 			array(
-				'product'   => $product,
-				'attribute' => 'pa_size',
+				'product'    => $product,
+				'attribute'  => 'pa_size',
 				'aria-label' => '',
 			)
 		);
