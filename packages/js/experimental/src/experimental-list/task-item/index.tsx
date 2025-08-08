@@ -13,7 +13,7 @@ import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
 import clsx from 'clsx';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML as _sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
@@ -24,9 +24,12 @@ import { VerticalCSSTransition } from '../../vertical-css-transition';
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
 
-const sanitizeHTML = ( html: string ) => {
+const sanitizeHTML = ( html: string ): { __html: string } => {
 	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
+		__html: _sanitizeHTML( html, {
+			tags: ALLOWED_TAGS,
+			attrs: ALLOWED_ATTR,
+		} ),
 	};
 };
 

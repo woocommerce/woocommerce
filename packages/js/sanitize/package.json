@@ -1,0 +1,49 @@
+{
+	"name": "@woocommerce/sanitize",
+	"version": "0.1.0",
+	"description": "WooCommerce HTML sanitization utilities.",
+	"main": "build/index.js",
+	"module": "build/index.js",
+	"types": "build/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/js/sanitize"
+	},
+	"keywords": [
+		"woocommerce",
+		"sanitize",
+		"dompurify",
+		"html",
+		"security"
+	],
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/sanitize#readme",
+	"dependencies": {
+		"dompurify": "^2.5.7"
+	},
+	"devDependencies": {
+		"@types/dompurify": "^2.4.0",
+		"@wordpress/scripts": "^27.0.0",
+		"typescript": "5.7.x"
+	},
+	"peerDependencies": {
+		"@types/react": "18.3.x",
+		"@types/react-dom": "18.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "wp-scripts build",
+		"dev": "wp-scripts start",
+		"lint": "wp-scripts lint",
+		"start": "wp-scripts start"
+	}
+} 

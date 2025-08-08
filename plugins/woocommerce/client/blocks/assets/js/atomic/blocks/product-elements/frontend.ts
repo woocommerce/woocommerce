@@ -10,7 +10,7 @@ import {
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { ProductData } from '@woocommerce/stores/woocommerce/cart';
-import { sanitize } from 'dompurify'; // eslint-disable-line import/named
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -92,9 +92,9 @@ const productElementStore = store(
 					];
 
 				if ( typeof productElementHtml === 'string' ) {
-					element.ref.innerHTML = sanitize( productElementHtml, {
-						ALLOWED_TAGS,
-						ALLOWED_ATTR,
+					element.ref.innerHTML = sanitizeHTML( productElementHtml, {
+						tags: ALLOWED_TAGS,
+						attr: ALLOWED_ATTR,
 					} );
 				}
 			},

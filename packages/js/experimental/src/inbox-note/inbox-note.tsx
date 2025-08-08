@@ -8,7 +8,7 @@ import { useInView } from 'react-intersection-observer';
 import moment from 'moment';
 import clsx from 'clsx';
 import { H, Section } from '@woocommerce/components';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
@@ -16,12 +16,9 @@ import { sanitize } from 'dompurify';
 import { InboxNoteActionButton } from './action';
 import { useCallbackOnLinkClick } from './use-callback-on-link-click';
 
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
-
-const sanitizeHTML = ( html: string ) => {
+const sanitizeHTMLForReact = ( html: string ) => {
 	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
+		__html: sanitizeHTML( html ),
 	};
 };
 
@@ -210,7 +207,7 @@ const InboxNoteCard = ( {
 					</H>
 					<Section className="woocommerce-inbox-message__text">
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML( content ) }
+							dangerouslySetInnerHTML={ sanitizeHTMLForReact( content ) }
 							ref={ linkCallbackRef }
 						/>
 					</Section>
