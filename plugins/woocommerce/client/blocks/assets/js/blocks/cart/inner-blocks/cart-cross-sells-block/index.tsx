@@ -7,9 +7,7 @@ import {
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
-	BlockInstance,
 } from '@wordpress/blocks';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -37,20 +35,11 @@ registerBlockType( 'woocommerce/cart-cross-sells-block', {
 			{
 				type: 'block',
 				blocks: [ 'woocommerce/product-collection' ],
-				transform: (
-					attributes: Record< string, unknown >,
-					innerBlocks: BlockInstance[]
-				) => {
-					const columns =
-						innerBlocks.find(
-							( block ) =>
-								block.name ===
-								'woocommerce/cart-cross-sells-products-block'
-						)?.attributes?.columns || 3;
-
+				transform: () => {
 					return createBlock(
 						'woocommerce/product-collection',
 						{
+							...crossSells.attributes,
 							collection:
 								'woocommerce/product-collection/cross-sells',
 						},
