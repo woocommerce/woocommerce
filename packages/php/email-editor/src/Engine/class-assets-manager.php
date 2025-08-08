@@ -203,9 +203,9 @@ class Assets_Manager {
 		);
 
 		$localization_data = array(
-			'current_post_type'     => esc_js( $post_type ),
+			'current_post_type'     => $post_type,
 			'current_post_id'       => $post_id,
-			'current_wp_user_email' => esc_js( wp_get_current_user()->user_email ),
+			'current_wp_user_email' => wp_get_current_user()->user_email,
 			'editor_settings'       => $this->settings_controller->get_settings(),
 			'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 			'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,

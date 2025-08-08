@@ -8,7 +8,6 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
-use Automattic\Jetpack\Assets;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;

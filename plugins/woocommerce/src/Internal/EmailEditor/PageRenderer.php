@@ -38,8 +38,8 @@ class PageRenderer {
 		$this->template_registry = $editor_container->get( Templates_Registry::class );
 
 		$assets_manager = $editor_container->get( Assets_Manager::class );
-		$assets_manager->set_assets_path( WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . '/email-editor/' );
-		$assets_manager->set_assets_url( WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . '/email-editor/' );
+		$assets_manager->set_assets_path( WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/' );
+		$assets_manager->set_assets_url( WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/' );
 		$this->assets_manager = $assets_manager;
 	}
 
