@@ -197,6 +197,7 @@ const productButtonStore = {
 				addToCartWithOptionsState?.isFormValid
 			) {
 				context.hasPressedButton = true;
+				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
 		},
 	},

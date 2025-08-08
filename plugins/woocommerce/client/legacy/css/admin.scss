@@ -8975,11 +8975,11 @@ body.woocommerce_page_wc-settings {
 		nav {
 			margin: 0 -30px 24px -30px;
 		}
-		padding: 0 30px;
+		padding: 0 30px 40px;
 		background: #f0f0f1;
 
 		.subsubsub {
-			margin-bottom: 24px;
+			margin-bottom: 0;
 			li {
 				color: #2271b1;
 				&:first-child a{
@@ -9075,3 +9075,15 @@ body.woocommerce_page_wc-settings {
 	}
 }
 
+/**
+ * Hide screen meta links on Advanced Keys settings page.
+ */ 
+body.woocommerce_page_wc-settings-advanced-keys,
+body.woocommerce_page_wc-settings-advanced-webhooks,
+body.woocommerce-admin-page__extensions,
+body.woocommerce-admin-launch-your-store,
+body.woocommerce-admin-full-screen {
+	#screen-meta-links {
+		display:none;
+	}
+}

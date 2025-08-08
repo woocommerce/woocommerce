@@ -155,9 +155,6 @@ $max-button-width: calc(100% / #{$max-button-columns});
 
 .wp-block-woocommerce-product-collection {
 	.wc-block-next-previous-buttons {
-		position: absolute;
-		top: 0;
-		left: 0;
 		pointer-events: none;
 
 		.wc-block-next-previous-buttons__button {
