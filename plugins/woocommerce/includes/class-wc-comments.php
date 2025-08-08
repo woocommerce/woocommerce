@@ -260,7 +260,7 @@ class WC_Comments {
 	 */
 	public static function clear_transients( $post_id ) {
 		$post_id = absint( $post_id );
-		if ( $post_id === 0 || 'product' !== get_post_type( $post_id ) ) {
+		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
 			return;
 		}
 
