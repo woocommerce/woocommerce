@@ -7,8 +7,6 @@
 
 declare( strict_types = 1);
 
-require_once WC_ABSPATH . '/includes/class-wc-brands.php';
-
 /**
  * WC Brands test
  */
@@ -92,14 +90,7 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 
 		// Get the brand term.
 		clean_term_cache( $data['brand_with_products']['term_id'], 'product_brand' );
-		$brand_terms = get_terms(
-			array(
-				'taxonomy'   => 'product_brand',
-				'include'    => array( $data['brand_with_products']['term_id'] ),
-				'hide_empty' => false,
-			)
-		);
-		$brand_term  = $brand_terms[0];
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
 
 		// Test that the count is correctly calculated.
 		$this->assertEquals( 1, $brand_term->count, 'Brand should have 1 product' );
@@ -124,14 +115,7 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		// Get the brand term.
-		$brand_terms = get_terms(
-			array(
-				'taxonomy'   => 'product_brand',
-				'include'    => array( $data['brand_with_products']['term_id'] ),
-				'hide_empty' => false,
-			)
-		);
-		$brand_term  = $brand_terms[0];
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
 
 		// Test that the count is 0 when product is out of stock and hidden.
 		$this->assertEquals( 0, $brand_term->count, 'Brand count should be 0 when product is out of stock and hidden' );
@@ -187,15 +171,8 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Set admin context.
 		set_current_screen( 'edit-post' );
 
-		// Get the brand term using get_terms() to see what happens.
-		$brand_terms = get_terms(
-			array(
-				'taxonomy'   => 'product_brand',
-				'include'    => array( $data['brand_with_products']['term_id'] ),
-				'hide_empty' => false,
-			)
-		);
-		$brand_term  = $brand_terms[0];
+		// Get the brand term using helper.
+		$brand_term = $this->get_first_brand_term( array( $data['brand_with_products']['term_id'] ) );
 
 		// Test that the count is 1 (ignores out of stock setting in admin context).
 		$this->assertEquals( 1, $brand_term->count, 'Brand count should be 1 in admin context, ignoring out of stock setting' );
@@ -225,5 +202,23 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 			'empty_brand'         => $empty_brand,
 			'product'             => $product,
 		);
+	}
+
+	/**
+	 * Helper method to get the first brand term.
+	 *
+	 * @param array $term_ids Array of brand term IDs to include.
+	 * @return WP_Term The first brand term.
+	 */
+	private function get_first_brand_term( $term_ids = array() ) {
+		$args = array(
+			'taxonomy'   => 'product_brand',
+			'hide_empty' => false,
+		);
+		if ( ! empty( $term_ids ) ) {
+			$args['include'] = $term_ids;
+		}
+		$brand_terms = get_terms( $args );
+		return $brand_terms[0];
 	}
 }
