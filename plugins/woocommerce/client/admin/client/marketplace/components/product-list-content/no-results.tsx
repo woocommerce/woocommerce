@@ -46,7 +46,7 @@ export default function NoResults( props: {
 
 				const productGroupsToDisplay = products.filter( ( group ) => {
 					return productGroupIds.includes( group.id );
-				} );
+				} ).map( group => ( { ...group, items: { ...group.items } } ) );
 
 				if ( ! productGroupsToDisplay ) {
 					return;
