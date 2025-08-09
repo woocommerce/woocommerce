@@ -119,6 +119,13 @@ class WC_REST_Product_Brands_Controller_Test extends WC_REST_Unit_Test_Case {
 		$brand_data = $data[0];
 		$this->assertEquals( 0, $brand_data['count'], 'Brand should have count of 0 when product is out of stock and hidden' );
 
+		// Brand specific request should have count of 1.
+		$request    = new WP_REST_Request( 'GET', '/wc/v3/products/brands/' . $brand['term_id'] );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
+		$brand_data = $data;
+		$this->assertEquals( 1, $brand_data['count'], 'Brand should have count of 0 when product is out of stock and hidden' );
+
 		// Reset the setting.
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
 	}
