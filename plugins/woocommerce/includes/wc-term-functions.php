@@ -386,7 +386,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * This is used as the update_count_callback for the Product Category and Product Tag
+ * This is used as the update_count_callback for the Product Category, Product Tag, and Product Brand
  * taxonomies. By default, it actually calculates two (possibly different) counts for each
  * term, which it stores in two different places. The first count is the one done by WordPress
  * itself, and is based on the status of the objects that are assigned the terms. In this case,
