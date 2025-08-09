@@ -49,7 +49,6 @@ const productReviewsFormStore = {
 			state.selectedStar = parseInt( starValue, 10 );
 		},
 		changeRatingWithKeyboard( event: KeyboardEvent ) {
-			event.preventDefault();
 			const { ref } = getElement();
 			if ( ! ref || ! ref.parentNode ) {
 				return;
@@ -57,18 +56,42 @@ const productReviewsFormStore = {
 
 			const { starValue } = getContext< StarContext >();
 			const starInt = parseInt( starValue, 10 );
+			let newRating = starInt;
+
+			let shouldPreventDefault = false;
 
 			if ( event.key === 'ArrowLeft' && starInt > 1 ) {
-				state.selectedStar = starInt - 1;
+				newRating = starInt - 1;
+				shouldPreventDefault = true;
 			} else if ( event.key === 'ArrowRight' && starInt < 5 ) {
-				state.selectedStar = starInt + 1;
+				newRating = starInt + 1;
+				shouldPreventDefault = true;
+			} else if ( event.key === 'Home' ) {
+				newRating = 1;
+				shouldPreventDefault = true;
+			} else if ( event.key === 'End' ) {
+				newRating = 5;
+				shouldPreventDefault = true;
+			} else if ( event.key === ' ' || event.key === 'Enter' ) {
+				// Activate current star.
+				event.preventDefault();
+				state.selectedStar = starInt;
+				return;
 			}
 
-			ref.parentNode
-				.querySelector< HTMLButtonElement >(
-					`button:nth-child(${ state.selectedStar })`
-				)
-				?.focus();
+			if ( shouldPreventDefault ) {
+				event.preventDefault();
+				state.selectedStar = newRating;
+
+				// Focus management - only move focus for navigation keys.
+				const nextButton =
+					ref.parentNode.querySelector< HTMLButtonElement >(
+						`button:nth-child(${ newRating })`
+					);
+				if ( nextButton ) {
+					nextButton.focus();
+				}
+			}
 		},
 		handleSubmit( event: HTMLElementEvent< HTMLFormElement > ) {
 			const formData = new FormData( event.target );

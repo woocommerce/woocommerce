@@ -32,7 +32,7 @@ class ProductReviewForm extends AbstractBlock {
 		}
 
 		if ( post_password_required( $block->context['postId'] ) ) {
-			return;
+			return '';
 		}
 
 		$product = wc_get_product( $block->context['postId'] );
@@ -182,7 +182,7 @@ class ProductReviewForm extends AbstractBlock {
 				data-wp-on-async--mouseenter="actions.hoverStar"
 				data-wp-on-async--mouseleave="actions.leaveStar"
 				data-wp-on-async--click="actions.selectStar"
-				data-wp-on-async--keyup="actions.changeRatingWithKeyboard"
+				data-wp-on-async--keydown="actions.changeRatingWithKeyboard"
 				data-wp-class--is-hovered="state.isStarHovered"
 				data-wp-class--is-selected="state.isStarSelected"
 				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
