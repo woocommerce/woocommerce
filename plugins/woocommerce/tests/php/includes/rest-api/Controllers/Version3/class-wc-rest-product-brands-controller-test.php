@@ -207,5 +207,22 @@ class WC_REST_Product_Brands_Controller_Test extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 0, $data['count'], 'Brand should have count of 0 after removing product' );
+
+		// Attach the product to the brand again.
+		wp_set_object_terms( $product->get_id(), array( $brand['term_id'] ), 'product_brand' );
+
+		// Now should have count of 1 again.
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/products/brands/' . $brand['term_id'] );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Delete the product.
+		wp_delete_post( $product->get_id() );
+
+		// Now should have count of 0 again.
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/products/brands/' . $brand['term_id'] );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 0, $data['count'], 'Brand should have count of 0 after deleting product' );
 	}
 }
