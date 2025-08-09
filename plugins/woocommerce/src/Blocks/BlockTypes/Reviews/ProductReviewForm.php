@@ -179,9 +179,10 @@ class ProductReviewForm extends AbstractBlock {
 				type="button"
 				<?php /* translators: %d is the rating value from 1 to 5 */ ?>
 				aria-label='<?php echo esc_attr( sprintf( _n( '%d of 5 star', '%d of 5 stars', $i, 'woocommerce' ), $i ) ); ?>'
-				data-wp-on--mouseenter="actions.hoverStar"
-				data-wp-on--mouseleave="actions.leaveStar"
-				data-wp-on--click="actions.selectStar"
+				data-wp-on-async--mouseenter="actions.hoverStar"
+				data-wp-on-async--mouseleave="actions.leaveStar"
+				data-wp-on-async--click="actions.selectStar"
+				data-wp-on-async--keyup="actions.changeRatingWithKeyboard"
 				data-wp-class--is-hovered="state.isStarHovered"
 				data-wp-class--is-selected="state.isStarSelected"
 				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

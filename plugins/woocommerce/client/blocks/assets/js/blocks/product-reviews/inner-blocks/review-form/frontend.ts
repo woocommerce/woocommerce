@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { getConfig, getContext, store } from '@wordpress/interactivity';
+import {
+	getConfig,
+	getContext,
+	getElement,
+	store,
+} from '@wordpress/interactivity';
 import type { HTMLElementEvent } from '@woocommerce/types';
 
 type ServerState = {
@@ -42,6 +47,28 @@ const productReviewsFormStore = {
 		selectStar() {
 			const { starValue } = getContext< StarContext >();
 			state.selectedStar = parseInt( starValue, 10 );
+		},
+		changeRatingWithKeyboard( event: KeyboardEvent ) {
+			event.preventDefault();
+			const { ref } = getElement();
+			if ( ! ref || ! ref.parentNode ) {
+				return;
+			}
+
+			const { starValue } = getContext< StarContext >();
+			const starInt = parseInt( starValue, 10 );
+
+			if ( event.key === 'ArrowLeft' && starInt > 1 ) {
+				state.selectedStar = starInt - 1;
+			} else if ( event.key === 'ArrowRight' && starInt < 5 ) {
+				state.selectedStar = starInt + 1;
+			}
+
+			ref.parentNode
+				.querySelector< HTMLButtonElement >(
+					`button:nth-child(${ state.selectedStar })`
+				)
+				?.focus();
 		},
 		handleSubmit( event: HTMLElementEvent< HTMLFormElement > ) {
 			const formData = new FormData( event.target );
