@@ -3069,3 +3069,39 @@ function wc_update_990_remove_email_notes() {
 function wc_update_1000_remove_patterns_toolkit_transient() {
 	delete_transient( 'ptk_patterns' );
 }
+
+/**
+ * Add MPN column to the product meta lookup table.
+ *
+ * @return void
+ */
+function wc_update_1020_add_mpn_to_product_lookup_table() {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_product_meta_lookup';
+	
+	// Check if the column already exists.
+	$column_exists = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'mpn'",
+			$wpdb->dbname,
+			$table_name
+		)
+	);
+
+	if ( ! $column_exists ) {
+		// Add the MPN column.
+		$wpdb->query(
+			"ALTER TABLE {$table_name} ADD COLUMN `mpn` varchar(100) NULL default '' AFTER `global_unique_id`"
+		);
+	}
+
+	// Populate the MPN column with existing data.
+	$wpdb->query(
+		"
+		UPDATE {$table_name} lookup
+		LEFT JOIN {$wpdb->postmeta} pm ON lookup.product_id = pm.post_id AND pm.meta_key = '_mpn'
+		SET lookup.mpn = COALESCE(pm.meta_value, '')
+		"
+	);
+}
