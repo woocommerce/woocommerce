@@ -727,6 +727,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'sku':
 					$base_data['sku'] = $product->get_sku( $context );
 					break;
+				case 'mpn':
+					$base_data['mpn'] = $product->get_mpn( $context );
+					break;
 				case 'price':
 					$base_data['price'] = $product->get_price( $context );
 					break;
@@ -1023,6 +1026,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
 			$product->set_sku( wc_clean( $request['sku'] ) );
+		}
+
+		// MPN.
+		if ( isset( $request['mpn'] ) ) {
+			$product->set_mpn( wc_clean( $request['mpn'] ) );
 		}
 
 		// Attributes.
@@ -1789,6 +1797,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'sku'                   => array(
 					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'mpn'                   => array(
+					'description' => __( 'Manufacturer product number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
