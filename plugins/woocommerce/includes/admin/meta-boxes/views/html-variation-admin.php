@@ -105,6 +105,19 @@ defined( 'ABSPATH' ) || exit;
 						'wrapper_class' => 'form-row',
 					)
 				);
+				
+				woocommerce_wp_text_input(
+					array(
+						'id'            => "variable_mpn{$loop}",
+						'name'          => "variable_mpn[{$loop}]",
+						'value'         => $variation_object->get_mpn( 'edit' ),
+						'placeholder'   => $variation_object->get_mpn(),
+						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer Product Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+						'desc_tip'      => true,
+						'description'   => __( 'Enter the manufacturer product number for this variation.', 'woocommerce' ),
+						'wrapper_class' => 'form-row',
+					)
+				);
 				?>
 				</div>
 			</div>
