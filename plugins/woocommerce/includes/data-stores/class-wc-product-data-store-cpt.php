@@ -35,6 +35,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_visibility',
 		'_sku',
 		'_global_unique_id',
+		'_mpn',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -444,6 +445,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_global_unique_id'      => 'global_unique_id',
+			'_mpn'                   => 'mpn',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_price'                 => 'price',
@@ -662,6 +664,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
 			'_global_unique_id'      => 'global_unique_id',
+			'_mpn'                   => 'mpn',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_sale_price_dates_from' => 'date_on_sale_from',
@@ -882,7 +885,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'mpn', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
 		if ( $this->cogs_feature_is_enabled() ) {
 			$props_in_lookup_table[] = 'cogs_value';
 		}
@@ -2401,6 +2404,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1020 ) {
+				$product_data['mpn'] = get_post_meta( $id, '_mpn', true );
 			}
 			return $product_data;
 		}
