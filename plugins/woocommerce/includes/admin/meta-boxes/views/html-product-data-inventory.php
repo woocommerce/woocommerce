@@ -41,6 +41,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		do_action( 'woocommerce_product_options_global_unique_id' );
 
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_mpn',
+				'value'       => $product_object->get_mpn( 'edit' ),
+				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer Product Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+				'desc_tip'    => true,
+				'description' => __( 'Enter the manufacturer product number for this product.', 'woocommerce' ),
+			)
+		);
+
+		do_action( 'woocommerce_product_options_mpn' );
+
 		?>
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />
