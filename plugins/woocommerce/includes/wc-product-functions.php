@@ -1609,6 +1609,7 @@ function wc_update_product_lookup_tables() {
 		'stock_quantity',
 		'sku',
 		'global_unique_id',
+		'mpn',
 		'stock_status',
 		'average_rating',
 		'total_sales',
@@ -1706,6 +1707,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 			break;
 		case 'sku':
 		case 'global_unique_id':
+		case 'mpn':
 		case 'stock_status':
 		case 'average_rating':
 		case 'total_sales':
