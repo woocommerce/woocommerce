@@ -72,6 +72,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'short_description'  => '',
 		'sku'                => '',
 		'global_unique_id'   => '',
+		'mpn'                => '',
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
@@ -277,6 +278,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_global_unique_id( $context = 'view' ) {
 		return $this->get_prop( 'global_unique_id', $context );
+	}
+
+	/**
+	 * Get MPN.
+	 *
+	 * @since 10.2.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_mpn( $context = 'view' ) {
+		return $this->get_prop( 'mpn', $context );
 	}
 
 	/**
@@ -880,6 +892,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 		$this->set_prop( 'global_unique_id', $global_unique_id );
+	}
+
+	/**
+	 * Set MPN.
+	 *
+	 * @since 10.2.0
+	 * @param string $mpn Product MPN.
+	 */
+	public function set_mpn( $mpn ) {
+		$this->set_prop( 'mpn', $mpn );
 	}
 
 	/**
