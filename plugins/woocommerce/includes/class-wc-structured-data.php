@@ -229,6 +229,12 @@ class WC_Structured_Data {
 			$markup['gtin'] = $gtin;
 		}
 
+		// Add MPN if available.
+		$mpn = $product->get_mpn();
+		if ( ! empty( $mpn ) ) {
+			$markup['mpn'] = $mpn;
+		}
+
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
