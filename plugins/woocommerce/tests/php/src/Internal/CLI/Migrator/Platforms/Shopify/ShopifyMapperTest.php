@@ -126,10 +126,10 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_product_classification_mapping() {
 		$shopify_product                        = $this->create_simple_shopify_product();
-		$shopify_product->productType           = 'Apparel';
+		$shopify_product->product_type          = 'Apparel';
 		$shopify_product->category              = (object) array( 'name' => 'Shirts' );
-		$shopify_product->isGiftCard            = false;
-		$shopify_product->requiresSellingPlan   = true;
+		$shopify_product->is_gift_card          = false;
+		$shopify_product->requires_selling_plan = true;
 
 		$result = $this->mapper->map_product_data( $shopify_product );
 
