@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.3) - 2025-08-11 
+
+-   Patch - Fixed a possible infinite loading of templates when editing emails. [#60196]
+
 ## [1.0.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.2) - 2025-08-01 
 
 -   Patch - Fix backward compatibility when personalization tag post types are not set. [#60134]

@@ -7,10 +7,10 @@ on:
       - 'release/*'
 
 env:
-  GIT_COMMITTER_NAME: 'WooCommerce Bot'
-  GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
-  GIT_AUTHOR_NAME: 'WooCommerce Bot'
-  GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+  GIT_COMMITTER_NAME: 'woocommercebot'
+  GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
+  GIT_AUTHOR_NAME: 'woocommercebot'
+  GIT_AUTHOR_EMAIL: 'woocommercebot@users.noreply.github.com'
 
 jobs:
   prepare:
@@ -38,6 +38,7 @@ jobs:
     with:
       pr_number: ${{ needs.prepare.outputs.pr_number }}
       target_branch: 'trunk'
+    secrets: inherit
 
   # Check if the original PR has been labeled to cherry pick to frozen and add a reminder to the output if not.  
   frozen-release-check:
@@ -49,7 +50,7 @@ jobs:
     steps:
       - name: Check frozen release conditions
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
           PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
@@ -112,8 +113,9 @@ jobs:
       # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preparation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.update({
               owner: context.repo.owner,
@@ -124,13 +126,14 @@ jobs:
 
       - name: Comment on original PR about cherry-pick success
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick.outputs.cherry_pick_pr_number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ADD_CP_TO_FROZEN_NAG: ${{ needs.frozen-release-check.outputs.add_cp_to_frozen_nag }}
           NEXT_BRANCH: ${{ needs.frozen-release-check.outputs.next_branch }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const cherryPickPrNumber = process.env.CHERRY_PICK_PR_NUMBER;
             const targetBranch = 'trunk';
@@ -191,8 +194,9 @@ jobs:
     steps:
       - name: Add "cherry pick failed" label
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -203,13 +207,14 @@ jobs:
 
       - name: Comment on original PR
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message || 'Unknown error' }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           ADD_CP_TO_FROZEN_NAG: ${{ needs.frozen-release-check.outputs.add_cp_to_frozen_nag }}
           NEXT_BRANCH: ${{ needs.frozen-release-check.outputs.next_branch }}
         with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const pr = (await github.rest.pulls.get({
               owner: context.repo.owner,
