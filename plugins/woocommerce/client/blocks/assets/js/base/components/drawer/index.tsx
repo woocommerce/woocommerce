@@ -84,6 +84,13 @@ const UnforwardedDrawer = (
 	const onRequestClose = () => {
 		document.body.classList.remove( bodyOpenClassName );
 		ariaHelper.showApp();
+
+		const a11yRegion = document.querySelector( '[id^="a11y-speak"]' )?.parentElement;
+
+		if ( a11yRegion ) {
+			a11yRegion.removeAttribute( 'data-keep-visible' );
+		}
+
 		onClose();
 	};
 
