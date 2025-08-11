@@ -160,24 +160,8 @@ class Utils {
 	 * @return bool True if min and max purchase quantity are the same, false otherwise.
 	 */
 	public static function is_min_max_quantity_same( $product ) {
-		/**
-		 * Filter the minimum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $min_purchase_quantity The minimum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$min_purchase_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
-		/**
-		 * Filter the maximum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $max_purchase_quantity The maximum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		$min_purchase_quantity = $product->get_min_purchase_quantity();
+		$max_purchase_quantity = $product->get_max_purchase_quantity();
 		return $min_purchase_quantity === $max_purchase_quantity;
 	}
 

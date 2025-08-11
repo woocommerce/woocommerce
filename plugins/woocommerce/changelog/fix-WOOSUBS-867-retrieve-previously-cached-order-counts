@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updated OrderCountCache to return values for all previously saved statuses, not just those registered.
