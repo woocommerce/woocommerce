@@ -84,7 +84,7 @@ Attributes are the properties that define the behavior of the collection. All th
         - `max` (type `number`): The maximum price.
 
 - `displayLayout` (type `object`): The display layout object that defines the layout of the collection. It can contain the following fields:
-    - `type` (type `string`): The type of layout. Accepted values are `grid` and `stack`.
+    - `type` (type `string`): The type of layout. Accepted values are `grid`, `stack` and `carousel`.
     - `columns` (type `number`): The number of columns to display.
     - `shrinkColumns` (type `boolean`): Whether the layout should be responsive.
 
