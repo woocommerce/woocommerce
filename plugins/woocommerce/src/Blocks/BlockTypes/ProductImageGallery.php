@@ -40,9 +40,7 @@ class ProductImageGallery extends AbstractBlock {
 	protected function enqueue_assets( $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 
-		if ( is_product() ) {
-			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
-		}
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
 	}
 
 	/**
