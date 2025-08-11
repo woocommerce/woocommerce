@@ -11,19 +11,21 @@ import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 // Mock problematic dependencies that cause SVG parsing issues
-jest.mock('@automattic/tour-kit', () => ({
-    __esModule: true,
-    default: () => null,
-    TourKit: () => null,
-}));
+jest.mock( '@automattic/tour-kit', () => ( {
+	__esModule: true,
+	default: () => null,
+	TourKit: () => null,
+} ) );
 
-jest.mock('gridicons/svg-sprite/gridicons.svg', () => 'mocked-svg', { virtual: true });
+jest.mock( 'gridicons/svg-sprite/gridicons.svg', () => 'mocked-svg', {
+	virtual: true,
+} );
 
-jest.mock('@automattic/components', () => ({
-    __esModule: true,
-    Card: ({ children }: any) => children,
-    Gridicon: () => null,
-}));
+jest.mock( '@automattic/components', () => ( {
+	__esModule: true,
+	Card: ( { children }: { children: React.ReactNode } ) => children,
+	Gridicon: () => null,
+} ) );
 
 /**
  * Internal dependencies
