@@ -3,32 +3,30 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
-        required: false
-        default: ''
+        description: 'Release branch (e.g.: release/x.y).'
+        required: true
       skip_verify:
         description: 'Skip verification steps.'
         type: boolean
         required: true
       create_github_release:
-        description: 'Create a draft GitHub release.'
+        description: 'Create GitHub release.'
         type: boolean
-        required: true
+        default: false
   workflow_call:
     inputs:
       branch:
-        description: 'Release branch to use. Defaults to the branch the workflow is run from.'
+        description: 'Release branch.'
         type: string
-        required: false
-        default: ''
+        required: true
       skip_verify:
         description: 'Skip verification steps.'
         type: boolean
-        required: true
+        default: false
       create_github_release:
-        description: 'Create a draft GitHub release.'
+        description: 'Create GitHub release.'
         type: boolean
-        required: true
+        default: false
     outputs:
       artifact_url:
         description: 'URL of the built release artifact'
@@ -40,87 +38,30 @@ concurrency:
   group: release-build-zip-file-${{ inputs.branch }}-${{ ( inputs.create_github_release == true && 'with-release' ) || github.run_id }}
 
 jobs:
-  verify-prs:
-    name: 'Verify if any PR is left open by author:app/github-actions'
-    outputs:
-      runBuildZipJob: ${{ steps.verify-prs.outputs.runBuildZipJob }}
+  verify:
+    name: 'Pre-build verification'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    permissions:
+      contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     steps:
-        - name: Verify if any PR is left open by author:app/github-actions
-          id: verify-prs
-          uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-          with:
-              github-token: ${{ secrets.GITHUB_TOKEN }}
-              script: |
-                  let runBuildZipJob = true;
-                  const event = context.payload;
+      - name: Workflow checks
+        run: |
+          # No special checks when running as a reusable workflow.
+          if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
+            exit 0
+          fi
 
-                  if ('${{ inputs.skip_verify }}' === 'true') {
-                    core.setOutput('runBuildZipJob', runBuildZipJob);
-                    console.log('Skipping verification step');
-                    return;
-                  }
+          # Must run from trunk.
+          if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
+              echo "::error::This workflow must be run from the `trunk` branch. Enter the release branch as input."
+              exit 1
+          fi
 
-                  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-
-                  // Helper function to add delay between API calls
-                  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-                  // Function to handle API call with retry logic
-                  const searchPRs = async (query) => {
-                    let attempts = 0;
-                    while (attempts < 5) {
-                      try {
-                        return await github.rest.search.issuesAndPullRequests({ q: query });
-                      } catch (error) {
-                        if (error.status === 403 && error.message.includes('secondary rate limit')) {
-                          console.log('Rate limit hit, retrying...');
-                          await delay(31000); // 31 second delay before retry
-                          attempts++;
-                        } else {
-                          throw error;
-                        }
-                      }
-                    }
-                    throw new Error('Failed to fetch PRs after multiple attempts');
-                  };
-
-                  // Search for PRs from github-actions bot
-                  const githubActionsPRsQuery = await searchPRs(`repo:${owner}/${repo} is:pr is:open author:app/github-actions`);
-                  const prsOpenByGithubActions = githubActionsPRsQuery.data.items;
-
-                  let failureMessage = ``;
-
-                  if (prsOpenByGithubActions.length > 0) {
-                      runBuildZipJob = false;
-
-                      failureMessage += `Identified \`${prsOpenByGithubActions.length}\` open PR(s) from \`github-actions\` bot which should be merged or closed before proceeding. <https://github.com/${owner}/${repo}/issues?q=is%3Apr+is%3Aopen+author%3Aapp%2Fgithub-actions|Link to PRs>`;
-
-                      failureMessage += '\n\nThis step maintains the code integrity and is critical to avoid regression in future releases. Please merge them or close them before proceeding or set \`skip_verify\` to \`true\` before running the workflow to skip this step if you are confident that the PRs are irrelevant.';
-
-                      console.error(failureMessage);
-                      core.setOutput('failureMessage', failureMessage);
-                  }
-                  core.setOutput('runBuildZipJob', runBuildZipJob);
-
-        - name: Notify Slack on failure
-          if: ${{ steps.verify-prs.outputs.failureMessage != '' && inputs.create_github_release }}
-          uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
-          with:
-              slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-              slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
-              slack-text: |
-                  :x: Oops we may have missed PRs left open by `github-actions` bot. WooCommerce release zip build failed.
-                  :warning-8c: ${{ steps.verify-prs.outputs.failureMessage }}
-                  <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Workflow Run>
-              slack-optional-unfurl_links: false
-              slack-optional-unfurl_media: false
-          continue-on-error: true
-
-  verify-release-versions:
-    name: 'Verify release and stable tag versions'
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    steps:
+          # Can not skip verification for actual releases.
+          if [ "${{ inputs.create_github_release }}" = "true" ] && [ "${{ inputs.skip_verify }}" = "true" ]; then
+              echo "::error::Verification can not be skipped when building for a release."
+              exit 1
+          fi
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch || github.ref }}
@@ -129,13 +70,22 @@ jobs:
             /plugins/woocommerce/woocommerce.php
             /plugins/woocommerce/readme.txt
           sparse-checkout-cone-mode: false
-        if: ${{ inputs.create_github_release && ! inputs.skip_verify }}
+        if: ${{ ! inputs.skip_verify }}
 
       - name: 'Pre-build verification'
-        if: ${{ inputs.create_github_release && ! inputs.skip_verify }}
+        if: ${{ ! inputs.skip_verify }}
         env:
           BRANCH: ${{ inputs.branch || github.ref }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+            # No PRs by automated tools should remain open.
+            count=$( gh pr list --search "is:open author:app/github-actions" --limit 1 --json number | jq length )
+            if (( count > 0 )); then
+                echo "::error::Pre-build verification: there are automated PRs by 'github-actions' still open."
+                exit 1
+            fi
+
             # Branch name must be 'release/*'.
             branch_name="${BRANCH#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
@@ -149,6 +99,12 @@ jobs:
             if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
                 echo "::error::Pre-build verification: release version in branch ($branch_plugin_version) is not matching '$version_prefix.*' pattern."
                 exit 1
+            fi
+
+            # GH release should not already exist.
+            if gh release view "$branch_plugin_version" &>/dev/null; then
+              echo "::error::Pre-build verification: GitHub release '$branch_plugin_version' already exists."
+              exit 1
             fi
 
             # Release should not already exist on wporg.
@@ -166,10 +122,25 @@ jobs:
                 exit 1
             fi
 
+            # No PRs against release branch should remain open.
+            count=$( gh pr list --search "is:open base:$BRANCH" --limit 1 --json number | jq length )
+            if (( count > 0 )); then
+                echo "::error::Pre-build verification: there are PRs against the release branch ($BRANCH) still open."
+                exit 1
+            fi
+
+            # No PRs with same milestone as main version should remain open.
+            milestone="$version_prefix.0"
+            count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
+            if (( count > 0 )); then
+                echo "::error::Pre-build verification: there are PRs with milestone '$milestone' still open."
+                exit 1
+            fi
+
   build:
     name: Build release zip file
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-4vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [ verify-prs, verify-release-versions ]
+    needs: [ verify ]
     outputs:
       artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
       commit-hash: ${{ steps.fetch-build-details.outputs.commit-hash }}
@@ -224,7 +195,7 @@ jobs:
   create-release:
     name: Create GitHub release
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: build
+    needs: [ build ]
     if: ${{ inputs.create_github_release }}
     permissions:
       contents: write
@@ -259,7 +230,7 @@ jobs:
           gh release create ${{ steps.get_version.outputs.version }} \
             './woocommerce.zip' \
             --title '${{ steps.get_version.outputs.version }}' \
-            --notes '' \
+            --notes '${{ steps.get_version.outputs.version }}' \
             --target '${{ needs.build.outputs.commit-hash }}' \
             --latest=false \
             --draft \
