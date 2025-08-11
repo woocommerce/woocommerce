@@ -365,10 +365,22 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 	].forEach( ( collection ) => {
 		collection.previewLabelTemplate.forEach( ( template ) => {
 			test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
+				admin,
 				pageObject,
 				editor,
 			} ) => {
-				await pageObject.goToEditorTemplate( template );
+				if (
+					template === `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
+				) {
+					await admin.visitSiteEditor( {
+						postType: 'wp_template',
+					} );
+					await editor.createTemplate( {
+						templateName: 'Products by Category',
+					} );
+				} else {
+					await pageObject.goToEditorTemplate( template );
+				}
 				await pageObject.insertProductCollection();
 				await pageObject.chooseCollectionInTemplate(
 					collection.id as Collections
@@ -553,10 +565,23 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		].forEach( ( collection ) => {
 			collection.previewLabelTemplate.forEach( ( template ) => {
 				test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
+					admin,
 					pageObject,
 					editor,
 				} ) => {
-					await pageObject.goToEditorTemplate( template );
+					if (
+						template ===
+						`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
+					) {
+						await admin.visitSiteEditor( {
+							postType: 'wp_template',
+						} );
+						await editor.createTemplate( {
+							templateName: 'Products by Category',
+						} );
+					} else {
+						await pageObject.goToEditorTemplate( template );
+					}
 					await pageObject.insertProductCollection();
 					await pageObject.chooseCollectionInTemplate(
 						collection.id as Collections

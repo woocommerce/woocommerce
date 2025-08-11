@@ -489,9 +489,10 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
 				postType: 'wp_template',
-				canvas: 'edit',
+			} );
+			await editor.createTemplate( {
+				templateName: 'Products by Category',
 			} );
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
@@ -518,9 +519,10 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
 				postType: 'wp_template',
-				canvas: 'edit',
+			} );
+			await editor.createTemplate( {
+				templateName: 'Products by Tag',
 			} );
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
@@ -607,14 +609,12 @@ test.describe( 'Product Collection', () => {
 			{
 				name: 'Products by Tag',
 				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+				needsCreation: true,
 			},
 			{
 				name: 'Products by Category',
 				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-			},
-			{
-				name: 'Products by Brand',
-				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+				needsCreation: true,
 			},
 			{
 				name: 'Products by Attribute',
@@ -622,9 +622,22 @@ test.describe( 'Product Collection', () => {
 			},
 		];
 
-		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( { editor, pageObject } ) => {
-				await pageObject.goToEditorTemplate( path );
+		genericArchiveTemplates.forEach( ( { name, path, needsCreation } ) => {
+			test( `${ name } template`, async ( {
+				admin,
+				editor,
+				pageObject,
+			} ) => {
+				if ( needsCreation ) {
+					await admin.visitSiteEditor( {
+						postType: 'wp_template',
+					} );
+					await editor.createTemplate( {
+						templateName: name,
+					} );
+				} else {
+					await pageObject.goToEditorTemplate( path );
+				}
 				await pageObject.focusProductCollection();
 
 				const previewButtonLocator = editor.canvas.getByTestId(

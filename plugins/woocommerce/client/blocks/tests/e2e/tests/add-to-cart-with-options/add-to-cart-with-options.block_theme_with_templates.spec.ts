@@ -5,7 +5,6 @@ import {
 	test as base,
 	expect,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -36,7 +35,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//single-product`,
+			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

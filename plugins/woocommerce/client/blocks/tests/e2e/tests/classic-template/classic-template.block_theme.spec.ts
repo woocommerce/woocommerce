@@ -34,31 +34,37 @@ const templates = [
 		title: 'Single Product',
 		slug: 'single-product',
 		path: '/product/hoodie',
+		needsCreation: false,
 	},
 	{
-		title: 'Product Attribute',
+		title: 'Products by Attribute',
 		slug: 'taxonomy-product_attribute',
 		path: '/color/blue',
+		needsCreation: false,
 	},
 	{
-		title: 'Product Category',
+		title: 'Products by Category',
 		slug: 'taxonomy-product_cat',
 		path: '/product-category/clothing',
+		needsCreation: true,
 	},
 	{
-		title: 'Product Tag',
+		title: 'Products by Tag',
 		slug: 'taxonomy-product_tag',
 		path: '/product-tag/recommended/',
+		needsCreation: true,
 	},
 	{
 		title: 'Product Catalog',
 		slug: 'archive-product',
 		path: '/shop/',
+		needsCreation: false,
 	},
 	{
 		title: 'Product Search Results',
 		slug: 'product-search-results',
 		path: '/?s=shirt&post_type=product',
+		needsCreation: false,
 	},
 ];
 
@@ -302,17 +308,32 @@ test.describe( `${ blockData.name } Block `, () => {
 			editor,
 			page,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//${ template.slug }`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+			if ( template.needsCreation ) {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+				await editor.createTemplate( {
+					templateName: template.title,
+				} );
+			} else {
+				await admin.visitSiteEditor( {
+					postId: `${ BLOCK_THEME_SLUG }//${ template.slug }`,
+					postType: 'wp_template',
+					canvas: 'edit',
+				} );
+			}
 
 			const block = editor.canvas.locator(
 				`[data-type="${ blockData.name }"]`
 			);
 
 			await expect( block ).toBeVisible();
+
+			if ( template.needsCreation ) {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+			}
 
 			await page.goto( template.path );
 
