@@ -46,7 +46,10 @@ export default function NoResults( props: {
 
 				const productGroupsToDisplay = products
 					.filter( ( group ) => productGroupIds.includes( group.id ) )
-					.map( ( group ) => ( { ...group, items: group.items.slice( 0, 4 ) } ) );
+					.map( ( group ) => ( {
+						...group,
+						items: group.items.slice( 0, 4 ),
+					} ) );
 
 				if ( ! productGroupsToDisplay ) {
 					return;
