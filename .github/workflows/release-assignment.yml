@@ -348,13 +348,15 @@ jobs:
             let parentIssue;
             try {
               const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
+              const stateId = '${{ steps.get-linear-data.outputs.inProgressStateId }}' || null;
+              const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
               const parentResult = await linearClient.createIssue({
                 teamId: '${{ secrets.LINEAR_TEAM_ID }}',
                 title: `${parent.title}`,
                 description: `${parent.body}`,
                 priority: 2,
-                stateId: '${{ steps.get-linear-data.outputs.inProgressStateId }}',
-                labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}'],
+                ...(labelId && { labelIds: [labelId] }),
+                ...(stateId && { stateId }),
                 ...(assigneeId && { assigneeId })
               });
 
