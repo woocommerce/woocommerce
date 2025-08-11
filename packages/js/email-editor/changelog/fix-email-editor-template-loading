@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed a possible infinite loading of templates when editing emails.
