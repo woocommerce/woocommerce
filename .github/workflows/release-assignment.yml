@@ -212,6 +212,39 @@ jobs:
       - name: Install linear-sdk
         run: npm install @linear/sdk
 
+      - name: Get Linear data
+        id: get-linear-data
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const { LinearClient } = require("@linear/sdk");
+            const linearClient = new LinearClient({
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
+            });
+
+            const organization = await linearClient.organization;
+
+            const labels = await linearClient.issueLabels({
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                name: { eq: 'Release' }
+              }
+            });
+
+            const states = await linearClient.workflowStates({
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                name: { eq: 'In Progress' }
+              }
+            });
+
+            const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[0].id : null;
+            const inProgressStateId = states.nodes.length > 0 ? states.nodes[0].id : null;
+
+            core.setOutput('releaseLabelId', releaseLabelId);
+            core.setOutput('inProgressStateId', inProgressStateId);
+            core.setOutput('organizationUrlKey', organization.urlKey);
+
       - name: Process release kickoff templates
         id: process-kickoff-templates
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -256,7 +289,7 @@ jobs:
 
             const userId = users.nodes.length ? users.nodes[0].id : null;
             const displayName = users.nodes.length ? users.nodes[0].displayName : null;
-            const mention = displayName ? `https://linear.app/${{ secrets.LINEAR_WORKSPACE }}/profiles/${displayName}` : null;
+            const mention = displayName ? `https://linear.app/${{ steps.get-linear-data.outputs.organizationUrlKey }}/profiles/${displayName}` : null;
 
             const replacements = {
               '{RELEASE_VERSION}': process.env.RELEASE_VERSION || '',
@@ -320,8 +353,8 @@ jobs:
                 title: `${parent.title}`,
                 description: `${parent.body}`,
                 priority: 2,
-                stateId: '${{ secrets.LINEAR_IN_PROGRESS_STATE_ID }}',
-                labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}'],
+                stateId: '${{ steps.get-linear-data.outputs.inProgressStateId }}',
+                labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}'],
                 ...(assigneeId && { assigneeId })
               });
 
@@ -340,7 +373,7 @@ jobs:
                     description: subIssue.body,
                     parentId: parentIssue.id,
                     priority: 2,
-                    labelIds: ['${{ secrets.LINEAR_RELEASE_LABEL_ID }}']
+                    labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}']
                   });
                 } catch (error) {
                   console.log(`Failed to create sub-issue in Linear: ${error.message}`);
