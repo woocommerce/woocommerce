@@ -547,7 +547,7 @@ class WC_Checkout {
 				   'subtotal_tax' => $values['line_subtotal_tax'],
 				   'total_tax'    => $values['line_tax'],
 				   'taxes'        => $values['line_tax_data'],
-				   'line_discount'=> isset($values['line_discount']) ? $values['line_discount'] : 0,
+				   'line_discount'=> isset($values['line_discount']) ? wc_format_decimal($values['line_discount']) : 0,
 			   )
 		   );
 
