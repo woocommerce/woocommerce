@@ -58,7 +58,7 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/webhook',
+			'/' . $this->rest_base . '/webhook-new',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_webhook' ),
@@ -156,7 +156,8 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 	 */
 	private function get_client_webhook_endpoint( $custom_client_data ) {
 		$data     = json_decode( $custom_client_data );
-		$endpoint = $data->endpoint ?? null;
+		$site_url = $data->site_url ?? null;
+		$endpoint = $site_url . '/wp-json/wc/v3/paypal-webhooks';
 
 		if ( ! $endpoint || ! wp_http_validate_url( $endpoint ) ) {
 			error_log( 'Invalid client webhook endpoint: ' . $endpoint );
