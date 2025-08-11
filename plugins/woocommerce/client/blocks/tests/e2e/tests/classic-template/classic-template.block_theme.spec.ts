@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { test, expect, wpCLI, BlockData, Editor } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	wpCLI,
+	BlockData,
+	Editor,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -145,7 +152,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -182,7 +189,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -233,7 +240,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		wpCoreVersion,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//single-product`,
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -296,7 +303,7 @@ test.describe( `${ blockData.name } Block `, () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.slug }`,
+				postId: `${ BLOCK_THEME_SLUG }//${ template.slug }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );

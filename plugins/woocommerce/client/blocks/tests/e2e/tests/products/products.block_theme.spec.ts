@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	BlockData,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -63,7 +68,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		page,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -102,7 +107,7 @@ for ( const {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ slug }`,
+				postId: `${ BLOCK_THEME_SLUG }//${ slug }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );

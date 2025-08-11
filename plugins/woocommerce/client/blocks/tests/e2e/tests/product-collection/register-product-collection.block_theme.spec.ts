@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -329,20 +329,20 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			id: 'myCustomCollectionWithProductContext',
 			name: 'My Custom Collection - Product Context',
 			label: 'Block: My Custom Collection - Product Context',
-			previewLabelTemplate: [ 'woocommerce/woocommerce//single-product' ],
+			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//single-product` ],
 		},
 		{
 			id: 'myCustomCollectionWithCartContext',
 			name: 'My Custom Collection - Cart Context',
 			label: 'Block: My Custom Collection - Cart Context',
-			previewLabelTemplate: [ 'woocommerce/woocommerce//page-cart' ],
+			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
 		},
 		{
 			id: 'myCustomCollectionWithOrderContext',
 			name: 'My Custom Collection - Order Context',
 			label: 'Block: My Custom Collection - Order Context',
 			previewLabelTemplate: [
-				'woocommerce/woocommerce//order-confirmation',
+				`${ BLOCK_THEME_SLUG }//order-confirmation`,
 			],
 		},
 		{
@@ -350,7 +350,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			name: 'My Custom Collection - Archive Context',
 			label: 'Block: My Custom Collection - Archive Context',
 			previewLabelTemplate: [
-				'woocommerce/woocommerce//taxonomy-product_cat',
+				`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
 			],
 		},
 		{
@@ -358,8 +358,8 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 			name: 'My Custom Collection - Multiple Contexts',
 			label: 'Block: My Custom Collection - Multiple Contexts',
 			previewLabelTemplate: [
-				'woocommerce/woocommerce//single-product',
-				'woocommerce/woocommerce//order-confirmation',
+				`${ BLOCK_THEME_SLUG }//single-product`,
+				`${ BLOCK_THEME_SLUG }//order-confirmation`,
 			],
 		},
 	].forEach( ( collection ) => {
@@ -511,7 +511,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				name: 'My Custom Collection - Product Context',
 				label: 'Block: My Custom Collection - Product Context',
 				previewLabelTemplate: [
-					'woocommerce/woocommerce//single-product',
+					`${ BLOCK_THEME_SLUG }//single-product`,
 				],
 				shouldShowProductPicker: true,
 			},
@@ -519,7 +519,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				id: 'myCustomCollectionWithCartContext',
 				name: 'My Custom Collection - Cart Context',
 				label: 'Block: My Custom Collection - Cart Context',
-				previewLabelTemplate: [ 'woocommerce/woocommerce//page-cart' ],
+				previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
 				shouldShowProductPicker: false,
 			},
 			{
@@ -527,7 +527,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				name: 'My Custom Collection - Order Context',
 				label: 'Block: My Custom Collection - Order Context',
 				previewLabelTemplate: [
-					'woocommerce/woocommerce//order-confirmation',
+					`${ BLOCK_THEME_SLUG }//order-confirmation`,
 				],
 				shouldShowProductPicker: false,
 			},
@@ -536,7 +536,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				name: 'My Custom Collection - Archive Context',
 				label: 'Block: My Custom Collection - Archive Context',
 				previewLabelTemplate: [
-					'woocommerce/woocommerce//taxonomy-product_cat',
+					`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
 				],
 				shouldShowProductPicker: false,
 			},
@@ -545,8 +545,8 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				name: 'My Custom Collection - Multiple Contexts',
 				label: 'Block: My Custom Collection - Multiple Contexts',
 				previewLabelTemplate: [
-					'woocommerce/woocommerce//single-product',
-					'woocommerce/woocommerce//order-confirmation',
+					`${ BLOCK_THEME_SLUG }//single-product`,
+					`${ BLOCK_THEME_SLUG }//order-confirmation`,
 				],
 				shouldShowProductPicker: true,
 			},

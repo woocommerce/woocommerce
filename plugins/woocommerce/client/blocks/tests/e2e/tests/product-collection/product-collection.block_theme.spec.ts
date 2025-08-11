@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { Request } from '@playwright/test';
-import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	wpCLI,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -484,7 +489,7 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
+				postId: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -513,7 +518,7 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
+				postId: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -601,15 +606,19 @@ test.describe( 'Product Collection', () => {
 		const genericArchiveTemplates = [
 			{
 				name: 'Products by Tag',
-				path: 'woocommerce/woocommerce//taxonomy-product_tag',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
 			},
 			{
 				name: 'Products by Category',
-				path: 'woocommerce/woocommerce//taxonomy-product_cat',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+			},
+			{
+				name: 'Products by Brand',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
 			},
 			{
 				name: 'Products by Attribute',
-				path: 'woocommerce/woocommerce//taxonomy-product_attribute',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
 			},
 		];
 
