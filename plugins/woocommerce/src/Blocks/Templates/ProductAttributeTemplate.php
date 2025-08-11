@@ -78,7 +78,7 @@ class ProductAttributeTemplate extends AbstractTemplateWithFallback {
 		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wp_is_block_theme() ) {
 			// If Products by Attribute template has been customized or it's in the
 			// theme, we load it first, otherwise we only load the fallback template.
-			// If we don't do that, the WC core template would also have priority
+			// If we don't do that, the WC core template would always have priority
 			// over the fallback template.
 			$slugs = array( $this->fallback_template );
 
