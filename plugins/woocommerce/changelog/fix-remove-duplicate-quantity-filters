@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove duplicate quantity filters applied on get_min_purchase_quantity and get_max_purchase_quantity

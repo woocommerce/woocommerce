@@ -1828,6 +1828,11 @@ class WooPaymentsService {
 				);
 			}
 
+			$test_account_step['actions']['reset'] = array(
+				'type' => self::ACTION_TYPE_REST,
+				'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_TEST_ACCOUNT . '/reset' ),
+			);
+
 			$steps[] = $test_account_step;
 		}
 
@@ -1862,29 +1867,33 @@ class WooPaymentsService {
 		// If the step is not completed, we need to add the actions.
 		if ( self::ONBOARDING_STEP_STATUS_COMPLETED !== $business_verification_step['status'] ) {
 			$business_verification_step['actions'] = array(
-				'start'              => array(
+				'start'                => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
 				),
-				'save'               => array(
+				'save'                 => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
 				),
-				'kyc_session'        => array(
+				'kyc_session'          => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
 				),
-				'kyc_session_finish' => array(
+				'kyc_session_finish'   => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
 				),
-				'kyc_fallback'       => array(
+				'kyc_fallback'         => array(
 					'type' => self::ACTION_TYPE_REDIRECT,
 					'href' => $this->get_onboarding_kyc_fallback_url(),
 				),
-				'finish'             => array(
+				'finish'               => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
+				),
+				'test_account_disable' => array(
+					'type' => self::ACTION_TYPE_REST,
+					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/test_account/disable' ),
 				),
 			);
 		}

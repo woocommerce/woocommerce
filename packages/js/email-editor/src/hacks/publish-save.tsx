@@ -40,26 +40,32 @@ function NextPublishSlot( { children }: NextButtonSlotPropType ) {
 
 export function PublishSave() {
 	const observerRef = useRef< MutationObserver | null >( null );
-	const { hasNonPostEntityChanges, isEditedPostDirty, currentPost } =
+	const { hasNonPostEntityChanges, isEditedPostDirty, isEditingTemplate } =
 		useSelect(
 			( select ) => ( {
 				hasNonPostEntityChanges:
 					// @ts-expect-error hasNonPostEntityChanges is not typed in @types/wordpress__editor
 					select( editorStore ).hasNonPostEntityChanges(),
 				isEditedPostDirty: select( editorStore ).isEditedPostDirty(),
-				currentPost: select( editorStore ).getCurrentPost(),
+				isEditingTemplate:
+					select( editorStore ).getCurrentPostType() ===
+					'wp_template',
 			} ),
 			[]
 		);
 
-	// Check the post status
-	const isDraftPost = currentPost.status === 'draft';
-
-	// Display original button when there are changes to save except for draft
-	// For draft, there is an extra save button to save as draft
-	// Also display original button when the post is in draft status
+	// Display the original publish button when:
+	// - The user is editing a template (regardless of detected changes).
+	// - There are changes outside of the post (e.g., in a linked template).
+	// - There are changes in the post together with changes outside of it.
+	//
+	// Do not display the button when:
+	// - There are only changes in the post content with no related entity changes.
+	// Draft posts have their own "Save as draft" button.
 	const displayOriginalPublishButton =
-		( hasNonPostEntityChanges || isEditedPostDirty ) && ! isDraftPost;
+		isEditingTemplate ||
+		hasNonPostEntityChanges ||
+		( isEditedPostDirty && hasNonPostEntityChanges );
 
 	const toggleElementVisible = useCallback(
 		( element: Element, visible: boolean ) => {

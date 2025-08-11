@@ -43,11 +43,13 @@ class WooPayments extends PaymentGateway {
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
 
+		$has_test_account = $this->has_test_drive_account();
+
 		// Switch the onboarding type to native.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
 		// Add the test [drive] account details to the onboarding state.
-		$details['onboarding']['state']['test_drive_account'] = $this->has_test_drive_account();
+		$details['onboarding']['state']['test_drive_account'] = $has_test_account;
 
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );
@@ -68,6 +70,37 @@ class WooPayments extends PaymentGateway {
 		$details['onboarding']['_links']['onboard'] = array(
 			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
+
+		try {
+			/**
+			 * The WooPayments REST controller instance.
+			 *
+			 * @var WooPaymentsRestController $rest_controller
+			 */
+			$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
+
+			// Add disable test account URL to onboarding links, if the current account is a test account.
+			if ( $has_test_account ) {
+				$details['onboarding']['_links']['disable_test_account'] = array(
+					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/test_account/disable' ) ),
+				);
+			}
+
+			// Add reset account/onboarding URL to onboarding links.
+			$details['onboarding']['_links']['reset'] = array(
+				'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/reset' ) ),
+			);
+		} catch ( \Throwable $e ) {
+			// If the REST controller is not available, we can't generate the REST API endpoint URLs.
+			// This is not a critical error, so we just ignore it.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
 
 		return $details;
 	}

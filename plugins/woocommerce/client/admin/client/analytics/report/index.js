@@ -19,7 +19,7 @@ import {
  */
 import './style.scss';
 import { NoMatch } from '~/layout/NoMatch';
-import getReports from './get-reports';
+import { useReports } from './use-reports';
 
 /**
  * An object defining a chart.
@@ -57,6 +57,13 @@ const getReportParam = ( { params, path } ) => {
 	return params.report || path.replace( /^\/+/, '' );
 };
 
+function withReports( WrappedComponent ) {
+	return function ReportsProvider( props ) {
+		const reports = useReports();
+		return <WrappedComponent { ...props } reports={ reports } />;
+	};
+}
+
 class Report extends Component {
 	constructor() {
 		super( ...arguments );
@@ -80,7 +87,7 @@ class Report extends Component {
 			return null;
 		}
 
-		const { isError } = this.props;
+		const { isError, reports } = this.props;
 
 		if ( isError ) {
 			return <AnalyticsError />;
@@ -88,7 +95,7 @@ class Report extends Component {
 
 		const reportParam = getReportParam( this.props );
 
-		const report = find( getReports(), { report: reportParam } );
+		const report = find( reports, { report: reportParam } );
 		if ( ! report ) {
 			return <NoMatch />;
 		}
@@ -105,9 +112,11 @@ class Report extends Component {
 
 Report.propTypes = {
 	params: PropTypes.object.isRequired,
+	reports: PropTypes.array,
 };
 
 export default compose(
+	withReports,
 	withSelect( ( select, props ) => {
 		const query = getQuery();
 		const { search } = query;
