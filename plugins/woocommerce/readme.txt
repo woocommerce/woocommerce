@@ -340,5 +340,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Improve initial load for the checkout block [#58782](https://github.com/woocommerce/woocommerce/pull/58782)
 * Enhancement - Only include WordPress.org themes in the Blueprint export steps. [#57888](https://github.com/woocommerce/woocommerce/pull/57888)
 * Enhancement - Order-pay page can also use the session choosen gateway [#47100](https://github.com/woocommerce/woocommerce/pull/47100)
+* Fix - Fix an issue when a product is not an object in html order item [#60252](https://github.com/woocommerce/woocommerce/pull/60252)
+* Fix - Preserve manual discount when manually editing an order [#60248](https://github.com/woocommerce/woocommerce/pull/60248)
+* Fix - Revert feature name to add_payment_method. [#60197](https://github.com/woocommerce/woocommerce/pull/60197)
+* Fix - Updated OrderCountCache to return values for all previously saved statuses, not just those registered. [#60236](https://github.com/woocommerce/woocommerce/pull/60236)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
