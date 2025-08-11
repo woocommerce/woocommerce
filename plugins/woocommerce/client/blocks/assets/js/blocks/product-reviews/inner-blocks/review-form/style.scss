@@ -96,7 +96,7 @@
 			padding: 0;
 			cursor: pointer;
 		}
-		.stars-wrapper {
+		.stars-wrapper:not([hidden]) {
 			display: flex;
 			align-items: center;
 			gap: $gap;

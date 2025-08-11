@@ -129,10 +129,17 @@ class ProductReviewForm extends AbstractBlock {
 		}
 
 		if ( wc_review_ratings_enabled() ) {
-			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-input" id="comment-form-rating-label">' .
+			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-selector" id="comment-form-rating-label">' .
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
-				'</label><input type="hidden" name="rating" id="rating-input" data-wp-bind--value="state.selectedStar">' .
-				'<p role="radiogroup" aria-labelledby="comment-form-rating-label" class="stars-wrapper" data-wp-bind--aria-invalid="state.hasError"' . ( wc_review_ratings_required() ? ' aria-required="true"' : '' ) . ' aria-describedby="rating-error">' . $this->render_stars() .
+				'</label><select name="rating" id="rating-selector" data-wp-init="callbacks.hideRatingSelector" data-wp-bind--value="state.selectedStar" ' . ( wc_review_ratings_required() ? ' required' : '' ) . '>
+				<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
+				<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
+				<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>
+				<option value="3">' . esc_html__( 'Average', 'woocommerce' ) . '</option>
+				<option value="2">' . esc_html__( 'Not that bad', 'woocommerce' ) . '</option>
+				<option value="1">' . esc_html__( 'Very poor', 'woocommerce' ) . '</option>
+			</select>' .
+				'<p role="radiogroup" aria-labelledby="comment-form-rating-label" class="stars-wrapper" data-wp-init="callbacks.showRatingStars" hidden data-wp-bind--aria-invalid="state.hasError"' . ( wc_review_ratings_required() ? ' aria-required="true"' : '' ) . ' aria-describedby="rating-error">' . $this->render_stars() .
 				( wc_review_ratings_required() ? '<small id="rating-error" data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError" role="alert"></small>' : '' ) .
 				'</p></div>';
 		}

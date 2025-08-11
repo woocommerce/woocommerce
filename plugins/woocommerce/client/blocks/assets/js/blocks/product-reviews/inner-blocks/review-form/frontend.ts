@@ -109,6 +109,20 @@ const productReviewsFormStore = {
 			state.ratingError = '';
 		},
 	},
+	callbacks: {
+		showRatingStars() {
+			const { ref } = getElement();
+			if ( ref ) {
+				ref.hidden = false;
+			}
+		},
+		hideRatingSelector() {
+			const { ref } = getElement();
+			if ( ref ) {
+				ref.hidden = true;
+			}
+		},
+	},
 };
 
 const { state } = store< ServerState & typeof productReviewsFormStore >(
