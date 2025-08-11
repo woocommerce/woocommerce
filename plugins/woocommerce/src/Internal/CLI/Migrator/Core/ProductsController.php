@@ -200,7 +200,7 @@ class ProductsController {
 		}
 
 		if ( ! $has_next_page ) {
-			$this->session->mark_as_finished();
+			$this->session->set_stage( ImportSession::STAGE_FINISHED );
 			WP_CLI::log( 'Migration completed - all products processed.' );
 		}
 	}
