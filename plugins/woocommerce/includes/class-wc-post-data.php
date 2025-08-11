@@ -765,21 +765,11 @@ class WC_Post_Data {
 			$new_slug     = ! empty( $attribute['attribute_name'] ) ? $attribute['attribute_name'] : $old_slug;
 			$new_taxonomy = 'pa_' . $new_slug;
 
-			if ( function_exists( 'as_schedule_single_action' ) ) {
-				$name = 'wc_regenerate_attribute_variation_summaries';
-				$args = array( $new_taxonomy );
-
-				// Prevent duplicate scheduling of the action.
-				$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
-				if ( ! $when ) {
-					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
-				}
-			} else {
-				wc_get_logger()->warning(
-					'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Attribute ID: ' . $attribute_id,
-					array( 'source' => 'woocommerce-variations' )
-				);
-			}
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_attribute_variation_summaries',
+				array( $new_taxonomy ),
+				'Taxonomy: ' . $taxonomy . ', Attribute ID: ' . $attribute_id
+			);
 		}
 	}
 
@@ -822,19 +812,11 @@ class WC_Post_Data {
 
 			if ( $count <= $threshold ) {
 				self::regenerate_variation_summaries( $variation_ids );
-			} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-				$name = 'wc_regenerate_product_variation_summaries';
-				$args = array( $product->get_id() );
-
-				// Prevent duplicate scheduling of the action.
-				$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
-				if ( ! $when ) {
-					as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
-				}
 			} else {
-				wc_get_logger()->warning(
-					'Action Scheduler unavailable for product variation summary regeneration. Product ID: ' . $product->get_id(),
-					array( 'source' => 'woocommerce-variations' )
+				self::schedule_variation_summary_regeneration(
+					'wc_regenerate_product_variation_summaries',
+					array( $product->get_id() ),
+					'Product ID: ' . $product->get_id()
 				);
 			}
 		}
@@ -897,19 +879,11 @@ class WC_Post_Data {
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-			$name = 'wc_regenerate_term_variation_summaries';
-			$args = array( $taxonomy, $new_term->slug );
-
-			// Prevent duplicate scheduling of the action.
-			$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
-			if ( ! $when ) {
-				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
-			}
 		} else {
-			wc_get_logger()->warning(
-				'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id,
-				array( 'source' => 'woocommerce-variations' )
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $new_term->slug ),
+				'Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id
 			);
 		}
 	}
@@ -951,18 +925,41 @@ class WC_Post_Data {
 
 		if ( $count <= $threshold ) {
 			self::regenerate_variation_summaries( $variation_ids );
-		} elseif ( function_exists( 'as_schedule_single_action' ) ) {
-			$name = 'wc_regenerate_term_variation_summaries';
-			$args = array( $taxonomy, $deleted_term->slug );
+		} else {
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $deleted_term->slug ),
+				'Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id
+			);
+		}
+	}
 
+	/**
+	 * Schedule an asynchronous action to regenerate product variation summaries.
+	 *
+	 * This method uses the WooCommerce Action Scheduler to queue a single regeneration action
+	 * for product variation summaries. It first checks whether an identical action with the
+	 * given arguments is already scheduled to avoid duplicate jobs. If the Action Scheduler
+	 * is not available, a warning is logged instead.
+	 *
+	 * @param string   $action_name     The name/identifier of the scheduled action (hook name).
+	 * @param array    $args            Arguments to pass to the scheduled action callback.
+	 * @param string   $warning_message Message to log when the Action Scheduler is unavailable.
+	 * @param string   $group           Optional. The Action Scheduler group to associate with
+	 *                                  the scheduled action. Default 'woocommerce'.
+	 *
+	 * @return void
+	 */
+	private static function schedule_variation_summary_regeneration( $action_name, $args, $warning_message, $group = 'woocommerce' ) {
+		if ( function_exists( 'as_schedule_single_action' ) ) {
 			// Prevent duplicate scheduling of the action.
-			$when = as_next_scheduled_action( $name, $args, 'woocommerce' );
+			$when = as_next_scheduled_action( $action_name, $args, $group );
 			if ( ! $when ) {
-				as_schedule_single_action( time() + 1, $name, $args, 'woocommerce' );
+				as_schedule_single_action( time() + 1, $action_name, $args, $group );
 			}
 		} else {
 			wc_get_logger()->warning(
-				'Action Scheduler unavailable for product variation summary regeneration. Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id,
+				'Action Scheduler unavailable for product variation summary regeneration. ' . $warning_message,
 				array( 'source' => 'woocommerce-variations' )
 			);
 		}
