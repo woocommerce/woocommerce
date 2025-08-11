@@ -857,9 +857,9 @@ class WC_Post_Data {
 
 		$meta_key = 'attribute_' . $taxonomy;
 		global $wpdb;
-		$variation_ids = $wpdb->get_col(
+		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT pm.post_id
+				"SELECT COUNT(DISTINCT pm.post_id)
 				FROM $wpdb->postmeta pm
 				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
 				WHERE pm.meta_key = %s
@@ -870,14 +870,25 @@ class WC_Post_Data {
 			)
 		);
 
-		if ( empty( $variation_ids ) ) {
+		if ( $count === 0 ) {
 			return;
 		}
 
 		$threshold = self::get_variation_summaries_sync_threshold();
-		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
+			$variation_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+					WHERE pm.meta_key = %s
+					AND pm.meta_value = %s
+					AND p.post_type = 'product_variation'",
+					$meta_key,
+					$new_term->slug
+				)
+			);
 			self::regenerate_variation_summaries( $variation_ids );
 		} else {
 			self::schedule_variation_summary_regeneration(
@@ -903,9 +914,9 @@ class WC_Post_Data {
 
 		$meta_key = 'attribute_' . $taxonomy;
 		global $wpdb;
-		$variation_ids = $wpdb->get_col(
+		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT pm.post_id
+				"SELECT COUNT(DISTINCT pm.post_id)
 				FROM $wpdb->postmeta pm
 				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
 				WHERE pm.meta_key = %s
@@ -916,14 +927,25 @@ class WC_Post_Data {
 			)
 		);
 
-		if ( empty( $variation_ids ) ) {
+		if ( $count === 0 ) {
 			return;
 		}
 
 		$threshold = self::get_variation_summaries_sync_threshold();
-		$count     = count( $variation_ids );
 
 		if ( $count <= $threshold ) {
+			$variation_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+					WHERE pm.meta_key = %s
+					AND pm.meta_value = %s
+					AND p.post_type = 'product_variation'",
+					$meta_key,
+					$deleted_term->slug
+				)
+			);
 			self::regenerate_variation_summaries( $variation_ids );
 		} else {
 			self::schedule_variation_summary_regeneration(
