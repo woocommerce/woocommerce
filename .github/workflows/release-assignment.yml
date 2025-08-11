@@ -105,7 +105,7 @@ jobs:
                 event.summary.trim() === eventTitle
               );
 
-              const date = matchingEvent ? new Date(matchingEvent.start).toLocaleDateString('en-US') : null;
+              const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
               core.setOutput(`event-${eventKey}-date`, date);
               console.log(`Event: ${eventTitle}, Date: ${date}`);
             }
