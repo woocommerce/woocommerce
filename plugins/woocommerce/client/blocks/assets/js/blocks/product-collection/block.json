@@ -28,7 +28,7 @@
 			"type": "object",
 			"properties": {
 				"type": {
-					"type": "enum",
+					"type": "string",
 					"enum": [ "flex", "list", "carousel" ]
 				},
 				"columns": {
