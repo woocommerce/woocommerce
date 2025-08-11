@@ -132,8 +132,8 @@ class ProductReviewForm extends AbstractBlock {
 			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-input" id="comment-form-rating-label">' .
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
 				'</label><input type="hidden" name="rating" id="rating-input" data-wp-bind--value="state.selectedStar">' .
-				'<p role="group" aria-labelledby="comment-form-rating-label" class="stars-wrapper">' . $this->render_stars() .
-				( wc_review_ratings_required() ? '<small data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError" aria-live="polite"></small>' : '' ) .
+				'<p role="radiogroup" aria-labelledby="comment-form-rating-label" class="stars-wrapper" data-wp-bind--aria-invalid="state.hasError"' . ( wc_review_ratings_required() ? ' aria-required="true"' : '' ) . ' aria-describedby="rating-error">' . $this->render_stars() .
+				( wc_review_ratings_required() ? '<small id="rating-error" data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError" role="alert"></small>' : '' ) .
 				'</p></div>';
 		}
 
@@ -176,6 +176,7 @@ class ProductReviewForm extends AbstractBlock {
 		for ( $i = 1; $i < 6; $i++ ) {
 			?>
 			<button
+				role="radio"
 				type="button"
 				<?php /* translators: %d is the rating value from 1 to 5 */ ?>
 				aria-label='<?php echo esc_attr( sprintf( _n( '%d of 5 star', '%d of 5 stars', $i, 'woocommerce' ), $i ) ); ?>'
@@ -185,12 +186,15 @@ class ProductReviewForm extends AbstractBlock {
 				data-wp-on-async--keydown="actions.changeRatingWithKeyboard"
 				data-wp-class--is-hovered="state.isStarHovered"
 				data-wp-class--is-selected="state.isStarSelected"
+				data-wp-bind--aria-checked="state.isStarSelected"
 				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 				<svg
 					width='24'
 					height='24'
 					viewBox='0 0 24 24'
+					aria-hidden="true"
+					focusable="false"
 				>
 					<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="none" stroke="currentColor" stroke-width="1.5"/>
 				</svg>
