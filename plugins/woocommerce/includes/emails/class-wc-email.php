@@ -801,7 +801,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Apply inline styles to dynamic content.
 	 *
-	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
+	 * We only inline CSS for html emails.
 	 *
 	 * @version 4.0.0
 	 * @param string|null $content Content that will receive inline styles.
@@ -832,9 +832,7 @@ class WC_Email extends WC_Settings_API {
 
 
 	/**
-	 * Apply inline styles to dynamic content.
-	 *
-	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
+	 * Apply inline styles to dynamic content using Emogrifier library (if supported).
 	 *
 	 * @since x.x.x
 	 * @param string|null $content Content that will receive inline styles.
