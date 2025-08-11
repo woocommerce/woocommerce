@@ -168,6 +168,26 @@ describe( 'Cart block editor integration', () => {
 		expect( filledCartAudioOption ).not.toBeInTheDocument();
 	} );
 
+	it( 'renders the Product collection cross-sells', async () => {
+		await setup( {} );
+
+		// Verify Cart block is properly initialized in the editor.
+		await waitFor( () => {
+			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+		} );
+
+		// Navigate to the Filled Cart block first
+		await selectBlock( /^Block: Filled Cart$/i );
+
+		// Verify Product Collection block is present in the Cart Items
+		await waitFor( () => {
+			const productCollection = screen.getByLabelText(
+				/^Block: Product Collection$/i
+			);
+			expect( productCollection ).toBeVisible();
+		} );
+	} );
+
 	it( 'shows the cart preview in the editor', async () => {
 		await setup( {} );
 
