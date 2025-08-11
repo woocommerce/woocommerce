@@ -816,11 +816,22 @@ class WC_Post_Data {
 	 */
 	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
-			$variation_ids = $product->get_children();
-			$threshold     = self::get_variation_summaries_sync_threshold();
-			$count         = count( $variation_ids );
+			global $wpdb;
+			$count = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT(ID)
+						FROM {$wpdb->posts}
+						WHERE post_parent = %d
+						AND post_type = %s",
+						$product->get_id(),
+						'product_variation'
+					)
+				);
+
+			$threshold = self::get_variation_summaries_sync_threshold();
 
 			if ( $count <= $threshold ) {
+				$variation_ids = $product->get_children();
 				self::regenerate_variation_summaries( $variation_ids );
 			} else {
 				self::schedule_variation_summary_regeneration(
