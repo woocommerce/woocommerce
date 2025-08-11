@@ -818,15 +818,15 @@ class WC_Post_Data {
 		if ( $product->is_type( 'variable' ) ) {
 			global $wpdb;
 			$count = (int) $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT(ID)
-						FROM {$wpdb->posts}
-						WHERE post_parent = %d
-						AND post_type = %s",
-						$product->get_id(),
-						'product_variation'
-					)
-				);
+				$wpdb->prepare(
+					"SELECT COUNT(ID)
+					FROM {$wpdb->posts}
+					WHERE post_parent = %d
+					AND post_type = %s",
+					$product->get_id(),
+					'product_variation'
+				)
+			);
 
 			$threshold = self::get_variation_summaries_sync_threshold();
 
@@ -891,7 +891,7 @@ class WC_Post_Data {
 			)
 		);
 
-		if ( $count === 0 ) {
+		if ( 0 === $count ) {
 			return;
 		}
 
@@ -948,7 +948,7 @@ class WC_Post_Data {
 			)
 		);
 
-		if ( $count === 0 ) {
+		if ( 0 === $count ) {
 			return;
 		}
 
@@ -985,11 +985,11 @@ class WC_Post_Data {
 	 * given arguments is already scheduled to avoid duplicate jobs. If the Action Scheduler
 	 * is not available, a warning is logged instead.
 	 *
-	 * @param string   $action_name     The name/identifier of the scheduled action (hook name).
-	 * @param array    $args            Arguments to pass to the scheduled action callback.
-	 * @param string   $warning_message Message to log when the Action Scheduler is unavailable.
-	 * @param string   $group           Optional. The Action Scheduler group to associate with
-	 *                                  the scheduled action. Default 'woocommerce'.
+	 * @param string $action_name     The name/identifier of the scheduled action (hook name).
+	 * @param array  $args            Arguments to pass to the scheduled action callback.
+	 * @param string $warning_message Message to log when the Action Scheduler is unavailable.
+	 * @param string $group           Optional. The Action Scheduler group to associate with
+	 *                                the scheduled action. Default 'woocommerce'.
 	 *
 	 * @return void
 	 */
