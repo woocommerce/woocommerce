@@ -137,7 +137,7 @@ export class Editor extends CoreEditor {
 		// them won't be shown. That's why we click the 'All Categories' /
 		// 'All Tags' button only if visible.
 		const allButton = dialog.getByRole( 'button', {
-			name: 'All',
+			name: 'For all items',
 		} );
 		if ( await allButton.isVisible() ) {
 			await allButton.click();
