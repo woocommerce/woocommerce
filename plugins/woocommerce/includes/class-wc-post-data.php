@@ -889,7 +889,7 @@ class WC_Post_Data {
 	}
 
 	/**
-	 * Hook called after a term is updated to handle updates for product variations.
+	 * Hook called after a term is deleted to handle updates for product variations.
 	 *
 	 * @param int     $term_id  Term ID.
 	 * @param int     $tt_id    Term taxonomy ID.
