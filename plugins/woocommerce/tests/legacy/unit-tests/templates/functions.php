@@ -156,6 +156,8 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
 	 *
 	 * @dataProvider data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values
+	 *
+	 * @param mixed $attribute_value The falsey attribute value to test.
 	 */
 	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values( $attribute_value ) {
 		$product = WC_Helper_Product::create_variation_product();
