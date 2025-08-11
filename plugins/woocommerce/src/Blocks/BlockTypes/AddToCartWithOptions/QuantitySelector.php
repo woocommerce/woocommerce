@@ -76,22 +76,8 @@ class QuantitySelector extends AbstractBlock {
 
 		woocommerce_quantity_input(
 			array(
-				/**
-				 * Filter the minimum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $min_value Minimum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-				/**
-				 * Filter the maximum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+				'min_value'   => $product->get_min_purchase_quantity(),
+				'max_value'   => $product->get_max_purchase_quantity(),
 				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			)
 		);

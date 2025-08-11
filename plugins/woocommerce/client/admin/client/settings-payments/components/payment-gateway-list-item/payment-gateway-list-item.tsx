@@ -246,6 +246,10 @@ export const PaymentGatewayListItem = ( {
 										setIsOnboardingModalOpen
 									}
 									onboardingType={ gateway.onboarding.type }
+									disableTestAccountUrl={
+										gateway.onboarding._links
+											.disable_test_account?.href
+									}
 								/>
 							) }
 

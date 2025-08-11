@@ -25,7 +25,7 @@ interface ProductEntityResponseBase {
 	date_modified: string;
 	date_modified_gmt: string;
 	type: 'simple' | 'grouped' | 'external' | 'variable' | 'variation';
-	status: 'draft' | 'pending' | 'private' | 'publish';
+	status: 'draft' | 'pending' | 'private' | 'publish' | 'trash';
 	featured: boolean;
 	catalog_visibility: 'visible' | 'catalog' | 'search' | 'hidden';
 	description: string;
@@ -34,6 +34,8 @@ interface ProductEntityResponseBase {
 	price: string;
 	regular_price: string;
 	sale_price: string;
+	rating_count: number;
+	average_rating: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	/**
 	 * Experimental price fields for grouped products

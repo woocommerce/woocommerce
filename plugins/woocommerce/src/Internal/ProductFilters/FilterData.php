@@ -376,7 +376,7 @@ class FilterData {
 	 *
 	 * @param string $product_ids   Comma-separated list of product IDs.
 	 * @param string $taxonomy_name Original taxonomy name for hierarchy methods.
-	 * @return array Array of term_taxonomy_id => count pairs.
+	 * @return array Array of term_id => count pairs.
 	 */
 	private function get_hierarchical_taxonomy_counts( string $product_ids, string $taxonomy_name ) {
 		global $wpdb;
@@ -407,34 +407,24 @@ class FilterData {
 			$term_id = (int) $term->term_id;
 
 			// Count for the term itself and all its descendants.
-			if ( ! isset( $hierarchy_counts[ $term->term_taxonomy_id ] ) ) {
-				$descendants                                 = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
-				$descendants[]                               = $term_id; // Include the term itself.
-				$hierarchy_counts[ $term->term_taxonomy_id ] = $descendants;
+			if ( ! isset( $hierarchy_counts[ $term_id ] ) ) {
+				$descendants                  = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
+				$descendants[]                = $term_id; // Include the term itself.
+				$hierarchy_counts[ $term_id ] = $descendants;
 			}
 
-			// Get ancestors using optimized hierarchy data.
-			$current_id = $term_id;
-			while ( $current_id > 0 ) {
-				$parent_id = $this->taxonomy_hierarchy_data->get_parent( $current_id, $taxonomy_name );
-				if ( $parent_id <= 0 ) {
-					break;
-				}
-
-				if ( in_array( $parent_id, $processed_terms, true ) ) {
-					$current_id = $parent_id;
+			// Get ancestors using hierarchy data.
+			$ancestors = $this->taxonomy_hierarchy_data->get_ancestors( $term_id, $taxonomy_name );
+			foreach ( $ancestors as $ancestor_id ) {
+				if ( in_array( $ancestor_id, $processed_terms, true ) ) {
 					continue;
 				}
 
-				$ancestor_term_taxonomy_id = $this->get_term_taxonomy_id_from_term_id( $parent_id, $taxonomy_escaped );
+				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $ancestor_id, $taxonomy_name );
+				$descendants[] = $ancestor_id; // Include the ancestor term itself.
 
-				// Get all descendants for this ancestor using optimized hierarchy data.
-				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $parent_id, $taxonomy_name );
-				$descendants[] = $parent_id; // Include the ancestor term itself.
-
-				$hierarchy_counts[ $ancestor_term_taxonomy_id ] = $descendants;
-				$processed_terms[]                              = $parent_id;
-				$current_id                                     = $parent_id;
+				$hierarchy_counts[ $ancestor_id ] = $descendants;
+				$processed_terms[]                = $ancestor_id;
 			}
 		}
 
@@ -444,9 +434,9 @@ class FilterData {
 
 		// Step 3: Execute batch counting using a single query with CASE statements.
 		$count_cases = array();
-		foreach ( $hierarchy_counts as $term_taxonomy_id => $term_ids ) {
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
 			$term_ids_str  = implode( ',', array_map( 'absint', $term_ids ) );
-			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_taxonomy_id}";
+			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_id}";
 		}
 
 		$batch_count_sql = '
@@ -464,38 +454,16 @@ class FilterData {
 			return array();
 		}
 
-		// Parse results back to term_taxonomy_id => count format.
+		// Parse results back to term_id => count format.
 		$final_counts = array();
-		foreach ( $hierarchy_counts as $term_taxonomy_id => $term_ids ) {
-			$count_key = "count_{$term_taxonomy_id}";
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
+			$count_key = "count_{$term_id}";
 			if ( isset( $count_result[ $count_key ] ) && $count_result[ $count_key ] > 0 ) {
-				$final_counts[ $term_taxonomy_id ] = absint( $count_result[ $count_key ] );
+				$final_counts[ $term_id ] = absint( $count_result[ $count_key ] );
 			}
 		}
 
 		return $final_counts;
-	}
-
-	/**
-	 * Get term_taxonomy_id from term_id.
-	 *
-	 * @param int    $term_id  Term ID.
-	 * @param string $taxonomy Taxonomy name.
-	 * @return int Term taxonomy ID.
-	 */
-	private function get_term_taxonomy_id_from_term_id( int $term_id, string $taxonomy ) {
-		global $wpdb;
-
-		$cache_key        = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'term_taxonomy_id_' . $term_id . '_' . $taxonomy;
-		$term_taxonomy_id = wp_cache_get( $cache_key );
-
-		if ( false === $term_taxonomy_id ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$term_taxonomy_id = $wpdb->get_var( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d AND taxonomy = %s", $term_id, $taxonomy ) );
-			wp_cache_set( $cache_key, $term_taxonomy_id, '', HOUR_IN_SECONDS );
-		}
-
-		return absint( $term_taxonomy_id );
 	}
 
 	/**
