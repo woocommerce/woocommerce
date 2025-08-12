@@ -1515,7 +1515,7 @@ class WooPaymentsService {
 					)
 				);
 			}
-		} else if ( $has_sandbox_account ) {
+		} elseif ( $has_sandbox_account ) {
 			try {
 				// Call the WooPayments API to reset onboarding.
 				$response = $this->proxy->call_static(
