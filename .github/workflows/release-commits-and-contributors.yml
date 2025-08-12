@@ -5,13 +5,13 @@ on:
       version:
         type: string
         required: true
-        description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
+        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
   workflow_call:
     inputs:
       version:
         type: string
         required: true
-        description: 'The release version (in X.Y or X.Y.Z-rc.N formats) to generate the release summary for.'
+        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
 
 jobs:
   extract-versions:
@@ -36,9 +36,9 @@ jobs:
             const currentVersion = '${{ inputs.version }}';
             console.log(`Current version from input: ${currentVersion}`);
 
-            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)(?:\.\d+)?(?:-(rc)\.(\d+))?$/);
+            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)(?:\.\d+)?(?:-(beta)\.(\d+))?$/);
             if (!versionMatch) {
-              core.setFailed(`Version format must be 'x.y' or 'x.y.z-rc.N'. Provided: ${currentVersion}`);
+              core.setFailed(`Version format must be 'x.y' or 'x.y.z-beta.N'. Provided: ${currentVersion}`);
               process.exit(1);
             }
 

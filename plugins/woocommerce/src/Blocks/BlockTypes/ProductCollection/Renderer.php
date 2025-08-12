@@ -128,12 +128,13 @@ class Renderer {
 			$collection                     = $block['attrs']['collection'] ?? '';
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 			$context                        = array(
-				'notices'            => array(),
+				'notices'                 => array(),
 				// Next/Previous Buttons block context.
-				'isDisabledPrevious' => false,
-				'isDisabledNext'     => false,
-				'ariaLabelPrevious'  => __( 'Scroll products left', 'woocommerce' ),
-				'ariaLabelNext'      => __( 'Scroll products right', 'woocommerce' ),
+				'hideNextPreviousButtons' => false,
+				'isDisabledPrevious'      => true,
+				'isDisabledNext'          => false,
+				'ariaLabelPrevious'       => __( 'Scroll products left', 'woocommerce' ),
+				'ariaLabelNext'           => __( 'Scroll products right', 'woocommerce' ),
 			);
 
 			if ( $collection ) {
@@ -205,7 +206,7 @@ class Renderer {
 						<path data-wp-bind--d="state.iconPath"></path>
 					</svg>
 					<div class="wc-block-components-notice-banner__content">
-						<span data-wp-init="callbacks.renderNoticeContent"></span>
+						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
 					</div>
 					<button
 						data-wp-bind--hidden="!context.notice.dismissible"

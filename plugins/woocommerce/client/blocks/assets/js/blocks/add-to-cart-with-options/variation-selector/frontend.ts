@@ -220,6 +220,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						selectedAttribute.attribute === attribute
 				);
 
+				if ( value === '' ) {
+					if ( index >= 0 ) {
+						selectedAttributes.splice( index, 1 );
+					}
+					return;
+				}
+
 				if ( index >= 0 ) {
 					selectedAttributes[ index ] = {
 						attribute,
