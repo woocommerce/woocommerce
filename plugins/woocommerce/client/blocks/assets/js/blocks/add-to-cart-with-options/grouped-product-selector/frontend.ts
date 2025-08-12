@@ -47,6 +47,9 @@ export type GroupedProductAddToCartWithOptionsStore =
 			setQuantity: ( value: number ) => void;
 			addToCart: () => void;
 		};
+		callbacks: {
+			validateGrouped: () => void;
+		};
 	};
 
 const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
@@ -105,6 +108,29 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 				yield actions.batchAddCartItems( addedItems );
 				
 			},
+		},
+		callbacks: {
+			validateGrouped: () => {
+
+				actions.clearErrors( 'grouped-product' );
+
+				const { errorMessages } = getConfig();
+
+				const { quantity } = getContext< Context >();
+
+				const totalQuantity = Object.values(quantity).reduce((sum, val) => sum + val, 0);
+				
+				// At least one quantity is greater than 0.
+				if ( totalQuantity <= 0 ) {
+					actions.addError( {
+						code: 'groupedProductAddToCartMissingItems',
+						message: errorMessages?.groupedProductAddToCartMissingItems || '',
+						group: 'grouped-product',
+					} );
+					return;
+				}
+			}
+
 		},
 	},
 	{ lock: universalLock }
