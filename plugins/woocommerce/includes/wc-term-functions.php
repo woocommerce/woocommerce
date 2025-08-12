@@ -323,12 +323,12 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		}
 		// the nextid of our term to order, lets move our term here.
 		if ( null !== $next_id && $term_id === $next_id ) {
-			$index++;
+			++$index;
 			$index = wc_set_term_order( $id, $index, $taxonomy, true );
 		}
 
 		// Set order.
-		$index++;
+		++$index;
 		$index = wc_set_term_order( $term_id, $index, $taxonomy );
 
 		/**
@@ -374,7 +374,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$children = get_terms( $taxonomy, "parent=$term_id&hide_empty=0&menu_order=ASC" );
 
 	foreach ( $children as $term ) {
-		$index++;
+		++$index;
 		$index = wc_set_term_order( $term->term_id, $index, $taxonomy, true );
 	}
 
@@ -386,7 +386,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 /**
  * Function for recounting product terms, ignoring hidden products.
  *
- * This is used as the update_count_callback for the Product Category and Product Tag
+ * This is used as the update_count_callback for the Product Category, Product Tag, and Product Brand
  * taxonomies. By default, it actually calculates two (possibly different) counts for each
  * term, which it stores in two different places. The first count is the one done by WordPress
  * itself, and is based on the status of the objects that are assigned the terms. In this case,
@@ -569,7 +569,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	 *
 	 * @param array $valid_taxonomies List of taxonomy slugs.
 	 */
-	$valid_taxonomies   = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag' ) );
+	$valid_taxonomies   = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
 	$current_taxonomies = array_intersect( (array) $taxonomies, $valid_taxonomies );
 
 	if ( empty( $current_taxonomies ) ) {
