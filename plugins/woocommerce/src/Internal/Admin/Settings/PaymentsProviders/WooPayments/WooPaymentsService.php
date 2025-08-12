@@ -1382,9 +1382,10 @@ class WooPaymentsService {
 
 		$source = $this->validate_onboarding_source( $source );
 
-		// Before resetting the account, record its details for tracking purposes.
+		// Before resetting the onboarding, record its details for tracking purposes.
 		$event_props = array(
-			'account_mode' => $this->has_live_account() ? 'live' : 'test',
+			'has_account'  => $this->has_account(),
+			'account_mode' => $this->has_account() ? ( $this->has_live_account() ? 'live' : 'test' ) : 'none' ,
 			'test_account' => $this->has_test_account(),
 			'source'       => $source,
 		);
