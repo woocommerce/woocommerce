@@ -2043,6 +2043,61 @@ class WooPaymentsService {
 	}
 
 	/**
+	 * Save the NOX profile data.
+	 *
+	 * @param array  $data The data to save in the profile.
+	 *
+	 * @return bool Whether the data was saved.
+	 */
+	private function save_nox_profile( array $data ): bool {
+		return $this->proxy->call_function( 'update_option', self::NOX_PROFILE_OPTION_KEY, $data, false );
+	}
+
+	/**
+	 * Get the onboarding data from the NOX profile.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The onboarding stored data from the NOX profile.
+	 *               If the step data is not found, an empty array is returned.
+	 */
+	private function get_nox_profile_onboarding( string $location ): array {
+		$nox_profile = $this->get_nox_profile();
+
+		if ( empty( $nox_profile['onboarding'] ) ) {
+			$nox_profile['onboarding'] = array();
+		}
+		if ( empty( $nox_profile['onboarding'][ $location ] ) ) {
+			$nox_profile['onboarding'][ $location ] = array();
+		}
+
+		return $nox_profile['onboarding'][ $location ];
+	}
+
+	/**
+	 * Save the onboarding data in the NOX profile.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 * @param array  $data     The onboarding step data to save in the profile.
+	 *
+	 * @return bool Whether the onboarding data was saved.
+	 */
+	private function save_nox_profile_onboarding( string $location, array $data ): bool {
+		$nox_profile = $this->get_nox_profile();
+
+		if ( empty( $nox_profile['onboarding'] ) ) {
+			$nox_profile['onboarding'] = array();
+		}
+
+		// Update the stored data.
+		$nox_profile['onboarding'][ $location ] = $data;
+
+		return $this->save_nox_profile( $nox_profile );
+	}
+
+	/**
 	 * Get the onboarding step data from the NOX profile.
 	 *
 	 * @param string $step_id  The ID of the onboarding step.
@@ -2053,22 +2108,16 @@ class WooPaymentsService {
 	 *               If the step data is not found, an empty array is returned.
 	 */
 	private function get_nox_profile_onboarding_step( string $step_id, string $location ): array {
-		$nox_profile = $this->get_nox_profile();
+		$nox_profile_onboarding = $this->get_nox_profile_onboarding( $location );
 
-		if ( empty( $nox_profile['onboarding'] ) ) {
-			$nox_profile['onboarding'] = array();
+		if ( empty( $nox_profile_onboarding['steps'] ) ) {
+			$nox_profile_onboarding['steps'] = array();
 		}
-		if ( empty( $nox_profile['onboarding'][ $location ] ) ) {
-			$nox_profile['onboarding'][ $location ] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ]['steps'] ) ) {
-			$nox_profile['onboarding'][ $location ]['steps'] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ]['steps'][ $step_id ] ) ) {
-			$nox_profile['onboarding'][ $location ]['steps'][ $step_id ] = array();
+		if ( empty( $nox_profile_onboarding['steps'][ $step_id ] ) ) {
+			$nox_profile_onboarding['steps'][ $step_id ] = array();
 		}
 
-		return $nox_profile['onboarding'][ $location ]['steps'][ $step_id ];
+		return $nox_profile_onboarding['steps'][ $step_id ];
 	}
 
 	/**
@@ -2082,22 +2131,16 @@ class WooPaymentsService {
 	 * @return bool Whether the onboarding step data was saved.
 	 */
 	private function save_nox_profile_onboarding_step( string $step_id, string $location, array $data ): bool {
-		$nox_profile = $this->get_nox_profile();
+		$nox_profile_onboarding = $this->get_nox_profile_onboarding( $location );
 
-		if ( empty( $nox_profile['onboarding'] ) ) {
-			$nox_profile['onboarding'] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ] ) ) {
-			$nox_profile['onboarding'][ $location ] = array();
-		}
-		if ( empty( $nox_profile['onboarding'][ $location ]['steps'] ) ) {
-			$nox_profile['onboarding'][ $location ]['steps'] = array();
+		if ( empty( $nox_profile_onboarding['steps'] ) ) {
+			$nox_profile_onboarding['steps'] = array();
 		}
 
 		// Update the stored step data.
-		$nox_profile['onboarding'][ $location ]['steps'][ $step_id ] = $data;
+		$nox_profile_onboarding['steps'][ $step_id ] = $data;
 
-		return $this->proxy->call_function( 'update_option', self::NOX_PROFILE_OPTION_KEY, $nox_profile, false );
+		return $this->save_nox_profile_onboarding( $location, $nox_profile_onboarding );
 	}
 
 	/**
