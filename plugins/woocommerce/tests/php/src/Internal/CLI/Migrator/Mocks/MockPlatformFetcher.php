@@ -34,7 +34,7 @@ class MockPlatformFetcher implements PlatformFetcherInterface {
 				),
 			),
 			'cursor'        => 'next-cursor',
-			'has_next_page' => false, // Set to false to avoid infinite loops in tests
+			'has_next_page' => false, // Set to false to avoid infinite loops in tests.
 		);
 	}
 
