@@ -1377,27 +1377,34 @@ class WooPaymentsService {
 			'source'       => $source,
 		);
 
-		try {
-			// Call the WooPayments API to reset onboarding.
-			$response = $this->proxy->call_static(
-				Utils::class,
-				'rest_endpoint_post_request',
-				'/wc/v3/payments/onboarding/reset',
-				array(
-					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => $source,
-				)
-			);
-		} catch ( Exception $e ) {
-			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
+		if ( $this->has_account() ) {
+			try {
+				// Call the WooPayments API to reset onboarding.
+				$response = $this->proxy->call_static(
+					Utils::class,
+					'rest_endpoint_post_request',
+					'/wc/v3/payments/onboarding/reset',
+					array(
+						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+						'source' => $source,
+					)
+				);
+			} catch ( Exception $e ) {
+				// Catch any exceptions to allow for proper error handling and onboarding unlock.
+				$response = new WP_Error(
+					'woocommerce_woopayments_onboarding_client_api_exception',
+					esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
+					array(
+						'code'    => $e->getCode(),
+						'message' => $e->getMessage(),
+						'trace'   => $e->getTrace(),
+					)
+				);
+			}
+		} else {
+			// If there is no account to reset, we can just use a success response.
+			$response = array(
+				'success' => true,
 			);
 		}
 
