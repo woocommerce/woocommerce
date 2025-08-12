@@ -150,6 +150,14 @@ const renderBlockInContainers = <
 		const isCartBlock = el.classList.contains(
 			'wp-block-woocommerce-cart'
 		);
+		// Check for reduced motion preference with sensible fallback
+		// Default to reduced motion (safer for accessibility) when matchMedia is unavailable
+		const hasMotionReduced =
+			typeof window !== 'undefined' &&
+			typeof window.matchMedia === 'function'
+				? window.matchMedia( '(prefers-reduced-motion: reduce)' )
+						.matches
+				: true; // Fallback: assume reduced motion for better accessibility
 
 		const props = getProps( el, i );
 
@@ -162,8 +170,7 @@ const renderBlockInContainers = <
 		// Determine rendering delay based on block type and user preferences.
 		// The cart and checkout blocks page placeholders should fade out if motion is not reduced.
 		const shouldAnimate =
-			( isCheckoutBlock || isCartBlock ) &&
-			! window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+			( isCheckoutBlock || isCartBlock ) && ! hasMotionReduced;
 
 		const performRender = () => {
 			const root = renderBlock( {
