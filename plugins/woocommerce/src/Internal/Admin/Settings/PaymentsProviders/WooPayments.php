@@ -113,6 +113,11 @@ class WooPayments extends PaymentGateway {
 				 */
 				$service = wc_get_container()->get( WooPaymentsService::class );
 
+				// Ensure we have a valid rest_controller from the earlier try block
+				if ( ! isset( $rest_controller ) ) {
+					throw new \RuntimeException( 'WooPayments REST controller not available' );
+				}
+
 				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
 				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
 					// Merge the onboarding state with the one provided by the service.
