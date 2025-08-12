@@ -3352,6 +3352,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				'selected'         => false,
 				'required'         => false,
 				'name'             => '',
+				'aria-label'       => false,
 				'id'               => '',
 				'class'            => '',
 				'show_option_none' => __( 'Choose an option', 'woocommerce' ),
@@ -3381,7 +3382,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . ( $args['aria-label'] ? '" aria-label="' . esc_attr( $args['aria-label'] ) : '' ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
