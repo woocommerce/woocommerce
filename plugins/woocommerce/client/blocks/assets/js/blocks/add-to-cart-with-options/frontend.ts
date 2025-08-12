@@ -587,5 +587,5 @@ const { actions, state } = store<
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
