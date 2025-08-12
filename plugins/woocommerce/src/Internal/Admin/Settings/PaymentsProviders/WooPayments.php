@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
@@ -57,7 +58,7 @@ class WooPayments extends PaymentGateway {
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
 		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
-			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 
 			return $details;
 		}
@@ -100,6 +101,37 @@ class WooPayments extends PaymentGateway {
 					'source' => 'settings-payments',
 				)
 			);
+		}
+
+		// Override the onboarding state with the entries provided by the WooPayments service.
+		if ( ! empty( $country_code ) ) {
+			try {
+				/**
+				 * The WooPayments service instance.
+				 *
+				 * @var WooPaymentsService $service
+				 */
+				$service = wc_get_container()->get( WooPaymentsService::class );
+
+				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
+				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
+					// Merge the onboarding state with the one provided by the service.
+					$details['onboarding']['state'] = array_merge(
+						$details['onboarding']['state'],
+						$onboarding_details['state']
+					);
+				}
+			} catch ( \Throwable $e ) {
+				// If the service is not available, we can't impose the more specific logic.
+				// This is not a critical error, so we just ignore it.
+				// Log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->error(
+					'Failed to get the WooPayments service instance: ' . $e->getMessage(),
+					array(
+						'source' => 'settings-payments',
+					)
+				);
+			}
 		}
 
 		return $details;
