@@ -52,6 +52,7 @@ export const EllipsisMenuWrapper = ( {
 		! canResetAccount &&
 		isWooPayments( provider.id ) &&
 		provider._type === 'gateway' &&
+		! provider.state?.account_connected &&
 		provider.onboarding?.state?.started &&
 		!! provider.onboarding?._links?.reset?.href;
 
