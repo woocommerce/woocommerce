@@ -186,7 +186,8 @@ class AddToCartWithOptions extends AbstractBlock {
 					'isFormValid' => function () {
 						$context = wp_interactivity_get_context();
 						$product = wc_get_product( $context['productId'] );
-						if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+
+						if ( $product instanceof \WC_Product && ( $product->is_type( 'grouped' ) || $product->has_options() ) ) {
 							return false;
 						}
 						return true;
