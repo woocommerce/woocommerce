@@ -1844,12 +1844,24 @@ class WooPaymentsService {
 		}
 
 		// Add the live account business verification onboarding step details.
+		$business_verification_step_sub_steps = $this->get_nox_profile_onboarding_step_data_entry(
+			self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+			$location,
+			'sub_steps',
+			array()
+		);
+		// Sanity check: If there is no account connected, the sub-steps details should be forced empty.
+		// This way we allow for the Transact Platform account reset to take effect and
+		// allow the user to restart the business verification process, including the self-assessment business step.
+		if ( ! $this->has_account() ) {
+			$business_verification_step_sub_steps = array();
+		}
 		$business_verification_step = $this->standardize_onboarding_step_details(
 			array(
 				'id'      => self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				'context' => array(
 					'fields'           => array(),
-					'sub_steps'        => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps', array() ),
+					'sub_steps'        => $business_verification_step_sub_steps,
 					'self_assessment'  => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment', array() ),
 					'has_test_account' => $this->has_test_account(),
 				),
