@@ -147,10 +147,16 @@ class WooPaymentsService {
 
 		$source = $this->validate_onboarding_source( $source );
 
+		$onboarding_started = $this->provider->is_onboarding_started( $this->get_payment_gateway() );
+		if ( ! $onboarding_started && ! empty( $this->get_nox_profile_onboarding( $location ) ) ) {
+			// If the onboarding profile is stored, we consider the onboarding started.
+			$onboarding_started = true;
+		}
+
 		return array(
 			// This state is high-level data, independent of the type of onboarding flow.
 			'state'   => array(
-				'started'   => $this->provider->is_onboarding_started( $this->get_payment_gateway() ),
+				'started'   => $onboarding_started,
 				'completed' => $this->provider->is_onboarding_completed( $this->get_payment_gateway() ),
 				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
 				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
