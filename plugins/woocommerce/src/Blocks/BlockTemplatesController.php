@@ -220,7 +220,7 @@ class BlockTemplatesController {
 	/**
 	 * Add the block template objects currently saved in the database with the WooCommerce slug.
 	 * That is, templates that have been customised before WooCommerce started to use the
-	 * Tempalte Registration API.
+	 * Template Registration API.
 	 *
 	 * @param array  $query_result Array of template objects.
 	 * @param array  $query Optional. Arguments to retrieve templates.
