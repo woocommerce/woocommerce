@@ -46,7 +46,8 @@ class WooPayments extends PaymentGateway {
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
 
-		$has_test_account = $this->has_test_drive_account();
+		$has_test_account    = $this->has_test_account();
+		$has_sandbox_account = $this->has_sandbox_account();
 
 		// Switch the onboarding type to native.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
@@ -82,8 +83,8 @@ class WooPayments extends PaymentGateway {
 			 */
 			$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
 
-			// Add disable test account URL to onboarding links, if the current account is a test account.
-			if ( $has_test_account ) {
+			// Add disable test account URL to onboarding links, if the current account is a test or sandbox account.
+			if ( $has_test_account || $has_sandbox_account ) {
 				$details['onboarding']['_links']['disable_test_account'] = array(
 					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/test_account/disable' ) ),
 				);
@@ -252,7 +253,7 @@ class WooPayments extends PaymentGateway {
 		}
 
 		// Test-drive accounts don't need setup.
-		if ( $this->has_test_drive_account() ) {
+		if ( $this->has_test_account() ) {
 			return false;
 		}
 
@@ -520,17 +521,43 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
-	 * Determines if the current account is a test-drive account.
+	 * Determines if the current account is a test account.
 	 *
-	 * @return bool True if the account is a test-drive account, false otherwise.
+	 * Test accounts are test-drive accounts.
+	 * They are different from sandbox accounts (i.e. accounts onboarded in test mode).
+	 *
+	 * @return bool True if the account is a test account, false otherwise.
 	 */
-	private function has_test_drive_account(): bool {
+	private function has_test_account(): bool {
 		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
 			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
 			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
 				$account_status = $account_service->get_account_status_data();
 
-				return ! empty( $account_status['testDrive'] );
+				return ! empty( $account_status['testDrive'] ) || empty( $account_status['isLive'] );
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determines if the current account is a sandbox account.
+	 *
+	 * Sandbox accounts are accounts that were onboarded in test mode.
+	 * They are different from test accounts (i.e. test-drive accounts).
+	 *
+	 * Sandbox accounts are generally created in development or staging environments when simulating live onboarding.
+	 *
+	 * @return bool True if the account is a sandbox account, false otherwise.
+	 */
+	private function has_sandbox_account(): bool {
+		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
+			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
+			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+				$account_status = $account_service->get_account_status_data();
+
+				return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
 			}
 		}
 

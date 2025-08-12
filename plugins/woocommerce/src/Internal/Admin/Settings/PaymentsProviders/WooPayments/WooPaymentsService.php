@@ -1455,7 +1455,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Disable test account during the switch-to-live onboarding flow.
+	 * Disable a test account during the switch-to-live onboarding flow.
 	 *
 	 * @param string      $location The location for which we are onboarding.
 	 *                              This is an ISO 3166-1 alpha-2 country code.
@@ -1473,37 +1473,76 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$has_test_account    = $this->has_test_account();
+		$has_sandbox_account = $this->has_sandbox_account();
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
 		$source = $this->validate_onboarding_source( $source );
 
-		try {
-			// Call the WooPayments API to disable the test account and prepare for the switch to live.
-			$response = $this->proxy->call_static(
-				Utils::class,
-				'rest_endpoint_post_request',
-				'/wc/v3/payments/onboarding/test_drive_account/disable',
-				array(
-					'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
-					'source' => $source,
-				)
-			);
-		} catch ( Exception $e ) {
-			// Catch any exceptions to allow for proper error handling and onboarding unlock.
-			$response = new WP_Error(
-				'woocommerce_woopayments_onboarding_client_api_exception',
-				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-				array(
-					'code'    => $e->getCode(),
-					'message' => $e->getMessage(),
-					'trace'   => $e->getTrace(),
-				)
-			);
+		$response = array(
+			'success' => true,
+		);
+
+		// First, check if we have a test account to disable.
+		if ( $has_test_account ) {
+			try {
+				// Call the WooPayments API to disable the test account and prepare for the switch to live.
+				$response = $this->proxy->call_static(
+					Utils::class,
+					'rest_endpoint_post_request',
+					'/wc/v3/payments/onboarding/test_drive_account/disable',
+					array(
+						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+						'source' => $source,
+					)
+				);
+			} catch ( Exception $e ) {
+				// Catch any exceptions to allow for proper error handling and onboarding unlock.
+				$response = new WP_Error(
+					'woocommerce_woopayments_onboarding_client_api_exception',
+					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
+					array(
+						'code'    => $e->getCode(),
+						'message' => $e->getMessage(),
+						'trace'   => $e->getTrace(),
+					)
+				);
+			}
+		} else if ( $has_sandbox_account ) {
+			try {
+				// Call the WooPayments API to reset onboarding.
+				$response = $this->proxy->call_static(
+					Utils::class,
+					'rest_endpoint_post_request',
+					'/wc/v3/payments/onboarding/reset',
+					array(
+						'from'   => ! empty( $from ) ? esc_attr( $from ) : self::FROM_PAYMENT_SETTINGS,
+						'source' => $source,
+					)
+				);
+			} catch ( Exception $e ) {
+				// Catch any exceptions to allow for proper error handling and onboarding unlock.
+				$response = new WP_Error(
+					'woocommerce_woopayments_onboarding_client_api_exception',
+					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
+					array(
+						'code'    => $e->getCode(),
+						'message' => $e->getMessage(),
+						'trace'   => $e->getTrace(),
+					)
+				);
+			}
 		}
 
 		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
+
+		// Make sure the onboarding mode is reset.
+		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
+			$this->proxy->call_function( 'update_option', Constants::get_constant( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ), 'no' );
+		}
 
 		// Track the failure to disable the test account.
 		if ( is_wp_error( $response ) || ! is_array( $response ) || empty( $response['success'] ) ) {
@@ -1547,7 +1586,8 @@ class WooPaymentsService {
 			self::EVENT_PREFIX . 'onboarding_test_account_disabled',
 			$location,
 			array(
-				'source' => $source,
+				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
+				'source'       => $source,
 			)
 		);
 
@@ -2453,6 +2493,22 @@ class WooPaymentsService {
 		$account_status  = $account_service->get_account_status_data();
 
 		return ! empty( $account_status['testDrive'] );
+	}
+
+	/**
+	 * Determine if WooPayments has a sandbox account set up.
+	 *
+	 * @return bool Whether WooPayments has a sandbox account set up.
+	 */
+	private function has_sandbox_account(): bool {
+		if ( ! $this->has_account() ) {
+			return false;
+		}
+
+		$account_service = $this->proxy->call_static( '\WC_Payments', 'get_account_service' );
+		$account_status  = $account_service->get_account_status_data();
+
+		return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
 	}
 
 	/**
