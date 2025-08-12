@@ -126,7 +126,6 @@ final class ProductsCommand {
 			return;
 		}
 
-
 		// Delegate actual migration logic to ProductsController with resolved platform.
 		$this->products_controller->migrate_products( $assoc_args, $platform );
 	}
@@ -161,5 +160,4 @@ final class ProductsCommand {
 			WP_CLI::success( "Found {$count} products{$status_filter} on {$platform}." );
 		}
 	}
-
 }

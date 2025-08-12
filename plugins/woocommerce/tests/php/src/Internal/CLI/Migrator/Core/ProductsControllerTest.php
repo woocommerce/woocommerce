@@ -1,8 +1,8 @@
 <?php
 /**
  * ProductsController Test
- * 
- * Tests business logic in ProductsController (parsing, validation, transformation).
+ *
+ * Tests for ProductsController (parsing, validation, transformation).
  *
  * @package Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Core
  */
@@ -56,14 +56,35 @@ class ProductsControllerTest extends \WC_Unit_Test_Case {
 	public function test_batch_size_validation(): void {
 		$test_cases = array(
 			// Valid batch sizes.
-			array( 'input' => '10', 'expected' => 10 ),
-			array( 'input' => '250', 'expected' => 250 ),
-			array( 'input' => '1', 'expected' => 1 ),
+			array(
+				'input'    => '10',
+				'expected' => 10,
+			),
+			array(
+				'input'    => '250',
+				'expected' => 250,
+			),
+			array(
+				'input'    => '1',
+				'expected' => 1,
+			),
 			// Invalid batch sizes (should use default).
-			array( 'input' => '0', 'expected' => 20 ),
-			array( 'input' => '-5', 'expected' => 20 ),
-			array( 'input' => '1000', 'expected' => 250 ), // Max cap.
-			array( 'input' => 'invalid', 'expected' => 20 ),
+			array(
+				'input'    => '0',
+				'expected' => 20,
+			),
+			array(
+				'input'    => '-5',
+				'expected' => 20,
+			),
+			array(
+				'input'    => '1000',
+				'expected' => 250,
+			), // Max cap.
+			array(
+				'input'    => 'invalid',
+				'expected' => 20,
+			),
 		);
 
 		$reflection = new \ReflectionClass( $this->products_controller );
