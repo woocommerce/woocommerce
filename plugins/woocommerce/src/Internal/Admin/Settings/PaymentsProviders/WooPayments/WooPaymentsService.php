@@ -1385,7 +1385,7 @@ class WooPaymentsService {
 		// Before resetting the onboarding, record its details for tracking purposes.
 		$event_props = array(
 			'has_account'  => $this->has_account(),
-			'account_mode' => $this->has_account() ? ( $this->has_live_account() ? 'live' : 'test' ) : 'none' ,
+			'account_mode' => $this->has_account() ? ( $this->has_live_account() ? 'live' : 'test' ) : 'none',
 			'test_account' => $this->has_test_account(),
 			'source'       => $source,
 		);
@@ -2045,7 +2045,7 @@ class WooPaymentsService {
 	/**
 	 * Save the NOX profile data.
 	 *
-	 * @param array  $data The data to save in the profile.
+	 * @param array $data The data to save in the profile.
 	 *
 	 * @return bool Whether the data was saved.
 	 */

@@ -7824,7 +7824,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange the DB options.
 		$onboarding_lock_cleared = 0;
-		$deleted_profiles = 0;
+		$deleted_profiles        = 0;
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
@@ -7899,7 +7899,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange the DB options.
 		$onboarding_lock_cleared = 0;
-		$deleted_profiles = 0;
+		$deleted_profiles        = 0;
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
