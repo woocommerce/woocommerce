@@ -80,7 +80,12 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 
 		// Register with Jetpack if not already connected.
 		$jetpack_connection_manager = $this->gateway->get_jetpack_connection_manager();
-		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
+		if ( ! $jetpack_connection_manager ) {
+			WC_Gateway_Paypal::log( 'Jetpack connection manager not found.', 'error' );
+			return;
+		}
+
+		if ( ! $jetpack_connection_manager->is_connected() ) {
 			$result = $jetpack_connection_manager->try_registration();
 			if ( is_wp_error( $result ) ) {
 				WC_Gateway_Paypal::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );

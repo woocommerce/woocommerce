@@ -163,8 +163,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	private function maybe_onboard_with_transact() {
-		// Limit the trigger to admin pages only.
-		if ( ! is_admin() ) {
+		// Limit onboarding trigger to when an admin visits wp-admin.
+		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
