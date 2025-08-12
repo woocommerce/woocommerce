@@ -113,12 +113,17 @@ class CheckoutLink {
 
 				if ( $product_data ) {
 
-					// Parse the product data into key=value pairs.
-					parse_str( $product_data, $pairs );
+					// Parse key=value pairs separated by semicolons.
+					$pairs = explode( ';', $product_data );
 
 					$cart_item_data = [];
 
-					foreach ( $pairs as $key => $value ) {
+					foreach ( $pairs as $pair ) {
+						if ( strpos( $pair, '=' ) === false ) {
+							continue;
+						}
+
+						list( $key, $value ) = explode( '=', $pair, 2 );
 						$cart_item_data[ wc_clean( $key ) ] = wc_clean( $value );
 					}
 
