@@ -124,7 +124,7 @@ class CheckoutLink {
 						}
 
 						list( $key, $value ) = explode( '=', $pair, 2 );
-						$cart_item_data[ wc_clean( $key ) ] = wc_clean( $value );
+						$cart_item_data[ sanitize_key( $key ) ] = wc_clean( $value );
 					}
 
 				}
