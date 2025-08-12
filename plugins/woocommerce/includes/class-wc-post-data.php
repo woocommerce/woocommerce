@@ -733,7 +733,7 @@ class WC_Post_Data {
 		$taxonomy = 'pa_' . $old_slug;
 
 		global $wpdb;
-		$threshold = self::get_variation_summaries_sync_threshold();
+		$threshold     = self::get_variation_summaries_sync_threshold();
 		$variation_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT p.ID
@@ -807,7 +807,7 @@ class WC_Post_Data {
 	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
 			global $wpdb;
-			$threshold = self::get_variation_summaries_sync_threshold();
+			$threshold     = self::get_variation_summaries_sync_threshold();
 			$variation_ids = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT DISTINCT ID
@@ -876,7 +876,7 @@ class WC_Post_Data {
 		$meta_key = 'attribute_' . $taxonomy;
 		global $wpdb;
 
-		$threshold = self::get_variation_summaries_sync_threshold();
+		$threshold     = self::get_variation_summaries_sync_threshold();
 		$variation_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT pm.post_id
