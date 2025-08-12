@@ -89,7 +89,7 @@ export default function sanitizeHtmlExtended( html, config = {} ) {
 	return {
 		__html: sanitizeHTML( html, {
 			tags: config.tags || EXTENDED_ALLOWED_TAGS,
-			attrs: config.attrs || EXTENDED_ALLOWED_ATTR,
+			attr: config.attr || EXTENDED_ALLOWED_ATTR,
 		} ),
 	};
 }

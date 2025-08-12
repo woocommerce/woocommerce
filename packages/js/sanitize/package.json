@@ -4,7 +4,7 @@
 	"description": "WooCommerce HTML sanitization utilities.",
 	"main": "build/index.js",
 	"module": "build/index.js",
-	"types": "build/index.d.ts",
+	"types": "build-types/index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git",
@@ -24,10 +24,10 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/sanitize#readme",
 	"dependencies": {
-		"dompurify": "^2.5.7"
+		"dompurify": "^3.2.0"
 	},
 	"devDependencies": {
-		"@types/dompurify": "^2.4.0",
+		"@types/dompurify": "^3.2.0",
 		"@wordpress/scripts": "^27.0.0",
 		"typescript": "5.7.x"
 	},
@@ -41,7 +41,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "wp-scripts build && tsc --emitDeclarationOnly",
+		"build": "wp-scripts build",
 		"dev": "wp-scripts start",
 		"lint": "wp-scripts lint",
 		"start": "wp-scripts start"
