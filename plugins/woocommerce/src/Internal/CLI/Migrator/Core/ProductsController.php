@@ -75,9 +75,11 @@ class ProductsController {
 	 * Initialize the controller with its dependencies.
 	 * Called automatically by the WooCommerce DI container.
 	 *
-	 * @param CredentialManager           $credential_manager The credential manager.
-	 * @param PlatformRegistry            $platform_registry  The platform registry.
-	 * @param WooCommerceProductImporter  $product_importer   The product importer.
+	 * @internal
+	 *
+	 * @param CredentialManager          $credential_manager The credential manager.
+	 * @param PlatformRegistry           $platform_registry  The platform registry.
+	 * @param WooCommerceProductImporter $product_importer   The product importer.
 	 */
 	final public function init(
 		CredentialManager $credential_manager,
@@ -113,10 +115,10 @@ class ProductsController {
 
 		// Fetch total count and setup progress tracking.
 		$total_count = $fetcher->fetch_total_count( $this->parsed_args['filters'] );
-		
-		// Only set total count if it hasn't been set yet (new session or first time)
+
+		// Only set total count if it hasn't been set yet (new session or first time).
 		$existing_total = $this->session->count_all_total_entities();
-		if ( $total_count > 0 && $existing_total === 0 ) {
+		if ( 0 < $total_count && 0 === $existing_total ) {
 			$this->session->bump_total_number_of_entities( array( 'post' => $total_count ) );
 		}
 
@@ -134,7 +136,7 @@ class ProductsController {
 		$progress->finish();
 
 		$this->display_migration_summary();
-		
+
 		WP_CLI::success( 'Migration completed successfully.' );
 	}
 
@@ -415,11 +417,11 @@ class ProductsController {
 		// Display session information.
 		$metadata = $session->get_metadata();
 
-		$total_imported = $session->count_all_imported_entities();
-		$total_entities = $session->count_all_total_entities();
+		$total_imported    = $session->count_all_imported_entities();
+		$total_entities    = $session->count_all_total_entities();
 		$started_timestamp = $session->get_started_at();
-		$started_at = is_numeric( $started_timestamp ) ? 
-			get_date_from_gmt( gmdate( 'Y-m-d H:i:s', (int) $started_timestamp ) ) : 
+		$started_at        = is_numeric( $started_timestamp ) ?
+			get_date_from_gmt( gmdate( 'Y-m-d H:i:s', (int) $started_timestamp ) ) :
 			$started_timestamp;
 
 		WP_CLI::line( '' );
@@ -455,11 +457,11 @@ class ProductsController {
 			WP_CLI::line( 'Previous session archived. Starting a new import session.' );
 
 			$new_session = $this->create_new_session( $parsed_args );
-			
+
 			if ( $new_session ) {
 				WP_CLI::success( sprintf( 'Starting fresh migration from the beginning (Session %d)', $new_session->get_id() ) );
 			}
-			
+
 			return $new_session;
 		}
 	}
@@ -499,18 +501,18 @@ class ProductsController {
 	 * @return int Number of successfully processed items.
 	 */
 	private function process_batch( array $batch_items, $mapper ): int {
-		$processed_count    = 0;
-		$mapped_products    = array();
-		$source_data_batch  = array();
+		$processed_count   = 0;
+		$mapped_products   = array();
+		$source_data_batch = array();
 
 		foreach ( $batch_items as $item ) {
 			try {
 				// Extract the actual product node from GraphQL response structure.
 				$product_data = isset( $item->node ) ? $item->node : $item;
-				
+
 				$mapped_product = $mapper->map_product_data( $product_data );
 				if ( ! empty( $mapped_product ) ) {
-					$mapped_products[] = $mapped_product;
+					$mapped_products[]   = $mapped_product;
 					$source_data_batch[] = is_object( $product_data ) ? (array) $product_data : $product_data;
 				}
 			} catch ( Exception $e ) {
@@ -555,11 +557,11 @@ class ProductsController {
 	 */
 	private function log_batch_results( array $batch_results ): void {
 		$stats = $batch_results['stats'];
-		
-		// Only log failures and errors when verbose flag is set
+
+		// Only log failures and errors when verbose flag is set.
 		if ( $this->parsed_args['verbose'] && $stats['failed'] > 0 ) {
 			WP_CLI::warning( sprintf( '%d products failed to import', $stats['failed'] ) );
-			
+
 			// Log first few errors for debugging.
 			$error_count = 0;
 			foreach ( $batch_results['results'] as $result ) {
@@ -570,7 +572,7 @@ class ProductsController {
 			}
 		}
 
-		// Only log skipped products if there are many and verbose is enabled
+		// Only log skipped products if there are many and verbose is enabled.
 		if ( $this->parsed_args['verbose'] && $stats['skipped'] > 5 ) {
 			WP_CLI::log( sprintf( 'Skipped %d existing products', $stats['skipped'] ) );
 		}
@@ -585,18 +587,18 @@ class ProductsController {
 		}
 
 		$stats = $this->product_importer->get_import_stats();
-		
+
 		WP_CLI::line( '' );
 		WP_CLI::line( WP_CLI::colorize( '%YMigration Summary:%n' ) );
 		WP_CLI::line( sprintf( '  Products Created: %d', $stats['products_created'] ) );
 		WP_CLI::line( sprintf( '  Products Updated: %d', $stats['products_updated'] ) );
 		WP_CLI::line( sprintf( '  Products Skipped: %d', $stats['products_skipped'] ) );
 		WP_CLI::line( sprintf( '  Images Processed: %d', $stats['images_processed'] ) );
-		
+
 		if ( $stats['errors_encountered'] > 0 ) {
 			WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RErrors Encountered: %d%%n', $stats['errors_encountered'] ) ) );
 		}
-		
+
 		WP_CLI::line( '' );
 	}
 
