@@ -89,6 +89,9 @@
 	}
 
 	.comment-form-rating {
+		select {
+			margin-left: 0.5em;
+		}
 		button {
 			appearance: none;
 			border: none;
