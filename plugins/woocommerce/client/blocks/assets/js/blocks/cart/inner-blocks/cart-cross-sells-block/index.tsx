@@ -16,6 +16,17 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 import crossSells from '../../../product-collection/collections/cross-sells';
 
+export const createCrossSellsProductCollection = () => {
+	return createBlock(
+		'woocommerce/product-collection',
+		{
+			...crossSells.attributes,
+			collection: 'woocommerce/product-collection/cross-sells',
+		},
+		createBlocksFromInnerBlocksTemplate( crossSells.innerBlocks )
+	);
+};
+
 // @ts-expect-error - blockName can be either string or object
 registerBlockType( 'woocommerce/cart-cross-sells-block', {
 	apiVersion: metadata.apiVersion,
@@ -35,19 +46,7 @@ registerBlockType( 'woocommerce/cart-cross-sells-block', {
 			{
 				type: 'block',
 				blocks: [ 'woocommerce/product-collection' ],
-				transform: () => {
-					return createBlock(
-						'woocommerce/product-collection',
-						{
-							...crossSells.attributes,
-							collection:
-								'woocommerce/product-collection/cross-sells',
-						},
-						createBlocksFromInnerBlocksTemplate(
-							crossSells.innerBlocks
-						)
-					);
-				},
+				transform: createCrossSellsProductCollection,
 			},
 		],
 	},
