@@ -27,9 +27,19 @@
 		"dompurify": "^3.2.0"
 	},
 	"devDependencies": {
+		"@babel/core": "7.25.7",
 		"@types/dompurify": "^3.2.0",
+		"@types/jest": "29.5.x",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/scripts": "^27.0.0",
-		"typescript": "5.7.x"
+		"eslint": "^8.55.0",
+		"jest": "29.5.x",
+		"jest-cli": "29.7.0",
+		"rimraf": "5.0.5",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",
@@ -44,6 +54,37 @@
 		"build": "wp-scripts build",
 		"dev": "wp-scripts start",
 		"lint": "wp-scripts lint",
-		"start": "wp-scripts start"
+		"lint:fix": "wp-scripts lint --fix",
+		"start": "wp-scripts start",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test:js"
+		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	}
 } 

@@ -40,8 +40,12 @@ export const TRUSTED_POLICY_NAME = 'woocommerce-sanitize';
  *
  * @return TrustedTypePolicy object.
  */
-function createPolicy(): TrustedTypePolicy {
-	const policy = window.trustedTypes!.createPolicy( TRUSTED_POLICY_NAME, {
+function createPolicy(): TrustedTypePolicy | null {
+	if ( ! window || ! window.trustedTypes ) {
+		return null;
+	}
+
+	const policy = window.trustedTypes.createPolicy( TRUSTED_POLICY_NAME, {
 		createHTML: ( string: string ) => string,
 		createScriptURL: ( url ) => url,
 	} );
@@ -55,6 +59,10 @@ function createPolicy(): TrustedTypePolicy {
  */
 export function initializeTrustedTypesPolicy(): void {
 	const policy = createPolicy();
+
+	if ( ! policy ) {
+		return;
+	}
 
 	// Set this as the policy for DOMPurify
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
