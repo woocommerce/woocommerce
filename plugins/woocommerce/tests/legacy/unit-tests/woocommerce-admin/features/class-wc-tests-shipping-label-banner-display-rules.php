@@ -25,13 +25,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	);
 
 	/**
-	 * Backup of global $theorder to restore global state after tests are done.
-	 *
-	 * @var null|\WC_Order
-	 */
-	private static $theorder;
-
-	/**
 	 * Setup for every single test.
 	 */
 	public function setUp(): void {
@@ -50,9 +43,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		foreach ( self::$modified_options as $option_name => $option_value ) {
 			self::$modified_options[ $option_name ] = $option_value;
 		}
-
-		// Back up global $theorder.
-		self::$theorder = $GLOBALS['theorder'] ?? null;
 	}
 
 	/**
@@ -64,9 +54,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		foreach ( self::$modified_options as $option_name => $option_value ) {
 			update_option( $option_name, $option_value );
 		}
-
-		// Restore $theorder to prior state.
-		$GLOBALS['theorder'] = self::$theorder;
 	}
 
 	/**
@@ -210,8 +197,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = WC_Helper_Order::create_order( 1, $product );
 
-		global $theorder;
-		$theorder = $order;
 		return $order;
 	}
 
@@ -236,10 +221,19 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	 * @param function $callback to wrap.
 	 */
 	private function with_order( $callback ) {
-		$order = $this->create_order();
+		// Back up global $theorder.
+		$theorder_backup = $GLOBALS['theorder'] ?? null;
 
-		$callback( $this );
+		$order               = $this->create_order();
+		$GLOBALS['theorder'] = $order;
 
-		$this->destroy_order( $order );
+		try {
+			$callback( $this );
+
+			$this->destroy_order( $order );
+		} finally {
+			// Restore $theorder to prior state.
+			$GLOBALS['theorder'] = $theorder_backup;
+		}
 	}
 }
