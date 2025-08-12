@@ -56,6 +56,20 @@ class MockWPCLI {
 	public static $all_log_messages = array();
 
 	/**
+	 * All success messages collected.
+	 *
+	 * @var array
+	 */
+	public static $all_success_messages = array();
+
+	/**
+	 * Simulated user input for STDIN reading in tests.
+	 *
+	 * @var string
+	 */
+	public static $mock_stdin_input = 'y';
+
+	/**
 	 * Mock debug method.
 	 *
 	 * @param string $message Debug message.
@@ -98,11 +112,74 @@ class MockWPCLI {
 	 * @param string $message Success message.
 	 */
 	public static function success( $message ): void {
-		self::$last_success_message = $message;
+		self::$last_success_message   = $message;
+		self::$all_success_messages[] = $message;
+	}
+
+	/**
+	 * Mock line method.
+	 *
+	 * @param string $message Line message.
+	 */
+	public static function line( $message ): void {
+		self::$last_log_message   = $message;
+		self::$all_log_messages[] = $message;
+	}
+
+	/**
+	 * Mock out method for prompting user input.
+	 *
+	 * @param string $message Output message.
+	 */
+	public static function out( $message ): void {
+		self::$last_log_message   = $message;
+		self::$all_log_messages[] = $message;
+	}
+
+	/**
+	 * Mock colorize method.
+	 *
+	 * @param string $message Message to colorize.
+	 * @return string Unmodified message (no actual colorization in tests).
+	 */
+	public static function colorize( $message ): string {
+		// Remove colorization codes for tests.
+		return preg_replace( '/%(.)/', '', $message );
+	}
+
+	/**
+	 * Mock confirm method.
+	 *
+	 * @param string $question Question to confirm.
+	 * @return bool Always returns true in tests.
+	 */
+	public static function confirm( $question ): bool {
+		self::$last_log_message = $question;
+		return true;
+	}
+}
+
+/**
+ * Mock Progress Bar class for testing.
+ */
+class MockProgressBar {
+	public function tick( $count = 1, $update_title = true ) {
+		// Mock implementation
+	}
+
+	public function finish() {
+		// Mock implementation
 	}
 }
 
 // Create global WP_CLI class alias if it doesn't exist.
 if ( ! class_exists( 'WP_CLI' ) ) {
 	class_alias( MockWPCLI::class, 'WP_CLI' );
+}
+
+// Create a standalone mock function for make_progress_bar
+if ( ! function_exists( 'make_progress_bar_mock' ) ) {
+	function make_progress_bar_mock( $message, $count ) {
+		return new MockProgressBar();
+	}
 }
