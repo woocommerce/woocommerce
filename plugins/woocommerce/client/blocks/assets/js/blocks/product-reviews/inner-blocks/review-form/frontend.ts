@@ -14,7 +14,7 @@ type ServerState = {
 		hoveredStar: number;
 		selectedStar: number;
 		ratingError: string;
-		hasError: boolean;
+		hasRatingError: boolean;
 	};
 };
 
@@ -32,7 +32,7 @@ const productReviewsFormStore = {
 			const { starValue } = getContext< StarContext >();
 			return state.selectedStar >= parseInt( starValue, 10 );
 		},
-		get hasError(): boolean {
+		get hasRatingError(): boolean {
 			return state.ratingError.length > 0;
 		},
 	},
@@ -47,6 +47,7 @@ const productReviewsFormStore = {
 		selectStar() {
 			const { starValue } = getContext< StarContext >();
 			state.selectedStar = parseInt( starValue, 10 );
+			state.ratingError = '';
 		},
 		changeRatingWithKeyboard( event: KeyboardEvent ) {
 			const { ref } = getElement();
@@ -76,12 +77,14 @@ const productReviewsFormStore = {
 				// Activate current star.
 				event.preventDefault();
 				state.selectedStar = starInt;
+				state.ratingError = '';
 				return;
 			}
 
 			if ( shouldPreventDefault ) {
 				event.preventDefault();
 				state.selectedStar = newRating;
+				state.ratingError = '';
 
 				// Focus management - only move focus for navigation keys.
 				const nextButton =
@@ -94,15 +97,18 @@ const productReviewsFormStore = {
 			}
 		},
 		handleSubmit( event: HTMLElementEvent< HTMLFormElement > ) {
+			const config = getConfig( 'woocommerce/product-reviews' );
+			if ( ! config.reviewRatingEnabled ) {
+				return;
+			}
 			const formData = new FormData( event.target );
 			const rating = formData.get( 'rating' ) as string | null;
-			const config = getConfig( 'woocommerce/product-reviews' );
 			if (
-				config.review_rating_required &&
+				config.reviewRatingRequired &&
 				( ! rating || parseInt( rating, 10 ) === 0 )
 			) {
 				event.preventDefault();
-				state.ratingError = config.i18n_required_rating_text;
+				state.ratingError = config.i18nRequiredRatingText;
 				return;
 			}
 
@@ -120,6 +126,9 @@ const productReviewsFormStore = {
 			const { ref } = getElement();
 			if ( ref ) {
 				ref.hidden = true;
+				if ( 'required' in ref ) {
+					ref.required = false;
+				}
 			}
 		},
 	},

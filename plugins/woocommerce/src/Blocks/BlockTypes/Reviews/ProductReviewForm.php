@@ -45,22 +45,10 @@ class ProductReviewForm extends AbstractBlock {
 			return '<p class="woocommerce-verification-required">' . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
 		}
 
-		wp_interactivity_state(
-			'woocommerce/product-reviews',
-			array(
-				'selectedStar' => '0',
-				'hoveredStar'  => '0',
-				'ratingError'  => '',
-				'hasError'     => false,
-			)
-		);
-		wp_interactivity_config(
-			'woocommerce/product-reviews',
-			array(
-				'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
-				'review_rating_required'    => wc_review_ratings_required(),
-			)
-		);
+		$interactivy_state  = [];
+		$interactivy_config = [
+			'reviewRatingEnabled' => wc_review_ratings_enabled(),
+		];
 
 		$classes = array( 'comment-respond' );
 		if ( isset( $attributes['textAlign'] ) ) {
@@ -129,6 +117,13 @@ class ProductReviewForm extends AbstractBlock {
 		}
 
 		if ( wc_review_ratings_enabled() ) {
+			$interactivy_state['selectedStar']            = '';
+			$interactivy_state['hoveredStar']             = '0';
+			$interactivy_state['ratingError']             = '';
+			$interactivy_state['hasRatingError']          = false;
+			$interactivy_config['i18nRequiredRatingText'] = esc_attr__( 'Please select a rating', 'woocommerce' );
+			$interactivy_config['reviewRatingRequired']   = wc_review_ratings_required();
+
 			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-selector" id="comment-form-rating-label">' .
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
 				'</label><select name="rating" id="rating-selector" data-wp-init="callbacks.hideRatingSelector" data-wp-bind--value="state.selectedStar" ' . ( wc_review_ratings_required() ? ' required' : '' ) . '>
@@ -139,8 +134,8 @@ class ProductReviewForm extends AbstractBlock {
 				<option value="2">' . esc_html__( 'Not that bad', 'woocommerce' ) . '</option>
 				<option value="1">' . esc_html__( 'Very poor', 'woocommerce' ) . '</option>
 			</select>' .
-				'<p role="radiogroup" aria-labelledby="comment-form-rating-label" class="stars-wrapper" data-wp-init="callbacks.showRatingStars" hidden data-wp-bind--aria-invalid="state.hasError"' . ( wc_review_ratings_required() ? ' aria-required="true"' : '' ) . ' aria-describedby="rating-error">' . $this->render_stars() .
-				( wc_review_ratings_required() ? '<small id="rating-error" data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasError" role="alert"></small>' : '' ) .
+				'<p role="radiogroup" aria-labelledby="comment-form-rating-label" class="stars-wrapper" data-wp-init="callbacks.showRatingStars" hidden data-wp-bind--aria-invalid="state.hasRatingError"' . ( wc_review_ratings_required() ? ' aria-required="true"' : '' ) . ' aria-describedby="rating-error">' . $this->render_stars() .
+				( wc_review_ratings_required() ? '<small id="rating-error" data-wp-text="state.ratingError" class="rating-error" data-wp-bind--hidden="!state.hasRatingError" role="alert"></small>' : '' ) .
 				'</p></div>';
 		}
 
@@ -169,6 +164,13 @@ class ProductReviewForm extends AbstractBlock {
 
 		if ( $p->next_tag( 'form' ) ) {
 			$p->set_attribute( 'data-wp-on--submit', 'actions.handleSubmit' );
+		}
+
+		if ( ! empty( $interactivy_state ) ) {
+			wp_interactivity_state( 'woocommerce/product-reviews', $interactivy_state );
+		}
+		if ( ! empty( $interactivy_config ) ) {
+			wp_interactivity_config( 'woocommerce/product-reviews', $interactivy_config );
 		}
 
 		return $p->get_updated_html();

@@ -93,7 +93,7 @@
 			appearance: none;
 			border: none;
 			background: transparent;
-			padding: 0;
+			padding: 0 1px;
 			cursor: pointer;
 		}
 		.stars-wrapper:not([hidden]) {
@@ -104,7 +104,6 @@
 		.stars {
 			display: flex;
 			align-items: center;
-			gap: 2px;
 			svg {
 				display: block;
 			}
