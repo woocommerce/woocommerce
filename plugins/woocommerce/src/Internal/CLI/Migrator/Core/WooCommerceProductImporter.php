@@ -69,8 +69,8 @@ class WooCommerceProductImporter {
 	 * @var array
 	 */
 	private array $migration_data = array(
-		'images_mapping'      => array(),
-		'variations_mapping'  => array(),
+		'images_mapping'     => array(),
+		'variations_mapping' => array(),
 	);
 
 	/**
@@ -120,7 +120,7 @@ class WooCommerceProductImporter {
 			if ( $existing_product_id ) {
 				$existing_migration_data = $product->get_meta( '_migration_data' );
 				if ( is_array( $existing_migration_data ) ) {
-					$this->migration_data['images_mapping'] = $existing_migration_data['images_mapping'] ?? array();
+					$this->migration_data['images_mapping']     = $existing_migration_data['images_mapping'] ?? array();
 					$this->migration_data['variations_mapping'] = $existing_migration_data['variations_mapping'] ?? array();
 				}
 			}
@@ -232,7 +232,7 @@ class WooCommerceProductImporter {
 			'import_images'          => true,
 			'image_timeout'          => self::DEFAULT_IMAGE_TIMEOUT,
 			'max_images_per_product' => self::MAX_IMAGES_PER_PRODUCT,
-			'skip_duplicate_images'  => false,  // Set to true for faster imports
+			'skip_duplicate_images'  => false,  // Set to true for faster imports.
 			'create_categories'      => true,
 			'create_tags'            => true,
 			'handle_variations'      => true,
@@ -273,16 +273,16 @@ class WooCommerceProductImporter {
 	 * @param array $source_data  Original source data.
 	 * @return int|null Existing product ID or null if not found.
 	 */
-	private function find_existing_product( array $product_data, array $source_data ): ?int {
+	private function find_existing_product( array $product_data ): ?int {
 		if ( ! empty( $product_data['original_product_id'] ) ) {
 			$existing_posts = get_posts(
 				array(
-					'post_type'      => 'product',
-					'post_status'    => 'any', // Find regardless of status
-					'meta_key'       => '_original_product_id',
-					'meta_value'     => $product_data['original_product_id'],
-					'fields'         => 'ids',
-					'numberposts'    => 1,
+					'post_type'   => 'product',
+					'post_status' => 'any', // Find regardless of status.
+					'meta_key'    => '_original_product_id',
+					'meta_value'  => $product_data['original_product_id'],
+					'fields'      => 'ids',
+					'numberposts' => 1,
 				)
 			);
 
@@ -525,7 +525,7 @@ class WooCommerceProductImporter {
 	 * @param array $product_data Product data.
 	 * @param array $source_data  Original source data.
 	 */
-	private function handle_post_save_operations( int $product_id, array $product_data, array $source_data ): void {
+	private function handle_post_save_operations( int $product_id, array $product_data ): void {
 		if ( ! empty( $product_data['categories'] ) && $this->import_options['create_categories'] ) {
 			$this->assign_product_categories( $product_id, $product_data['categories'] );
 		}
@@ -625,9 +625,8 @@ class WooCommerceProductImporter {
 
 			$original_id = $image['original_id'] ?? null;
 			$is_featured = $image['is_featured'] ?? ( 0 === $index );
-			
-			$attachment_id = $this->import_image_with_mapping( 
-				$image['src'], 
+			$attachment_id = $this->import_image_with_mapping(
+				$image['src'],
 				$image['alt'] ?? '',
 				$original_id,
 				$product_id
@@ -707,7 +706,7 @@ class WooCommerceProductImporter {
 	 * @param int    $product_id Product ID for sideloading.
 	 * @return int|null Attachment ID or null on failure.
 	 */
-	private function import_image( string $image_url, string $alt_text = '', int $product_id = 0 ): ?int {
+	private function import_image( string $image_url, string $alt_text = '' ): ?int {
 		if ( $this->import_options['dry_run'] ) {
 			return null;
 		}
@@ -725,7 +724,6 @@ class WooCommerceProductImporter {
 
 		add_filter( 'http_request_timeout', array( $this, 'set_image_download_timeout' ) );
 		add_filter( 'http_request_args', array( $this, 'optimize_http_request_args' ) );
-		
 		try {
 			$attachment_id = media_sideload_image( $image_url, 0, null, 'id' );
 
@@ -735,7 +733,6 @@ class WooCommerceProductImporter {
 				if ( $this->import_options['verbose'] ?? false ) {
 					\WP_CLI::warning( $message );
 				}
-				
 				wc_get_logger()->error( $message, array( 'source' => 'wc-migrator-images' ) );
 				return null;
 			}
@@ -757,7 +754,7 @@ class WooCommerceProductImporter {
 	 * @param int $timeout Original timeout.
 	 * @return int Modified timeout.
 	 */
-	public function set_image_download_timeout( int $timeout ): int {
+	public function set_image_download_timeout(): int {
 		return $this->import_options['image_timeout'];
 	}
 

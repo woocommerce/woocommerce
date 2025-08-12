@@ -508,7 +508,14 @@ class ProductsController {
 		foreach ( $batch_items as $item ) {
 			try {
 				// Extract the actual product node from GraphQL response structure.
-				$product_data = isset( $item->node ) ? $item->node : $item;
+				// Handle both object and array GraphQL shapes.
+				if ( is_object( $item ) && isset( $item->node ) ) {
+					$product_data = $item->node;
+				} elseif ( is_array( $item ) && isset( $item['node'] ) ) {
+					$product_data = $item['node'];
+				} else {
+					$product_data = $item;
+				}
 
 				$mapped_product = $mapper->map_product_data( $product_data );
 				if ( ! empty( $mapped_product ) ) {
