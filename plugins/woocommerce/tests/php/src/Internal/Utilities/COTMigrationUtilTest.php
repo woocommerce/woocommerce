@@ -63,6 +63,10 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_init_theorder_object() {
 		global $theorder;
+
+		// Back up $theorder before running test.
+		$theorder_backup = $theorder;
+
 		$order1           = OrderHelper::create_order();
 		$order2           = OrderHelper::create_order();
 		$post_from_order2 = get_post( $order2->get_id() );
@@ -73,6 +77,9 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 		$theorder = null;
 		$this->sut->init_theorder_object( $post_from_order2 );
 		$this->assertEquals( $theorder->get_id(), $order2->get_id() );
+
+		// Restore original $theorder.
+		$theorder = $theorder_backup;
 	}
 
 	/**
