@@ -534,7 +534,7 @@ class WooPayments extends PaymentGateway {
 			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
 				$account_status = $account_service->get_account_status_data();
 
-				return ! empty( $account_status['testDrive'] ) || empty( $account_status['isLive'] );
+				return ! empty( $account_status['testDrive'] );
 			}
 		}
 
