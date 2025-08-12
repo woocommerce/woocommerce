@@ -168,11 +168,21 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		// Check if the merchant is eligible for migration and onboarding.
-		if (
-			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
-			! WC_Gateway_Paypal_Helper::is_tos_accepted()
-		) {
+		/**
+		 * Filters whether the gateway should use Orders v2 API.
+		 *
+		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.2.0
+		 */
+		$use_orders_v2 = apply_filters(
+			'woocommerce_paypal_use_orders_v2',
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_tos_accepted()
+		);
+
+		// If the conditions are met, but there is an override to not use Orders v2,
+		// respect the override. Bail early -- we don't need to onboard if not using Orders v2.
+		if ( ! $use_orders_v2 ) {
 			return;
 		}
 
