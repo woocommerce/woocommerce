@@ -120,8 +120,7 @@ class CheckoutLink {
 				if ( $product_data ) {
 
 					// Parse key=value pairs separated by semicolons.
-					$pairs = explode( ';', $product_data );
-
+					$pairs          = explode( ';', $product_data );
 					$cart_item_data = [];
 
 					foreach ( $pairs as $pair ) {
@@ -129,18 +128,18 @@ class CheckoutLink {
 							continue;
 						}
 
-						list( $key, $value ) = explode( '=', $pair, 2 );
+						list( $key, $value )                    = explode( '=', $pair, 2 );
 						$cart_item_data[ sanitize_key( $key ) ] = wc_clean( $value );
 					}
-
 				}
 			} else {
+				// No custom attributes provided, treat as default quantity.
 				$product_id = $raw_product;
 				$qty        = 1;
 			}
 
+			// If the product ID is not numeric, it may be a SKU.
 			if ( ! is_numeric( $product_id ) ) {
-				// If the product ID is not numeric, it may be a SKU.
 				$product_id = wc_get_product_id_by_sku( wc_clean( $product_id ) );
 			}
 
