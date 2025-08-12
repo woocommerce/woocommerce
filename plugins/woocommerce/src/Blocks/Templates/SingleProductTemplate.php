@@ -97,8 +97,6 @@ class SingleProductTemplate extends AbstractTemplate {
 					)
 				);
 			}
-
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 
