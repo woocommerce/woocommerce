@@ -342,11 +342,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			}
 
 			$taxonomy_data[] = array(
-				'label'  => $taxonomy->label,
-				'name'   => $taxonomy->name,
-				'labels' => array(
-					'singular_name' => $taxonomy->labels->singular_name,
-				),
+				'label' => $taxonomy->labels->singular_name,
+				'name'  => $taxonomy->name,
 			);
 		}
 
