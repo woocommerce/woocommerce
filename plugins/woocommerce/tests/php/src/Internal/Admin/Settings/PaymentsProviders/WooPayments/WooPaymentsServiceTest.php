@@ -7367,9 +7367,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$updated_stored_profiles = array();
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile, &$updated_stored_profiles ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
+						// Chain the responses to simulate the sequence of DB updates.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
 					}
 
 					return $default_value;
@@ -7425,8 +7426,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		self::assertEquals( $expected_response, $result );
 		self::assertCount( 1, $requests_made );
 		self::assertEquals( $expected_payload, $requests_made[0] );
-		// One is from the step status update, two are from the onboarding block.
-		$this->assertCount( 3, $updated_stored_profiles );
+		// One is from the step status update and one is from the test account being marked as completed.
+		$this->assertCount( 2, $updated_stored_profiles );
 		// The step status should have been set to `completed`.
 		$this->assertEquals(
 			array(
@@ -7435,7 +7436,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
 				),
 			),
-			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
+			$updated_stored_profiles[1]['onboarding'][ $location ]['steps'][ $step_id ]
+		);
+		$this->assertEquals(
+			array(
+				'statuses' => array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
+				),
+			),
+			$updated_stored_profiles[1]['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]
 		);
 	}
 
