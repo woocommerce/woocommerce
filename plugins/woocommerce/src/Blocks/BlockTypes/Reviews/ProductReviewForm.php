@@ -50,7 +50,7 @@ class ProductReviewForm extends AbstractBlock {
 			'reviewRatingEnabled' => wc_review_ratings_enabled(),
 		];
 
-		$classes = array( 'comment-respond' );
+		$classes = [ 'comment-respond' ];
 		if ( isset( $attributes['textAlign'] ) ) {
 			$classes[] = 'has-text-align-' . $attributes['textAlign'];
 		}
@@ -58,13 +58,13 @@ class ProductReviewForm extends AbstractBlock {
 			$classes[] = 'has-link-color';
 		}
 		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
+			[
 				'class' => implode( ' ', $classes ),
-			)
+			]
 		);
 
 		$commenter    = wp_get_current_commenter();
-		$comment_form = array(
+		$comment_form = [
 			/* translators: %s is product title */
 			'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
 			/* translators: %s is product title */
@@ -75,27 +75,27 @@ class ProductReviewForm extends AbstractBlock {
 			'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
 			'logged_in_as'        => '',
 			'comment_field'       => '',
-		);
+		];
 
 		$name_email_required = (bool) get_option( 'require_name_email', 1 );
-		$fields              = array(
-			'author' => array(
+		$fields              = [
+			'author' => [
 				'label'        => __( 'Name', 'woocommerce' ),
 				'type'         => 'text',
 				'value'        => $commenter['comment_author'],
 				'required'     => $name_email_required,
 				'autocomplete' => 'name',
-			),
-			'email'  => array(
+			],
+			'email'  => [
 				'label'        => __( 'Email', 'woocommerce' ),
 				'type'         => 'email',
 				'value'        => $commenter['comment_author_email'],
 				'required'     => $name_email_required,
 				'autocomplete' => 'email',
-			),
-		);
+			],
+		];
 
-		$comment_form['fields'] = array();
+		$comment_form['fields'] = [];
 
 		foreach ( $fields as $key => $field ) {
 			$field_html  = '<p class="comment-form-' . esc_attr( $key ) . '">';
@@ -196,7 +196,7 @@ class ProductReviewForm extends AbstractBlock {
 				data-wp-class--is-hovered="state.isStarHovered"
 				data-wp-class--is-selected="state.isStarSelected"
 				data-wp-bind--aria-checked="state.isStarSelected"
-				<?php echo wp_interactivity_data_wp_context( array( 'starValue' => $i ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo wp_interactivity_data_wp_context( [ 'starValue' => $i ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 				<svg
 					width='24'
