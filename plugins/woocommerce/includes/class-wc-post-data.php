@@ -923,38 +923,29 @@ class WC_Post_Data {
 
 		$meta_key = 'attribute_' . $taxonomy;
 		global $wpdb;
-		$count = (int) $wpdb->get_var(
+		$threshold = self::get_variation_summaries_sync_threshold();
+		$variation_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT COUNT(DISTINCT pm.post_id)
+				"SELECT DISTINCT pm.post_id
 				FROM $wpdb->postmeta pm
 				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
 				WHERE pm.meta_key = %s
 				AND pm.meta_value = %s
-				AND p.post_type = 'product_variation'",
+				AND p.post_type = 'product_variation'
+				LIMIT %d
+				",
 				$meta_key,
-				$deleted_term->slug
+				$deleted_term->slug,
+				$threshold + 1
 			)
 		);
 
-		if ( 0 === $count ) {
+		if ( empty( $variation_ids ) ) {
 			return;
 		}
 
-		$threshold = self::get_variation_summaries_sync_threshold();
-
-		if ( $count <= $threshold ) {
-			$variation_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT pm.post_id
-					FROM $wpdb->postmeta pm
-					INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
-					WHERE pm.meta_key = %s
-					AND pm.meta_value = %s
-					AND p.post_type = 'product_variation'",
-					$meta_key,
-					$deleted_term->slug
-				)
-			);
+		if ( count( $variation_ids ) <= $threshold ) {
+			// If the number of variations is below the threshold, regenerate summaries synchronously.
 			self::regenerate_variation_summaries( $variation_ids );
 		} else {
 			self::schedule_variation_summary_regeneration(
