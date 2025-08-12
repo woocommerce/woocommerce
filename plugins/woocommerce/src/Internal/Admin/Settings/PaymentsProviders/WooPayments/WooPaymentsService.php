@@ -2026,7 +2026,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the entire stored NOX profile data
+	 * Get the entire stored NOX profile data.
 	 *
 	 * @return array The stored NOX profile.
 	 */
