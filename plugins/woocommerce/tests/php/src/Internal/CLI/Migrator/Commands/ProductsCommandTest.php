@@ -83,23 +83,19 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 	 * Test that count requests don't trigger migration.
 	 */
 	public function test_count_request_prevents_migration() {
-		// Create mocked dependencies.
 		$credential_manager = $this->createMock( CredentialManager::class );
 		$platform_registry  = $this->createMock( PlatformRegistry::class );
 		$products_controller = $this->createMock( ProductsController::class );
 
-		// Mock credentials exist.
 		$credential_manager->expects( $this->once() )
 			->method( 'has_credentials' )
 			->with( 'shopify' )
 			->willReturn( true );
 
-		// Mock platform resolution.
 		$platform_registry->expects( $this->once() )
 			->method( 'resolve_platform' )
 			->willReturn( 'shopify' );
 
-		// Mock fetcher for count.
 		$mock_fetcher = $this->createMock( ShopifyFetcher::class );
 		$mock_fetcher->expects( $this->once() )
 			->method( 'fetch_total_count' )
@@ -109,20 +105,16 @@ class ProductsCommandTest extends \WC_Unit_Test_Case {
 			->method( 'get_fetcher' )
 			->willReturn( $mock_fetcher );
 
-		// ProductsController should NEVER be called for count requests.
 		$products_controller->expects( $this->never() )
 			->method( 'migrate_products' );
 
 		$this->command->init( $credential_manager, $platform_registry, $products_controller );
 
-		// Reset mock messages.
 		\WP_CLI::$last_success_message = '';
 		\WP_CLI::$last_log_message     = '';
 
-		// Call with count flag - should NOT trigger migration.
 		$this->command->__invoke( array(), array( 'count' => true ) );
 
-		// Should show count message.
 		$this->assertStringContainsString( '42', \WP_CLI::$last_success_message );
 	}
 
