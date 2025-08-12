@@ -58,7 +58,7 @@ class WC_REST_Paypal_Webhooks_Proxy_Controller extends WC_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/webhook-new',
+			'/' . $this->rest_base . '/webhook',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_webhook' ),
