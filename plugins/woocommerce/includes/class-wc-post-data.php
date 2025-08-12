@@ -733,38 +733,28 @@ class WC_Post_Data {
 		$taxonomy = 'pa_' . $old_slug;
 
 		global $wpdb;
-		$count = (int) $wpdb->get_var(
+		$threshold = self::get_variation_summaries_sync_threshold();
+		$variation_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT COUNT(DISTINCT p.ID)
+				"SELECT DISTINCT p.ID
 				FROM {$wpdb->posts} p
 				INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
 				WHERE p.post_type = 'product_variation'
-				AND pm.meta_key = %s",
-				'attribute_' . $taxonomy
+				AND pm.meta_key = %s
+				LIMIT %d",
+				'attribute_' . $taxonomy,
+				$threshold + 1
 			)
 		);
 
-		$threshold = self::get_variation_summaries_sync_threshold();
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
 
-		if ( $count <= $threshold ) {
+		if ( count( $variation_ids ) <= $threshold ) {
 			// Update variation summaries that used this product attribute, but
 			// wait until shutdown. This will allow WooC to carry out post_meta migrations
 			// if the slug of the attribute changed.
-			// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			$variation_ids = get_posts(
-				array(
-					'post_type'   => 'product_variation',
-					'numberposts' => -1,
-					'fields'      => 'ids',
-					'meta_query'  => array(
-						array(
-							'key'     => 'attribute_' . $taxonomy,
-							'compare' => 'EXISTS',
-						),
-					),
-				)
-			);
-			// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			add_action(
 				'shutdown',
 				function () use ( $variation_ids ) {
