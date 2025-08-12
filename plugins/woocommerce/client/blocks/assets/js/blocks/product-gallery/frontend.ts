@@ -555,19 +555,11 @@ const productGallery = {
 				element.style.scrollbarWidth = 'none';
 			}
 		},
-		initScrollable: () => {
-			callbacks.initResizeObserver();
-			callbacks.hideGhostOverflow();
-		},
 	},
 };
 
-const { actions, callbacks } = store(
-	'woocommerce/product-gallery',
-	productGallery,
-	{
-		lock: true,
-	}
-);
+const { actions } = store( 'woocommerce/product-gallery', productGallery, {
+	lock: true,
+} );
 
 export type Store = typeof productGallery;
