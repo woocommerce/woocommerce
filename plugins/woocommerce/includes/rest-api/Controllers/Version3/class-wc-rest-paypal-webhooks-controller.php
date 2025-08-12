@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\Jetpack\Connection\REST_Authentication;
 /**
  * REST API PayPal webhook handler controller class.
  *
@@ -63,7 +64,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_webhook' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'validate_webhook' ),
 			)
 		);
 	}
@@ -80,6 +81,16 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	public function test_webhook( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 		return new WP_REST_Response( 'Test webhook processed', 200 );
+	}
+
+	/**
+	 * Validate the webhook.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool True if the webhook is valid, false otherwise.
+	 */
+	public function validate_webhook( WP_REST_Request $request ) {
+		return REST_Authentication::is_signed_with_blog_token();
 	}
 
 	/**
