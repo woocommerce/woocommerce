@@ -270,7 +270,6 @@ class WooCommerceProductImporter {
 	 * Find existing product by various identifiers.
 	 *
 	 * @param array $product_data Mapped product data.
-	 * @param array $source_data  Original source data.
 	 * @return int|null Existing product ID or null if not found.
 	 */
 	private function find_existing_product( array $product_data ): ?int {
@@ -523,7 +522,6 @@ class WooCommerceProductImporter {
 	 *
 	 * @param int   $product_id   Product ID.
 	 * @param array $product_data Product data.
-	 * @param array $source_data  Original source data.
 	 */
 	private function handle_post_save_operations( int $product_id, array $product_data ): void {
 		if ( ! empty( $product_data['categories'] ) && $this->import_options['create_categories'] ) {
@@ -623,8 +621,8 @@ class WooCommerceProductImporter {
 				continue;
 			}
 
-			$original_id = $image['original_id'] ?? null;
-			$is_featured = $image['is_featured'] ?? ( 0 === $index );
+			$original_id   = $image['original_id'] ?? null;
+			$is_featured   = $image['is_featured'] ?? ( 0 === $index );
 			$attachment_id = $this->import_image_with_mapping(
 				$image['src'],
 				$image['alt'] ?? '',
@@ -703,7 +701,6 @@ class WooCommerceProductImporter {
 	 *
 	 * @param string $image_url Image URL.
 	 * @param string $alt_text  Alt text for the image.
-	 * @param int    $product_id Product ID for sideloading.
 	 * @return int|null Attachment ID or null on failure.
 	 */
 	private function import_image( string $image_url, string $alt_text = '' ): ?int {
@@ -751,7 +748,6 @@ class WooCommerceProductImporter {
 	/**
 	 * Set HTTP timeout for image downloads.
 	 *
-	 * @param int $timeout Original timeout.
 	 * @return int Modified timeout.
 	 */
 	public function set_image_download_timeout(): int {
