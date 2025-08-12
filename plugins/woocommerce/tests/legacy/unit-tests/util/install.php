@@ -117,14 +117,16 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - remove roles.
 	 */
 	public function test_remove_roles() {
-		WC_Install::remove_roles();
+		try {
+			WC_Install::remove_roles();
 
-		$this->assertNull( get_role( 'customer' ) );
-		$this->assertNull( get_role( 'shop_manager' ) );
-
-		// Add roles back.
-		WC_Install::create_roles();
-		wp_roles()->for_site();
+			$this->assertNull( get_role( 'customer' ) );
+			$this->assertNull( get_role( 'shop_manager' ) );
+		} finally {
+			// Always restore roles for subsequent tests.
+			WC_Install::create_roles();
+			wp_roles()->for_site();
+		}
 	}
 
 	/**
