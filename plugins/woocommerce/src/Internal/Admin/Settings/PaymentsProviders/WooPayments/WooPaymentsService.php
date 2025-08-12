@@ -1411,6 +1411,9 @@ class WooPaymentsService {
 		// Unlock the onboarding after the API call finished or errored.
 		$this->clear_onboarding_lock();
 
+		// Clean up any NOX-specific onboarding data, regardless of the API response.
+		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
+
 		if ( is_wp_error( $response ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
@@ -1427,9 +1430,6 @@ class WooPaymentsService {
 				(int) WP_Http::FAILED_DEPENDENCY
 			);
 		}
-
-		// Clean up any NOX-specific onboarding data.
-		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
 
 		// Record an event for the onboarding reset.
 		$this->record_event(
