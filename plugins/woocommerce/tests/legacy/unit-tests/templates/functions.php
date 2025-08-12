@@ -119,6 +119,78 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="Size for product" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => 'Size for product',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="&quot; onload=&quot;alert(&#039;XSS&#039;)&quot;" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => '" onload="alert(\'XSS\')"',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @dataProvider data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values
+	 *
+	 * @param mixed $attribute_value The falsey attribute value to test.
+	 */
+	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values( $attribute_value ) {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => $attribute_value,
+			)
+		);
+	}
+
+	/**
+	 * Data provider for test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @return array[] Data provider
+	 */
+	public function data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values() {
+		return array(
+			'false'        => array( false ),
+			'null'         => array( null ),
+			'0 (int)'      => array( 0 ),
+			'0 (string)'   => array( '0' ),
+			'0.0 (float)'  => array( 0.0 ),
+			'empty string' => array( '' ),
+			'empty array'  => array( array() ),
+		);
+	}
+
+	/**
 	 * Test wc_query_string_form_fields.
 	 *
 	 * @return void

@@ -1,31 +1,7 @@
 :where(.wc-block-next-previous-buttons) {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	height: 100%;
-
-	&:where(.alignleft) {
-		justify-content: flex-start;
-		gap: 0;
-	}
-
-	&:where(.alignright) {
-		justify-content: flex-end;
-		gap: 0;
-	}
-
-	&:where(.aligncenter) {
-		justify-content: center;
-		gap: 0;
-	}
-
-	&:where(.aligntop) {
-		align-items: flex-start;
-	}
-
-	&:where(.alignbottom) {
-		align-items: flex-end;
+	// Hidden doesn't work well with flexbox, so we need to hide it manually.
+	&[hidden] {
+		display: none !important;
 	}
 }
 
@@ -55,7 +31,9 @@
 
 :where(.wc-block-next-previous-buttons__button) {
 	cursor: pointer;
-	z-index: 3;
+	// Make sure the buttons are always on top of elements.
+	// Sale badge with align setting has z-index: 21.
+	z-index: 22;
 	pointer-events: all;
 	border: none;
 	width: 40px;
