@@ -40,6 +40,8 @@ class WooPayments extends PaymentGateway {
 	 *                                         This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway provider details.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- We wrap the throw in a try/catch.
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
@@ -113,7 +115,7 @@ class WooPayments extends PaymentGateway {
 				 */
 				$service = wc_get_container()->get( WooPaymentsService::class );
 
-				// Ensure we have a valid rest_controller from the earlier try block
+				// Ensure we have a valid rest_controller from the earlier try block.
 				if ( ! isset( $rest_controller ) ) {
 					throw new \RuntimeException( 'WooPayments REST controller not available' );
 				}
