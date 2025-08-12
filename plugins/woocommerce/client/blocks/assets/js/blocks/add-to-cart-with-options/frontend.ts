@@ -199,6 +199,7 @@ export type AddToCartWithOptionsStore = {
 		handleQuantityCheckboxChange: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
+		addToCart: () => void;
 		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
 	};
 };
@@ -512,48 +513,7 @@ const { actions, state } = store<
 					inputElement.checked ? 1 : 0
 				);
 			},
-			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
-				event.preventDefault();
-
-				const { isFormValid } = state;
-
-				if ( ! isFormValid ) {
-
-					// Dynamically import the store module first
-					yield import( '@woocommerce/stores/store-notices' );
-
-					const { actions: noticeActions } =
-						store< StoreNotices >(
-							'woocommerce/store-notices',
-							{},
-							{
-								lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-							}
-						);
-
-					const { noticeIds, validationErrors } = state;
-
-					// Clear previous notices.
-					noticeIds.forEach( ( id ) => {
-						noticeActions.removeNotice( id );
-					});
-					noticeIds.splice( 0, noticeIds.length );
-
-					// Add new notices and track their IDs.
-					const newNoticeIds = validationErrors.map( ( error ) =>
-						noticeActions.addNotice( {
-							notice: error.message,
-							type: 'error',
-							dismissible: true,
-						} )
-					);
-
-					// Store the new IDs in-place.
-					noticeIds.push( ...newNoticeIds );
-
-					return;
-				}
-
+			*addToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
@@ -647,6 +607,51 @@ const { actions, state } = store<
 						updateOptimistically: isFormValid,
 					} );
 				}
+			},
+			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
+				event.preventDefault();
+
+				const { isFormValid } = state;
+
+				if ( ! isFormValid ) {
+
+					// Dynamically import the store module first
+					yield import( '@woocommerce/stores/store-notices' );
+
+					const { actions: noticeActions } =
+						store< StoreNotices >(
+							'woocommerce/store-notices',
+							{},
+							{
+								lock: universalLock,
+							}
+						);
+
+					const { noticeIds, validationErrors } = state;
+
+					// Clear previous notices.
+					noticeIds.forEach( ( id ) => {
+						noticeActions.removeNotice( id );
+					});
+					noticeIds.splice( 0, noticeIds.length );
+
+					// Add new notices and track their IDs.
+					const newNoticeIds = validationErrors.map( ( error ) =>
+						noticeActions.addNotice( {
+							notice: error.message,
+							type: 'error',
+							dismissible: true,
+						} )
+					);
+
+					// Store the new IDs in-place.
+					noticeIds.push( ...newNoticeIds );
+
+					return;
+				}
+
+				actions.addToCart();
+				
 			},
 		},
 	},
