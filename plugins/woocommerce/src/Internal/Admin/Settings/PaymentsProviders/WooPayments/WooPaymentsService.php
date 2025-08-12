@@ -923,15 +923,8 @@ class WooPaymentsService {
 
 		// Nothing to do if there is a connected account, but it is not a test account.
 		if ( $this->has_account() ) {
-			// Mark the onboarding step as blocked, if it is not already.
-			$this->mark_onboarding_step_blocked(
-				self::ONBOARDING_STEP_TEST_ACCOUNT,
-				$location,
-				array(
-					'code'    => 'account_already_exists',
-					'message' => esc_html__( 'An account is already set up. Reset the onboarding first.', 'woocommerce' ),
-				)
-			);
+			// Mark the onboarding step as completed, if it is not already.
+			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',
@@ -1163,17 +1156,10 @@ class WooPaymentsService {
 		// Add the user locale to the account session data to allow for localized KYC sessions.
 		$response['locale'] = $this->proxy->call_function( 'get_user_locale' );
 
-		// For sanity, make sure the test account step is blocked if not already completed,
+		// For sanity, make sure the test account step is completed if not already,
 		// since we are doing live account KYC.
 		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_blocked(
-				self::ONBOARDING_STEP_TEST_ACCOUNT,
-				$location,
-				array(
-					'code'    => 'live_account_kyc_session',
-					'message' => esc_html__( 'A live account is set up. Reset the onboarding first.', 'woocommerce' ),
-				)
-			);
+			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, );
 		}
 
 		// Record an event for the KYC session being created.
@@ -1299,17 +1285,10 @@ class WooPaymentsService {
 		// Mark the business verification step as completed.
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, false, $source );
 
-		// For sanity, make sure the test account step is blocked if not already completed,
+		// For sanity, make sure the test account step is completed, if not already,
 		// since we are doing live account KYC.
 		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_blocked(
-				self::ONBOARDING_STEP_TEST_ACCOUNT,
-				$location,
-				array(
-					'code'    => 'live_account_kyc_session',
-					'message' => esc_html__( 'A live account is set up. Reset the onboarding first.', 'woocommerce' ),
-				)
-			);
+			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		}
 
 		return $response;
