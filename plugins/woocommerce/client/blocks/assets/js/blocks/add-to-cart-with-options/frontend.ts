@@ -19,6 +19,7 @@ import {
 	type AvailableVariation,
 } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
+import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {
@@ -38,13 +39,6 @@ export type AddToCartError = {
 	group: string;
 	message: string;
 };
-
-interface GroupedCartItem {
-	id: number;
-	quantity: number;
-	variation: SelectedAttributes[];
-	type: string;
-}
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -138,7 +132,7 @@ const getInputData = (
 	};
 };
 
-const getNewQuantity = (
+export const getNewQuantity = (
 	productId: number,
 	quantity: number,
 	variation?: SelectedAttributes[]
@@ -206,7 +200,8 @@ export type AddToCartWithOptionsStore = {
 
 const { actions, state } = store<
 	AddToCartWithOptionsStore &
-		Partial< VariableProductAddToCartWithOptionsStore >
+	Partial<GroupedProductAddToCartWithOptionsStore> &
+	Partial<VariableProductAddToCartWithOptionsStore>
 >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -523,90 +518,27 @@ const { actions, state } = store<
 					quantity,
 					selectedAttributes,
 					productType,
-					groupedProductIds,
 				} = getContext< Context >();
 
-				if (
-					productType === 'grouped' &&
-					groupedProductIds.length > 0
-				) {
-					const addedItems: GroupedCartItem[] = [];
+				const { variationId } = state;
+				const id = variationId || productId;
+				const newQuantity = getNewQuantity(
+					id,
+					quantity[ id ],
+					selectedAttributes
+				);
 
-					for ( const childProductId of groupedProductIds ) {
-						if ( quantity[ childProductId ] === 0 ) {
-							continue;
-						}
-
-						const newQuantity = getNewQuantity(
-							childProductId,
-							quantity[ childProductId ]
-						);
-
-						addedItems.push( {
-							id: childProductId,
-							quantity: newQuantity,
-							variation: selectedAttributes,
-							type: productType,
-						} );
-					}
-
-					if ( addedItems.length === 0 ) {
-						// Todo: Use the module exports instead of `store()` once the store-notices
-						// store is public.
-						yield import( '@woocommerce/stores/store-notices' );
-						const { actions: noticeActions } =
-							store< StoreNotices >(
-								'woocommerce/store-notices',
-								{},
-								{
-									lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-								}
-							);
-
-						const { errorMessages } = getConfig();
-
-						const errorMessage = errorMessages?.groupedProductAddToCartMissingItems;
-
-						if ( errorMessage ) {
-							noticeActions.addNotice( {
-								notice: errorMessage,
-								type: 'error',
-								dismissible: true,
-							} );
-						}
-
-						return;
-					}
-
-					const { actions } = store< WooCommerce >(
-						'woocommerce',
-						{},
-						{ lock: universalLock }
-					);
-
-					yield actions.batchAddCartItems( addedItems );
-				} else {
-					const { isFormValid, variationId } = state;
-					const id = variationId || productId;
-					const newQuantity = getNewQuantity(
-						id,
-						quantity[ id ],
-						selectedAttributes
-					);
-
-					const { actions } = store< WooCommerce >(
-						'woocommerce',
-						{},
-						{ lock: universalLock }
-					);
-					yield actions.addCartItem( {
-						id,
-						quantity: newQuantity,
-						variation: selectedAttributes,
-						type: productType,
-						updateOptimistically: isFormValid,
-					} );
-				}
+				const { actions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
+				yield actions.addCartItem( {
+					id,
+					quantity: newQuantity,
+					variation: selectedAttributes,
+					type: productType,
+				} );
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();
