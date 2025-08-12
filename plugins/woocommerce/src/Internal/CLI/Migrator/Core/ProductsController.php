@@ -542,6 +542,7 @@ class ProductsController {
 			'create_tags'           => in_array( 'tags', $this->fields_to_process, true ),
 			'handle_variations'     => in_array( 'attributes', $this->fields_to_process, true ),
 			'dry_run'               => $this->parsed_args['dry_run'] ?? false,
+			'verbose'               => $this->parsed_args['verbose'] ?? false,
 		);
 
 		$this->product_importer->configure( $import_options );
