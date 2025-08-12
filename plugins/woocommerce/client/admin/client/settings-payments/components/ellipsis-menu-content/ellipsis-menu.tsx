@@ -80,6 +80,7 @@ export const EllipsisMenuWrapper = ( {
 			<WooPaymentsResetAccountModal
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
+				hasAccount={ provider.state?.account_connected }
 				isTestMode={ provider.onboarding?.state?.test_mode }
 				resetUrl={ provider.onboarding?._links?.reset?.href }
 			/>
