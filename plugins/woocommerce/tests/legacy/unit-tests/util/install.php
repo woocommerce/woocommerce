@@ -105,7 +105,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
 		}
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
+		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
 
 		WC_Install::create_roles();
 
@@ -121,6 +121,10 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		$this->assertNull( get_role( 'customer' ) );
 		$this->assertNull( get_role( 'shop_manager' ) );
+
+		// Add roles back.
+		WC_Install::create_roles();
+		wp_roles()->for_site();
 	}
 
 	/**
@@ -171,5 +175,4 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
-
 }
