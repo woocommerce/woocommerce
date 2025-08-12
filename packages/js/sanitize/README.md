@@ -84,7 +84,7 @@ interface SanitizeConfig {
 
 ## Trusted Types
 
-This package automatically configures a trusted types policy named `woocommerce-dompurify` to avoid conflicts with DOMPurify's default policy. The policy is initialized when the module is loaded.
+This package automatically configures a trusted types policy named `woocommerce-sanitize` to avoid conflicts with DOMPurify's default policy. The policy is initialized when the module is loaded.
 
 ## Security
 

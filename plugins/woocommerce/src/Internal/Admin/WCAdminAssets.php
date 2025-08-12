@@ -325,6 +325,7 @@ class WCAdminAssets {
 			'wc-product-editor',
 			'wc-settings-editor',
 			'wc-remote-logging',
+			'wc-sanitize',
 		);
 
 		$scripts_map = array(
@@ -460,6 +461,7 @@ class WCAdminAssets {
 				'wc-tracks',
 				'wc-block-templates',
 				'wc-product-editor',
+				'wc-sanitize',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );
