@@ -817,20 +817,27 @@ class WC_Post_Data {
 	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
 			global $wpdb;
-			$count = (int) $wpdb->get_var(
+			$threshold = self::get_variation_summaries_sync_threshold();
+			$variation_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT COUNT(ID)
+					"SELECT DISTINCT ID
 					FROM {$wpdb->posts}
 					WHERE post_parent = %d
-					AND post_type = %s",
+					AND post_type = %s
+					LIMIT %d
+					",
 					$product->get_id(),
-					'product_variation'
+					'product_variation',
+					$threshold + 1
 				)
 			);
 
-			$threshold = self::get_variation_summaries_sync_threshold();
+			if ( empty( $variation_ids ) ) {
+				return;
+			}
 
-			if ( $count <= $threshold ) {
+			if ( count( $variation_ids ) <= $threshold ) {
+				// If the number of variations is below the threshold, regenerate summaries synchronously.
 				$variation_ids = $product->get_children();
 				self::regenerate_variation_summaries( $variation_ids );
 			} else {
