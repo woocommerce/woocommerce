@@ -571,7 +571,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "27.5.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"dependencies": [
