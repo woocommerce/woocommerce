@@ -159,27 +159,7 @@ class MockWPCLI {
 	}
 }
 
-/**
- * Mock Progress Bar class for testing.
- */
-class MockProgressBar {
-	public function tick( $count = 1, $update_title = true ) {
-		// Mock implementation
-	}
-
-	public function finish() {
-		// Mock implementation
-	}
-}
-
 // Create global WP_CLI class alias if it doesn't exist.
 if ( ! class_exists( 'WP_CLI' ) ) {
 	class_alias( MockWPCLI::class, 'WP_CLI' );
-}
-
-// Create a standalone mock function for make_progress_bar
-if ( ! function_exists( 'make_progress_bar_mock' ) ) {
-	function make_progress_bar_mock( $message, $count ) {
-		return new MockProgressBar();
-	}
 }
