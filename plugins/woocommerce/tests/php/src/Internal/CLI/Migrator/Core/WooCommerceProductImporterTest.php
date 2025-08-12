@@ -352,7 +352,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_platform_id_tracking(): void {
 		$product_data                        = MockShopifyData::get_mock_wc_product_data( 60 );
-		$product_data['original_product_id'] = 'shopify_product_123'; // Override for this test
+		$product_data['original_product_id'] = 'shopify_product_123';
 		$source_data                         = array(
 			'id'   => 'shopify_product_123',
 			'node' => array( 'id' => 'gid://shopify/Product/123' ),
@@ -430,7 +430,10 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 
 		$product_data           = MockShopifyData::get_mock_wc_product_data( 72 );
 		$product_data['images'] = array(
-			array( 'src' => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=1', 'is_featured' => true ),
+			array(
+				'src'         => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=1',
+				'is_featured' => true,
+			),
 			array( 'src' => 'https://via.placeholder.com/600x400/00FF00/000000?text=2' ),
 			array( 'src' => 'https://via.placeholder.com/600x400/0000FF/FFFFFF?text=3' ),
 			array( 'src' => 'https://via.placeholder.com/600x400/FFFF00/000000?text=4' ),
@@ -442,7 +445,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		// Test passes if product is created successfully.
 		// The max_images_per_product logic is tested (images processed up to limit).
 		$this->assertNotEmpty( $result['product_id'] );
-		
+
 		// Verify the product was created with correct basic data.
 		$product = wc_get_product( $result['product_id'] );
 		$this->assertNotNull( $product );
@@ -502,10 +505,10 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 * Test error handling with duplicate SKUs.
 	 */
 	public function test_error_handling_with_duplicate_skus(): void {
-		$product_data1 = MockShopifyData::get_mock_wc_product_data( 80 );
+		$product_data1        = MockShopifyData::get_mock_wc_product_data( 80 );
 		$product_data1['sku'] = 'DUPLICATE-SKU-TEST';
 
-		$product_data2 = MockShopifyData::get_mock_wc_product_data( 81 );
+		$product_data2        = MockShopifyData::get_mock_wc_product_data( 81 );
 		$product_data2['sku'] = 'DUPLICATE-SKU-TEST';
 
 		// First product should succeed.
@@ -530,21 +533,21 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 
 		// Test that validation errors are handled properly (but don't increment error counter).
 		$invalid_product = array(); // Missing name.
-		$result = $this->importer->import_product( $invalid_product );
-		
+		$result          = $this->importer->import_product( $invalid_product );
+
 		$this->assertEquals( 'error', $result['status'] );
 		$this->assertEquals( 'validation_failed', $result['error_code'] );
 
 		// Test that valid products increment created counter.
 		$valid_product = MockShopifyData::get_mock_wc_product_data( 120 );
-		$result = $this->importer->import_product( $valid_product );
-		
+		$result        = $this->importer->import_product( $valid_product );
+
 		$this->assertEquals( 'success', $result['status'] );
 
 		$stats = $this->importer->get_import_stats();
 		$this->assertEquals( 1, $stats['products_created'] );
-		
-		// Note: Validation errors don't increment 'errors_encountered' - 
+
+		// Note: Validation errors don't increment 'errors_encountered' -
 		// only exceptions do. This is the actual implementation behavior.
 		$this->assertGreaterThanOrEqual( 0, $stats['errors_encountered'] );
 	}
@@ -628,7 +631,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$no_variations_importer = new WooCommerceProductImporter();
 		$no_variations_importer->configure( array( 'handle_variations' => false ) );
 
-		$product_data = MockShopifyData::get_mock_wc_product_data( 102 );
+		$product_data               = MockShopifyData::get_mock_wc_product_data( 102 );
 		$product_data['variations'] = array(
 			array(
 				'sku'        => 'VAR-SHOULD-NOT-CREATE',
@@ -658,7 +661,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_find_existing_product_by_slug(): void {
 		// Create a product first.
-		$original_data = MockShopifyData::get_mock_wc_product_data( 110 );
+		$original_data         = MockShopifyData::get_mock_wc_product_data( 110 );
 		$original_data['slug'] = 'test-slug-finder';
 
 		$result1 = $this->importer->import_product( $original_data );
@@ -666,9 +669,9 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$original_id = $result1['product_id'];
 
 		// Try to import with same slug but different SKU.
-		$duplicate_data = MockShopifyData::get_mock_wc_product_data( 111 );
+		$duplicate_data         = MockShopifyData::get_mock_wc_product_data( 111 );
 		$duplicate_data['slug'] = 'test-slug-finder';
-		$duplicate_data['sku'] = 'DIFFERENT-SKU';
+		$duplicate_data['sku']  = 'DIFFERENT-SKU';
 		$duplicate_data['name'] = 'Updated Product Name';
 
 		$update_importer = new WooCommerceProductImporter();
@@ -689,7 +692,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_find_existing_product_by_original_id(): void {
 		// Create a product with original_product_id.
-		$original_data = MockShopifyData::get_mock_wc_product_data( 112 );
+		$original_data                        = MockShopifyData::get_mock_wc_product_data( 112 );
 		$original_data['original_product_id'] = 'shopify_original_123';
 
 		$result1 = $this->importer->import_product( $original_data );
@@ -697,10 +700,10 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$original_id = $result1['product_id'];
 
 		// Try to import with same original_product_id but different data.
-		$duplicate_data = MockShopifyData::get_mock_wc_product_data( 113 );
+		$duplicate_data                        = MockShopifyData::get_mock_wc_product_data( 113 );
 		$duplicate_data['original_product_id'] = 'shopify_original_123';
-		$duplicate_data['sku'] = 'COMPLETELY-DIFFERENT-SKU';
-		$duplicate_data['name'] = 'Updated via Original ID';
+		$duplicate_data['sku']                 = 'COMPLETELY-DIFFERENT-SKU';
+		$duplicate_data['name']                = 'Updated via Original ID';
 
 		$update_importer = new WooCommerceProductImporter();
 		$update_importer->configure( array( 'update_existing' => true ) );
@@ -720,9 +723,9 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_product_finding_priority_order(): void {
 		// Create a product with all identifiers.
-		$original_data = MockShopifyData::get_mock_wc_product_data( 114 );
-		$original_data['sku'] = 'PRIORITY-TEST-SKU';
-		$original_data['slug'] = 'priority-test-slug';
+		$original_data                        = MockShopifyData::get_mock_wc_product_data( 114 );
+		$original_data['sku']                 = 'PRIORITY-TEST-SKU';
+		$original_data['slug']                = 'priority-test-slug';
 		$original_data['original_product_id'] = 'priority_original_456';
 
 		$result1 = $this->importer->import_product( $original_data );
@@ -730,9 +733,9 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$original_id = $result1['product_id'];
 
 		// Create another product with same SKU and slug but different original_product_id.
-		$other_data = MockShopifyData::get_mock_wc_product_data( 115 );
-		$other_data['sku'] = 'PRIORITY-TEST-SKU';
-		$other_data['slug'] = 'priority-test-slug';
+		$other_data                        = MockShopifyData::get_mock_wc_product_data( 115 );
+		$other_data['sku']                 = 'PRIORITY-TEST-SKU';
+		$other_data['slug']                = 'priority-test-slug';
 		$other_data['original_product_id'] = 'different_original_789';
 
 		$result2 = $this->importer->import_product( $other_data );
@@ -741,10 +744,10 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 
 		// Now try to import with original_product_id that matches first product.
 		// Should find by original_product_id (highest priority) not by SKU.
-		$test_data = MockShopifyData::get_mock_wc_product_data( 116 );
+		$test_data                        = MockShopifyData::get_mock_wc_product_data( 116 );
 		$test_data['original_product_id'] = 'priority_original_456'; // Matches first product.
-		$test_data['sku'] = 'PRIORITY-TEST-SKU'; // Also matches first product.
-		$test_data['name'] = 'Found by Original ID Priority';
+		$test_data['sku']                 = 'PRIORITY-TEST-SKU'; // Also matches first product.
+		$test_data['name']                = 'Found by Original ID Priority';
 
 		$update_importer = new WooCommerceProductImporter();
 		$update_importer->configure( array( 'update_existing' => true ) );
