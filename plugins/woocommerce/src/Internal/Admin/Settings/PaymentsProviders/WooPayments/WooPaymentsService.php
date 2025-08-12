@@ -1427,6 +1427,11 @@ class WooPaymentsService {
 		// Clean up any NOX-specific onboarding data, regardless of the API response.
 		$this->proxy->call_function( 'delete_option', self::NOX_PROFILE_OPTION_KEY );
 
+		// Make sure the onboarding mode is reset.
+		if ( class_exists( 'WC_Payments_Onboarding_Service' ) && defined( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ) ) {
+			$this->proxy->call_function( 'update_option', Constants::get_constant( 'WC_Payments_Onboarding_Service::TEST_MODE_OPTION' ), 'no' );
+		}
+
 		if ( is_wp_error( $response ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_client_api_error',
