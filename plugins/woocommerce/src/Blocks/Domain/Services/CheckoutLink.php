@@ -88,7 +88,13 @@ class CheckoutLink {
 	/**
 	 * Get the products from the checkout link.
 	 *
-	 * @return array The products (keys) and their quantities (values).
+	 * @return array[] Array of products, each containing:
+	 * [
+	 *     'id'             => (int)    Product ID,
+	 *     'quantity'       => (int)    Quantity of the product,
+	 *     'variation'      => (array)  Variation attributes (if any),
+	 *     'cart_item_data' => (array)  Additional cart item data,
+	 * ]
 	 */
 	protected function get_products_from_checkout_link() {
 		$raw_products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -156,7 +162,8 @@ class CheckoutLink {
 				$cart_item_data
 			);
 
-			$products[ $product_id ] = [
+			$products[] = [
+				'id'             => $product_id,
 				'quantity'       => $qty,
 				'variation'      => $variation,
 				'cart_item_data' => $cart_item_data,
@@ -188,14 +195,9 @@ class CheckoutLink {
 		$products   = $this->get_products_from_checkout_link();
 		$errors     = new \WP_Error();
 
-		foreach ( $products as $product_id => $product_data ) {
+		foreach ( $products as $product_data ) {
 			try {
-				$controller->add_to_cart(
-					array_merge(
-						[ 'id' => $product_id ],
-						$product_data
-					)
-				);
+				$controller->add_to_cart( $product_data );
 			} catch ( \Exception $e ) {
 				$errors->add( 'error', $e->getMessage() );
 			}
