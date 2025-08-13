@@ -28,7 +28,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
-		"@types/dompurify": "^3.2.0",
+		"@types/dompurify": "^2.0.4",
 		"@types/jest": "29.5.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
