@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix horizontal scrolling issue in the email editor on mobile devices.
