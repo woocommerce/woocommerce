@@ -1398,6 +1398,7 @@ final class WooCommerce {
 	 */
 	public function add_recurring_action_wrappers() {
 		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
+		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
 	}
 
 	/**
@@ -1413,6 +1414,20 @@ final class WooCommerce {
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_tracker_send_event' );
 		}
+	}
+
+	/**
+	 * Wrapper for the `wc_admin_daily` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 */
+	public function add_wc_admin_daily_wrapper() {
+		if ( class_exists( \Automattic\WooCommerce\Internal\Admin\Events::class ) ) {
+			\Automattic\WooCommerce\Internal\Admin\Events::instance();
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_admin_daily' );
 	}
 
 	/**
@@ -1477,7 +1492,7 @@ final class WooCommerce {
 
 		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily', array(), 'woocommerce', true );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
 		// Note: this is potentially redundant when the core package exists.
 		as_schedule_single_action( time() + 10, 'generate_category_lookup_table', array(), 'woocommerce', true );
