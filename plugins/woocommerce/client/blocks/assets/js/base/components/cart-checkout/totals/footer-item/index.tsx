@@ -150,6 +150,7 @@ const TotalsFooterItem = ( {
 									<Skeleton
 										height="1em"
 										width="45px"
+										tag="span"
 										ariaMessage={ __(
 											'Loading price… ',
 											'woocommerce'

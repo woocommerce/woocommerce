@@ -370,7 +370,8 @@ jQuery( function( $ ) {
 	ProductGallery.prototype.initPhotoswipe = function() {
 		if ( this.zoom_enabled && this.$images.length > 0 ) {
 			this.$target.prepend(
-				'<a href="#" role="button" class="woocommerce-product-gallery__trigger" aria-haspopup="dialog" aria-label="'+
+				'<a href="#" role="button" class="woocommerce-product-gallery__trigger" aria-haspopup="dialog" ' +
+				'aria-controls="photoswipe-fullscreen-dialog" aria-label="' +
 				wc_single_product_params.i18n_product_gallery_trigger_text + '">' +
 					'<span aria-hidden="true">🔍</span>' +
 				'</a>'

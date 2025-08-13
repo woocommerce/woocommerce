@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Make Product SKU and Product Details blocks update based on the selected variation in the Add to Cart + Options block

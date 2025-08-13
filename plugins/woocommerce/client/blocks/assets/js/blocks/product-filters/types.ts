@@ -24,6 +24,9 @@ export type FilterOptionItem = (
 	value: string;
 	selected?: boolean;
 	count: number;
+	id?: number;
+	parent?: number;
+	depth?: number;
 };
 
 export type FilterBlockContext = {

@@ -150,6 +150,8 @@ class PersonalizationTagsRegistryTest extends TestCase {
 		$this->assertArrayHasKey( '[tag-2]', $all_tags );
 	}
 
+
+
 	/**
 	 * Initialize the registry and apply a filter.
 	 */

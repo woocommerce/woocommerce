@@ -880,7 +880,7 @@ class PaymentsRestController extends RestApiControllerBase {
 							'context'    => array( 'view', 'edit' ),
 							'readonly'   => true,
 							'properties' => array(
-								'preload' => array(
+								'preload'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The onboarding preload link for the payment gateway.', 'woocommerce' ),
 									'context'     => array( 'view', 'edit' ),
@@ -894,7 +894,7 @@ class PaymentsRestController extends RestApiControllerBase {
 										),
 									),
 								),
-								'onboard' => array(
+								'onboard'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
 									'context'     => array( 'view', 'edit' ),
@@ -903,6 +903,34 @@ class PaymentsRestController extends RestApiControllerBase {
 										'href' => array(
 											'type'        => 'string',
 											'description' => esc_html__( 'The URL to start/continue onboarding for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
+								'disable_test_account' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The link to disable the test account for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to POST to disable the test account for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
+								'reset'                => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The link to reset the provider state/account and restart the onboarding.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to POST to for resetting the provider onboarding.', 'woocommerce' ),
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),

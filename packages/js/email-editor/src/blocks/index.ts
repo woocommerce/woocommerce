@@ -6,11 +6,9 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 /**
  * Internal dependencies
  */
-import { enhanceColumnBlock } from './core/column';
 import {
-	disableColumnsLayout,
+	disableColumnsLayoutAndEnhanceColumnsBlock,
 	deactivateStackOnMobile,
-	enhanceColumnsBlock,
 } from './core/columns';
 import { enhancePostContentBlock } from './core/post-content';
 import { disableGroupVariations } from './core/group';
@@ -20,13 +18,16 @@ import {
 	extendRichTextFormats,
 	activatePersonalizationTagsReplacing,
 } from './core/rich-text';
-import { enhanceButtonBlock } from './core/button';
 import { enhanceButtonsBlock } from './core/buttons';
-import { alterSupportConfiguration } from './core/general-block-support';
+import {
+	alterSupportConfiguration,
+	removeBlockStylesFromAllBlocks,
+} from './core/general-block-support';
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { modifyMoveToTrashAction } from './core/move-to-trash';
+import { enhanceSiteLogoBlock } from './core/site-logo';
 
 export { getAllowedBlockNames } from './utils';
 
@@ -36,12 +37,9 @@ export function initBlocks() {
 	hideExpandOnClick();
 	disableImageFilter();
 	disableCertainRichTextFormats();
-	disableColumnsLayout();
+	disableColumnsLayoutAndEnhanceColumnsBlock();
 	disableGroupVariations();
-	enhanceButtonBlock();
 	enhanceButtonsBlock();
-	enhanceColumnBlock();
-	enhanceColumnsBlock();
 	enhancePostContentBlock();
 	enhanceQuoteBlock();
 	extendRichTextFormats();
@@ -49,5 +47,7 @@ export function initBlocks() {
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
 	modifyMoveToTrashAction();
+	enhanceSiteLogoBlock();
 	registerCoreBlocks();
+	removeBlockStylesFromAllBlocks();
 }

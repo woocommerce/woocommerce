@@ -106,6 +106,7 @@ class Email_Api_Controller {
 								'category'      => $tag->get_category(),
 								'attributes'    => $tag->get_attributes(),
 								'valueToInsert' => $tag->get_value_to_insert(),
+								'postTypes'     => $tag->get_post_types(),
 							);
 						},
 						$tags

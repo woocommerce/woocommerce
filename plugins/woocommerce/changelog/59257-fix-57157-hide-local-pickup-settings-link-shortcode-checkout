@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show local pickup link within Shipping zones settings description conditionally when store uses block checkout
