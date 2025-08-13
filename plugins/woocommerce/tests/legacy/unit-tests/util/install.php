@@ -13,6 +13,19 @@
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
 	/**
+	 * Restore test environment after class completion.
+	 */
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
+
+		// Remove and then reinstall the plugin to reset the test environment.
+		self::uninstall();
+		WC_Install::install();
+		// Reload role definitions to ensure they are up to date in memory.
+		wp_roles()->for_site();
+	}
+
+	/**
 	 * Test check version.
 	 */
 	public function test_check_version() {
@@ -38,14 +51,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	/**
 	 * Test - install.
 	public function test_install() {
-		// clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
-		delete_transient( 'wc_installing' );
+		// Clean existing install first.
+		self::uninstall();
 
 		WC_Install::install();
 
@@ -100,13 +107,6 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		// Clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
-
 		WC_Install::create_roles();
 
 		$this->assertNotNull( get_role( 'customer' ) );
@@ -117,16 +117,10 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - remove roles.
 	 */
 	public function test_remove_roles() {
-		try {
-			WC_Install::remove_roles();
+		WC_Install::remove_roles();
 
-			$this->assertNull( get_role( 'customer' ) );
-			$this->assertNull( get_role( 'shop_manager' ) );
-		} finally {
-			// Always restore roles for subsequent tests.
-			WC_Install::create_roles();
-			wp_roles()->for_site();
-		}
+		$this->assertNull( get_role( 'customer' ) );
+		$this->assertNull( get_role( 'shop_manager' ) );
 	}
 
 	/**
@@ -176,5 +170,18 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
+	}
+
+	/**
+	 * Uninstall the plugin.
+	 */
+	private static function uninstall() {
+		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+			define( 'WP_UNINSTALL_PLUGIN', true );
+			define( 'WC_REMOVE_ALL_DATA', true );
+		}
+
+		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
+		delete_transient( 'wc_installing' );
 	}
 }
