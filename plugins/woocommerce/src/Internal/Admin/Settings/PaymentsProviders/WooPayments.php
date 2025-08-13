@@ -46,12 +46,9 @@ class WooPayments extends PaymentGateway {
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
 
-<<<<<<< HEAD
-=======
 		$has_test_account    = $this->has_test_account();
 		$has_sandbox_account = $this->has_sandbox_account();
 
->>>>>>> 30d789cc51 ([Payments NOX] Prevent activate payments dead-ends and allow NOX profile reset (#60319))
 		// Switch the onboarding type to native.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
@@ -78,8 +75,6 @@ class WooPayments extends PaymentGateway {
 			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
 
-<<<<<<< HEAD
-=======
 		try {
 			/**
 			 * The WooPayments REST controller instance.
@@ -147,7 +142,6 @@ class WooPayments extends PaymentGateway {
 			}
 		}
 
->>>>>>> 30d789cc51 ([Payments NOX] Prevent activate payments dead-ends and allow NOX profile reset (#60319))
 		return $details;
 	}
 
