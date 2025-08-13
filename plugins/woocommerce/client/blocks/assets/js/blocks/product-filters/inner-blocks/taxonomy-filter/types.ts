@@ -17,7 +17,4 @@ export type EditProps = BlockEditProps< BlockAttributes >;
 export type TaxonomyItem = {
 	name: string;
 	label: string;
-	labels: {
-		singular_name: string;
-	};
 };
