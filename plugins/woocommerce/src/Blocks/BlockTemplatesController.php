@@ -25,7 +25,9 @@ class BlockTemplatesController {
 	public function init() {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
-		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
+		add_filter( 'get_block_templates', array( $this, 'add_db_templates_with_woo_slug' ), 10, 3 );
+		add_filter( 'rest_pre_insert_wp_template', array( $this, 'dont_load_templates_for_suggestions' ), 10, 1 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
@@ -197,105 +199,87 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Add the block template objects to be used.
+	 * Run hooks on block templates.
+	 *
+	 * @param array $templates The block templates.
+	 * @return array The block templates.
+	 */
+	public function run_hooks_on_block_templates( $templates ) {
+		// There is a bug in the WordPress implementation that causes block hooks not to run in templates registered
+		// via the Template Registration API. Because of this, we run them manually.
+		// https://github.com/WordPress/gutenberg/issues/71139.
+		foreach ( $templates as $template ) {
+			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
+				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );
+			}
+		}
+
+		return $templates;
+	}
+
+	/**
+	 * Add the block template objects currently saved in the database with the WooCommerce slug.
+	 * That is, templates that have been customised before WooCommerce started to use the
+	 * Template Registration API.
 	 *
 	 * @param array  $query_result Array of template objects.
 	 * @param array  $query Optional. Arguments to retrieve templates.
 	 * @param string $template_type wp_template or wp_template_part.
 	 * @return array
 	 */
-	public function add_block_templates( $query_result, $query, $template_type ) {
+	public function add_db_templates_with_woo_slug( $query_result, $query, $template_type ) {
 		$slugs = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
 
 		if ( ! BlockTemplateUtils::supports_block_templates( $template_type ) && ! in_array( ComingSoonTemplate::SLUG, $slugs, true ) ) {
 			return $query_result;
 		}
 
-		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
-		$template_files = $this->get_block_templates( $slugs, $template_type );
-
-		$theme_slug = get_stylesheet();
+		$template_files = BlockTemplateUtils::get_block_templates_from_db( $slugs, $template_type );
+		$new_templates  = array();
 
 		foreach ( $template_files as $template_file ) {
-
-			// If we have a template which is eligible for a fallback, we need to explicitly tell Gutenberg that
-			// it has a theme file (because it is using the fallback template file). And then `continue` to avoid
-			// adding duplicates.
-			if ( BlockTemplateUtils::is_template_in_query_result( $query_result, $template_file ) ) {
-				continue;
-			}
-
-			// If the current $post_type is set (e.g. on an Edit Post screen), and isn't included in the available post_types
-			// on the template file, then lets skip it so that it doesn't get added. This is typically used to hide templates
-			// in the template dropdown on the Edit Post page.
-			if ( $post_type &&
-				isset( $template_file->post_types ) &&
-				! in_array( $post_type, $template_file->post_types, true )
-			) {
-				continue;
-			}
-
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if ( 'custom' === $template_file->source ) {
-				$query_result[] = $template_file;
-				continue;
-			}
-
-			// If the template has a fallback, we should not include it in the list of templates, unless it has been modified.
-			$template_data = BlockTemplateUtils::get_template( $template_file->slug );
-			if ( $template_data && isset( $template_data->fallback_template ) ) {
-				continue;
-			}
-
-			$possible_template_ids = [
-				$theme_slug . '//' . $template_file->slug,
-				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_file->slug,
-				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['DEPRECATED_TEMPLATE_PARTS'] . '/' . $template_file->slug,
-			];
-
-			$is_custom                 = false;
-			$query_result_template_ids = array_column( $query_result, 'id' );
-
-			foreach ( $possible_template_ids as $template_id ) {
-				if ( in_array( $template_id, $query_result_template_ids, true ) ) {
-					$is_custom = true;
-					break;
-				}
-			}
-			$fits_slug_query =
-				! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
-			$fits_area_query =
-				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-			$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
-			if ( $should_include ) {
-				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
-				$query_result[] = $template;
+			if (
+				'custom' === $template_file->source &&
+				(
+					BlockTemplateUtils::PLUGIN_SLUG === $template_file->theme ||
+					BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === $template_file->theme
+				)
+			) {
+				array_unshift( $new_templates, $template_file );
 			}
 		}
 
-		// We need to remove theme (i.e. filesystem) templates that have the same slug as a customised one.
-		// This only affects saved templates that were saved BEFORE a theme template with the same slug was added.
-		$query_result = BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $query_result );
+		$query_result = array_merge( $new_templates, $query_result );
 
-		// There is the chance that the user customized the default template, installed a theme with a custom template
-		// and customized that one as well. When that happens, duplicates might appear in the list.
-		// See: https://github.com/woocommerce/woocommerce/issues/42220.
-		$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result, $theme_slug );
+		if ( count( $new_templates ) > 0 ) {
+			// If there are certain templates that have been customised with the `woocommerce/woocommerce` slug,
+			// We prioritize them over the theme and WC templates. That is, we remove the theme and WC templates
+			// from the results and only keep the customised ones.
+			$query_result = BlockTemplateUtils::remove_templates_with_custom_alternative( $query_result );
 
-		/**
-		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
-		 * We need to do additional search through all templates file to update title and description for WC
-		 * templates that aren't listed in theme.json.
-		 */
-		$query_result = array_map(
-			function ( $template ) use ( $template_type ) {
-				return BlockTemplateUtils::update_template_data( $template, $template_type );
-			},
-			$query_result
-		);
+			// There is the chance that the user customized the default template, installed a theme with a custom template
+			// and customized that one as well. When that happens, duplicates might appear in the list.
+			// See: https://github.com/woocommerce/woocommerce/issues/42220.
+			$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result );
+		}
 
 		return $query_result;
+	}
+
+	/**
+	 * When creating a template from the WP suggestion, don't load the templates with the WooCommerce slug.
+	 * Otherwise they take precedence and the new template can't be created.
+	 *
+	 * @param stdClass $prepared_post An object representing a single post prepared
+	 *                                for inserting or updating the database.
+	 */
+	public function dont_load_templates_for_suggestions( $prepared_post ) {
+		if ( isset( $prepared_post->meta_input['is_wp_suggestion'] ) ) {
+			remove_filter( 'get_block_templates', array( $this, 'add_db_templates_with_woo_slug' ), 10, 3 );
+		}
+		return $prepared_post;
 	}
 
 	/**

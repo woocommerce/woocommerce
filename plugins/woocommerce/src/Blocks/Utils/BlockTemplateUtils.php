@@ -535,60 +535,37 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns `true` if the $template has been found in the $query_result.
-	 *
-	 * @param array  $query_result Array of template objects.
-	 * @param object $template A specific template object.
-	 *
-	 * @return boolean
-	 */
-	public static function is_template_in_query_result( $query_result, $template ) {
-		foreach ( $query_result as &$query_result_template ) {
-			if (
-				$query_result_template->slug === $template->slug
-				&& $query_result_template->theme === $template->theme
-			) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Removes templates that were added to a theme's block-templates directory, but already had a customised version saved in the database.
+	 * Removes templates from the theme or WooCommerce which have the same slug
+	 * as template saved in the database with the `woocommerce/woocommerce` theme.
+	 * Before WC migrated to the Template Registration API from WordPress, templates
+	 * were saved in the database with the `woocommerce/woocommerce` theme instead
+	 * of the theme's slug.
 	 *
 	 * @param \WP_Block_Template[]|\stdClass[] $templates List of templates to run the filter on.
 	 *
 	 * @return array List of templates with duplicates removed. The customised alternative is preferred over the theme default.
 	 */
-	public static function remove_theme_templates_with_custom_alternative( $templates ) {
+	public static function remove_templates_with_custom_alternative( $templates ) {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
-		$customised_template_slugs = array_map(
-			function ( $template ) {
-				return $template->slug;
-			},
-			array_values(
-				array_filter(
-					$templates,
-					function ( $template ) {
-						// This template has been customised and saved as a post.
-						return 'custom' === $template->source;
-					}
-				)
-			)
+		$customised_template_slugs = array_column(
+			array_filter(
+				$templates,
+				function ( $template ) {
+					// This template has been customised and saved as a post.
+					return 'custom' === $template->source && 'woocommerce/woocommerce' === $template->theme;
+				}
+			),
+			'slug'
 		);
 
-		// Remove theme (i.e. filesystem) templates that have the same slug as a customised one. We don't need to check
-		// for `woocommerce` in $template->source here because woocommerce templates won't have been added to $templates
-		// if a saved version was found in the db. This only affects saved templates that were saved BEFORE a theme
-		// template with the same slug was added.
+		// Remove theme and WC templates that have the same slug as a customised one.
 		return array_values(
 			array_filter(
 				$templates,
 				function ( $template ) use ( $customised_template_slugs ) {
 					// This template has been customised and saved as a post, so return it.
-					return ! ( 'theme' === $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
+					return ! ( 'custom' !== $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
 				}
 			)
 		);
@@ -599,11 +576,12 @@ class BlockTemplateUtils {
 	 * WooCommerce default template when there is a customized template based on the theme template.
 	 *
 	 * @param \WP_Block_Template[]|\stdClass[] $templates  List of templates to run the filter on.
-	 * @param string                           $theme_slug Slug of the theme currently active.
 	 *
 	 * @return array Filtered list of templates with only relevant templates available.
 	 */
-	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
+	public static function remove_duplicate_customized_templates( $templates ) {
+		$theme_slug = get_stylesheet();
+
 		$filtered_templates = array_filter(
 			$templates,
 			function ( $template ) use ( $templates, $theme_slug ) {
@@ -616,7 +594,7 @@ class BlockTemplateUtils {
 				$is_there_a_customized_theme_template = array_filter(
 					$templates,
 					function ( $theme_template ) use ( $template, $theme_slug ) {
-						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug;
+						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug && 'custom' === $theme_template->source;
 					}
 				);
 				if ( $is_there_a_customized_theme_template ) {

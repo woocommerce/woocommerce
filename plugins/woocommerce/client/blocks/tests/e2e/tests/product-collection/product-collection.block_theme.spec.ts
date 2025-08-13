@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { Request } from '@playwright/test';
-import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	wpCLI,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -484,9 +489,10 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
-				canvas: 'edit',
+			} );
+			await editor.createTemplate( {
+				templateName: 'Products by Category',
 			} );
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
@@ -513,9 +519,10 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
-				canvas: 'edit',
+			} );
+			await editor.createTemplate( {
+				templateName: 'Products by Tag',
 			} );
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
@@ -601,21 +608,36 @@ test.describe( 'Product Collection', () => {
 		const genericArchiveTemplates = [
 			{
 				name: 'Products by Tag',
-				path: 'woocommerce/woocommerce//taxonomy-product_tag',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+				needsCreation: true,
 			},
 			{
 				name: 'Products by Category',
-				path: 'woocommerce/woocommerce//taxonomy-product_cat',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+				needsCreation: true,
 			},
 			{
 				name: 'Products by Attribute',
-				path: 'woocommerce/woocommerce//taxonomy-product_attribute',
+				path: `${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
 			},
 		];
 
-		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( { editor, pageObject } ) => {
-				await pageObject.goToEditorTemplate( path );
+		genericArchiveTemplates.forEach( ( { name, path, needsCreation } ) => {
+			test( `${ name } template`, async ( {
+				admin,
+				editor,
+				pageObject,
+			} ) => {
+				if ( needsCreation ) {
+					await admin.visitSiteEditor( {
+						postType: 'wp_template',
+					} );
+					await editor.createTemplate( {
+						templateName: name,
+					} );
+				} else {
+					await pageObject.goToEditorTemplate( path );
+				}
 				await pageObject.focusProductCollection();
 
 				const previewButtonLocator = editor.canvas.getByTestId(

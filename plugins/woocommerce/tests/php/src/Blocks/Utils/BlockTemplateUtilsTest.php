@@ -40,7 +40,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 				return new BlockTemplatesRegistry();
 			}
 		);
-		$this->container->get( BlockTemplatesRegistry::class )->init();
 		$this->container->register(
 			TemplateOptions::class,
 			function () {
@@ -135,31 +134,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the is_template_in_query_result method.
-	 */
-	public function test_is_template_in_query_result() {
-		$query_result = array(
-			(object) array(
-				'slug'  => 'taxonomy-product_cat',
-				'theme' => 'twentytwentytwo',
-			),
-		);
-
-		$non_matching_template_file = (object) array(
-			'slug'  => 'archive-product',
-			'theme' => 'twentytwentytwo',
-		);
-
-		$matching_template_file = (object) array(
-			'slug'  => 'taxonomy-product_cat',
-			'theme' => 'twentytwentytwo',
-		);
-
-		$this->assertFalse( BlockTemplateUtils::is_template_in_query_result( $query_result, $non_matching_template_file ) );
-		$this->assertTrue( BlockTemplateUtils::is_template_in_query_result( $query_result, $matching_template_file ) );
-	}
-
-	/**
 	 * Test create_new_block_template_object.
 	 */
 	public function test_create_new_block_template_object() {
@@ -171,7 +145,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'theme'       => 'woocommerce/woocommerce',
 			'source'      => 'plugin',
 			'title'       => 'Single Product',
-			'description' => 'Displays a single product.',
+			'description' => '',
 			'post_types'  => array(),
 		);
 
@@ -186,25 +160,29 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test remove_theme_templates_with_custom_alternative.
+	 * Test remove_templates_with_custom_alternative.
 	 */
-	public function test_remove_theme_templates_with_custom_alternative() {
+	public function test_remove_templates_with_custom_alternative() {
 		$templates = array(
 			(object) array(
 				'slug'   => 'single-product',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_tag',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'custom',
+				'theme'  => 'woocommerce/woocommerce',
 			),
 		);
 
@@ -212,18 +190,21 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			(object) array(
 				'slug'   => 'single-product',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_tag',
 				'source' => 'theme',
+				'theme'  => 'my-theme',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
 				'source' => 'custom',
+				'theme'  => 'woocommerce/woocommerce',
 			),
 		);
 
-		$this->assertEquals( $expected_templates, BlockTemplateUtils::remove_theme_templates_with_custom_alternative( $templates ) );
+		$this->assertEquals( $expected_templates, BlockTemplateUtils::remove_templates_with_custom_alternative( $templates ) );
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect, Editor } from '@woocommerce/e2e-utils';
+import { test, expect, Editor, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 const insertSingleProductBlock = async (
 	blockName: string,
@@ -24,7 +24,7 @@ const insertInSingleProductTemplate = async (
 	admin: Admin
 ) => {
 	await admin.visitSiteEditor( {
-		postId: `woocommerce/woocommerce//single-product`,
+		postId: `${ BLOCK_THEME_SLUG }//single-product`,
 		postType: 'wp_template',
 		canvas: 'edit',
 	} );
@@ -80,7 +80,7 @@ test.describe( 'registerProductBlockType registers', () => {
 		await test.step( 'Blocks not available in non-product template', async () => {
 			// Visit site editor with a non-product template
 			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//coming-soon',
+				postId: `${ BLOCK_THEME_SLUG }//coming-soon`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );

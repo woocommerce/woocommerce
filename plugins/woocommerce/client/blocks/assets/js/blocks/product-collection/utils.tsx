@@ -67,9 +67,9 @@ export function setQueryAttribute(
 
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
-		'woocommerce/woocommerce//archive-product',
-		'woocommerce/woocommerce//taxonomy-product_attribute',
-		'woocommerce/woocommerce//product-search-results',
+		'//archive-product',
+		'//taxonomy-product_attribute',
+		'//product-search-results',
 		// Custom taxonomy templates have structure:
 		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
 		// hence we're checking if template ID includes the middle part.
@@ -79,6 +79,7 @@ const isInProductArchive = () => {
 		// - woocommerce/woocommerce//taxonomy-product_tag
 		'//taxonomy-product_cat',
 		'//taxonomy-product_tag',
+		'//taxonomy-product_brand',
 	];
 
 	const currentTemplateId = select(
