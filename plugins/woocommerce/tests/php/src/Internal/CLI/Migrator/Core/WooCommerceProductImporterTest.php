@@ -81,19 +81,22 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$product_data = MockShopifyData::get_mock_wc_product_data( 2 );
 
 		// Convert to variable product by adding variations.
-		$product_data['variations'] = array(
+		$product_data['is_variable'] = true;
+		$product_data['variations']  = array(
 			array(
-				'sku'        => 'TEST-SKU-2-VAR1',
-				'price'      => '20.00',
-				'attributes' => array(
+				'original_id'   => 'var1',
+				'sku'           => 'TEST-SKU-2-VAR1',
+				'regular_price' => '20.00',
+				'attributes'    => array(
 					'Size'  => 'Small',
 					'Color' => 'Red',
 				),
 			),
 			array(
-				'sku'        => 'TEST-SKU-2-VAR2',
-				'price'      => '25.00',
-				'attributes' => array(
+				'original_id'   => 'var2',
+				'sku'           => 'TEST-SKU-2-VAR2',
+				'regular_price' => '25.00',
+				'attributes'    => array(
 					'Size'  => 'Large',
 					'Color' => 'Blue',
 				),
@@ -102,7 +105,7 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 
 		// Mark attributes for variation.
 		foreach ( $product_data['attributes'] as &$attribute ) {
-			$attribute['variation'] = true;
+			$attribute['is_variation'] = true;
 		}
 
 		$result = $this->importer->import_product( $product_data );
@@ -161,8 +164,8 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$first_product_id = $result1['product_id'];
 
 		// Modify product data and import again.
-		$product_data['name']  = 'Updated Test Product 4';
-		$product_data['price'] = '25.00';
+		$product_data['name']          = 'Updated Test Product 4';
+		$product_data['regular_price'] = '25.00';
 
 		$result2 = $importer_update->import_product( $product_data );
 		$this->assertEquals( 'success', $result2['status'] );
