@@ -1,0 +1,5 @@
+Significance: patch
+Type: fixed
+Comment: Fix logic for capturing cart update event
+
+

@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Set expiration time for session cookie to 30 mins or midnight UTC
