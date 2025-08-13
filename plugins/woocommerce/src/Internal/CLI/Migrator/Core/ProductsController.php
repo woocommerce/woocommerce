@@ -312,13 +312,15 @@ class ProductsController {
 			return array();
 		}
 
-		WP_CLI::log( sprintf( 'Selected fields for migration: %s', implode( ', ', $fields ) ) );
+		if ( ! empty( $assoc_args['verbose'] ) ) {
+			WP_CLI::log( sprintf( 'Selected fields for migration: %s', implode( ', ', $fields ) ) );
+		}
 
 		return $fields;
 	}
 
 	/**
-	 * Parse query filters for Shopify-specific filtering.
+	 * Parse query filters for platform-agnostic filtering.
 	 *
 	 * @param array $assoc_args Command arguments.
 	 * @return array Parsed query filters.
@@ -326,12 +328,11 @@ class ProductsController {
 	private function parse_query_filters( array $assoc_args ): array {
 		$filters = array();
 
-		// Status filter.
 		if ( isset( $assoc_args['status'] ) ) {
 			$valid_statuses = array( 'active', 'archived', 'draft' );
 			$status         = strtolower( $assoc_args['status'] );
 			if ( in_array( $status, $valid_statuses, true ) ) {
-				$filters['status'] = strtoupper( $status );
+				$filters['status'] = $status;
 			} else {
 				WP_CLI::warning(
 					sprintf(
@@ -343,7 +344,6 @@ class ProductsController {
 			}
 		}
 
-		// Date range filters.
 		if ( isset( $assoc_args['created-after'] ) ) {
 			$date = $this->validate_date_filter( $assoc_args['created-after'], 'created-after' );
 			if ( $date ) {
@@ -358,14 +358,20 @@ class ProductsController {
 			}
 		}
 
-		// Product type filter.
 		if ( isset( $assoc_args['product-type'] ) && 'all' !== $assoc_args['product-type'] ) {
 			$filters['product_type'] = $assoc_args['product-type'];
 		}
 
-		// Handle filter.
 		if ( isset( $assoc_args['handle'] ) ) {
 			$filters['handle'] = sanitize_title( $assoc_args['handle'] );
+		}
+
+		if ( isset( $assoc_args['vendor'] ) ) {
+			$filters['vendor'] = $assoc_args['vendor'];
+		}
+
+		if ( isset( $assoc_args['ids'] ) ) {
+			$filters['ids'] = $assoc_args['ids'];
 		}
 
 		return $filters;
