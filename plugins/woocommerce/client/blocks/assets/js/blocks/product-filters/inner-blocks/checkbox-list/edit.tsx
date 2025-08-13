@@ -96,7 +96,13 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 							).map( ( item, index ) => (
 								<div
 									key={ index }
-									className="wc-block-product-filter-checkbox-list__item"
+									className={ clsx(
+										'wc-block-product-filter-checkbox-list__item',
+										{
+											[ `has-depth-${ item?.depth }` ]:
+												item?.depth,
+										}
+									) }
 								>
 									<label
 										htmlFor={ `interactive-checkbox-${ index }` }
