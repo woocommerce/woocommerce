@@ -1399,6 +1399,7 @@ final class WooCommerce {
 	public function add_recurring_action_wrappers() {
 		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
 		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
+		add_action( 'generate_category_lookup_table_wrapper', array( $this, 'add_generate_category_lookup_table_wrapper' ) );
 	}
 
 	/**
@@ -1428,6 +1429,20 @@ final class WooCommerce {
 		}
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_admin_daily' );
+	}
+
+	/**
+	 * Wrapper for the `wc_admin_daily` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 */
+	public function add_generate_category_lookup_table_wrapper() {
+		if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
+			\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'generate_category_lookup_table' );
 	}
 
 	/**
@@ -1495,7 +1510,7 @@ final class WooCommerce {
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
 		// Note: this is potentially redundant when the core package exists.
-		as_schedule_single_action( time() + 10, 'generate_category_lookup_table', array(), 'woocommerce', true );
+		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
 	}
 
 	/**
