@@ -191,7 +191,7 @@ final class ProductsCommand {
 			if ( isset( $assoc_args['ids'] ) ) {
 				$filters[] = "IDs '{$assoc_args['ids']}'";
 			}
-			
+
 			$filter_description = empty( $filters ) ? '' : ' with ' . implode( ', ', $filters );
 			WP_CLI::success( "Found {$count} products{$filter_description} on {$platform}." );
 		}

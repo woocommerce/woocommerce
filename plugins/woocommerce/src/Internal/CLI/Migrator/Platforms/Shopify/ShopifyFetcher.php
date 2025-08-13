@@ -279,9 +279,12 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 			$ids = is_array( $args['ids'] ) ? $args['ids'] : explode( ',', $args['ids'] );
 			$ids = array_filter( array_map( 'trim', $ids ) );
 			if ( ! empty( $ids ) ) {
-				$formatted_ids = array_map( function( $id ) {
-					return 'gid://shopify/Product/' . $id;
-				}, $ids );
+				$formatted_ids = array_map(
+					function ( $id ) {
+						return 'gid://shopify/Product/' . $id;
+					},
+					$ids
+				);
 				$query_parts[] = 'id:(' . implode( ' OR ', $formatted_ids ) . ')';
 			}
 		}
