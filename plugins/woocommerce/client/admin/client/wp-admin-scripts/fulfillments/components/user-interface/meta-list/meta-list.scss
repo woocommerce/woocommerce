@@ -1,0 +1,36 @@
+ul.woocommerce-fulfillment-meta-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+
+	.woocommerce-fulfillment-meta-list__item {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+
+		.woocommerce-fulfillment-meta-list__item-label {
+			font-size: 12px;
+			line-height: 20px;
+			font-weight: 500;
+			color: #1e1e1e;
+			min-width: 140px;
+		}
+
+		.woocommerce-fulfillment-meta-list__item-value {
+			flex: 1;
+			font-size: 12px;
+			line-height: 16px;
+			font-weight: 400;
+			color: var(--wc-admin-subtext, #757575);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}

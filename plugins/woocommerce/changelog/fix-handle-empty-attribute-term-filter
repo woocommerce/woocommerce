@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Filters: gracefully handle invalid items

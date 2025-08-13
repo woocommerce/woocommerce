@@ -19,3 +19,9 @@ ul.has-background,
 ol.has-background {
 	padding: 20px 40px;
 }
+
+/* Remove default browser underline from site title link */
+.wp-block-site-title a:not(.wp-element-button) {
+	text-decoration: none !important;
+	color: inherit;
+}

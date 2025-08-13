@@ -18,8 +18,8 @@ const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
 const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
-	disableLeft: imageIndex === 0,
-	disableRight: imageIndex === totalImages - 1,
+	isDisabledPrevious: imageIndex === 0,
+	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
 /**
@@ -175,13 +175,13 @@ const productGallery = {
 			const { imageData } = context;
 
 			const imageId = imageData[ newImageIndex ];
-			const { disableLeft, disableRight } = getArrowsState(
+			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
 				newImageIndex,
 				imageData.length
 			);
 
-			context.disableLeft = disableLeft;
-			context.disableRight = disableRight;
+			context.isDisabledPrevious = isDisabledPrevious;
+			context.isDisabledNext = isDisabledNext;
 			context.selectedImageId = imageId;
 
 			if ( imageId !== -1 ) {
@@ -347,9 +347,9 @@ const productGallery = {
 
 			// Only trigger swipe actions if there was significant movement
 			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.disableLeft ) {
+				if ( delta > 0 && ! context.isDisabledPrevious ) {
 					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.disableRight ) {
+				} else if ( delta < 0 && ! context.isDisabledNext ) {
 					actions.selectNextImage();
 				}
 			}
@@ -400,6 +400,19 @@ const productGallery = {
 					}
 				}
 			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: ( event?: MouseEvent ) => {
+			actions.selectPreviousImage( event );
+		},
+		onClickNext: ( event?: MouseEvent ) => {
+			actions.selectNextImage( event );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
 		},
 	},
 	callbacks: {
@@ -524,6 +537,23 @@ const productGallery = {
 			return () => {
 				resizeObserver.disconnect();
 			};
+		},
+		// There's this issue with the scrollbar on the thumbnails block,
+		// that in certain cases thumbnails overflow slightly the container.
+		// This triggers the overflow and scrollbar makes thumbnails smaller
+		// so they no longer overflow resulting in a ghost scrollbar (no scroll).
+		// scrollbar-gutter doesn't work well in flexbox and doesn't solve it,
+		// hence programmatic solution.
+		// See https://github.com/woocommerce/woocommerce/issues/59810.
+		hideGhostOverflow: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) return;
+
+			const { clientWidth, scrollWidth } = element;
+
+			if ( clientWidth >= scrollWidth ) {
+				element.style.scrollbarWidth = 'none';
+			}
 		},
 	},
 };

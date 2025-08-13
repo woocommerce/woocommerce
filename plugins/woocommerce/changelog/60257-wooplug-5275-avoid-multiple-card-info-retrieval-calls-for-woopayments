@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache data while preparing WooPayments card info, allow the `wc_order_payment_card_info` filter to take precedence over the built-in fallback.

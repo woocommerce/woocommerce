@@ -179,4 +179,18 @@ trait BlocksSharedState {
 			],
 		];
 	}
+
+	/**
+	 * Add placeholder image.
+	 *
+	 * @param string $consent_statement - The consent statement string.
+	 */
+	public function placeholder_image( $consent_statement ) {
+		self::check_consent( $consent_statement );
+
+		wp_interactivity_config(
+			self::$settings_namespace,
+			array( 'placeholderImgSrc' => wc_placeholder_img_src() )
+		);
+	}
 }

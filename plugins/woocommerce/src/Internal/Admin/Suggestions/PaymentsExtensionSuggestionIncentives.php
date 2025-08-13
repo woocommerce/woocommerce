@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Partner payments extension suggestion incentives provider class.
+ *
+ * @internal
  */
 class PaymentsExtensionSuggestionIncentives {
 	/**

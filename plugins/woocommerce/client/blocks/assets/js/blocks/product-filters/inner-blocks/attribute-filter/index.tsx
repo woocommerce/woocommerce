@@ -33,7 +33,11 @@ registerBlockType( metadata, {
 	variations: ATTRIBUTES.map( ( attribute, index ) => {
 		return {
 			name: `product-filter-attribute-${ attribute.attribute_name }`,
-			title: `${ attribute.attribute_label }`,
+			title: sprintf(
+				// translators: %s is the attribute label.
+				__( '%s Filter', 'woocommerce' ),
+				attribute.attribute_label
+			),
 			description: sprintf(
 				// translators: %s is the attribute label.
 				__(

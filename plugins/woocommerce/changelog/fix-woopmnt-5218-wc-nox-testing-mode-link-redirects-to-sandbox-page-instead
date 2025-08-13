@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix testing payments documentation links in WooPayments NOX modals to use the updated "test-accounts" URL instead of the deprecated "sandbox-mode" URL.

@@ -53,6 +53,7 @@
     -   [isItemPendingDelete( cartItemKey )](#isitempendingdelete-cartitemkey-)
     -   [isCustomerDataUpdating](#iscustomerdataupdating)
     -   [isAddressFieldsForShippingRatesUpdating](#isaddressfieldsforshippingratesupdating)
+    -   [hasPendingItemsOperations](#haspendingitemsoperations)
     -   [isShippingRateBeingSelected](#isshippingratebeingselected)
     -   [getItemsPendingQuantityUpdate](#getitemspendingquantityupdate)
     -   [getItemsPendingDelete](#getitemspendingdelete)
@@ -937,6 +938,21 @@ By default, Store API considers the following shipping fields as essential for s
 ```js
 const store = select( cartStore );
 const isAddressFieldsForShippingRatesUpdating = store.isCustomerDataUpdating();
+```
+
+### hasPendingItemsOperations
+
+Queries whether there are any pending cart operations (add, quantity update, or delete items).
+
+#### _Returns_ <!-- omit in toc -->
+
+-   `boolean`: True if there are pending cart operations (adding products, updating quantities, or deleting items).
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( cartStore );
+const hasPendingItemsOperations = store.hasPendingItemsOperations();
 ```
 
 ### isShippingRateBeingSelected

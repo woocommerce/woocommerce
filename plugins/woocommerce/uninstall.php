@@ -14,6 +14,7 @@ global $wpdb, $wp_version, $wc_uninstalling_plugin;
 
 $wc_uninstalling_plugin = true;
 
+// Clear WordPress cron events.
 wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
 wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_sessions' );
@@ -25,6 +26,21 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
+
+// Clear Action Scheduler events.
+if ( function_exists( 'as_unschedule_all_actions' ) ) {
+	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
+	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_sessions' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_personal_data' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_logs' );
+	as_unschedule_all_actions( 'woocommerce_geoip_updater' );
+	as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
+	as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
+	as_unschedule_all_actions( 'wc_admin_daily' );
+	as_unschedule_all_actions( 'generate_category_lookup_table' );
+	as_unschedule_all_actions( 'wc_admin_unsnooze_admin_notes' );
+}
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's

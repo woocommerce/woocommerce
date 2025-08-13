@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * A collection of tests for the PluginUtil class.
@@ -310,5 +311,76 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_3', $plugin_compatibility_info );
 		sort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+
+	/**
+	 * @testdox Test 'get_wp_plugin_id' is not called during declaration but is called during query in lazy mode.
+	 */
+	public function test_lazy_normalization_during_query() {
+		$this->reset_container_resolutions();
+		$this->reset_legacy_proxy_mocks();
+
+		$get_plugins_call_count = 0;
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_plugins'     => function () use ( &$get_plugins_call_count ) {
+					$get_plugins_call_count++;
+					return array(
+						'test-plugin/test-plugin.php' => array( 'Name' => 'Test Plugin' ),
+					);
+				},
+				'plugin_basename' => function ( $file ) {
+					return basename( $file );
+				},
+			)
+		);
+
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$features_controller->add_feature_definition( 'test_feature', 'Test Feature' );
+
+		// Simulate declaration (should not call get_plugins yet).
+		$this->simulate_inside_before_woocommerce_init_hook();
+		FeaturesUtil::declare_compatibility( 'test_feature', __DIR__ . '/test-plugin/test-plugin.php', true );
+		$this->simulate_after_woocommerce_init_hook();
+		$this->assertEquals( 0, $get_plugins_call_count, 'get_plugins should not be called during declaration.' );
+
+		// Trigger query (should process pending and call get_plugins once).
+		$features_controller->get_compatible_features_for_plugin( 'test-plugin/test-plugin.php' );
+		$this->assertEquals( 1, $get_plugins_call_count, 'get_plugins should be called once during query.' );
+
+		// Second query should not call again (since we already processed, we don't call get_wp_plugin_id again).
+		$features_controller->get_compatible_features_for_plugin( 'test-plugin/test-plugin.php' );
+		$this->assertEquals( 1, $get_plugins_call_count, 'get_plugins should not be called again on subsequent queries.' );
+
+		// Test-plugin should be compatible with test_feature.
+		$result = $features_controller->get_compatible_features_for_plugin( 'test-plugin/test-plugin.php' );
+		$this->assertContains( 'test_feature', $result['compatible'] );
+	}
+
+	/**
+	 * Simulates that the code is running inside the 'before_woocommerce_init' action.
+	 */
+	private function simulate_inside_before_woocommerce_init_hook() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'doing_action' => function ( $action_name ) {
+					return 'before_woocommerce_init' === $action_name || doing_action( $action_name );
+				},
+			)
+		);
+	}
+
+	/**
+	 * Simulates that the code is running after the 'woocommerce_init' action has been fired.
+	 */
+	private function simulate_after_woocommerce_init_hook() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'did_action' => function ( $action_name ) {
+					return 'woocommerce_init' === $action_name || did_action( $action_name );
+				},
+			)
+		);
 	}
 }

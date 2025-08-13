@@ -6,6 +6,7 @@ import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -59,7 +60,13 @@ const TotalsItem = ( {
 				{ label }
 			</span>
 			{ ! value || showSkeleton ? (
-				<Skeleton width="45px" height="1em" />
+				<>
+					<Skeleton
+						width="45px"
+						height="1em"
+						ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+					/>
+				</>
 			) : (
 				<TotalsItemValue value={ value } currency={ currency } />
 			) }

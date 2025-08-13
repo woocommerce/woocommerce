@@ -10,6 +10,11 @@ export function reducer( state: State, action ): State {
 				...state,
 				preview: { ...state.preview, ...action.state },
 			};
+		case 'SET_EMAIL_POST':
+			return {
+				...state,
+				...action.state,
+			};
 		case 'CHANGE_PERSONALIZATION_TAGS_STATE':
 			return {
 				...state,
@@ -41,6 +46,11 @@ export function reducer( state: State, action ): State {
 					...state.personalizationTags,
 					...action.state,
 				},
+			};
+		case 'SET_CONTENT_VALIDATION':
+			return {
+				...state,
+				contentValidation: action.validation,
 			};
 		default:
 			return state;

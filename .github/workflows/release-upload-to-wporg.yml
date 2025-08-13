@@ -6,13 +6,21 @@ on:
         description: 'Release tag to upload (can be a draft release).'
         required: true
         default: ''
+      confirm-update:
+        description: 'I confirm that I want to upload a release to WordPress.org.'
+        type: boolean
+        required: true
+        default: false
 
 permissions: {}
+
+concurrency:
+  group: release-wporg-svn
 
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -20,6 +28,12 @@ jobs:
       release_asset: ${{ steps.fetch-release.outputs.release_asset }}
       overwrite_trunk: ${{ steps.check-asset.outputs.overwrite_trunk }}
     steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
+            echo "::error::You must check the confirmation checkbox to proceed."
+            exit 1
+          fi
       - name: Fetch release
         id: fetch-release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
@@ -125,7 +139,7 @@ jobs:
 
   commit:
     name: Commit release to WordPress.org
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [get-and-validate-release-asset]
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.

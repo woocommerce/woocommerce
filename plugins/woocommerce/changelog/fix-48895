@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed the divider in order summary to expand to full width in editor to match with frontend UI.
