@@ -6173,7 +6173,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test onboarding_step_check throws excetion when onboarding is locked.
+	 * Test onboarding_step_check throws exception when onboarding is locked.
 	 *
 	 * @return void
 	 * @throws \Exception When trying to mock uncallable user functions.
