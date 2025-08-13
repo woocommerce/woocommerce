@@ -119,6 +119,16 @@ class ProductsController {
 			return;
 		}
 
+		wc_get_logger()->info(
+			sprintf(
+				'Migration session started for platform: %s (limit: %d, batch_size: %d)',
+				$this->parsed_args['platform'],
+				$this->parsed_args['limit'] === PHP_INT_MAX ? -1 : $this->parsed_args['limit'],
+				$this->parsed_args['batch_size']
+			),
+			array( 'source' => 'wc-migrator' )
+		);
+
 		$this->session = $this->manage_session_lifecycle( $this->parsed_args );
 		if ( ! $this->session ) {
 			return;
@@ -212,6 +222,17 @@ class ProductsController {
 
 			$batch_duration = microtime( true ) - $batch_start_time;
 
+			wc_get_logger()->info(
+				sprintf(
+					'Batch completed: %d products processed in %.2f seconds (fetched: %d items, success rate: %.1f%%)',
+					$processed_count,
+					$batch_duration,
+					count( $batch_data['items'] ),
+					$processed_count > 0 ? ( $processed_count / count( $batch_data['items'] ) ) * 100 : 0
+				),
+				array( 'source' => 'wc-migrator' )
+			);
+
 			if ( $this->parsed_args['verbose'] ) {
 				WP_CLI::line( 
 					sprintf( 
@@ -233,6 +254,14 @@ class ProductsController {
 		if ( ! $has_next_page ) {
 			$this->session->set_stage( ImportSession::STAGE_FINISHED );
 			WP_CLI::log( 'Migration completed - all products processed.' );
+			
+			wc_get_logger()->info(
+				sprintf(
+					'Migration loop completed. Total products processed in session: %d. No more products available.',
+					$total_processed_in_session
+				),
+				array( 'source' => 'wc-migrator' )
+			);
 		}
 	}
 
@@ -652,6 +681,20 @@ class ProductsController {
 		} else {
 			WP_CLI::line( 'No products processed to calculate average time.' );
 		}
+
+		wc_get_logger()->info(
+			sprintf(
+				'Migration session completed. Duration: %.2f seconds, Products: %d created, %d updated, %d skipped, %d errors. Images: %d processed. Average: %.2f seconds per product.',
+				$total_duration,
+				$stats['products_created'],
+				$stats['products_updated'],
+				$stats['products_skipped'],
+				$stats['errors_encountered'],
+				$stats['images_processed'],
+				$this->total_processed_count > 0 ? $total_duration / $this->total_processed_count : 0
+			),
+			array( 'source' => 'wc-migrator' )
+		);
 
 		WP_CLI::line( '' );
 	}
