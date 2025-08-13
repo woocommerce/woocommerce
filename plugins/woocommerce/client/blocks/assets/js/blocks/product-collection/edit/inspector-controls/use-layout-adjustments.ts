@@ -246,7 +246,7 @@ const handleTransitionToStackLayout = (
  * @param {string}                      clientId   - The client ID of the product collection block.
  * @param {ProductCollectionAttributes} attributes - The attributes of the product collection block.
  */
-const useCarouselLayoutAdjustments = (
+const useLayoutAdjustments = (
 	clientId: string,
 	attributes: ProductCollectionAttributes
 ) => {
@@ -318,4 +318,4 @@ const useCarouselLayoutAdjustments = (
 	}, [ displayLayout.type, clientId, actions, collection ] );
 };
 
-export default useCarouselLayoutAdjustments;
+export default useLayoutAdjustments;
