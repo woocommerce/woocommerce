@@ -1,4 +1,4 @@
-WooCommerce {RELEASE_VERSION}-RC.{RC_PATCH_VERSION}
+# WooCommerce {RELEASE_VERSION}-RC.{RC_PATCH_VERSION}
 
 This issue tracks the progress of a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. Patch version in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
 
@@ -9,11 +9,11 @@ The following details are copied from the official [Building and Publishing guid
 ## Pre-Checks
 
 - [ ] **Verify no open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr) or [Issues](https://github.com/woocommerce/woocommerce/issues)** for the milestone matching the release being published.
-  - All pull requests tied to the release milestone must be closed, including [backported pull requests](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22type%3A+cherry-pick%22) that may need to be merged into other release branches or trunk.
+    - All pull requests tied to the release milestone must be closed, including [backported pull requests](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22type%3A+cherry-pick%22) that may need to be merged into other release branches or trunk.
 - [ ] **Check for unresolved ["cherry pick failed" Pull Requests](https://github.com/woocommerce/woocommerce/pulls?q=is:pr+label:%22cherry+pick+failed%22).**
-  - Ensure any such PRs are either expected or manually resolved via another PR.
+    - Ensure any such PRs are either expected or manually resolved via another PR.
 - [ ] **Confirm the Stable tag in** `readme.txt` **matches [trunk on WordPress.org](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).**
-  - The value should match the current stable version, not the version being built.
+    - The value should match the current stable version, not the version being built.
 - [ ] **Ensure [GitHub services](https://www.githubstatus.com/) are fully operational**
 
 ## Build WooCommerce
@@ -49,8 +49,8 @@ The following details are copied from the official [Building and Publishing guid
 ### Step 3: Verify Release Availability
 
 - [ ] **Confirm the new release appears at:**
-  - https://plugins.svn.wordpress.org/woocommerce/tags/
-  - The "Previous versions" dropdown on the [Advanced Options screen](https://wordpress.org/plugins/woocommerce/advanced/).
+    - <https://plugins.svn.wordpress.org/woocommerce/tags/>
+    - The "Previous versions" dropdown on the [Advanced Options screen](https://wordpress.org/plugins/woocommerce/advanced/).
 
 ## Release to the Staging Environment (Stable and RC releases)
 
@@ -63,7 +63,7 @@ The following details are copied from the official [Building and Publishing guid
 
 - [ ] **Action:** [Publish the previously created GitHub draft release tag](https://github.com/woocommerce/woocommerce/releases).
 - [ ] **When setting release status:**
-  - check "Set as a pre-release."
+    - check "Set as a pre-release."
 
 ## Post Release Monitoring
 

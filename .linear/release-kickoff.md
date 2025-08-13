@@ -1,4 +1,4 @@
-WooCommerce Release {RELEASE_VERSION}: Tracking
+# WooCommerce Release {RELEASE_VERSION}: Tracking
 
 This issue provides visibility on the progress of the release process of WooCommerce core **{RELEASE_VERSION}**, and it centralizes all related discussions and documentation. The ultimate goal of this issue is to keep a reference to the steps, resources, work, and conversations associated with this release so it can be helpful for future contributors handling the release of a new WooCommerce core version.
 
@@ -11,8 +11,8 @@ This issue provides visibility on the progress of the release process of WooComm
 
 ## Resources
 
-• **WooCommerce core changelog:** [here](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt)
-• **Previous releases:** [here](https://github.com/woocommerce/woocommerce/releases)
-• **Release process documentation:** [here](https://developer.woocommerce.com/docs/contribution/releases/)
+• **[WooCommerce core changelog](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt)**
+• **[Previous releases](https://github.com/woocommerce/woocommerce/releases)**
+• **[Release process documentation](https://developer.woocommerce.com/docs/contribution/releases/)**
 
 Add any new Sub-issues as needed for any point releases (patch) needed after the `x.y.0` stable release using the [`.github/ISSUE\_TEMPLATE/release-kickoff-patch.md`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/release-kickoff-patch.md) template.
