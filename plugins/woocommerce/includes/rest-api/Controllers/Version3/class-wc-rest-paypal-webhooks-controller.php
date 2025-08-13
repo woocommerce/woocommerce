@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\Jetpack\Connection\REST_Authentication;
+use Automattic\Jetpack\Connection\REST_Authentication;
 /**
  * REST API PayPal webhook handler controller class.
  *
