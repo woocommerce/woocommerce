@@ -30,8 +30,8 @@ The following details are copied from the official [Building and Publishing guid
    - **Ensure the changelog date is correct.**
 
 3. **Build the release ZIP file.**
-   - Run the ["Release: Build ZIP file" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml) from the release branch.
-   - Set "Create a draft GitHub release" to `true`.
+   - Build the release ZIP file using the ["Release: Build ZIP file" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml).
+   - Run from `trunk` and enter the release branch as argument.
    - The workflow will create a [draft release tag](https://github.com/woocommerce/woocommerce/releases) with an attached `woocommerce.zip` file.
 
 ## Publish the Release
