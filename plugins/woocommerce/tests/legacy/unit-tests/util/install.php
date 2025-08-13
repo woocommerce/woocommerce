@@ -18,11 +18,16 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
 
-		// Remove and then reinstall the plugin to reset the test environment.
-		self::uninstall();
+		// Reinstall WooCommerce to ensure test environment is clean.
 		WC_Install::install();
-		// Reload role definitions to ensure they are up to date in memory.
-		wp_roles()->for_site();
+
+		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
+		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+			$GLOBALS['wp_roles']->reinit();
+		} else {
+			$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			wp_roles();
+		}
 	}
 
 	/**
@@ -107,6 +112,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
+		self::uninstall();
+
 		WC_Install::create_roles();
 
 		$this->assertNotNull( get_role( 'customer' ) );
