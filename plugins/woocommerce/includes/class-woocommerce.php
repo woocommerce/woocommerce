@@ -310,6 +310,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'maybe_schedule_tracking_action' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
@@ -1454,6 +1455,28 @@ final class WooCommerce {
 
 		// Note: this is potentially redundant when the core package exists.
 		as_schedule_single_action( time() + 10, 'generate_category_lookup_table', array(), 'woocommerce', true );
+	}
+
+	/**
+	 * Schedule the action send tracking events if tracking is enabled, or unregister it if tracking is disabled.
+	 * This will be called when the `woocommerce_allow_tracking` option is updated.
+	 *
+	 * @param string $old_value The old value of the `woocommerce_allow_tracking` option.
+	 * @param string $value     The new value of the `woocommerce_allow_tracking` option.
+	 *
+	 * @return void
+	 */
+	public function maybe_schedule_tracking_action( $old_value, $value ) {
+		if ( $old_value === $value ) {
+			return;
+		}
+		if ( false === wc_string_to_bool( $value ) ) {
+			as_unschedule_all_actions( 'woocommerce_tracker_send_event', array(), 'woocommerce' );
+		}
+		if ( wc_string_to_bool( $value ) ) {
+			// Schedule the first run of the tracker send event.
+			as_schedule_single_action( time() + 10, 'woocommerce_tracker_send_event', array(), 'woocommerce', true );
+		}
 	}
 
 	/**
