@@ -59,7 +59,8 @@
 			"allowVerticalAlignment": false
 		},
 		"spacing": {
-			"blockGap": true
+			"blockGap": true,
+			"padding": true
 		}
 	},
 	"editorStyle": "file:../woocommerce/product-template-editor.css",
