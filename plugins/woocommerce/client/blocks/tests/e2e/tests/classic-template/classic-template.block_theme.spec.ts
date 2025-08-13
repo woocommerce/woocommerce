@@ -253,10 +253,10 @@ test.describe( `${ blockData.name } Block `, () => {
 			templateName: 'Single Product',
 		} );
 
-		const actionsButton = editor.page.getByRole( 'button', {
-			name: 'Actions',
-		} );
 		if ( wpCoreVersion >= 6.8 ) {
+			const actionsButton = editor.page.getByRole( 'button', {
+				name: 'Actions',
+			} );
 			await actionsButton.click();
 		}
 
