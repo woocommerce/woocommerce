@@ -178,14 +178,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
-			/**
-			 * Filter the default quantity to add to cart.
-			 *
-			 * @since 10.0.0
-			 * @param number $default_quantity The default quantity.
-			 * @param \WC_Product $product The product object.
-			 */
-			$default_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+			$default_quantity = $product->get_min_purchase_quantity();
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
@@ -230,14 +223,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
-					/**
-					 * Filter the default quantity to add to cart.
-					 *
-					 * @since 10.1.0
-					 * @param number $default_variation_quantity The default quantity.
-					 * @param WC_Variation_Product $variation The variation object.
-					 */
-					$default_variation_quantity                  = apply_filters( 'woocommerce_quantity_input_min', $variation->get_min_purchase_quantity(), $variation );
+					$default_variation_quantity                  = $variation->get_min_purchase_quantity();
 					$context['quantity'][ $variation->get_id() ] = $default_variation_quantity;
 					$context['availableVariations'][]            = array(
 						'variation_id' => $variation->get_id(),

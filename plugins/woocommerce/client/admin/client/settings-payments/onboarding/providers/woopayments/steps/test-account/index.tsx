@@ -539,6 +539,7 @@ const TestAccountStep = () => {
 					} );
 				} }
 				isEmbeddedResetFlow
+				resetUrl={ currentStep?.actions?.reset?.href }
 			/>
 		</div>
 	);

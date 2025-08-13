@@ -14,6 +14,7 @@ on:
         type: choice
         options:
           - stable
+          - beta
           - rc
           - dev
   workflow_call:
@@ -60,23 +61,31 @@ jobs:
             const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
-            const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-rc\.(?<rc>\d+))?/ );
+            const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-(?<prerelease>rc|beta|dev)(\.(?<prerelease_number>\d+))?)?/ );
             if ( ! m ) {
               core.setFailed( `Current version (${ currentVersion }) does not have the expected format.` );
               return;
             }
 
-            const baseVersion = m.groups['base'];
-            const patch       = parseInt( m.groups['patch'] );
-            const rc          = m.groups['rc'] ? parseInt( m.groups['rc'] ) : null;
+            const baseVersion      = m.groups['base'];
+            const patch            = parseInt( m.groups['patch'] );
+            const prerelease       = m.groups['prerelease'] ?? '';
+            const prereleaseNumber = m.groups['prerelease_number'] ? parseInt( m.groups['prerelease_number'] ) : 0;
 
             // Validate current version against bumpType and/or branch.
-            if ( 0 !== patch && ( 'dev' === bumpType || 'rc' === bumpType || ( 'stable' === bumpType && rc ) ) ) {
+            const invalidBump =
+                ( prerelease && 0 !== patch ) ||
+                ( ! prerelease && 'stable' !== bumpType ) ||
+                ( 'dev' === prerelease && ! [ 'dev', 'beta' ].includes( bumpType ) ) ||
+                ( 'beta' === prerelease && ! [ 'beta', 'rc' ].includes( bumpType ) ) ||
+                ( 'rc' === prerelease && ! [ 'rc', 'stable' ].includes( bumpType ) );
+
+            if ( invalidBump ) {
               core.setFailed( `Bump type (${ bumpType }) does not apply to current version (${ currentVersion }).` );
               return;
             }
 
-            if ( ( 'trunk' === branch && ( rc || 'dev' !== bumpType ) ) || ( 'trunk' !== branch && 'dev' === bumpType ) ) {
+            if ( ( 'trunk' === branch && 'dev' !== bumpType ) || ( 'trunk' !== branch && 'dev' === bumpType ) ) {
               core.setFailed( `Bump type (${ bumpType }) does not apply to source branch (${ branch }).` );
               return;
             }
@@ -89,12 +98,13 @@ jobs:
                 newVersion = `${ ( Number( baseVersion ) + 0.1 ).toFixed( 1 ) }.0-dev`;
                 break;
 
+              case 'beta':
               case 'rc':
-                newVersion = `${ baseVersion }.${ patch }-rc.${ rc + 1 }`;
+                newVersion = `${ baseVersion }.${ patch }-${ bumpType }.${ bumpType === prerelease ? prereleaseNumber + 1 : 1 }`;
                 break;
 
               case 'stable':
-                newVersion = rc ? `${ baseVersion }.0` : `${ baseVersion }.${ patch + 1 }`;
+                newVersion = prerelease ? `${ baseVersion }.0` : `${ baseVersion }.${ patch + 1 }`;
                 break;
 
               default:
@@ -103,12 +113,14 @@ jobs:
             }
 
             core.setOutput( 'nextVersion', newVersion );
-            core.setOutput( 'nextStable', newVersion.replace( /-(dev|rc\.\d+)/, '' ) );
+            core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
+            core.setOutput( 'clearChangelog', '' === prerelease );
 
       - name: Bump version in files
         env:
           NEXT_VERSION: ${{ steps.compute-new-version.outputs.nextVersion }}
           NEXT_STABLE: ${{ steps.compute-new-version.outputs.nextStable }}
+          CLEAR_CHANGELOG: ${{ steps.compute-new-version.outputs.clearChangelog }}
         run: |
           cd plugins/woocommerce
 
@@ -117,6 +129,10 @@ jobs:
 
           # Update changelog in readme.txt.
           sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
+
+          if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
+            perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
+          fi
 
           # Update composer.json and package.json.
           for filename in {composer,package}.json; do

@@ -292,7 +292,7 @@ export const applyCoupon =
 				},
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
+			dispatch.receiveCartContents( response );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -324,7 +324,7 @@ export const removeCoupon =
 				},
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
+			dispatch.receiveCartContents( response );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );

@@ -468,6 +468,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
 					),
+					'reset'  => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/reset' ),
+					),
 				),
 			),
 			// The business verification step.
@@ -548,37 +552,41 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_test_account' => $account_state['has_account'] && $account_state['test_account'],
 				),
 				'actions'        => array(
-					'start'              => array(
+					'start'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/start' ),
 					),
-					'save'               => array(
+					'save'                 => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/save' ),
 					),
-					'kyc_session'        => array(
+					'kyc_session'          => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session' ),
 					),
-					'kyc_session_finish' => array(
+					'kyc_session_finish'   => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/kyc_session/finish' ),
 					),
-					'kyc_fallback'       => array(
+					'kyc_fallback'         => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REDIRECT,
 						'href' => $kyc_fallback_url,
 					),
-					'finish'             => array(
+					'finish'               => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/finish' ),
 					),
-					'check'              => array(
+					'check'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/check' ),
 					),
-					'clean'              => array(
+					'clean'                => array(
 						'type' => WooPaymentsService::ACTION_TYPE_REST,
 						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/clean' ),
+					),
+					'test_account_disable' => array(
+						'type' => WooPaymentsService::ACTION_TYPE_REST,
+						'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/test_account/disable' ),
 					),
 				),
 			),
@@ -652,6 +660,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'clean' => array(
 					'type' => WooPaymentsService::ACTION_TYPE_REST,
 					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/clean' ),
+				),
+				'reset' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/reset' ),
 				),
 			);
 		}
@@ -4140,7 +4152,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored completed with no account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
@@ -4172,7 +4184,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored completed with valid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
@@ -4204,7 +4216,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored completed with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
@@ -4236,7 +4248,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
 				),
@@ -4301,7 +4313,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started and completed with no account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
@@ -4335,7 +4347,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started and completed with valid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
@@ -4369,7 +4381,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started and completed with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
@@ -4403,7 +4415,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started and completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
@@ -4472,7 +4484,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, failed, and completed with no account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
@@ -4508,7 +4520,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, failed, and completed with valid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
@@ -4544,7 +4556,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, failed, and completed with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
@@ -4580,7 +4592,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, failed, and completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
@@ -4652,7 +4664,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, blocked, and completed with no account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
@@ -4688,7 +4700,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, blocked, and completed with valid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
@@ -4724,7 +4736,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, blocked, and completed with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
@@ -4760,7 +4772,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'business_verification - stored started, blocked, and completed with invalid live account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
-				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED,
 				array(
 					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
 					WooPaymentsService::ONBOARDING_STEP_STATUS_BLOCKED => $current_time - 5,
@@ -7355,9 +7367,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$updated_stored_profiles = array();
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile, &$updated_stored_profiles ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
+						// Chain the responses to simulate the sequence of DB updates.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
 					}
 
 					return $default_value;
@@ -7413,8 +7426,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		self::assertEquals( $expected_response, $result );
 		self::assertCount( 1, $requests_made );
 		self::assertEquals( $expected_payload, $requests_made[0] );
-		// One is from the step status update, two are from the onboarding block.
-		$this->assertCount( 3, $updated_stored_profiles );
+		// One is from the step status update and one is from the test account being marked as completed.
+		$this->assertCount( 2, $updated_stored_profiles );
 		// The step status should have been set to `completed`.
 		$this->assertEquals(
 			array(
@@ -7423,7 +7436,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
 				),
 			),
-			$updated_stored_profiles[0]['onboarding'][ $location ]['steps'][ $step_id ]
+			$updated_stored_profiles[1]['onboarding'][ $location ]['steps'][ $step_id ]
+		);
+		$this->assertEquals(
+			array(
+				'statuses' => array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $this->current_time,
+				),
+			),
+			$updated_stored_profiles[1]['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]
 		);
 	}
 
@@ -7638,14 +7659,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that reset_onboarding throws an exception when the REST API call fails.
+	 * Test that reset_onboarding with a connected account throws an exception when the REST API call fails.
 	 *
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_reset_onboarding_throws_on_error_response() {
+	public function test_reset_onboarding_with_account_throws_on_error_response() {
 		// Arrange.
 		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
 
 		// Arrange the REST API requests.
 		$requests_made  = array();
@@ -7677,14 +7704,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that reset_onboarding throws an exception when the REST API call doesn't respond properly.
+	 * Test that reset_onboarding with a connected account throws an exception when the REST API call doesn't respond properly.
 	 *
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_reset_onboarding_throws_on_invalid_response() {
+	public function test_reset_onboarding_with_account_throws_on_invalid_response() {
 		// Arrange.
 		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
 
 		// Arrange the REST API requests.
 		$requests_made = array();
@@ -7714,14 +7747,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that reset_onboarding throws an exception when the REST API call doesn't succeed.
+	 * Test that reset_onboarding with a connected account throws an exception when the REST API call doesn't succeed.
 	 *
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_reset_onboarding_throws_on_failure() {
+	public function test_reset_onboarding_with_account_throws_on_failure() {
 		// Arrange.
 		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
 
 		// Arrange the REST API requests.
 		$requests_made = array();
@@ -7751,14 +7790,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reset_onboarding.
+	 * Test reset_onboarding with a connected account.
 	 *
 	 * @return void
 	 * @throws \Exception On POST request not mocked.
 	 */
-	public function test_reset_onboarding() {
+	public function test_reset_onboarding_with_account() {
 		// Arrange.
 		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
 
 		// Arrange the REST API requests.
 		$requests_made     = array();
@@ -7786,6 +7831,32 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		// Arrange the DB options.
+		$onboarding_lock_cleared = 0;
+		$deleted_profiles        = 0;
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 'no' === $value ) {
+						$onboarding_lock_cleared++;
+
+						return true;
+					}
+
+					return true;
+				},
+				'delete_option' => function ( $option_name ) use ( &$deleted_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$deleted_profiles++;
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
 		// Act.
 		$result = $this->sut->reset_onboarding( $location );
 
@@ -7793,6 +7864,82 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		self::assertEquals( $expected_response, $result );
 		self::assertCount( 1, $requests_made );
 		self::assertEquals( $expected_payload, $requests_made[0] );
+		self::assertEquals( 1, $onboarding_lock_cleared ); // The onboarding lock should be cleared.
+		self::assertEquals( 1, $deleted_profiles ); // The NOX profile option should be deleted.
+	}
+
+	/**
+	 * Test reset_onboarding with no connected account.
+	 *
+	 * @return void
+	 * @throws \Exception On POST request not mocked.
+	 */
+	public function test_reset_onboarding_without_account() {
+		// Arrange.
+		$location = 'US';
+
+		// Arrange the account.
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturn( false );
+
+		// Arrange the REST API requests.
+		$requests_made     = array();
+		$expected_response = array(
+			'success' => true,
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
+							$requests_made[] = $params;
+
+							return;
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Arrange the DB options.
+		$onboarding_lock_cleared = 0;
+		$deleted_profiles        = 0;
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 'no' === $value ) {
+						$onboarding_lock_cleared++;
+
+						return true;
+					}
+
+					return true;
+				},
+				'delete_option' => function ( $option_name ) use ( &$deleted_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$deleted_profiles++;
+
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->reset_onboarding( $location );
+
+		// Assert.
+		self::assertEquals( $expected_response, $result );
+		self::assertCount( 0, $requests_made ); // No request should be made when there is no connected account.
+		self::assertEquals( 1, $onboarding_lock_cleared ); // The onboarding lock should be cleared.
+		self::assertEquals( 1, $deleted_profiles ); // The NOX profile option should be deleted.
 	}
 
 	/**
