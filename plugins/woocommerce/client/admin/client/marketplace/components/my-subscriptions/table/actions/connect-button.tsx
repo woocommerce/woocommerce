@@ -20,6 +20,7 @@ import {
 import {
 	getConnectionErrorMessage,
 	getConnectionErrorAction,
+	trackConnectErrorActionClicked,
 } from '../../error-utils';
 import { Subscription } from '../../types';
 import { NoticeStatus } from '../../../../contexts/types';
@@ -98,17 +99,20 @@ export default function ConnectButton( props: ConnectProps ) {
 				);
 				const action = getConnectionErrorAction( error );
 
-				let actions;
-				if ( action ) {
-					actions = [ { label: action.label, url: action.url } ];
-				} else {
-					actions = [
-						{
-							label: __( 'Try again', 'woocommerce' ),
-							onClick: connect,
-						},
-					];
-				}
+				const actions = action
+					? [ action ]
+					: [
+							{
+								label: __( 'Try again', 'woocommerce' ),
+								onClick: () => {
+									trackConnectErrorActionClicked(
+										'try_again',
+										error.data?.code || ''
+									);
+									connect();
+								},
+							},
+					  ];
 
 				addNotice(
 					props.subscription.product_key,

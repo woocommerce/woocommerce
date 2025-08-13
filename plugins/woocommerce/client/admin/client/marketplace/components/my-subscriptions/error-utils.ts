@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
+import type { Options as NoticeOptions } from 'wordpress__notices';
 
 /**
  * Internal dependencies
@@ -23,10 +25,17 @@ type ConnectError = {
 	};
 };
 
-type ConnectionErrorAction = {
-	label: string;
-	url: string;
-} | null;
+type StoreAction = NonNullable< NoticeOptions[ 'actions' ] >[ number ];
+
+function trackConnectErrorActionClicked(
+	action: 'manage_subscriptions' | 'contact_support' | 'try_again',
+	errorCode: string
+) {
+	recordEvent( 'marketplace_product_connect_error_action_clicked', {
+		action,
+		error_code: errorCode,
+	} );
+}
 
 function getConnectionErrorMessage(
 	error: ConnectError,
@@ -109,25 +118,33 @@ function getConnectionErrorMessage(
 	return baseMessage;
 }
 
-function getConnectionErrorAction(
-	error: ConnectError
-): ConnectionErrorAction {
+function getConnectionErrorAction( error: ConnectError ): StoreAction | null {
 	const code = error?.data?.code || '';
 	if ( code === 'maxed_out' ) {
 		return {
 			label: __( 'Manage subscriptions', 'woocommerce' ),
-			url: MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+			onClick: () => {
+				trackConnectErrorActionClicked( 'manage_subscriptions', code );
+				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTON_PATH );
+			},
 		};
 	}
 
 	if ( code === 'invalid_product_key' ) {
 		return {
 			label: __( 'Contact support', 'woocommerce' ),
-			url: MARKETPLACE_SUPPORT_PATH,
+			onClick: () => {
+				trackConnectErrorActionClicked( 'contact_support', code );
+				window.location.assign( MARKETPLACE_SUPPORT_PATH );
+			},
 		};
 	}
 
 	return null;
 }
 
-export { getConnectionErrorMessage, getConnectionErrorAction };
+export {
+	getConnectionErrorMessage,
+	getConnectionErrorAction,
+	trackConnectErrorActionClicked,
+};
