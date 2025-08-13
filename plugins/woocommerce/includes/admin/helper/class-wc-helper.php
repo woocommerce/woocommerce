@@ -1172,9 +1172,15 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
+
+			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
+			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
+			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
 			throw new WC_Data_Exception(
 				$body['code'] ?? 'unknown_error',
 				$body['message'] ?? __( 'Unknown error', 'woocommerce' ),
+				$status_code,
+				$error_data
 			);
 		}
 

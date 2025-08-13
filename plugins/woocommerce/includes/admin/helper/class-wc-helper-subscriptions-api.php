@@ -191,7 +191,9 @@ class WC_Helper_Subscriptions_API {
 
 			if ( $e instanceof WC_Data_Exception ) {
 				$error_data['code'] = $e->getErrorCode();
-				$status_code = $e->getCode();
+				// Include extra data from the exception so the client can render contextual UI (e.g. maxed out sites list).
+				$error_data['data'] = $e->getErrorData();
+				$status_code        = $e->getCode();
 			} else {
 				$status_code = 400;
 			}
