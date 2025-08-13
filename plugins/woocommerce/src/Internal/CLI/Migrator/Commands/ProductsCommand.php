@@ -67,6 +67,15 @@ final class ProductsCommand {
 	 * [--status=<status>]
 	 * : Filter products by status (active, archived, draft).
 	 *
+	 * [--product-type=<product-type>]
+	 * : Filter products by type (for Shopify: any product type name, or 'single'/'variable' for WooCommerce equivalents).
+	 *
+	 * [--vendor=<vendor>]
+	 * : Filter products by vendor name.
+	 *
+	 * [--ids=<ids>]
+	 * : Comma-separated list of product IDs to migrate.
+	 *
 	 * [--batch-size=<size>]
 	 * : Number of products to process per batch (default: 20, max: 250).
 	 *
@@ -92,7 +101,11 @@ final class ProductsCommand {
 	 *
 	 *     wp wc migrate products --count
 	 *     wp wc migrate products --count --status=active
+	 *     wp wc migrate products --count --product-type="T-Shirt"
+	 *     wp wc migrate products --count --vendor="My Brand"
 	 *     wp wc migrate products --limit=100 --batch-size=25
+	 *     wp wc migrate products --product-type="single" --status=active --limit=50
+	 *     wp wc migrate products --ids="123,456,789"
 	 *     wp wc migrate products --fields=name,price,sku --resume
 	 *     wp wc migrate products --verbose --limit=50
 	 *
@@ -150,14 +163,37 @@ final class ProductsCommand {
 		if ( isset( $assoc_args['status'] ) ) {
 			$filter_args['status'] = $assoc_args['status'];
 		}
+		if ( isset( $assoc_args['product-type'] ) ) {
+			$filter_args['product_type'] = $assoc_args['product-type'];
+		}
+		if ( isset( $assoc_args['vendor'] ) ) {
+			$filter_args['vendor'] = $assoc_args['vendor'];
+		}
+		if ( isset( $assoc_args['ids'] ) ) {
+			$filter_args['ids'] = $assoc_args['ids'];
+		}
 
 		$count = $fetcher->fetch_total_count( $filter_args );
 
 		if ( 0 === $count ) {
 			WP_CLI::log( 'No products found or unable to fetch count.' );
 		} else {
-			$status_filter = isset( $assoc_args['status'] ) ? " with status '{$assoc_args['status']}'" : '';
-			WP_CLI::success( "Found {$count} products{$status_filter} on {$platform}." );
+			$filters = array();
+			if ( isset( $assoc_args['status'] ) ) {
+				$filters[] = "status '{$assoc_args['status']}'";
+			}
+			if ( isset( $assoc_args['product-type'] ) ) {
+				$filters[] = "type '{$assoc_args['product-type']}'";
+			}
+			if ( isset( $assoc_args['vendor'] ) ) {
+				$filters[] = "vendor '{$assoc_args['vendor']}'";
+			}
+			if ( isset( $assoc_args['ids'] ) ) {
+				$filters[] = "IDs '{$assoc_args['ids']}'";
+			}
+			
+			$filter_description = empty( $filters ) ? '' : ' with ' . implode( ', ', $filters );
+			WP_CLI::success( "Found {$count} products{$filter_description} on {$platform}." );
 		}
 	}
 }
