@@ -182,6 +182,47 @@ class QuantityLimitsTests extends TestCase {
 	}
 
 	/**
+	 * Test quantity limit when stock management is disabled but product has manage_stock enabled from when it was previously enabled.
+	 * This reproduces the Cart Block bug where products retain their stock quantity as max even when stock management is globally disabled.
+	 */
+	public function test_quantity_limit_when_stock_management_disabled_but_product_has_manage_stock_enabled() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		// Step 1: Enable stock management globally and on product level.
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		// Verify that with stock management enabled, max is limited to stock quantity.
+		$quantity_limits     = new QuantityLimits();
+		$limits_when_enabled = $quantity_limits->get_add_to_cart_limits( $product );
+		$this->assertEquals( 10, $limits_when_enabled['maximum'], 'When stock management is enabled, maximum should be limited to stock quantity' );
+
+		// Step 2: Disable stock management globally but leave product-level manage_stock as true.
+		// This simulates the scenario from import or when stock management was previously enabled.
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		// The product still has manage_stock = true and stock_quantity = 10.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertTrue( $product->get_manage_stock(), 'Product should still have manage_stock = true' );
+		$this->assertEquals( 10, $product->get_stock_quantity(), 'Product should still have stock quantity of 10' );
+
+		// Step 3: Test quantity limits - this should return 9999, not 10.
+		$quantity_limits      = new QuantityLimits();
+		$limits_when_disabled = $quantity_limits->get_add_to_cart_limits( $product );
+
+		$this->assertEquals( 9999, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should be 9999 regardless of product-level manage_stock setting or stock quantity' );
+	}
+
+	/**
 	 * Test quantity limit when stock quantity is sold individually.
 	 */
 	public function test_quantity_limit_when_stock_quantity_is_sold_individually() {
