@@ -72,6 +72,20 @@ class ProductsController {
 	private WooCommerceProductImporter $product_importer;
 
 	/**
+	 * Overall migration start time.
+	 *
+	 * @var float|null
+	 */
+	private ?float $overall_start_time = null;
+
+	/**
+	 * Total products processed in this session.
+	 *
+	 * @var int
+	 */
+	private int $total_processed_count = 0;
+
+	/**
 	 * Initialize the controller with its dependencies.
 	 * Called automatically by the WooCommerce DI container.
 	 *
@@ -99,6 +113,7 @@ class ProductsController {
 	 * @return void
 	 */
 	public function migrate_products( array $assoc_args, string $platform = '' ): void {
+		$this->overall_start_time = microtime( true );
 		$this->parsed_args = $this->parse_and_validate_args( $assoc_args, $platform );
 		if ( empty( $this->parsed_args ) ) {
 			return;
@@ -156,6 +171,7 @@ class ProductsController {
 		$total_processed_in_session = 0;
 
 		do {
+			$batch_start_time = microtime( true );
 			$batch_limit = min( $this->parsed_args['batch_size'], $limit_remaining );
 			if ( $batch_limit <= 0 ) {
 				break;
@@ -185,6 +201,7 @@ class ProductsController {
 			$processed_count = $this->process_batch( $batch_data['items'], $mapper );
 
 			$total_processed_in_session += $processed_count;
+			$this->total_processed_count += $processed_count;
 
 			$this->session->bump_imported_entities_counts( array( 'post' => $processed_count ) );
 			$after_cursor = $batch_data['cursor'];
@@ -192,6 +209,18 @@ class ProductsController {
 
 			$limit_remaining -= count( $batch_data['items'] );
 			$has_next_page    = $batch_data['has_next_page'] ?? false;
+
+			$batch_duration = microtime( true ) - $batch_start_time;
+
+			if ( $this->parsed_args['verbose'] ) {
+				WP_CLI::line( 
+					sprintf( 
+						'Batch processed %d products in %.2f seconds.', 
+						$processed_count, 
+						$batch_duration 
+					) 
+				);
+			}
 
 			$progress->tick( $processed_count );
 
@@ -600,6 +629,8 @@ class ProductsController {
 		}
 
 		$stats = $this->product_importer->get_import_stats();
+		$overall_end_time = microtime( true );
+		$total_duration = $this->overall_start_time ? $overall_end_time - $this->overall_start_time : 0;
 
 		WP_CLI::line( '' );
 		WP_CLI::line( WP_CLI::colorize( '%YMigration Summary:%n' ) );
@@ -610,6 +641,16 @@ class ProductsController {
 
 		if ( $stats['errors_encountered'] > 0 ) {
 			WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RErrors Encountered: %d%%n', $stats['errors_encountered'] ) ) );
+		}
+
+		WP_CLI::line( '' );
+		WP_CLI::line( sprintf( 'Total migration time: %.2f seconds.', $total_duration ) );
+
+		if ( $this->total_processed_count > 0 ) {
+			$average_duration = $total_duration / $this->total_processed_count;
+			WP_CLI::line( sprintf( 'Average time per product: %.2f seconds.', $average_duration ) );
+		} else {
+			WP_CLI::line( 'No products processed to calculate average time.' );
 		}
 
 		WP_CLI::line( '' );
