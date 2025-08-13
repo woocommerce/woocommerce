@@ -42,8 +42,9 @@ export const BusinessVerificationStep: React.FC = () => {
 
 	// Only include the activate step if the user has a test or sandbox account.
 	// The activate step can handle disabling the test or sandbox account and proceed to live onboarding.
+	const showActivateSubStep = hasTestAccount || hasSandboxAccount;
 	const subStepsList = [
-		...( hasTestAccount || hasSandboxAccount ? [ 'activate' ] : [] ),
+		...( showActivateSubStep ? [ 'activate' ] : [] ),
 		'business',
 		'embedded',
 	];
@@ -98,7 +99,7 @@ export const BusinessVerificationStep: React.FC = () => {
 							);
 						} }
 					>
-						{ ( hasTestAccount || hasSandboxAccount ) && (
+						{ showActivateSubStep && (
 							<Step name="activate" showHeading={ false }>
 								<ActivatePayments />
 							</Step>
