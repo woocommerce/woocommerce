@@ -1405,7 +1405,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function add_woocommerce_tracker_send_event_wrapper() {
-		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+		if ( true === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
 			WC_Tracker::init();
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
