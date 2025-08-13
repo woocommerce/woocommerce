@@ -124,6 +124,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			}
 		>;
 		has_test_account?: boolean;
+		has_sandbox_account?: boolean;
 	};
 	errors?: {
 		message: string;

@@ -1897,10 +1897,11 @@ class WooPaymentsService {
 			array(
 				'id'      => self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				'context' => array(
-					'fields'           => array(),
-					'sub_steps'        => $business_verification_step_sub_steps,
-					'self_assessment'  => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment', array() ),
-					'has_test_account' => $this->has_test_account(),
+					'fields'              => array(),
+					'sub_steps'           => $business_verification_step_sub_steps,
+					'self_assessment'     => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment', array() ),
+					'has_test_account'    => $this->has_test_account(),
+					'has_sandbox_account' => $this->has_sandbox_account(),
 				),
 			),
 			$location,
