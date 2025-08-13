@@ -483,7 +483,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				'errors'         => array(),
 				'context'        => array(
 					// Only with a working WPCOM connection we include the fields.
-					'fields'           => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
+					'fields'              => ( $wpcom_connection['is_store_connected'] && $wpcom_connection['has_connected_owner'] ) ? array(
 						'business_types'      => $this->get_mock_onboarding_fields_business_types(),
 						'mccs_display_tree'   => array(
 							array(
@@ -547,9 +547,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'available_countries' => $this->get_woopayments_supported_countries(),
 						'location'            => $location,
 					) : array(),
-					'sub_steps'        => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
-					'self_assessment'  => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
-					'has_test_account' => $account_state['has_account'] && $account_state['test_account'],
+					'sub_steps'           => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['sub_steps'] ?? array(),
+					'self_assessment'     => $steps_stored_profile[ WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION ]['self_assessment'] ?? array(),
+					'has_test_account'    => $account_state['has_account'] && $account_state['test_account'],
+					'has_sandbox_account' => $account_state['has_account'] && $account_state['sandbox_account'],
 				),
 				'actions'        => array(
 					'start'                => array(
@@ -781,6 +782,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'has_account'       => false,
 			'has_valid_account' => false,
 			'test_account'      => false,
+			'sandbox_account'   => false,
 		);
 
 		return array(
@@ -968,7 +970,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 			'stored statuses (failed) - working WPCOM connection, test account' => array(
 				array(
-					// The PMs step is force-completd on valid accounts.
+					// The PMs step is force-completed on valid accounts.
 					WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 					WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION   => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT       => WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
@@ -1015,10 +1017,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses (failed) - working WPCOM connection, live account' => array(
@@ -1070,10 +1075,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses (blocked) - no WPCOM connection, no account' => array(
@@ -1216,10 +1224,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses (blocked) - working WPCOM connection, live account' => array(
@@ -1271,10 +1282,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses (completed) - no WPCOM connection, test account' => array(
@@ -1316,10 +1330,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				$expected_pms_state,
 				$default_wpcom_connection,
 				$expected_wpcom_connection_state,
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses (completed) - no WPCOM connection, live account' => array(
@@ -1361,10 +1378,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				$expected_pms_state,
 				$default_wpcom_connection,
 				$expected_wpcom_connection_state,
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses (completed with failed) - no WPCOM connection, test account' => array(
@@ -1410,10 +1430,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				$expected_pms_state,
 				$default_wpcom_connection,
 				$expected_wpcom_connection_state,
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses (completed with blocked) - no WPCOM connection, live account' => array(
@@ -1459,10 +1482,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				$expected_pms_state,
 				$default_wpcom_connection,
 				$expected_wpcom_connection_state,
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses (mixed)' => array(
@@ -1650,10 +1676,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses ignored - Test account not completed due to unmet requirements' => array(
@@ -1687,10 +1716,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => false,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => true,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => true,
+					)
 				),
 			),
 			'stored statuses respected - Test account started with no account' => array(
@@ -1722,10 +1754,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => false,
-					'has_valid_account' => false,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => false,
+						'has_valid_account' => false,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses respected - Test account step with live, invalid account' => array(
@@ -1758,10 +1793,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => false,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => false,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses respected - Test account with live, valid account' => array(
@@ -1794,10 +1832,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses ignored - Business verification completed with requirements met' => array(
@@ -1835,10 +1876,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses ignored - Business verification not completed due to unmet requirements' => array(
@@ -1879,10 +1923,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => false,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses respected - Business verification started with no account' => array(
@@ -1920,10 +1967,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => false,
-					'has_valid_account' => false,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => false,
+						'has_valid_account' => false,
+						'test_account'      => false,
+					)
 				),
 			),
 			'stored statuses ignored - Business verification with live, valid account' => array(
@@ -1961,10 +2011,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+					)
 				),
 			),
 		);
