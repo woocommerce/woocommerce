@@ -219,7 +219,10 @@ class QuantityLimitsTests extends TestCase {
 		$quantity_limits      = new QuantityLimits();
 		$limits_when_disabled = $quantity_limits->get_add_to_cart_limits( $product );
 
-		$this->assertEquals( 9999, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should be 9999 regardless of product-level manage_stock setting or stock quantity' );
+		$expected_max = apply_filters( 'woocommerce_store_api_product_quantity_maximum', 9999, $product );
+		$this->assertEquals( $expected_max, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should ignore product-level manage_stock/stock and use the default maximum' );
+		$this->assertEquals( 1, $limits_when_disabled['minimum'], 'Minimum should remain default when stock management is globally disabled' );
+		$this->assertEquals( 1, $limits_when_disabled['multiple_of'], 'Multiple-of should remain default when stock management is globally disabled' );
 	}
 
 	/**
