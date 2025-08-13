@@ -1400,6 +1400,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
 		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
 		add_action( 'generate_category_lookup_table_wrapper', array( $this, 'add_generate_category_lookup_table_wrapper' ) );
+		add_action( 'woocommerce_cleanup_rate_limits_wrapper', array( $this, 'add_woocommerce_cleanup_rate_limits_wrapper' ) );
 	}
 
 	/**
@@ -1443,6 +1444,19 @@ final class WooCommerce {
 		}
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'generate_category_lookup_table' );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_cleanup_rate_limits` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 */
+	public function add_woocommerce_cleanup_rate_limits_wrapper() {
+		include_once WC_ABSPATH . 'includes/class-wc-rate-limiter.php';
+		WC_Rate_Limiter::init();
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_cleanup_rate_limits' );
 	}
 
 	/**
@@ -1505,7 +1519,7 @@ final class WooCommerce {
 
 		// Schedule daily cleanup rate limits at 3 AM.
 
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits', array(), 'woocommerce', true );
+		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
