@@ -158,24 +158,9 @@ test.describe( 'Template priority', () => {
 				} );
 
 				if ( testData.fallbackTemplate ) {
-					await page.getByLabel( 'Add Template' ).click();
-
-					const dialog = page.getByRole( 'dialog' );
-					await dialog
-						.getByRole( 'button', { name: testData.templateName } )
-						.click();
-					// There is the chance that the Add template dialog is opened before
-					// product taxonomies could load. In that case, the screen to select
-					// whether to create a template for a specific taxonomy or for all of
-					// them won't be shown. That's why we click the 'All Categories' /
-					// 'All Tags' button only if visible.
-					const allButton = dialog.getByRole( 'button', {
-						name: 'All',
+					await editor.createTemplate( {
+						templateName: testData.templateName,
 					} );
-					if ( await allButton.isVisible() ) {
-						await allButton.click();
-					}
-					await page.getByLabel( 'Fallback content' ).click();
 
 					// Verify we are editing the correct template.
 					await page

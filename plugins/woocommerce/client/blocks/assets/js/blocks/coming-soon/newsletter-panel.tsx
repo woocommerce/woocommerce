@@ -17,7 +17,7 @@ const NewsletterPanel = () => {
 	);
 
 	// Restrict the panel to only show on the coming soon page tempalte
-	if ( postId !== 'woocommerce/woocommerce//coming-soon' ) {
+	if ( ! postId?.endsWith( '//coming-soon' ) ) {
 		return null;
 	}
 
