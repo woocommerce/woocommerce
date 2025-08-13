@@ -1543,7 +1543,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function schedule_tracking_action() {
-		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+		if ( false === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
 			return;
 		}
 
