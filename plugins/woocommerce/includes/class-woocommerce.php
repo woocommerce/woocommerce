@@ -1503,14 +1503,8 @@ final class WooCommerce {
 
 		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
-		/**
-		 * How frequent to schedule the tracker send event.
-		 *
-		 * @since 2.3.0
-		 */
-		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
-		$core_internals     = wp_get_schedules();
-		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
+		// Schedule the action to send tracking events if tracking is enabled.
+		$this->schedule_tracking_action();
 
 		// Schedule daily cleanup rate limits at 3 AM.
 
@@ -1538,10 +1532,29 @@ final class WooCommerce {
 		if ( false === wc_string_to_bool( $value ) ) {
 			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
 		}
-		if ( wc_string_to_bool( $value ) ) {
-			// Schedule the first run of the tracker send event.
-			as_schedule_single_action( time() + 10, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
+		if ( true === wc_string_to_bool( $value ) ) {
+			$this->schedule_tracking_action();
 		}
+	}
+
+	/**
+	 * Schedule the action to send tracking events if tracking is enabled.
+	 *
+	 * @return void
+	 */
+	public function schedule_tracking_action() {
+		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+
+		/**
+		 * How frequent to schedule the tracker send event.
+		 *
+		 * @since 2.3.0
+		 */
+		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
+		$core_internals     = wp_get_schedules();
+		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 	}
 
 	/**
