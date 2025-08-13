@@ -625,7 +625,7 @@ function wc_price( $price, $args = array() ) {
 	/**
 	 * Filter formatted price.
 	 *
-	 * @param float        $formatted_price    Formatted price.
+	 * @param string       $formatted_price    Formatted price.
 	 * @param float        $price              Unformatted price.
 	 * @param int          $decimals           Number of decimals.
 	 * @param string       $decimal_separator  Decimal separator.
