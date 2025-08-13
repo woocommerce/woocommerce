@@ -42,6 +42,7 @@ export function InnerEditor( {
 	postId: initialPostId,
 	postType: initialPostType,
 	settings,
+	contentRef,
 } ) {
 	const {
 		currentPost,
@@ -134,6 +135,7 @@ export function InnerEditor( {
 					settings={ editorSettings }
 					templateId={ template && template.id }
 					styles={ styles }
+					contentRef={ contentRef }
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

@@ -192,18 +192,50 @@ class Settings_Controller {
 
 		$this->iframe_assets = _wp_get_iframed_editor_assets();
 
-		// Remove layout styles and block library for classic themes. They are added only when a classic theme is active
-		// and they add unwanted margins and paddings in the editor content.
+		$allowed_stylesheet_handles = array();
+		// Include stylesheets for blocks with email support.
+		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+			if ( ! isset( $block->supports['email'] ) || ! $block->supports['email'] ) {
+				continue;
+			}
+
+			if ( strpos( $block->name, 'core/' ) !== false ) {
+				continue;
+			}
+
+			$handle_base                  = str_replace( '/', '-', $block->name );
+			$allowed_stylesheet_handles[] = $handle_base . '-style-css';
+			$allowed_stylesheet_handles[] = $handle_base . '-editor-style-css';
+		}
+
 		$cleaned_styles = array();
 		foreach ( explode( "\n", (string) $this->iframe_assets['styles'] ) as $asset ) {
+			// Remove layout styles and block library for classic themes. They are added only when a classic theme is active
+			// and they add unwanted margins and paddings in the editor content.
 			if ( strpos( $asset, 'wp-editor-classic-layout-styles-css' ) !== false ) {
 				continue;
 			}
 			if ( strpos( $asset, 'wp-block-library-theme-css' ) !== false ) {
 				continue;
 			}
+
+			// Skip styles that are not core (`wp-` prefixed stylesheets are considered core) and not in the allowed stylesheet handles list.
+			$is_core_style    = strpos( $asset, "id='wp-" ) !== false;
+			$is_allowed_style = false;
+
+			foreach ( $allowed_stylesheet_handles as $handle ) {
+				if ( strpos( $asset, $handle ) !== false ) {
+					$is_allowed_style = true;
+					break;
+				}
+			}
+
+			if ( ! $is_core_style && ! $is_allowed_style ) {
+				continue;
+			}
 			$cleaned_styles[] = $asset;
 		}
+
 		$this->iframe_assets['styles'] = implode( "\n", $cleaned_styles );
 	}
 }
