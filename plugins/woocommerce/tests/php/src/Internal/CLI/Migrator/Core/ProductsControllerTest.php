@@ -149,7 +149,7 @@ class ProductsControllerTest extends \WC_Unit_Test_Case {
 			// Test status filter.
 			array(
 				'input'    => array( 'status' => 'active' ),
-				'expected' => array( 'status' => 'ACTIVE' ),
+				'expected' => array( 'status' => 'active' ),
 			),
 			// Test date filters.
 			array(
