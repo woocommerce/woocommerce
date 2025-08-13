@@ -362,23 +362,10 @@ const ProductTemplateEdit = (
 		[ products ]
 	);
 
-	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
-	let customClassName = '';
-
-	// We don't want to apply layout styles if there's no products.
-	if ( products && products.length && hasLayoutFlex ) {
-		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
-		const staticGrid = `is-flex-container columns-${ columns }`;
-
-		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
-	}
-
 	const blockProps = useBlockProps( {
 		className: clsx(
 			__unstableLayoutClassNames,
-			'wc-block-product-template',
-			customClassName,
-			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
+			'wc-block-product-template'
 		),
 	} );
 
