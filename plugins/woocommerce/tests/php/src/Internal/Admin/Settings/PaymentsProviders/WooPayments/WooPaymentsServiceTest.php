@@ -2026,25 +2026,31 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT          => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 					WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION => WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
 				),
-				array(), // no stored profile steps
+				array(), // no stored profile steps.
 				$default_recommended_pms,
 				$expected_pms_state,
-				array_merge( $default_wpcom_connection, array(
-					'is_store_connected'  => true,
-					'has_connected_owner' => true,
-				) ),
+				array_merge(
+					$default_wpcom_connection,
+					array(
+						'is_store_connected'  => true,
+						'has_connected_owner' => true,
+					)
+				),
 				array(
 					'has_working_connection' => true,
 					'is_store_connected'     => true,
 					'has_connected_owner'    => true,
 					'is_connection_owner'    => false,
 				),
-				array_merge( $default_account_state, array(
-					'has_account'       => true,
-					'has_valid_account' => true,
-					'test_account'      => false,
-					'sandbox_account'   => true,
-				) ),
+				array_merge(
+					$default_account_state,
+					array(
+						'has_account'       => true,
+						'has_valid_account' => true,
+						'test_account'      => false,
+						'sandbox_account'   => true,
+					)
+				),
 			),
 		);
 	}
