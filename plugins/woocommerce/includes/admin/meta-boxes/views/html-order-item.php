@@ -78,7 +78,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 
 				if ( $refunded_cost ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo '<small class="refunded">' . apply_filters('woocommerce_order_item_cogs_refunded_html', wc_price( $refunded_cost, $wc_price_arg ), $refunded_cost, $item) . '</small>';
+					echo '<small class="refunded">' . apply_filters( 'woocommerce_order_item_cogs_refunded_html', wc_price( $refunded_cost, $wc_price_arg ), $refunded_cost, $item ) . '</small>';
 				}
 				?>
 			</div>
