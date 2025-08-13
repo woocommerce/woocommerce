@@ -220,11 +220,14 @@ export const getEditedPostTemplate = createRegistrySelector(
 				select( editorStore ).getEditedPostAttribute( 'template' );
 
 			if ( currentTemplate ) {
+				const query: Record< string, string | number > = {
+					context: 'view',
+					per_page: -1,
+					_woocommerce_email_editor: 'fetch-all-templates', // Unused parameter to avoid using cached response.
+				};
+
 				const templateWithSameSlug = select( coreDataStore )
-					.getEntityRecords( 'postType', 'wp_template', {
-						per_page: -1,
-						context: 'view',
-					} )
+					.getEntityRecords( 'postType', 'wp_template', query )
 					// @ts-expect-error Missing property in type
 					?.find( ( template ) => template.slug === currentTemplate );
 
