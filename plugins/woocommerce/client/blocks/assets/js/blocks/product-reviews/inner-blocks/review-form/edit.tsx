@@ -16,7 +16,6 @@ import type { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import CommentsForm from './form';
-import './editor.scss';
 
 export default function PostCommentsFormEdit( {
 	attributes,
