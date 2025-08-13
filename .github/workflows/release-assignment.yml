@@ -206,7 +206,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            .github/ISSUE_TEMPLATE/
+            .linear
           sparse-checkout-cone-mode: false
 
       - name: Install linear-sdk
@@ -255,11 +255,11 @@ jobs:
             const path = require('path');
 
             const templates = {
-              'parent': '.github/ISSUE_TEMPLATE/release-kickoff.md',
-              'beta-1': '.github/ISSUE_TEMPLATE/release-kickoff-beta.md',
-              'beta-2': '.github/ISSUE_TEMPLATE/release-kickoff-beta.md',
-              'rc-1': '.github/ISSUE_TEMPLATE/release-kickoff-rc.md',
-              'final': '.github/ISSUE_TEMPLATE/release-kickoff-patch.md'
+              'parent': '.linear/release-kickoff.md',
+              'beta-1': '.linear/release-kickoff-beta.md',
+              'beta-2': '.linear/release-kickoff-beta.md',
+              'rc-1': '.linear/release-kickoff-rc.md',
+              'final': '.linear/release-kickoff-patch.md'
             };
 
             let templateContents = {};
