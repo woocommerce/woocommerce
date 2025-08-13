@@ -312,6 +312,7 @@ final class WooCommerce {
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'maybe_schedule_tracking_action' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
+		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
@@ -1390,6 +1391,31 @@ final class WooCommerce {
 	}
 
 	/**
+	 * For actions that may fail at execution time due to missing callbacks, register the recurring action in a wrapper
+	 * to prevent errors, and load the classes where the callback is added.
+	 *
+	 * @return void
+	 */
+	public function add_recurring_action_wrappers() {
+		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_tracker_send_event` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 */
+	public function add_woocommerce_tracker_send_event_wrapper() {
+		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+			WC_Tracker::init();
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'woocommerce_tracker_send_event' );
+		}
+	}
+
+	/**
 	 * Register recurring actions.
 	 */
 	public function register_recurring_actions() {
@@ -1445,7 +1471,7 @@ final class WooCommerce {
 		 */
 		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
 		$core_internals     = wp_get_schedules();
-		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event', array(), 'woocommerce', true );
+		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 
 		// Schedule daily cleanup rate limits at 3 AM.
 
@@ -1471,11 +1497,11 @@ final class WooCommerce {
 			return;
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
-			as_unschedule_all_actions( 'woocommerce_tracker_send_event', array(), 'woocommerce' );
+			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
 		}
 		if ( wc_string_to_bool( $value ) ) {
 			// Schedule the first run of the tracker send event.
-			as_schedule_single_action( time() + 10, 'woocommerce_tracker_send_event', array(), 'woocommerce', true );
+			as_schedule_single_action( time() + 10, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 		}
 	}
 
