@@ -296,7 +296,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label cost-total"><?php esc_html_e( 'Cost Total', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total cost-total">
-					<?php echo apply_filters('woocommerce_order_cogs_total_value_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo apply_filters( 'woocommerce_order_cogs_total_value_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		</table>
