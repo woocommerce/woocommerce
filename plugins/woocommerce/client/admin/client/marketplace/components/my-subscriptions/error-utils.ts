@@ -86,6 +86,17 @@ function getConnectionErrorMessage(
 		);
 	}
 
+	if ( code === 'invalid_product' ) {
+		return (
+			baseMessage +
+			' ' +
+			__(
+				'We are unable to activate the subscription at this time. Please try again later.',
+				'woocommerce'
+			)
+		);
+	}
+
 	if (
 		ERROR_CODES_WITH_MESSAGES.includes(
 			code as ( typeof ERROR_CODES_WITH_MESSAGES )[ number ]
