@@ -78,7 +78,6 @@
 		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
-		"__experimentalLayout": true,
 		"interactivity": true
 	},
 	"editorStyle": "file:../woocommerce/product-collection-editor.css",

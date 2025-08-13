@@ -47,11 +47,19 @@
 			}
 		},
 		"layout": {
-			"allowEditing": false,
+			"default": {
+				"type": "grid",
+				"columnCount": null,
+				"minimumColumnWidth": "150px"
+			},
+			"allowEditing": true,
 			"allowSwitching": false,
 			"allowInheriting": false,
 			"allowSizingOnChildren": false,
 			"allowVerticalAlignment": false
+		},
+		"spacing": {
+			"blockGap": true
 		}
 	},
 	"editorStyle": "file:../woocommerce/product-template-editor.css",
