@@ -310,7 +310,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
-		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'maybe_schedule_tracking_action' ), 10, 2 );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
 		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
 
@@ -1536,7 +1536,7 @@ final class WooCommerce {
 	 *
 	 * @return void
 	 */
-	public function maybe_schedule_tracking_action( $old_value, $value ) {
+	public function handle_tracking_setting_change( $old_value, $value ) {
 		if ( $old_value === $value ) {
 			return;
 		}
