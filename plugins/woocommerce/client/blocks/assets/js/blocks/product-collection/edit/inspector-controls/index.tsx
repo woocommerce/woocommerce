@@ -35,7 +35,6 @@ import {
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
-import ColumnsControl from './columns-control';
 import {
 	InheritQueryControl,
 	FilterableControl,
@@ -104,7 +103,6 @@ const ProductCollectionInspectorControls = (
 	const showDefaultOrderControl = ! showCustomQueryControls;
 	const showOffsetControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
-	const showColumnsControl = ! isCarouselLayout;
 	const showMaxPagesToShowControl =
 		showCustomQueryControls &&
 		! isCarouselLayout &&
@@ -191,9 +189,6 @@ const ProductCollectionInspectorControls = (
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
 					/>
-				) }
-				{ showColumnsControl && (
-					<ColumnsControl { ...displayControlProps } />
 				) }
 				{ showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
