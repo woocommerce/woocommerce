@@ -141,8 +141,8 @@ function plugin_check_turnstile_token( $result ) {
     $token = sanitize_text_field( $extensions['plugin-namespace-turnstile']['token'] );
 
     /**
-     * Note: The function `my_token_check_function` would include custom
-     * logic implemented by your plugin to handle token validation.
+     * Note: The function `my_token_check_function` would be
+     * implemented in your plugin to handle token validation.
      **/
     $check = my_token_check_function( $token );
     $success = $check['success'];
