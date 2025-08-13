@@ -506,7 +506,7 @@
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
-						const value = parseFloat( priceInput.attr( 'value' ) );
+						const value = priceInput.attr( 'value' );
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
@@ -726,6 +726,20 @@
 
 					var decimalSeparator = config.decimalSeparator || '.';
 					var thousandSeparator = config.thousandSeparator || ',';
+
+					// Check if the value contains a formula character
+					if ( /[\[\]\+\-\*\/()]/.test( value ) ) {
+						const matches = value.match( /\d+[.,]\d+/g );
+						if ( ! matches ) return true; // No decimals at all
+
+						return ! matches.some( ( num ) => {
+							const usedSeparator = num.match( /\d+(.)\d+/ )[ 1 ];
+							return (
+								usedSeparator.trim() !== decimalSeparator.trim()
+							);
+						} ); // All decimals use the correct separator
+					}
+
 					var escapedThousand = thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 					var escapedDecimal = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
