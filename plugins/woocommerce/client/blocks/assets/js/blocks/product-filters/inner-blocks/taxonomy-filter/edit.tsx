@@ -142,6 +142,7 @@ const Edit = ( props: EditProps ) => {
 			setTermOptions(
 				sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
 			);
+			setIsOptionsLoading( false );
 			return;
 		}
 
@@ -232,8 +233,9 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const isLoading =
-		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
+	const isLoading = isPreview
+		? false
+		: isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
 	if ( ! taxonomy )
 		return (

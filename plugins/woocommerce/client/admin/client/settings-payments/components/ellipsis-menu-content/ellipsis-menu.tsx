@@ -45,6 +45,17 @@ export const EllipsisMenuWrapper = ( {
 			! provider.onboarding?.state?.completed ) &&
 		!! provider.onboarding?._links?.reset?.href;
 
+	// For WooPayments, we can reset onboarding if there is no account connected but onboarding has been started.
+	// This is an escape hatch for when the account is reset from the Transact Platform, but the onboarding state is not reset.
+	// This is mutually exclusive with canResetAccount since resetting the account already includes resetting the onboarding.
+	const canResetOnboarding =
+		! canResetAccount &&
+		isWooPayments( provider.id ) &&
+		provider._type === 'gateway' &&
+		! provider.state?.account_connected &&
+		provider.onboarding?.state?.started &&
+		!! provider.onboarding?._links?.reset?.href;
+
 	return (
 		<>
 			<EllipsisMenu
@@ -61,6 +72,7 @@ export const EllipsisMenuWrapper = ( {
 						setResetAccountModalVisible={
 							setResetAccountModalVisible
 						}
+						canResetOnboarding={ canResetOnboarding }
 					/>
 				) }
 				focusOnMount={ true }
@@ -69,6 +81,7 @@ export const EllipsisMenuWrapper = ( {
 			<WooPaymentsResetAccountModal
 				isOpen={ resetAccountModalVisible }
 				onClose={ () => setResetAccountModalVisible( false ) }
+				hasAccount={ provider.state?.account_connected }
 				isTestMode={ provider.onboarding?.state?.test_mode }
 				resetUrl={ provider.onboarding?._links?.reset?.href }
 			/>
