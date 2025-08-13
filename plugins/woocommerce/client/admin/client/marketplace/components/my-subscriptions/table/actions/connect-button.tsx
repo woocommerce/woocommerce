@@ -106,7 +106,6 @@ export default function ConnectButton( props: ConnectProps ) {
 						{
 							label: __( 'Try again', 'woocommerce' ),
 							onClick: connect,
-							url: '',
 						},
 					];
 				}
