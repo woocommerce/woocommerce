@@ -6,7 +6,10 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { MARKETPLACE_RENEW_SUBSCRIPTON_PATH } from '../constants';
+import {
+	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_SUPPORT_PATH,
+} from '../constants';
 import { ERROR_CODES_WITH_MESSAGES } from './constants';
 
 type ConnectError = {
@@ -72,6 +75,17 @@ function getConnectionErrorMessage(
 		}
 	}
 
+	if ( code === 'invalid_product_key' ) {
+		return (
+			baseMessage +
+			' ' +
+			__(
+				'The product key is invalid. Please contact support for assistance.',
+				'woocommerce'
+			)
+		);
+	}
+
 	if (
 		ERROR_CODES_WITH_MESSAGES.includes(
 			code as ( typeof ERROR_CODES_WITH_MESSAGES )[ number ]
@@ -92,6 +106,13 @@ function getConnectionErrorAction(
 		return {
 			label: __( 'Manage subscriptions', 'woocommerce' ),
 			url: MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+		};
+	}
+
+	if ( code === 'invalid_product_key' ) {
+		return {
+			label: __( 'Contact support', 'woocommerce' ),
+			url: MARKETPLACE_SUPPORT_PATH,
 		};
 	}
 

@@ -5,5 +5,4 @@ export const ERROR_CODES_WITH_MESSAGES = [
 	'maxed_out',
 	'invalid_product_key',
 	'invalid_product',
-	'expired',
 ] as const;
