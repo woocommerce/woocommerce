@@ -13,6 +13,11 @@
 			0.667em + 2px
 		); // The extra 2px is added to match outline buttons.
 	}
+
+	:where(.comment-form-rating button.is-hovered path),
+	:where(.comment-form-rating button.is-selected path) {
+		fill: currentColor;
+	}
 }
 
 .wp-block-woocommerce-product-review-form {
@@ -81,5 +86,30 @@
 		font-size: var(--wp--preset--font-size--medium);
 		font-weight: 700;
 		margin-bottom: 0;
+	}
+
+	.comment-form-rating {
+		select {
+			margin-left: 0.5em;
+		}
+		button {
+			appearance: none;
+			border: none;
+			background: transparent;
+			padding: 0 1px;
+			cursor: pointer;
+		}
+		.stars-wrapper:not([hidden]) {
+			display: flex;
+			align-items: center;
+			gap: $gap;
+		}
+		.stars {
+			display: flex;
+			align-items: center;
+			svg {
+				display: block;
+			}
+		}
 	}
 }

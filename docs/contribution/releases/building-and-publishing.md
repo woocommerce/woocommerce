@@ -30,9 +30,9 @@ sidebar_label: Building and Publishing
    - Run from `trunk` and enter the major version number and the intended release date.
    - Review and merge the two PRs created (one for trunk, one for the release branch).
    - Ensure the changelog date is correct.
-3. **Build the release ZIP file.**
-   - Run the [“Release: Build ZIP file” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml) from the release branch.
-   - Set "Create a draft GitHub release" to `true`.
+3. **Build the release ZIP file using the [“Release: Build ZIP file” workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml).**
+   - Run from `trunk` and enter the release branch as argument.
+   - Set "Create GitHub release" to `true`.
    - The workflow will create a [draft release tag](https://github.com/woocommerce/woocommerce/releases) with an attached `woocommerce.zip` file.
 
 ## Publishing the Release

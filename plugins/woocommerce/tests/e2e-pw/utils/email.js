@@ -97,7 +97,7 @@ export async function getWooEmails( params ) {
 export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
 	await page
-		.getByRole( 'row', { name: emailTitle } )
+		.getByRole( 'row', { name: new RegExp( emailTitle ) } )
 		.getByLabel( 'Edit' )
 		.click();
 	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
