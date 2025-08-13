@@ -33,7 +33,7 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 	 */
 	do_action( 'woocommerce_before_quantity_input_field' );
 	?>
-	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_attr( $label ); ?></label>
+	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_html( $label ); ?></label>
 	<input
 		type="<?php echo esc_attr( $type ); ?>"
 		<?php echo $readonly ? 'readonly="readonly"' : ''; ?>
