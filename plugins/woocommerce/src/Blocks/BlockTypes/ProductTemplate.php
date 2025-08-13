@@ -59,6 +59,29 @@ class ProductTemplate extends AbstractBlock {
 			update_post_thumbnail_cache( $query );
 		}
 
+		$classnames = '';
+
+		// Layout is now handled with Gutenberg's `supports.layout` property.
+		// However, we need to keep the "old" logic for backward compatibility
+		// if $attributes['layout']['type'] is not set (GRID or STACK).
+		$backward_compatibility = ! isset( $attributes['layout']['type'] );
+
+		if ( $backward_compatibility && isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
+			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
+
+			if ( 'flex' === $block->context['displayLayout']['type'] ) {
+				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
+					$classnames = "wc-block-product-template__responsive columns-{$block->context['displayLayout']['columns']}";
+				} else {
+					$classnames = "is-flex-container columns-{$block->context['displayLayout']['columns']}";
+				}
+			}
+		}
+
+		if ( isset( $block->context['displayLayout']['type'] ) && 'carousel' === $block->context['displayLayout']['type'] ) {
+			$classnames .= ' is-product-collection-layout-carousel';
+		}
+
 		if ( isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
 			$classnames .= ' has-link-color';
 		}
