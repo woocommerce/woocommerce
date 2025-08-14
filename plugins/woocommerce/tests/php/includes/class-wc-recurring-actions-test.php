@@ -101,13 +101,14 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	 * Test that tracker wrapper is removed when tracking is disabled and added back when tracking is enabled.
 	 */
 	public function test_tracker_wrapper_removed_added_when_tracking_disabled() {
+		// Ensure we transition from "no" -> "yes" so update_option hooks fire.
+		update_option( 'woocommerce_allow_tracking', 'no' );
 		// Enable tracking.
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$this->assertTrue(
 			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
 			'Tracker send event wrapper should be scheduled'
 		);
-
 		// Disable tracking.
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$this->assertFalse(
