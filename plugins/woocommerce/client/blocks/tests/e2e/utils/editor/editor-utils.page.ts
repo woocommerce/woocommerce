@@ -91,6 +91,16 @@ export class Editor extends CoreEditor {
 		}
 	}
 
+	async openTemplate( { templateName }: { templateName: string } ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		// Let's wait for the search to finish.
+		await expect(
+			this.page.locator( '.dataviews-view-grid__title-actions' ).first()
+		).toHaveText( templateName );
+
+		await this.page.getByLabel( templateName ).click();
+	}
+
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 		// Let's wait for the search to finish.
