@@ -79,7 +79,7 @@ subscribe( () => {
 
 	if ( isSiteEditorPage( store ) ) {
 		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			currentTemplateId?.endsWith( template )
+			currentTemplateId?.includes( template )
 		);
 
 		const inheritQuery: Partial< ProductQueryBlockQuery > = {

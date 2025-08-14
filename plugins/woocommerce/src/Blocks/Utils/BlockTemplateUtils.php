@@ -709,7 +709,7 @@ class BlockTemplateUtils {
 	 * @param array  $slugs An array of slugs to retrieve templates for.
 	 * @param string $template_type wp_template or wp_template_part.
 	 *
-	 * @return int[]|\WP_Post[] An array of found templates.
+	 * @return \WP_Post[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		$check_query_args = array(

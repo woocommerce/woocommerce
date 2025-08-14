@@ -134,7 +134,7 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( block.first() ).toBeVisible();
 		} );
 
-		test( `should be not rendered when the product isn't on sale the frontend side`, async ( {
+		test( `should not render on the frontend when the product is not on sale`, async ( {
 			frontendUtils,
 			editor,
 			page,

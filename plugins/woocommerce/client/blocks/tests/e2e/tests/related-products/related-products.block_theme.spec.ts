@@ -8,7 +8,7 @@ import {
 	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
-// Block is soft-depreacted meaning that it's hidden from the inserter.
+// Block is soft-deprecated, meaning that it's hidden from the inserter.
 const blockData: BlockData = {
 	name: 'Related Products',
 	slug: 'woocommerce/related-products',
