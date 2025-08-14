@@ -59,11 +59,6 @@ describe( 'CartExpressPayment', () => {
 		beforeEach( () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {},
 				expressPaymentMethodsInitialized: true,
 				isExpressPaymentMethodActive: false,
@@ -82,11 +77,6 @@ describe( 'CartExpressPayment', () => {
 		beforeEach( () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {}, // No available methods
 				expressPaymentMethodsInitialized: true,
 				isExpressPaymentMethodActive: false,
@@ -97,7 +87,7 @@ describe( 'CartExpressPayment', () => {
 			} );
 		} );
 
-		it( 'should render null when not in editor and user is not admin', () => {
+		it( 'should render null', () => {
 			const { container } = render( <CartExpressPayment /> );
 			expect( container ).toBeEmptyDOMElement();
 		} );
@@ -107,11 +97,6 @@ describe( 'CartExpressPayment', () => {
 		beforeEach( () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 					paypal: { name: 'paypal' },
@@ -144,233 +129,10 @@ describe( 'CartExpressPayment', () => {
 		} );
 	} );
 
-	describe( 'Processing states', () => {
-		it( 'should add conditional accessibility attributes when isProcessing', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: true,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
-			render( <CartExpressPayment /> );
-
-			const expressPaymentContainer = document.querySelector(
-				'.wc-block-components-express-payment--cart'
-			);
-
-			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-live',
-				'polite'
-			);
-
-			// Conditional attributes (only present when processing)
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-busy',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
-			);
-		} );
-
-		it( 'should add conditional accessibility attributes when isAfterProcessing', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: true,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
-			render( <CartExpressPayment /> );
-
-			const expressPaymentContainer = document.querySelector(
-				'.wc-block-components-express-payment--cart'
-			);
-
-			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-live',
-				'polite'
-			);
-
-			// Conditional attributes (only present when processing)
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-busy',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
-			);
-		} );
-
-		it( 'should add conditional accessibility attributes when isBeforeProcessing', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: true,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
-			render( <CartExpressPayment /> );
-
-			const expressPaymentContainer = document.querySelector(
-				'.wc-block-components-express-payment--cart'
-			);
-
-			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-live',
-				'polite'
-			);
-
-			// Conditional attributes (only present when processing)
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-busy',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
-			);
-		} );
-
-		it( 'should add conditional accessibility attributes when isComplete without error', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: true,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
-			render( <CartExpressPayment /> );
-
-			const expressPaymentContainer = document.querySelector(
-				'.wc-block-components-express-payment--cart'
-			);
-
-			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-live',
-				'polite'
-			);
-
-			// Conditional attributes (only present when processing)
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-busy',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
-			);
-		} );
-
-		it( 'should not add conditional accessibility attributes when isComplete with error', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: true,
-				hasError: true,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
-			render( <CartExpressPayment /> );
-
-			const expressPaymentContainer = document.querySelector(
-				'.wc-block-components-express-payment--cart'
-			);
-
-			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-disabled',
-				'false'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-live',
-				'polite'
-			);
-
-			// Conditional attributes should NOT be present when complete with error
-			expect( expressPaymentContainer ).not.toHaveAttribute(
-				'aria-busy'
-			);
-			expect( expressPaymentContainer ).not.toHaveAttribute(
-				'aria-label'
-			);
-		} );
-
+	describe( 'Accessibility states', () => {
 		it( 'should add conditional accessibility attributes when express payment method is active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
@@ -413,14 +175,9 @@ describe( 'CartExpressPayment', () => {
 			);
 		} );
 
-		it( 'should not have conditional accessibility attributes when not processing', () => {
+		it( 'should not have conditional accessibility attributes when an express payment method is not active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
@@ -447,7 +204,7 @@ describe( 'CartExpressPayment', () => {
 				'polite'
 			);
 
-			// Conditional attributes should NOT be present when not processing
+			// Conditional attributes should NOT be present when an express payment method is not active
 			expect( expressPaymentContainer ).not.toHaveAttribute(
 				'aria-busy'
 			);
@@ -466,11 +223,6 @@ describe( 'CartExpressPayment', () => {
 		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
@@ -496,11 +248,6 @@ describe( 'CartExpressPayment', () => {
 		it( 'should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
@@ -526,11 +273,6 @@ describe( 'CartExpressPayment', () => {
 		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
 				availableExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 					paypal: { name: 'paypal' },

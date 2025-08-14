@@ -19,11 +19,6 @@ import { getExpressPaymentMethodsState } from './express-payment-methods-helpers
 const CartExpressPayment = () => {
 	const {
 		isCalculating,
-		isProcessing,
-		isAfterProcessing,
-		isBeforeProcessing,
-		isComplete,
-		hasError,
 		availableExpressPaymentMethods = {},
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
@@ -33,11 +28,6 @@ const CartExpressPayment = () => {
 		const payment = select( paymentStore );
 		return {
 			isCalculating: checkout.isCalculating(),
-			isProcessing: checkout.isProcessing(),
-			isAfterProcessing: checkout.isAfterProcessing(),
-			isBeforeProcessing: checkout.isBeforeProcessing(),
-			isComplete: checkout.isComplete(),
-			hasError: checkout.hasError(),
 			availableExpressPaymentMethods:
 				payment.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
@@ -59,13 +49,6 @@ const CartExpressPayment = () => {
 		expressPaymentMethodsInitialized,
 		registeredExpressPaymentMethods,
 	} );
-	// Set loading state for express payment methods when payment or checkout is in progress.
-	const checkoutProcessing =
-		isProcessing ||
-		isAfterProcessing ||
-		isBeforeProcessing ||
-		( isComplete && ! hasError ) ||
-		isExpressPaymentMethodActive;
 
 	// We show the skeleton when
 	// the express payment method is not active (because they trigger recalculations) and
@@ -90,12 +73,12 @@ const CartExpressPayment = () => {
 					'wc-block-components-express-payment--cart',
 					{
 						'wc-block-components-express-payment--disabled':
-							checkoutProcessing,
+							isExpressPaymentMethodActive,
 					}
 				) }
-				aria-disabled={ checkoutProcessing }
+				aria-disabled={ isExpressPaymentMethodActive }
 				aria-live="polite"
-				{ ...( checkoutProcessing && {
+				{ ...( isExpressPaymentMethodActive && {
 					'aria-busy': true,
 					'aria-label': __(
 						'Processing express checkout',
