@@ -1141,6 +1141,7 @@ class WC_Helper {
 	 * Activate helper subscription.
 	 *
 	 * @throws Exception If the subscription could not be activated or found.
+	 * @throws WC_Data_Exception If the activation fails with error details.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1177,10 +1178,10 @@ class WC_Helper {
 			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
 			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
 			throw new WC_Data_Exception(
-				$body['code'] ?? 'unknown_error',
-				$body['message'] ?? __( 'Unknown error', 'woocommerce' ),
-				$status_code,
-				$error_data
+				sanitize_text_field( $body['code'] ?? 'unknown_error' ),
+				sanitize_text_field( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) ),
+				(int) $status_code,
+				array_map( 'sanitize_text_field', $error_data )
 			);
 		}
 
