@@ -1564,6 +1564,12 @@ class WooPaymentsService {
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		// Clear the NOX profile data for the business verification step sub-step data.
+		// This way the user will be prompted to complete ALL the business verification sub-steps.
+		$business_verification_sub_step_data = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps', array() );
+		if ( ! empty( $business_verification_sub_step_data ) ) {
+			$this->save_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps', array() );
+		}
 
 		// Record an event for the test account being disabled.
 		$this->record_event(
