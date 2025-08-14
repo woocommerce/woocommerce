@@ -33,6 +33,11 @@ interface WooPaymentsResetAccountModalProps {
 	onClose: () => void;
 
 	/**
+	 * Indicates if there is a connected account.
+	 */
+	hasAccount?: boolean;
+
+	/**
 	 * Indicates if the account is a test-drive/sandbox account.
 	 */
 	isTestMode?: boolean;
@@ -49,11 +54,12 @@ interface WooPaymentsResetAccountModalProps {
 }
 
 /**
- * A modal component that allows users to reset their WooPayments test account.
+ * A modal component that allows users to reset their WooPayments account.
  */
 export const WooPaymentsResetAccountModal = ( {
 	isOpen,
 	onClose,
+	hasAccount,
 	isTestMode,
 	isEmbeddedResetFlow = false,
 	resetUrl,
@@ -96,10 +102,23 @@ export const WooPaymentsResetAccountModal = ( {
 				} );
 				createNotice(
 					'error',
-					__(
-						'Failed to reset your WooPayments account.',
-						'woocommerce'
-					),
+					hasAccount
+						? sprintf(
+								/* translators: %s: Provider name */
+								__(
+									'Failed to reset your %s account.',
+									'woocommerce'
+								),
+								'WooPayments'
+						  )
+						: sprintf(
+								/* translators: %s: Provider name */
+								__(
+									'Failed to reset your %s onboarding.',
+									'woocommerce'
+								),
+								'WooPayments'
+						  ),
 					{
 						isDismissible: true,
 					}
@@ -111,41 +130,64 @@ export const WooPaymentsResetAccountModal = ( {
 			} );
 	};
 
-	let content = isTestMode
-		? sprintf(
-				/* translators: %s: plugin name */
-				__(
-					'When you reset your test account, all payment data — including your %s account details, test transactions, and payouts history — will be lost. Your order history will remain. This action cannot be undone, but you can create a new test account at any time.',
-					'woocommerce'
-				),
-				'WooPayments'
-		  )
-		: sprintf(
-				/* translators: %s: plugin name */
-				__(
-					'When you reset your account, all payment data — including your %s account details, test transactions, and payouts history — will be lost. Your order history will remain. This action cannot be undone, but you can create a new test account at any time.',
-					'woocommerce'
-				),
-				'WooPayments'
-		  );
+	let title: string;
+	let content: string;
+	let buttonText: string;
+	if ( hasAccount ) {
+		title = isTestMode
+			? __( 'Reset your test account', 'woocommerce' )
+			: __( 'Reset your account', 'woocommerce' );
 
-	if ( isEmbeddedResetFlow ) {
-		// If reseting the account from NOX, override the content.
+		content = isTestMode
+			? sprintf(
+					/* translators: %s: Provider name */
+					__(
+						'When you reset your test account, all payment data — including your %s account details, test transactions, and payouts history — will be lost. Your order history will remain. This action cannot be undone, but you can create a new test account at any time.',
+						'woocommerce'
+					),
+					'WooPayments'
+			  )
+			: sprintf(
+					/* translators: %s: Provider name */
+					__(
+						'When you reset your account, all payment data — including your %s account details, test transactions, and payouts history — will be lost. Your order history will remain. This action cannot be undone, but you can create a new test account at any time.',
+						'woocommerce'
+					),
+					'WooPayments'
+			  );
+		if ( isEmbeddedResetFlow ) {
+			// If resetting the account from NOX, override the content.
+			content = sprintf(
+				/* translators: 1: Provider name, 2: Provider name */
+				__(
+					'You need to reset your test account to continue onboarding with %1$s. This will create a new test account and reset any existing %2$s account details and test transactions.',
+					'woocommerce'
+				),
+				'WooPayments',
+				'WooPayments'
+			);
+		}
+
+		buttonText = isTestMode
+			? __( 'Yes, reset test account', 'woocommerce' )
+			: __( 'Yes, reset account', 'woocommerce' );
+	} else {
+		title = __( 'Reset onboarding', 'woocommerce' );
 		content = sprintf(
-			/* translators: %1$s: plugin name, %2$s: plugin name */
+			/* translators: %s: Provider name */
 			__(
-				'You need to reset your test account to continue onboarding with %1$s. This will create a new test account and reset any existing %2$s account details and test transactions.',
+				'When you reset the %s onboarding your progress and the provided data will be lost. This action cannot be undone, but you can restart the onboarding any time.',
 				'woocommerce'
 			),
-			'WooPayments',
 			'WooPayments'
 		);
+		buttonText = __( 'Yes, reset onboarding', 'woocommerce' );
 	}
 	return (
 		<>
 			{ isOpen && (
 				<Modal
-					title={ __( 'Reset your test account', 'woocommerce' ) }
+					title={ title }
 					className="woocommerce-woopayments-modal"
 					isDismissible={ true }
 					onRequestClose={ onClose }
@@ -186,7 +228,7 @@ export const WooPaymentsResetAccountModal = ( {
 								handleResetAccount();
 							} }
 						>
-							{ __( 'Yes, reset account', 'woocommerce' ) }
+							{ buttonText }
 						</Button>
 					</div>
 				</Modal>
