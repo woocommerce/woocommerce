@@ -730,22 +730,22 @@ class WC_Post_Data {
 		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
 			$old_slug = substr( $old_slug, 3 );
 		}
-		$taxonomy = 'pa_' . $old_slug;
-
-		global $wpdb;
-		$threshold     = self::get_variation_summaries_sync_threshold();
-		$variation_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT p.ID
-				FROM {$wpdb->posts} p
-				INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-				WHERE p.post_type = 'product_variation'
-				AND pm.meta_key = %s
-				LIMIT %d",
-				'attribute_' . $taxonomy,
-				$threshold + 1
-			)
+		$taxonomy  = 'pa_' . $old_slug;
+		$threshold = self::get_variation_summaries_sync_threshold();
+		$args      = array(
+			'post_type'      => 'product_variation',
+			'post_status'    => 'any',
+			'posts_per_page' => $threshold + 1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				array(
+					'key'     => 'attribute_' . $taxonomy,
+					'compare' => 'EXISTS',
+				),
+			),
 		);
+
+		$variation_ids = get_posts( $args );
 
 		if ( empty( $variation_ids ) ) {
 			return;
