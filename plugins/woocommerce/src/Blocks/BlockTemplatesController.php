@@ -234,7 +234,10 @@ class BlockTemplatesController {
 			return $query_result;
 		}
 
-		$template_files = BlockTemplateUtils::get_block_templates_from_db( $slugs, $template_type );
+		// For templates, we only need to load templates from the database. For
+		// template parts, we also need to load them from the filesystem, as
+		// there is no Template registration API for template parts.
+		$template_files = 'wp_template' === $template_type ? BlockTemplateUtils::get_block_templates_from_db( $slugs, $template_type ) : $this->get_block_templates( $slugs, $template_type );
 		$new_templates  = array();
 
 		foreach ( $template_files as $template_file ) {
@@ -248,6 +251,37 @@ class BlockTemplatesController {
 				)
 			) {
 				array_unshift( $new_templates, $template_file );
+				continue;
+			}
+
+			// We only need to build templates from the filesystem for template parts.
+			// Regular templates are handled by the Template registration API.
+			if ( 'wp_template_part' === $template_type ) {
+				$theme_slug            = get_stylesheet();
+				$possible_template_ids = [
+					$theme_slug . '//' . $template_file->slug,
+					$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_file->slug,
+					$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['DEPRECATED_TEMPLATE_PARTS'] . '/' . $template_file->slug,
+				];
+
+				$is_custom                 = false;
+				$query_result_template_ids = array_column( $query_result, 'id' );
+
+				foreach ( $possible_template_ids as $template_id ) {
+					if ( in_array( $template_id, $query_result_template_ids, true ) ) {
+						$is_custom = true;
+						break;
+					}
+				}
+				$fits_slug_query =
+					! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
+				$fits_area_query =
+					! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
+				$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
+				if ( $should_include ) {
+					$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
+					$query_result[] = $template;
+				}
 			}
 		}
 
@@ -264,6 +298,18 @@ class BlockTemplatesController {
 			// See: https://github.com/woocommerce/woocommerce/issues/42220.
 			$query_result = BlockTemplateUtils::remove_duplicate_customized_templates( $query_result );
 		}
+
+		/**
+		 * WC templates from theme aren't included in `$this->get_block_templates()` but are handled by Gutenberg.
+		 * We need to do additional search through all templates file to update title and description for WC
+		 * templates that aren't listed in theme.json.
+		 */
+		$query_result = array_map(
+			function ( $template ) use ( $template_type ) {
+				return BlockTemplateUtils::update_template_data( $template, $template_type );
+			},
+			$query_result
+		);
 
 		return $query_result;
 	}
