@@ -1450,8 +1450,6 @@ final class WooCommerce {
 	 *
 	 * @return void
 	 */
-	 * @return void
-	 */
 	public function add_generate_category_lookup_table_wrapper() {
 		try {
 			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {

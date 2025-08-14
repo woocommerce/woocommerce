@@ -34,7 +34,6 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'action_scheduler_ensure_recurring_actions' );
 
-		// Check that all wrapper actions are scheduled.
 		$this->assertTrue(
 			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
 			'Tracker send event wrapper should be scheduled'
@@ -55,7 +54,6 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 			'Rate limits cleanup wrapper should be scheduled'
 		);
 
-		// Check that other core recurring actions are scheduled.
 		$this->assertTrue(
 			as_has_scheduled_action( 'woocommerce_scheduled_sales' ),
 			'Scheduled sales should be scheduled'
@@ -83,7 +81,7 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wrapper actions execute without fatal errors even when tracking is disabled.
+	 * Test that the tracker wrapper is not added when tracking is disabled.
 	 */
 	public function test_tracker_wrapper_not_added_when_tracking_disabled() {
 		// Disable tracking.
@@ -95,7 +93,7 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wrapper actions execute without fatal errors even when tracking is disabled.
+	 * Test that tracker wrapper is removed when tracking is disabled and added back when tracking is enabled.
 	 */
 	public function test_tracker_wrapper_removed_added_when_tracking_disabled() {
 		// Enable tracking.
@@ -118,12 +116,10 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	 */
 	private function clear_scheduled_actions() {
 		$actions = array(
-			// Wrapper actions
 			'woocommerce_tracker_send_event_wrapper',
 			'wc_admin_daily_wrapper',
 			'generate_category_lookup_table_wrapper',
 			'woocommerce_cleanup_rate_limits_wrapper',
-			// Core recurring actions
 			'woocommerce_scheduled_sales',
 			'woocommerce_cleanup_personal_data',
 			'woocommerce_cleanup_logs',
