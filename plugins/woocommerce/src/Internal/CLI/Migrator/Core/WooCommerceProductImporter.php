@@ -568,12 +568,17 @@ class WooCommerceProductImporter {
 	 */
 	private function setup_attributes( WC_Product_Variable $product, array $attributes_data ): void {
 		$woo_attributes = array();
+		wc_get_logger()->debug( sprintf( 'Setting up %d attributes for product ID %d', count( $attributes_data ), $product->get_id() ), array( 'source' => 'wc-migrator' ) );
+		
 		foreach ( $attributes_data as $attribute_info ) {
 			$attr_name    = $attribute_info['name'] ?? null;
 			$attr_options = $attribute_info['options'] ?? array();
 			if ( empty( $attr_name ) || empty( $attr_options ) ) {
+				wc_get_logger()->warning( "Skipping attribute: missing name or options", array( 'source' => 'wc-migrator' ) );
 				continue;
 			}
+			
+			wc_get_logger()->debug( sprintf( 'Processing attribute "%s" with options: %s', $attr_name, implode( ', ', $attr_options ) ), array( 'source' => 'wc-migrator' ) );
 
 			$taxonomy_slug = sanitize_title( $attr_name );
 			$taxonomy_name = 'pa_' . $taxonomy_slug;
@@ -627,6 +632,7 @@ class WooCommerceProductImporter {
 		}
 
 		$product->set_attributes( $woo_attributes );
+		wc_get_logger()->debug( sprintf( 'Set %d attributes on product. Attribute names: %s', count( $woo_attributes ), implode( ', ', array_map( function( $attr ) { return $attr->get_name(); }, $woo_attributes ) ) ), array( 'source' => 'wc-migrator' ) );
 	}
 
 	/**
@@ -644,12 +650,19 @@ class WooCommerceProductImporter {
 		wc_get_logger()->debug( "Syncing {$variation_count} variations for product ID {$parent_product_id}", array( 'source' => 'wc-migrator' ) );
 
 		$attribute_taxonomy_map = array();
-		foreach ( $product->get_attributes() as $taxonomy => $attribute_obj ) {
+		$product_attributes = $product->get_attributes();
+
+		foreach ( $product_attributes as $taxonomy => $attribute_obj ) {
 			if ( $attribute_obj->get_variation() ) {
-				$attribute_label                            = wc_attribute_label( $taxonomy, $product );
+				$attribute_label = wc_attribute_label( $taxonomy, $product );
+				// Store mapping with both original case and lowercase for case-insensitive lookup.
 				$attribute_taxonomy_map[ $attribute_label ] = $taxonomy;
+				$attribute_taxonomy_map[ strtolower( $attribute_label ) ] = $taxonomy;
+				wc_get_logger()->debug( sprintf( 'Mapped attribute label "%s" to taxonomy "%s"', $attribute_label, $taxonomy ), array( 'source' => 'wc-migrator' ) );
 			}
 		}
+
+		wc_get_logger()->debug( sprintf( 'Final attribute taxonomy map: %s', json_encode( $attribute_taxonomy_map ) ), array( 'source' => 'wc-migrator' ) );
 
 		foreach ( $variations_data as $var_data ) {
 			$original_variant_id = $var_data['original_id'] ?? null;
