@@ -40,9 +40,15 @@ export const BusinessVerificationStep: React.FC = () => {
 	const hasSandboxAccount =
 		currentStep?.context?.has_sandbox_account ?? false;
 
-	// Only include the activate step if the user has a test or sandbox account.
+	// Only include the activate step if the user has:
+	// - a test OR;
+	// - a sandbox account and the business verification step is not started;
+	//   this is due to the fact that a sandbox account goes through the same onboarding flow as a live account,
+	//   but with test KYC data.
 	// The activate step can handle disabling the test or sandbox account and proceed to live onboarding.
-	const showActivateSubStep = hasTestAccount || hasSandboxAccount;
+	const showActivateSubStep =
+		hasTestAccount ||
+		( hasSandboxAccount && currentStep?.status === 'not_started' );
 	const subStepsList = [
 		...( showActivateSubStep ? [ 'activate' ] : [] ),
 		'business',
