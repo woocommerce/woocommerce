@@ -25,6 +25,11 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	 * Test that recurring actions are properly enqueued when ensure_recurring_actions is called.
 	 */
 	public function test_recurring_actions_are_enqueued() {
+		$this->assertTrue(
+			as_supports( 'ensure_recurring_actions_hook' ),
+			'Action Scheduler must support ensure_recurring_actions_hook for WooCommerce recurring actions to work properly'
+		);
+
 		// Allow tracking for the purpose of this test.
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		// Clear any existing scheduled actions first.
