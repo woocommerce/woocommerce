@@ -148,3 +148,5 @@ export {
 	getConnectionErrorAction,
 	trackConnectErrorActionClicked,
 };
+
+export type { ConnectError };

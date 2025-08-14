@@ -21,6 +21,7 @@ import {
 	getConnectionErrorMessage,
 	getConnectionErrorAction,
 	trackConnectErrorActionClicked,
+	type ConnectError,
 } from '../../error-utils';
 import { Subscription } from '../../types';
 import { NoticeStatus } from '../../../../contexts/types';
@@ -87,17 +88,18 @@ export default function ConnectButton( props: ConnectProps ) {
 
 				refreshSubscriptionsList();
 			} )
-			.catch( ( error ) => {
+			.catch( ( error: unknown ) => {
+				const connectError = error as ConnectError;
 				const baseNoticeMessage = sprintf(
 					// translators: %s is the product name.
 					__( '%s couldn’t be connected.', 'woocommerce' ),
 					props.subscription.product_name
 				);
 				const noticeMessage = getConnectionErrorMessage(
-					error,
+					connectError,
 					baseNoticeMessage
 				);
-				const action = getConnectionErrorAction( error );
+				const action = getConnectionErrorAction( connectError );
 
 				const actions = action
 					? [ action ]
@@ -107,7 +109,7 @@ export default function ConnectButton( props: ConnectProps ) {
 								onClick: () => {
 									trackConnectErrorActionClicked(
 										'try_again',
-										error.data?.code || ''
+										connectError.data?.code || ''
 									);
 									connect();
 								},
