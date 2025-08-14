@@ -50,14 +50,12 @@ describe( 'createCrossSellsProductCollection transform function', () => {
 
 		expect( transformedBlock.innerBlocks.length ).toBeGreaterThan( 0 );
 
-		const headingBlock = transformedBlock.innerBlocks.find(
+		const headingBlocks = transformedBlock.innerBlocks.filter(
 			( block ) => block.name === 'core/heading'
 		);
-		expect( headingBlock ).toBeDefined();
-		if ( ! headingBlock ) return;
-
-		expect( headingBlock.attributes.level ).toBe( 2 );
-		expect( headingBlock.attributes.content ).toBeDefined();
-		expect( headingBlock.attributes.textAlign ).toBe( 'left' );
+		expect( headingBlocks.length ).toBeGreaterThan( 0 );
+		expect( headingBlocks[ 0 ].attributes.level ).toBe( 2 );
+		expect( headingBlocks[ 0 ].attributes.content ).toBeDefined();
+		expect( headingBlocks[ 0 ].attributes.textAlign ).toBe( 'left' );
 	} );
 } );
