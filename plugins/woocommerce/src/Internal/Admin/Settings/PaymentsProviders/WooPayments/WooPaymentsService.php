@@ -1272,6 +1272,10 @@ class WooPaymentsService {
 			);
 		}
 
+		// For sanity, make sure the test account step is marked as completed, if not already,
+		// since we are doing live account KYC.
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+
 		// Record an event for the KYC session being finished.
 		$event_props = array(
 			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
@@ -1288,12 +1292,6 @@ class WooPaymentsService {
 
 		// Mark the business verification step as completed.
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, false, $source );
-
-		// For sanity, make sure the test account step is completed, if not already,
-		// since we are doing live account KYC.
-		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-		}
 
 		return $response;
 	}
