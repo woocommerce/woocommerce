@@ -275,7 +275,11 @@ class WooPaymentsService {
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
 				// The step can only be completed if the requirements are met. Otherwise, ignore the stored completed status.
 				// Sanity check: we only report the completed status if there is a live account and the account is valid (i.e. completed KYC).
-				if ( $meets_requirements && $this->has_valid_account() && $this->has_live_account() && $this->was_onboarding_step_marked_completed( $step_id, $location ) ) {
+				if ( $meets_requirements &&
+					 $this->was_onboarding_step_marked_completed( $step_id, $location ) &&
+					 $this->has_valid_account() &&
+					 ( $this->has_live_account() || $this->has_sandbox_account() )
+				) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 				break;
