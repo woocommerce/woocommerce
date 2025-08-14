@@ -14,7 +14,8 @@ import strings from '../strings';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 const ActivatePayments: React.FC = () => {
-	const { currentStep, sessionEntryPoint } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint, refreshStoreData } =
+		useOnboardingContext();
 	const { nextStep } = useStepperContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
@@ -45,6 +46,9 @@ const ActivatePayments: React.FC = () => {
 		} )
 			.then( () => {
 				setIsContinueButtonLoading( false );
+				// Refresh the entire onboarding store data after disabling the test account.
+				// This ensures that the latest data is available for the next steps.
+				refreshStoreData();
 				// Navigate to the live account setup.
 				return nextStep();
 			} )
