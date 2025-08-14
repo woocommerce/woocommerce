@@ -1405,16 +1405,22 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function add_woocommerce_tracker_send_event_wrapper() {
-		try {
-			if ( true === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
-				include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
-				WC_Tracker::init();
-				// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-				do_action( 'woocommerce_tracker_send_event' );
-			}
-		} catch ( Exception $e ) {
-			wc_get_logger()->error( 'Error in tracker wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
 		}
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+			if ( ! class_exists( 'WC_Tracker' ) ) {
+				wc_get_logger()->warning( 'WC_Tracker class not found; skipping tracker send.', array( 'source' => 'woocommerce-scheduled-actions' ) );
+				return;
+			}
+			WC_Tracker::init();
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing WC_Tracker: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+			return;
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_tracker_send_event' );
 	}
 
 	/**
