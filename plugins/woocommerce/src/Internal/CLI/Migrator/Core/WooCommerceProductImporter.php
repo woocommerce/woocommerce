@@ -256,16 +256,17 @@ class WooCommerceProductImporter {
 	 */
 	private function get_default_options(): array {
 		return array(
-			'skip_existing'          => false,
-			'update_existing'        => true,
-			'import_images'          => true,
-			'image_timeout'          => self::DEFAULT_IMAGE_TIMEOUT,
-			'max_images_per_product' => self::MAX_IMAGES_PER_PRODUCT,
-			'skip_duplicate_images'  => false,  // Set to true for faster imports.
-			'create_categories'      => true,
-			'create_tags'            => true,
-			'handle_variations'      => true,
-			'dry_run'                => false,
+			'skip_existing'           => false,
+			'update_existing'         => true,
+			'import_images'           => true,
+			'image_timeout'           => self::DEFAULT_IMAGE_TIMEOUT,
+			'max_images_per_product'  => self::MAX_IMAGES_PER_PRODUCT,
+			'skip_duplicate_images'   => false,
+			'create_categories'       => true,
+			'create_tags'             => true,
+			'handle_variations'       => true,
+			'assign_default_category' => false,
+			'dry_run'                 => false,
 		);
 	}
 
@@ -830,11 +831,14 @@ class WooCommerceProductImporter {
 			$term_ids = $this->get_or_create_terms( $product_data['categories'], 'product_cat' );
 			if ( ! empty( $term_ids ) ) {
 				$taxonomies_to_set['product_cat'] = $term_ids;
-			} else {
+			} elseif ( $this->import_options['assign_default_category'] ) {
 				$default_cat_id = get_option( 'default_product_cat' );
 				if ( $default_cat_id ) {
 					$taxonomies_to_set['product_cat'] = array( $default_cat_id );
+					wc_get_logger()->info( "Assigned default category (ID: {$default_cat_id}) to product with no categories", array( 'source' => 'wc-migrator' ) );
 				}
+			} else {
+				wc_get_logger()->debug( 'Product has no categories and assign_default_category is disabled', array( 'source' => 'wc-migrator' ) );
 			}
 		}
 

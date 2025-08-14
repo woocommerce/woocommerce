@@ -97,6 +97,9 @@ final class ProductsCommand {
 	 * [--verbose]
 	 * : Show detailed progress information including warnings and errors.
 	 *
+	 * [--assign-default-category]
+	 * : Assign WooCommerce default category to products that have no categories.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp wc migrate products --count
@@ -108,6 +111,7 @@ final class ProductsCommand {
 	 *     wp wc migrate products --ids="123,456,789"
 	 *     wp wc migrate products --fields=name,price,sku --resume
 	 *     wp wc migrate products --verbose --limit=50
+	 *     wp wc migrate products --assign-default-category --limit=100
 	 *
 	 * @param array $args       The positional arguments.
 	 * @param array $assoc_args The associative arguments.

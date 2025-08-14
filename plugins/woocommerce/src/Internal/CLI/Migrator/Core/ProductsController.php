@@ -227,13 +227,15 @@ class ProductsController {
 		$parsed['platform'] = $platform;
 
 		$this->fields_to_process = $this->parse_field_selection( $assoc_args );
-		$parsed['fields']        = $this->fields_to_process;
-		$parsed['limit']         = isset( $assoc_args['limit'] ) ? max( 1, (int) $assoc_args['limit'] ) : PHP_INT_MAX;
-		$parsed['batch_size']    = isset( $assoc_args['batch-size'] ) ? max( 1, min( 250, (int) $assoc_args['batch-size'] ) ) : 20;
-		$parsed['skip_existing'] = isset( $assoc_args['skip-existing'] );
-		$parsed['dry_run']       = isset( $assoc_args['dry-run'] );
-		$parsed['resume']        = isset( $assoc_args['resume'] );
-		$parsed['verbose']       = isset( $assoc_args['verbose'] );
+
+		$parsed['fields']                  = $this->fields_to_process;
+		$parsed['limit']                   = isset( $assoc_args['limit'] ) ? max( 1, (int) $assoc_args['limit'] ) : PHP_INT_MAX;
+		$parsed['batch_size']              = isset( $assoc_args['batch-size'] ) ? max( 1, min( 250, (int) $assoc_args['batch-size'] ) ) : 20;
+		$parsed['skip_existing']           = isset( $assoc_args['skip-existing'] );
+		$parsed['dry_run']                 = isset( $assoc_args['dry-run'] );
+		$parsed['resume']                  = isset( $assoc_args['resume'] );
+		$parsed['verbose']                 = isset( $assoc_args['verbose'] );
+		$parsed['assign_default_category'] = isset( $assoc_args['assign-default-category'] );
 
 		$parsed['filters'] = $this->parse_query_filters( $assoc_args );
 
@@ -549,15 +551,16 @@ class ProductsController {
 	 */
 	private function configure_product_importer(): void {
 		$import_options = array(
-			'skip_existing'         => $this->parsed_args['skip_existing'] ?? false,
-			'update_existing'       => ! ( $this->parsed_args['skip_existing'] ?? false ),
-			'import_images'         => in_array( 'images', $this->fields_to_process, true ),
-			'skip_duplicate_images' => true,
-			'create_categories'     => in_array( 'categories', $this->fields_to_process, true ),
-			'create_tags'           => in_array( 'tags', $this->fields_to_process, true ),
-			'handle_variations'     => in_array( 'attributes', $this->fields_to_process, true ),
-			'dry_run'               => $this->parsed_args['dry_run'] ?? false,
-			'verbose'               => $this->parsed_args['verbose'] ?? false,
+			'skip_existing'           => $this->parsed_args['skip_existing'] ?? false,
+			'update_existing'         => ! ( $this->parsed_args['skip_existing'] ?? false ),
+			'import_images'           => in_array( 'images', $this->fields_to_process, true ),
+			'skip_duplicate_images'   => true,
+			'create_categories'       => in_array( 'categories', $this->fields_to_process, true ),
+			'create_tags'             => in_array( 'tags', $this->fields_to_process, true ),
+			'handle_variations'       => in_array( 'attributes', $this->fields_to_process, true ),
+			'assign_default_category' => $this->parsed_args['assign_default_category'] ?? false,
+			'dry_run'                 => $this->parsed_args['dry_run'] ?? false,
+			'verbose'                 => $this->parsed_args['verbose'] ?? false,
 		);
 
 		$this->product_importer->configure( $import_options );
