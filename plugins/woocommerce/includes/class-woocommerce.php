@@ -1436,9 +1436,11 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Wrapper for the `wc_admin_daily` action. This prevents the event failing when the class is not loaded.
+	 * Wrapper for the `generate_category_lookup_table` action. This prevents the event failing when the class is not loaded.
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
+	 * @return void
+	 */
 	 * @return void
 	 */
 	public function add_generate_category_lookup_table_wrapper() {
