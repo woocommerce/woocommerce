@@ -99,6 +99,11 @@ export class Editor extends CoreEditor {
 		).toHaveText( templateName );
 
 		await this.page.getByLabel( templateName ).click();
+
+		// Wait until editor has loaded.
+		await this.page
+			.getByRole( 'heading', { name: templateName, level: 1 } )
+			.waitFor();
 	}
 
 	async revertTemplate( { templateName }: { templateName: string } ) {
