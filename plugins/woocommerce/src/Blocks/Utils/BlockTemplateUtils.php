@@ -553,7 +553,7 @@ class BlockTemplateUtils {
 				$templates,
 				function ( $template ) {
 					// This template has been customised and saved as a post.
-					return 'custom' === $template->source && 'woocommerce/woocommerce' === $template->theme;
+					return 'custom' === $template->source && ( self::PLUGIN_SLUG === $template->theme || self::DEPRECATED_PLUGIN_SLUG === $template->theme );
 				}
 			),
 			'slug'

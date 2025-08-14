@@ -184,6 +184,11 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 				'source' => 'custom',
 				'theme'  => 'woocommerce/woocommerce',
 			),
+			(object) array(
+				'slug'   => 'taxonomy-product_tag',
+				'source' => 'custom',
+				'theme'  => 'woocommerce',
+			),
 		);
 
 		$expected_templates = array(
@@ -195,7 +200,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			(object) array(
 				'slug'   => 'taxonomy-product_tag',
 				'source' => 'theme',
-				'theme'  => 'my-theme',
+				'theme'  => 'woocommerce',
 			),
 			(object) array(
 				'slug'   => 'taxonomy-product_cat',
