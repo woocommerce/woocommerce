@@ -809,7 +809,7 @@ function get_woocommerce_currency_symbols() {
 			'RSD' => '&#1088;&#1089;&#1076;',
 			'RUB' => '&#8381;',
 			'RWF' => 'Fr',
-			'SAR' => '&#x631;.&#x633;',
+			'SAR' => '&#x20C1;',
 			'SBD' => '&#36;',
 			'SCR' => '&#x20a8;',
 			'SDG' => '&#x62c;.&#x633;.',
