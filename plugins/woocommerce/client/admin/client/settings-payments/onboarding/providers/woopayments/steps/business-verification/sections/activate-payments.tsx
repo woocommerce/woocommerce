@@ -35,7 +35,7 @@ const ActivatePayments: React.FC = () => {
 
 		setIsContinueButtonLoading( true );
 
-		// Disable test account and proceed to live KYC.
+		// Disable test account and proceed with business verification.
 		apiFetch( {
 			url: currentStep?.actions?.test_account_disable?.href,
 			method: 'POST',
@@ -44,12 +44,15 @@ const ActivatePayments: React.FC = () => {
 				source: sessionEntryPoint,
 			},
 		} )
-			.then( () => {
-				setIsContinueButtonLoading( false );
+			.then( async () => {
 				// Refresh the entire onboarding store data after disabling the test account.
-				// This ensures that the latest data is available for the next steps.
-				refreshStoreData();
-				// Navigate to the live account setup.
+				// This ensures that the latest data is available for the next sub-steps.
+				await ( typeof refreshStoreData === 'function'
+					? refreshStoreData()
+					: Promise.resolve() );
+				// Stop loading before navigating to avoid setState-after-unmount.
+				setIsContinueButtonLoading( false );
+				// Navigate to the business sub-step.
 				return nextStep();
 			} )
 			.catch( () => {
