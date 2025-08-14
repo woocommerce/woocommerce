@@ -1433,12 +1433,15 @@ final class WooCommerce {
 		try {
 			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\Events::class ) ) {
 				\Automattic\WooCommerce\Internal\Admin\Events::instance();
+			} else {
+				return;
 			}
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'wc_admin_daily' );
-		} catch ( Exception $e ) {
-			wc_get_logger()->error( 'Error in admin daily wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing wc_admin_daily: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+			return;
 		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_admin_daily' );
 	}
 
 	/**
