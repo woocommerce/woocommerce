@@ -15,7 +15,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: post feature freeze\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
+          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: feature freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
           issue=$( gh issue create --title "[Release] trend analysis for ${{ inputs.milestone }} milestone (CFEs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
 
           gh issue comment ${issue} --body "
@@ -63,7 +63,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: post feature freeze\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
+          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: feature freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
           prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
           issue=$( gh issue create --title "[Release] quality trend analysis for ${{ inputs.milestone }} milestone (CFEs and PRRs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
 
