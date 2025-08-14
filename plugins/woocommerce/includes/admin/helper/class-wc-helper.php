@@ -1177,11 +1177,12 @@ class WC_Helper {
 			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
 			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
 			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+			$error_data = function_exists( 'map_deep' ) ? map_deep( $error_data, 'esc_html' ) : array_map( 'esc_html', $error_data );
 			throw new WC_Data_Exception(
-				sanitize_text_field( $body['code'] ?? 'unknown_error' ),
-				sanitize_text_field( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) ),
+				esc_html( $body['code'] ?? 'unknown_error' ),
+				isset( $body['message'] ) ? esc_html( $body['message'] ) : __( 'Unknown error', 'woocommerce' ),
 				(int) $status_code,
-				array_map( 'sanitize_text_field', $error_data )
+				$error_data
 			);
 		}
 
