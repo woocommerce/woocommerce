@@ -1,24 +1,19 @@
 /**
  * External dependencies
  */
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
-import { Block } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { getAllowedBlocks } from '../blocks';
+import { EmailEditorSettings } from '../store';
 
 export const useFilterEditorContentStylesheets = () => {
 	const contentRef = useRef( null );
-	const [ , forceUpdate ] = useState( 0 );
+	const [ refUpdateIndex, forceUpdate ] = useState( 0 );
 
 	const handleRefChange = useCallback(
 		( ref: Element ) => {
@@ -28,21 +23,12 @@ export const useFilterEditorContentStylesheets = () => {
 		[ contentRef, forceUpdate ]
 	);
 
-	const allowedBlocks = getAllowedBlocks();
-	const allowedEmailBlocksStylesheetHandles = useMemo( () => {
-		return allowedBlocks.reduce( ( acc: string[], block: Block ) => {
-			// @ts-expect-error: 'email' is a custom property
-			if ( ! block?.supports?.email ) {
-				return acc;
-			}
-			const handleBase = ( block?.name ?? '' ).replace( '/', '-' );
+	const allowedIframeStyleHandles = useSelect( ( select ) => {
+		const { getEditorSettings } = select( editorStore );
+		const emailEditorSettings = getEditorSettings() as EmailEditorSettings;
 
-			return acc.concat(
-				`${ handleBase }-style-css`,
-				`${ handleBase }-editor-style-css`
-			);
-		}, [] );
-	}, [ allowedBlocks ] );
+		return emailEditorSettings?.allowedIframeStyleHandles ?? [];
+	} );
 
 	useEffect( () => {
 		if ( ! contentRef.current ) {
@@ -53,18 +39,12 @@ export const useFilterEditorContentStylesheets = () => {
 		const stylesheets = Array.from( document.styleSheets );
 		const stylesheetIds = stylesheets
 			.filter( ( stylesheet ) => {
-				const stylesheetId = (
-					stylesheet?.ownerNode as Element
-				 )?.getAttribute( 'id' );
-
+				if ( ! ( stylesheet?.ownerNode instanceof Element ) ) {
+					return false;
+				}
+				const stylesheetId = stylesheet.ownerNode.getAttribute( 'id' );
 				const shouldRemove =
-					stylesheetId &&
-					// We assume that all stylesheets with a 'wp-' prefix are part of the core and should not be removed.
-					! stylesheetId.startsWith( 'wp-' ) &&
-					// Blocks with email support should not be removed.
-					! allowedEmailBlocksStylesheetHandles.includes(
-						stylesheetId
-					);
+					! allowedIframeStyleHandles.includes( stylesheetId );
 
 				return applyFilters(
 					'woocommerce_email_editor_iframe_stylesheet_should_remove',
@@ -73,7 +53,7 @@ export const useFilterEditorContentStylesheets = () => {
 				);
 			} )
 			.map( ( stylesheet ) =>
-				( stylesheet?.ownerNode as Element )?.getAttribute( 'id' )
+				( stylesheet.ownerNode as Element ).getAttribute( 'id' )
 			);
 
 		stylesheetIds.forEach( ( id ) => {
@@ -89,7 +69,7 @@ export const useFilterEditorContentStylesheets = () => {
 			stylePlaceholder.id = id;
 			ownerDocument.head.appendChild( stylePlaceholder );
 		} );
-	}, [ allowedEmailBlocksStylesheetHandles ] );
+	}, [ allowedIframeStyleHandles, refUpdateIndex ] );
 
 	return handleRefChange;
 };

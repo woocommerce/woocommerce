@@ -29,7 +29,7 @@ import { enhanceSocialLinksBlock } from './core/social-links';
 import { modifyMoveToTrashAction } from './core/move-to-trash';
 import { enhanceSiteLogoBlock } from './core/site-logo';
 
-export { getAllowedBlocks, getAllowedBlockNames } from './utils';
+export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
 	filterSetUrlAttribute();
