@@ -41,8 +41,10 @@ class ProductSchema {
 				'description' => __( 'Product name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
+				'required'    => true,
 				'arg_options' => array(
 					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => 'rest_validate_request_arg',
 				),
 			),
 			'slug'              => array(
@@ -59,6 +61,9 @@ class ProductSchema {
 				'default'     => 'simple',
 				'enum'        => array( 'simple', 'grouped', 'external', 'variable' ),
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'status'            => array(
 				'description' => __( 'Product status (post status).', 'woocommerce' ),
@@ -66,12 +71,18 @@ class ProductSchema {
 				'default'     => 'publish',
 				'enum'        => array( 'draft', 'pending', 'private', 'publish' ),
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'featured'          => array(
 				'description' => __( 'Featured product.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'description'       => array(
 				'description' => __( 'Product description.', 'woocommerce' ),
@@ -79,6 +90,7 @@ class ProductSchema {
 				'context'     => array( 'view', 'edit' ),
 				'arg_options' => array(
 					'sanitize_callback' => 'wp_kses_post',
+					'validate_callback' => 'rest_validate_request_arg',
 				),
 			),
 			'short_description' => array(
@@ -87,12 +99,17 @@ class ProductSchema {
 				'context'     => array( 'view', 'edit' ),
 				'arg_options' => array(
 					'sanitize_callback' => 'wp_kses_post',
+					'validate_callback' => 'rest_validate_request_arg',
 				),
 			),
 			'sku'               => array(
 				'description' => __( 'Unique identifier.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'price'             => array(
 				'description' => __( 'Current product price.', 'woocommerce' ),
@@ -104,22 +121,34 @@ class ProductSchema {
 				'description' => __( 'Product regular price.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'sale_price'        => array(
 				'description' => __( 'Product sale price.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'manage_stock'      => array(
 				'description' => __( 'Stock management at product level.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'stock_quantity'    => array(
 				'description' => __( 'Stock quantity.', 'woocommerce' ),
 				'type'        => array( 'integer', 'null' ),
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'stock_status'      => array(
 				'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
@@ -127,6 +156,9 @@ class ProductSchema {
 				'default'     => 'instock',
 				'enum'        => array( 'instock', 'outofstock', 'onbackorder' ),
 				'context'     => array( 'view', 'edit' ),
+				'arg_options' => array(
+					'validate_callback' => 'rest_validate_request_arg',
+				),
 			),
 			'date_created'      => array(
 				'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce' ),
@@ -159,6 +191,9 @@ class ProductSchema {
 			unset( $schema['properties'][ $field ] );
 		}
 
+		// Ensure name is required for creation
+		$schema['properties']['name']['required'] = true;
+
 		return $schema;
 	}
 
@@ -174,6 +209,11 @@ class ProductSchema {
 		$readonly_fields = array( 'price', 'date_created', 'date_modified' );
 		foreach ( $readonly_fields as $field ) {
 			unset( $schema['properties'][ $field ] );
+		}
+
+		// Remove required flag from name for updates (make it optional)
+		if ( isset( $schema['properties']['name'] ) ) {
+			unset( $schema['properties']['name']['required'] );
 		}
 
 		// ID is required for updates

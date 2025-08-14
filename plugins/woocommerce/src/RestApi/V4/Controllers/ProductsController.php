@@ -7,7 +7,6 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 use WC_Product;
-use WC_Product_Factory;
 use Automattic\WooCommerce\RestApi\V4\Schemas\ProductSchema;
 
 /**
@@ -255,20 +254,15 @@ class ProductsController extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
+		// 1. Pure function: prepare data (validation handled by WordPress REST API)
+		$product_data = $this->prepare_product_data_for_creation( $request );
+
+		// 2. Separate persistence operation
 		try {
-			$product = new \WC_Product_Simple();
-
-			$this->update_product_from_request( $product, $request );
-			$product->save();
-
-			$data     = $this->prepare_item_for_response( $product, $request );
-			$response = rest_ensure_response( $data );
-			$response->set_status( 201 );
-			$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $product->get_id() ) ) );
-
-			return $response;
+			$product = $this->create_product_from_data( $product_data );
+			return $this->build_create_response( $product, $request );
 		} catch ( \Exception $e ) {
-			return $this->handle_internal_error( $e, 'Product creation failed' );
+			return $this->handle_creation_error( $e );
 		}
 	}
 
@@ -279,8 +273,8 @@ class ProductsController extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function update_item( $request ) {
+		// 1. Get existing product
 		$product = wc_get_product( $request['id'] );
-
 		if ( ! $product || 0 === $product->get_id() ) {
 			return new WP_Error(
 				'rest_post_invalid_id',
@@ -289,14 +283,16 @@ class ProductsController extends AbstractController {
 			);
 		}
 
-		try {
-			$this->update_product_from_request( $product, $request );
-			$product->save();
+		// 2. Pure function: prepare update data (validation handled by WordPress REST API)
+		$update_data = $this->prepare_product_data_for_update( $request );
 
-			$data = $this->prepare_item_for_response( $product, $request );
+		// 3. Separate persistence operation
+		try {
+			$updated_product = $this->update_product_with_data( $product, $update_data );
+			$data = $this->prepare_item_for_response( $updated_product, $request );
 			return rest_ensure_response( $data );
 		} catch ( \Exception $e ) {
-			return $this->handle_internal_error( $e, 'Product update failed' );
+			return $this->handle_update_error( $e );
 		}
 	}
 
@@ -336,6 +332,204 @@ class ProductsController extends AbstractController {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Pure function: Prepare data for product creation.
+	 *
+	 * Note: WordPress REST API handles validation and sanitization automatically
+	 * based on our JSON schema. This function only prepares business data.
+	 *
+	 * @param WP_REST_Request $request Request object with validated/sanitized data.
+	 * @return array Prepared data for product creation.
+	 */
+	protected function prepare_product_data_for_creation( $request ) {
+		$params = $request->get_params();
+		
+		// WordPress REST API has already validated and sanitized the data
+		// based on our JSON schema, so we can trust the input here
+		return array(
+			'name'              => $params['name'], // Required, already validated
+			'type'              => $params['type'] ?? 'simple', // Default applied by schema
+			'status'            => $params['status'] ?? 'publish', // Default applied by schema
+			'description'       => $params['description'] ?? '',
+			'short_description' => $params['short_description'] ?? '',
+			'sku'               => $params['sku'] ?? '',
+			'regular_price'     => $params['regular_price'] ?? '',
+			'sale_price'        => $params['sale_price'] ?? '',
+			'featured'          => $params['featured'] ?? false, // Default applied by schema
+			'manage_stock'      => $params['manage_stock'] ?? false, // Default applied by schema
+			'stock_quantity'    => $params['stock_quantity'] ?? null,
+			'stock_status'      => $params['stock_status'] ?? 'instock', // Default applied by schema
+		);
+	}
+
+	/**
+	 * Separate persistence: Create product from prepared data.
+	 *
+	 * @param array $product_data Prepared product data.
+	 * @return WC_Product Created product.
+	 * @throws Exception If product creation fails.
+	 */
+	protected function create_product_from_data( $product_data ) {
+		$product = new WC_Product();
+		
+		$product->set_name( $product_data['name'] );
+		$product->set_status( $product_data['status'] );
+		$product->set_description( $product_data['description'] );
+		$product->set_short_description( $product_data['short_description'] );
+		
+		if ( ! empty( $product_data['sku'] ) ) {
+			$product->set_sku( $product_data['sku'] );
+		}
+		
+		if ( ! empty( $product_data['regular_price'] ) ) {
+			$product->set_regular_price( $product_data['regular_price'] );
+		}
+		
+		if ( ! empty( $product_data['sale_price'] ) ) {
+			$product->set_sale_price( $product_data['sale_price'] );
+		}
+		
+		$product->set_featured( $product_data['featured'] );
+		$product->set_manage_stock( $product_data['manage_stock'] );
+		$product->set_stock_status( $product_data['stock_status'] );
+		
+		if ( $product_data['manage_stock'] && null !== $product_data['stock_quantity'] ) {
+			$product->set_stock_quantity( $product_data['stock_quantity'] );
+		}
+		
+		$product_id = $product->save();
+		
+		if ( ! $product_id ) {
+			throw new \Exception( __( 'Failed to create product.', 'woocommerce' ) );
+		}
+		
+		return $product;
+	}
+
+	/**
+	 * Build response for successful product creation.
+	 *
+	 * @param WC_Product      $product Created product.
+	 * @param WP_REST_Request $request Original request.
+	 * @return WP_REST_Response Response object.
+	 */
+	protected function build_create_response( $product, $request ) {
+		$request->set_param( 'context', 'edit' );
+		$data = $this->prepare_item_for_response( $product, $request );
+		$response = rest_ensure_response( $data );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $product->get_id() ) ) );
+		return $response;
+	}
+
+	/**
+	 * Handle creation errors consistently.
+	 *
+	 * @param Exception $e Exception that occurred.
+	 * @return WP_Error Error response.
+	 */
+	protected function handle_creation_error( $e ) {
+		return $this->handle_internal_error( $e->getMessage() );
+	}
+
+	/**
+	 * Pure function: Prepare data for product update.
+	 *
+	 * Note: WordPress REST API handles validation and sanitization automatically
+	 * based on our JSON schema. This function only prepares business data.
+	 *
+	 * @param WP_REST_Request $request Request object with validated/sanitized data.
+	 * @return array Prepared update data.
+	 */
+	protected function prepare_product_data_for_update( $request ) {
+		$params = $request->get_params();
+		$update_data = array();
+		
+		// WordPress REST API has already validated and sanitized the data
+		// Only include fields that are actually being updated
+		$updatable_fields = array(
+			'name', 'description', 'short_description', 'sku',
+			'regular_price', 'sale_price', 'status', 'featured',
+			'manage_stock', 'stock_quantity', 'stock_status'
+		);
+		
+		foreach ( $updatable_fields as $field ) {
+			if ( isset( $params[ $field ] ) ) {
+				$update_data[ $field ] = $params[ $field ];
+			}
+		}
+		
+		return $update_data;
+	}
+
+	/**
+	 * Separate persistence: Update product with prepared data.
+	 *
+	 * @param WC_Product $product Product to update.
+	 * @param array      $update_data Prepared update data.
+	 * @return WC_Product Updated product.
+	 * @throws Exception If product update fails.
+	 */
+	protected function update_product_with_data( $product, $update_data ) {
+		foreach ( $update_data as $key => $value ) {
+			switch ( $key ) {
+				case 'name':
+					$product->set_name( $value );
+					break;
+				case 'description':
+					$product->set_description( $value );
+					break;
+				case 'short_description':
+					$product->set_short_description( $value );
+					break;
+				case 'sku':
+					$product->set_sku( $value );
+					break;
+				case 'regular_price':
+					$product->set_regular_price( $value );
+					break;
+				case 'sale_price':
+					$product->set_sale_price( $value );
+					break;
+				case 'status':
+					$product->set_status( $value );
+					break;
+				case 'featured':
+					$product->set_featured( $value );
+					break;
+				case 'manage_stock':
+					$product->set_manage_stock( $value );
+					break;
+				case 'stock_quantity':
+					if ( $product->get_manage_stock() || ( isset( $update_data['manage_stock'] ) && $update_data['manage_stock'] ) ) {
+						$product->set_stock_quantity( $value );
+					}
+					break;
+				case 'stock_status':
+					$product->set_stock_status( $value );
+					break;
+			}
+		}
+		
+		$product_id = $product->save();
+		
+		if ( ! $product_id ) {
+			throw new \Exception( __( 'Failed to update product.', 'woocommerce' ) );
+		}
+		
+		return $product;
+	}
+
+	/**
+	 * Handle update errors consistently.
+	 *
+	 * @param Exception $e Exception that occurred.
+	 * @return WP_Error Error response.
+	 */
+	protected function handle_update_error( $e ) {
+		return $this->handle_internal_error( $e->getMessage() );
 	}
 
 	/**
@@ -450,86 +644,80 @@ class ProductsController extends AbstractController {
 	}
 
 	/**
+	 * Get endpoint arguments for item schema.
+	 *
+	 * @param string $method HTTP method of the request.
+	 * @return array Endpoint arguments.
+	 */
+	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ) {
+		$schema = ProductSchema::get_create_schema();
+		$schema_properties = ! empty( $schema['properties'] ) ? $schema['properties'] : array();
+		
+		// Generate validation args from JSON schema
+		$endpoint_args = rest_get_endpoint_args_for_schema( $schema_properties, $method );
+		
+		// Add custom validation for SKU uniqueness
+		if ( isset( $endpoint_args['sku'] ) ) {
+			$endpoint_args['sku']['validate_callback'] = array( $this, 'validate_sku_callback' );
+		}
+		
+		return $endpoint_args;
+	}
+
+	/**
 	 * Get arguments for creating products.
 	 *
 	 * @return array
 	 */
 	public function get_create_item_args() {
-		return array(
-			'name'              => array(
-				'required'          => true,
-				'type'              => 'string',
-				'description'       => __( 'Product name.', 'woocommerce' ),
-				'sanitize_callback' => 'sanitize_text_field',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'type'              => array(
-				'type'              => 'string',
-				'default'           => 'simple',
-				'enum'              => array( 'simple', 'grouped', 'external', 'variable' ),
-				'description'       => __( 'Product type.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'status'            => array(
-				'type'              => 'string',
-				'default'           => 'publish',
-				'enum'              => array( 'draft', 'pending', 'private', 'publish' ),
-				'description'       => __( 'Product status.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'description'       => array(
-				'type'              => 'string',
-				'description'       => __( 'Product description.', 'woocommerce' ),
-				'sanitize_callback' => 'wp_kses_post',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'short_description' => array(
-				'type'              => 'string',
-				'description'       => __( 'Product short description.', 'woocommerce' ),
-				'sanitize_callback' => 'wp_kses_post',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'sku'               => array(
-				'type'              => 'string',
-				'description'       => __( 'Unique identifier.', 'woocommerce' ),
-				'sanitize_callback' => 'sanitize_text_field',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'regular_price'     => array(
-				'type'              => 'string',
-				'description'       => __( 'Product regular price.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'sale_price'        => array(
-				'type'              => 'string',
-				'description'       => __( 'Product sale price.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'featured'          => array(
-				'type'              => 'boolean',
-				'default'           => false,
-				'description'       => __( 'Featured product.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'manage_stock'      => array(
-				'type'              => 'boolean',
-				'default'           => false,
-				'description'       => __( 'Stock management at product level.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'stock_quantity'    => array(
-				'type'              => 'integer',
-				'description'       => __( 'Stock quantity.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'stock_status'      => array(
-				'type'              => 'string',
-				'default'           => 'instock',
-				'enum'              => array( 'instock', 'outofstock', 'onbackorder' ),
-				'description'       => __( 'Controls the stock status of the product.', 'woocommerce' ),
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-		);
+		return $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE );
+	}
+
+	/**
+	 * Custom validation callback for SKU field.
+	 *
+	 * @param mixed           $value   Value of the 'sku' argument.
+	 * @param WP_REST_Request $request Request object.
+	 * @param string          $param   Key of the parameter.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 */
+	public function validate_sku_callback( $value, $request, $param ) {
+		// First, run standard validation
+		$is_valid = rest_validate_request_arg( $value, $request, $param );
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+		
+		// Skip uniqueness check if SKU is empty
+		if ( empty( $value ) ) {
+			return true;
+		}
+		
+		// Check SKU uniqueness for creation
+		if ( WP_REST_Server::CREATABLE === $request->get_method() ) {
+			$existing_product_id = wc_get_product_id_by_sku( $value );
+			if ( $existing_product_id ) {
+				return new WP_Error(
+					'rest_product_sku_exists',
+					__( 'Product SKU already exists.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+		
+		// Check SKU uniqueness for updates (exclude current product)
+		if ( WP_REST_Server::EDITABLE === $request->get_method() && isset( $request['id'] ) ) {
+			$existing_product_id = wc_get_product_id_by_sku( $value );
+			if ( $existing_product_id && $existing_product_id !== (int) $request['id'] ) {
+				return new WP_Error(
+					'rest_product_sku_exists',
+					__( 'Product SKU already exists.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+		
+		return true;
 	}
 
 	/**
@@ -538,12 +726,7 @@ class ProductsController extends AbstractController {
 	 * @return array
 	 */
 	public function get_update_item_args() {
-		$args = $this->get_create_item_args();
-
-		// Remove required validation for updates
-		unset( $args['name']['required'] );
-
-		return $args;
+		return $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE );
 	}
 
 	/**
@@ -555,4 +738,3 @@ class ProductsController extends AbstractController {
 		return ProductSchema::get_schema();
 	}
 }
-
