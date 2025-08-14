@@ -24,6 +24,11 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	private $prev_cot_state;
 
 	/**
+	 * @var null|\WC_Order
+	 */
+	private $prev_theorder;
+
+	/**
 	 * Set-up subject under test.
 	 */
 	public function setUp(): void {
@@ -33,6 +38,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$cot_controller       = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
+		$this->prev_theorder  = $GLOBALS['theorder'] ?? null;
 	}
 
 	/**
@@ -43,6 +49,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		$GLOBALS['theorder'] = $this->prev_theorder;
 		parent::tearDown();
 	}
 
@@ -63,6 +70,7 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_init_theorder_object() {
 		global $theorder;
+
 		$order1           = OrderHelper::create_order();
 		$order2           = OrderHelper::create_order();
 		$post_from_order2 = get_post( $order2->get_id() );
