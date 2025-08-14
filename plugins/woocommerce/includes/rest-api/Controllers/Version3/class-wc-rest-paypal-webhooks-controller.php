@@ -95,8 +95,9 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 				) {
 					return \Automattic\Jetpack\Connection\REST_Authentication::is_signed_with_blog_token();
 			}
+			return false;
 		} catch ( \Throwable $e ) {
-			WC_Gateway_Paypal::log( 'REST authentication method not available. Request data: ' . wc_print_r( $request->get_params(), true ), 'error' );
+			WC_Gateway_Paypal::log( 'REST authentication method not available. Webhook data: ' . wc_print_r( $request->get_json_params(), true ), 'error' );
 			return false;
 		}
 	}
