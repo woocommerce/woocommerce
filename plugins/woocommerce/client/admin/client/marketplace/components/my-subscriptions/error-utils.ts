@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, sprintf, _n } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import type { Options as NoticeOptions } from 'wordpress__notices';
 
@@ -68,14 +68,16 @@ function getConnectionErrorMessage(
 				);
 			}
 
-			const others = Math.max( domainCount - 2, 1 );
+			const others = domainCount - 2;
 			return (
 				baseMessage +
 				' ' +
 				sprintf(
 					// translators: %1$s and %2$s are domain names, %3$d is a number of additional sites.
-					__(
+					_n(
+						"This subscription is maxed out as it's connected to %1$s, %2$s, and %3$d other site.",
 						"This subscription is maxed out as it's connected to %1$s, %2$s, and %3$d other sites.",
+						others,
 						'woocommerce'
 					),
 					first,
