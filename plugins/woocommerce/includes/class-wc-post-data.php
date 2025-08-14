@@ -733,7 +733,7 @@ class WC_Post_Data {
 		$taxonomy  = 'pa_' . $old_slug;
 		$threshold = self::get_variation_summaries_sync_threshold();
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		$args      = array(
+		$args = array(
 			'post_type'      => 'product_variation',
 			'post_status'    => 'any',
 			'posts_per_page' => $threshold + 1,
