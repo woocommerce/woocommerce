@@ -12,8 +12,6 @@
 declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
-
-use Automattic\Jetpack\Connection\REST_Authentication;
 /**
  * REST API PayPal webhook handler controller class.
  *
@@ -90,7 +88,17 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 * @return bool True if the webhook is valid, false otherwise.
 	 */
 	public function validate_webhook( WP_REST_Request $request ) {
-		return REST_Authentication::is_signed_with_blog_token();
+		try {
+			if (
+					class_exists( 'Automattic\Jetpack\Connection\REST_Authentication' ) &&
+					method_exists( 'Automattic\Jetpack\Connection\REST_Authentication', 'is_signed_with_blog_token' )
+				) {
+					return \Automattic\Jetpack\Connection\REST_Authentication::is_signed_with_blog_token();
+			}
+		} catch ( \Throwable $e ) {
+			WC_Gateway_Paypal::log( 'REST authentication method not available. Request data: ' . wc_print_r( $request->get_params(), true ), 'error' );
+			return false;
+		}
 	}
 
 	/**
