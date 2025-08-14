@@ -95,6 +95,13 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
 			'Tracker send event wrapper should be scheduled'
 		);
+		// Validate the wrapper is not scheduled when ensure_recurring_actions is called with tracking disabled.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+		$this->assertFalse(
+			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
+			'Tracker send event wrapper should not be scheduled'
+		);
 	}
 
 	/**
