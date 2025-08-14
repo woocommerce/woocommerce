@@ -585,7 +585,7 @@ class BlockTemplateUtils {
 		$customized_theme_template_slugs = array_column(
 			array_filter(
 				$templates,
-				function ( $template ) {
+				function ( $template ) use ( $theme_slug ) {
 					// This template has been customised and saved as a post.
 					return 'custom' === $template->source && $theme_slug === $template->theme;
 				}
