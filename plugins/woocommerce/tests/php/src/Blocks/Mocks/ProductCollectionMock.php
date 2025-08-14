@@ -78,17 +78,4 @@ class ProductCollectionMock extends Controller {
 	public function unregister_collection_handlers( $collection_name ) {
 		$this->collection_handler_registry->unregister_collection_handlers( $collection_name );
 	}
-
-	/**
-	 * Get all collection handlers.
-	 *
-	 * @return array All collection handlers.
-	 */
-	public function get_collection_handlers() {
-		// Access the protected collection_handler_store property via reflection.
-		$reflection = new \ReflectionClass( $this->collection_handler_registry );
-		$property   = $reflection->getProperty( 'collection_handler_store' );
-		$property->setAccessible( true );
-		return $property->getValue( $this->collection_handler_registry );
-	}
 }
