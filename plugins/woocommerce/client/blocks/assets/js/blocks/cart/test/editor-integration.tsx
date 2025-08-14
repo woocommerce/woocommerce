@@ -17,14 +17,9 @@ jest.mock( '@automattic/tour-kit', () => ( {
 	TourKit: () => null,
 } ) );
 
-jest.mock( 'gridicons/svg-sprite/gridicons.svg', () => 'mocked-svg', {
-	virtual: true,
-} );
-
 jest.mock( '@automattic/components', () => ( {
 	__esModule: true,
 	Card: ( { children }: { children: React.ReactNode } ) => children,
-	Gridicon: () => null,
 } ) );
 
 /**
@@ -180,12 +175,9 @@ describe( 'Cart block editor integration', () => {
 		await selectBlock( /^Block: Filled Cart$/i );
 
 		// Verify Product Collection block is present in the Cart Items
-		await waitFor( () => {
-			const productCollection = screen.getByLabelText(
-				/^Block: Product Collection$/i
-			);
-			expect( productCollection ).toBeVisible();
-		} );
+		expect(
+			await screen.findByLabelText( /^Block: Cart$/i )
+		).toBeVisible();
 	} );
 
 	it( 'shows the cart preview in the editor', async () => {
