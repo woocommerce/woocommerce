@@ -78,8 +78,9 @@ const CheckoutExpressPayment = () => {
 		return null;
 	}
 
-	// Set loading state for express payment methods when payment or checkout is in progress.
-	const checkoutProcessing =
+	// Set disabled state for express payment methods when
+	// checkout is processing or an express payment method is active
+	const isAreaDisabled =
 		isProcessing ||
 		isAfterProcessing ||
 		isBeforeProcessing ||
@@ -102,12 +103,12 @@ const CheckoutExpressPayment = () => {
 					'wc-block-components-express-payment--checkout',
 					{
 						'wc-block-components-express-payment--disabled':
-							checkoutProcessing,
+							isAreaDisabled,
 					}
 				) }
-				aria-disabled={ checkoutProcessing }
+				aria-disabled={ isAreaDisabled }
 				aria-live="polite"
-				{ ...( checkoutProcessing && {
+				{ ...( isAreaDisabled && {
 					'aria-busy': true,
 					'aria-label': __(
 						'Processing express checkout',
