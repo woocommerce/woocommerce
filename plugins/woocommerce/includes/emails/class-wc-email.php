@@ -863,7 +863,7 @@ class WC_Email extends WC_Settings_API {
 			try {
 				$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
 
-				do_action( 'woocommerce_emogrifier', $css_inliner, $this );
+				do_action( 'woocommerce_emogrifier', $css_inliner, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 				$dom_document = $css_inliner->getDomDocument();
 
