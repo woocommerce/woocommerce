@@ -1,0 +1,140 @@
+<?php
+/**
+ * Unit tests for WooCommerce recurring actions.
+ *
+ * @package WooCommerce\Tests
+ */
+
+/**
+ * Class WC_Recurring_Actions_Test
+ */
+class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up the test environment.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		// Clear any existing scheduled actions first.
+		$this->clear_scheduled_actions();
+	}
+
+	/**
+	 * Test that recurring actions are properly enqueued when ensure_recurring_actions is called.
+	 */
+	public function test_recurring_actions_are_enqueued() {
+		// Allow tracking for the purpose of this test.
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		// Clear any existing scheduled actions first.
+		$this->clear_scheduled_actions();
+
+		// Ensure recurring actions are scheduled.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'action_scheduler_ensure_recurring_actions' );
+
+		// Check that all wrapper actions are scheduled.
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
+			'Tracker send event wrapper should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'wc_admin_daily_wrapper' ),
+			'Admin daily wrapper should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'generate_category_lookup_table_wrapper' ),
+			'Category lookup table wrapper should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_cleanup_rate_limits_wrapper' ),
+			'Rate limits cleanup wrapper should be scheduled'
+		);
+
+		// Check that other core recurring actions are scheduled.
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_scheduled_sales' ),
+			'Scheduled sales should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_cleanup_personal_data' ),
+			'Personal data cleanup should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_cleanup_logs' ),
+			'Log cleanup should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_cleanup_sessions' ),
+			'Session cleanup should be scheduled'
+		);
+
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_geoip_updater' ),
+			'GeoIP updater should be scheduled'
+		);
+	}
+
+	/**
+	 * Test that wrapper actions execute without fatal errors even when tracking is disabled.
+	 */
+	public function test_tracker_wrapper_not_added_when_tracking_disabled() {
+		// Disable tracking.
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		$this->assertFalse(
+			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
+			'Tracker send event wrapper should be scheduled'
+		);
+	}
+
+	/**
+	 * Test that wrapper actions execute without fatal errors even when tracking is disabled.
+	 */
+	public function test_tracker_wrapper_removed_added_when_tracking_disabled() {
+		// Enable tracking.
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$this->assertTrue(
+			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
+			'Tracker send event wrapper should be scheduled'
+		);
+
+		// Disable tracking.
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		$this->assertFalse(
+			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
+			'Tracker send event wrapper should not be scheduled'
+		);
+	}
+
+	/**
+	 * Helper method to clear all scheduled actions.
+	 */
+	private function clear_scheduled_actions() {
+		$actions = array(
+			// Wrapper actions
+			'woocommerce_tracker_send_event_wrapper',
+			'wc_admin_daily_wrapper',
+			'generate_category_lookup_table_wrapper',
+			'woocommerce_cleanup_rate_limits_wrapper',
+			// Core recurring actions
+			'woocommerce_scheduled_sales',
+			'woocommerce_cleanup_personal_data',
+			'woocommerce_cleanup_logs',
+			'woocommerce_cleanup_sessions',
+			'woocommerce_geoip_updater',
+		);
+
+		foreach ( $actions as $action ) {
+			while ( as_has_scheduled_action( $action ) ) {
+				as_unschedule_all_actions( $action );
+			}
+		}
+	}
+}
