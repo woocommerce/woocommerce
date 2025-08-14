@@ -184,9 +184,13 @@ export const updateReleaseBranchChangelogs = async (
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
 		try {
-			addLabelsToIssue( options, pullRequest.number, [ 'Release' ] );
+			await addLabelsToIssue( options, pullRequest.number, [
+				'Release',
+			] );
 		} catch {
-			// Not a critical error.
+			Logger.warn(
+				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
 		}
 
 		return {
@@ -264,9 +268,13 @@ export const updateBranchChangelog = async (
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
 		try {
-			addLabelsToIssue( options, pullRequest.number, [ 'Release' ] );
+			await addLabelsToIssue( options, pullRequest.number, [
+				'Release',
+			] );
 		} catch {
-			// Not a critical error.
+			Logger.warn(
+				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
 		}
 
 		return pullRequest.number;
