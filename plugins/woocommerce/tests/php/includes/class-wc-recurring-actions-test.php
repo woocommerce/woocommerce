@@ -108,7 +108,7 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	/**
 	 * Test that tracker wrapper is removed when tracking is disabled and added back when tracking is enabled.
 	 */
-	public function test_tracker_wrapper_removed_added_when_tracking_disabled() {
+	public function test_tracker_wrapper_added_then_removed_on_tracking_toggle() {
 		// Ensure we transition from "no" -> "yes" so update_option hooks fire.
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		// Enable tracking.
@@ -142,9 +142,7 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $actions as $action ) {
-			while ( as_has_scheduled_action( $action ) ) {
-				as_unschedule_all_actions( $action );
-			}
+			as_unschedule_all_actions( $action );
 		}
 	}
 }
