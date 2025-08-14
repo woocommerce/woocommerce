@@ -22,18 +22,16 @@ export const PreviewSaveGuard = () => {
 	const guard = async ( event ) => {
 		const target = event.target;
 
-		// Find the triggering element (the preview button).
+		// Find the triggering element by the selector and early return if not found.
 		const triggerEl = target?.closest( selector );
 		if ( ! triggerEl ) {
 			return;
 		}
 
-		// Check if there are any unsaved changes using the editor data store.
 		const editorStoreInstance = select( editorStore );
 		const isDirty = editorStoreInstance?.isEditedPostDirty?.();
 
 		if ( ! isDirty ) {
-			// If the post is saved, do nothing and let the preview open normally.
 			return;
 		}
 
@@ -42,22 +40,21 @@ export const PreviewSaveGuard = () => {
 		event.stopPropagation();
 		event.stopImmediatePropagation();
 
-		// Dispatch a notice to inform the user they need to save first.
 		dispatch( noticesStore ).createNotice(
-			'info',
+			'warning',
 			__(
 				'You have unsaved changes. Please save the post before previewing.',
 				'woocommerce'
 			),
 			{
-				type: 'snackbar',
+				context: 'email-editor',
 				isDismissible: true,
 			}
 		);
 	};
 
 	/**
-	 * Handles keydown events for the preview button.
+	 * Handles keydown events for the preview button for Enter and Space keys.
 	 *
 	 * @param {KeyboardEvent} event The triggered event.
 	 */
@@ -65,7 +62,6 @@ export const PreviewSaveGuard = () => {
 		( event ) => {
 			try {
 				const target = event.target;
-				// Trigger on 'Enter' or 'Space' keys if the target is the preview button.
 				if (
 					( event.key === 'Enter' || event.key === ' ' ) &&
 					target?.closest( selector )
@@ -80,7 +76,6 @@ export const PreviewSaveGuard = () => {
 		[ selector ]
 	);
 
-	// The `useEffect` hook manages the lifecycle of the event listeners.
 	useEffect( () => {
 		// Add event listeners when the component is mounted.
 		// We use the 'capture' phase to ensure our handler runs before the default React handler.
@@ -97,6 +92,5 @@ export const PreviewSaveGuard = () => {
 		};
 	}, [ keydownHandler ] );
 
-	// The component doesn't need to render any UI, its functionality is purely in the `useEffect` hook.
 	return null;
 };
