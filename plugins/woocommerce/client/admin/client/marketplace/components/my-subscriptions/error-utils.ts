@@ -45,7 +45,9 @@ function getConnectionErrorMessage(
 
 	if ( code === 'maxed_out' ) {
 		const sites = error?.data?.data?.sites_list || [];
-		const domainCount = error?.data?.data?.total_domains ?? sites.length;
+		const domainCount = Number(
+			error?.data?.data?.total_domains ?? sites.length
+		);
 
 		if ( domainCount >= 2 ) {
 			const first = sites[ 0 ] || '';
