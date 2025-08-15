@@ -214,7 +214,7 @@ class PaymentsProviders {
 	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( ! is_null( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
+			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
 				return $this->payment_gateways_for_display_memo[ $country_code ];
 			}
 
@@ -246,7 +246,7 @@ class PaymentsProviders {
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( ! is_null( $this->payment_gateways_memo[ $country_code ] ) ) {
+		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
 			return $this->payment_gateways_memo[ $country_code ];
 		}
 
