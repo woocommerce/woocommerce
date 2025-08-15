@@ -219,7 +219,16 @@ class QuantityLimitsTests extends TestCase {
 		$quantity_limits      = new QuantityLimits();
 		$limits_when_disabled = $quantity_limits->get_add_to_cart_limits( $product );
 
-		/** Filter the maximum quantity to allow extensions to override the default value for testing purposes. */
+		/**
+		 * Filter the maximum quantity to allow extensions to override the default value for testing purposes.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param mixed $value The value being filtered.
+		 * @param \WC_Product $product The product object.
+		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
+		 * @return mixed
+		 */
 		$expected_max = apply_filters( 'woocommerce_store_api_product_quantity_maximum', 9999, $product );
 		$this->assertEquals( $expected_max, $limits_when_disabled['maximum'], 'When stock management is globally disabled, maximum should ignore product-level manage_stock/stock and use the default maximum' );
 		$this->assertEquals( 1, $limits_when_disabled['minimum'], 'Minimum should remain default when stock management is globally disabled' );
