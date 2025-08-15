@@ -364,6 +364,10 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * @return array|null The API response body, or null if the request fails.
 	 */
 	private function send_transact_api_request( $method, $endpoint, $request_body ) {
+		if ( 'GET' === $method ) {
+			$endpoint .= '?' . http_build_query( $request_body );
+		}
+
 		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
 			$endpoint,
 			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
@@ -372,7 +376,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 				'method'  => $method,
 				'timeout' => 60,
 			),
-			'GET' === $method ? $request_body : wp_json_encode( $request_body ),
+			'GET' === $method ? null : wp_json_encode( $request_body ),
 			'wpcom'
 		);
 
