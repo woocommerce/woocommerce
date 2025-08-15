@@ -2,6 +2,7 @@ export { default as BlockErrorBoundary } from './block-error-boundary';
 export * from './button';
 export * from './cart-checkout';
 export * from './country-input';
+export * from './delayed-content-with-skeleton';
 export * from './drawer';
 export { default as FilterElementLabel } from './filter-element-label';
 export { default as FilterPlaceholder } from './filter-placeholder';

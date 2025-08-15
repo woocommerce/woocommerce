@@ -376,7 +376,7 @@ class ProductCollectionPage {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
-		await this.editor.canvas.locator( 'body' ).click();
+		await this.editor.setContent( '' );
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		// If product picker is available, choose a product.

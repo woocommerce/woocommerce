@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Migrate the product price block to fetch product data via the `@wordpress/core-data` package.

@@ -60,6 +60,10 @@ const productButtonStore = {
 				( item ) => item.id === state.productId
 			);
 
+			if ( products.length === 0 ) {
+				return 0;
+			}
+
 			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
 				return products[ 0 ]?.quantity || 0;
@@ -193,6 +197,7 @@ const productButtonStore = {
 				addToCartWithOptionsState?.isFormValid
 			) {
 				context.hasPressedButton = true;
+				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}
 		},
 	},
@@ -217,9 +222,7 @@ const productButtonStore = {
 			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
-				context.animationStatus === AnimationStatus.IDLE &&
-				( addToCartWithOptionsState?.isFormValid === undefined ||
-					addToCartWithOptionsState?.isFormValid )
+				context.animationStatus === AnimationStatus.IDLE
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;
 			}

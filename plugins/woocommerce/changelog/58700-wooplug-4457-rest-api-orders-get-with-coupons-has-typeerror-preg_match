@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fixes a bug where listing Woo orders on the REST API will crash if the order has a coupon with a malformed date.
+

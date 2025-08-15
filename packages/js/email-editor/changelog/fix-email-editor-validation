@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Email Editor: validation now correctly runs when both the email body and its template are modified, preventing silent skips of template-only edits.

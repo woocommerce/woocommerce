@@ -25,6 +25,7 @@ $dialog-padding: 20px;
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
 		flex-shrink: 0;
+		min-width: 100%;
 		max-width: 100%;
 		display: flex;
 		align-items: center;
@@ -40,6 +41,7 @@ $dialog-padding: 20px;
 	.wc-block-components-product-image.wc-block-components-product-image {
 		margin: 0;
 		height: 100%;
+		width: 100%;
 
 		:where(a) {
 			height: 100%;
@@ -100,6 +102,37 @@ $dialog-padding: 20px;
 		> * {
 			margin-left: unset;
 			margin-right: unset;
+		}
+	}
+
+	:where(.wc-block-next-previous-buttons) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		height: 100%;
+
+		&:where(.alignleft) {
+			justify-content: flex-start;
+			gap: 0;
+		}
+
+		&:where(.alignright) {
+			justify-content: flex-end;
+			gap: 0;
+		}
+
+		&:where(.aligncenter) {
+			justify-content: center;
+			gap: 0;
+		}
+
+		&:where(.aligntop) {
+			align-items: flex-start;
+		}
+
+		&:where(.alignbottom) {
+			align-items: flex-end;
 		}
 	}
 }
