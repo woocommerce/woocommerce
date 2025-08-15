@@ -437,7 +437,7 @@ class WC_Brands {
                 'name'  => $brands[0]->name,
             );
             if ( $brand_thumbnail ) {
-                $markup['brand']['image'] = $brand_thumbnail;
+                $markup['brand']['logo'] = $brand_thumbnail;
             }
 		}
 
