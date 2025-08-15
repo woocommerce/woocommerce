@@ -42,16 +42,19 @@ export const useValidation = (): ValidationData => {
 		getValidationError: (
 			validationErrorId: string
 		) => ValidationContextError;
-	} = useSelect( ( select ) => {
-		const store = select( validationStore );
-		return {
-			hasValidationErrors: store.hasValidationErrors(),
-			getValidationError: ( validationErrorId: string ) =>
-				store.getValidationError(
-					`${ prefix }-${ validationErrorId }`
-				),
-		};
-	}, [] );
+	} = useSelect(
+		( select ) => {
+			const store = select( validationStore );
+			return {
+				hasValidationErrors: store.hasValidationErrors(),
+				getValidationError: ( validationErrorId: string ) =>
+					store.getValidationError(
+						`${ prefix }-${ validationErrorId }`
+					),
+			};
+		},
+		[ prefix ]
+	);
 
 	const clearValidationErrorCallback = useCallback(
 		( validationErrorId: string ) =>
