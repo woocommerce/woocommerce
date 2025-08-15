@@ -1410,14 +1410,11 @@ final class WooCommerce {
 		}
 		try {
 			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
-			if ( ! class_exists( 'WC_Tracker' ) ) {
-				wc_get_logger()->warning( 'WC_Tracker class not found; skipping tracker send.', array( 'source' => 'woocommerce-scheduled-actions' ) );
-				return;
+			if ( class_exists( WC_Tracker::class ) ) {
+				WC_Tracker::init();
 			}
-			WC_Tracker::init();
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error( 'Error initializing WC_Tracker: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
-			return;
 		}
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_tracker_send_event' );
@@ -1433,12 +1430,9 @@ final class WooCommerce {
 		try {
 			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\Events::class ) ) {
 				\Automattic\WooCommerce\Internal\Admin\Events::instance();
-			} else {
-				return;
 			}
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error( 'Error initializing wc_admin_daily: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
-			return;
 		}
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'wc_admin_daily' );
@@ -1455,11 +1449,11 @@ final class WooCommerce {
 			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
 				\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();
 			}
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'generate_category_lookup_table' );
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
 			wc_get_logger()->error( 'Error in category lookup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
 		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'generate_category_lookup_table' );
 	}
 
 	/**
@@ -1471,12 +1465,14 @@ final class WooCommerce {
 	public function add_woocommerce_cleanup_rate_limits_wrapper() {
 		try {
 			include_once WC_ABSPATH . 'includes/class-wc-rate-limiter.php';
-			WC_Rate_Limiter::init();
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'woocommerce_cleanup_rate_limits' );
-		} catch ( Exception $e ) {
+			if ( class_exists( WC_Rate_Limiter::class ) ) {
+				WC_Rate_Limiter::init();
+			}
+		} catch ( Throwable $e ) {
 			wc_get_logger()->error( 'Error in rate limiter cleanup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
 		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_cleanup_rate_limits' );
 	}
 
 	/**
