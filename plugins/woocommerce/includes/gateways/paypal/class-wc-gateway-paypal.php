@@ -153,8 +153,27 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
 		add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
 
-		// Transact merchant and provider onboarding.
-		$this->maybe_onboard_with_transact();
+		// Hook for plugin upgrades.
+		add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
+	}
+
+	/**
+	 * Handle onboarding on plugin upgrade.
+	 *
+	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
+	 * @param array       $options Array of bulk item update data.
+	 *
+	 * @return void
+	 */
+	public function maybe_onboard_on_upgrade( $upgrader_object, $options ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
+			foreach ( $options['plugins'] as $plugin ) {
+				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
+					$this->maybe_onboard_with_transact();
+					break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -163,8 +182,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	private function maybe_onboard_with_transact() {
-		// Limit onboarding trigger to when an admin visits wp-admin.
 		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		// Do not run if PayPal Standard is not enabled.
+		if ( ! $this->should_load() ) {
 			return;
 		}
 
@@ -240,6 +263,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				self::$log = wc_get_logger();
 			}
 			self::$log->clear( self::ID );
+		}
+
+		// Trigger onboarding when settings are saved.
+		if ( $saved ) {
+			$this->maybe_onboard_with_transact();
 		}
 
 		return $saved;
@@ -683,6 +711,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function should_use_orders_v2() {
+		// If the gateway is not enabled, bail early.
+		if ( ! $this->should_load() ) {
+			return false;
+		}
+
 		/**
 		 * Filters whether the gateway should use Orders v2 API.
 		 *
@@ -701,13 +734,18 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return false;
 		}
 
+		// If the gateway is not onboarded, bail early.
+		if ( ! $this->get_option( 'transact_onboarding_complete' ) ) {
+			return false;
+		}
+
 		// We need a Jet be able to send authenticated requests to the proxy.
 		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
 		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
 			return false;
 		}
 
-		// We need the merchant to be onboarded to Transact to be able to use the proxy.
+		// We need merchant and provider accounts with Transact to be able to use the proxy.
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
 		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
 		$merchant_account_data    = $transact_account_manager->get_merchant_account_data();
