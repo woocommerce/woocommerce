@@ -207,7 +207,8 @@ module.exports = function ( grunt ) {
 						dest: '<%= dirs.cssDest %>/photoswipe/',
 					},
 					{
-						src: '<%= dirs.css %>/photoswipe/default-skin/*.min.css',
+						src:
+							'<%= dirs.css %>/photoswipe/default-skin/*.min.css',
 						dest: '<%= dirs.cssDest %>/photoswipe/default-skin/',
 					},
 				],
@@ -247,10 +248,7 @@ module.exports = function ( grunt ) {
 					{
 						expand: true,
 						flatten: true,
-						src: [
-							'node_modules/sourcebuster/dist/sourcebuster*',
-							'node_modules/sourcebuster/LICENSE',
-						],
+						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
 						dest: '<%= dirs.jsDest %>/sourcebuster/',
 					},
 				],
