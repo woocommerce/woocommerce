@@ -380,7 +380,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count' ), true ) ) {
+			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count', 'variations' ), true ) ) {
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id' );
 			} else {
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
