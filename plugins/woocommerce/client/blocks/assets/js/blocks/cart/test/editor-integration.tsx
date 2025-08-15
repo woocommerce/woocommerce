@@ -167,17 +167,18 @@ describe( 'Cart block editor integration', () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor.
-		await waitFor( () => {
-			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
-		} );
+		expect(
+			await screen.findByLabelText( /^Block: Cart$/i )
+		).toBeVisible();
 
 		// Navigate to the Filled Cart block first
 		await selectBlock( /^Block: Filled Cart$/i );
 
 		// Verify Product Collection block is present in the Cart Items
-		expect(
-			await screen.findByLabelText( /^Block: Cart$/i )
-		).toBeVisible();
+		const productCollection = await screen.findByLabelText(
+			/^Block: Product Collection$/i
+		);
+		expect( productCollection ).toBeVisible();
 	} );
 
 	it( 'shows the cart preview in the editor', async () => {
