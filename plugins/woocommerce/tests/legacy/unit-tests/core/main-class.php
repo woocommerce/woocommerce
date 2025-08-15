@@ -41,6 +41,16 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that `version_main` is the same or ahead of `version`.
+	 *
+	 * @since 10.2.0
+	 */
+	public function test_version_method() {
+		$this->assertTrue( version_compare( $this->wc->version(), $this->wc->version, '>=' ) );
+		$this->assertTrue( version_compare( $this->wc->version( true ), $this->wc->version, '=' ) );
+	}
+
+	/**
 	 * Test that all WC constants are set.
 	 *
 	 * @since 2.2
