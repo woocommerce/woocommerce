@@ -27,7 +27,7 @@ class Settings_Controller {
 	/**
 	 * Allowed iframe style handles.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	private array $allowed_iframe_style_handles = array();
 

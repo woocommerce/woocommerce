@@ -11,9 +11,14 @@ import { store as editorStore } from '@wordpress/editor';
  */
 import { EmailEditorSettings } from '../store';
 
+/**
+ * Returns a ref callback to be attached to the editor content element (inside the iframe).
+ * When attached, it removes non-email, non-core stylesheets from the iframe and installs placeholders
+ * to prevent Gutenberg's style-compat feature from cloning them back.
+ */
 export const useFilterEditorContentStylesheets = () => {
 	const contentRef = useRef( null );
-	const [ refUpdateIndex, forceUpdate ] = useState( 0 );
+	const [ refRevision, forceUpdate ] = useState( 0 );
 
 	const handleRefChange = useCallback(
 		( ref: Element ) => {
@@ -44,6 +49,7 @@ export const useFilterEditorContentStylesheets = () => {
 				}
 				const stylesheetId = stylesheet.ownerNode.getAttribute( 'id' );
 				const shouldRemove =
+					stylesheetId &&
 					! allowedIframeStyleHandles.includes( stylesheetId );
 
 				return applyFilters(
@@ -65,11 +71,11 @@ export const useFilterEditorContentStylesheets = () => {
 
 			// Create a placeholder style element to ensure the stylesheet will not be cloned over to the iframe by Gutenberg's style compatibility feature.
 			// See https://github.com/WordPress/gutenberg/blob/48ccf3317ef0f18f8ff38e8da748aa62ca3f11cb/packages/block-editor/src/components/iframe/index.js#L184-L186.
-			const stylePlaceholder = ownerDocument.createElement( 'stlye' );
+			const stylePlaceholder = ownerDocument.createElement( 'style' );
 			stylePlaceholder.id = id;
 			ownerDocument.head.appendChild( stylePlaceholder );
 		} );
-	}, [ allowedIframeStyleHandles, refUpdateIndex ] );
+	}, [ allowedIframeStyleHandles, refRevision ] );
 
 	return handleRefChange;
 };
