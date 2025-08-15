@@ -18,7 +18,7 @@ class AddToCartWithOptionsVariationSelectorAttributeNameMock extends VariationSe
 	 */
 	public function __construct() {
 		parent::__construct(
-			Package::container()->get( API::class ),
+			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class ),
 			new IntegrationRegistry(),
 		);
