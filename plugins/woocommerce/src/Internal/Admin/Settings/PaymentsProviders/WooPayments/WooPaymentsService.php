@@ -1160,11 +1160,9 @@ class WooPaymentsService {
 		// Add the user locale to the account session data to allow for localized KYC sessions.
 		$response['locale'] = $this->proxy->call_function( 'get_user_locale' );
 
-		// For sanity, make sure the test account step is completed if not already,
+		// For sanity, make sure the test account step is marked as completed, if not already,
 		// since we are doing live account KYC.
-		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, );
-		}
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
 
 		// Record an event for the KYC session being created.
 		$event_props = array(
