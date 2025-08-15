@@ -14,13 +14,15 @@ import {
  */
 import { Edit, Save } from './edit';
 import metadata from './block.json';
-import crossSells from '../../../product-collection/collections/cross-sells';
+import crossSells, {
+	cartAttributes,
+} from '../../../product-collection/collections/cross-sells';
 
 export const createCrossSellsProductCollection = () => {
 	return createBlock(
 		'woocommerce/product-collection',
 		{
-			...crossSells.attributes,
+			...cartAttributes,
 			collection: 'woocommerce/product-collection/cross-sells',
 		},
 		createBlocksFromInnerBlocksTemplate( crossSells.innerBlocks )
