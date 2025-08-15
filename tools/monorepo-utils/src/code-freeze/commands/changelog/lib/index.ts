@@ -12,7 +12,10 @@ import { readFileSync } from 'fs';
  */
 import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
-import { createPullRequest } from '../../../../core/github/repo';
+import {
+	addLabelsToIssue,
+	createPullRequest,
+} from '../../../../core/github/repo';
 import { Options } from '../types';
 import { getToday } from '../../get-version/lib';
 
@@ -179,6 +182,17 @@ export const updateReleaseBranchChangelogs = async (
 			base: releaseBranch,
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
+
+		try {
+			await addLabelsToIssue( options, pullRequest.number, [
+				'Release',
+			] );
+		} catch {
+			Logger.warn(
+				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
 		return {
 			deletionCommitHash: deletionCommitHash.trim(),
 			prNumber: pullRequest.number,
@@ -197,13 +211,14 @@ export const updateReleaseBranchChangelogs = async (
  * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ * @return {number} Update PR number.
  */
 export const updateBranchChangelog = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranch: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
-): Promise< void > => {
+): Promise< number > => {
 	const { owner, name, version } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
@@ -251,6 +266,18 @@ export const updateBranchChangelog = async (
 			base: releaseBranch,
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
+
+		try {
+			await addLabelsToIssue( options, pullRequest.number, [
+				'Release',
+			] );
+		} catch {
+			Logger.warn(
+				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		return pullRequest.number;
 	} catch ( e ) {
 		if ( e.message.includes( `No commits between ${ releaseBranch }` ) ) {
 			Logger.notice(
@@ -281,7 +308,7 @@ export const updateTrunkChangelog = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
-): Promise< void > => {
+): Promise< number > => {
 	return await updateBranchChangelog(
 		options,
 		tmpRepoPath,
