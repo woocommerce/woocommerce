@@ -60,7 +60,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 *
 	 * @param WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
-	public function __construct( $gateway ) {
+	public function __construct( WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
 	}
 
