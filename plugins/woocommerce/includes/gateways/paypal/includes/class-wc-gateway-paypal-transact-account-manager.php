@@ -7,8 +7,6 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
