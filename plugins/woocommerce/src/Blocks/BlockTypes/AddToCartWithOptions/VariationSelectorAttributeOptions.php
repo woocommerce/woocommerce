@@ -175,8 +175,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 							'option' => $attribute_term,
 						),
 					),
-				),
-				$attribute_term['label']
+				)
 			);
 
 			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . $attribute_term['label'] . '</label>';
