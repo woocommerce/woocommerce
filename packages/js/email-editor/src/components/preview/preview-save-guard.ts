@@ -29,7 +29,7 @@ export const PreviewSaveGuard = () => {
 		}
 
 		const editorStoreInstance = select( editorStore );
-		const isDirty = editorStoreInstance?.isEditedPostDirty?.();
+		const isDirty = editorStoreInstance?.isEditedPostDirty();
 
 		if ( ! isDirty ) {
 			return;
