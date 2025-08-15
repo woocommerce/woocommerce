@@ -1399,6 +1399,19 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Unschedule unwrapped actions that may have been added to the site.
+	 *
+	 * @return void
+	 */
+	public function unschedule_unwrapped_actions() {
+		// Unschedule the unwrapped actions.
+		as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
+		as_unschedule_all_actions( 'wc_admin_daily' );
+		as_unschedule_all_actions( 'generate_category_lookup_table' );
+		as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
+	}
+
+	/**
 	 * Wrapper for the `woocommerce_tracker_send_event` action. This prevents the event failing when the class is not loaded.
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
@@ -1479,6 +1492,9 @@ final class WooCommerce {
 	 * Register recurring actions.
 	 */
 	public function register_recurring_actions() {
+		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
+		$this->unschedule_unwrapped_actions();
+
 		// Check if Action Scheduler is available.
 		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
