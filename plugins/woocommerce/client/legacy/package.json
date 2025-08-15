@@ -68,21 +68,6 @@
 				"dependencyOutputs"
 			]
 		},
-		"watch:build:project:assets": {
-			"command": "grunt assets",
-			"clean": "if-file-deleted",
-			"files": [
-				"Gruntfile.js",
-				"js/**/*.js",
-				"css/**/*.scss"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [

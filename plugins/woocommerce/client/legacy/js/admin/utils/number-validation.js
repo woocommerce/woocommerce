@@ -13,7 +13,7 @@
  */
 function isValidFormattedNumber( value, config ) {
 	// Check if value is a string and config is provided
-	if ( ! value || typeof value !== 'string' || ! config ) {
+	if ( ! value || typeof value !== 'string' || ! config || typeof config !== 'object' ) {
 		return false;
 	}
 
@@ -48,7 +48,7 @@ function isValidFormattedNumber( value, config ) {
 
 	// Check if all matches are valid numbers with the correct separators
 	return matches.every( ( num ) => {
-		if ( ! num[ 0 ].match( /\d/ ) ) {
+		if ( ! num || num.length === 0 || ! num[ 0 ].match( /\d/ ) ) {
 			return false; // If the first character is not a digit, it's invalid
 		}
 		// Extract the separators used in the number
@@ -72,15 +72,15 @@ function isValidFormattedNumber( value, config ) {
 		}
 
 		if ( usedDecimalSeparator.trim() !== decimalSeparator.trim() ) {
-			// Check if the last separator may be a thousand separator by checking if the last group has 3 digits
-			const lastGroup = num.split( usedDecimalSeparator ).pop();
-			if ( lastGroup.length !== 3 ) {
-				return false; // Invalid separator used
-			}
-			// If the last group has 3 digits, it may be a valid thousand separator
-			if ( usedDecimalSeparator.trim() !== thousandSeparator.trim() ) {
-				return false; // Invalid separator used
-			}
+			// If the last separator is not the decimal separator, it must be the thousand separator
+            if ( usedDecimalSeparator.trim() !== thousandSeparator.trim() ) {
+                return false; // Invalid separator used
+            }
+            // Check if the last group has exactly 3 digits for thousand separator
+            const lastGroup = num.split( usedDecimalSeparator ).pop();
+            if ( ! lastGroup || lastGroup.length !== 3 || ! /^\d{3}$/.test( lastGroup ) ) {
+                return false; // Invalid thousand separator format
+            }
 		}
 
 		return true; // Valid decimal.
