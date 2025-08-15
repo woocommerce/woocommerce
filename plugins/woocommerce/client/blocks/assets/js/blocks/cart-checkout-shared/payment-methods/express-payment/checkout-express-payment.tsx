@@ -99,7 +99,7 @@ const CheckoutExpressPayment = () => {
 	// or when the express payment methods are not initialized
 	const showSkeleton =
 		! isExpressPaymentMethodActive &&
-		( isCalculating || hasRegisteredNotInitializedExpressPaymentMethods );
+		( isCalculating || hasRegisteredNotInitializedExpressPayments );
 
 	return (
 		<>
@@ -138,12 +138,7 @@ const CheckoutExpressPayment = () => {
 					<StoreNoticesContainer
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
-<<<<<<< HEAD
-					{ isCalculating ||
-					hasRegisteredNotInitializedExpressPayments ? (
-=======
 					{ showSkeleton ? (
->>>>>>> 4814166cde (Prevent skeleton display when express payment methods are active (#60378))
 						<ul className="wc-block-components-express-payment__event-buttons">
 							<li>
 								<Skeleton height="48px" />

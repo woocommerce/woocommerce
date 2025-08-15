@@ -216,7 +216,6 @@ describe( 'CheckoutExpressPayment', () => {
 	} );
 
 	describe( 'Processing states', () => {
-<<<<<<< HEAD
 		it( 'should add accessibility attributes when isProcessing', () => {
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -238,25 +237,6 @@ describe( 'CheckoutExpressPayment', () => {
 					},
 				} );
 
-=======
-		it( 'should add conditional accessibility attributes when isProcessing', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: true,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
->>>>>>> 4814166cde (Prevent skeleton display when express payment methods are active (#60378))
 			render( <CheckoutExpressPayment /> );
 
 			const expressPaymentContainer = document.querySelector(
@@ -284,8 +264,7 @@ describe( 'CheckoutExpressPayment', () => {
 			);
 		} );
 
-<<<<<<< HEAD
-		it( 'should add disabled class when express payment method is active', () => {
+		it( 'should add conditional accessibility attributes when express payment method is active', () => {
 			mockUseSelect
 				.mockReturnValueOnce( {
 					isCalculating: false,
@@ -305,25 +284,6 @@ describe( 'CheckoutExpressPayment', () => {
 						stripe: { name: 'stripe' },
 					},
 				} );
-=======
-		it( 'should add conditional accessibility attributes when express payment method is active', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: true,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
->>>>>>> 4814166cde (Prevent skeleton display when express payment methods are active (#60378))
 
 			render( <CheckoutExpressPayment /> );
 
@@ -358,22 +318,25 @@ describe( 'CheckoutExpressPayment', () => {
 		} );
 
 		it( 'should not have conditional accessibility attributes when not processing', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: false,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
+			mockUseSelect
+				.mockReturnValueOnce( {
+					isCalculating: false,
+					isProcessing: false,
+					isAfterProcessing: false,
+					isBeforeProcessing: false,
+					isComplete: false,
+					hasError: false,
+				} )
+				.mockReturnValueOnce( {
+					availableExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+					},
+					expressPaymentMethodsInitialized: true,
+					isExpressPaymentMethodActive: false,
+					registeredExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+					},
+				} );
 
 			render( <CheckoutExpressPayment /> );
 
@@ -440,7 +403,6 @@ describe( 'CheckoutExpressPayment', () => {
 			expect( titleSkeleton ).toHaveAttribute( 'data-height', '18px' );
 		} );
 
-<<<<<<< HEAD
 		it( 'should render skeleton buttons when calculating', () => {
 			mockUseSelect
 				.mockReturnValueOnce( {
@@ -461,25 +423,6 @@ describe( 'CheckoutExpressPayment', () => {
 						stripe: { name: 'stripe' },
 					},
 				} );
-=======
-		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
->>>>>>> 4814166cde (Prevent skeleton display when express payment methods are active (#60378))
 
 			render( <CheckoutExpressPayment /> );
 
@@ -493,26 +436,26 @@ describe( 'CheckoutExpressPayment', () => {
 				screen.queryByTestId( 'express-payment-methods' )
 			).not.toBeInTheDocument();
 		} );
-<<<<<<< HEAD
-=======
-
 		it( 'should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: true,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-				},
-			} );
+			mockUseSelect
+				.mockReturnValueOnce( {
+					isCalculating: true,
+					isProcessing: false,
+					isAfterProcessing: false,
+					isBeforeProcessing: false,
+					isComplete: false,
+					hasError: false,
+				} )
+				.mockReturnValueOnce( {
+					availableExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+					},
+					expressPaymentMethodsInitialized: true,
+					isExpressPaymentMethodActive: true,
+					registeredExpressPaymentMethods: {
+						stripe: { name: 'stripe' },
+					},
+				} );
 
 			render( <CheckoutExpressPayment /> );
 
@@ -525,37 +468,5 @@ describe( 'CheckoutExpressPayment', () => {
 				screen.queryByTestId( 'express-payment-methods' )
 			).toBeInTheDocument();
 		} );
-
-		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
-			mockUseSelect.mockReturnValueOnce( {
-				isCalculating: true,
-				isProcessing: false,
-				isAfterProcessing: false,
-				isBeforeProcessing: false,
-				isComplete: false,
-				hasError: false,
-				availableExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-					paypal: { name: 'paypal' },
-					applepay: { name: 'applepay' },
-				},
-				expressPaymentMethodsInitialized: true,
-				isExpressPaymentMethodActive: false,
-				registeredExpressPaymentMethods: {
-					stripe: { name: 'stripe' },
-					paypal: { name: 'paypal' },
-					applepay: { name: 'applepay' },
-				},
-			} );
-
-			render( <CheckoutExpressPayment /> );
-
-			const buttonSkeletons = screen.getAllByLabelText(
-				'Loading express payment method…'
-			);
-
-			expect( buttonSkeletons ).toHaveLength( 3 ); // 3 skeleton buttons
-		} );
->>>>>>> 4814166cde (Prevent skeleton display when express payment methods are active (#60378))
 	} );
 } );
