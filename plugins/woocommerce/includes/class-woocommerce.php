@@ -232,6 +232,10 @@ final class WooCommerce {
 		return class_exists( 'WC_Legacy_REST_API_Plugin', false );
 	}
 
+	public function version( $include_prerelease_info = false ) {
+		return $include_prerelease_info ? $this->version : preg_replace( '/-.*/', '', $this->version );
+	}
+
 	/**
 	 * WooCommerce Constructor.
 	 */
