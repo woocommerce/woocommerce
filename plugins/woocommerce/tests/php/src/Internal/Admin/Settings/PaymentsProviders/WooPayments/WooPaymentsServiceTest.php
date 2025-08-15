@@ -3754,6 +3754,42 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => false,
 				),
 			),
+			'test_account - stored started with valid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'test_account - stored started, failed, and completed with valid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED => $current_time - 5,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
 			'business_verification - clean slate'          => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
@@ -3796,6 +3832,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'business_verification - nothing stored with valid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
 			'business_verification - nothing stored with invalid test account, met requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
@@ -3808,6 +3859,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_account'       => true,
 					'has_valid_account' => false,
 					'test_account'      => true,
+				),
+			),
+			'business_verification - nothing stored with invalid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
 				),
 			),
 			'business_verification - nothing stored with invalid live account, unmet requirements' => array(
@@ -3930,6 +3996,40 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'business_verification - stored started with valid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored started with valid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
 			'business_verification - stored started with invalid test account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
@@ -3960,6 +4060,40 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_account'       => true,
 					'has_valid_account' => false,
 					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started with invalid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored started with invalid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
 				),
 			),
 			'business_verification - stored started with invalid live account, unmet requirements' => array(
@@ -4282,6 +4416,40 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'business_verification - stored completed with valid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored completed with valid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
 			'business_verification - stored completed with invalid test account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
@@ -4312,6 +4480,40 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_account'       => true,
 					'has_valid_account' => false,
 					'test_account'      => true,
+				),
+			),
+			'business_verification - stored completed with invalid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored completed with invalid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
 				),
 			),
 			'business_verification - stored completed with invalid live account, unmet requirements' => array(
@@ -4446,6 +4648,42 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'test_account'      => true,
 				),
 			),
+			'business_verification - stored started and completed with valid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored started and completed with valid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => true,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
 			'business_verification - stored started and completed with invalid test account, unmet requirements' => array(
 				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
@@ -4478,6 +4716,42 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					'has_account'       => true,
 					'has_valid_account' => false,
 					'test_account'      => true,
+				),
+			),
+			'business_verification - stored started and completed with invalid sandbox account, unmet requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => false,
+					'has_connected_owner' => false,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
+				),
+			),
+			'business_verification - stored started and completed with invalid sandbox account, met requirements' => array(
+				WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION,
+				WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED,
+				array(
+					WooPaymentsService::ONBOARDING_STEP_STATUS_STARTED => $current_time - 10,
+					WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED => $current_time,
+				),
+				array(
+					'is_store_connected'  => true,
+					'has_connected_owner' => true,
+				),
+				array(
+					'has_account'       => true,
+					'has_valid_account' => false,
+					'test_account'      => false,
+					'sandbox_account'   => true,
 				),
 			),
 			'business_verification - stored started and completed with invalid live account, unmet requirements' => array(
