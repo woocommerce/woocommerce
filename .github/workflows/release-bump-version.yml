@@ -170,7 +170,8 @@ jobs:
             --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
-            --head ${branch_name}
+            --head ${branch_name} \
+            --label Release
 
       - name: Ensure milestone for dev version exists
         if: ${{ inputs.bump-type == 'dev' }}
