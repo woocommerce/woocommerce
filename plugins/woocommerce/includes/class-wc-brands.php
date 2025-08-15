@@ -431,10 +431,14 @@ class WC_Brands {
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.
-			$markup['brand'] = array(
-				'@type' => 'Brand',
-				'name'  => $brands[0]->name,
-			);
+            $brand_thumbnail = wc_get_brand_thumbnail_url( $brands[0]->term_id, 'full' );
+            $markup['brand'] = array(
+                '@type' => 'Brand',
+                'name'  => $brands[0]->name,
+            );
+            if ( $brand_thumbnail ) {
+                $markup['brand']['image'] = $brand_thumbnail;
+            }
 		}
 
 		return $markup;
