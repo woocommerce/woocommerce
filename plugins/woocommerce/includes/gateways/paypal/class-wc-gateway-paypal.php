@@ -91,6 +91,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	private $jetpack_connection_manager;
 
 	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @var bool
+	 */
+	private $transact_onboarding_complete;
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
@@ -110,14 +117,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->title          = $this->get_option( 'title' );
-		$this->description    = $this->get_option( 'description' );
-		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
-		$this->debug          = 'yes' === $this->get_option( 'debug', 'no' );
-		$this->email          = $this->get_option( 'email' );
-		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
-		$this->identity_token = $this->get_option( 'identity_token' );
-		self::$log_enabled    = $this->debug;
+		$this->title                        = $this->get_option( 'title' );
+		$this->description                  = $this->get_option( 'description' );
+		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
+		$this->email                        = $this->get_option( 'email' );
+		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
+		$this->identity_token               = $this->get_option( 'identity_token' );
+		$this->transact_onboarding_complete = 'yes' === $this->get_option( 'transact_onboarding_complete', 'no' );
+		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
@@ -187,7 +195,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// Do not run if PayPal Standard is not enabled.
-		if ( ! $this->should_load() ) {
+		if ( ! $this->enabled ) {
 			return;
 		}
 
@@ -265,7 +273,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			self::$log->clear( self::ID );
 		}
 
-		// Trigger onboarding when settings are saved.
+		// Trigger Transact onboarding when settings are saved.
 		if ( $saved ) {
 			$this->maybe_onboard_with_transact();
 		}
@@ -711,11 +719,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function should_use_orders_v2() {
-		// If the gateway is not enabled, bail early.
-		if ( ! $this->should_load() ) {
-			return false;
-		}
-
 		/**
 		 * Filters whether the gateway should use Orders v2 API.
 		 *
@@ -735,7 +738,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the gateway is not onboarded, bail early.
-		if ( ! $this->get_option( 'transact_onboarding_complete' ) ) {
+		if ( ! $this->is_transact_onboarding_complete() ) {
 			return false;
 		}
 
@@ -781,5 +784,24 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function should_show_legacy_settings() {
 		return ! $this->should_use_orders_v2();
+	}
+
+	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @return bool
+	 */
+	public function is_transact_onboarding_complete() {
+		return $this->transact_onboarding_complete;
+	}
+
+	/**
+	 * Set the Transact onboarding as complete.
+	 *
+	 * @return void
+	 */
+	public function set_transact_onboarding_complete() {
+		$this->update_option( 'transact_onboarding_complete', 'yes' );
+		$this->transact_onboarding_complete = true;
 	}
 }

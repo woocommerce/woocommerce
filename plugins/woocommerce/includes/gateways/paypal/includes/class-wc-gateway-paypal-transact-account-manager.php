@@ -99,6 +99,9 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 				WC_Gateway_Paypal::log( 'Transact merchant onboarding failed.', 'error' );
 				return;
 			}
+
+			// Cache the merchant account data.
+			$this->update_merchant_account_cache( $merchant_account );
 		}
 
 		$provider_account_data = $this->get_provider_account_data();
@@ -108,16 +111,15 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 				WC_Gateway_Paypal::log( 'Transact provider onboarding failed.', 'error' );
 				return;
 			}
+
+			// Cache the provider account data.
+			$this->update_provider_account_cache( $provider_account );
 		}
 
 		// Set an extra flag to indicate that we've completed onboarding,
 		// so we can do inexpensive early returns for checkers like
 		// WC_Gateway_Paypal::should_use_orders_v2().
-		$this->gateway->update_option( 'transact_onboarding_complete', 'yes' );
-
-		// Cache the merchant and provider account data.
-		$this->update_merchant_account_cache( $merchant_account );
-		$this->update_provider_account_cache( $provider_account );
+		$this->gateway->set_transact_onboarding_complete();
 	}
 
 	/**
