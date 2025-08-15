@@ -223,7 +223,7 @@ class WC_Gateway_Paypal_Request {
 			$http_code = wp_remote_retrieve_response_code( $response );
 			$body      = wp_remote_retrieve_body( $response );
 
-			if ( 200 !== $http_code ) {
+			if ( 200 !== $http_code && 201 !== $http_code ) {
 				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 		} catch ( Exception $e ) {
