@@ -2159,9 +2159,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn(
 				array(
 					'status'           => 'complete',
-					// These two are mirror images of each other.
 					'testDrive'        => $account_state['test_account'] ?? false,
-					'isLive'           => ! ( $account_state['test_account'] ?? false ),
+					'isLive'           => ! ( ( $account_state['test_account'] ?? false ) || ( $account_state['sandbox_account'] ?? false ) ),
 					'paymentsEnabled'  => true,
 					'detailsSubmitted' => true,
 				)
