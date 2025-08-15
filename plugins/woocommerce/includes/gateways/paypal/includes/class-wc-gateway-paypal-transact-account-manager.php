@@ -114,6 +114,10 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		// so we can do inexpensive early returns for checkers like
 		// WC_Gateway_Paypal::should_use_orders_v2().
 		$this->gateway->update_option( 'transact_onboarding_complete', 'yes' );
+
+		// Cache the merchant and provider account data.
+		$this->update_merchant_account_cache( $merchant_account );
+		$this->update_provider_account_cache( $provider_account );
 	}
 
 	/**
