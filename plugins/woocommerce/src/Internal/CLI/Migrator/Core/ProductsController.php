@@ -111,7 +111,7 @@ class ProductsController {
 
 		// Get platform components.
 		$fetcher = $this->platform_registry->get_fetcher( $this->parsed_args['platform'] );
-		$mapper  = $this->platform_registry->get_mapper( $this->parsed_args['platform'] );
+		$mapper  = $this->platform_registry->get_mapper( $this->parsed_args['platform'], array( 'fields' => $this->fields_to_process ) );
 
 		// Fetch total count and setup progress tracking.
 		$total_count = $fetcher->fetch_total_count( $this->parsed_args['filters'] );
@@ -279,9 +279,13 @@ class ProductsController {
 			'metafields',
 		);
 
+		$excluded_fields     = array();
+		$explicitly_selected = false;
+
 		if ( isset( $assoc_args['fields'] ) ) {
-			$selected_fields = array_map( 'trim', explode( ',', $assoc_args['fields'] ) );
-			$selected_fields = array_filter( $selected_fields );
+			$explicitly_selected = true;
+			$selected_fields     = array_map( 'trim', explode( ',', $assoc_args['fields'] ) );
+			$selected_fields     = array_filter( $selected_fields );
 
 			$invalid_fields = array_diff( $selected_fields, $default_fields );
 			if ( ! empty( $invalid_fields ) ) {
@@ -294,19 +298,17 @@ class ProductsController {
 				);
 			}
 
-			$fields = array_intersect( $selected_fields, $default_fields );
+			$fields          = array_intersect( $selected_fields, $default_fields );
+			$excluded_fields = array_diff( $default_fields, $fields );
 		} else {
 			$fields = $default_fields;
 		}
 
 		// Handle --exclude-fields argument.
 		if ( isset( $assoc_args['exclude-fields'] ) ) {
-			$exclude_fields = array_map( 'trim', explode( ',', $assoc_args['exclude-fields'] ) );
-			$fields         = array_diff( $fields, $exclude_fields );
-
-			WP_CLI::log(
-				sprintf( 'Excluding fields: %s', implode( ', ', $exclude_fields ) )
-			);
+			$exclude_fields_input = array_map( 'trim', explode( ',', $assoc_args['exclude-fields'] ) );
+			$excluded_fields      = array_merge( $excluded_fields, $exclude_fields_input );
+			$fields               = array_diff( $fields, $exclude_fields_input );
 		}
 
 		if ( empty( $fields ) ) {
@@ -314,8 +316,17 @@ class ProductsController {
 			return array();
 		}
 
-		if ( ! empty( $assoc_args['verbose'] ) ) {
-			WP_CLI::log( sprintf( 'Selected fields for migration: %s', implode( ', ', $fields ) ) );
+		// Log field selection information.
+		if ( $explicitly_selected || isset( $assoc_args['exclude-fields'] ) || ! empty( $assoc_args['verbose'] ) ) {
+			$include_message = sprintf( 'Including fields: %s', implode( ', ', $fields ) );
+			WP_CLI::log( $include_message );
+			wc_get_logger()->info( $include_message, array( 'source' => 'wc-migrator' ) );
+
+			if ( ! empty( $excluded_fields ) ) {
+				$exclude_message = sprintf( 'Excluding fields: %s', implode( ', ', array_unique( $excluded_fields ) ) );
+				WP_CLI::log( $exclude_message );
+				wc_get_logger()->info( $exclude_message, array( 'source' => 'wc-migrator' ) );
+			}
 		}
 
 		return $fields;
