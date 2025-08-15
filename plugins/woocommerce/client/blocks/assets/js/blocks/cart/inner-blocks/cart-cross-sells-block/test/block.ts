@@ -7,7 +7,7 @@ import { registerCoreBlocks } from '@wordpress/block-library';
  * Internal dependencies
  */
 import { createCrossSellsProductCollection } from '../index';
-import crossSells from '../../../../product-collection/collections/cross-sells';
+import { cartAttributes } from '../../../../product-collection/collections/cross-sells';
 import '../../../../../atomic/blocks/product-elements/sale-badge/index';
 import '../../../../../atomic/blocks/product-elements/image/index';
 import '../../../../../atomic/blocks/product-elements/price/index';
@@ -35,13 +35,13 @@ describe( 'createCrossSellsProductCollection transform function', () => {
 
 		// Test that cross-sells attributes are preserved exactly
 		expect( transformedBlock.attributes.displayLayout ).toEqual(
-			crossSells.attributes.displayLayout
+			cartAttributes.displayLayout
 		);
 		expect( transformedBlock.attributes.query ).toEqual(
-			crossSells.attributes.query
+			cartAttributes.query
 		);
 		expect( transformedBlock.attributes.hideControls ).toEqual(
-			crossSells.attributes.hideControls
+			cartAttributes.hideControls
 		);
 	} );
 
