@@ -7,8 +7,6 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
