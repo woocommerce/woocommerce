@@ -61,32 +61,6 @@ export const getLysTasklist = async () => {
 	] );
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
-	// Custom handling of the Payments task:
-	// We need to override the task completion based on the additional data.
-	// This is because LYS and the Home screen share the same task list, but the completion logic is different.
-	const paymentsTask = tasklist?.[ 0 ]?.tasks?.find(
-		( task: TaskType ) => task?.id === 'payments'
-	);
-
-	if ( paymentsTask?.isComplete && paymentsTask.additionalData ) {
-		const {
-			wooPaymentsIsActive = false,
-			wooPaymentsHasOnlineGatewaysEnabled = false,
-			wooPaymentsHasOtherProvidersNeedSetup = false,
-		} = paymentsTask.additionalData;
-
-		// Override completion if WooPayments is not active and either:
-		// - no online gateways are enabled, OR
-		// - some enabled gateways need setup
-		const shouldOverrideCompletion =
-			! wooPaymentsIsActive &&
-			( ! wooPaymentsHasOnlineGatewaysEnabled ||
-				wooPaymentsHasOtherProvidersNeedSetup );
-
-		if ( shouldOverrideCompletion ) {
-			paymentsTask.isComplete = false;
-		}
-	}
 
 	/**
 	 * Show tasks that fulfill all the following conditions:
