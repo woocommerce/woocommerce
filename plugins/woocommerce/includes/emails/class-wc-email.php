@@ -863,7 +863,15 @@ class WC_Email extends WC_Settings_API {
 			try {
 				$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
 
-				do_action( 'woocommerce_emogrifier', $css_inliner, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				/**
+				 * Action hook fired when an email content has been processed by Emogrifier CssInliner instance.
+				 *
+				 * @since 4.1.0
+				 *
+				 * @param CssInliner $css_inliner CssInliner instance.
+				 * @param WC_Email $this WC_Email instance.
+				 */
+				do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
 				$dom_document = $css_inliner->getDomDocument();
 
