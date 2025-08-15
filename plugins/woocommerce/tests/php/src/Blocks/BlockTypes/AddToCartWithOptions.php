@@ -279,7 +279,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$product_id = $product->get_id();
 
-		$variation = $fixtures->get_variation_product(
+		$fixtures->get_variation_product(
 			$product_id,
 			array(
 				'pa_color' => 'red-slug',
@@ -296,7 +296,11 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringNotContainsString( '<input checked type="radio"', $markup, 'No options are checked by default.' );
+		$this->assertDoesNotMatchRegularExpression(
+			'/<input[^>]*type="radio"[^>]* checked(?:="checked")?[^>]*>/',
+			$markup,
+			'No radio options should be checked by default.'
+		);
 
 		$product->set_default_attributes( array( 'pa_size' => 'small-slug' ) );
 
@@ -304,6 +308,10 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( '<input checked type="radio"', $markup, 'Options are checked by default if they are set as the default attribute.' );
+		$this->assertMatchesRegularExpression(
+			'/<input[^>]*checked(?:=" checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			$markup,
+			'The "small" size option should be checked when set as the default attribute.'
+		);
 	}
 }

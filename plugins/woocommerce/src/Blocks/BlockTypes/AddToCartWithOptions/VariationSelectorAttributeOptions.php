@@ -178,7 +178,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				)
 			);
 
-			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . $attribute_term['label'] . '</label>';
+			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . esc_html( $attribute_term['label'] ) . '</label>';
 		}
 
 		return sprintf(
@@ -247,7 +247,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				$this->get_normalized_attributes(
 					$option_attributes
 				),
-				$attribute_term['label']
+				esc_html( $attribute_term['label'] )
 			);
 		}
 
