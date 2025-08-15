@@ -85,20 +85,20 @@ class Universal {
 			if ( ! empty( $data ) ) {
 				foreach ( $data as $data_instance ) {
 					$event_props = array(
-						'pq' => $data_instance['quantity'],
+						'pq' => $data_instance['quantity'] ?? null,
 					);
 
 					// Attach the session ID, engagement status and landing_page to this event in case it's saved in the Data Instance.
 					// Otherwise, keep it unset to allow override.
-					if ( $data_instance['session_id'] ) {
+					if ( isset( $data_instance['session_id'] ) && $data_instance['session_id'] ) {
 						$event_props['session_id'] = $data_instance['session_id'];
 					}
 
-					if ( $data_instance['is_engaged'] ) {
+					if ( isset( $data_instance['is_engaged'] ) && $data_instance['is_engaged'] ) {
 						$event_props['is_engaged'] = $data_instance['is_engaged'];
 					}
 
-					if ( $data_instance['landing_page'] ) {
+					if ( isset( $data_instance['landing_page'] ) && $data_instance['landing_page'] ) {
 						$event_props['landing_page'] = $data_instance['landing_page'];
 					}
 
@@ -256,7 +256,7 @@ class Universal {
 		global $post;
 		$checkout_page_id    = wc_get_page_id( 'checkout' );
 		$cart                = WC()->cart->get_cart();
-		$is_in_checkout_page = $checkout_page_id === $post->ID ? 'Yes' : 'No';
+		$is_in_checkout_page = isset( $post->ID ) && $checkout_page_id === $post->ID ? 'Yes' : 'No';
 		$session             = WC()->session;
 		if ( is_object( $session ) ) {
 			$session->set( 'checkout_page_used', 'Yes' === $is_in_checkout_page );
@@ -718,7 +718,7 @@ class Universal {
 			return;
 		}
 
-		$is_in_checkout_page                       = $checkout_page_id === $post->ID ? 'Yes' : 'No';
+		$is_in_checkout_page                       = isset( $post->ID ) && $checkout_page_id === $post->ID ? 'Yes' : 'No';
 		$checkout_page_contains_checkout_block     = '0';
 		$checkout_page_contains_checkout_shortcode = '1';
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix PHP warnings for undefined array keys and null object properties
