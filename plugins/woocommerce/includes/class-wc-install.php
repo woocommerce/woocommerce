@@ -294,8 +294,9 @@ class WC_Install {
 		'10.0.0' => array(
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
-			'wc_update_1000_update_primary_key_to_composite_in_order_product_lookup_table',
-			'wc_update_1000_add_old_refunded_order_items_to_product_lookup_table',
+		),
+		'10.2.0' => array(
+			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
 	);
 
@@ -1552,7 +1553,7 @@ class WC_Install {
 
 		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_product_lookup';" ) ) {
 			if ( 2 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
-				$result = $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
 			}
 		}
 

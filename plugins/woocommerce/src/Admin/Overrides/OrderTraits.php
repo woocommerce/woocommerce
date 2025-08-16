@@ -61,7 +61,7 @@ trait OrderTraits {
 		// Use the passed order_items_count if provided, otherwise get the total number of items in the order.
 		// This is useful when calculating refunds for partial items in an order.
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping tax of the refunded items distributed to them.
-		$order_items = $order_items_count ? $order_items_count : $this->get_item_count();
+		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
 		if ( 0 === $order_items ) {
 			return 0;
