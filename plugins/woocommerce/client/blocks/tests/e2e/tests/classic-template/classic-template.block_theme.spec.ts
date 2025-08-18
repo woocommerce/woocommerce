@@ -249,32 +249,20 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.page.getByLabel( 'Open Navigation' ).click();
 
-		// Reset the template.
-		await editor.page.getByPlaceholder( 'Search' ).fill( 'Single Product' );
-		const resetNotice = editor.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText( `"Single Product" reset.` );
-		const searchResults = editor.page.getByLabel( 'Actions', {
-			exact: true,
+		await editor.revertTemplate( {
+			templateName: 'Single Product',
 		} );
-		// Wait until there's only one search result.
-		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
 
-		const actionsButton = editor.page.getByRole( 'button', {
-			name: 'Actions',
-		} );
-		await actionsButton.click();
-
-		await editor.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
-		await editor.page.getByRole( 'button', { name: 'Reset' } ).click();
-		await expect( resetNotice ).toBeVisible();
+		if ( wpCoreVersion >= 6.8 ) {
+			const actionsButton = editor.page.getByRole( 'button', {
+				name: 'Actions',
+			} );
+			await actionsButton.click();
+		}
 
 		const editButton = editor.page.getByRole( 'menuitem', {
 			name: 'Edit',
 		} );
-		if ( wpCoreVersion >= 6.8 ) {
-			await actionsButton.click();
-		}
 
 		// Edit the template again.
 		await editButton.click();

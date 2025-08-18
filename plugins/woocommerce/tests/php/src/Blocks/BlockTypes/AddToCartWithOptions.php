@@ -4,12 +4,18 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -37,6 +43,10 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsGroupedProductSelectorMock();
 			new AddToCartWithOptionsGroupedProductItemMock();
 			new AddToCartWithOptionsGroupedProductItemSelectorMock();
+			new AddToCartWithOptionsVariationSelectorMock();
+			new AddToCartWithOptionsVariationSelectorAttributeMock();
+			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
+			new AddToCartWithOptionsVariationSelectorAttributeOptionsMock();
 
 			self::$are_blocks_registered = true;
 		}
@@ -131,7 +141,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'Add to cart', $markup, 'The Simple Product Add to Cart Button is visible for purchasable in stock products.' );
 
-		$product->set_stock_status( 'outofstock' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product->save();
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
@@ -155,7 +165,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'Hook into add to cart action', $markup, 'The Add to Cart + Options correctly renders the contents from the wrapper hook.' );
 		$this->assertStringContainsString( 'Hook into add to cart button action', $markup, 'The Add to Cart + Options doesn\'t render the contents from the inner hooks.' );
 
-		$product->set_stock_status( 'outofstock' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product_id = $product->save();
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
@@ -185,7 +195,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'type="checkbox"', $markup, 'The Grouped Product Add to Cart + Options form contains a checkbox.' );
 
-		$simple_product->set_stock_status( 'outofstock' );
+		$simple_product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$simple_product->save();
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 		$this->assertStringContainsString( 'Read more', $markup, 'The Grouped Product Add to Cart + Options form contains a button.' );
@@ -249,5 +259,59 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when an extension hooks into the form.' );
 
 		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
+	}
+
+	/**
+	 * Tests that the default option is set in variable products.
+	 */
+	public function test_variable_product_default_option_render() {
+		global $product;
+
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+
+		$product_id = $product->get_id();
+
+		$fixtures->get_variation_product(
+			$product_id,
+			array(
+				'pa_color' => 'red-slug',
+				'pa_size'  => 'small-slug',
+			),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		// Sync the variable product to update its children list.
+		\WC_Product_Variable::sync( $product_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertDoesNotMatchRegularExpression(
+			'/<input[^>]*type="radio"[^>]* checked(?:="checked")?[^>]*>/',
+			$markup,
+			'No radio options should be checked by default.'
+		);
+
+		$product->set_default_attributes( array( 'pa_size' => 'small-slug' ) );
+
+		$product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertMatchesRegularExpression(
+			'/<input[^>]*checked(?:=" checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			$markup,
+			'The "small" size option should be checked when set as the default attribute.'
+		);
 	}
 }
