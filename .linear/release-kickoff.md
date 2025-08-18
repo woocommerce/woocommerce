@@ -15,4 +15,4 @@ This issue provides visibility on the progress of the release process of WooComm
 • **[Previous releases](https://github.com/woocommerce/woocommerce/releases)**
 • **[Release process documentation](https://developer.woocommerce.com/docs/contribution/releases/)**
 
-Add any new Sub-issues as needed for any point releases (patch) needed after the `x.y.0` stable release using the [`.github/ISSUE\_TEMPLATE/release-kickoff-patch.md`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/release-kickoff-patch.md) template.
+Add any new Sub-issues as needed for any point releases (patch) needed after the `x.y.0` stable release using the [`.linear/release-kickoff-patch.md`](https://github.com/woocommerce/woocommerce/blob/trunk/.linear/release-kickoff-patch.md) template.

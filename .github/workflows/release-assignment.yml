@@ -307,7 +307,7 @@ jobs:
             let processedTemplates = {};
             for (const [key, content] of Object.entries(templateContents)) {
               const lines = content.split('\n');
-              const title = lines[0].trim();
+              const title = lines[0].slice(2).trim();
               const body = lines.slice(1).join('\n').trim();
 
               let processedTitle = title;

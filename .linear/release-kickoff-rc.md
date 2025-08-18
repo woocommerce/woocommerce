@@ -1,4 +1,4 @@
-# WooCommerce {RELEASE_VERSION}-RC.{RC_PATCH_VERSION}
+# WooCommerce {RELEASE_VERSION}-rc.{RC_PATCH_VERSION}
 
 This issue tracks the progress of a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. Patch version in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
 
