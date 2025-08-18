@@ -179,10 +179,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		);
 
 		/**
-		 * Add custom sections to the list of sections to be rendered using React.
+		 * Modify the optional set of payments settings sections to be rendered using React.
 		 *
-		 * This filter allows plugins to add their own sections that should be rendered using React.
-		 * The sections should be identified by their unique gateway identifiers.
+		 * This filter allows plugins to add or remove optional sections (typically offline gateways)
+		 * that should be rendered using React. Sections should be identified by their gateway IDs.
+		 * Note: The main Payments page ("main") and the Offline overview ("offline") are always React-only
+		 * and cannot be disabled via this filter.
 		 *
 		 * @since 9.3.0
 		 *
