@@ -164,18 +164,18 @@ class PaymentsProviders {
 	/**
 	 * The memoized payment gateways to avoid computing the list multiple times during a request.
 	 *
-	 * @var array|null
+	 * @var array
 	 */
-	private ?array $payment_gateways_memo = null;
+	private array $payment_gateways_memo = array();
 
 	/**
 	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
 	 *
 	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
 	 *
-	 * @var array|null
+	 * @var array
 	 */
-	private ?array $payment_gateways_for_display_memo = null;
+	private array $payment_gateways_for_display_memo = array();
 
 	/**
 	 * The payment extension suggestions service.
@@ -201,18 +201,20 @@ class PaymentsProviders {
 	 * We apply the same actions and logic that the non-React Payments settings page uses to get the gateways.
 	 * This way we maintain backwards compatibility.
 	 *
-	 * @param bool $for_display Whether the payment gateway list is intended for display purposes.
-	 *                          This triggers the legacy `woocommerce_admin_field_payment_gateways` action and
-	 *                          the exclusion of "shell" gateways.
-	 *                          Default is true.
+	 * @param bool   $for_display  Whether the payment gateway list is intended for display purposes.
+	 *                             This triggers the legacy `woocommerce_admin_field_payment_gateways` action and
+	 *                             the exclusion of "shell" gateways.
+	 *                             Default is true.
+	 * @param string $country_code Optional. The country code for which the payment gateways are being generated.
+	 *                             This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway objects list.
 	 */
-	public function get_payment_gateways( bool $for_display = true ): array {
+	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( ! is_null( $this->payment_gateways_for_display_memo ) ) {
-				return $this->payment_gateways_for_display_memo;
+			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
+				return $this->payment_gateways_for_display_memo[ $country_code ];
 			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
@@ -235,15 +237,15 @@ class PaymentsProviders {
 
 			// Remove "shell" gateways that are not intended for display.
 			// We consider a gateway to be a "shell" if it has no WC admin title or description.
-			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
+			$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways, $country_code );
 			$payment_gateways         = array_filter(
 				$payment_gateways,
-				function ( $gateway ) use ( $grouped_payment_gateways ) {
+				function ( $gateway ) use ( $grouped_payment_gateways, $country_code ) {
 					// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
 					// This is to avoid removing all the gateways registered by an extension and
 					// preventing user access to the settings page(s) for that extension.
 					if ( $this->is_shell_payment_gateway( $gateway ) ) {
-						$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+						$gateway_details = $this->get_payment_gateway_details( $gateway, 0, $country_code );
 						// In case we don't have the needed extension details,
 						// we allow the gateway to be displayed (aka better safe than sorry).
 						if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
@@ -273,14 +275,14 @@ class PaymentsProviders {
 			);
 
 			// Store the entire payment gateways list for display for later use.
-			$this->payment_gateways_for_display_memo = $payment_gateways;
+			$this->payment_gateways_for_display_memo[ $country_code ] = $payment_gateways;
 
 			return $payment_gateways;
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( ! is_null( $this->payment_gateways_memo ) ) {
-			return $this->payment_gateways_memo;
+		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
+			return $this->payment_gateways_memo[ $country_code ];
 		}
 
 		// Get all payment gateways, ordered by the user.
@@ -290,7 +292,7 @@ class PaymentsProviders {
 		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 		// Store the entire payment gateways list for later use.
-		$this->payment_gateways_memo = $payment_gateways;
+		$this->payment_gateways_memo[ $country_code ] = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -1062,8 +1064,8 @@ class PaymentsProviders {
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo             = null;
-		$this->payment_gateways_for_display_memo = null;
+		$this->payment_gateways_memo             = array();
+		$this->payment_gateways_for_display_memo = array();
 	}
 
 	/**
@@ -1392,14 +1394,16 @@ class PaymentsProviders {
 	/**
 	 * Group payment gateways by their plugin extension filename.
 	 *
-	 * @param WC_Payment_Gateway[] $gateways The list of payment gateway instances to group.
+	 * @param WC_Payment_Gateway[] $gateways     The list of payment gateway instances to group.
+	 * @param string               $country_code Optional. The country code for which the gateways are being generated.
+	 *                                           This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The grouped payment gateway instances, keyed by the plugin file.
 	 *               Each group contains an array of payment gateway instances that belong to the same plugin.
 	 *               If a payment gateway does not have a corresponding plugin file,
 	 *               it will be grouped under the 'unknown_extension' key.
 	 */
-	private function group_gateways_by_extension( array $gateways ): array {
+	private function group_gateways_by_extension( array $gateways, string $country_code = '' ): array {
 		$grouped = array(
 			// This is the group for gateways that we don't know how to group by extension.
 			// It can be used for gateways that are not registered by a WP plugin.
@@ -1408,7 +1412,7 @@ class PaymentsProviders {
 
 		foreach ( $gateways as $gateway ) {
 			// Get the payment gateway details, but use a dummy gateway order since it is inconsequential here.
-			$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+			$gateway_details = $this->get_payment_gateway_details( $gateway, 0, $country_code );
 			// If we don't have the necessary plugin details, put it in the unknown group.
 			if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
 				$grouped['unknown_extension'][] = $gateway;

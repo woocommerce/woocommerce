@@ -95,6 +95,14 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		reset?: {
+			type?: string;
+			href?: string;
+		};
+		test_account_disable?: {
+			type?: string;
+			href?: string;
+		};
 	};
 	content?: ReactNode;
 	context?: {
@@ -116,6 +124,7 @@ export interface WooPaymentsProviderOnboardingStep {
 			}
 		>;
 		has_test_account?: boolean;
+		has_sandbox_account?: boolean;
 	};
 	errors?: {
 		message: string;
