@@ -531,13 +531,24 @@ class PaymentGateway {
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		try {
 			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-				$url = (string) $payment_gateway->get_settings_url();
+				$url = trim( (string) $payment_gateway->get_settings_url() );
+				if ( ! empty( $url ) && ! wc_is_valid_url( $url ) ) {
+					// Back-compat: normalize common relative admin URLs.
+					$url = ltrim( $url, '/' );
+					// Remove the '/wp-admin/' prefix if it exists.
+					if ( 0 === strpos( $url, 'wp-admin/' ) ) {
+						$url = substr( $url, strlen( 'wp-admin/' ) );
+					}
+					if ( 0 === strpos( $url, 'admin.php' ) || 0 === strpos( $url, '/admin.php' ) ) {
+						$url = admin_url( ltrim( $url, '/' ) );
+					}
+				}
 				if ( ! empty( $url ) && wc_is_valid_url( $url ) ) {
 					return add_query_arg(
 						array(
 							'from' => Payments::FROM_PAYMENTS_SETTINGS,
 						),
-						$payment_gateway->get_settings_url()
+						$url
 					);
 				}
 			}
@@ -553,7 +564,7 @@ class PaymentGateway {
 			);
 		}
 
-		// If we couldn't get the settings URL from the gateway, fall back to a general gateway settings URL.
+		// If we couldn't get a valid settings URL from the gateway, fall back to a general gateway settings URL.
 		return Utils::wc_payments_settings_url(
 			null,
 			array(
