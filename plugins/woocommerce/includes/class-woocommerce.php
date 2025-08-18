@@ -232,7 +232,15 @@ final class WooCommerce {
 		return class_exists( 'WC_Legacy_REST_API_Plugin', false );
 	}
 
-	public function version( $include_prerelease_info = false ) {
+	/**
+	 * Get the WooCommerce version.
+	 *
+	 * @since 10.2.0
+	 *
+	 * @param bool $include_prerelease_info Whether to include pre-release information in the version string.
+	 * @return string The WooCommerce version.
+	 */
+	public function version( ?bool $include_prerelease_info = false ): string {
 		return $include_prerelease_info ? $this->version : preg_replace( '/-.*/', '', $this->version );
 	}
 

@@ -41,7 +41,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that `version_main` is the same or ahead of `version`.
+	 * Test that `version()` returns the correct version.
 	 *
 	 * @since 10.2.0
 	 */
