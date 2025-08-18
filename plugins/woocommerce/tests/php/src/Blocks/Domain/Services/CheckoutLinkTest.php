@@ -57,18 +57,27 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 			\WC_Helper_Product::create_simple_product(),
 			\WC_Helper_Product::create_simple_product(),
 			\WC_Helper_Product::create_simple_product(),
+			\WC_Helper_Product::create_variation_product(),
 		];
 
-		$product_ids = array_map(
-			function ( $product ) {
-				return $product->get_id();
-			},
-			$test_products
-		);
+		$product_ids = [];
+		$products    = [];
+
+		foreach ( $test_products as $product ) {
+			$product_ids[] = $product->get_id();
+			if ( $product->is_type( 'variable' ) ) {
+				$variations = $product->get_available_variations();
+				$variation  = array_shift( $variations );
+
+				$products[] = $product->get_id() . ':1:' . http_build_query( $variation['attributes'], '', ';' );
+			} else {
+				$products[] = $product->get_id();
+			}
+		}
 
 		$coupon = CouponHelper::create_coupon( 'test-coupon' );
 
-		$_GET['products'] = implode( ',', $product_ids );
+		$_GET['products'] = implode( ',', $products );
 		$_GET['coupon']   = 'test-coupon';
 
 		$service = new class() extends CheckoutLink {
