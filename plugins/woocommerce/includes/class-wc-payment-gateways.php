@@ -85,11 +85,8 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
+			'WC_Gateway_Paypal',
 		);
-
-		if ( $this->should_load_paypal_standard() ) {
-			$load_gateways[] = 'WC_Gateway_Paypal';
-		}
 
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
@@ -101,11 +98,11 @@ class WC_Payment_Gateways {
 		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
-				if ( 'WC_Gateway_Paypal' === $gateway ) {
-					$gateway = WC_Gateway_Paypal::get_instance();
-				} else {
-					$gateway = new $gateway();
-				}
+				$gateway = new $gateway();
+			}
+
+			if ( 'WC_Gateway_Paypal' === $gateway && ! $this->should_load_paypal_standard() ) {
+				continue;
 			}
 
 			// Gateways need to be valid and extend WC_Payment_Gateway.

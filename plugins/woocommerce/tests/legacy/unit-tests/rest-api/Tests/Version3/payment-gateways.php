@@ -54,7 +54,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$matching_gateway_data = current(
 			array_filter(
 				$gateways,
-				function( $gateway ) {
+				function ( $gateway ) {
 					return WC_Gateway_Cheque::ID === $gateway['id'];
 				}
 			)
@@ -181,10 +181,11 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test updating a single payment gateway.
+	 * Called inside test_get_payment_gateway, as it needs to run after it.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_update_payment_gateway() {
+	private function test_update_payment_gateway() {
 		wp_set_current_user( $this->user );
 
 		// Test defaults.
@@ -370,5 +371,4 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		}
 		return $settings;
 	}
-
 }
