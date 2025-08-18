@@ -26,8 +26,8 @@
 		margin-top: $gap !important;
 	}
 	.wc-block-checkout__guest-checkout-notice {
+		@include font-small-locked;
 		margin: $gap-smallest 0 0;
-		@include font-size(smaller);
 	}
 }
 
