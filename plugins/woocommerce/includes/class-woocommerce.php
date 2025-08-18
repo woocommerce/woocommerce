@@ -1390,6 +1390,7 @@ final class WooCommerce {
 	 * to prevent errors, and load the classes where the callback is added.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function add_recurring_action_wrappers() {
 		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
@@ -1402,6 +1403,7 @@ final class WooCommerce {
 	 * Unschedule unwrapped actions that may have been added to the site.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function unschedule_unwrapped_actions() {
 		// Unschedule the unwrapped actions.
@@ -1416,6 +1418,7 @@ final class WooCommerce {
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function add_woocommerce_tracker_send_event_wrapper() {
 		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
@@ -1438,6 +1441,7 @@ final class WooCommerce {
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function add_wc_admin_daily_wrapper() {
 		try {
@@ -1456,6 +1460,7 @@ final class WooCommerce {
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function add_generate_category_lookup_table_wrapper() {
 		try {
@@ -1474,6 +1479,7 @@ final class WooCommerce {
 	 * It loads the class if it exists, and then calls the actual action.
 	 *
 	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function add_woocommerce_cleanup_rate_limits_wrapper() {
 		try {
