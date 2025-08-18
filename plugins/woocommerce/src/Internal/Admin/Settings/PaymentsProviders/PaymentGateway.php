@@ -97,7 +97,7 @@ class PaymentGateway {
 	 * @return array The enhanced payment extension suggestion details.
 	 */
 	public function enhance_extension_suggestion( array $extension_suggestion ): array {
-		if ( empty( $extensionp['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
+		if ( empty( $extension_suggestion['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
 			$extension_suggestion['onboarding'] = array();
 		}
 
