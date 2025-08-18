@@ -170,6 +170,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'product_url'        => __( 'External URL', 'woocommerce' ),
 			'button_text'        => __( 'Button text', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
+			'attributes'         => __( 'Attributes', 'woocommerce' ),
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
