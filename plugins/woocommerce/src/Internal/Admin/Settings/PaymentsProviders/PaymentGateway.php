@@ -545,17 +545,6 @@ class PaymentGateway {
 			);
 		}
 
-		// Special handling for offline payment gateways to use the front-end navigation.
-		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
-			return Utils::wc_payments_settings_url(
-				null,
-				array(
-					'path' => '/offline/' . strtolower( $payment_gateway->id ),
-					'from' => Payments::FROM_PAYMENTS_SETTINGS,
-				)
-			);
-		}
-
 		return Utils::wc_payments_settings_url(
 			null,
 			array(
