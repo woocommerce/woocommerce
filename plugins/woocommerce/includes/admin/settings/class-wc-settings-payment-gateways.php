@@ -71,7 +71,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * @return bool Whether the section should be rendered using React.
 	 */
 	public function should_render_react_section( string $section ): bool {
-		return in_array( $section, $this->get_reactified_sections(), true );
+		return in_array( $this->standardize_section_name( $section ), $this->get_reactified_sections(), true );
 	}
 
 	/**
@@ -94,7 +94,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			return $classes;
 		}
 
-		if ( ! $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
+		if ( ! $this->should_render_react_section( $current_section ) ) {
 			// Add a class to indicate that the payments settings section page is rendered in legacy mode.
 			$classes .= ' woocommerce-settings-payments-section_legacy';
 			// Add a class to indicate that the current section is rendered in legacy mode.
@@ -122,7 +122,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		ob_end_clean();
 
 		if ( is_string( $current_section ) && $this->should_render_react_section( $current_section ) ) {
-			$this->render_react_section( $current_section );
+			$this->render_react_section( $this->standardize_section_name( $current_section ) );
 		} elseif ( is_string( $current_section ) && ! empty( $current_section ) ) {
 			// Load gateways so we can show any global options they may have.
 			$payment_gateways = WC()->payment_gateways()->payment_gateways;
@@ -275,7 +275,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		global $current_tab, $current_section;
 
 		// We only want to prevent sections on the main WooCommerce Payments settings page and Reactified sections.
-		if ( self::TAB_NAME === $current_tab && $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
+		if ( self::TAB_NAME === $current_tab && $this->should_render_react_section( $current_section ) ) {
 			return array();
 		}
 
@@ -327,15 +327,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * Hide the help tabs.
 	 */
 	public function hide_help_tabs() {
-		$screen = get_current_screen();
+		global $current_tab, $current_section;
 
+		$screen = get_current_screen();
 		if ( ! $screen instanceof WP_Screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
 			return;
 		}
 
-		global $current_tab, $current_section;
 		// We only want to hide the help tabs on the main WooCommerce Payments settings page and Reactified sections.
-		if ( ! ( self::TAB_NAME === $current_tab && $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) ) {
+		if ( self::TAB_NAME === $current_tab && ! $this->should_render_react_section( $current_section ) ) {
 			return;
 		}
 
@@ -346,17 +346,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * Suppress WP admin notices on the WooCommerce Payments settings page.
 	 */
 	public function suppress_admin_notices() {
-		global $wp_filter;
+		global $wp_filter, $current_tab, $current_section;
 
 		$screen = get_current_screen();
-
 		if ( ! $screen instanceof WP_Screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
 			return;
 		}
 
-		global $current_tab, $current_section;
 		// We only want to suppress notices on the main WooCommerce Payments settings page and Reactified sections.
-		if ( ! ( self::TAB_NAME === $current_tab && $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) ) {
+		if ( self::TAB_NAME === $current_tab && ! $this->should_render_react_section( $current_section ) ) {
 			return;
 		}
 
@@ -436,7 +434,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		if ( is_array( $features ) &&
 			in_array( $feature_name, $features, true ) &&
 			self::TAB_NAME === $current_tab &&
-			$this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
+			$this->should_render_react_section( $current_section ) ) {
 
 			unset( $features[ array_search( $feature_name, $features, true ) ] );
 		}
