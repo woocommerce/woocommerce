@@ -7,10 +7,10 @@ import {
 	OfflinePaymentMethodProvider,
 	PaymentGatewayProvider,
 	paymentGatewaysStore,
-	PaymentsProviderType,
 } from '@woocommerce/data';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from '@wordpress/data';
+import { getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -50,7 +50,9 @@ export const SettingsButton = ( {
 	isInstallingPlugin,
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
-	const isOffline = gatewayProvider._type === PaymentsProviderType.OfflinePm;
+	// Determine if the settingsHref is for a Reactified page.
+	// A Reactified page will have a 'path' query parameter.
+	const isReactifiedPage = !! getQueryArg( settingsHref, 'path' ) || false;
 	const navigate = useNavigate();
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( paymentGatewaysStore );
@@ -61,11 +63,22 @@ export const SettingsButton = ( {
 	return (
 		<Button
 			variant={ 'secondary' }
-			href={ ! isOffline ? settingsHref : undefined }
+			href={
+				// If it's a Reactified page, we handle navigation via the router.
+				// Otherwise, we use the href directly.
+				// This allows us to use the React Router's navigation system for Reactified pages.
+				! isReactifiedPage ? settingsHref : undefined
+			}
 			disabled={ isInstallingPlugin }
 			onClick={ () => {
 				recordButtonClickEvent();
-				if ( isOffline ) {
+
+				// If it's a Reactified page, we invalidate the resolution for the store selector
+				// to ensure the latest data is fetched when navigating.
+				// Then we navigate to the settings URL.
+				// This is necessary to ensure that the page updates correctly with the latest data.
+				// If it's not a Reactified page, we just navigate to the settingsHref via the href prop.
+				if ( isReactifiedPage ) {
 					invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 					navigate( removeOriginFromURL( settingsHref ) );
 				}
