@@ -29,44 +29,18 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	const CHEQUE_SECTION_NAME  = 'cheque';  // Cheque payments.
 
 	/**
-	 * Get the whitelist of sections to render using React.
+	 * Setting page icon.
 	 *
-	 * @return array List of section identifiers.
+	 * @var string
 	 */
-	private function get_reactify_render_sections() {
-		$sections = array(
-			self::MAIN_SECTION_NAME,
-			self::OFFLINE_SECTION_NAME,
-			self::COD_SECTION_NAME,
-			self::BACS_SECTION_NAME,
-			self::CHEQUE_SECTION_NAME,
-		);
-
-		/**
-		 * Filters the list of payment settings sections to be rendered using React.
-		 *
-		 * @since 9.3.0
-		 *
-		 * @param array $sections List of section identifiers.
-		 */
-		return apply_filters( 'experimental_woocommerce_admin_payment_reactify_render_sections', $sections );
-	}
+	public $icon = 'payment';
 
 	/**
-	 * Standardize the current section name.
+	 * Memoized list of sections to render using React.
 	 *
-	 * @param string $section The section name to standardize.
-	 *
-	 * @return string The standardized section name.
+	 * @var array|null
 	 */
-	private function standardize_section_name( string $section ): string {
-		// If the section is empty, we are on the main settings page/section. Use a standardized name.
-		if ( '' === $section ) {
-			return self::MAIN_SECTION_NAME;
-		}
-
-		return $section;
-	}
+	private ?array $reactified_sections_memo = null;
 
 	/**
 	 * Constructor.
@@ -76,6 +50,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		$this->label = esc_html_x( 'Payments', 'Settings tab label', 'woocommerce' );
 
 		// Add filters and actions.
+		add_filter( 'admin_body_class', array( $this, 'add_body_classes' ), 30 );
 		add_action( 'admin_head', array( $this, 'hide_help_tabs' ) );
 		// Hook in as late as possible - `in_admin_header` is the last action before the `admin_notices` action is fired.
 		// It is too risky to hook into `admin_notices` with a low priority because the callbacks might be cached.
@@ -89,11 +64,45 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 
 	/**
-	 * Setting page icon.
+	 * Check if the given section should be rendered using React.
 	 *
-	 * @var string
+	 * @param string $section The section to check.
+	 *
+	 * @return bool Whether the section should be rendered using React.
 	 */
-	public $icon = 'payment';
+	public function should_render_react_section( string $section ): bool {
+		return in_array( $section, $this->get_reactified_sections(), true );
+	}
+
+	/**
+	 * Add body classes.
+	 *
+	 * @param string $classes The existing body classes.
+	 *
+	 * @return string The modified body classes.
+	 */
+	public function add_body_classes( $classes ): string {
+		global $current_tab, $current_section;
+
+		// Bail if the $classes variable is not a string.
+		if ( ! is_string( $classes ) ) {
+			return $classes;
+		}
+
+		// If we are not on the WooCommerce Payments settings page, return the classes as they are.
+		if ( self::TAB_NAME !== $current_tab ) {
+			return $classes;
+		}
+
+		if ( ! $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
+			// Add a class to indicate that this is a legacy payments settings section page.
+			$classes .= ' woocommerce-settings-payments-section_legacy';
+			// Add a class to indicate that the current section is Reactified.
+			$classes .= ' woocommerce_page_wc-settings-checkout-section-' . esc_attr( $this->standardize_section_name( $current_section ) ) . '_legacy';
+		}
+
+		return $classes;
+	}
 
 	/**
 	 * Output the settings.
@@ -112,9 +121,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		do_action( 'woocommerce_admin_field_payment_gateways' );
 		ob_end_clean();
 
-		if ( $this->should_render_react_section( $current_section ) ) {
+		if ( is_string( $current_section ) && $this->should_render_react_section( $current_section ) ) {
 			$this->render_react_section( $current_section );
-		} elseif ( $current_section ) {
+		} elseif ( is_string( $current_section ) && ! empty( $current_section ) ) {
 			// Load gateways so we can show any global options they may have.
 			$payment_gateways = WC()->payment_gateways()->payment_gateways;
 			$this->render_classic_gateway_settings_page( $payment_gateways, $current_section );
@@ -147,13 +156,65 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 
 	/**
-	 * Check if the given section should be rendered using React.
+	 * Get the whitelist of sections to render using React.
 	 *
-	 * @param string $section The section to check.
-	 * @return bool Whether the section should be rendered using React.
+	 * @return array List of section identifiers.
 	 */
-	private function should_render_react_section( $section ) {
-		return in_array( $section, $this->get_reactify_render_sections(), true );
+	private function get_reactified_sections(): array {
+		if ( ! is_null( $this->reactified_sections_memo ) ) {
+			return $this->reactified_sections_memo;
+		}
+
+		// These sections are always rendered using React.
+		$reactified_sections = array(
+			self::MAIN_SECTION_NAME,
+			self::OFFLINE_SECTION_NAME,
+		);
+
+		// These sections are optional and can be modified by plugins or themes.
+		$optional_reactified_sections = array(
+			self::COD_SECTION_NAME,
+			self::BACS_SECTION_NAME,
+//			self::CHEQUE_SECTION_NAME,
+		);
+		/**
+		 * Add custom sections to the list of sections to be rendered using React.
+		 *
+		 * This filter allows plugins to add their own sections that should be rendered using React.
+		 * The sections should be identified by their unique gateway identifiers.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param array $sections List of section identifiers to be rendered using React.
+		 */
+		$optional_reactified_sections = apply_filters( 'experimental_woocommerce_admin_payment_reactify_render_sections', $optional_reactified_sections );
+		if ( empty( $optional_reactified_sections ) || ! is_array( $optional_reactified_sections ) ) {
+			// Sanity check: use empty array if the filter returns something unexpected.
+			$optional_reactified_sections = array();
+		} else {
+			// Enforce a list format for section identifiers.
+			$optional_reactified_sections = array_values( $optional_reactified_sections );
+		}
+
+		$this->reactified_sections_memo = array_unique( array_merge( $reactified_sections, $optional_reactified_sections ) );
+
+		return $this->reactified_sections_memo;
+	}
+
+	/**
+	 * Standardize the current section name.
+	 *
+	 * @param string $section The section name to standardize.
+	 *
+	 * @return string The standardized section name.
+	 */
+	private function standardize_section_name( string $section ): string {
+		// If the section is empty, we are on the main settings page/section. Use a standardized name.
+		if ( '' === $section ) {
+			return self::MAIN_SECTION_NAME;
+		}
+
+		return $section;
 	}
 
 	/**
