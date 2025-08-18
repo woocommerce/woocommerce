@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from '@wordpress/data';
 import { getQueryArg } from '@wordpress/url';
+import { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -63,24 +64,34 @@ export const SettingsButton = ( {
 	return (
 		<Button
 			variant={ 'secondary' }
-			href={
-				// If it's a Reactified page, we handle navigation via the router.
-				// Otherwise, we use the href directly.
-				// This allows us to use the React Router's navigation system for Reactified pages.
-				! isReactifiedPage ? settingsHref : undefined
-			}
 			disabled={ isInstallingPlugin }
-			onClick={ () => {
+			onClick={ ( event: MouseEvent ) => {
 				recordButtonClickEvent();
+
+				// Allow modified clicks (new tab/window, etc.) to proceed with default behavior.
+				const isModifiedClick =
+					event.metaKey ||
+					event.ctrlKey ||
+					event.shiftKey ||
+					event.altKey ||
+					event.button === 1;
+
+				// If it's a modified click, open in new tab/window.
+				if ( isModifiedClick ) {
+					window.open( settingsHref, '_blank' );
+					return;
+				}
 
 				// If it's a Reactified page, we invalidate the resolution for the store selector
 				// to ensure the latest data is fetched when navigating.
 				// Then we navigate to the settings URL.
 				// This is necessary to ensure that the page updates correctly with the latest data.
-				// If it's not a Reactified page, we just navigate to the settingsHref via the href prop.
+				// If it's not a Reactified page, we just navigate to the settingsHref directly.
 				if ( isReactifiedPage ) {
 					invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 					navigate( removeOriginFromURL( settingsHref ) );
+				} else {
+					window.location.href = settingsHref;
 				}
 			} }
 		>
