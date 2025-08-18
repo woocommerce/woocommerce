@@ -383,7 +383,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$products_query = $this->subquery->get_query_statement();
 		}
 
-		error_log( $products_query );
 		$product_data = $wpdb->get_results(
 			$products_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			ARRAY_A
