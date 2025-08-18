@@ -81,7 +81,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 *
 	 * @return string The modified body classes.
 	 */
-	public function add_body_classes( $classes ): string {
+	public function add_body_classes( $classes ) {
 		global $current_tab, $current_section;
 
 		// Bail if the $classes variable is not a string.
@@ -95,9 +95,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 
 		if ( ! $this->should_render_react_section( $this->standardize_section_name( $current_section ) ) ) {
-			// Add a class to indicate that this is a legacy payments settings section page.
+			// Add a class to indicate that the payments settings section page is rendered in legacy mode.
 			$classes .= ' woocommerce-settings-payments-section_legacy';
-			// Add a class to indicate that the current section is Reactified.
+			// Add a class to indicate that the current section is rendered in legacy mode.
 			$classes .= ' woocommerce_page_wc-settings-checkout-section-' . esc_attr( $this->standardize_section_name( $current_section ) ) . '_legacy';
 		}
 
