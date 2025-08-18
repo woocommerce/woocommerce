@@ -213,7 +213,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		if ( $is_offline_gateway ) {
 			// For offline gateways, we return to the offline settings section which is a Reactified page,
 			// hence the use of `path` parameter.
-			$return_path = '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME;
+			$offline_section = class_exists( 'WC_Settings_Payment_Gateways' )
+				? WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME
+				: 'offline';
+			$return_path     = '/' . $offline_section;
 		}
 
 		wc_back_header( $this->get_method_title(), esc_html__( 'Return to payments', 'woocommerce' ), SettingsUtils::wc_payments_settings_url( $return_path ) );
