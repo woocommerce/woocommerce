@@ -7,6 +7,7 @@
 		border-top: 1px solid $universal-border-light;
 
 		@include cart-checkout-below-large-container {
+			padding-top: 0;
 			border-top: 0;
 		}
 	}
