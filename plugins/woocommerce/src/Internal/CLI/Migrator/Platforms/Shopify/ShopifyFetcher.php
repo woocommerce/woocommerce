@@ -229,7 +229,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		$variables = array(
 			'first'         => $args['limit'] ?? 50,
 			'after'         => $args['after_cursor'] ?? null,
-			'query'         => $args['query_filter'] ?? '',
+			'query'         => $this->build_graphql_query_string( $args ),
 			'variantsFirst' => $args['variants_per_product'] ?? 100,
 		);
 
@@ -237,9 +237,59 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		return array_filter(
 			$variables,
 			function ( $value ) {
-				return null !== $value;
+				return null !== $value && '' !== $value;
 			}
 		);
+	}
+
+	/**
+	 * Build GraphQL query string from filter arguments.
+	 *
+	 * @param array $args Filter arguments.
+	 * @return string GraphQL query string.
+	 */
+	private function build_graphql_query_string( array $args ): string {
+		$query_parts = array();
+
+		if ( isset( $args['status'] ) ) {
+			$query_parts[] = 'status:' . strtoupper( $args['status'] );
+		}
+
+		if ( isset( $args['product_type'] ) ) {
+			$query_parts[] = 'product_type:"' . $args['product_type'] . '"';
+		}
+
+		if ( isset( $args['vendor'] ) ) {
+			$query_parts[] = 'vendor:"' . $args['vendor'] . '"';
+		}
+
+		if ( isset( $args['handle'] ) ) {
+			$query_parts[] = 'handle:' . $args['handle'];
+		}
+
+		if ( isset( $args['created_after'] ) ) {
+			$query_parts[] = 'created_at:>=' . $args['created_after'];
+		}
+
+		if ( isset( $args['created_before'] ) ) {
+			$query_parts[] = 'created_at:<=' . $args['created_before'];
+		}
+
+		if ( isset( $args['ids'] ) ) {
+			$ids = is_array( $args['ids'] ) ? $args['ids'] : explode( ',', $args['ids'] );
+			$ids = array_filter( array_map( 'trim', $ids ) );
+			if ( ! empty( $ids ) ) {
+				$formatted_ids = array_map(
+					function ( $id ) {
+						return 'gid://shopify/Product/' . $id;
+					},
+					$ids
+				);
+				$query_parts[] = 'id:(' . implode( ' OR ', $formatted_ids ) . ')';
+			}
+		}
+
+		return implode( ' AND ', $query_parts );
 	}
 
 	/**
@@ -254,7 +304,7 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 		if ( isset( $args['ids'] ) ) {
 			\WP_CLI::debug( 'Calculating total count based on provided product IDs.' );
 			$ids = is_array( $args['ids'] ) ? $args['ids'] : explode( ',', $args['ids'] );
-			return count( array_filter( $ids ) ); // Filter out empty values.
+			return count( array_filter( $ids ) );
 		}
 
 		$rest_api_path = '/products/count.json';
