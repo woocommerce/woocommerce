@@ -8,6 +8,7 @@ import type { AddressFormValues } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
+import type { FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -27,33 +28,47 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
+	const { hasValidationErrors, validationErrors } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
+			
+			// Get all validation errors for billing fields
+			const errors = Object.keys( billingAddress ).reduce( ( acc, key ) => {
+				if ( key !== 'email' ) {
+					const error = store.getValidationError( 'billing_' + key );
+					if ( error !== undefined ) {
+						acc[ key ] = error;
+					}
+				}
+				return acc;
+			}, {} as Record< string, FieldValidationStatus > );
+			
+			// Check for any billing-specific validation errors (including hidden ones)
+			const billingValidationErrors = Object.keys( errors ).length > 0;
+			
+
 			return {
-				hasValidationErrors: store.hasValidationErrors(),
-				getValidationErrorSelector: store.getValidationError,
+				hasValidationErrors: billingValidationErrors,
+				validationErrors: errors,
 			};
 		},
-		[]
+		[ billingAddress ]
 	);
 
 	const invalidProps = useMemo( () => {
-		return Object.keys( billingAddress )
+		return Object.keys( validationErrors )
 			.filter( ( key ) => {
-				return (
-					key !== 'email' &&
-					getValidationErrorSelector( 'billing_' + key ) !== undefined
-				);
+				const error = validationErrors[ key ];
+				return ! error?.hidden;
 			} )
 			.filter( Boolean );
-	}, [ billingAddress, getValidationErrorSelector ] );
+	}, [ validationErrors ] );
 
 	useEffect( () => {
-		if ( invalidProps.length > 0 && editing === false ) {
+		if ( hasValidationErrors && editing === false ) {
 			setEditing( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
+	}, [ editing, hasValidationErrors, setEditing ] );
 
 	const onChangeAddress = useCallback(
 		( values: AddressFormValues ) => {

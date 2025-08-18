@@ -8,6 +8,7 @@ import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
+import type { FieldValidationStatus } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -28,33 +29,44 @@ const CustomerAddress = () => {
 	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
+	const { hasValidationErrors, validationErrors } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
+			
+			// Get all validation errors for shipping fields
+			const errors = Object.keys( shippingAddress ).reduce( ( acc, key ) => {
+				const error = store.getValidationError( 'shipping_' + key );
+				if ( error !== undefined ) {
+					acc[ key ] = error;
+				}
+				return acc;
+			}, {} as Record< string, FieldValidationStatus > );
+			
+			// Check for any shipping-specific validation errors (including hidden ones)
+			const shippingValidationErrors = Object.keys( errors ).length > 0;
+
 			return {
-				hasValidationErrors: store.hasValidationErrors(),
-				getValidationErrorSelector: store.getValidationError,
+				hasValidationErrors: shippingValidationErrors,
+				validationErrors: errors,
 			};
 		},
-		[]
+		[ shippingAddress ]
 	);
 
 	const invalidProps = useMemo( () => {
-		return Object.keys( shippingAddress )
+		return Object.keys( validationErrors )
 			.filter( ( key ) => {
-				return (
-					getValidationErrorSelector( 'shipping_' + key ) !==
-					undefined
-				);
+				const error = validationErrors[ key ];
+				return ! error?.hidden;
 			} )
 			.filter( Boolean );
-	}, [ shippingAddress, getValidationErrorSelector ] );
+	}, [ validationErrors ] );
 
 	useEffect( () => {
-		if ( invalidProps.length > 0 && editing === false ) {
+		if ( hasValidationErrors && editing === false ) {
 			setEditing( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
+	}, [ editing, hasValidationErrors, setEditing ] );
 
 	const onChangeAddress = useCallback(
 		( values: ShippingAddress ) => {
