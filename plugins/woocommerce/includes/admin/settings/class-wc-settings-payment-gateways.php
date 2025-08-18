@@ -66,11 +66,13 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	/**
 	 * Check if the given section should be rendered using React.
 	 *
-	 * @param string $section The section to check.
+	 * @param mixed $section The section name to check.
+	 *                       Since this value originates from the global `$current_section` variable,
+	 *                       it is best to accept anything and standardize it to a string.
 	 *
 	 * @return bool Whether the section should be rendered using React.
 	 */
-	public function should_render_react_section( string $section ): bool {
+	public function should_render_react_section( $section ): bool {
 		return in_array( $this->standardize_section_name( $section ), $this->get_reactified_sections(), true );
 	}
 
@@ -207,11 +209,12 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	/**
 	 * Standardize the current section name.
 	 *
-	 * @param string $section The section name to standardize.
+	 * @param mixed $section The section name to standardize.
 	 *
 	 * @return string The standardized section name.
 	 */
-	private function standardize_section_name( string $section ): string {
+	private function standardize_section_name( $section ): string {
+		$section = (string) $section;
 		// If the section is empty, we are on the main settings page/section. Use a standardized name.
 		if ( '' === $section ) {
 			return self::MAIN_SECTION_NAME;
