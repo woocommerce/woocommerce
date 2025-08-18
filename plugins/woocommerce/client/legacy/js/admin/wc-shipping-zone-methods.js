@@ -1,4 +1,4 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl */
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
@@ -506,7 +506,7 @@
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
-						const value = parseFloat( priceInput.attr( 'value' ) );
+						const value = priceInput.attr( 'value' );
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
@@ -678,7 +678,6 @@
 						event.data.view.possiblyAddShippingClassLink( event );
 						if ( window.wc.wcSettings.CURRENCY && window.wc.currency.localiseMonetaryValue ) {
 							const config = window.wc.wcSettings.CURRENCY;
-							const isValidFormattedNumber = event.data.view.isValidFormattedNumber;
 							$('.wc-shipping-modal-price').on( 'input', function() {
 								// When the user types, we validate the value.
 								const value = $(this).val();
@@ -687,7 +686,7 @@
 								const modal = $( this ).parents( '.wc-backbone-modal-main' );
 								modal.find( '#btn-ok' ).removeAttr( 'disabled' );
 								modal.find( '.wc-shipping-method-add-class-costs').show();
-								if ( ! isValidFormattedNumber( value, config ) ) {
+								if ( ! WCNumberValidation.isValidFormattedNumber( value, config ) ) {
 									$(this).addClass( 'wc-shipping-invalid-price' );
 									$('<span class="wc-shipping-zone-method-fields-help-text wc-shipping-invalid-price-message">'
 										+ shippingZoneMethodsLocalizeScript.strings.invalid_number_format
@@ -718,30 +717,6 @@
 						const link = article.find( '.wc-shipping-method-add-class-costs' );
 						link.css( 'display', 'block' );
 					}
-				},
-				isValidFormattedNumber: function(value, config) {
-					if ( ! value || typeof value !== 'string' || ! config ) {
-						return false;
-					}
-
-					var decimalSeparator = config.decimalSeparator || '.';
-					var thousandSeparator = config.thousandSeparator || ',';
-					var escapedThousand = thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-					var escapedDecimal = decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-					// Accept either:
-					// - digits with optional thousands separator (1[ts]234[ts]567[ds]89)
-					// - OR plain digits without any separators (1234567[ds]89)
-					var regex = new RegExp(
-						'^(' +
-						'\\d{1,3}(?:' + escapedThousand + '\\d{3})+' + // with thousand separator
-						'|' +
-						'\\d+' + // or just plain digits
-						')' +
-						'(' + escapedDecimal + '\\d+)?$' // optional decimal part
-					);
-
-					return regex.test(value.trim());
 				},
 				validateFormArguments: function( event, target, data ) {
 					if ( target === 'wc-modal-add-shipping-method' ) {
