@@ -35,6 +35,9 @@
 		box-sizing: border-box;
 		height: 20px;
 		width: 20px;
+		// prevents input from shrinking when text next to it takes too much space
+		// to fit within the available width of the page
+		min-width: 20px;
 		margin: 0;
 		overflow: hidden;
 		position: static;
