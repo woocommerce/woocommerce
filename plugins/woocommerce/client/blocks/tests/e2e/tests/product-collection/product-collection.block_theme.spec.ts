@@ -911,6 +911,13 @@ test.describe( 'Product Collection', () => {
 				} )
 				.click();
 
+			// We need to wait for Product categories to load. Otherwise clicking
+			// on Products by Category might direct the user to the generic
+			// template.
+			await admin.page.waitForResponse( ( response ) => {
+				return response.url().includes( 'wp-json/wp/v2/product_cat' );
+			} );
+
 			await page
 				.getByRole( 'button', { name: 'Products by Category' } )
 				.click();
@@ -956,6 +963,12 @@ test.describe( 'Product Collection', () => {
 							: 'Add New Template',
 				} )
 				.click();
+
+			// We need to wait for Product tags to load. Otherwise clicking
+			// on Products by Tag might direct the user to the generic template.
+			await admin.page.waitForResponse( ( response ) => {
+				return response.url().includes( 'wp-json/wp/v2/product_tag' );
+			} );
 
 			await page
 				.getByRole( 'button', { name: 'Products by Tag' } )
