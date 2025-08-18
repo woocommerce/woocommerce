@@ -553,7 +553,7 @@ class BlockTemplateUtils {
 				$templates,
 				function ( $template ) {
 					// This template has been customised and saved as a post.
-					return 'custom' === $template->source && 'woocommerce/woocommerce' === $template->theme;
+					return 'custom' === $template->source && ( self::PLUGIN_SLUG === $template->theme || self::DEPRECATED_PLUGIN_SLUG === $template->theme );
 				}
 			),
 			'slug'
@@ -582,29 +582,31 @@ class BlockTemplateUtils {
 	public static function remove_duplicate_customized_templates( $templates ) {
 		$theme_slug = get_stylesheet();
 
-		$filtered_templates = array_filter(
+		$customized_theme_template_slugs = array_column(
+			array_filter(
+				$templates,
+				function ( $template ) use ( $theme_slug ) {
+					// This template has been customised and saved as a post.
+					return 'custom' === $template->source && $theme_slug === $template->theme;
+				}
+			),
+			'slug'
+		);
+
+		return array_filter(
 			$templates,
-			function ( $template ) use ( $templates, $theme_slug ) {
+			function ( $template ) use ( $theme_slug, $customized_theme_template_slugs ) {
 				if ( $template->theme === $theme_slug ) {
 					// This is a customized template based on the theme template, so it should be returned.
 					return true;
 				}
-				// This is a template customized from the WooCommerce default template.
-				// Only return it if there isn't a customized version of the theme template.
-				$is_there_a_customized_theme_template = array_filter(
-					$templates,
-					function ( $theme_template ) use ( $template, $theme_slug ) {
-						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug && 'custom' === $theme_template->source;
-					}
-				);
-				if ( $is_there_a_customized_theme_template ) {
-					return false;
+				// Customized from the WooCommerce default template: keep only if there is no customized theme template with same slug.
+				if ( 'custom' === $template->source ) {
+					return ! in_array( $template->slug, $customized_theme_template_slugs, true );
 				}
 				return true;
-			},
+			}
 		);
-
-		return $filtered_templates;
 	}
 
 	/**
@@ -709,7 +711,7 @@ class BlockTemplateUtils {
 	 * @param array  $slugs An array of slugs to retrieve templates for.
 	 * @param string $template_type wp_template or wp_template_part.
 	 *
-	 * @return int[]|\WP_Post[] An array of found templates.
+	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		$check_query_args = array(

@@ -39,7 +39,7 @@ test.describe( 'Template priority', () => {
 			path: '/product/hoodie',
 			templateName: 'Single Product',
 			templatePath: 'single-product',
-			identificableText: 'Related products',
+			identifiableText: 'Related products',
 		},
 		{
 			path: '/product-category/clothing',
@@ -49,7 +49,7 @@ test.describe( 'Template priority', () => {
 				templateName: 'Product Catalog',
 				templatePath: 'archive-product',
 			},
-			identificableText: 'Showing all 9 results',
+			identifiableText: 'Showing all 9 results',
 		},
 	];
 
@@ -66,7 +66,7 @@ test.describe( 'Template priority', () => {
 
 				// Verify it loaded correctly but has no custom text.
 				await expect(
-					page.getByText( testData.identificableText )
+					page.getByText( testData.identifiableText )
 				).toBeVisible();
 				await expect(
 					page.getByText( 'Custom template' )
@@ -78,8 +78,10 @@ test.describe( 'Template priority', () => {
 					BLOCK_THEME_WITH_TEMPLATES_SLUG
 				);
 
+				await page.goto( testData.path );
+
 				await expect(
-					page.getByText( testData.identificableText )
+					page.getByText( testData.identifiableText )
 				).toBeVisible();
 				await expect(
 					page.getByText( 'Custom template' )
@@ -97,7 +99,7 @@ test.describe( 'Template priority', () => {
 					await page.goto( testData.path );
 
 					await expect(
-						page.getByText( testData.identificableText )
+						page.getByText( testData.identifiableText )
 					).toBeVisible();
 					await expect(
 						page.getByText(
@@ -115,7 +117,7 @@ test.describe( 'Template priority', () => {
 					await page.goto( testData.path );
 
 					await expect(
-						page.getByText( testData.identificableText )
+						page.getByText( testData.identifiableText )
 					).toBeVisible();
 					await expect(
 						page.getByText(
@@ -139,7 +141,7 @@ test.describe( 'Template priority', () => {
 				await page.goto( testData.path );
 
 				await expect(
-					page.getByText( testData.identificableText )
+					page.getByText( testData.identifiableText )
 				).toBeVisible();
 				await expect(
 					page.getByText( 'Custom fallback template with theme slug' )
@@ -190,7 +192,7 @@ test.describe( 'Template priority', () => {
 				await page.goto( testData.path );
 
 				await expect(
-					page.getByText( testData.identificableText )
+					page.getByText( testData.identifiableText )
 				).toBeVisible();
 				await expect(
 					page.getByText( 'Custom template with theme slug' )
