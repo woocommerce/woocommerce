@@ -17,7 +17,6 @@ declare global {
 			) => TrustedTypePolicy;
 			defaultPolicy?: TrustedTypePolicy;
 		};
-		woocommerceTrustedPolicyConfigured?: boolean;
 	}
 }
 
