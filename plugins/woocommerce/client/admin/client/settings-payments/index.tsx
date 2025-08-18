@@ -104,6 +104,10 @@ const OfflinePaymentGatewayWrapper = ( {
 	title,
 	chunkComponent: ChunkComponent,
 }: OfflinePaymentGatewayWrapperProps ) => {
+	useEffect( () => {
+		window.scrollTo( 0, 0 ); // Scrolls to the top of the page.
+	}, [] );
+
 	return (
 		<>
 			<div className="settings-payments-offline__container">
@@ -354,6 +358,10 @@ export const SettingsPaymentsMethods = () => {
  * Wraps the offline payment gateways settings page.
  */
 export const SettingsPaymentsOfflineWrapper = () => {
+	useEffect( () => {
+		window.scrollTo( 0, 0 ); // Scrolls to the top of the page.
+	}, [] );
+
 	return (
 		<>
 			<div className="settings-payments-offline__container">
