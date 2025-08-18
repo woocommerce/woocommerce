@@ -61,7 +61,7 @@ trait Woo_Analytics_Trait {
 	protected $session_id = '';
 
 	/**
-	 *  Landing page where session started.
+	 *  Landing page breadcrumb trail where session started (stored as JSON string).
 	 *
 	 *  @var string
 	 */
@@ -381,10 +381,9 @@ trait Woo_Analytics_Trait {
 		if ( empty( $session_data ) ) {
 			return;
 		}
-		$session_data['is_engaged']   = true;
-		$session_data['landing_page'] = rawurlencode( $session_data['landing_page'] );
-		$encoded_session_data         = wp_json_encode( $session_data );
-		$cookie_js                    = "document.cookie = 'woocommerceanalytics_session={$encoded_session_data}; expires={$session_data['expires']}; path=/; secure; samesite=strict';";
+		$session_data['is_engaged'] = true;
+		$encoded_session_data       = rawurlencode( wp_json_encode( $session_data ) );
+		$cookie_js                  = "document.cookie = 'woocommerceanalytics_session={$encoded_session_data}; expires={$session_data['expires']}; path=/; secure; samesite=strict';";
 		wc_enqueue_js( $cookie_js );
 
 		wc_enqueue_js( "_wca.push({$event_js});" );
@@ -400,16 +399,16 @@ trait Woo_Analytics_Trait {
 		if ( ! $this->get_session_id() ) {
 			$session_id           = wp_generate_uuid4();
 			$this->session_id     = $session_id;
-			$this->landing_page   = $this->get_current_url();
+			$this->landing_page   = wp_json_encode( $this->get_breadcrumb_titles() );
 			$this->is_new_session = true;
 
 			$session_expiration = $this->get_session_expiration_time();
 			$session_data       = array(
 				'session_id'   => $this->session_id,
-				'landing_page' => rawurlencode( $this->landing_page ),
+				'landing_page' => $this->landing_page,
 				'expires'      => $session_expiration,
 			);
-			$encoded_data       = wp_json_encode( $session_data );
+			$encoded_data       = rawurlencode( wp_json_encode( $session_data ) );
 			$cookie_js          = "document.cookie = 'woocommerceanalytics_session={$encoded_data}; expires={$session_expiration}; path=/; secure; samesite=strict';";
 			wc_enqueue_js( $cookie_js ); // save the session cookie for further events in the session
 
@@ -822,7 +821,7 @@ trait Woo_Analytics_Trait {
 			return array();
 		}
 
-		$decoded = json_decode( $raw_cookie, true );
+		$decoded = json_decode( rawurldecode( $raw_cookie ), true );
 		return is_array( $decoded ) ? $decoded : array();
 	}
 
@@ -895,5 +894,75 @@ trait Woo_Analytics_Trait {
 	private function is_initial_page_view( $event ) {
 		$initial_events = array( 'woocommerceanalytics_page_view', 'woocommerceanalytics_product_view', 'woocommerceanalytics_cart_view' );
 		return in_array( $event, $initial_events, true ) && ( ! $this->get_session_id() || $this->is_new_session );
+	}
+
+	/**
+	 * Retrieves the breadcrumb trail as an array of page titles.
+	 *
+	 * This function attempts to generate a hierarchical breadcrumb trail for the current page or post.
+	 * - For the front page, it returns "Home".
+	 * - For WooCommerce product, category, or tag pages, it uses the WooCommerce breadcrumb generator and prepends the shop page title if needed.
+	 * - For regular pages, it builds the breadcrumb from the page's ancestors, ordered from top-level to current.
+	 * - For all other cases, it returns the current page's title.
+	 *
+	 * @return array The breadcrumb trail as an array of titles.
+	 */
+	private function get_breadcrumb_titles() {
+		if ( is_front_page() ) {
+			return array( __( 'Home', 'woocommerce-analytics' ) );
+		}
+
+		if ( class_exists( '\WC_Breadcrumb' ) ) {
+			$breadcrumb = new \WC_Breadcrumb();
+			$crumbs     = $breadcrumb->generate();
+			$titles     = wp_list_pluck( $crumbs, 0 );
+
+			if ( is_product() || is_product_category() || is_product_tag() ) {
+				$titles = $this->prepend_shop_page_title( $titles );
+			}
+
+			if ( ! empty( $titles ) ) {
+				return $titles;
+			}
+		}
+
+		// If it's a page, get the hierarchical title.
+		if ( is_page() ) {
+			$titles    = array();
+			$page_id   = get_queried_object_id();
+			$ancestors = get_post_ancestors( $page_id );
+			// Reverse the ancestors to get the top-level first.
+			$ancestors = array_reverse( $ancestors );
+
+			foreach ( $ancestors as $ancestor ) {
+				$titles[] = get_the_title( $ancestor );
+			}
+			$titles[] = get_the_title( $page_id );
+
+			return $titles;
+		}
+
+		return array( get_the_title() );
+	}
+
+	/**
+	 * Prepend the shop page title if it's not already present.
+	 *
+	 * @param array $titles The titles to prepend the shop page title to.
+	 * @return array The titles with the shop page title prepended.
+	 */
+	private function prepend_shop_page_title( array $titles ) {
+		$shop_page_id = wc_get_page_id( 'shop' );
+		if ( ! $shop_page_id ) {
+			return $titles;
+		}
+
+		$shop_page_title = get_the_title( $shop_page_id );
+
+		if ( ! $shop_page_title || ( ! empty( $titles ) && $titles[0] === $shop_page_title ) ) {
+			return $titles;
+		}
+
+		return array_merge( array( $shop_page_title ), $titles );
 	}
 }
