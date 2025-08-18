@@ -144,7 +144,6 @@ class WC_Admin {
 	/**
 	 * Handle redirects:
 	 * 1. Nonced plugin install redirects.
-	 * 2. To offline payment gateway(s) new settings page.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
