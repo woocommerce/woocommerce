@@ -25,7 +25,7 @@ The **Point Release Request (PRR) flow** is a structured process for requesting 
 
 To ensure the release lead is aware of all planned fixes to be included in the next point release, it is important to create either an issue or PR as soon as a bug is discovered and planned as a patch fix.  This will help reduce the number of patch releases that need to be created.
 
-If the initial PR may take more than a few hours to create, please create an issue in GitHub or Linear and set the milestone of the issue to targeted release. E.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
+If the initial PR may take more than a few hours to create, please create an issue and set the milestone of the issue to targeted release. E.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
 
 #### 1b. Initial Pull Request Creation
 
