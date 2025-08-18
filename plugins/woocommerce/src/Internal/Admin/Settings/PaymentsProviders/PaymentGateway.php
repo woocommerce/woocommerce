@@ -531,7 +531,15 @@ class PaymentGateway {
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		try {
 			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-				return (string) $payment_gateway->get_settings_url();
+				$url = (string) $payment_gateway->get_settings_url();
+				if ( ! empty( $url ) && wc_is_valid_url( $url ) ) {
+					return add_query_arg(
+						array(
+							'from' => Payments::FROM_PAYMENTS_SETTINGS,
+						),
+						$payment_gateway->get_settings_url()
+					);
+				}
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -545,6 +553,7 @@ class PaymentGateway {
 			);
 		}
 
+		// If we couldn't get the settings URL from the gateway, fall back to a general gateway settings URL.
 		return Utils::wc_payments_settings_url(
 			null,
 			array(
