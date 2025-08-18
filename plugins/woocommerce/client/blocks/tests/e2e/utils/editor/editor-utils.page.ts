@@ -91,12 +91,43 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async revertTemplate( { templateName }: { templateName: string } ) {
+	/**
+	 * Search for a template or template part in the Site Editor.
+	 */
+	async searchTemplate( { templateName }: { templateName: string } ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
-		// Let's wait for the search to finish.
+
+		// Wait for the search to finish.
 		await expect(
-			this.page.locator( '.dataviews-view-grid__title-actions' ).first()
-		).toHaveText( templateName );
+			this.page.getByRole( 'button', { name: 'Reset' } )
+		).toBeVisible();
+		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+	}
+
+	/**
+	 * Opens a template or template part in the Site Editor given it's name.
+	 */
+	async openTemplate( { templateName }: { templateName: string } ) {
+		const templateButton = this.page
+			.getByRole( 'button', {
+				name: templateName,
+				exact: true,
+			} )
+			.first();
+		if ( ! ( await templateButton.isVisible() ) ) {
+			await this.searchTemplate( { templateName } );
+		}
+
+		await templateButton.click();
+
+		// Wait until editor has loaded.
+		await this.page
+			.getByRole( 'heading', { name: templateName, level: 1 } )
+			.waitFor();
+	}
+
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		await this.searchTemplate( { templateName } );
 
 		await this.page
 			.getByRole( 'button', { name: 'Actions' } )
