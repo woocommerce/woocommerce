@@ -18,6 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -84,8 +88,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @var Jetpack_Connection_Manager
 	 */
-	protected $jetpack_connection_manager;
+	private $jetpack_connection_manager;
 
+	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @var bool
+	 */
+	private $transact_onboarding_complete;
 
 	/**
 	 * Constructor for the gateway.
@@ -107,14 +117,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->title          = $this->get_option( 'title' );
-		$this->description    = $this->get_option( 'description' );
-		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
-		$this->debug          = 'yes' === $this->get_option( 'debug', 'no' );
-		$this->email          = $this->get_option( 'email' );
-		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
-		$this->identity_token = $this->get_option( 'identity_token' );
-		self::$log_enabled    = $this->debug;
+		$this->title                        = $this->get_option( 'title' );
+		$this->description                  = $this->get_option( 'description' );
+		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
+		$this->email                        = $this->get_option( 'email' );
+		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
+		$this->identity_token               = $this->get_option( 'identity_token' );
+		$this->transact_onboarding_complete = 'yes' === $this->get_option( 'transact_onboarding_complete', 'no' );
+		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
@@ -148,65 +159,67 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
+		add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
 
-		$this->maybe_register_site_with_wpcom();
+		// Hook for plugin upgrades.
+		add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
 	}
 
 	/**
-	 * Check if Jetpack is connected.
+	 * Handle onboarding on plugin upgrade.
 	 *
-	 * @return bool
-	 */
-	public function is_jetpack_connected() {
-		if ( ! isset( $this->jetpack_connection_manager ) ) {
-			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
-		}
-		return $this->jetpack_connection_manager->is_connected();
-	}
-
-	/**
-	 * Get the blog token.
-	 *
-	 * @return string|null The blog token, or null if the blog is not connected to Jetpack.
-	 */
-	public function get_blog_token() {
-		if ( ! isset( $this->jetpack_connection_manager ) ) {
-			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
-		}
-
-		$blog_token = $this->jetpack_connection_manager->get_tokens()->get_access_token();
-		if ( is_wp_error( $blog_token ) || empty( $blog_token ) ) {
-			return null;
-		}
-
-		return $blog_token->secret;
-	}
-
-	/**
-	 * Register the site with WPCOM if it is not already registered.
+	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
+	 * @param array       $options Array of bulk item update data.
 	 *
 	 * @return void
 	 */
-	private function maybe_register_site_with_wpcom() {
-		if ( ! is_admin() ||
-			! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ||
-			! WC_Gateway_Paypal_Helper::is_tos_accepted()
-		) {
+	public function maybe_onboard_on_upgrade( $upgrader_object, $options ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
+			foreach ( $options['plugins'] as $plugin ) {
+				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
+					$this->maybe_onboard_with_transact();
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Onboard the merchant with the Transact platform.
+	 *
+	 * @return void
+	 */
+	private function maybe_onboard_with_transact() {
+		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
-		$is_connected                     = $this->jetpack_connection_manager->is_connected();
-
-		if ( $is_connected ) {
+		// Do not run if PayPal Standard is not enabled.
+		if ( ! $this->enabled ) {
 			return;
 		}
 
-		$result = $this->jetpack_connection_manager->try_registration();
-		if ( is_wp_error( $result ) ) {
-			self::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
+		/**
+		 * Filters whether the gateway should use Orders v2 API.
+		 *
+		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.2.0
+		 */
+		$use_orders_v2 = apply_filters(
+			'woocommerce_paypal_use_orders_v2',
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_tos_accepted()
+		);
+
+		// If the conditions are met, but there is an override to not use Orders v2,
+		// respect the override. Bail early -- we don't need to onboard if not using Orders v2.
+		if ( ! $use_orders_v2 ) {
 			return;
 		}
+
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
+		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager->do_onboarding();
 	}
 
 	/**
@@ -258,6 +271,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				self::$log = wc_get_logger();
 			}
 			self::$log->clear( self::ID );
+		}
+
+		// Trigger Transact onboarding when settings are saved.
+		if ( $saved ) {
+			$this->maybe_onboard_with_transact();
 		}
 
 		return $saved;
@@ -428,7 +446,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function maybe_remove_fields( $form_fields ) {
 		// Additional details are added to the receiver email when subscriptions are enabled.
 		// We don't need this for Orders v2.
-		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+		if ( $this->should_use_orders_v2() ) {
 			unset( $form_fields['receiver_email'] );
 		}
 		return $form_fields;
@@ -462,7 +480,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
 
-		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+		if ( $this->should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
@@ -562,7 +580,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() ) {
+		if ( $this->should_use_orders_v2() ) {
 			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
@@ -646,7 +664,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function hide_action_buttons( $actions, $order ) {
-		if ( WC_Gateway_Paypal_Helper::should_use_orders_v2() && $this->id === $order->get_payment_method() ) {
+		if ( $this->should_use_orders_v2() && $this->id === $order->get_payment_method() ) {
 			unset( $actions['pay'], $actions['cancel'] );
 		}
 		return $actions;
@@ -696,25 +714,94 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Checks if the gateway should use Orders v2 API.
+	 * Check if the gateway should use Orders v2 API.
 	 *
 	 * @return bool
 	 */
-	protected function should_use_orders_v2() {
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: We expect this flag to be true if the merchant can be migrated,
-		// i.e. does not need PayPal API keys, and they have accepted the ToS.
-
+	public function should_use_orders_v2() {
 		/**
 		 * Filters whether the gateway should use Orders v2 API.
 		 *
 		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
 		 *
-		 * @since 10.1.0
+		 * @since 10.2.0
 		 */
-		return apply_filters(
+		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			'yes' === $this->get_option( 'use_orders_v2' )
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_tos_accepted()
 		);
+
+		// If the conditions are met, but there is an override to not use Orders v2,
+		// respect the override.
+		if ( ! $use_orders_v2 ) {
+			return false;
+		}
+
+		// If the gateway is not onboarded, bail early.
+		if ( ! $this->is_transact_onboarding_complete() ) {
+			return false;
+		}
+
+		// We need a Jet be able to send authenticated requests to the proxy.
+		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
+		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
+			return false;
+		}
+
+		// We need merchant and provider accounts with Transact to be able to use the proxy.
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
+		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$merchant_account_data    = $transact_account_manager->get_merchant_account_data();
+		if ( empty( $merchant_account_data ) ) {
+			return false;
+		}
+
+		$provider_account_data = $transact_account_manager->get_provider_account_data();
+		if ( empty( $provider_account_data ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the Jetpack connection manager.
+	 *
+	 * @return Jetpack_Connection_Manager
+	 */
+	public function get_jetpack_connection_manager() {
+		if ( ! $this->jetpack_connection_manager ) {
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		}
+		return $this->jetpack_connection_manager;
+	}
+
+	/**
+	 * Whether to show legacy settings. Hooked into the
+	 * `woocommerce_paypal_show_legacy_settings` filter.
+	 *
+	 * @return bool
+	 */
+	public function should_show_legacy_settings() {
+		return ! $this->should_use_orders_v2();
+	}
+
+	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @return bool
+	 */
+	public function is_transact_onboarding_complete() {
+		return $this->transact_onboarding_complete;
+	}
+
+	/**
+	 * Set the Transact onboarding as complete.
+	 *
+	 * @return void
+	 */
+	public function set_transact_onboarding_complete() {
+		$this->update_option( 'transact_onboarding_complete', 'yes' );
+		$this->transact_onboarding_complete = true;
 	}
 }
