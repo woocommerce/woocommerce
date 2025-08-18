@@ -11,9 +11,6 @@ use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
-use WC_Gateway_BACS;
-use WC_Gateway_COD;
-use WC_Gateway_Cheque;
 
 defined( 'ABSPATH' ) || exit;
 
