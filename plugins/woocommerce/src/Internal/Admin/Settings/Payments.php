@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
-use WC_Settings_Payment_Gateways;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -174,7 +173,7 @@ class Payments {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => Utils::wc_payments_settings_url( '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME ),
+							'href' => Utils::wc_payments_settings_url( '/' . ( class_exists( '\WC_Settings_Payment_Gateways' ) ? \WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME : 'offline' ) ),
 						),
 					),
 				),
