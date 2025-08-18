@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Allow the ability to override the method used to apply inline styles to html emails dynamic content.

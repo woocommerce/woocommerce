@@ -21,7 +21,6 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
-import { __ } from '@wordpress/i18n';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
@@ -62,29 +61,6 @@ export const getLysTasklist = async () => {
 	] );
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
-
-	// This is a special case for the payments task.
-	// We need to override the task completion status and title based on the additional data.
-	// This is because LYS and the Home screen share the same task list, but the completion logic is different.
-	tasklist[ 0 ].tasks.forEach( ( task: TaskType ) => {
-		if ( task.id === 'payments' ) {
-			let isComplete = false;
-
-			if (
-				// Store has other online gateways enabled and WooPayments is not onboarded.
-				( task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
-					! task.additionalData?.wooPaymentsIsOnboarded ) ||
-				// WooPayments is onboarded and not in test mode.
-				( task.additionalData?.wooPaymentsIsOnboarded &&
-					! task.additionalData?.wooPaymentsHasTestAccount )
-			) {
-				isComplete = true;
-			}
-
-			task.isComplete = isComplete;
-			task.title = __( 'Set up payments', 'woocommerce' );
-		}
-	} );
 
 	/**
 	 * Show tasks that fulfill all the following conditions:
