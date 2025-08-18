@@ -657,7 +657,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'https://example.com/settings-url' ) );
-		$this->assertEquals( 'https://example.com/settings-url', $this->sut->get_settings_url( $fake_gateway ) );
+		$this->assertEquals( 'https://example.com/settings-url&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => false ) );

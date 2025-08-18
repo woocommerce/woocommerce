@@ -177,6 +177,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			self::BACS_SECTION_NAME,
 			self::CHEQUE_SECTION_NAME,
 		);
+
 		/**
 		 * Add custom sections to the list of sections to be rendered using React.
 		 *
