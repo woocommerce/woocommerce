@@ -340,7 +340,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 
 		// We only want to hide the help tabs on the main WooCommerce Payments settings page and Reactified sections.
-		if ( self::TAB_NAME === $current_tab && ! $this->should_render_react_section( $current_section ) ) {
+		if ( self::TAB_NAME !== $current_tab ) {
+			return;
+		}
+		if ( ! $this->should_render_react_section( $current_section ) ) {
 			return;
 		}
 
@@ -359,7 +362,10 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 
 		// We only want to suppress notices on the main WooCommerce Payments settings page and Reactified sections.
-		if ( self::TAB_NAME === $current_tab && ! $this->should_render_react_section( $current_section ) ) {
+		if ( self::TAB_NAME !== $current_tab ) {
+			return;
+		}
+		if ( ! $this->should_render_react_section( $current_section ) ) {
 			return;
 		}
 
