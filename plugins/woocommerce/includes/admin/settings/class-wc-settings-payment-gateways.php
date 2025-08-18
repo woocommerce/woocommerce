@@ -195,8 +195,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			// Sanity check: use empty array if the filter returns something unexpected.
 			$optional_reactified_sections = array();
 		} else {
-			// Enforce a list format for section identifiers.
-			$optional_reactified_sections = array_values( $optional_reactified_sections );
+			// Enforce a list format and string-only values for section identifiers.
+			$optional_reactified_sections = array_values( array_filter( $optional_reactified_sections, 'is_string' ) );
 		}
 
 		$this->reactified_sections_memo = array_unique( array_merge( $reactified_sections, $optional_reactified_sections ) );
