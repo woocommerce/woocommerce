@@ -9075,21 +9075,6 @@ body.woocommerce_page_wc-settings {
 	}
 }
 
-<<<<<<< HEAD
-=======
-/**
- * Hide screen meta links on Advanced Keys settings page.
- */ 
-body.woocommerce_page_wc-settings-advanced-keys,
-body.woocommerce_page_wc-settings-advanced-webhooks,
-body.woocommerce-admin-page__extensions,
-body.woocommerce-admin-launch-your-store,
-body.woocommerce-admin-full-screen {
-	#screen-meta-links {
-		display:none;
-	}
-}
-
 /**
  * Fixes for offline payment methods pages rendered in legacy mode (not Reactified).
  */
@@ -9102,4 +9087,3 @@ body.woocommerce-settings-payments-section_legacy {
 		background: #f0f0f1;
 	}
 }
->>>>>>> 57c46969d6 ([Payments NOX] Fix allowing offline pms settings pages to be rendered in legacy mode (#60418))
