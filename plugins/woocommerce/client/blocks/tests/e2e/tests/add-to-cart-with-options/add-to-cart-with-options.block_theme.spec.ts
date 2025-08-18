@@ -142,6 +142,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '1.5 lbs' )
 			).toBeVisible();
+			await expect(
+				page.getByText( 'Lorem ipsum dolor sit amet' )
+			).toBeHidden();
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
@@ -155,6 +158,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '2 lbs' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Lorem ipsum dolor sit amet' )
 			).toBeVisible();
 		} );
 
