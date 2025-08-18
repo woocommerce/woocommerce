@@ -1568,8 +1568,7 @@ final class WooCommerce {
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
 			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
-		}
-		if ( true === wc_string_to_bool( $value ) ) {
+		} else {
 			$this->schedule_tracking_action();
 		}
 	}
