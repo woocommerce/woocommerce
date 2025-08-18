@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Unit_Test_Case;
@@ -20,7 +21,9 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 	}
 
 	/**
@@ -35,7 +38,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	 * Tests if the hooks are added correctly in the constructor.
 	 */
 	public function test_hooks_added() {
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 
 		// Check if the admin_init filter is added.
 		$this->assertNotFalse( has_filter( 'admin_init', array( $fulfillments_settings, 'init_settings_auto_fulfill' ) ) > 0 );
@@ -56,7 +59,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$modified_settings     = $fulfillments_settings->add_auto_fulfill_settings( $settings, '' );
 
 		$this->assertCount( 5, $modified_settings );
@@ -76,7 +79,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	 * Tests the auto_fulfill_items_on_processing method when an order doesn't exist.
 	 */
 	public function test_auto_fulfill_items_on_processing_bails_out_if_no_order_exists() {
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$mock_order            = $this->createMock( WC_Order::class );
 		$mock_order->expects( $this->never() )->method( 'get_items' );
 		// Simulate an order status change without an order.
@@ -95,7 +98,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 				return $products;
 			}
 		);
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$mock_order            = $this->createMock( WC_Order::class );
 		$mock_order->expects( $this->once() )->method( 'get_items' )->willReturn( array() );
 		// Simulate an order status change with an order that has no items.
@@ -153,7 +156,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 				return $products;
 			}
 		);
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$mock_order            = $this->createMock( WC_Order::class );
 
 		$mock_items = array();
@@ -222,7 +225,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	 * Tests the auto_fulfill_items_on_completed method when order doesn't exist.
 	 */
 	public function test_auto_fulfill_items_on_completed_bails_out_if_no_order_exists() {
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$mock_order            = $this->createMock( WC_Order::class );
 		$mock_order->expects( $this->never() )->method( 'get_items' );
 		// Simulate an order status change without an order.
@@ -233,7 +236,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	 * Tests the auto_fulfill_items_on_completed method with an order that has no items.
 	 */
 	public function test_auto_fulfill_items_on_completed_bails_out_if_order_has_no_items() {
-		$fulfillments_settings = new \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings();
+		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$mock_order            = $this->createMock( WC_Order::class );
 		$mock_order->expects( $this->once() )->method( 'get_items' )->willReturn( array() );
 		$mock_order->expects( $this->never() )->method( 'get_meta' );
@@ -248,6 +251,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 		$mock_sut = $this->getMockBuilder( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsSettings::class )
 			->onlyMethods( array( 'auto_fulfill_items_on_processing' ) )
 			->getMock();
+		$mock_sut->register();
 		$mock_sut->expects( $this->once() )
 			->method( 'auto_fulfill_items_on_processing' );
 		$mock_order = $this->createMock( WC_Order::class );

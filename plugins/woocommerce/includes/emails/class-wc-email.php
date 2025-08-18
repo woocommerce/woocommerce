@@ -801,57 +801,94 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Apply inline styles to dynamic content.
 	 *
-	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
+	 * We only inline CSS for html emails.
 	 *
-	 * @version 4.0.0
+	 * @version 10.2.0
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
 	public function style_inline( $content ) {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
-			$css  = '';
-			$css .= $this->get_must_use_css_styles();
-			$css .= "\n";
-
-			ob_start();
-			wc_get_template( 'emails/email-styles.php' );
-			$css .= ob_get_clean();
-
 			/**
-			 * Provides an opportunity to filter the CSS styles included in e-mails.
+			 * Filter to allow the ability to override the email inline styling method.
 			 *
-			 * @since 2.3.0
+			 * @since 10.2.0
 			 *
-			 * @param string    $css   CSS code.
-			 * @param \WC_Email $email E-mail instance.
+			 * @param callable $style_inline_callback The default email inline styling callback.
+			 * @param string|null $content Content that will receive inline styles.
+			 * @param WC_Email $this The WC_Email object.
 			 */
-			$css = apply_filters( 'woocommerce_email_styles', $css, $this );
+			$style_inline_callback = apply_filters( 'woocommerce_mail_style_inline_callback', array( $this, 'apply_inline_style' ), $content, $this );
 
-			$css_inliner_class = CssInliner::class;
-
-			if ( $this->supports_emogrifier() && class_exists( $css_inliner_class ) ) {
-				try {
-					$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
-
-					do_action( 'woocommerce_emogrifier', $css_inliner, $this );
-
-					$dom_document = $css_inliner->getDomDocument();
-
-					// When the email is rendered in the block editor, we don't want to remove the elements with display: none.
-					// The main reason is using preview text in the email body which is hidden by default.
-					if ( ! $this->block_email_editor_enabled ) {
-						HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
-					}
-					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
-						->convertCssToVisualAttributes()
-						->render();
-				} catch ( Exception $e ) {
-					$logger = wc_get_logger();
-					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
-				}
-			} else {
-				$content = '<style type="text/css">' . $css . '</style>' . $content;
+			if ( ! is_callable( $style_inline_callback ) ) {
+				$style_inline_callback = array( $this, 'apply_inline_style' );
 			}
+
+			return call_user_func( $style_inline_callback, $content );
+		}
+
+		return $content;
+	}
+
+
+	/**
+	 * Apply inline styles to dynamic content using Emogrifier library (if supported).
+	 *
+	 * @since 10.2.0
+	 * @param string|null $content Content that will receive inline styles.
+	 * @return string
+	 */
+	private function apply_inline_style( $content ) {
+		$css  = '';
+		$css .= $this->get_must_use_css_styles();
+		$css .= "\n";
+
+		ob_start();
+		wc_get_template( 'emails/email-styles.php' );
+		$css .= ob_get_clean();
+
+		/**
+		 * Provides an opportunity to filter the CSS styles included in e-mails.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param string    $css   CSS code.
+		 * @param \WC_Email $email E-mail instance.
+		 */
+		$css = apply_filters( 'woocommerce_email_styles', $css, $this );
+
+		$css_inliner_class = CssInliner::class;
+
+		if ( $this->supports_emogrifier() && class_exists( $css_inliner_class ) ) {
+			try {
+				$css_inliner = CssInliner::fromHtml( $content )->inlineCss( $css );
+
+				/**
+				 * Action hook fired when an email content has been processed by Emogrifier CssInliner instance.
+				 *
+				 * @since 4.1.0
+				 *
+				 * @param CssInliner $css_inliner CssInliner instance.
+				 * @param WC_Email $this WC_Email instance.
+				 */
+				do_action( 'woocommerce_emogrifier', $css_inliner, $this );
+
+				$dom_document = $css_inliner->getDomDocument();
+
+				// When the email is rendered in the block editor, we don't want to remove the elements with display: none.
+				// The main reason is using preview text in the email body which is hidden by default.
+				if ( ! $this->block_email_editor_enabled ) {
+					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+				}
+				$content = CssToAttributeConverter::fromDomDocument( $dom_document )
+					->convertCssToVisualAttributes()
+					->render();
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
+			}
+		} else {
+			$content = '<style type="text/css">' . $css . '</style>' . $content;
 		}
 
 		return $content;
@@ -1148,6 +1185,7 @@ class WC_Email extends WC_Settings_API {
 				wp_safe_redirect( $redirect );
 				exit;
 			}
+			wc_clear_template_cache();
 		}
 	}
 

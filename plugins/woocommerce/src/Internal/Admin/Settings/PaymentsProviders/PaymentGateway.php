@@ -11,9 +11,6 @@ use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
-use WC_Gateway_BACS;
-use WC_Gateway_COD;
-use WC_Gateway_Cheque;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -100,7 +97,7 @@ class PaymentGateway {
 	 * @return array The enhanced payment extension suggestion details.
 	 */
 	public function enhance_extension_suggestion( array $extension_suggestion ): array {
-		if ( empty( $extensionp['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
+		if ( empty( $extension_suggestion['onboarding'] ) || ! is_array( $extension_suggestion['onboarding'] ) ) {
 			$extension_suggestion['onboarding'] = array();
 		}
 
@@ -531,7 +528,26 @@ class PaymentGateway {
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		try {
 			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
-				return (string) $payment_gateway->get_settings_url();
+				$url = trim( (string) $payment_gateway->get_settings_url() );
+				if ( ! empty( $url ) && ! wc_is_valid_url( $url ) ) {
+					// Back-compat: normalize common relative admin URLs.
+					$url = ltrim( $url, '/' );
+					// Remove the '/wp-admin/' prefix if it exists.
+					if ( 0 === strpos( $url, 'wp-admin/' ) ) {
+						$url = substr( $url, strlen( 'wp-admin/' ) );
+					}
+					if ( 0 === strpos( $url, 'admin.php' ) || 0 === strpos( $url, '/admin.php' ) ) {
+						$url = admin_url( ltrim( $url, '/' ) );
+					}
+				}
+				if ( ! empty( $url ) && wc_is_valid_url( $url ) ) {
+					return add_query_arg(
+						array(
+							'from' => Payments::FROM_PAYMENTS_SETTINGS,
+						),
+						$url
+					);
+				}
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -545,17 +561,7 @@ class PaymentGateway {
 			);
 		}
 
-		// Special handling for offline payment gateways to use the front-end navigation.
-		if ( WC_Gateway_BACS::ID === $payment_gateway->id || WC_Gateway_COD::ID === $payment_gateway->id || WC_Gateway_Cheque::ID === $payment_gateway->id ) {
-			return Utils::wc_payments_settings_url(
-				null,
-				array(
-					'path' => '/offline/' . strtolower( $payment_gateway->id ),
-					'from' => Payments::FROM_PAYMENTS_SETTINGS,
-				)
-			);
-		}
-
+		// If we couldn't get a valid settings URL from the gateway, fall back to a general gateway settings URL.
 		return Utils::wc_payments_settings_url(
 			null,
 			array(

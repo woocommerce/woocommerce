@@ -6,7 +6,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
 import { registerPlugin } from '@wordpress/plugins';
 /**
@@ -43,13 +43,13 @@ describe( 'Testing Slotfills', () => {
 		} );
 	} );
 	beforeEach( () => {
+		server.use(
+			http.get( '/wc/store/v1/cart/', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
+
 		act( () => {
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
 			// need to clear the store resolution state between tests.
 			dispatch( storeKey ).invalidateResolutionForStore();
 			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
@@ -57,12 +57,12 @@ describe( 'Testing Slotfills', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		server.resetHandlers();
 	} );
 
 	it( 'still expects billingData', async () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
 				const cart = {
 					...previewCart,
 					billing_address: {
@@ -71,16 +71,15 @@ describe( 'Testing Slotfills', () => {
 					},
 				};
 
-				return Promise.resolve( JSON.stringify( cart ) );
-			}
-		} );
+				return HttpResponse.json( cart );
+			} )
+		);
 		render( <CartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
-		expect(
-			screen.getByText( /My address: Street address/i )
-		).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+		await waitFor( () => {
+			expect(
+				screen.getByText( /My address: Street address/i )
+			).toBeVisible();
+		} );
 	} );
 } );

@@ -48,9 +48,6 @@ describe( 'Intro Banners', () => {
 						customizeStoreTaskCompleted: false,
 					},
 					themeConfiguration: {},
-					transitionalScreen: {
-						hasCompleteSurvey: false,
-					},
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,

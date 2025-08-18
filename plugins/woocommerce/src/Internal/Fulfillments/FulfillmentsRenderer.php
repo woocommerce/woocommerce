@@ -26,9 +26,9 @@ class FulfillmentsRenderer {
 	private array $fulfillments_cache = array();
 
 	/**
-	 * CLass constructor.
+	 * Registers the hooks related to fulfillments.
 	 */
-	public function __construct() {
+	public function register() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			// Hook into column definitions and add the new fulfillment columns.
 			add_filter( 'manage_woocommerce_page_wc-orders_columns', array( $this, 'add_fulfillment_columns' ) );

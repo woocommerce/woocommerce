@@ -350,7 +350,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( array $args, \WP_Query $wp_query ) {
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
 		if ( $wp_query->get( 'search' ) ) {

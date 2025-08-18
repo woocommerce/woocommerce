@@ -13,7 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
- * This renderer covers both core/paragraph and core/heading blocks
+ * This renderer covers both core/paragraph, core/heading and core/site-title blocks.
  */
 class Text extends Abstract_Block_Renderer {
 	/**
@@ -61,7 +61,7 @@ class Text extends Abstract_Block_Renderer {
 		// Add fallback text color when no custom text color or preset text color is set.
 		if ( empty( $block_styles['declarations']['color'] ) ) {
 			$email_styles               = $rendering_context->get_theme_styles();
-			$additional_styles['color'] = $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
 		$additional_styles['text-align'] = 'left';

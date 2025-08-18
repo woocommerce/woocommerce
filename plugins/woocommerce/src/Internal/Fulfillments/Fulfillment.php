@@ -17,7 +17,6 @@ use WC_Meta_Data;
 
 defined( 'ABSPATH' ) || exit;
 
-
 /**
  * WC Order Fulfillment Class
  *

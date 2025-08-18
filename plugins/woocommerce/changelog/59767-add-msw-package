@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add msw package to implement integration tests

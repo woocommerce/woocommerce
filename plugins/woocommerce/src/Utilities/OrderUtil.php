@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
@@ -206,6 +207,8 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
+		$order_type = (string) $order_type;
+
 		$order_count_cache = new OrderCountCache();
 		$count_per_status  = $order_count_cache->get( $order_type );
 
@@ -229,13 +232,11 @@ final class OrderUtil {
 
 			// Make sure all order statuses are included just in case.
 			$count_per_status = array_merge(
-				array_fill_keys( $order_count_cache->get_default_statuses(), 0 ),
+				array_fill_keys( array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) ), 0 ),
 				$count_per_status
 			);
 
-			foreach ( $count_per_status as $order_status => $count ) {
-				$order_count_cache->set( $order_type, $order_status, $count );
-			}
+			$order_count_cache->set_multiple( $order_type, $count_per_status );
 		}
 
 		return $count_per_status;

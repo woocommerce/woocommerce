@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reset quantities when adding to cart a grouped product fails with the Add to Cart + Options block

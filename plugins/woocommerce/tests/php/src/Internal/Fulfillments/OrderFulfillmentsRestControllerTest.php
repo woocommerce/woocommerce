@@ -53,7 +53,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		parent::setupBeforeClass();
 
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
 

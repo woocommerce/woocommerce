@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use WC_Cache_Helper;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
+use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for filter counts.
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
  */
 class FilterData {
 	/**
@@ -21,12 +24,21 @@ class FilterData {
 	private $query_clauses;
 
 	/**
+	 * Instance of TaxonomyHierarchyData.
+	 *
+	 * @var TaxonomyHierarchyData
+	 */
+	private $taxonomy_hierarchy_data;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
+	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses ) {
-		$this->query_clauses = $query_clauses;
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
+		$this->query_clauses           = $query_clauses;
+		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
 	}
 
 	/**
@@ -321,25 +333,30 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$taxonomies_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $taxonomy_to_count ) ) . '")';
-			$taxonomy_count_sql      = "
-				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, term_taxonomy.term_taxonomy_id as term_count_id
-				FROM {$wpdb->term_relationships} AS term_relationships
-				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-				WHERE term_relationships.object_id IN ( {$product_ids} )
-				{$taxonomies_to_count_sql}
-				GROUP BY term_taxonomy.term_taxonomy_id
-			";
+			$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $taxonomy_to_count ) );
 
-			/**
-			 * We can't use $wpdb->prepare() here because using %s with
-			 * $wpdb->prepare() for a subquery won't work as it will escape the
-			 * SQL query.
-			 * We're using the query as is, same as Core does.
-			 */
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$results = $wpdb->get_results( $taxonomy_count_sql );
-			$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+			if ( is_taxonomy_hierarchical( $taxonomy_to_count ) ) {
+				$results = $this->get_hierarchical_taxonomy_counts( $product_ids, $taxonomy_to_count );
+			} else {
+				$taxonomy_count_sql = "
+					SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, term_taxonomy.term_taxonomy_id as term_count_id
+					FROM {$wpdb->term_relationships} AS term_relationships
+					INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+					WHERE term_relationships.object_id IN ( {$product_ids} )
+					AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
+					GROUP BY term_taxonomy.term_taxonomy_id
+				";
+
+				/**
+				 * We can't use $wpdb->prepare() here because using %s with
+				 * $wpdb->prepare() for a subquery won't work as it will escape the
+				 * SQL query.
+				 * We're using the query as is, same as Core does.
+				 */
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$base_results = $wpdb->get_results( $taxonomy_count_sql );
+				$results      = array_map( 'absint', wp_list_pluck( $base_results, 'term_count', 'term_count_id' ) );
+			}
 		}
 
 		/**
@@ -352,6 +369,101 @@ class FilterData {
 		$this->set_cache( $transient_key, $results );
 
 		return $results;
+	}
+
+	/**
+	 * Get hierarchical taxonomy counts using optimized hierarchy data.
+	 *
+	 * @param string $product_ids   Comma-separated list of product IDs.
+	 * @param string $taxonomy_name Original taxonomy name for hierarchy methods.
+	 * @return array Array of term_id => count pairs.
+	 */
+	private function get_hierarchical_taxonomy_counts( string $product_ids, string $taxonomy_name ) {
+		global $wpdb;
+
+		// Step 1: Get all terms that have products in the filtered set (1 query).
+		$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $taxonomy_name ) );
+		$base_terms_sql   = "
+			SELECT DISTINCT tt.term_id, tt.term_taxonomy_id
+			FROM {$wpdb->term_relationships} tr
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE tr.object_id IN ( {$product_ids} )
+			AND tt.taxonomy = '{$taxonomy_escaped}'
+		";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$base_terms = $wpdb->get_results( $base_terms_sql );
+
+		if ( empty( $base_terms ) ) {
+			return array();
+		}
+
+		// Step 2: Build hierarchy relationships using TaxonomyHierarchyData.
+		$hierarchy_counts = array();
+		$processed_terms  = array();
+
+		// Process each base term and its ancestors.
+		foreach ( $base_terms as $term ) {
+			$term_id = (int) $term->term_id;
+
+			// Count for the term itself and all its descendants.
+			if ( ! isset( $hierarchy_counts[ $term_id ] ) ) {
+				$descendants                  = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
+				$descendants[]                = $term_id; // Include the term itself.
+				$hierarchy_counts[ $term_id ] = $descendants;
+			}
+
+			// Get ancestors using hierarchy data.
+			$ancestors = $this->taxonomy_hierarchy_data->get_ancestors( $term_id, $taxonomy_name );
+			foreach ( $ancestors as $ancestor_id ) {
+				if ( in_array( $ancestor_id, $processed_terms, true ) ) {
+					continue;
+				}
+
+				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $ancestor_id, $taxonomy_name );
+				$descendants[] = $ancestor_id; // Include the ancestor term itself.
+
+				$hierarchy_counts[ $ancestor_id ] = $descendants;
+				$processed_terms[]                = $ancestor_id;
+			}
+		}
+
+		if ( empty( $hierarchy_counts ) ) {
+			return array();
+		}
+
+		// Step 3: Execute batch counting using a single query with CASE statements.
+		$count_cases = array();
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
+			$term_ids_str  = implode( ',', array_map( 'absint', $term_ids ) );
+			$count_cases[] = "COUNT(DISTINCT CASE WHEN tt.term_id IN ({$term_ids_str}) THEN tr.object_id END) as count_{$term_id}";
+		}
+
+		$batch_count_sql = '
+			SELECT ' . implode( ', ', $count_cases ) . "
+			FROM {$wpdb->term_relationships} tr
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			WHERE tr.object_id IN ( {$product_ids} )
+			AND tt.taxonomy = '{$taxonomy_escaped}'
+		";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$count_result = $wpdb->get_row( $batch_count_sql, ARRAY_A );
+
+		if ( empty( $count_result ) ) {
+			return array();
+		}
+
+		// Parse results back to term_id => count format.
+		$final_counts = array();
+		foreach ( $hierarchy_counts as $term_id => $term_ids ) {
+			$count_key = "count_{$term_id}";
+			if ( isset( $count_result[ $count_key ] ) && $count_result[ $count_key ] > 0 ) {
+				$final_counts[ $term_id ] = absint( $count_result[ $count_key ] );
+			}
+		}
+
+		return $final_counts;
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make button animation show up in the Add to Cart + Options even when 'Enable AJAX add to cart buttons' setting is disabled

@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
@@ -60,26 +61,32 @@ class Payments {
 	 *
 	 * @param string $location    The location for which the providers are being determined.
 	 *                            This is an ISO 3166-1 alpha-2 country code.
-	 * @param bool   $for_display Whether the payment providers list is intended for display purposes or
+	 * @param bool   $for_display Optional. Whether the payment providers list is intended for display purposes or
 	 *                            it is meant to be used for internal business logic.
 	 *                            Primarily, this means that when it is not for display, we will use the raw
 	 *                            payment gateways list (all the registered gateways), not just the ones that
 	 *                            should be shown to the user on the Payments Settings page.
 	 *                            This complication is for backward compatibility as it relates to legacy settings hooks
 	 *                            being fired or not.
+	 * @param bool   $remove_shells Optional. Whether to remove the payment providers shells from the list.
+	 *                              If the $for_display is true, this will be ignored since the display logic will
+	 *                              handle the shells itself.
 	 *
 	 * @return array The payment providers details list.
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
-	public function get_payment_providers( string $location, bool $for_display = true ): array {
+	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
-		$suggestions      = array();
+		if ( ! $for_display && $remove_shells ) {
+			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways );
+		}
 
 		$providers_order_map = $this->providers->get_order_map();
 
 		$payment_providers = array();
 
 		// Only include suggestions if the requesting user can install plugins.
+		$suggestions = array();
 		if ( current_user_can( 'install_plugins' ) ) {
 			$suggestions = $this->providers->get_extension_suggestions( $location, self::SUGGESTIONS_CONTEXT );
 		}
@@ -92,7 +99,15 @@ class Payments {
 					return $a['_priority'] <=> $b['_priority'];
 				}
 			);
+
+			// By default, we will add the preferred suggestions at the top of the list.
 			$last_preferred_order = -1;
+			// If WooPayments is already present, we add the preferred suggestions after it.
+			// This way we ensure default installed WooPayments is at the same place as its suggestion would be.
+			if ( isset( $providers_order_map[ WooPaymentsService::GATEWAY_ID ] ) ) {
+				$last_preferred_order = $providers_order_map[ WooPaymentsService::GATEWAY_ID ];
+			}
+
 			foreach ( $suggestions['preferred'] as $suggestion ) {
 				$suggestion_order_map_id = $this->providers->get_suggestion_order_map_id( $suggestion['id'] );
 				// Determine the suggestion's order value.
@@ -100,13 +115,11 @@ class Payments {
 				// PSP first, APM after PSP, offline PSP after PSP and APM.
 				if ( ! isset( $providers_order_map[ $suggestion_order_map_id ] ) ) {
 					$providers_order_map = Utils::order_map_add_at_order( $providers_order_map, $suggestion_order_map_id, $last_preferred_order + 1 );
-					if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
-						// If the last preferred order is less than the current one, we need to update it.
-						$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
-					}
-				} elseif ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
-					// Save the preferred provider's order to know where we should be inserting next.
-					// But only if the last preferred order is less than the current one.
+				}
+
+				// Save the preferred provider's order to know where we should be inserting next.
+				// But only if the last preferred order is less than the current one.
+				if ( $last_preferred_order < $providers_order_map[ $suggestion_order_map_id ] ) {
 					$last_preferred_order = $providers_order_map[ $suggestion_order_map_id ];
 				}
 
@@ -160,7 +173,7 @@ class Payments {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline' ),
+							'href' => Utils::wc_payments_settings_url( '/' . ( class_exists( '\WC_Settings_Payment_Gateways' ) ? \WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME : 'offline' ) ),
 						),
 					),
 				),

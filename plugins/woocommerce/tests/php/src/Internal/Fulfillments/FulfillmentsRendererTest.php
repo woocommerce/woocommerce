@@ -17,12 +17,21 @@ use WC_Order;
 class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * FulfillmentsRenderer instance.
+	 *
+	 * @var FulfillmentsRenderer
+	 */
+	private FulfillmentsRenderer $renderer;
+
+	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
 	}
 
 	/**
@@ -34,95 +43,23 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test hooks.
+	 * Set up the test case.
 	 */
-	public function test_hooks() {
-		/**
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
-		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( true );
-		$container->replace( CustomOrdersTableController::class, $cot_mock );
-
-		$renderer = new FulfillmentsRenderer();
-		$this->assertNotFalse( has_filter( 'manage_woocommerce_page_wc-orders_columns', array( $renderer, 'add_fulfillment_columns' ) ) );
-		$this->assertNotFalse( has_action( 'manage_woocommerce_page_wc-orders_custom_column', array( $renderer, 'render_fulfillment_column_row_data' ) ) );
-		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
-		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
-		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_admin_hooks' ) ) );
-		$container->reset_replacement( CustomOrdersTableController::class );
-	}
-
-	/**
-	 * Test hooks when HPOS isn't enabled.
-	 */
-	public function test_hooks_legacy() {
-		/**
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
-		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( false );
-		$container->replace( CustomOrdersTableController::class, $cot_mock );
-
-		$renderer = new FulfillmentsRenderer();
-
-		$this->assertNotFalse( has_filter( 'manage_edit-shop_order_columns', array( $renderer, 'add_fulfillment_columns' ) ) );
-		$this->assertNotFalse( has_action( 'manage_shop_order_posts_custom_column', array( $renderer, 'render_fulfillment_column_row_data_legacy' ) ) );
-		$this->assertNotFalse( has_action( 'admin_footer', array( $renderer, 'render_fulfillment_drawer_slot' ) ) );
-		$this->assertNotFalse( has_action( 'admin_enqueue_scripts', array( $renderer, 'load_components' ) ) );
-		$this->assertNotFalse( has_action( 'admin_init', array( $renderer, 'init_admin_hooks' ) ) );
-		$container->reset_replacement( CustomOrdersTableController::class );
-	}
-
-	/**
-	 * Test that the admin_init hooks are registered.
-	 */
-	public function test_admin_init_hooks() {
-		/**
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
-		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( true );
-		$container->replace( CustomOrdersTableController::class, $cot_mock );
-
-		$renderer = new FulfillmentsRenderer();
-		$renderer->init_admin_hooks();
-		$this->assertNotFalse( has_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
-		$this->assertNotFalse( has_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
-		$container->reset_replacement( CustomOrdersTableController::class );
-	}
-
-	/**
-	 * Test that the admin_init hooks are registered when HPOS isn't enabled.
-	 */
-	public function test_admin_init_hooks_legacy() {
-		/**
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-		$cot_mock  = $this->createMock( CustomOrdersTableController::class );
-		$cot_mock->method( 'custom_orders_table_usage_is_enabled' )->willReturn( false );
-		$container->replace( CustomOrdersTableController::class, $cot_mock );
-
-		$renderer = new FulfillmentsRenderer();
-		$renderer->init_admin_hooks();
-		$this->assertNotFalse( has_filter( 'bulk_actions-edit-shop_order', array( $renderer, 'define_fulfillment_bulk_actions' ) ) );
-		$this->assertNotFalse( has_filter( 'handle_bulk_actions-edit-shop_order', array( $renderer, 'handle_fulfillment_bulk_actions' ) ) );
-		$container->reset_replacement( CustomOrdersTableController::class );
+	public function setUp(): void {
+		parent::setUp();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$this->renderer->register();
 	}
 
 	/**
 	 * Test the add_fulfillment_columns method.
 	 */
 	public function test_add_fulfillment_columns() {
-		$renderer = new FulfillmentsRenderer();
-		$columns  = array(
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$columns        = array(
 			'order_status' => 'Order Status',
 		);
-		$result   = $renderer->add_fulfillment_columns( $columns );
+		$result         = $this->renderer->add_fulfillment_columns( $columns );
 		$this->assertArrayHasKey( 'fulfillment_status', $result );
 		$this->assertArrayHasKey( 'shipment_tracking', $result );
 		$this->assertArrayHasKey( 'shipment_provider', $result );
@@ -157,12 +94,12 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->save();
 
-		$renderer = new FulfillmentsRenderer();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
 
 		ob_start();
-		$renderer->render_fulfillment_column_row_data( 'fulfillment_status', $order );
-		$renderer->render_fulfillment_column_row_data( 'shipment_tracking', $order );
-		$renderer->render_fulfillment_column_row_data( 'shipment_provider', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'fulfillment_status', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'shipment_tracking', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'shipment_provider', $order );
 
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Fulfilled', $output );
@@ -179,16 +116,16 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the render_fulfillment_column_row_data method with no fulfillments.
 	 */
 	public function test_render_fulfillment_column_row_data_no_fulfillments() {
-		$renderer = new FulfillmentsRenderer();
-		$order    = $this->createMock( \WC_Order::class );
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$order          = $this->createMock( \WC_Order::class );
 		$order->method( 'get_id' )->willReturn( 1 );
 		$order->method( 'meta_exists' )->willReturn( true );
 		$order->method( 'get_meta' )->with( '_fulfillment_status' )->willReturn( 'unfulfilled' );
 
 		ob_start();
-		$renderer->render_fulfillment_column_row_data( 'fulfillment_status', $order );
-		$renderer->render_fulfillment_column_row_data( 'shipment_tracking', $order );
-		$renderer->render_fulfillment_column_row_data( 'shipment_provider', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'fulfillment_status', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'shipment_tracking', $order );
+		$this->renderer->render_fulfillment_column_row_data( 'shipment_provider', $order );
 
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'Unfulfilled', $output );
@@ -200,10 +137,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the render_fulfillment_drawer_slot method.
 	 */
 	public function test_render_fulfillment_drawer_slot_doesnt_render_without_current_screen() {
-		$renderer = new FulfillmentsRenderer();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
 		set_current_screen( null );
 		ob_start();
-		$renderer->render_fulfillment_drawer_slot();
+		$this->renderer->render_fulfillment_drawer_slot();
 		$output = ob_get_clean();
 		$this->assertStringNotContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
 	}
@@ -212,10 +149,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the render_fulfillment_drawer_slot method.
 	 */
 	public function test_render_fulfillment_drawer_slot_doesnt_render_on_other_pages() {
-		$renderer = new FulfillmentsRenderer();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
 		set_current_screen( 'dashboard' );
 		ob_start();
-		$renderer->render_fulfillment_drawer_slot();
+		$this->renderer->render_fulfillment_drawer_slot();
 		$output = ob_get_clean();
 		$this->assertStringNotContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
 	}
@@ -224,10 +161,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the render_fulfillment_drawer_slot method.
 	 */
 	public function test_render_fulfillment_drawer_slot_renders_on_orders_page() {
-		$renderer = new FulfillmentsRenderer();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
 		set_current_screen( 'woocommerce_page_wc-orders' );
 		ob_start();
-		$renderer->render_fulfillment_drawer_slot();
+		$this->renderer->render_fulfillment_drawer_slot();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div id="wc_order_fulfillments_panel_container"></div>', $output );
 	}
@@ -236,10 +173,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order without any fulfillments.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_new_order() {
-		$renderer = new FulfillmentsRenderer();
-		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$order          = WC_Helper_Order::create_order( get_current_user_id() );
 
-		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+		$this->renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
@@ -265,7 +202,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test the test_handle_fulfillment_bulk_actions method fulfill action on an order with existing fulfillments.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_with_partial_fulfillments() {
-		$renderer = new FulfillmentsRenderer();
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
 
 		$order = WC_Helper_Order::create_order( get_current_user_id() );
 		$order->add_item( WC_Helper_Product::create_simple_product(), 2 );
@@ -289,7 +226,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->save();
 
 		// Now fulfill the order again.
-		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+		$this->renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
@@ -308,8 +245,8 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test bulk action for fulfilling orders with all items in an unfullfilled fulfillment.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_unfulfilled_fulfillment() {
-		$renderer = new FulfillmentsRenderer();
-		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$order          = WC_Helper_Order::create_order( get_current_user_id() );
 
 		// Add multiple items to the order.
 		for ( $i = 0; $i < 3; $i++ ) {
@@ -337,7 +274,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->save();
 
 		// Fulfill the order with bulk action. There should be no change except the existing fulfillment status.
-		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+		$this->renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
@@ -355,8 +292,8 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test bulk action for fulfilling orders with all items in a fullfilled fulfillment.
 	 */
 	public function test_handle_fulfillment_bulk_actions_fulfill_all_items_in_fulfilled_fulfillment() {
-		$renderer = new FulfillmentsRenderer();
-		$order    = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		$order          = WC_Helper_Order::create_order( get_current_user_id() );
 
 		// Add multiple items to the order.
 		for ( $i = 0; $i < 3; $i++ ) {
@@ -384,7 +321,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->save();
 
 		// Fulfill the order with bulk action. There should be no change since all items are fulfilled.
-		$renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
+		$this->renderer->handle_fulfillment_bulk_actions( 'dummy_redirect', 'fulfill', array( $order->get_id() ) );
 
 		$fulfillments = wc_get_container()
 		->get( FulfillmentsDataStore::class )
@@ -402,18 +339,18 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test that the load_components method doesn't render on other pages.
 	 */
 	public function test_load_components_doesnt_render_on_other_pages() {
-		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+		$renderer_mock = $this->getMockBuilder( FulfillmentsRenderer::class )
 			->onlyMethods( array( 'should_render_fulfillment_drawer', 'register_fulfillments_assets' ) )
 			->getMock();
-		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( false );
-		$renderer->method( 'register_fulfillments_assets' )->willReturnCallback(
+		$renderer_mock->method( 'should_render_fulfillment_drawer' )->willReturn( false );
+		$renderer_mock->method( 'register_fulfillments_assets' )->willReturnCallback(
 			function () {
 				wp_enqueue_script( 'wc-admin-fulfillments', 'dummy-path', array(), '1.0.0', array( 'in_footer' => false ) );
 			}
 		);
 
 		ob_start();
-		$renderer->load_components();
+		$renderer_mock->load_components();
 		wp_print_scripts();
 		$output = ob_get_clean();
 		$this->assertStringNotContainsString( 'wc-admin-fulfillments-js', $output );
@@ -424,18 +361,18 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * Test that the load_components method renders on the orders page.
 	 */
 	public function test_load_components_renders_on_orders_page() {
-		$renderer = $this->getMockBuilder( FulfillmentsRenderer::class )
+		$renderer_mock = $this->getMockBuilder( FulfillmentsRenderer::class )
 			->onlyMethods( array( 'should_render_fulfillment_drawer', 'register_fulfillments_assets' ) )
 			->getMock();
-		$renderer->method( 'should_render_fulfillment_drawer' )->willReturn( true );
-		$renderer->method( 'register_fulfillments_assets' )->willReturnCallback(
+		$renderer_mock->method( 'should_render_fulfillment_drawer' )->willReturn( true );
+		$renderer_mock->method( 'register_fulfillments_assets' )->willReturnCallback(
 			function () {
 				wp_enqueue_script( 'wc-admin-fulfillments', 'dummy-path', array(), '1.0.0', array( 'in_footer' => false ) );
 			}
 		);
 
 		ob_start();
-		$renderer->load_components();
+		$renderer_mock->load_components();
 		wp_print_scripts();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'wc-admin-fulfillments-js', $output );

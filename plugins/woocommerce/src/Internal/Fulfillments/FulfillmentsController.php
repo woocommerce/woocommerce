@@ -12,20 +12,6 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
  */
 class FulfillmentsController {
 	/**
-	 * Database utility instance.
-	 *
-	 * @var DatabaseUtil
-	 */
-	private DatabaseUtil $database_util;
-
-	/**
-	 * FeaturesController instance.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
-
-	/**
 	 * Provides the list of classes that this controller provides.
 	 *
 	 * @var string[]
@@ -38,22 +24,23 @@ class FulfillmentsController {
 	);
 
 	/**
-	 * FulfillmentsController constructor.
-	 */
-	public function __construct() {
-		$container                 = wc_get_container();
-		$this->database_util       = $container->get( DatabaseUtil::class );
-		$this->features_controller = $container->get( FeaturesController::class );
-	}
-
-	/**
 	 * Initialize the controller.
 	 *
 	 * @return void
 	 */
 	public function register() {
+		add_action( 'init', array( $this, 'initialize_fulfillments' ), 10, 0 );
+	}
+
+	/**
+	 * Initialize the fulfillments controller.
+	 */
+	public function initialize_fulfillments() {
+		$container           = wc_get_container();
+		$features_controller = $container->get( FeaturesController::class );
+
 		// If fulfillments feature is not enabled, do not add the DB tables, and don't register the controller.
-		if ( ! $this->features_controller->feature_is_enabled( 'fulfillments' ) ) {
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
 			return;
 		}
 
@@ -61,7 +48,6 @@ class FulfillmentsController {
 		$this->maybe_create_db_tables();
 
 		// Register the classes that this controller provides.
-		$container = wc_get_container();
 		foreach ( $this->provides as $class ) {
 			$class = $container->get( $class );
 			if ( method_exists( $class, 'register' ) ) {
@@ -91,8 +77,11 @@ class FulfillmentsController {
 		// Bulk delete order fulfillment status meta from legacy and HPOS order tables.
 		$this->bulk_delete_order_fulfillment_status_meta();
 
-		$collate          = '';
-		$max_index_length = $this->database_util->get_max_index_length();
+		$collate       = '';
+		$container     = wc_get_container();
+		$database_util = $container->get( DatabaseUtil::class );
+
+		$max_index_length = $database_util->get_max_index_length();
 		if ( $wpdb->has_cap( 'collation' ) ) {
 			$collate = $wpdb->get_charset_collate();
 		}
@@ -120,7 +109,7 @@ class FulfillmentsController {
 			KEY fulfillment_id (fulfillment_id)
 		) $collate;";
 
-		$this->database_util->dbdelta( $schema );
+		$database_util->dbdelta( $schema );
 
 		// Update the option to indicate that the tables have been created.
 		update_option( 'woocommerce_fulfillments_db_tables_created', true );

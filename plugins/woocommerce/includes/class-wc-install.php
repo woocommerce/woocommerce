@@ -1604,6 +1604,13 @@ class WC_Install {
 			self::should_enable_hpos_for_new_shop();
 		$hpos_table_schema  = $hpos_enabled ? wc_get_container()->get( OrdersTableDataStore::class )->get_database_schema() : '';
 
+		$mysql_version = wc_get_server_database_version()['number'];
+		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
+			$datetime_default = 'DEFAULT CURRENT_TIMESTAMP';
+		} else {
+			$datetime_default = "DEFAULT '1970-01-01 00:00:00'";
+		}
+
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -1860,7 +1867,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	product_id bigint(20) unsigned NOT NULL,
 	variation_id bigint(20) unsigned NOT NULL,
 	customer_id bigint(20) unsigned NULL,
-	date_created datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	date_created datetime $datetime_default NOT NULL,
 	product_qty int(11) NOT NULL,
 	product_net_revenue double DEFAULT 0 NOT NULL,
 	product_gross_revenue double DEFAULT 0 NOT NULL,

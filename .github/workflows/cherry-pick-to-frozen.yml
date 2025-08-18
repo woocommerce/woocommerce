@@ -1,0 +1,277 @@
+# This workflow can be used to cherry pick a PR that is being merged into a release branch into the frozen release branch.
+# The logic for the frozen release branch is based on the current branch being merged into and incrementing by one release.
+# There are some assumptions made that we would only have at most two active release branches being worked on, current/stable, and next/frozen.
+
+name: Cherry-pick to Frozen Release
+on:
+  pull_request_target:
+    types: [closed, labeled]
+    branches:
+      - 'release/*'
+
+env:
+  GIT_COMMITTER_NAME: 'woocommercebot'
+  GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
+  GIT_AUTHOR_NAME: 'woocommercebot'
+  GIT_AUTHOR_EMAIL: 'woocommercebot@users.noreply.github.com'
+
+jobs:
+
+  # Only run when a PR is merged into a release branch and has the label 'cherry pick to frozen release' - can happen in any order.
+  prepare:
+    if: |
+      (github.event.action == 'closed' && 
+       github.event.pull_request.merged == true && 
+       contains(github.event.pull_request.labels.*.name, 'cherry pick to frozen release')) ||
+      (github.event.action == 'labeled' && 
+       github.event.pull_request.merged == true && 
+       github.event.label.name == 'cherry pick to frozen release')
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.set-vars.outputs.pr_number }}
+      base_branch: ${{ steps.set-vars.outputs.base_branch }}
+      next_branch: ${{ steps.compute-next.outputs.next_branch }}
+      branch_exists: ${{ steps.check-branch.outputs.exists }}
+    steps:
+      - name: Set variables
+        id: set-vars
+        run: |
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "base_branch=${{ github.event.pull_request.base.ref }}" >> $GITHUB_OUTPUT
+
+      - name: Compute next branch
+        id: compute-next
+        run: |
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          VERSION="${BASE_BRANCH#release/}"
+          
+          # Split into major and minor
+          MAJOR="${VERSION%%.*}"
+          MINOR="${VERSION##*.}"
+          
+          # Compute next version
+          if [ "$MINOR" -eq 9 ]; then
+            NEXT_MAJOR=$((MAJOR + 1))
+            NEXT_MINOR=0
+          else
+            NEXT_MAJOR="$MAJOR"
+            NEXT_MINOR=$((MINOR + 1))
+          fi
+          
+          NEXT_BRANCH="release/$NEXT_MAJOR.$NEXT_MINOR"
+          echo "next_branch=$NEXT_BRANCH" >> $GITHUB_OUTPUT
+          echo "Next branch: $NEXT_BRANCH"
+
+      - name: Check if next branch exists
+        id: check-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ steps.compute-next.outputs.next_branch }}"
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/branches/$BRANCH")
+          
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Branch $BRANCH does not exist. Skipping cherry-pick."
+          fi
+
+  cherry-pick:
+    needs: prepare
+    if: ${{ needs.prepare.outputs.branch_exists == 'true' }}
+    uses: ./.github/workflows/shared-cherry-pick.yml
+    with:
+      pr_number: ${{ needs.prepare.outputs.pr_number }}
+      target_branch: ${{ needs.prepare.outputs.next_branch }}
+    secrets: inherit
+
+  # Check if the original PR has been labeled to cherry pick to trunk and add a reminder to the output if not.  
+  cherry-pick-to-trunk-check:
+    needs: [prepare, cherry-pick]
+    runs-on: ubuntu-latest
+    outputs:
+      add_cp_to_trunk_nag: ${{ steps.check.outputs.add_cp_to_trunk_nag }}
+    steps:
+      - name: Check frozen release conditions
+        id: check
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
+        with:
+          script: |
+            // Check if 'cherry pick to trunk' label exists on original PR
+            const pr = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+            });
+
+            const hasCPToTrunkLabel = pr.data.labels.some(
+              label => label.name.toLowerCase() === 'cherry pick to trunk'
+            );
+
+            core.setOutput('add_cp_to_trunk_nag', ! hasCPToTrunkLabel);
+
+  handle-successes:
+    needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
+    if: ${{ always() && needs.cherry-pick.outputs.status == 'success' && needs.cherry-pick.outputs.cherry_pick_pr_number }}
+    runs-on: ubuntu-latest
+    steps:
+
+      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preperation for the same release.
+      - name: Add milestone
+        if: github.event.pull_request.milestone.number != null
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ needs.cherry-pick.outputs.cherry_pick_pr_number }},
+              milestone: '${{ github.event.pull_request.milestone.number }}'
+            })
+
+      - name: Comment on original PR about cherry-pick success
+        if: always()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          CHERRY_PICK_PR_NUMBER: ${{ needs.cherry-pick.outputs.cherry_pick_pr_number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADD_CP_TO_TRUNK_NAG: ${{ needs.cherry-pick-to-trunk-check.outputs.add_cp_to_trunk_nag }}
+          NEXT_BRANCH: ${{ needs.prepare.outputs.next_branch }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const cherryPickPrNumber = process.env.CHERRY_PICK_PR_NUMBER;
+            const targetBranch = process.env.NEXT_BRANCH;
+            const { owner, repo } = context.repo;
+
+            let cherryPickPr;
+            try {
+              cherryPickPr = (await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: parseInt(cherryPickPrNumber)
+              })).data;
+            } catch (e) {
+              core.setFailed("Could not fetch cherry-pick PR details: " + e.message);
+              return;
+            }
+
+            const cherryPickPrUrl = cherryPickPr.html_url;
+            const cherryPickPrTitle = cherryPickPr.title;
+
+            let body = 'IMPORTANT: Merging this PR to the appropriate branches is critical to the release process and ensures that the bug does not cause regressions in the future releases.\n\n' +
+                       `Cherry picking was successful for \`${targetBranch}\`. Please merge the following PR: [${cherryPickPrTitle}](${cherryPickPrUrl})`;
+
+            if (process.env.ADD_CP_TO_TRUNK_NAG === 'true') {
+              body += `\n\nNOTE: This PR might need to be cherry-picked to trunk.`;
+            }
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
+
+      - name: Notify Slack on success
+        if: always()
+        uses: archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517 # v2.10.1
+        env:
+          CHERRY_PICK_PR_URL: https://github.com/${{ github.repository }}/pull/${{ needs.cherry-pick.outputs.cherry_pick_pr_number }}
+          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
+          SOURCE_PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
+          ADD_CP_TO_TRUNK_NAG: ${{ needs.cherry-pick-to-trunk-check.outputs.add_cp_to_trunk_nag }}
+          NEXT_BRANCH: ${{ needs.prepare.outputs.next_branch }}
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-optional-unfurl_links: false
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-text: |
+            :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `${{ env.NEXT_BRANCH }}`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
+            ${{ env.ADD_CP_TO_TRUNK_NAG == 'true' && '\n\nNOTE: This PR might need to be cherry-picked trunk and is not currently labeled for it.' || '' }}
+
+  handle-failures:
+    needs: [prepare, cherry-pick, cherry-pick-to-trunk-check]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.cherry-pick.outputs.status == 'failed' }}
+    steps:
+      - name: Add "cherry pick failed" label
+        if: always()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              labels: ['cherry pick failed']
+            })
+
+      - name: Comment on original PR
+        if: always()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message || 'Unknown error' }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          ADD_CP_TO_TRUNK_NAG: ${{ needs.cherry-pick-to-trunk-check.outputs.add_cp_to_trunk_nag }}
+          NEXT_BRANCH: ${{ needs.prepare.outputs.next_branch }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = (await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: parseInt('${{ needs.prepare.outputs.pr_number }}')
+            })).data;
+
+            const merger = pr.merged_by?.login ? `@${pr.merged_by.login}` : '';
+            const errorMsg = process.env.ERROR_MESSAGE;
+            const workflowLink = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            let body = (merger ? merger + ' ' : '') +
+                       '❌ **Cherry-pick to \`${process.env.NEXT_BRANCH}\` failed.**\n\n' +
+                       '**Error:** ' + errorMsg + '\n\n' +
+                       '---\n\n' +
+                       'IMPORTANT: Merging this PR to the appropriate branches is critical to the release process.\n\n' +
+                       '**Workflow run:** ' + workflowLink;
+
+            if (process.env.ADD_CP_TO_TRUNK_NAG === 'true') {
+              body += `\n\nNOTE: This PR might need to be cherry-picked to trunk and is not currently labeled for it.`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
+
+      - name: Notify Slack on failure
+        if: always()
+        uses: archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517 # v2.10.1
+        env:
+          WORKFLOW_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
+          SOURCE_PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_BRANCH: ${{ needs.prepare.outputs.base_branch }}
+          ADD_CP_TO_TRUNK_NAG: ${{ needs.cherry-pick-to-trunk-check.outputs.add_cp_to_trunk_nag }}
+          NEXT_BRANCH: ${{ needs.prepare.outputs.next_branch }}
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :warning: *Cherry pick from `${{ env.BASE_BRANCH }}` to `${{ env.NEXT_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
+            Please resolve before releasing.  
+            Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
+            ${{ env.ADD_CP_TO_TRUNK_NAG == 'true' && '\n\nNOTE: This PR might need to be cherry-picked to trunk.' || '' }}
