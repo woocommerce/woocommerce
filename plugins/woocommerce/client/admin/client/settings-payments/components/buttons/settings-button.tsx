@@ -52,7 +52,7 @@ export const SettingsButton = ( {
 }: SettingsButtonProps ) => {
 	// Determine if the settingsHref is for a Reactified page.
 	// A Reactified page will have a 'path' query parameter.
-	const isReactifiedPage = !! getQueryArg( settingsHref, 'path' ) || false;
+	const isReactifiedPage = !! getQueryArg( settingsHref, 'path' );
 	const navigate = useNavigate();
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( paymentGatewaysStore );
