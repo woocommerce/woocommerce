@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type { AddressFormValues } from '@woocommerce/settings';
@@ -28,24 +28,28 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, validationErrors } = useSelect(
+	const { hasValidationErrors } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
-			
+
 			// Get all validation errors for billing fields
-			const errors = Object.keys( billingAddress ).reduce( ( acc, key ) => {
-				if ( key !== 'email' ) {
-					const error = store.getValidationError( 'billing_' + key );
-					if ( error !== undefined ) {
-						acc[ key ] = error;
+			const errors = Object.keys( billingAddress ).reduce(
+				( acc, key ) => {
+					if ( key !== 'email' ) {
+						const error = store.getValidationError(
+							'billing_' + key
+						);
+						if ( error !== undefined ) {
+							acc[ key ] = error;
+						}
 					}
-				}
-				return acc;
-			}, {} as Record< string, FieldValidationStatus > );
-			
+					return acc;
+				},
+				{} as Record< string, FieldValidationStatus >
+			);
+
 			// Check for any billing-specific validation errors (including hidden ones)
 			const billingValidationErrors = Object.keys( errors ).length > 0;
-			
 
 			return {
 				hasValidationErrors: billingValidationErrors,
@@ -54,15 +58,6 @@ const CustomerAddress = () => {
 		},
 		[ billingAddress ]
 	);
-
-	const invalidProps = useMemo( () => {
-		return Object.keys( validationErrors )
-			.filter( ( key ) => {
-				const error = validationErrors[ key ];
-				return ! error?.hidden;
-			} )
-			.filter( Boolean );
-	}, [ validationErrors ] );
 
 	useEffect( () => {
 		if ( hasValidationErrors && editing === false ) {

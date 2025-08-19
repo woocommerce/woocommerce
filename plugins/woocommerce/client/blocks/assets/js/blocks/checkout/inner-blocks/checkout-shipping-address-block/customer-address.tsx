@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
@@ -29,38 +29,31 @@ const CustomerAddress = () => {
 	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
 	// Forces editing state if store has errors.
-	const { hasValidationErrors, validationErrors } = useSelect(
+	const { hasValidationErrors } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
-			
+
 			// Get all validation errors for shipping fields
-			const errors = Object.keys( shippingAddress ).reduce( ( acc, key ) => {
-				const error = store.getValidationError( 'shipping_' + key );
-				if ( error !== undefined ) {
-					acc[ key ] = error;
-				}
-				return acc;
-			}, {} as Record< string, FieldValidationStatus > );
-			
+			const errors = Object.keys( shippingAddress ).reduce(
+				( acc, key ) => {
+					const error = store.getValidationError( 'shipping_' + key );
+					if ( error !== undefined ) {
+						acc[ key ] = error;
+					}
+					return acc;
+				},
+				{} as Record< string, FieldValidationStatus >
+			);
+
 			// Check for any shipping-specific validation errors (including hidden ones)
 			const shippingValidationErrors = Object.keys( errors ).length > 0;
 
 			return {
 				hasValidationErrors: shippingValidationErrors,
-				validationErrors: errors,
 			};
 		},
 		[ shippingAddress ]
 	);
-
-	const invalidProps = useMemo( () => {
-		return Object.keys( validationErrors )
-			.filter( ( key ) => {
-				const error = validationErrors[ key ];
-				return ! error?.hidden;
-			} )
-			.filter( Boolean );
-	}, [ validationErrors ] );
 
 	useEffect( () => {
 		if ( hasValidationErrors && editing === false ) {
