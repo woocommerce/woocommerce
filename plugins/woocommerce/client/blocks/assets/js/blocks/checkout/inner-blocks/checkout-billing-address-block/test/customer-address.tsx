@@ -89,7 +89,7 @@ const baseMockCheckoutAddress = {
 	showShippingMethods: true,
 };
 
-describe( 'CustomerAddress', () => {
+describe( 'BillingCustomerAddress (Billing)', () => {
 	let mockGetValidationError: jest.Mock;
 
 	beforeEach( () => {
@@ -130,6 +130,20 @@ describe( 'CustomerAddress', () => {
 			...baseMockCheckoutAddress,
 			editingBillingAddress: false, // Start not editing
 			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: 'John',
+				last_name: 'Doe',
+				company: 'Test Company',
+				address_1: '123 Test Street',
+				address_2: 'Apt 1',
+				city: '', // Empty city to trigger validation error
+				state: 'CA',
+				postcode: '12345',
+				country: 'US',
+				phone: '555-123-4567',
+				email: 'john@example.com',
+			} as BillingAddress,
 		} );
 
 		// Mock the validation store to return error for billing_city
@@ -145,7 +159,6 @@ describe( 'CustomerAddress', () => {
 
 		render( <CustomerAddress /> );
 
-		// The useEffect should trigger setEditing(true) due to hasValidationErrors being true
 		expect( mockSetEditing ).toHaveBeenCalledWith( true );
 	} );
 
@@ -157,6 +170,20 @@ describe( 'CustomerAddress', () => {
 			...baseMockCheckoutAddress,
 			editingBillingAddress: false,
 			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: 'John',
+				last_name: 'Doe',
+				company: 'Test Company',
+				address_1: '123 Test Street',
+				address_2: 'Apt 1',
+				city: '', // Empty city to trigger validation error
+				state: 'CA',
+				postcode: '12345',
+				country: 'US',
+				phone: '555-123-4567',
+				email: 'john@example.com',
+			} as BillingAddress,
 		} );
 
 		// Mock the validation store to return hidden error for billing_city
@@ -183,6 +210,20 @@ describe( 'CustomerAddress', () => {
 			...baseMockCheckoutAddress,
 			editingBillingAddress: false,
 			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: 'John',
+				last_name: 'Doe',
+				company: 'Test Company',
+				address_1: '123 Test Street',
+				address_2: 'Apt 1',
+				city: '', // Empty city to trigger validation error
+				state: 'CA',
+				postcode: '', // Empty postcode to trigger validation error
+				country: 'US',
+				phone: '555-123-4567',
+				email: 'john@example.com',
+			} as BillingAddress,
 		} );
 
 		// Mock the validation store to return mixed errors for billing fields
@@ -229,6 +270,20 @@ describe( 'CustomerAddress', () => {
 			...baseMockCheckoutAddress,
 			editingBillingAddress: true, // Already editing
 			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: 'John',
+				last_name: 'Doe',
+				company: 'Test Company',
+				address_1: '123 Test Street',
+				address_2: 'Apt 1',
+				city: '', // Empty city to trigger validation error
+				state: 'CA',
+				postcode: '12345',
+				country: 'US',
+				phone: '555-123-4567',
+				email: 'john@example.com',
+			} as BillingAddress,
 		} );
 
 		// Mock the validation store to return error for billing_city
@@ -259,6 +314,20 @@ describe( 'CustomerAddress', () => {
 			...baseMockCheckoutAddress,
 			editingBillingAddress: false,
 			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: '',
+				last_name: '',
+				company: '',
+				address_1: '',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: '',
+				phone: '',
+				email: 'john@example.com',
+			} as BillingAddress,
 		} );
 
 		// Mock the validation store to return email error for contact_email but no billing errors
@@ -277,6 +346,72 @@ describe( 'CustomerAddress', () => {
 
 		// Should not enter editing mode since email errors don't affect billing form
 		// (email is filtered out by the `if ( key !== 'email' )` condition)
+		expect( mockSetEditing ).not.toHaveBeenCalled();
+		expect( screen.getByTestId( 'is-editing' ) ).toHaveTextContent(
+			'false'
+		);
+		expect( screen.getByTestId( 'is-expanded' ) ).toHaveTextContent(
+			'false'
+		);
+	} );
+
+	it( 'should not enter editing mode when all billing address fields are empty', () => {
+		const mockSetEditing = jest.fn();
+
+		// Override only the properties we need for this test
+		mockUseCheckoutAddress.mockReturnValue( {
+			...baseMockCheckoutAddress,
+			editingBillingAddress: false,
+			setEditingBillingAddress: mockSetEditing,
+			billingAddress: {
+				...previewCart.billing_address,
+				first_name: '',
+				last_name: '',
+				company: '',
+				address_1: '',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: '',
+				phone: '',
+				email: '',
+			} as BillingAddress,
+		} );
+
+		// Mock the validation store to return errors for all empty required fields
+		mockGetValidationError.mockImplementation( ( key: string ) => {
+			// Check if it's a billing field that should have validation errors
+			if ( key.startsWith( 'billing_' ) ) {
+				const fieldName = key.replace( 'billing_', '' );
+				const errorMessages: Record< string, string > = {
+					first_name: 'First name is required',
+					last_name: 'Last name is required',
+					address_1: 'Address is required',
+					address_2: 'Address is required',
+					city: 'City is required',
+					state: 'State is required',
+					postcode: 'Postcode is required',
+					country: 'Country is required',
+					phone: 'Phone is required',
+					email: 'Email is required',
+				};
+
+				if ( errorMessages[ fieldName ] ) {
+					return {
+						message: errorMessages[ fieldName ],
+						hidden: false,
+					} as FieldValidationStatus;
+				}
+			}
+
+			return undefined;
+		} );
+
+		render( <CustomerAddress /> );
+
+		// Should not enter editing mode when all fields are empty, even with validation errors
+		// This tests the component's logic to prevent expansion for empty fields
 		expect( mockSetEditing ).not.toHaveBeenCalled();
 		expect( screen.getByTestId( 'is-editing' ) ).toHaveTextContent(
 			'false'
