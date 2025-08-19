@@ -212,6 +212,10 @@ class Settings_Controller {
 				continue;
 			}
 
+			foreach ( $block->style_handles as $handle ) {
+				$allowed_iframe_style_handles[] = $handle . '-css';
+			}
+
 			foreach ( $block->editor_style_handles as $handle ) {
 				$allowed_iframe_style_handles[] = $handle . '-css';
 			}
