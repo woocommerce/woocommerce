@@ -126,19 +126,19 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				</tr>
 				<?php
 			}
-			if ( $order->get_customer_note() && $email_improvements_enabled ) {
-				?>
-				<tr class="order-customer-note">
-					<td class="td text-align-left" colspan="3">
-						<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
-						<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
-					</td>
-				</tr>
-				<?php
-			}
 			?>
 		</tfoot>
 	</table>
+	<?php if ( $order->get_customer_note() && $email_improvements_enabled ) { ?>
+		<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1" role="presentation">
+			<tr class="order-customer-note">
+				<td class="td text-align-left">
+					<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
+					<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
+				</td>
+			</tr>
+		</table>
+	<?php } ?>
 </div>
 
 <?php
