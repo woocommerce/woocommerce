@@ -43,7 +43,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 	<?php foreach ( $downloads as $download ) : ?>
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
-				<td class="td <?php echo $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left'; ?>">
+				<<?php echo 'download-product' === $column_id ? 'th scope="row"' : 'td'; ?> class="td <?php echo $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left'; ?>">
 					<?php
 					if ( has_action( 'woocommerce_email_downloads_column_' . $column_id ) ) {
 						do_action( 'woocommerce_email_downloads_column_' . $column_id, $download, $plain_text );
@@ -71,7 +71,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 						}
 					}
 					?>
-				</td>
+				</<?php echo 'download-product' === $column_id ? 'th' : 'td'; ?>>
 			<?php endforeach; ?>
 		</tr>
 	<?php endforeach; ?>
