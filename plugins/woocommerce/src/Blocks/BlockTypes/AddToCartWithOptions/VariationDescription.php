@@ -35,7 +35,7 @@ class VariationDescription extends AbstractBlock {
 		$formatted_variations_data = array();
 		foreach ( $variations as $variation ) {
 			$formatted_variations_data[ $variation->get_id() ] = array(
-				'variationDescription' => $variation->get_description(),
+				'variation_description' => $variation->get_description(),
 			);
 		}
 
@@ -52,12 +52,16 @@ class VariationDescription extends AbstractBlock {
 
 		wp_enqueue_script_module( 'woocommerce/product-elements' );
 
-		$wrapper_attributes = array(
-			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-text'         => 'state.productData.variationDescription',
-			'data-wp-bind--hidden' => '!state.productData.variationDescription',
+		$context = array(
+			'productElementKey' => 'variation_description',
 		);
 
-		return '<div ' . get_block_wrapper_attributes( $wrapper_attributes ) . '></div>';
+		$wrapper_attributes = array(
+			'data-wp-interactive'  => 'woocommerce/product-elements',
+			'data-wp-context'      => wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wp-bind--hidden' => '!state.productData.variation_description',
+		);
+
+		return '<div ' . get_block_wrapper_attributes( $wrapper_attributes ) . ' data-wp-watch="callbacks.updateValue"></div>';
 	}
 }
