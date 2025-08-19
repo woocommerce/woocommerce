@@ -1,6 +1,7 @@
 ---
 post_title: Building and Publishing a Release
 sidebar_label: Building and Publishing
+sidebar_position: 1
 ---
 
 # Building and Publishing a Release
