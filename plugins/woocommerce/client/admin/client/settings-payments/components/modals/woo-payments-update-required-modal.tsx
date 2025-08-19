@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 interface WooPaymentsUpdateRequiredModalProps {
 	/**
@@ -32,7 +33,7 @@ export const WooPaymentsUpdateRequiredModal = ( {
 		setIsUpdating( true );
 
 		// Navigate to Plugins page to update WooPayments.
-		window.location.href = '/wp-admin/plugins.php';
+		window.location.href = getAdminLink( 'plugins.php' );
 	};
 
 	return (
