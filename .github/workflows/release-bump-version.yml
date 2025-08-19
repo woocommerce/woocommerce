@@ -131,7 +131,7 @@ jobs:
           # Update changelog in readme.txt with version and date.
           if [[ "$BUMP_TYPE" == "dev" ]]; then
             # For dev releases, keep the XX-XX format
-            sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE 2025-XX-XX =/" readme.txt
+            sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE $(date +%Y)-XX-XX =/" readme.txt
           else
             # For beta, rc, stable releases, use current date
             current_date=$(date +%Y-%m-%d)
