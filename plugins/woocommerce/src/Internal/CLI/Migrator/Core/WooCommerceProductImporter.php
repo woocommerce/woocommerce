@@ -1043,6 +1043,7 @@ class WooCommerceProductImporter {
 
 		add_filter( 'http_request_timeout', array( $this, 'set_image_download_timeout' ) );
 		add_filter( 'http_request_args', array( $this, 'optimize_http_request_args' ) );
+		add_filter( 'image_sideload_extensions', array( $this, 'add_avif_support_to_sideload' ) );
 		try {
 			$attachment_id = media_sideload_image( $image_url, $product_id, null, 'id' );
 
@@ -1064,6 +1065,7 @@ class WooCommerceProductImporter {
 		} finally {
 			remove_filter( 'http_request_timeout', array( $this, 'set_image_download_timeout' ) );
 			remove_filter( 'http_request_args', array( $this, 'optimize_http_request_args' ) );
+			remove_filter( 'image_sideload_extensions', array( $this, 'add_avif_support_to_sideload' ) );
 		}
 	}
 
@@ -1087,6 +1089,19 @@ class WooCommerceProductImporter {
 		$args['timeout']     = $this->import_options['image_timeout'] ?? 30;
 
 		return $args;
+	}
+
+	/**
+	 * Add AVIF support to image sideload extensions.
+	 *
+	 * @param array $allowed_extensions Array of allowed file extensions.
+	 * @return array Modified array with AVIF support.
+	 */
+	public function add_avif_support_to_sideload( array $allowed_extensions ): array {
+		if ( ! in_array( 'avif', $allowed_extensions, true ) ) {
+			$allowed_extensions[] = 'avif';
+		}
+		return $allowed_extensions;
 	}
 
 	/**
