@@ -44,3 +44,4 @@ export function initializeEditor( htmlId: string ) {
 }
 
 export { ExperimentalEmailEditor } from './editor';
+export { EditorPlugin as ExperimentalEditorPlugin } from './editor-plugin';
