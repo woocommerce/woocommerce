@@ -64,7 +64,7 @@ The following details are copied from the official [Building and Publishing guid
 - [ ] **Condition:** Only perform this step if:
     - The release is a stable release, and
     - No major issues were found during the release to staging.
-    - You have monitored the release following the ["Monitoring Deploys to WPCOM Atomic"](https://fieldguide.automattic.com/woocommerce-core-releases/woocommerce-core-releases-deploying-to-atomic-staging/) guide for at least 4 hr for `.0` versions, and 2 hr for other dot releases.
+    - You have monitored the release following the ["Monitoring Deploys to WPCOM Atomic"](https://fieldguide.automattic.com/woocommerce-core-releases/woocommerce-core-releases-deploying-to-atomic-staging/#monitoring-deploys-atomic) guide for at least 4 hr for `.0` versions, and 2 hr for other dot releases.
 - [ ] **Action:** Run the ["Release: Update stable tag" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) from `trunk`, set the version, and select the option to update the stable tag as part of the workflow input.
     - Review and merge the pull requests created (one for the release branch and trunk).
 
