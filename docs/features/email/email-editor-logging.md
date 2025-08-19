@@ -15,4 +15,4 @@ add_filter( 'woocommerce_email_editor_logging_threshold', function() {
 
 This will enable logging for all email editor operations, such as email editor initialization, personalization tag registration, etc.
 
-For available log levels and their priority, see the [Logging in WooCommerce](/docs/best-practices/data-management/logging.md/#level) documentation.
+For available log levels and their priority, see the [Logging in WooCommerce](/docs/best-practices/data-management/logging/#level) documentation.
