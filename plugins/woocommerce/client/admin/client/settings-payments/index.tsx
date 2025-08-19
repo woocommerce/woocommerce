@@ -3,11 +3,7 @@
  */
 import { Gridicon } from '@automattic/components';
 import { Button, Placeholder, SelectControl } from '@wordpress/components';
-import React, {
-	lazy,
-	Suspense,
-	useEffect,
-} from '@wordpress/element';
+import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,
@@ -34,7 +30,6 @@ const SettingsPaymentsMainChunk = lazy(
 			/* webpackChunkName: "settings-payments-main" */ './settings-payments-main'
 		)
 );
-
 
 /**
  * Lazy-loaded chunk for the offline payment gateways settings page.
@@ -205,7 +200,6 @@ const SettingsPaymentsMain = () => {
 		</>
 	);
 };
-
 
 /**
  * Wraps the offline payment gateways settings page.
