@@ -2,16 +2,17 @@
  * External dependencies
  */
 import { render, fireEvent, screen } from '@testing-library/react';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { WooPaymentsUpdateRequiredModal } from '..';
 
-// Mock getAdminLink
+// Mock @woocommerce/settings
 jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: jest.fn(),
+	getSetting: jest.fn( () => ( {} ) ),
 } ) );
 
 // Mock window.location
@@ -34,6 +35,7 @@ describe( 'WooPaymentsUpdateRequiredModal', () => {
 		( getAdminLink as jest.Mock ).mockReturnValue(
 			'/wp-admin/plugins.php'
 		);
+		( getSetting as jest.Mock ).mockReturnValue( {} );
 		mockLocation.href = '';
 	} );
 
