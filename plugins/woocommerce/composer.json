@@ -45,10 +45,10 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"pelago/emogrifier": "^6.0",
+		"pelago/emogrifier": "^7.3",
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*"
+		"woocommerce/email-editor": "1.4.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

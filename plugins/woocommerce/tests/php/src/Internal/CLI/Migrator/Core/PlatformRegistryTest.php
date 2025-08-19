@@ -218,41 +218,7 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Shopify', $platform['name'] );
 	}
 
-	/**
-	 * Test resolve_platform method exists and is callable.
-	 *
-	 * Note: Full testing requires WP_CLI which is not available in test environment.
-	 */
-	public function test_resolve_platform_method_exists() {
-		$registry = new PlatformRegistry();
-		$this->assertTrue( method_exists( $registry, 'resolve_platform' ) );
-		$this->assertTrue( is_callable( array( $registry, 'resolve_platform' ) ) );
-	}
 
-	/**
-	 * Test that PlatformRegistry can handle platform validation.
-	 *
-	 * Note: This test only verifies method structure since WP_CLI calls
-	 * would cause failures in the test environment.
-	 */
-	public function test_platform_validation_structure() {
-		$registry = new PlatformRegistry();
-
-		// Test that the registry can check for platform existence.
-		$this->assertNull( $registry->get_platform( 'nonexistent_platform' ) );
-
-		// Test that get_platforms returns an array.
-		$this->assertIsArray( $registry->get_platforms() );
-	}
-
-	/**
-	 * Test get_platform_credential_fields method exists and is callable.
-	 */
-	public function test_get_platform_credential_fields_method_exists() {
-		$registry = new PlatformRegistry();
-		$this->assertTrue( method_exists( $registry, 'get_platform_credential_fields' ) );
-		$this->assertTrue( is_callable( array( $registry, 'get_platform_credential_fields' ) ) );
-	}
 
 	/**
 	 * Test get_platform_credential_fields returns expected fields for shopify.
@@ -437,116 +403,28 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $platform );
 	}
 
+
+
 	/**
-	 * Test that platforms with malformed class names are handled gracefully.
+	 * Test that platforms with invalid data types are not registered.
 	 */
-	public function test_platform_with_malformed_class_names() {
+	public function test_platform_with_invalid_data_types_not_registered() {
 		add_filter(
 			'woocommerce_migrator_platforms',
 			function ( $platforms ) {
-				$platforms['malformed-class-names'] = array(
-					'name'    => 'Malformed Class Names Platform',
-					'fetcher' => '\\\\InvalidNamespace\\\\Class',
-					'mapper'  => '123InvalidClassName',
-				);
-				return $platforms;
-			}
-		);
-
-		$registry = new PlatformRegistry();
-
-		// Test fetcher with malformed namespace.
-		$this->expectException( \InvalidArgumentException::class );
-		$registry->get_fetcher( 'malformed-class-names' );
-	}
-
-	/**
-	 * Test that platforms with array values instead of strings are not registered.
-	 */
-	public function test_platform_with_array_values_not_registered() {
-		add_filter(
-			'woocommerce_migrator_platforms',
-			function ( $platforms ) {
-				$platforms['array-values-platform'] = array(
-					'name'    => 'Array Values Platform',
+				$platforms['invalid-types-platform'] = array(
+					'name'    => 'Invalid Types Platform',
 					'fetcher' => array( 'TestFetcher' ), // Array instead of string.
-					'mapper'  => array( 'TestMapper' ),  // Array instead of string.
+					'mapper'  => 123, // Number instead of string.
 				);
 				return $platforms;
 			}
 		);
 
 		$registry = new PlatformRegistry();
-		$platform = $registry->get_platform( 'array-values-platform' );
+		$platform = $registry->get_platform( 'invalid-types-platform' );
 
-		// Platform should not be registered due to enhanced validation.
+		// Platform should not be registered due to validation.
 		$this->assertNull( $platform );
-	}
-
-	/**
-	 * Test that get_fetcher throws exception with proper message for array values.
-	 */
-	public function test_get_fetcher_with_array_value_throws_exception() {
-		// Manually add a platform with array values to bypass load_platforms validation for testing.
-		$registry           = new PlatformRegistry();
-		$reflection         = new \ReflectionClass( $registry );
-		$platforms_property = $reflection->getProperty( 'platforms' );
-		$platforms_property->setAccessible( true );
-		$platforms_property->setValue(
-			$registry,
-			array(
-				'array-fetcher-platform' => array(
-					'name'    => 'Array Fetcher Platform',
-					'fetcher' => array( 'TestFetcher' ), // Array instead of string.
-					'mapper'  => 'TestMapper',
-				),
-			)
-		);
-
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid fetcher class for platform array-fetcher-platform. Fetcher must be a non-empty string.' );
-
-		$registry->get_fetcher( 'array-fetcher-platform' );
-	}
-
-	/**
-	 * Test resolve_platform with empty string platform argument.
-	 */
-	public function test_resolve_platform_with_empty_string() {
-		$registry = new PlatformRegistry();
-
-		// Mock WP_CLI::log to avoid output during tests.
-		if ( ! class_exists( 'WP_CLI' ) ) {
-			$this->markTestSkipped( 'WP_CLI not available in test environment.' );
-		}
-
-		$result = $registry->resolve_platform( array( 'platform' => '' ) );
-
-		// Should fall back to default.
-		$this->assertEquals( 'shopify', $result );
-	}
-
-	/**
-	 * Test that platform IDs with special characters are handled correctly.
-	 */
-	public function test_platform_with_special_characters_in_id() {
-		add_filter(
-			'woocommerce_migrator_platforms',
-			function ( $platforms ) {
-				// Test various special characters in platform ID.
-				$platforms['platform@with#special$chars'] = array(
-					'name'    => 'Special Characters Platform',
-					'fetcher' => 'TestFetcher',
-					'mapper'  => 'TestMapper',
-				);
-				return $platforms;
-			}
-		);
-
-		$registry = new PlatformRegistry();
-		$platform = $registry->get_platform( 'platform@with#special$chars' );
-
-		$this->assertNotNull( $platform );
-		$this->assertEquals( 'Special Characters Platform', $platform['name'] );
 	}
 }

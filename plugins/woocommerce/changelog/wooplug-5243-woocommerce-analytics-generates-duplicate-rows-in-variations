@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where variation, product, customers, taxes, and coupon reports where showing duplicate entries across pages.

@@ -23,7 +23,7 @@ class MockPlatformFetcher implements PlatformFetcherInterface {
 	 */
 	public function fetch_batch( array $args ): array {
 		return array(
-			'items'       => array(
+			'items'         => array(
 				(object) array(
 					'id'   => 1,
 					'name' => 'Test Product 1',
@@ -33,8 +33,8 @@ class MockPlatformFetcher implements PlatformFetcherInterface {
 					'name' => 'Test Product 2',
 				),
 			),
-			'cursor'      => 'next-cursor',
-			'hasNextPage' => true,
+			'cursor'        => 'next-cursor',
+			'has_next_page' => false, // Set to false to avoid infinite loops in tests.
 		);
 	}
 
