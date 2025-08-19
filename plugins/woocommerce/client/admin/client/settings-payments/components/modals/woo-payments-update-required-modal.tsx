@@ -56,7 +56,7 @@ export const WooPaymentsUpdateRequiredModal = ( {
 									{ sprintf(
 										/* translators: %s: Provider name */
 										__(
-											'To continue, please update your %s plugin to the latest version. This update includes critical security enhancements and new features',
+											'To continue, please update your %s plugin to the latest version. This update includes critical security enhancements and new features.',
 											'woocommerce'
 										),
 										'WooPayments'

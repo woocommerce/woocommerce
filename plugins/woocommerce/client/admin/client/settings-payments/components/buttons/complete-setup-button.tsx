@@ -159,7 +159,7 @@ export const CompleteSetupButton = ( {
 		<>
 			<Button
 				key={ gatewayProvider.id }
-				variant={ 'primary' }
+				variant="primary"
 				isBusy={ isUpdating }
 				disabled={ isUpdating || !! installingPlugin }
 				onClick={ completeSetup }
