@@ -35,7 +35,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 */
 	protected function initialize_hooks() {
 		// This does not use the Block Hooks Trait used in mini cart. The implementation is simpler because we support
-		// versions higher than WP 6.5 when hooks were introduced. They should be consolodated in the future.
+		// versions higher than WP 6.5 when hooks were introduced. They should be consolidated in the future.
 		add_filter(
 			'hooked_block_types',
 			function ( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {

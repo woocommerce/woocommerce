@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
@@ -68,7 +68,7 @@ class AddToCartWithOptionsPage {
 
 	async updateSingleProductTemplate() {
 		await this.admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
