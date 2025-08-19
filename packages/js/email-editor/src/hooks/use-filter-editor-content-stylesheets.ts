@@ -7,11 +7,6 @@ import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
 /**
- * Internal dependencies
- */
-import { EmailEditorSettings } from '../store';
-
-/**
  * Returns a ref callback to be attached to the editor content element (inside the iframe).
  * When attached, it removes non-email, non-core stylesheets from the iframe and installs placeholders
  * to prevent Gutenberg's style-compat feature from cloning them back.
@@ -30,9 +25,9 @@ export const useFilterEditorContentStylesheets = () => {
 
 	const allowedIframeStyleHandles = useSelect( ( select ) => {
 		const { getEditorSettings } = select( editorStore );
-		const emailEditorSettings = getEditorSettings() as EmailEditorSettings;
 
-		return emailEditorSettings?.allowedIframeStyleHandles ?? [];
+		// @ts-expect-error - `allowedIframeStyleHandles` is a custom property available in the email editor settings.
+		return getEditorSettings()?.allowedIframeStyleHandles ?? [];
 	} );
 
 	useEffect( () => {
