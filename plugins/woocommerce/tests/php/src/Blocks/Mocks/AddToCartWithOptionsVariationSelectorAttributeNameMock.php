@@ -3,16 +3,16 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemSelector;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttributeName;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 
 /**
- * AddToCartWithOptionsGroupedProductItemSelectorMock used to test GroupedProductItemSelector block functions.
+ * AddToCartWithOptionsVariationSelectorAttributeNameMock used to test VariationSelectorAttributeName block functions.
  */
-class AddToCartWithOptionsGroupedProductItemSelectorMock extends GroupedProductItemSelector {
+class AddToCartWithOptionsVariationSelectorAttributeNameMock extends VariationSelectorAttributeName {
 	/**
 	 * Initialize our mock class.
 	 */
