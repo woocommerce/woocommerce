@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { ClientCartItem } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -14,35 +14,12 @@ import type {
 
 import { getNewQuantity } from '../frontend';
 
-interface GroupedCartItem {
-	id: number;
-	quantity: number;
-	variation: SelectedAttributes[];
-	type: string;
-}
-
-type Option = {
-	value: string;
-	label: string;
-	isSelected: boolean;
-};
-
-type Context = AddToCartWithOptionsStoreContext & {
-	name: string;
-	selectedValue: string | null;
-	option: Option;
-	options: Option[];
-};
-
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
-		state: {
-			variationId: number | null;
-		};
 		actions: {
 			setQuantity: ( value: number ) => void;
 			addToCart: () => void;
@@ -57,7 +34,8 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 	{
 		actions: {
 			setQuantity( value: number ) {
-				const context = getContext< Context >();
+				const context =
+					getContext< AddToCartWithOptionsStoreContext >();
 
 				const id = context.childProductId;
 
@@ -77,9 +55,9 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 					selectedAttributes,
 					productType,
 					groupedProductIds,
-				} = getContext< Context >();
+				} = getContext< AddToCartWithOptionsStoreContext >();
 
-				const addedItems: GroupedCartItem[] = [];
+				const addedItems: ClientCartItem[] = [];
 
 				for ( const childProductId of groupedProductIds ) {
 					if ( quantity[ childProductId ] === 0 ) {
@@ -106,31 +84,33 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 				);
 
 				yield actions.batchAddCartItems( addedItems );
-				
 			},
 		},
 		callbacks: {
 			validateGrouped: () => {
-
 				actions.clearErrors( 'grouped-product' );
 
 				const { errorMessages } = getConfig();
 
-				const { quantity } = getContext< Context >();
+				const { quantity } =
+					getContext< AddToCartWithOptionsStoreContext >();
 
-				const totalQuantity = Object.values(quantity).reduce((sum, val) => sum + val, 0);
-				
+				const hasNonZeroQuantity = Object.values( quantity ).some(
+					( val ) => val > 0
+				);
+
 				// At least one quantity is greater than 0.
-				if ( totalQuantity <= 0 ) {
+				if ( ! hasNonZeroQuantity ) {
 					actions.addError( {
 						code: 'groupedProductAddToCartMissingItems',
-						message: errorMessages?.groupedProductAddToCartMissingItems || '',
+						message:
+							errorMessages?.groupedProductAddToCartMissingItems ||
+							'',
 						group: 'grouped-product',
 					} );
 					return;
 				}
-			}
-
+			},
 		},
 	},
 	{ lock: universalLock }
