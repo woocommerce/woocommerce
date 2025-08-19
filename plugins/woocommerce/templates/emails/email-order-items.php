@@ -42,7 +42,7 @@ foreach ( $items as $item_id => $item ) :
 
 	?>
 	<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-		<td class="td font-family text-align-left" style="vertical-align: middle; word-wrap:break-word;">
+		<th class="td font-family text-align-left" style="vertical-align: middle; word-wrap:break-word;" scope="row">
 			<?php if ( $email_improvements_enabled ) { ?>
 				<table class="order-item-data">
 					<tr>
