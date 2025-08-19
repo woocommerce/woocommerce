@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix filtering offline payment methods settings pages to be rendered in legacy mode.

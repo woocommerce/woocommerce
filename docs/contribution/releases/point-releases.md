@@ -22,13 +22,20 @@ The **Point Release Request (PRR) flow** is a structured process for requesting 
 
 ### Step-by-Step Process
 
-#### 1. Initial Pull Request Creation
+#### 1a. Initial Issue Creation
+
+To ensure the release lead is aware of all planned fixes to be included in the next point release, it is important to create either an issue or PR as soon as a bug is discovered and planned as a patch fix.  This will help reduce the number of patch releases that need to be created.
+
+If the initial PR may take more than a few hours to create, please create an issue and set the milestone of the issue to targeted release. E.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
+
+#### 1b. Initial Pull Request Creation
 
 **Author Action**: Create a pull request against the release branch (`release/x.y`) instead of the trunk branch, following the standard PR creation process.
 
 - The PR should target the specific release branch (e.g., `release/9.5` for an issue found on WooCommerce 9.5.x)
 - Include a regular changelog file as you would for trunk PRs
 - Ensure all standard PR requirements are met (description, testing, etc.)
+- Ensure that the PR has a milestone set to the target release so it can be tracked by the release lead, e.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
 
 #### 2. Point Release Request Submission
 
