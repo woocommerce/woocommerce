@@ -275,10 +275,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				productDataActions.setVariationId( matchedVariationId ?? null );
 			},
 			validateVariation() {
-
 				actions.clearErrors( 'variable-product' );
 
-				const { availableVariations, selectedAttributes } = getContext<Context>();
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
 				const matchedVariation = getMatchedVariation(
 					availableVariations,
 					selectedAttributes
@@ -303,10 +303,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						message: errorMessages?.variableProductOutOfStock || '',
 						group: 'variable-product',
 					} );
-					return;
 				}
-			}
-
+			},
 		},
 	},
 	{ lock: universalLock }

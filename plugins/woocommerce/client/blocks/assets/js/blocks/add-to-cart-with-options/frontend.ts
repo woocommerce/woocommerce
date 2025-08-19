@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import { store, getConfig, getContext } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -200,15 +200,14 @@ export type AddToCartWithOptionsStore = {
 
 const { actions, state } = store<
 	AddToCartWithOptionsStore &
-	Partial<GroupedProductAddToCartWithOptionsStore> &
-	Partial<VariableProductAddToCartWithOptionsStore>
+		Partial< GroupedProductAddToCartWithOptionsStore > &
+		Partial< VariableProductAddToCartWithOptionsStore >
 >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
 			noticeIds: [],
 			get validationErrors(): Array< AddToCartError > {
-
 				const context = getContext< Context >();
 
 				if ( context && context.validationErrors ) {
@@ -219,7 +218,6 @@ const { actions, state } = store<
 			},
 
 			get isFormValid(): boolean {
-	
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return true;
@@ -232,7 +230,6 @@ const { actions, state } = store<
 				}
 
 				return state.validationErrors.length === 0;
-				
 			},
 			get allowsDecrease() {
 				const {
@@ -331,8 +328,14 @@ const { actions, state } = store<
 				const { validationErrors } = state;
 
 				if ( group ) {
-					const remaining = validationErrors.filter( ( error ) => error.group !== group );
-					validationErrors.splice( 0, validationErrors.length, ...remaining );
+					const remaining = validationErrors.filter(
+						( error ) => error.group !== group
+					);
+					validationErrors.splice(
+						0,
+						validationErrors.length,
+						...remaining
+					);
 				} else {
 					// Clear all.
 					validationErrors.length = 0;
@@ -442,7 +445,6 @@ const { actions, state } = store<
 				const { currentValue } = inputData;
 
 				actions.setQuantity( currentValue );
-
 			},
 			handleQuantityChange: (
 				event: HTMLElementEvent< HTMLInputElement >
@@ -504,21 +506,15 @@ const { actions, state } = store<
 				}
 				const { inputElement } = inputData;
 
-				actions.setQuantity(
-					inputElement.checked ? 1 : 0
-				);
+				actions.setQuantity( inputElement.checked ? 1 : 0 );
 			},
 			*addToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const {
-					productId,
-					quantity,
-					selectedAttributes,
-					productType,
-				} = getContext< Context >();
+				const { productId, quantity, selectedAttributes, productType } =
+					getContext< Context >();
 
 				const { variationId } = state;
 				const id = variationId || productId;
@@ -528,12 +524,12 @@ const { actions, state } = store<
 					selectedAttributes
 				);
 
-				const { actions } = store< WooCommerce >(
+				const { actions: wooActions } = store< WooCommerce >(
 					'woocommerce',
 					{},
 					{ lock: universalLock }
 				);
-				yield actions.addCartItem( {
+				yield wooActions.addCartItem( {
 					id,
 					quantity: newQuantity,
 					variation: selectedAttributes,
@@ -546,25 +542,23 @@ const { actions, state } = store<
 				const { isFormValid } = state;
 
 				if ( ! isFormValid ) {
-
 					// Dynamically import the store module first
 					yield import( '@woocommerce/stores/store-notices' );
 
-					const { actions: noticeActions } =
-						store< StoreNotices >(
-							'woocommerce/store-notices',
-							{},
-							{
-								lock: universalLock,
-							}
-						);
+					const { actions: noticeActions } = store< StoreNotices >(
+						'woocommerce/store-notices',
+						{},
+						{
+							lock: universalLock,
+						}
+					);
 
 					const { noticeIds, validationErrors } = state;
 
 					// Clear previous notices.
 					noticeIds.forEach( ( id ) => {
 						noticeActions.removeNotice( id );
-					});
+					} );
 					noticeIds.splice( 0, noticeIds.length );
 
 					// Add new notices and track their IDs.
@@ -583,7 +577,6 @@ const { actions, state } = store<
 				}
 
 				actions.addToCart();
-				
 			},
 		},
 	},

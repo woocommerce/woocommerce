@@ -29,7 +29,7 @@ export type GroupedProductAddToCartWithOptionsStore =
 		};
 	};
 
-const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
+const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
@@ -45,7 +45,6 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 				};
 			},
 			*addToCart() {
-
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
@@ -77,13 +76,13 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 					} );
 				}
 
-				const { actions } = store< WooCommerce >(
+				const { actions: wooActions } = store< WooCommerce >(
 					'woocommerce',
 					{},
 					{ lock: universalLock }
 				);
 
-				yield actions.batchAddCartItems( addedItems );
+				yield wooActions.batchAddCartItems( addedItems );
 			},
 		},
 		callbacks: {
@@ -99,7 +98,6 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 					( val ) => val > 0
 				);
 
-				// At least one quantity is greater than 0.
 				if ( ! hasNonZeroQuantity ) {
 					actions.addError( {
 						code: 'groupedProductAddToCartMissingItems',
@@ -108,7 +106,6 @@ const { actions, state } = store< GroupedProductAddToCartWithOptionsStore >(
 							'',
 						group: 'grouped-product',
 					} );
-					return;
 				}
 			},
 		},
