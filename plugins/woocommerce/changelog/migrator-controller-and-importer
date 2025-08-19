@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Added products controller and importer for Migrator CLI

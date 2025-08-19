@@ -310,7 +310,9 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
-		add_action( 'action_scheduler_schedule_recurring_actions', array( $this, 'register_recurring_actions' ) );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
+		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
+		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
@@ -756,11 +758,6 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'frontend' ) || $this->is_rest_api_request() || $in_post_editor ) {
 			$this->frontend_includes();
-		}
-
-		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
-			WC_Tracker::init();
 		}
 
 		$this->theme_support_includes();
@@ -1389,9 +1386,121 @@ final class WooCommerce {
 	}
 
 	/**
+	 * For actions that may fail at execution time due to missing callbacks, register the recurring action in a wrapper
+	 * to prevent errors, and load the classes where the callback is added.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_recurring_action_wrappers() {
+		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
+		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
+		add_action( 'generate_category_lookup_table_wrapper', array( $this, 'add_generate_category_lookup_table_wrapper' ) );
+		add_action( 'woocommerce_cleanup_rate_limits_wrapper', array( $this, 'add_woocommerce_cleanup_rate_limits_wrapper' ) );
+	}
+
+	/**
+	 * Unschedule unwrapped actions that may have been added to the site.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function unschedule_unwrapped_actions() {
+		// Unschedule the unwrapped actions.
+		as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
+		as_unschedule_all_actions( 'wc_admin_daily' );
+		as_unschedule_all_actions( 'generate_category_lookup_table' );
+		as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_tracker_send_event` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_woocommerce_tracker_send_event_wrapper() {
+		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+			if ( class_exists( WC_Tracker::class ) ) {
+				WC_Tracker::init();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing WC_Tracker: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_tracker_send_event' );
+	}
+
+	/**
+	 * Wrapper for the `wc_admin_daily` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_wc_admin_daily_wrapper() {
+		try {
+			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\Events::class ) ) {
+				\Automattic\WooCommerce\Internal\Admin\Events::instance();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing wc_admin_daily: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_admin_daily' );
+	}
+
+	/**
+	 * Wrapper for the `generate_category_lookup_table` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_generate_category_lookup_table_wrapper() {
+		try {
+			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
+				\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error in category lookup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'generate_category_lookup_table' );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_cleanup_rate_limits` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_woocommerce_cleanup_rate_limits_wrapper() {
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-rate-limiter.php';
+			if ( class_exists( WC_Rate_Limiter::class ) ) {
+				WC_Rate_Limiter::init();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error in rate limiter cleanup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_cleanup_rate_limits' );
+	}
+
+	/**
 	 * Register recurring actions.
 	 */
 	public function register_recurring_actions() {
+		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
+		$this->unschedule_unwrapped_actions();
+
 		// Check if Action Scheduler is available.
 		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
@@ -1437,6 +1546,49 @@ final class WooCommerce {
 
 		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
+		// Schedule the action to send tracking events if tracking is enabled.
+		$this->schedule_tracking_action();
+
+		// Schedule daily cleanup rate limits at 3 AM.
+
+		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+
+		// Note: this is potentially redundant when the core package exists.
+		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
+	}
+
+	/**
+	 * Schedule the action send tracking events if tracking is enabled, or unregister it if tracking is disabled.
+	 * This will be called when the `woocommerce_allow_tracking` option is updated.
+	 *
+	 * @param string $old_value The old value of the `woocommerce_allow_tracking` option.
+	 * @param string $value     The new value of the `woocommerce_allow_tracking` option.
+	 *
+	 * @return void
+	 */
+	public function handle_tracking_setting_change( $old_value, $value ) {
+		if ( $old_value === $value ) {
+			return;
+		}
+		if ( false === wc_string_to_bool( $value ) ) {
+			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+		} else {
+			$this->schedule_tracking_action();
+		}
+	}
+
+	/**
+	 * Schedule the action to send tracking events if tracking is enabled.
+	 *
+	 * @return void
+	 */
+	public function schedule_tracking_action() {
+		if ( false === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+
 		/**
 		 * How frequent to schedule the tracker send event.
 		 *
@@ -1444,16 +1596,7 @@ final class WooCommerce {
 		 */
 		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
 		$core_internals     = wp_get_schedules();
-		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event', array(), 'woocommerce', true );
-
-		// Schedule daily cleanup rate limits at 3 AM.
-
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits', array(), 'woocommerce', true );
-
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily', array(), 'woocommerce', true );
-
-		// Note: this is potentially redundant when the core package exists.
-		as_schedule_single_action( time() + 10, 'generate_category_lookup_table', array(), 'woocommerce', true );
+		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 	}
 
 	/**

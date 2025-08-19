@@ -583,7 +583,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 				if ( property_exists( $media_node, 'image' ) && is_object( $media_node->image ) && ! empty( $media_node->id ) && ! empty( $media_node->image->url ) ) {
 					$images_data[] = array(
 						'original_id' => $media_node->id,
-						'url'         => $media_node->image->url,
+						'src'         => $media_node->image->url,
 						'alt'         => $media_node->image->altText ?? null,
 						'is_featured' => ( $media_node->id === $featured_media_id ),
 					);

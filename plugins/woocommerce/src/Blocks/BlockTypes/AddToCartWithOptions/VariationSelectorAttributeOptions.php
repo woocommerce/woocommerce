@@ -146,6 +146,17 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 
+		wp_interactivity_state(
+			'woocommerce/add-to-cart-with-options',
+			array(
+				'isOptionSelected' =>
+				function () {
+					$context = wp_interactivity_get_context();
+					return $context['option']['isSelected'];
+				},
+			)
+		);
+
 		$pills = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$input = sprintf(
@@ -164,11 +175,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 							'option' => $attribute_term,
 						),
 					),
-				),
-				$attribute_term['label']
+				)
 			);
 
-			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . $attribute_term['label'] . '</label>';
+			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . esc_html( $attribute_term['label'] ) . '</label>';
 		}
 
 		return sprintf(
@@ -237,7 +247,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				$this->get_normalized_attributes(
 					$option_attributes
 				),
-				$attribute_term['label']
+				esc_html( $attribute_term['label'] )
 			);
 		}
 
