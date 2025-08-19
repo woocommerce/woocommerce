@@ -47,7 +47,9 @@ const CartLineItemsTable = ( {
 				nextItemKey &&
 				rowRefs.current[ nextItemKey ].current instanceof HTMLElement
 			) {
-				( rowRefs.current[ nextItemKey ].current as HTMLElement ).focus();
+				(
+					rowRefs.current[ nextItemKey ].current as HTMLElement
+				 ).focus();
 			} else if ( tableRef.current instanceof HTMLElement ) {
 				tableRef.current.focus();
 			}

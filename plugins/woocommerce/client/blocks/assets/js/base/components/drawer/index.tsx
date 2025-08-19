@@ -85,7 +85,8 @@ const UnforwardedDrawer = (
 		document.body.classList.remove( bodyOpenClassName );
 		ariaHelper.showApp();
 
-		const a11yRegion = document.querySelector( '[id^="a11y-speak"]' )?.parentElement;
+		const a11yRegion =
+			document.querySelector( '[id^="a11y-speak"]' )?.parentElement;
 
 		if ( a11yRegion ) {
 			a11yRegion.removeAttribute( 'data-keep-visible' );
@@ -102,7 +103,8 @@ const UnforwardedDrawer = (
 
 	useEffect( () => {
 		if ( isOpen ) {
-			const a11yRegion = document.querySelector('[id^="a11y-speak"]')?.parentElement;
+			const a11yRegion =
+				document.querySelector( '[id^="a11y-speak"]' )?.parentElement;
 
 			if ( a11yRegion ) {
 				a11yRegion.setAttribute( 'data-keep-visible', 'true' );
