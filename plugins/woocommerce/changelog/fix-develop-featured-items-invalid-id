@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Handled the invalid product id once the product is deleted or moved to draft in featured item blocks .

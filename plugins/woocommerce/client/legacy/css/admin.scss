@@ -9087,3 +9087,16 @@ body.woocommerce-admin-full-screen {
 		display:none;
 	}
 }
+
+/**
+ * Fixes for offline payment methods pages rendered in legacy mode (not Reactified).
+ */
+body.woocommerce-settings-payments-section_legacy {
+	.woocommerce-layout__header {
+		border-bottom: 1px solid #ebebeb;
+	}
+
+	#wpbody-content {
+		background: #f0f0f1;
+	}
+}

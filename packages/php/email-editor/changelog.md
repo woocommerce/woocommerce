@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1](https://github.com/woocommerce/email-editor/releases/tag/1.4.1) - 2025-08-08 
+
+-   Patch - Introduce new class Assets_Manager to simplify integration. [#60165]
+
 ## [1.4.0](https://github.com/woocommerce/email-editor/releases/tag/1.4.0) - 2025-07-31 
 
 -   Minor - Enable Site Logo and Site Title blocks for the Email Editor [#59624]
