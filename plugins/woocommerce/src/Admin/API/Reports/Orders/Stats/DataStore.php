@@ -564,8 +564,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
 			if ( $parent_order ) {
-				$data['parent_id'] = $parent_order->get_id();
-				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
+				$data['parent_id'] 		= $parent_order->get_id();
+				$data['status']     	= self::normalize_order_status( $parent_order->get_status() );
+
+				$refund_type = $order->get_meta( '_refund_type' );
+				if ( 'full' === $refund_type ) {
+					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
+				}
 			}
 			/**
 			 * Set date_completed and date_paid the same as date_created to avoid problems
