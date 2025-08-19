@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Update e2e tests to use the theme template slug instead of the woocommerce slug
+
+
