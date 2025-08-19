@@ -36,6 +36,11 @@ class WC_Install {
 	 * via dbDelta at both install and update time. If any other kind of database change is required
 	 * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
 	 *
+	 * IMPORTANT:
+	 * If your update targets a version that already has a key in this array (and we're past feature freeze),
+	 * add your update under a new key by appending a suffix like `-1`, `-2`, etc. (e.g., use `10.2.0-1` if `10.2.0` exists).
+	 * This ensures updates are applied for users upgrading from beta or RC versions to the final release.
+	 *
 	 * @var array
 	 */
 	private static $db_updates = array(
