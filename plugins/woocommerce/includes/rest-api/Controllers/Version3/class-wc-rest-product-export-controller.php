@@ -2,7 +2,7 @@
 /**
  * REST API Product Export controller
  *
- * Handles requests to the /products/export endpoint.
+ * Handles requests to the /catalog endpoint.
  *
  * @package WooCommerce\RestApi
  * @since   8.x.x
@@ -40,7 +40,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'products/export';
+	protected $rest_base = 'catalog';
 
 	/**
 	 * Check if a given request has permission to export products.
@@ -75,6 +75,20 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		if ( empty( $filename ) ) {
 			return new WP_Error( 'woocommerce_rest_export_invalid_filename', __( 'Invalid filename provided.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		// Deduce format from filename extension if not provided
+		if ( empty( $format ) ) {
+			$file_info = pathinfo( $filename );
+			$extension = strtolower( $file_info['extension'] ?? '' );
+			
+			if ( 'csv' === $extension ) {
+				$format = 'csv';
+			} elseif ( 'json' === $extension ) {
+				$format = 'json';
+			} else {
+				return new WP_Error( 'woocommerce_rest_export_invalid_format', __( 'Unable to determine file format from filename. Please specify format parameter.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		$upload_dir = wp_upload_dir();
@@ -217,12 +231,6 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 							'type'        => 'string',
 							'required'    => true,
 						),
-						'format' => array(
-							'description' => __( 'Export format (json or csv).', 'woocommerce' ),
-							'type'        => 'string',
-							'enum'        => array( 'json', 'csv' ),
-							'required'    => true,
-						),
 						'compress' => array(
 							'description' => __( 'Compression format (zip, gzip, or none).', 'woocommerce' ),
 							'type'        => 'string',
@@ -323,7 +331,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'format' => $format,
 			'filename' => $filename,
 			'created_at' => current_time( 'mysql' ),
-			'status_url' => rest_url( "wc/v3/products/export/status/{$job_id}" ),
+			'status_url' => rest_url( "wc/v3/catalog/status/{$job_id}" ),
 		);
 
 		return rest_ensure_response( $response_data );
@@ -379,7 +387,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		// Add download URL if export is complete
 		if ( 'complete' === $job_data['status'] ) {
-			$response_data['download_url'] = rest_url( 'wc/v3/products/export/download' ) .
+			$response_data['download_url'] = rest_url( 'wc/v3/catalog/download' ) .
 				'?filename=' . urlencode( $job_data['filename'] ) .
 				'&format=' . $job_data['format'];
 		}
@@ -528,7 +536,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'status' => 'complete',
 			'total_exported' => $total_exported,
 			'percentage' => 100,
-			'download_url' => rest_url( 'wc/v3/products/export/download' ) . '?filename=' . urlencode( $exporter->get_filename() ) . '&format=' . $format,
+			'download_url' => rest_url( 'wc/v3/catalog/download' ) . '?filename=' . urlencode( $exporter->get_filename() ) . '&format=' . $format,
 			'filename' => $exporter->get_filename()
 		);
 	}
