@@ -90,7 +90,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			if ( is_wp_error( $compressed_file_path ) ) {
 				return $compressed_file_path;
 			}
-			
+
 			// Update file path and filename for compressed file
 			$file_path = $compressed_file_path;
 			$filename = basename( $compressed_file_path );
@@ -98,7 +98,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		$file_size = filesize( $file_path );
 		$mime_type = $this->get_mime_type( $format, $compress );
-		
+
 		// For GZIP files, suggest the original filename when decompressed
 		$download_filename = $filename;
 		if ( 'gzip' === $compress && substr( $filename, -3 ) === '.gz' ) {
@@ -120,7 +120,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		// Clean up files after download
 		unlink( $file_path );
-		
+
 		// Also clean up original file if we created a compressed version
 		if ( 'none' !== $compress ) {
 			$original_file = trailingslashit( $upload_dir['basedir'] ) . $request->get_param( 'filename' );
@@ -186,6 +186,25 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/status/(?P<job_id>[a-zA-Z0-9_]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_export_status' ),
+					'permission_callback' => array( $this, 'export_products_permissions_check' ),
+					'args'                => array(
+						'job_id' => array(
+							'description' => __( 'Export job ID.', 'woocommerce' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/download',
 			array(
 				array(
@@ -232,94 +251,215 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		$format = $request->get_param( 'format' );
 		$format = in_array( $format, array( 'csv', 'json' ), true ) ? $format : 'json';
 
-		// Create the appropriate exporter
-		if ( 'json' === $format ) {
-			include_once WC_ABSPATH . 'includes/export/class-wc-product-json-exporter.php';
-			$exporter = new WC_Product_JSON_Exporter();
+		// Generate a unique filename if not provided
+		$filename = $request->get_param( 'filename' );
+		if ( empty( $filename ) ) {
+			$filename = 'wc-product-export-' . date( 'Y-m-d-H-i-s' ) . '.' . $format;
+		}
+
+		// Generate a unique job ID without using Action Scheduler for immediate processing
+		$job_id = 'export_' . time() . '_' . wp_rand( 1000, 9999 );
+
+		// Prepare export parameters for background job
+		$export_params = array(
+			'job_id' => $job_id,
+			'format' => $format,
+			'filename' => $filename,
+			'columns' => $request->get_param( 'columns' ),
+			'selected_columns' => $request->get_param( 'selected_columns' ),
+			'export_meta' => $request->get_param( 'export_meta' ),
+			'export_types' => $request->get_param( 'export_types' ),
+			'export_category' => $request->get_param( 'export_category' ),
+			'export_product_ids' => $request->get_param( 'export_product_ids' ),
+			'created_at' => current_time( 'mysql' ),
+		);
+
+		// Store job metadata
+		update_option( "wc_product_export_job_{$job_id}", array(
+			'status' => 'pending',
+			'format' => $format,
+			'filename' => $filename,
+			'created_at' => current_time( 'mysql' ),
+			'progress' => 0,
+			'total_products' => 0,
+			'columns' => $export_params['columns'],
+			'selected_columns' => $export_params['selected_columns'],
+			'export_meta' => $export_params['export_meta'],
+			'export_types' => $export_params['export_types'],
+			'export_category' => $export_params['export_category'],
+			'export_product_ids' => $export_params['export_product_ids'],
+		) );
+
+		// Log for debugging
+		error_log( "WooCommerce Product Export: Created job {$job_id} for {$format} export" );
+
+		// Use ActionScheduler with immediate processing trigger
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			// Enqueue the async action
+			$action_id = as_enqueue_async_action(
+				'woocommerce_product_export_background_process',
+				array( $export_params ),
+				'wc_product_export'
+			);
+			error_log( "WooCommerce Product Export: Scheduled async action {$action_id} for job {$job_id}" );
+
+			// Store ActionScheduler ID for status tracking
+			$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
+			$job_data['action_id'] = $action_id;
+			update_option( "wc_product_export_job_{$job_id}", $job_data );
+
+			// Trigger processing in a background thread using non-blocking HTTP request
+			$this->trigger_background_processing( $action_id );
+
 		} else {
-			include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
-			$exporter = new WC_Product_CSV_Exporter();
+			error_log( "WooCommerce Product Export: ActionScheduler functions not available" );
 		}
 
-		// Set up the exporter with the same parameters as AJAX
-		if ( ! empty( $request->get_param( 'columns' ) ) ) {
-			$exporter->set_column_names( $request->get_param( 'columns' ) );
-		}
 
-		if ( ! empty( $request->get_param( 'selected_columns' ) ) ) {
-			$exporter->set_columns_to_export( $request->get_param( 'selected_columns' ) );
-		}
+		// Return job information
+		$response_data = array(
+			'job_id' => $job_id,
+			'status' => 'pending',
+			'format' => $format,
+			'filename' => $filename,
+			'created_at' => current_time( 'mysql' ),
+			'status_url' => rest_url( "wc/v3/products/export/status/{$job_id}" ),
+		);
 
-		if ( ! empty( $request->get_param( 'export_meta' ) ) ) {
-			$exporter->enable_meta_export( true );
-		}
+		return rest_ensure_response( $response_data );
+	}
 
-		if ( ! empty( $request->get_param( 'export_types' ) ) ) {
-			$exporter->set_product_types_to_export( $request->get_param( 'export_types' ) );
-		}
 
-		if ( ! empty( $request->get_param( 'export_category' ) ) ) {
-			$exporter->set_product_category_to_export( $request->get_param( 'export_category' ) );
-		}
+	/**
+	 * Get export job status.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_export_status( $request ) {
+		$job_id = $request->get_param( 'job_id' );
 
-		if ( ! empty( $request->get_param( 'export_product_ids' ) ) ) {
-			$ids_raw = explode( ',', sanitize_text_field( $request->get_param( 'export_product_ids' ) ) );
-			if ( ! empty( $ids_raw ) ) {
-				$exporter->set_product_ids_to_export( $ids_raw );
-			}
-		}
+		// Get job metadata
+		$job_data = get_option( "wc_product_export_job_{$job_id}", false );
 
-		if ( ! empty( $request->get_param( 'filename' ) ) ) {
-			$exporter->set_filename( $request->get_param( 'filename' ) );
-		}
-
-		// Use streaming approach to avoid memory accumulation
-		$export_status = $this->stream_export_all_products( $exporter, $format );
-
-		// Check if we have a valid export file
-		$upload_dir = wp_upload_dir();
-		$filename = $exporter->get_filename();
-		$file_path = trailingslashit( $upload_dir['basedir'] ) . $filename;
-
-		if ( ! file_exists( $file_path ) ) {
+		if ( false === $job_data ) {
 			return new WP_Error(
-				'woocommerce_rest_export_failed',
-				__( 'Failed to create export file.', 'woocommerce' ),
-				array( 'status' => 500 )
+				'woocommerce_rest_export_job_not_found',
+				__( 'Export job not found.', 'woocommerce' ),
+				array( 'status' => 404 )
 			);
 		}
 
-		// Check if export is complete
-		if ( $export_status['status'] === 'complete' ) {
-			// Export is complete, return download URL
-			$download_url = rest_url( 'wc/v3/products/export/download' ) . '?filename=' . urlencode( $exporter->get_filename() ) . '&format=' . $format;
-		} else {
-			// Export is in progress, return progress info
-			$download_url = null;
+		// Check Action Scheduler status to update our status if needed
+		$action_status = $this->get_action_scheduler_status( $job_id );
+
+		// Update job status based on Action Scheduler status if it has changed
+		if ( 'pending' === $job_data['status'] && 'complete' === $action_status ) {
+			$job_data['status'] = 'complete';
+			$job_data['progress'] = 100;
+			update_option( "wc_product_export_job_{$job_id}", $job_data );
+		} elseif ( 'pending' === $job_data['status'] && 'failed' === $action_status ) {
+			$job_data['status'] = 'failed';
+			update_option( "wc_product_export_job_{$job_id}", $job_data );
+		} elseif ( 'pending' === $job_data['status'] && in_array( $action_status, array( 'in-progress', 'running' ) ) ) {
+			$job_data['status'] = 'processing';
+			update_option( "wc_product_export_job_{$job_id}", $job_data );
 		}
 
 		$response_data = array(
-			'format'         => $format,
-			'total_products' => $export_status['total_exported'],
-			'download_url'   => $download_url,
-			'filename'       => $exporter->get_filename(),
-			'exported_at'    => current_time( 'mysql' ),
-			'status'         => $export_status['status'],
+			'job_id' => $job_id,
+			'status' => $job_data['status'],
+			'format' => $job_data['format'],
+			'filename' => $job_data['filename'],
+			'created_at' => $job_data['created_at'],
+			'progress' => isset( $job_data['progress'] ) ? $job_data['progress'] : 0,
+			'total_products' => isset( $job_data['total_products'] ) ? $job_data['total_products'] : 0,
+			'action_scheduler_status' => $action_status, // Debug info
 		);
 
-		// Add progress info if export is in progress
-		if ( $export_status['status'] === 'in_progress' ) {
-			$response_data['current_step'] = $export_status['current_step'];
-			$response_data['next_step'] = $export_status['next_step'];
-			$response_data['percentage'] = $export_status['percentage'];
-			$response_data['message'] = $export_status['message'];
-			$response_data['total_rows'] = $export_status['total_rows'];
+		// Add download URL if export is complete
+		if ( 'complete' === $job_data['status'] ) {
+			$response_data['download_url'] = rest_url( 'wc/v3/products/export/download' ) .
+				'?filename=' . urlencode( $job_data['filename'] ) .
+				'&format=' . $job_data['format'];
 		}
 
-		$response = rest_ensure_response( $response_data );
-		$response->header( 'Content-Type', 'json' === $format ? 'application/json' : 'text/csv' );
+		// Add error message if failed
+		if ( 'failed' === $job_data['status'] && isset( $job_data['error_message'] ) ) {
+			$response_data['error_message'] = $job_data['error_message'];
+		}
 
-		return $response;
+		return rest_ensure_response( $response_data );
+	}
+
+	/**
+	 * Get Action Scheduler status for a job.
+	 *
+	 * @param string $job_id Job ID.
+	 * @return string Status: pending, in-progress, complete, failed, or canceled.
+	 */
+	private function get_action_scheduler_status( $job_id ) {
+		if ( ! function_exists( 'as_get_scheduled_actions' ) || ! class_exists( 'ActionScheduler_Store' ) ) {
+			return 'unknown';
+		}
+
+		// Get the job data to find the ActionScheduler action_id
+		$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
+		$action_id = isset( $job_data['action_id'] ) ? $job_data['action_id'] : null;
+
+		if ( ! $action_id ) {
+			error_log( "Action Scheduler: No action_id found for job {$job_id}" );
+			return 'not_found';
+		}
+
+		try {
+			$store = ActionScheduler_Store::instance();
+
+			// Try to fetch the action by ActionScheduler ID
+			$action = $store->fetch_action( $action_id );
+
+			if ( ! $action ) {
+				error_log( "Action Scheduler: No action found for action_id {$action_id} (job {$job_id})" );
+				return 'not_found';
+			}
+
+			// Get the status directly from the store for this action
+			$status = $store->get_status( $action_id );
+			error_log( "Action Scheduler: Action {$action_id} (job {$job_id}) has status: {$status}" );
+
+			// If failed, try to get the failure reason
+			if ( 'failed' === $status ) {
+				try {
+					$logs = $store->get_logs( $action_id );
+					foreach ( $logs as $log ) {
+						error_log( "Action Scheduler Log for action {$action_id} (job {$job_id}): " . $log->get_message() );
+					}
+				} catch ( Exception $e ) {
+					error_log( "Could not retrieve logs for action {$action_id} (job {$job_id}): " . $e->getMessage() );
+				}
+			}
+
+			// Map Action Scheduler statuses to our statuses
+			switch ( $status ) {
+				case 'pending':
+					return 'pending';
+				case 'in-progress':
+				case 'running':
+					return 'in-progress';
+				case 'complete':
+					return 'complete';
+				case 'failed':
+					return 'failed';
+				case 'canceled':
+					return 'canceled';
+				default:
+					return $status; // Return as-is for debugging
+			}
+
+		} catch ( Exception $e ) {
+			error_log( 'Error fetching action scheduler status for action ' . $action_id . ' (job ' . $job_id . '): ' . $e->getMessage() );
+			return 'error';
+		}
 	}
 
 	/**
@@ -659,51 +799,51 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		$upload_dir = wp_upload_dir();
 		$base_filename = pathinfo( $file_path, PATHINFO_FILENAME );
-		
+
 		if ( 'zip' === $compress ) {
 			if ( ! class_exists( 'ZipArchive' ) ) {
 				return new WP_Error( 'woocommerce_rest_export_zip_not_available', __( 'ZIP compression not available on this server.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
-			
+
 			$zip_filename = $base_filename . '.zip';
 			$zip_path = trailingslashit( $upload_dir['basedir'] ) . $zip_filename;
-			
+
 			$zip = new ZipArchive();
 			if ( $zip->open( $zip_path, ZipArchive::CREATE ) === true ) {
 				$zip->addFile( $file_path, basename( $file_path ) );
 				$zip->close();
-				
+
 				if ( file_exists( $zip_path ) ) {
 					return $zip_path;
 				}
 			}
-			
+
 			return new WP_Error( 'woocommerce_rest_export_zip_failed', __( 'Failed to create ZIP archive.', 'woocommerce' ), array( 'status' => 500 ) );
-			
+
 		} elseif ( 'gzip' === $compress ) {
 			if ( ! function_exists( 'gzopen' ) ) {
 				return new WP_Error( 'woocommerce_rest_export_gzip_not_available', __( 'GZIP compression not available on this server.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
-			
+
 			$original_filename = basename( $file_path );
 			$gzip_filename = $original_filename . '.gz';
 			$gzip_path = trailingslashit( $upload_dir['basedir'] ) . $gzip_filename;
-			
+
 			$source = fopen( $file_path, 'rb' );
 			$dest = gzopen( $gzip_path, 'wb9' );
-			
+
 			if ( $source && $dest ) {
 				while ( ! feof( $source ) ) {
 					gzwrite( $dest, fread( $source, 8192 ) );
 				}
 				fclose( $source );
 				gzclose( $dest );
-				
+
 				if ( file_exists( $gzip_path ) ) {
 					return $gzip_path;
 				}
 			}
-			
+
 			return new WP_Error( 'woocommerce_rest_export_gzip_failed', __( 'Failed to create GZIP archive.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
@@ -723,7 +863,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		} elseif ( 'gzip' === $compress ) {
 			return 'application/gzip';
 		}
-		
+
 		return 'json' === $format ? 'application/json' : 'text/csv';
 	}
 
@@ -756,4 +896,207 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		return $value;
 	}
+
+
+	/**
+	 * Trigger background processing using non-blocking HTTP request.
+	 *
+	 * @param int $action_id ActionScheduler action ID.
+	 */
+	private function trigger_background_processing( $action_id ) {
+		error_log( "WooCommerce Product Export: Triggering background processing for action {$action_id}" );
+
+		// Create a special endpoint URL for triggering ActionScheduler
+		$trigger_url = add_query_arg( array(
+			'action' => 'wc_trigger_export_processing',
+			'action_id' => $action_id,
+			'nonce' => wp_create_nonce( "trigger_export_{$action_id}" ),
+		), admin_url( 'admin-ajax.php' ) );
+
+		// Make a non-blocking HTTP request to trigger processing
+		$response = wp_remote_post( $trigger_url, array(
+			'timeout'   => 0.01,  // Very short timeout
+			'blocking'  => false, // Non-blocking
+			'sslverify' => false, // For local requests
+			'headers'   => array(
+				'User-Agent' => 'WooCommerce Export Trigger',
+			),
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			error_log( "WooCommerce Product Export: Failed to trigger background processing: " . $response->get_error_message() );
+		} else {
+			error_log( "WooCommerce Product Export: Background processing trigger sent for action {$action_id}" );
+		}
+	}
+
+	/**
+	 * Force immediate processing of ActionScheduler action.
+	 *
+	 * @param int $action_id ActionScheduler action ID.
+	 */
+	private function run_action_immediately( $action_id ) {
+		error_log( "WooCommerce Product Export: Attempting immediate processing of action {$action_id}" );
+
+		try {
+			// Multiple approaches to force immediate processing
+
+			// Approach 1: Trigger the queue runner hook directly
+			error_log( "WooCommerce Product Export: Triggering action_scheduler_run_queue hook" );
+			do_action( 'action_scheduler_run_queue', 'WooCommerce Export' );
+
+			// Approach 2: Force ActionScheduler runner directly (most reliable)
+			if ( class_exists( 'ActionScheduler' ) && method_exists( 'ActionScheduler', 'runner' ) ) {
+				error_log( "WooCommerce Product Export: Running ActionScheduler runner directly" );
+				$runner = ActionScheduler::runner();
+				if ( method_exists( $runner, 'run' ) ) {
+					// Run with a small time limit to process our action
+					$runner->run( 'WooCommerce Export' );
+				}
+			}
+
+			// Approach 3: If we have QueueRunner class, use it directly
+			if ( class_exists( 'ActionScheduler_QueueRunner' ) ) {
+				error_log( "WooCommerce Product Export: Using ActionScheduler_QueueRunner directly" );
+				$queue_runner = ActionScheduler_QueueRunner::instance();
+				if ( method_exists( $queue_runner, 'run' ) ) {
+					$queue_runner->run( 'WooCommerce Export' );
+				}
+			}
+		} catch ( Exception $e ) {
+			error_log( "WooCommerce Product Export: Failed to trigger immediate processing: " . $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Process product export in background.
+	 * This is called by Action Scheduler.
+	 *
+	 * @param array $export_params Export parameters including job_id.
+	 */
+	public function process_export_background( $export_params ) {
+		error_log( 'WooCommerce Product Export: Background process handler called with params: ' . wp_json_encode( $export_params ) );
+
+		// Get job ID from export parameters
+		$job_id = isset( $export_params['job_id'] ) ? $export_params['job_id'] : null;
+
+		if ( ! $job_id ) {
+			error_log( 'WooCommerce Product Export: No job ID provided in export parameters' );
+			return;
+		}
+
+		// Implement mutex lock to prevent duplicate execution
+		$lock_key = "wc_export_lock_{$job_id}";
+		$lock_value = time();
+		$lock_timeout = 300; // 5 minutes
+
+		// Try to acquire lock
+		if ( ! add_option( $lock_key, $lock_value, '', 'no' ) ) {
+			// Lock exists, check if it's stale
+			$existing_lock = get_option( $lock_key );
+			if ( $existing_lock && ( time() - $existing_lock ) < $lock_timeout ) {
+				error_log( "WooCommerce Product Export: Job {$job_id} is already running, skipping duplicate execution" );
+				return;
+			}
+			// Stale lock, update it
+			update_option( $lock_key, $lock_value );
+		}
+
+		try {
+			// Get current job data
+			$job_data_current = get_option( "wc_product_export_job_{$job_id}", array() );
+
+			// Check if job is already completed or processing
+			if ( isset( $job_data_current['status'] ) && in_array( $job_data_current['status'], array( 'processing', 'complete' ) ) ) {
+				error_log( "WooCommerce Product Export: Job {$job_id} already {$job_data_current['status']}, skipping" );
+				delete_option( $lock_key ); // Release lock
+				return;
+			}
+
+			// Update job status to processing
+			$processing_data = array_merge( $job_data_current, array(
+				'status' => 'processing',
+				'started_at' => current_time( 'mysql' ),
+				'progress' => 0,
+			) );
+
+			update_option( "wc_product_export_job_{$job_id}", $processing_data );
+			error_log( "WooCommerce Product Export: Starting job {$job_id}" );
+
+			$format = $export_params['format'];
+
+			// Create the appropriate exporter
+			if ( 'json' === $format ) {
+				include_once WC_ABSPATH . 'includes/export/class-wc-product-json-exporter.php';
+				$exporter = new WC_Product_JSON_Exporter();
+			} else {
+				include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
+				$exporter = new WC_Product_CSV_Exporter();
+			}
+
+			// Set up the exporter with the provided parameters
+			if ( ! empty( $export_params['columns'] ) ) {
+				$exporter->set_column_names( $export_params['columns'] );
+			}
+
+			if ( ! empty( $export_params['selected_columns'] ) ) {
+				$exporter->set_columns_to_export( $export_params['selected_columns'] );
+			}
+
+			if ( ! empty( $export_params['export_meta'] ) ) {
+				$exporter->enable_meta_export( true );
+			}
+
+			if ( ! empty( $export_params['export_types'] ) ) {
+				$exporter->set_product_types_to_export( $export_params['export_types'] );
+			}
+
+			if ( ! empty( $export_params['export_category'] ) ) {
+				$exporter->set_product_category_to_export( $export_params['export_category'] );
+			}
+
+			if ( ! empty( $export_params['export_product_ids'] ) ) {
+				$ids_raw = explode( ',', sanitize_text_field( $export_params['export_product_ids'] ) );
+				if ( ! empty( $ids_raw ) ) {
+					$exporter->set_product_ids_to_export( $ids_raw );
+				}
+			}
+
+			$exporter->set_filename( $export_params['filename'] );
+
+			// Use the existing streaming approach
+			$controller = new self();
+			$export_status = $controller->stream_export_all_products( $exporter, $format );
+
+			// Update job status based on export result
+			$completion_data = array_merge( $job_data_current, array(
+				'status' => 'complete', // Always mark as complete if we reach here
+				'completed_at' => current_time( 'mysql' ),
+				'progress' => 100,
+				'total_products' => isset( $export_status['total_exported'] ) ? $export_status['total_exported'] : 0,
+			) );
+
+			update_option( "wc_product_export_job_{$job_id}", $completion_data );
+			error_log( "WooCommerce Product Export: Job {$job_id} completed successfully" );
+		} catch ( Exception $e ) {
+			// Update job status to failed
+			update_option( "wc_product_export_job_{$job_id}", array(
+				'status' => 'failed',
+				'format' => $export_params['format'],
+				'filename' => $export_params['filename'],
+				'created_at' => $export_params['created_at'],
+				'failed_at' => current_time( 'mysql' ),
+				'error_message' => $e->getMessage(),
+				'progress' => 0,
+				'total_products' => 0,
+			) );
+
+			error_log( 'WooCommerce Product Export Background Job Failed: ' . $e->getMessage() );
+		} finally {
+			// Always release the lock
+			delete_option( $lock_key );
+			error_log( "WooCommerce Product Export: Released lock for job {$job_id}" );
+		}
+	}
+
 }
