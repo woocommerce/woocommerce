@@ -2750,7 +2750,7 @@ function wc_update_890_update_connect_to_woocommerce_note() {
  * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
  */
 function wc_update_890_update_paypal_standard_load_eligibility() {
-	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? WC_Gateway_Paypal::get_instance() : null;
 
 	if ( ! $paypal ) {
 		return;

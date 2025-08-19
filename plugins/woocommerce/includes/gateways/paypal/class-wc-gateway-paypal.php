@@ -98,6 +98,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	private $transact_onboarding_complete;
 
 	/**
+	 * The *Singleton* instance of this class
+	 *
+	 * @var WC_Gateway_Paypal
+	 */
+	private static $instance;
+
+	/**
+	 * Returns the *Singleton* instance of this class.
+	 *
+	 * @return WC_Gateway_Paypal The *Singleton* instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
@@ -156,13 +175,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
 			// Hide action buttons for pending orders as they take a while to be captured with orders v2.
 			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
+
+			add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
+			add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
+
+			// Hook for plugin upgrades.
+			add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
 		}
-
-		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
-		add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
-
-		// Hook for plugin upgrades.
-		add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
 	}
 
 	/**
