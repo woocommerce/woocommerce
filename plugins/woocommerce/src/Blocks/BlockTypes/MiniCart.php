@@ -539,6 +539,7 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
+					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
@@ -553,7 +554,6 @@ class MiniCart extends AbstractBlock {
 			);
 
 			$context = array(
-				'isOpen'                       => false,
 				'productCountVisibility'       => $product_count_visibility,
 				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
 			);
@@ -574,6 +574,43 @@ class MiniCart extends AbstractBlock {
 			$button_role = 'navigate_to_checkout' === $on_cart_click_behaviour
 				? 'role="link"'
 				: '';
+
+			// Render the minicart overlay in the body, outside of the block itself.
+			add_action( 'wp_footer', function() {
+				ob_start();
+				$template_part_contents           = $this->get_template_part_contents( false );
+				$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
+				
+				?>
+
+				<div
+					data-wp-interactive="woocommerce/mini-cart"
+					data-wp-router-region='{ "id": "woocommerce/mini-cart-overlay", "attachTo": "body" }'
+					data-wp-key="wc-mini-cart-overlay"
+					data-wp-on--click="callbacks.overlayCloseDrawer"
+					data-wp-bind--class="state.drawerOverlayClass"
+				>
+					<div 
+						data-wp-bind--role="state.drawerRole"
+						data-wp-bind--aria-modal="state.isOpen"
+						data-wp-bind--aria-hidden="!state.isOpen"
+						data-wp-bind--tabindex="state.drawerTabIndex"
+						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
+					>
+						<div class="wc-block-components-drawer__content">
+							<div class="wc-block-mini-cart__template-part">
+								<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									echo $template_part_contents;
+								?>
+							</div>
+						</div>
+					</div>
+				</div>				
+
+				<?php
+				echo wp_interactivity_process_directives( ob_get_clean() );
+			});
 
 			ob_start();
 			?>
@@ -612,24 +649,6 @@ class MiniCart extends AbstractBlock {
 						?>
 					<?php endif; ?>
 				</button>
-				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass">
-					<div 
-						data-wp-bind--role="state.drawerRole"
-						data-wp-bind--aria-modal="context.isOpen"
-						data-wp-bind--aria-hidden="!context.isOpen"
-						data-wp-bind--tabindex="state.drawerTabIndex"
-						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
-					>
-						<div class="wc-block-components-drawer__content">
-							<div class="wc-block-mini-cart__template-part">
-								<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-									echo $template_part_contents;
-								?>
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
 			<?php
 			return ob_get_clean();
