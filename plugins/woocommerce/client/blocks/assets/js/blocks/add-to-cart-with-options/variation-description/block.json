@@ -29,10 +29,7 @@
 			"__experimentalFontStyle": true,
 			"__experimentalTextTransform": true,
 			"__experimentalTextDecoration": true,
-			"__experimentalLetterSpacing": true,
-			"__experimentalDefaultControls": {
-				"fontSize": true
-			}
+			"__experimentalLetterSpacing": true
 		},
 		"__experimentalBorder": {
 			"radius": true,
