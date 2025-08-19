@@ -131,7 +131,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'             => __( 'Account creation options', 'woocommerce' ),
-				'desc'              => __( 'Create the username using the customers first and last name if both are provided. If either is missing, use their email address instead (recommended).', 'woocommerce' ),
+				'desc'              => __( 'Use first and/or last name if available and valid to create the username. If neither is usable, fall back to the email address (recommended).', 'woocommerce' ),
 				'desc_tip'          => __( 'If unchecked, customers will need to set a username during account creation.', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_username',
 				'default'           => 'yes',
