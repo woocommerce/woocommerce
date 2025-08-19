@@ -31,7 +31,9 @@ describe( 'WooPaymentsUpdateRequiredModal', () => {
 
 	beforeEach( () => {
 		jest.clearAllMocks();
-		( getAdminLink as jest.Mock ).mockReturnValue( '/wp-admin/plugins.php' );
+		( getAdminLink as jest.Mock ).mockReturnValue(
+			'/wp-admin/plugins.php'
+		);
 		mockLocation.href = '';
 	} );
 
