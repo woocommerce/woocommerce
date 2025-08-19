@@ -32,22 +32,27 @@ import { enhanceSiteLogoBlock } from './core/site-logo';
 export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
+	const restoreFunctions = [];
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
 	disableImageFilter();
-	disableCertainRichTextFormats();
+	restoreFunctions.push( disableCertainRichTextFormats() );
 	disableColumnsLayoutAndEnhanceColumnsBlock();
 	disableGroupVariations();
 	enhanceButtonsBlock();
 	enhancePostContentBlock();
 	enhanceQuoteBlock();
-	extendRichTextFormats();
+	restoreFunctions.push( extendRichTextFormats() );
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
 	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
-	registerCoreBlocks();
 	removeBlockStylesFromAllBlocks();
+	registerCoreBlocks();
+	// Return a function that can restore restorable modifications made during initialization
+	return () => {
+		restoreFunctions.forEach( ( restoreFunction ) => restoreFunction() );
+	};
 }

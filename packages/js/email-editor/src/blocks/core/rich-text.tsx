@@ -30,21 +30,41 @@ import { storeName } from '../../store';
 import { PersonalizationTagsPopover } from '../../components/personalization-tags/personalization-tags-popover';
 import { PersonalizationTagsLinkPopover } from '../../components/personalization-tags/personalization-tags-link-popover';
 import { recordEvent } from '../../events';
-import { useIsEmailEditor } from '../../hooks/use-is-email-editor';
 
 /**
- * Disable Rich text formats we currently cannot support
+ * Disable Rich text formats we currently cannot support and preserve them for potential restoration
  * Note: This will remove its support for all blocks in the email editor e.g., p, h1,h2, etc
+ * @return {Function} A function that can restore the disabled formats
  */
 function disableCertainRichTextFormats() {
-	// remove support for inline image - We can't use it
-	unregisterFormatType( 'core/image' );
+	// Store the format types before unregistering them
+	const preservedFormats: Record< string, any > = {};
 
-	// remove support for Inline code - Not well formatted
-	unregisterFormatType( 'core/code' );
+	// Format types to disable
+	const formatTypesToDisable = [
+		'core/image', // remove support for inline image - We can't use it
+		'core/code', // remove support for Inline code - Not well formatted
+		'core/language', // remove support for Language - Not supported for now
+	];
 
-	// remove support for Language - Not supported for now
-	unregisterFormatType( 'core/language' );
+	// Unregister each format type and preserve its definition
+	formatTypesToDisable.forEach( ( formatName ) => {
+		const formatType = unregisterFormatType( formatName );
+		if ( formatType ) {
+			preservedFormats[ formatName ] = formatType;
+		}
+	} );
+
+	// Return a function that can restore the preserved formats
+	return function restoreRichTextFormats() {
+		Object.entries( preservedFormats ).forEach(
+			( [ formatName, formatType ] ) => {
+				if ( formatType ) {
+					registerFormatType( formatName, formatType );
+				}
+			}
+		);
+	};
 }
 
 type Props = {
@@ -134,12 +154,6 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			updateBlockAttributes,
 		]
 	);
-
-	const isEmailEditor = useIsEmailEditor();
-
-	if ( ! isEmailEditor ) {
-		return null;
-	}
 
 	return (
 		<BlockControls>
@@ -234,6 +248,11 @@ function extendRichTextFormats() {
 		},
 		edit: null,
 	} );
+	// Cleanup function to remove the formats when the plugin is unmounted
+	return () => {
+		unregisterFormatType( 'woocommerce-email-editor/shortcode' );
+		unregisterFormatType( 'woocommerce-email-editor/link-shortcode' );
+	};
 }
 
 const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
