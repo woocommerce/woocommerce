@@ -121,14 +121,22 @@ jobs:
           NEXT_VERSION: ${{ steps.compute-new-version.outputs.nextVersion }}
           NEXT_STABLE: ${{ steps.compute-new-version.outputs.nextStable }}
           CLEAR_CHANGELOG: ${{ steps.compute-new-version.outputs.clearChangelog }}
+          BUMP_TYPE: ${{ inputs.bump-type }}
         run: |
           cd plugins/woocommerce
 
           # Update version header in woocommerce.php.
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
-          # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
+          # Update changelog in readme.txt with version and date.
+          if [[ "$BUMP_TYPE" == "dev" ]]; then
+            # For dev releases, keep the XX-XX format
+            sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE 2025-XX-XX =/" readme.txt
+          else
+            # For beta, rc, stable releases, use current date
+            current_date=$(date +%Y-%m-%d)
+            sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE $current_date =/" readme.txt
+          fi
 
           if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
             perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
