@@ -7572,6 +7572,7 @@ table.bar_chart {
 	}
 }
 
+.woocommerce-customer-stock-notifications .woocommerce-BlankState,
 .woocommerce_page_wc-orders .woocommerce-BlankState,
 .post-type-product .woocommerce-BlankState,
 .post-type-shop_order .woocommerce-BlankState {
@@ -8300,6 +8301,7 @@ table.bar_chart {
 	}
 }
 
+.woocommerce_page_wc-customer-stock-notifications .tablenav,
 .woocommerce_page_wc-orders .tablenav,
 .post-type-product .tablenav,
 .post-type-shop_order .tablenav {
@@ -9076,8 +9078,165 @@ body.woocommerce_page_wc-settings {
 }
 
 /**
+  * WooCommerce > Notifications > Stock notifications > Add/Edit elements.
+  */
+.woocommerce-customer-stock-notifications #poststuff .notification-data {
+	padding: 34px 32px;
+
+	&--create {
+		.notification-data__product-data {
+			margin-top: 20px;
+		}
+
+		.or_relation_label {
+			padding: 14px 0;
+			display: block;
+			text-align: center;
+			color: #777;
+			width: 80%;
+		}
+
+		.select2-container,
+		.or_relation_label__input {
+			width: 80% !important;
+		}
+
+		.notification-data__form-field .notification-data__form-field {
+			margin-top: 40px;
+		}
+	}
+
+	&__row {
+		display: block;
+		margin-bottom: 2em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		&--columns {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+
+			.notification-data__form-field,
+			.notification-data__meta-column {
+				width: 50%;
+			}
+
+			.notification-data__meta-column:last-child,
+			.notification-data__form-field:last-child {
+				width: 50%;
+			}
+		}
+
+		@media screen and (max-width: 782px) {
+			margin-bottom: 0px;
+
+			&--columns {
+
+				.notification-data__meta-column {
+					width: 50% !important;
+				}
+
+				.notification-data__form-field {
+					width: 100% !important;
+				}
+			}
+
+			.notification-data__form-field {
+				margin-bottom: 10px;
+			}
+		}
+	}
+
+	&__header-column {
+		width: 70%;
+		overflow: hidden;
+	}
+
+	&__header {
+		margin: 0;
+		font-size: 21px;
+		font-weight: 300;
+		line-height: 1.2;
+		text-shadow: 1px 1px 1px #fff;
+		padding: 0;
+
+		@media screen and (max-width: 782px) {
+			margin-bottom: 20px;
+		}
+	}
+
+	&__customer-data {
+		font-size: 17px;
+		margin-top: 0;
+		margin-bottom: 15px;
+	}
+
+	&__form-field {
+		clear: both;
+
+		label,
+		input:not([type=checkbox]),
+		select,
+		textarea {
+			width: 100%;
+		}
+
+		label {
+			color: #333;
+			font-weight: bold;
+			display: block;
+			padding: 0 0 15px;
+
+			a {
+				float: right;
+				margin-left: 10px;
+			}
+		}
+
+		.form-field__actions {
+			margin-bottom: 20px;
+
+			a {
+				display: block;
+				padding: 2px 0;
+			}
+		}
+	}
+
+	&__meta {
+		margin-top: 50px;
+
+		&-column :last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__meta-data {
+		margin-bottom: 25px;
+
+		label {
+			font-size: 13px;
+			color: #777;
+			display: block;
+			margin-bottom: 13px;
+		}
+
+		span {
+			display: block;
+
+			a {
+				margin-left: 10px;
+			}
+		}
+	}
+}
+
+/**
  * Hide screen meta links on Advanced Keys settings page.
- */ 
+ */
 body.woocommerce_page_wc-settings-advanced-keys,
 body.woocommerce_page_wc-settings-advanced-webhooks,
 body.woocommerce-admin-page__extensions,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Email editor conflict with the site editor.

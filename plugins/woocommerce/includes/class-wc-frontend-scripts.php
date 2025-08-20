@@ -326,6 +326,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery' ),
 				'version' => '1.7.21-wc.' . $version,
 			),
+			'wc-back-in-stock-form'      => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/back-in-stock-form' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
 		);
 
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {

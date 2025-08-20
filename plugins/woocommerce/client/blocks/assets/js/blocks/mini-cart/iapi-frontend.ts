@@ -569,11 +569,13 @@ const { state: cartItemState } = store(
 			},
 
 			get isProductHiddenFromCatalog(): boolean {
+				const context = getContext< { isImageHidden: boolean } >();
 				const { catalog_visibility: catalogVisibility } =
 					cartItemState.cartItem;
 				return (
-					catalogVisibility === 'hidden' ||
-					catalogVisibility === 'search'
+					( catalogVisibility === 'hidden' ||
+						catalogVisibility === 'search' ) &&
+					! context.isImageHidden
 				);
 			},
 
@@ -662,6 +664,11 @@ const { state: cartItemState } = store(
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 				} );
+			},
+
+			hideImage() {
+				const context = getContext< { isImageHidden: boolean } >();
+				context.isImageHidden = true;
 			},
 		},
 
