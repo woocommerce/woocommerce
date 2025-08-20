@@ -198,6 +198,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: release/${{ needs.extract-versions.outputs.current_version }}
           fetch-depth: 0
 
       - name: Check for database updates
@@ -227,24 +228,22 @@ jobs:
               // Check if the version exists as a key in the array
               // This regex looks for the version as a string key with the format X.Y.Z
               const escapedVersion = version.replace('.', '\\.');
-              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
-              const versionMatch = dbUpdatesContent.match(versionPattern);
+              const versionPattern = new RegExp( `['"]${escapedVersion}\\.\\d+(?:-.*?)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 'gs' );
+              const versionMatch = [...dbUpdatesContent.matchAll(versionPattern)];
 
-              if (versionMatch) {
+              if ( versionMatch && versionMatch.length > 0 ) {
                 console.log(`✅ Found database updates for version ${version}`);
                 core.setOutput('has_updates', 'true');
 
-                const updatesContent = versionMatch[1];
+                // Split by comma and clean up each update function.
+                const updates = versionMatch
+                  .flatMap( m => m[1].split( ',' ) )
+                  .map( u => u.replace( /['"]/g, '' ).trim() )
+                  .filter( u => u.length > 0 )
 
-                // Split by comma and clean up each update function
-                const updates = updatesContent
-                  .split(',')
-                  .map(update => update.trim().replace(/['"]/g, ''))
-                  .filter(update => update.length > 0);
 
                 // Store updates for the PR finding step
                 core.setOutput('updates_list', updates.join(','));
-
               } else {
                 console.log(`⛔ No database updates found for version ${version}`);
                 core.setOutput('has_updates', 'false');
