@@ -165,6 +165,67 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Update a PayPal order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string   $paypal_order_id PayPal order ID.
+	 * @return array|null
+	 */
+	public function update_paypal_order( $order, $paypal_order_id ) {
+		$request_body = array(
+			'test_mode' => $this->gateway->testmode,
+			'updates'   => array(
+				array(
+					'op'    => 'replace',
+					'path'  => "/purchase_units/@reference_id=='default'/shipping/address",
+					'value' => array(
+						'address_line_1' => $order->get_billing_address_1(),
+						'address_line_2' => $order->get_billing_address_2(),
+						'admin_area_2'   => $order->get_billing_city(),
+						'admin_area_1'   => $order->get_billing_state(),
+						'postal_code'    => $order->get_billing_postcode(),
+						'country_code'   => $order->get_billing_country(),
+					),
+				),
+				array(
+					'op'    => 'replace',
+					'path'  => "/purchase_units/@reference_id=='default'/amount",
+					'value' => array(
+						'currency_code' => $order->get_currency(),
+						'value'         => $order->get_total(),
+						'breakdown'     => array(
+							'item_total' => array(
+								'currency_code' => $order->get_currency(),
+								'value'         => $this->get_paypal_order_items_subtotal( $order ),
+							),
+							'shipping'   => array(
+								'currency_code' => $order->get_currency(),
+								'value'         => $order->get_shipping_total(),
+							),
+							'tax_total'  => array(
+								'currency_code' => $order->get_currency(),
+								'value'         => $order->get_total_tax(),
+							),
+							'discount'   => array(
+								'currency_code' => $order->get_currency(),
+								'value'         => $order->get_discount_total(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$response = $this->send_wpcom_proxy_request(
+			'PUT',
+			self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id,
+			$request_body
+		);
+
+		return $response;
+	}
+
+	/**
 	 * Authorize or capture a PayPal payment using the Orders v2 API.
 	 *
 	 * This method authorizes or captures a PayPal payment and updates the order status.
@@ -488,8 +549,8 @@ class WC_Gateway_Paypal_Request {
 
 		// PayPal requires postal code to be set for some countries.
 		// https://developer.paypal.com/api/rest/reference/orders/v2/country-address-requirements/
-		if ( OrderStatus::DRAFT === $order->get_status() &&
-			! empty( $shipping['address']['country_code'] ) && empty( $shipping['address']['postal_code'] ) ) {
+		// TODO: Apply this logic to Buttons only.
+		if ( ! empty( $shipping['address']['country_code'] ) && empty( $shipping['address']['postal_code'] ) ) {
 			return null;
 		}
 
