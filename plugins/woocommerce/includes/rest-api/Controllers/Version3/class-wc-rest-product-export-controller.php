@@ -172,7 +172,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 							'description' => __( 'Column names for export.', 'woocommerce' ),
 							'type'        => 'array',
 						),
-						'selected_columns' => array(
+						'fields' => array(
 							'description' => __( 'Selected columns to export.', 'woocommerce' ),
 							'type'        => 'array',
 						),
@@ -277,7 +277,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'format' => $format,
 			'filename' => $filename,
 			'columns' => $request->get_param( 'columns' ),
-			'selected_columns' => $request->get_param( 'selected_columns' ),
+			'selected_columns' => $request->get_param( 'fields' ),
 			'export_meta' => $request->get_param( 'export_meta' ),
 			'export_types' => $request->get_param( 'export_types' ),
 			'export_category' => $request->get_param( 'export_category' ),
