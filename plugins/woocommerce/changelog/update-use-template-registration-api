@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use the WordPress core template registration API to register WooCommerce templates

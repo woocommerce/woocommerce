@@ -226,11 +226,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						$product_names[ $product_id ] = $wpdb->get_var(
 							$wpdb->prepare(
 								"SELECT i.order_item_name
-								FROM {$wpdb->prefix}woocommerce_order_items i, {$wpdb->prefix}woocommerce_order_itemmeta m
-								WHERE i.order_item_id = m.order_item_id
-								AND m.meta_key = '_product_id'
-								AND m.meta_value = %s
-								ORDER BY i.order_item_id DESC
+								FROM {$wpdb->prefix}wc_order_product_lookup l
+								JOIN {$wpdb->prefix}woocommerce_order_items i ON i.order_item_id = l.order_item_id
+								WHERE l.product_id = %d
+								ORDER BY l.order_item_id DESC
 								LIMIT 1",
 								$product_id
 							)

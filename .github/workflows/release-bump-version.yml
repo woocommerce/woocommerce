@@ -141,7 +141,7 @@ jobs:
           done
 
           # Update $version property in class-woocommerce.php.
-          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+';/public \\\$version = '$NEXT_STABLE'\;/" includes/class-woocommerce.php
+          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
 
           if git diff --quiet; then
             echo "::error::No changes to commit."
