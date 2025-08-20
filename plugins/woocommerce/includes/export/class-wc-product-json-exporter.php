@@ -309,7 +309,124 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 		$this->prepare_attributes_for_export( $product, $row );
 		$this->prepare_meta_for_export( $product, $row );
 
+		// Apply type casting to ensure API consistency
+		$row = $this->cast_row_data_to_api_types( $row );
+
 		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );
+	}
+
+	/**
+	 * Cast entire row data to expected API types.
+	 *
+	 * @param array $row Row data to cast.
+	 * @return array Row data with proper types.
+	 */
+	protected function cast_row_data_to_api_types( $row ) {
+		foreach ( $row as $column_id => $value ) {
+			$row[ $column_id ] = $this->cast_value_to_api_type( $column_id, $value );
+		}
+		return $row;
+	}
+
+	/**
+	 * Cast value to expected API type based on column ID.
+	 *
+	 * @param string $column_id Column identifier.
+	 * @param mixed  $value     Raw value.
+	 * @return mixed Properly typed value.
+	 */
+	protected function cast_value_to_api_type( $column_id, $value ) {
+		// Boolean fields
+		$boolean_fields = array(
+			'featured',
+			'virtual',
+			'downloadable',
+			'manage_stock',
+			'sold_individually',
+			'reviews_allowed',
+		);
+
+		// Integer/numeric fields
+		$integer_fields = array(
+			'id',
+			'parent_id',
+			'menu_order',
+			'stock',
+			'low_stock_amount',
+			'download_limit',
+			'download_expiry',
+			'shipping_class_id',
+		);
+
+		// Float/decimal fields
+		$float_fields = array(
+			'weight',
+			'length',
+			'width',
+			'height',
+		);
+
+		// Price fields (keep as strings but ensure numeric format)
+		$price_fields = array(
+			'regular_price',
+			'sale_price',
+		);
+
+		// String fields that should always be strings
+		$string_fields = array(
+			'sku',
+			'name',
+			'description',
+			'short_description',
+			'status',
+			'catalog_visibility',
+			'tax_status',
+			'tax_class',
+			'stock_status',
+			'backorders',
+			'button_text',
+			'purchase_note',
+			'product_url',
+			'global_unique_id',
+		);
+
+		// Array fields that should always be arrays
+		$array_fields = array(
+			'category_ids',
+			'tag_ids',
+			'images',
+			'upsell_ids',
+			'cross_sell_ids',
+			'grouped_products',
+			'type',
+		);
+
+		if ( in_array( $column_id, $boolean_fields, true ) ) {
+			return (bool) $value;
+		}
+
+		if ( in_array( $column_id, $integer_fields, true ) ) {
+			return is_numeric( $value ) ? (int) $value : $value;
+		}
+
+		if ( in_array( $column_id, $float_fields, true ) ) {
+			return is_numeric( $value ) ? (float) $value : $value;
+		}
+
+		if ( in_array( $column_id, $price_fields, true ) ) {
+			// Keep prices as strings but ensure they're properly formatted numbers
+			return is_numeric( $value ) ? (string) $value : '';
+		}
+
+		if ( in_array( $column_id, $array_fields, true ) ) {
+			return is_array( $value ) ? $value : array();
+		}
+
+		if ( in_array( $column_id, $string_fields, true ) ) {
+			return (string) $value;
+		}
+
+		return $value;
 	}
 
 	/**
@@ -553,5 +670,20 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Override parent format_data to preserve our API type casting.
+	 *
+	 * @param mixed $data Data to format.
+	 * @return mixed Formatted data.
+	 */
+	public function format_data( $data ) {
+		if ( is_a( $data, 'WC_Datetime' ) ) {
+			return $data->date( 'Y-m-d H:i:s' );
+		}
+		
+		// Don't auto-convert numeric strings to numbers - preserve our type casting
+		return $data;
 	}
 }
