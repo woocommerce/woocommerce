@@ -312,7 +312,7 @@ describe( 'RemoveButton component', () => {
 				const confirmButton = screen.getByRole( 'button', {
 					name: 'Confirm removal of fulfillment',
 				} );
-				
+
 				fireEvent.click( confirmButton );
 
 				// The button text should update immediately
