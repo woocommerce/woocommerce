@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 /**
  * Internal dependencies
@@ -27,6 +27,82 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 	onClose,
 	orderId,
 } ) => {
+	const drawerRef = useRef< HTMLDivElement >( null );
+	const previousFocusRef = useRef< HTMLElement | null >( null );
+
+	// Focus management when drawer opens/closes
+	useEffect( () => {
+		if ( isOpen ) {
+			const drawerElement = drawerRef.current;
+			if ( drawerElement ) {
+				// Save the previous focused element to restore focus later
+				previousFocusRef.current = drawerElement.ownerDocument
+					.activeElement as HTMLElement;
+
+				// Focus the drawer container itself after it's fully rendered
+				// This allows natural scrolling and keyboard navigation within
+				setTimeout( () => {
+					drawerElement.focus();
+				}, 100 );
+			}
+		} else if ( previousFocusRef.current ) {
+			// Restore focus to the previously focused element
+			previousFocusRef.current.focus();
+		}
+	}, [ isOpen ] );
+
+	// Handle keyboard navigation: Escape to close and focus trapping
+	useEffect( () => {
+		const handleKeyDown = ( event: KeyboardEvent ) => {
+			if ( ! isOpen ) return;
+
+			// Close drawer on Escape key
+			if ( event.key === 'Escape' ) {
+				onClose();
+				return;
+			}
+
+			// Focus trap: Only trap Tab navigation, allow all other keys (including scrolling)
+			if ( event.key === 'Tab' ) {
+				const drawerElement = drawerRef.current;
+				if ( ! drawerElement ) return;
+
+				const focusableElements = drawerElement.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				);
+
+				if ( focusableElements.length === 0 ) return;
+
+				const firstElement = focusableElements[ 0 ] as HTMLElement;
+				const lastElement = focusableElements[
+					focusableElements.length - 1
+				] as HTMLElement;
+				const activeElement = drawerElement.ownerDocument
+					.activeElement as HTMLElement;
+
+				// Shift+Tab: If focus is on first element, move to last
+				if ( event.shiftKey ) {
+					if ( activeElement === firstElement ) {
+						event.preventDefault();
+						lastElement?.focus();
+					}
+				} else if ( activeElement === lastElement ) {
+					// Tab: If focus is on last element, move to first
+					event.preventDefault();
+					firstElement?.focus();
+				}
+			}
+		};
+
+		if ( isOpen ) {
+			document.addEventListener( 'keydown', handleKeyDown );
+		}
+
+		return () => {
+			document.removeEventListener( 'keydown', handleKeyDown );
+		};
+	}, [ isOpen, onClose ] );
+
 	return (
 		<>
 			{ hasBackdrop && (
@@ -35,14 +111,21 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 					onClick={ onClose }
 					role="presentation"
 					style={ { display: isOpen ? 'block' : 'none' } }
+					aria-hidden={ ! isOpen }
 				/>
 			) }
 			<div className="woocommerce-fulfillment-drawer">
 				<div
+					ref={ drawerRef }
 					className={ [
 						'woocommerce-fulfillment-drawer__panel',
 						isOpen ? 'is-open' : 'is-closed',
 					].join( ' ' ) }
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="fulfillment-drawer-header"
+					aria-hidden={ ! isOpen }
+					tabIndex={ -1 }
 				>
 					<ErrorBoundary>
 						<FulfillmentDrawerProvider orderId={ orderId }>

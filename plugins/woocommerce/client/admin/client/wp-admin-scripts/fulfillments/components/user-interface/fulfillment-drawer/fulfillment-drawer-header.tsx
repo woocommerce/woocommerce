@@ -21,9 +21,12 @@ export default function FulfillmentsDrawerHeader( {
 
 	return (
 		order && (
-			<div className={ 'woocommerce-fulfillment-drawer__header' }>
+			<div
+				className={ 'woocommerce-fulfillment-drawer__header' }
+				tabIndex={ -1 }
+			>
 				<div className="woocommerce-fulfillment-drawer__header__title">
-					<h2>
+					<h2 id="fulfillment-drawer-header">
 						#{ order.id }{ ' ' }
 						{ order.billing.first_name +
 							' ' +
@@ -36,6 +39,7 @@ export default function FulfillmentsDrawerHeader( {
 							setOpenSection( 'order' );
 							onClose();
 						} }
+						aria-label="Close fulfillment drawer"
 					>
 						×
 					</button>

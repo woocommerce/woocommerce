@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { Button, Icon } from '@wordpress/components';
-import { useEffect, useState } from 'react';
+import { Icon } from '@wordpress/components';
+import { useEffect, useState, useRef } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -51,6 +51,7 @@ export default function FulfillmentEditor( {
 	const { order, fulfillments, refunds } = useFulfillmentDrawerContext();
 	const { isEditing, setIsEditing } = useFulfillmentDrawerContext();
 	const [ error, setError ] = useState< string | null >( null );
+	const contentRef = useRef< HTMLDivElement >( null );
 	const itemsInFulfillment = order
 		? getItemsFromFulfillment( order, fulfillment )
 		: [];
@@ -68,6 +69,25 @@ export default function FulfillmentEditor( {
 	useEffect( () => {
 		setError( null );
 	}, [ order?.id ] );
+
+	// Focus management when entering edit mode
+	useEffect( () => {
+		if ( isEditing && expanded && contentRef.current ) {
+			// Small delay to ensure content is rendered
+			setTimeout( () => {
+				if ( contentRef.current ) {
+					// Look for the first interactive element in edit mode
+					const firstEditable = contentRef.current.querySelector(
+						'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+					) as HTMLElement;
+
+					if ( firstEditable ) {
+						firstEditable.focus();
+					}
+				}
+			}, 100 );
+		}
+	}, [ isEditing, expanded ] );
 
 	const handleChevronClick = () => {
 		if ( isEditing ) return;
@@ -98,13 +118,20 @@ export default function FulfillmentEditor( {
 					expanded ? 'is-open' : '',
 				].join( ' ' ) }
 				onClick={ handleChevronClick }
-				onKeyUp={ ( event ) => {
-					if ( event.key === 'Enter' ) {
+				onKeyDown={ ( event ) => {
+					if ( event.key === 'Enter' || event.key === ' ' ) {
+						event.preventDefault();
 						handleChevronClick();
 					}
 				} }
 				role="button"
-				tabIndex={ -1 }
+				tabIndex={ 0 }
+				aria-expanded={ expanded }
+				aria-label={
+					expanded
+						? __( 'Collapse fulfillment details', 'woocommerce' )
+						: __( 'Expand fulfillment details', 'woocommerce' )
+				}
 			>
 				<h3>
 					{
@@ -122,7 +149,7 @@ export default function FulfillmentEditor( {
 				<FulfillmentStatusBadge fulfillment={ fulfillment } />
 				{ ( itemsNotInAnyFulfillment.length > 0 ||
 					fulfillments.length > 1 ) && (
-					<Button __next40pxDefaultSize size="small">
+					<div aria-hidden="true">
 						<Icon
 							icon={
 								expanded ? 'arrow-up-alt2' : 'arrow-down-alt2'
@@ -130,11 +157,14 @@ export default function FulfillmentEditor( {
 							size={ 16 }
 							color={ isEditing ? '#dddddd' : undefined }
 						/>
-					</Button>
+					</div>
 				) }
 			</div>
 			{ expanded && (
-				<div className="woocommerce-fulfillment-stored-fulfillment-list-item-content">
+				<div
+					className="woocommerce-fulfillment-stored-fulfillment-list-item-content"
+					ref={ contentRef }
+				>
 					{ error && <ErrorLabel error={ error } /> }
 
 					<ShipmentFormProvider fulfillment={ fulfillment }>
