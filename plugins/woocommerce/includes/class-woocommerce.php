@@ -307,6 +307,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'wc_cleanup_export_files', array( $this, 'cleanup_export_files' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
@@ -1496,5 +1497,24 @@ final class WooCommerce {
 		// Create an instance and call the processing method
 		$controller = new WC_REST_Product_Export_Controller();
 		$controller->process_export_background( $export_params );
+	}
+
+	/**
+	 * Clean up export files scheduled for deletion.
+	 * Called by WordPress cron 1 day after file download.
+	 *
+	 * @param array $files_to_cleanup Array of file paths to delete.
+	 */
+	public function cleanup_export_files( $files_to_cleanup ) {
+		if ( ! is_array( $files_to_cleanup ) ) {
+			return;
+		}
+
+		foreach ( $files_to_cleanup as $file_path ) {
+			if ( file_exists( $file_path ) ) {
+				unlink( $file_path );
+				error_log( "WooCommerce Product Export: Cleaned up file {$file_path}" );
+			}
+		}
 	}
 }

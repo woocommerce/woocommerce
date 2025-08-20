@@ -81,7 +81,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		if ( empty( $format ) ) {
 			$file_info = pathinfo( $filename );
 			$extension = strtolower( $file_info['extension'] ?? '' );
-			
+
 			if ( 'csv' === $extension ) {
 				$format = 'csv';
 			} elseif ( 'json' === $extension ) {
@@ -132,16 +132,19 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		// Output file content
 		readfile( $file_path );
 
-		// Clean up files after download
-		unlink( $file_path );
+		// Schedule file cleanup after 1 day
+		$files_to_cleanup = array( $file_path );
 
-		// Also clean up original file if we created a compressed version
+		// Also schedule cleanup of original file if we created a compressed version
 		if ( 'none' !== $compress ) {
 			$original_file = trailingslashit( $upload_dir['basedir'] ) . $request->get_param( 'filename' );
 			if ( file_exists( $original_file ) ) {
-				unlink( $original_file );
+				$files_to_cleanup[] = $original_file;
 			}
 		}
+
+		// Schedule cleanup using WordPress cron (1 day = 86400 seconds)
+		wp_schedule_single_event( time() + DAY_IN_SECONDS, 'wc_cleanup_export_files', array( $files_to_cleanup ) );
 
 		exit;
 	}
