@@ -438,7 +438,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 60,
 						'orders_count'        => 0,
-						'num_items_sold'      => 0,
+						'num_items_sold'      => -4,
 						'avg_items_per_order' => 0,
 						'avg_order_value'     => 0,
 						'total_customers'     => 1,
