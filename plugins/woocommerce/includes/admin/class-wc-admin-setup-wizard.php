@@ -2252,6 +2252,32 @@ class WC_Admin_Setup_Wizard {
 						><?php esc_html_e( 'Yes please!', 'woocommerce' ); ?></button>
 					</p>
 				</div>
+				<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					// Track newsletter form submissions for debugging
+					$('#mc-embedded-subscribe').on('click', function(e) {
+						// Log newsletter opt-in attempt
+						console.log('Newsletter opt-in attempted from setup wizard');
+						
+						// Track event if WooCommerce Tracks is available
+						if (typeof wc_tracks !== 'undefined' && wc_tracks.recordEvent) {
+							wc_tracks.recordEvent('newsletter_optin_attempt', {
+								source: 'setup_wizard',
+								version: '<?php echo esc_js( WC()->version ); ?>',
+								timestamp: Date.now()
+							});
+						}
+						
+						// Ensure form submission isn't blocked
+						var form = $(this).closest('form');
+						if (form.length) {
+							setTimeout(function() {
+								form[0].submit();
+							}, 100);
+						}
+					});
+				});
+				</script>
 			</form>
 		</div>
 

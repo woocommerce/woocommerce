@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix newsletter opt-in rates regression introduced in 9.9.0 by preventing email improvements from interfering with newsletter forms and adding tracking for debugging.

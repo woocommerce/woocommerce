@@ -107,6 +107,12 @@ class EmailImprovements {
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 			return false;
 		}
+		
+		// Don't enable on pages that might interfere with newsletter functionality
+		if ( self::should_bypass_email_improvements() ) {
+			return false;
+		}
+		
 		$manually_disabled_before = get_option( 'woocommerce_email_improvements_last_disabled_at' );
 		if ( $manually_disabled_before ) {
 			return false;
@@ -129,6 +135,18 @@ class EmailImprovements {
 	 */
 	public static function should_notify_merchant_about_email_improvements() {
 		return ! FeaturesUtil::feature_is_enabled( 'email_improvements' );
+	}
+
+	/**
+	 * Check if we're on a page that should not be affected by email improvements.
+	 * This prevents email improvements from interfering with newsletter forms.
+	 *
+	 * @return bool True if email improvements should be bypassed, false otherwise.
+	 */
+	public static function should_bypass_email_improvements() {
+		// Bypass on setup wizard pages to prevent newsletter form interference
+		$current_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		return in_array( $current_page, array( 'wc-setup' ), true );
 	}
 
 	/**
