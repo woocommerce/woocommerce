@@ -369,6 +369,7 @@ class WC_Gateway_Paypal_Request {
 						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
 						'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
 						'locale'              => str_replace( '_', '-', get_locale() ),
 					),
 				),
