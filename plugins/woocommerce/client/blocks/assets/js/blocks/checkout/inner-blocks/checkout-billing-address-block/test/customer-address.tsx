@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import type { FieldValidationStatus } from '@woocommerce/types';
-import { useCheckoutAddress } from '@woocommerce/base-context';
+import { useCheckoutAddress, useCustomerData } from '@woocommerce/base-context';
 import { previewCart } from '@woocommerce/resource-previews';
 import type {
 	FormFields,
@@ -31,6 +31,7 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	useStoreEvents: jest.fn( () => ( {
 		dispatchCheckoutEvent: jest.fn(),
 	} ) ),
+	useCustomerData: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
@@ -55,17 +56,18 @@ jest.mock( '../../../address-card', () =>
 	) )
 );
 
-// const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
 const mockUseCheckoutAddress = useCheckoutAddress as jest.MockedFunction<
 	typeof useCheckoutAddress
 >;
 
-// Minimal mock - only the properties our test actually uses
+const mockUseCustomerData = useCustomerData as jest.MockedFunction<
+	typeof useCustomerData
+>;
+
 const baseMockCheckoutAddress = {
 	billingAddress: previewCart.billing_address as BillingAddress,
 	editingBillingAddress: false,
 	setEditingBillingAddress: jest.fn(),
-	// Required TypeScript properties (minimal implementation)
 	shippingAddress: previewCart.shipping_address as ShippingAddress,
 	setShippingAddress: jest.fn(),
 	setBillingAddress: jest.fn(),
@@ -79,7 +81,6 @@ const baseMockCheckoutAddress = {
 		shippingAddress: previewCart.shipping_address as ShippingAddress,
 	},
 	setCustomerData: jest.fn(),
-	// Additional required properties from CheckoutAddress interface
 	setUseShippingAsBilling: jest.fn(),
 	defaultFields: {} as FormFields,
 	showShippingFields: false,
@@ -96,6 +97,14 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		jest.clearAllMocks();
 		// Set default mock with base implementation
 		mockUseCheckoutAddress.mockReturnValue( baseMockCheckoutAddress );
+
+		mockUseCustomerData.mockReturnValue( {
+			isInitialized: true,
+			setBillingAddress: jest.fn(),
+			setShippingAddress: jest.fn(),
+			billingAddress: previewCart.billing_address as BillingAddress,
+			shippingAddress: previewCart.shipping_address as ShippingAddress,
+		} );
 
 		// Create fresh mock for each test
 		mockGetValidationError = jest.fn();
@@ -377,6 +386,14 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 				phone: '',
 				email: '',
 			} as BillingAddress,
+		} );
+
+		mockUseCustomerData.mockReturnValue( {
+			isInitialized: false,
+			setBillingAddress: jest.fn(),
+			setShippingAddress: jest.fn(),
+			billingAddress: previewCart.billing_address as BillingAddress,
+			shippingAddress: previewCart.shipping_address as ShippingAddress,
 		} );
 
 		// Mock the validation store to return errors for all empty required fields

@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
+import {
+	useCheckoutAddress,
+	useStoreEvents,
+	useCustomerData,
+} from '@woocommerce/base-context';
 import type { AddressFormValues } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -25,16 +29,7 @@ const CustomerAddress = () => {
 		setEditingBillingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-
-	const areAllFieldsEmpty = useMemo( () => {
-		const billingFieldKeys = Object.keys( billingAddress ).filter(
-			( key ) => key !== 'email'
-		);
-		return billingFieldKeys.every( ( key ) => {
-			const value = billingAddress[ key as keyof typeof billingAddress ];
-			return ! value || value === '';
-		} );
-	}, [ billingAddress ] );
+	const { isInitialized } = useCustomerData();
 
 	const hasValidationErrors = useSelect(
 		( select ) => {
@@ -55,13 +50,18 @@ const CustomerAddress = () => {
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
 		if (
+			isInitialized &&
 			hasValidationErrors &&
-			editingBillingAddress === false &&
-			! areAllFieldsEmpty
+			editingBillingAddress === false
 		) {
 			setEditingBillingAddress( true );
 		}
-	}, [ editingBillingAddress, hasValidationErrors, billingAddress ] );
+	}, [
+		editingBillingAddress,
+		hasValidationErrors,
+		billingAddress,
+		isInitialized,
+	] );
 
 	const onChangeAddress = useCallback(
 		( values: AddressFormValues ) => {

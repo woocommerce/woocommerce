@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
+import {
+	useCheckoutAddress,
+	useStoreEvents,
+	useCustomerData,
+} from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -27,16 +31,7 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
-	const areAllFieldsEmpty = useMemo( () => {
-		const shippingFieldKeys = Object.keys( shippingAddress ).filter(
-			( key ) => key !== 'email'
-		);
-		return shippingFieldKeys.every( ( key ) => {
-			const value =
-				shippingAddress[ key as keyof typeof shippingAddress ];
-			return ! value || value === '';
-		} );
-	}, [ shippingAddress ] );
+	const { isInitialized } = useCustomerData();
 
 	const hasValidationErrors = useSelect(
 		( select ) => {
@@ -56,15 +51,19 @@ const CustomerAddress = () => {
 	useEffect( () => {
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
-
 		if (
+			isInitialized &&
 			hasValidationErrors &&
-			editingShippingAddress === false &&
-			! areAllFieldsEmpty
+			editingShippingAddress === false
 		) {
 			setEditingShippingAddress( true );
 		}
-	}, [ editingShippingAddress, hasValidationErrors, shippingAddress ] );
+	}, [
+		editingShippingAddress,
+		hasValidationErrors,
+		shippingAddress,
+		isInitialized,
+	] );
 
 	const onChangeAddress = useCallback(
 		( values: ShippingAddress ) => {
@@ -97,7 +96,7 @@ const CustomerAddress = () => {
 					address={ shippingAddress }
 					target="shipping"
 					onEdit={ handleEditClick }
-					isExpanded={ true }
+					isExpanded={ editingShippingAddress }
 				/>
 			}
 			addressForm={
