@@ -278,4 +278,17 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$this->assertFalse( $update_scheduled );
 		}
 	}
+
+	/**
+	 * Ensures that the `WC_Install::$db_update_callbacks` array is sorted by version.
+	 *
+	 * @since 10.2.0
+	 */
+	public function test_db_update_callbacks_are_sorted_by_version(): void {
+		$callbacks = \WC_Install::get_db_update_callbacks();
+		$versions  = array_keys( $callbacks );
+		usort( $versions, 'version_compare' );
+
+		$this->assertSame( $versions, array_keys( $callbacks ) );
+	}
 }

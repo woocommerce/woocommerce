@@ -692,11 +692,8 @@ class WC_Install {
 	 */
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
-		$updates            = self::get_db_update_callbacks();
-		$update_versions    = array_keys( $updates );
-		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, self::get_last_db_update_version(), '<' );
 	}
 
 	/**
@@ -779,15 +776,29 @@ class WC_Install {
 	}
 
 	/**
+	 * Get the version of the last DB update.
+	 *
+	 * @since 10.2.0
+	 *
+	 * @return string
+	 */
+	public static function get_last_db_update_version(): string {
+		return self::$db_updates
+			? array_key_last( self::$db_updates )
+			: WC()->version();
+	}
+
+	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$current_wc_version = WC()->version;
+		$updates            = self::get_db_update_callbacks();
+		$wc_db_version      = array_key_last( $updates );
 		$scheduled_time     = time();
 
 		wc_get_logger()->info(
-			sprintf( 'Scheduling database updates (from %s to %s)...', $current_db_version, $current_wc_version ),
+			sprintf( 'Scheduling database updates (from %s)...', $current_db_version ),
 			array( 'source' => 'wc-updater' )
 		);
 
@@ -812,13 +823,10 @@ class WC_Install {
 		}
 
 		$loop = 0;
-		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
+		foreach ( $updates as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '>=' ) ) {
 				continue;
 			}
-
-			// Version without pre-release info to reduce noise in logs.
-			$log_version = preg_replace( '/-.*/', '', $version );
 
 			foreach ( $update_callbacks as $update_callback ) {
 				WC()->queue()->schedule_single(
@@ -832,7 +840,7 @@ class WC_Install {
 				++$loop;
 
 				wc_get_logger()->info(
-					sprintf( '  [%s] Scheduled \'%s\'.', $log_version, $update_callback ),
+					sprintf( '  [%s] Scheduled \'%s\'.', $version, $update_callback ),
 					array( 'source' => 'wc-updater' )
 				);
 			}
@@ -840,13 +848,13 @@ class WC_Install {
 
 		// After the callbacks finish, update the db version to the current WC version.
 		$success = true;
-		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
+		if ( version_compare( $current_db_version, $wc_db_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
 			$success = WC()->queue()->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
-					'version' => $current_wc_version,
+					'version' => $wc_db_version,
 				),
 				'woocommerce-db-updates'
 			) > 0;
@@ -873,7 +881,7 @@ class WC_Install {
 	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		update_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
+		update_option( 'woocommerce_db_version', is_null( $version ) ? self::get_last_db_update_version() : $version );
 	}
 
 	/**
