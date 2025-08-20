@@ -359,15 +359,22 @@ class WC_Gateway_Paypal_Request {
 		$currency = $order->get_currency();
 
 		return array(
-			'intent'              => $this->get_paypal_order_intent(),
-			'payment_source'      => array(
+			'intent'         => $this->get_paypal_order_intent(),
+			'payment_source' => array(
 				'paypal' => array(
 					'experience_context' => array(
-						'user_action' => 'PAY_NOW',
+						'user_action'         => 'PAY_NOW',
+						'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
+						// Customer redirected here on approval.
+						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						// Customer redirected here on cancellation.
+						'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
+						'locale'              => str_replace( '_', '-', get_locale() ),
 					),
 				),
 			),
-			'purchase_units'      => array(
+			'purchase_units' => array(
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => array(
@@ -399,15 +406,6 @@ class WC_Gateway_Paypal_Request {
 					),
 					'shipping'   => $this->get_paypal_order_shipping( $order ),
 				),
-			),
-			'application_context' => array(
-				'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
-				// Customer redirected here on approval.
-				'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
-				// Customer redirected here on cancellation.
-				'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
-				// phpcs:ignore Generic.Commenting.Todo.TaskFound,Squiz.PHP.CommentedOutCode.Found
-				// 'locale' => get_locale(), // TODO: PayPal has its own locale format, will need conversion.
 			),
 		);
 	}
