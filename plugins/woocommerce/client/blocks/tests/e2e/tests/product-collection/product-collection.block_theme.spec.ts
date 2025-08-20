@@ -469,6 +469,8 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
+			await editor.closeGlobalBlockInserter();
+
 			const locationRequestPromise =
 				page.waitForRequest( filterProductRequest );
 			await pageObject.chooseCollectionInTemplate( 'featured' );

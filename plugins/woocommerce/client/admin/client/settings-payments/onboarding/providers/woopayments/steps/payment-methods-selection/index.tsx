@@ -14,7 +14,7 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import { useOnboardingContext } from '../../data/onboarding-context';
-import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
+import { PaymentMethodListItem } from './list-item';
 import {
 	combinePaymentMethodsState,
 	combineRequestMethods,
