@@ -576,45 +576,9 @@ class MiniCart extends AbstractBlock {
 				: '';
 
 			// Render the minicart overlay in the body, outside of the block itself.
-			add_action(
-				'wp_footer',
-				function () {
-					ob_start();
-					$template_part_contents = $this->get_template_part_contents( false );
-					$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );					
-					?>
-
-					<div
-						data-wp-interactive="woocommerce/mini-cart"
-						data-wp-router-region='{ "id": "woocommerce/mini-cart-overlay", "attachTo": "body" }'
-						data-wp-key="wc-mini-cart-overlay"
-						data-wp-on--click="callbacks.overlayCloseDrawer"
-						data-wp-bind--class="state.drawerOverlayClass"
-					>
-						<div 
-							data-wp-bind--role="state.drawerRole"
-							data-wp-bind--aria-modal="state.isOpen"
-							data-wp-bind--aria-hidden="!state.isOpen"
-							data-wp-bind--tabindex="state.drawerTabIndex"
-							class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
-						>
-							<div class="wc-block-components-drawer__content">
-								<div class="wc-block-mini-cart__template-part">
-									<?php
-										// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-										echo $template_part_contents;
-									?>
-								</div>
-							</div>
-						</div>
-					</div>				
-
-					<?php
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo wp_interactivity_process_directives( ob_get_clean() );
-				}
-			);
-
+			if ( ! has_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) ) ) {
+				add_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) );
+			}
 			ob_start();
 			?>
 		
@@ -658,6 +622,45 @@ class MiniCart extends AbstractBlock {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Echoes the Interactivity API Mini Cart overlay markup.
+	 * 
+	 * @return string The processed template contents.
+	 */
+	public function render_experimental_iapi_mini_cart_overlay() {
+		$template_part_contents = $this->get_template_part_contents( false );
+		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		ob_start();
+		?>
+		<div
+			data-wp-interactive="woocommerce/mini-cart"
+			data-wp-router-region='{ "id": "woocommerce/mini-cart-overlay", "attachTo": "body" }'
+			data-wp-key="wc-mini-cart-overlay"
+			data-wp-on--click="callbacks.overlayCloseDrawer"
+			data-wp-bind--class="state.drawerOverlayClass"
+		>
+			<div
+				data-wp-bind--role="state.drawerRole"
+				data-wp-bind--aria-modal="state.isOpen"
+				data-wp-bind--aria-hidden="!state.isOpen"
+				data-wp-bind--tabindex="state.drawerTabIndex"
+				class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
+			>
+				<div class="wc-block-components-drawer__content">
+					<div class="wc-block-mini-cart__template-part">
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $template_part_contents;
+						?>
+					</div>
+				</div>
+			</div>
+		</div>				
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_interactivity_process_directives( ob_get_clean() );
 	}
 
 	/**
