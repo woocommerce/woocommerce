@@ -1206,6 +1206,49 @@ p.demo_store,
 	}
 
 	/**
+	 * Back in stock form
+	 */
+	.wc_bis_form {
+		margin: 2em 0;
+		padding: 0;
+
+		&.hidden {
+			display: none;
+		}
+
+		&__form-row {
+			display: flex;
+			flex-wrap: wrap;
+			flex-direction: row;
+			align-items: center;
+			justify-content: flex-start;
+			gap: 0.7em;
+			margin: .7em 0;
+		}
+
+		&__input {
+			box-sizing: border-box;
+			width: auto;
+			white-space: nowrap;
+		}
+
+		&__button {
+			box-sizing: border-box;
+			white-space: nowrap;
+		}
+
+		&__checkbox {
+			font-size: var(--wp--preset--font-size--small, .7em);
+			display: block;
+		}
+	}
+
+	:where(.wc_bis_form__input, .wc_bis_form__button) {
+		padding: .9rem 1.1rem;
+		line-height: 1;
+	}
+
+	/**
 	 * Order page
 	 */
 	ul.order_details {
