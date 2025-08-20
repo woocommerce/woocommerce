@@ -712,7 +712,7 @@ class WC_Post_Data {
 		 * @param int $threshold The default threshold value (50).
 		 * @return int The filtered threshold value.
 		 */
-		return apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 );
+		return absint( apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 ) );
 	}
 
 	/**
