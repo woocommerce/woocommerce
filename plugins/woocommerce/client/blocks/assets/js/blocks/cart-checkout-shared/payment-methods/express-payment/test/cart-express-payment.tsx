@@ -64,27 +64,6 @@ const mockUseStoreCart = useStoreCart as jest.MockedFunction<
 	typeof useStoreCart
 >;
 
-const baseUseStoreCartMock = {
-	billingAddress: previewCart.billing_address,
-	cartCoupons: previewCart.coupons,
-	cartFees: previewCart.fees,
-	cartHasCalculatedShipping: previewCart.has_calculated_shipping,
-	cartIsLoading: false,
-	cartItemErrors: [],
-	cartItems: previewCart.items,
-	cartTotals: previewCart.totals,
-	cartNeedsShipping: previewCart.needs_shipping,
-	shippingRates: previewCart.shipping_rates,
-	shippingAddress: previewCart.shipping_address,
-	hasPendingItemsOperations: false,
-	isLoadingRates: false,
-	paymentMethods: [],
-	paymentRequirements: [],
-	receiveCart: jest.fn(),
-	receiveCartContents: jest.fn(),
-	extensions: {},
-};
-
 const baseMockUseStoreCart = {
 	billingAddress: previewCart.billing_address,
 	billingData: previewCart.billing_address,
