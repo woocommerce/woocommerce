@@ -258,6 +258,10 @@ class PlatformRegistry {
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
 		$platform = $this->get_platform( $platform_slug );
-		return $platform['credentials'] ?? array();
+		if ( ! is_array( $platform ) ) {
+			return array();
+		}
+		$credentials = $platform['credentials'] ?? array();
+		return is_array( $credentials ) ? $credentials : array();
 	}
 }
