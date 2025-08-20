@@ -37,5 +37,6 @@
 			"width": true,
 			"style": true
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-elements"
 }
