@@ -55,7 +55,7 @@ The following details are copied from the official [Building and Publishing guid
 ## Release to the Staging Environment (Stable and RC releases)
 
 - [ ] **Condition:** Only perform this step for stable and RC releases (`-rc.x` or `.x`).
-- [ ] **Action:** Follow the [guide to deploy to the staging environment](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/).
+- [ ] **Action:** Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ).
 
 ## Update the Release Tags
 
