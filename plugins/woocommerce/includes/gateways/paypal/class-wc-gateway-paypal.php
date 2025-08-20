@@ -160,28 +160,44 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
-		} else {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
-			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
-
-			if ( $this->identity_token ) {
-				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
-				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
-				$pdt_handler->set_receiver_email( $this->receiver_email );
-			}
 		}
 
-		if ( 'yes' === $this->enabled ) {
-			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
-			// Hide action buttons for pending orders as they take a while to be captured with orders v2.
-			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
-
-			add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
-			add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
-
-			// Hook for plugin upgrades.
-			add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
+		if ( 'yes' !== $this->enabled ) {
+			return;
 		}
+
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
+		new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
+
+		if ( $this->identity_token ) {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
+			$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+			$pdt_handler->set_receiver_email( $this->receiver_email );
+		}
+
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+		// Hide action buttons for pending orders as they take a while to be captured with orders v2.
+		add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
+
+		add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
+		add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
+
+		// Hook for plugin upgrades.
+		add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
+
+		add_action( 'wc_payment_gateways_initialized', array( $this, 'init_buttons' ) );
+	}
+
+	/**
+	 * Initialize the buttons.
+	 */
+	public function init_buttons() {
+		if ( 'yes' !== $this->enabled || ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-buttons.php';
+		new WC_Gateway_Paypal_Buttons( $this );
 	}
 
 	/**

@@ -472,7 +472,7 @@ class WC_Gateway_Paypal_Request {
 
 		$address_type = 'yes' === $this->gateway->get_option( 'send_shipping' ) ? 'shipping' : 'billing';
 
-		return array(
+		$shipping = array(
 			'name'    => array(
 				'full_name' => $order->{"get_formatted_{$address_type}_full_name"}(),
 			),
@@ -485,6 +485,15 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => $order->{"get_{$address_type}_country"}(),
 			),
 		);
+
+		// PayPal requires postal code to be set for some countries.
+		// https://developer.paypal.com/api/rest/reference/orders/v2/country-address-requirements/
+		if ( OrderStatus::DRAFT === $order->get_status() &&
+			! empty( $shipping['address']['country_code'] ) && empty( $shipping['address']['postal_code'] ) ) {
+			return null;
+		}
+
+		return $shipping;
 	}
 
 	/**
