@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
-import { chevronLeft } from '@wordpress/icons';
+import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { getHistory } from '@woocommerce/navigation';
 
 /**
@@ -63,7 +63,7 @@ export const BackButton = ( {
 		<Tooltip text={ tooltipText }>
 			<Button
 				className="woocommerce-settings-payments__back-button"
-				icon={ chevronLeft }
+				icon={ isRTL() ? chevronRight : chevronLeft }
 				onClick={ onGoBack }
 			/>
 		</Tooltip>
