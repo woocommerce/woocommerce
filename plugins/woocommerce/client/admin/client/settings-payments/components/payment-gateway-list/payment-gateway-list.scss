@@ -209,3 +209,52 @@
 		}
 	}
 }
+
+html[dir="rtl"] {
+	.settings-payment-gateways__list {
+		.woocommerce-list__item {
+			&-before {
+				margin-right: 0;
+				margin-left: $gap;
+
+				@media screen and ( max-width: $break-medium ) {
+					margin-left: 0;
+				}
+			}
+
+			&-text {
+				margin-right: 0;
+				margin-left: $gap;
+
+				@media screen and ( max-width: $break-medium ) {
+					margin-left: 0;
+				}
+			}
+
+			&-buttons {
+				margin-left: 0;
+				margin-right: auto;
+
+				@media screen and ( max-width: $break-medium ) {
+					margin-right: 0;
+				}
+
+				&__actions {
+					@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
+						justify-content: flex-start;
+					}
+				}
+			}
+
+			&-after {
+				margin-left: 0;
+				margin-right: $gap;
+
+				&.no-buttons {
+					margin-left: 0;
+					margin-right: auto;
+				}
+			}
+		}
+	}
+}

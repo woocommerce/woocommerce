@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/data';
 import { Gridicon } from '@automattic/components';
 import { useNavigate } from 'react-router-dom';
+import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -191,7 +192,9 @@ export const PaymentGatewayList = ( {
 															.settings.href
 													}
 												>
-													<Gridicon icon="chevron-right" />
+													<Gridicon
+														icon={ isRTL() ? 'chevron-left' : 'chevron-right' }
+													/>
 												</a>
 											</div>
 										</div>
