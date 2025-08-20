@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Set the ‘Set up payments’ task to in-progress state upon starting live WooPayments onboarding.

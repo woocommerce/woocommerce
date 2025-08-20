@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce Release Candidates
 sidebar_label: Release Candidates
+sidebar_position: 5
 ---
 
 # WooCommerce Release Candidates

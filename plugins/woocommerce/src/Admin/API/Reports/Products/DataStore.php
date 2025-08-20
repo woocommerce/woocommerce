@@ -201,6 +201,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( 'sku' === $order_by ) {
 			return 'meta_value';
 		}
+
 		return $order_by;
 	}
 
@@ -225,11 +226,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						$product_names[ $product_id ] = $wpdb->get_var(
 							$wpdb->prepare(
 								"SELECT i.order_item_name
-								FROM {$wpdb->prefix}woocommerce_order_items i, {$wpdb->prefix}woocommerce_order_itemmeta m
-								WHERE i.order_item_id = m.order_item_id
-								AND m.meta_key = '_product_id'
-								AND m.meta_value = %s
-								ORDER BY i.order_item_id DESC
+								FROM {$wpdb->prefix}wc_order_product_lookup l
+								JOIN {$wpdb->prefix}woocommerce_order_items i ON i.order_item_id = l.order_item_id
+								WHERE l.product_id = %d
+								ORDER BY l.order_item_id DESC
 								LIMIT 1",
 								$product_id
 							)
@@ -379,7 +379,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count', 'variations' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$products_query = $this->subquery->get_query_statement();
 		}

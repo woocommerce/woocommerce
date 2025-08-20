@@ -367,7 +367,7 @@ All at %6$s
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
+				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}

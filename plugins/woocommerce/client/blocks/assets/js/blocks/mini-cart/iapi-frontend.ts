@@ -293,7 +293,7 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -346,7 +346,7 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -426,7 +426,7 @@ const { state: cartItemState } = store(
 				let { name } = cartItemState.cartItem;
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					name =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -466,7 +466,7 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -492,7 +492,7 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -538,7 +538,7 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -593,7 +593,7 @@ const { state: cartItemState } = store(
 
 			get itemShowRemoveItemLink(): boolean {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				return ( window.wc as any )?.blocksCheckout.applyCheckoutFilter
+				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
 					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
 							filterName: 'showRemoveItemLink',
