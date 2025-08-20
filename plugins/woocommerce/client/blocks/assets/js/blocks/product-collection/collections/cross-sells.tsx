@@ -46,21 +46,6 @@ export const attributes = {
 	hideControls: [ CoreFilterNames.FILTERABLE ],
 };
 
-export const cartAttributes = {
-	...DEFAULT_ATTRIBUTES,
-	displayLayout: {
-		type: 'flex',
-		columns: 3,
-		shrinkColumns: true,
-	},
-	query: {
-		...DEFAULT_QUERY,
-		perPage: 3,
-		pages: 1,
-	},
-	hideControls: [ CoreFilterNames.FILTERABLE ],
-};
-
 const heading: InnerBlockTemplate = [
 	'core/heading',
 	{
