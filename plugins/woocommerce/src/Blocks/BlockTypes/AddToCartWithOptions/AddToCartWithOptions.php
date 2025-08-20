@@ -268,7 +268,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				// Add quantity context for purchasable child products.
 				$context['quantity'] = array_fill_keys(
 					$context['groupedProductIds'],
-					$default_quantity
+					0
 				);
 
 				// Set default quantity for each child product.

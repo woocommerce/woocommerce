@@ -177,7 +177,6 @@ export type AddToCartWithOptionsStore = {
 		setQuantity: ( value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
-		removeError: ( code: string ) => void;
 		increaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
@@ -576,7 +575,7 @@ const { actions, state } = store<
 					return;
 				}
 
-				actions.addToCart();
+				yield actions.addToCart();
 			},
 		},
 	},
