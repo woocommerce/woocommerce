@@ -18,6 +18,7 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -186,9 +187,11 @@ const Edit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
-			<Block { ...attributes } />
+			<Block isAdmin={ true } { ...attributes } product={ product } />
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }
