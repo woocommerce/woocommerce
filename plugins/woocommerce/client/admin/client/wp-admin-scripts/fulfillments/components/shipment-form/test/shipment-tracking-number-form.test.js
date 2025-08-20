@@ -25,18 +25,20 @@ jest.mock( '@wordpress/api-fetch' );
 
 jest.mock( '@wordpress/components', () => ( {
 	...jest.requireActual( '@wordpress/components' ),
-	TextControl: React.forwardRef( ( { value, onChange, placeholder, onKeyDown }, ref ) => (
-		<div data-testid="text-control">
-			<input
-				ref={ ref }
-				type="text"
-				value={ value }
-				placeholder={ placeholder }
-				onChange={ ( e ) => onChange( e.target.value ) }
-				onKeyDown={ onKeyDown }
-			/>
-		</div>
-	) ),
+	TextControl: React.forwardRef(
+		( { value, onChange, placeholder, onKeyDown }, ref ) => (
+			<div data-testid="text-control">
+				<input
+					ref={ ref }
+					type="text"
+					value={ value }
+					placeholder={ placeholder }
+					onChange={ ( e ) => onChange( e.target.value ) }
+					onKeyDown={ onKeyDown }
+				/>
+			</div>
+		)
+	),
 } ) );
 
 describe( 'ShipmentTrackingNumberForm', () => {
@@ -200,8 +202,10 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	it( 'focuses input when tracking number label is clicked', () => {
 		mockContext.trackingNumber = '1Z12345E0291980793';
 		const { container } = render( <ShipmentTrackingNumberForm /> );
-		
-		const trackingNumberSpan = screen.getAllByLabelText( 'Edit tracking number' )[ 0 ];
+
+		const trackingNumberSpan = screen.getAllByLabelText(
+			'Edit tracking number'
+		)[ 0 ];
 		fireEvent.click( trackingNumberSpan );
 
 		const input = container.querySelector( 'input' );
@@ -211,7 +215,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	it( 'focuses input when edit button is clicked', () => {
 		mockContext.trackingNumber = '1Z12345E0291980793';
 		const { container } = render( <ShipmentTrackingNumberForm /> );
-		
+
 		fireEvent.click( screen.getByTestId( 'edit-icon' ) );
 
 		const input = container.querySelector( 'input' );
