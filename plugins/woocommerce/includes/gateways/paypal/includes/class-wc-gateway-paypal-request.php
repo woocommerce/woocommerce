@@ -359,11 +359,11 @@ class WC_Gateway_Paypal_Request {
 		$currency = $order->get_currency();
 
 		return array(
-			'intent'              => $this->get_paypal_order_intent(),
-			'payment_source'      => array(
+			'intent'         => $this->get_paypal_order_intent(),
+			'payment_source' => array(
 				'paypal' => array(
 					'experience_context' => array(
-						'user_action' => 'PAY_NOW',
+						'user_action'         => 'PAY_NOW',
 						'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
 						// Customer redirected here on approval.
 						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
@@ -374,7 +374,7 @@ class WC_Gateway_Paypal_Request {
 					),
 				),
 			),
-			'purchase_units'      => array(
+			'purchase_units' => array(
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => array(
