@@ -191,6 +191,9 @@ export const PaymentGatewayList = ( {
 															.management._links
 															.settings.href
 													}
+													aria-label={
+														offlinePmsGroup.title
+													}
 												>
 													<Gridicon
 														icon={

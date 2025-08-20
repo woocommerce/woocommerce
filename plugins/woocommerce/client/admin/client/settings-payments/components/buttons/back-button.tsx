@@ -65,6 +65,7 @@ export const BackButton = ( {
 				className="woocommerce-settings-payments__back-button"
 				icon={ isRTL() ? chevronRight : chevronLeft }
 				onClick={ onGoBack }
+				aria-label={ tooltipText }
 			/>
 		</Tooltip>
 	);
