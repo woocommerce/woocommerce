@@ -1,0 +1,319 @@
+<?php
+/**
+ * This file is part of the WooCommerce Email Editor package
+ *
+ * @package Automattic\WooCommerce\EmailEditor
+ */
+
+declare( strict_types = 1 );
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+
+/**
+ * Integration test for Table class
+ */
+class Table_Test extends \Email_Editor_Integration_Test_Case {
+	/**
+	 * Table renderer instance
+	 *
+	 * @var Table
+	 */
+	private $table_renderer;
+
+	/**
+	 * Content of the table block
+	 *
+	 * @var string
+	 */
+	private $table_content = '
+    <figure class="wp-block-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Header 1</th>
+                    <th>Header 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Cell 1</td>
+                    <td>Cell 2</td>
+                </tr>
+                <tr>
+                    <td>Cell 3</td>
+                    <td>Cell 4</td>
+                </tr>
+            </tbody>
+        </table>
+    </figure>
+  ';
+
+	/**
+	 * Simple table content without figure wrapper
+	 *
+	 * @var string
+	 */
+	private $simple_table_content = '
+    <table>
+        <thead>
+            <tr>
+                <th>Header 1</th>
+                <th>Header 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Cell 1</td>
+                <td>Cell 2</td>
+            </tr>
+        </tbody>
+    </table>
+  ';
+
+	/**
+	 * Parse table block configuration
+	 *
+	 * @var array
+	 */
+	private $parsed_table = array(
+		'blockName'    => 'core/table',
+		'attrs'        => array(
+			'textAlign' => 'left',
+			'style'     => array(),
+		),
+		'email_attrs'  => array(
+			'width' => '640px',
+			'color' => '#000000',
+		),
+		'innerBlocks'  => array(),
+		'innerHTML'    => '',
+		'innerContent' => array(),
+	);
+
+	/**
+	 * Instance of Rendering_Context class
+	 *
+	 * @var Rendering_Context
+	 */
+	private $rendering_context;
+
+	/**
+	 * Set up before each test
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->di_container->get( Email_Editor::class )->initialize();
+		$this->table_renderer    = new Table();
+		$theme_controller        = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
+	}
+
+	/**
+	 * Test it renders table content
+	 */
+	public function testItRendersTableContent(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->table_content;
+
+		$rendered = $this->table_renderer->render( $this->table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'Header 1', $rendered );
+		$this->assertStringContainsString( 'Header 2', $rendered );
+		$this->assertStringContainsString( 'Cell 1', $rendered );
+		$this->assertStringContainsString( 'Cell 2', $rendered );
+		$this->assertStringContainsString( 'Cell 3', $rendered );
+		$this->assertStringContainsString( 'Cell 4', $rendered );
+	}
+
+	/**
+	 * Test it extracts table from figure wrapper
+	 */
+	public function testItExtractsTableFromFigureWrapper(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->table_content;
+
+		$rendered = $this->table_renderer->render( $this->table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringNotContainsString( '<figure', $rendered );
+		$this->assertStringNotContainsString( '</figure>', $rendered );
+		$this->assertStringContainsString( '<table', $rendered );
+		$this->assertStringContainsString( '</table>', $rendered );
+	}
+
+	/**
+	 * Test it renders table without figure wrapper
+	 */
+	public function testItRendersTableWithoutFigureWrapper(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'Header 1', $rendered );
+		$this->assertStringContainsString( 'Cell 1', $rendered );
+		$this->assertStringContainsString( '<table', $rendered );
+		$this->assertStringContainsString( '</table>', $rendered );
+	}
+
+	/**
+	 * Test it renders email-compatible table attributes
+	 */
+	public function testItRendersEmailCompatibleTableAttributes(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'border="1"', $rendered );
+		$this->assertStringContainsString( 'cellpadding="8"', $rendered );
+		$this->assertStringContainsString( 'cellspacing="0"', $rendered );
+		$this->assertStringContainsString( 'role="presentation"', $rendered );
+		$this->assertStringContainsString( 'width="100%"', $rendered );
+		$this->assertStringContainsString( 'border-collapse: collapse', $rendered );
+	}
+
+	/**
+	 * Test it renders email-compatible cell attributes
+	 */
+	public function testItRendersEmailCompatibleCellAttributes(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'valign="top"', $rendered );
+		$this->assertStringContainsString( 'vertical-align: top', $rendered );
+		$this->assertStringContainsString( 'border: 1px solid #e5e5e5', $rendered );
+		$this->assertStringContainsString( 'padding: 8px', $rendered );
+	}
+
+	/**
+	 * Test it renders text alignment
+	 */
+	public function testItRendersTextAlignment(): void {
+		$parsed_table                       = $this->parsed_table;
+		$parsed_table['innerHTML']          = $this->simple_table_content;
+		$parsed_table['attrs']['textAlign'] = 'center';
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+	}
+
+	/**
+	 * Test it renders custom colors
+	 */
+	public function testItRendersCustomColors(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+		$parsed_table['attrs']['style']['color']['background'] = '#ff0000';
+		$parsed_table['attrs']['style']['color']['text']       = '#00ff00';
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'background-color:#ff0000', $rendered );
+		$this->assertStringContainsString( 'color:#00ff00;', $rendered );
+	}
+
+	/**
+	 * Test it uses inherited color from email_attrs when no color is specified
+	 */
+	public function testItUsesInheritedColorFromEmailAttrs(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		unset( $parsed_table['attrs']['style']['color'] );
+
+		$parsed_table['email_attrs'] = array(
+			'color' => '#ff0000',
+		);
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
+
+	/**
+	 * Test it renders empty table as empty string
+	 */
+	public function testItRendersEmptyTableAsEmptyString(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = '<figure class="wp-block-table"><table></table></figure>';
+
+		$rendered = $this->table_renderer->render( '<figure class="wp-block-table"><table></table></figure>', $parsed_table, $this->rendering_context );
+		$this->assertEquals( '', $rendered );
+	}
+
+	/**
+	 * Test it renders table with custom styles
+	 */
+	public function testItRendersTableWithCustomStyles(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+		$parsed_table['attrs']['style']['spacing']['padding']['top']    = '20px';
+		$parsed_table['attrs']['style']['spacing']['padding']['bottom'] = '20px';
+		$parsed_table['attrs']['style']['typography']['fontSize']       = '18px';
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'padding-top:20px;', $rendered );
+		$this->assertStringContainsString( 'padding-bottom:20px;', $rendered );
+		$this->assertStringContainsString( 'font-size:18px;', $rendered );
+	}
+
+	/**
+	 * Test it renders table with border styles
+	 */
+	public function testItRendersTableWithBorderStyles(): void {
+		$parsed_table                                      = $this->parsed_table;
+		$parsed_table['innerHTML']                         = $this->simple_table_content;
+		$parsed_table['attrs']['style']['border']['width'] = '2px';
+		$parsed_table['attrs']['style']['border']['color'] = '#333333';
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'border-width:2px;', $rendered );
+		$this->assertStringContainsString( 'border-color:#333333;', $rendered );
+	}
+
+	/**
+	 * Test it removes background classes from table
+	 */
+	public function testItRemovesBackgroundClassesFromTable(): void {
+		$table_content_with_background = '<figure class="wp-block-table"><table class="has-background has-blue-background-color">' .
+			'<thead><tr><th>Header</th></tr></thead>' .
+			'<tbody><tr><td>Cell</td></tr></tbody>' .
+			'</table></figure>';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table_content_with_background;
+
+		$rendered = $this->table_renderer->render( $table_content_with_background, $parsed_table, $this->rendering_context );
+		$this->assertStringNotContainsString( 'has-background', $rendered );
+		$this->assertStringContainsString( 'has-blue-background-color', $rendered );
+	}
+
+	/**
+	 * Test it removes border classes from table
+	 */
+	public function testItRemovesBorderClassesFromTable(): void {
+		$table_content_with_border = '<figure class="wp-block-table"><table class="has-border has-top-border">' .
+			'<thead><tr><th>Header</th></tr></thead>' .
+			'<tbody><tr><td>Cell</td></tr></tbody>' .
+			'</table></figure>';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table_content_with_border;
+
+		$rendered = $this->table_renderer->render( $table_content_with_border, $parsed_table, $this->rendering_context );
+		$this->assertStringNotContainsString( 'has-border', $rendered );
+		$this->assertStringNotContainsString( 'has-top-border', $rendered );
+	}
+
+	/**
+	 * Test it renders table wrapper with proper structure
+	 */
+	public function testItRendersTableWrapperWithProperStructure(): void {
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $this->simple_table_content;
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'email-table-block', $rendered );
+		$this->assertStringContainsString( 'border-collapse: separate', $rendered );
+		$this->assertStringContainsString( 'min-width:100%', $rendered );
+	}
+}
