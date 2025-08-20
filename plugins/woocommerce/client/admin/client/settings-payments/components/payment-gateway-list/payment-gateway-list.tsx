@@ -193,7 +193,11 @@ export const PaymentGatewayList = ( {
 													}
 												>
 													<Gridicon
-														icon={ isRTL() ? 'chevron-left' : 'chevron-right' }
+														icon={
+															isRTL()
+																? 'chevron-left'
+																: 'chevron-right'
+														}
 													/>
 												</a>
 											</div>
