@@ -663,6 +663,11 @@ const { state: cartItemState } = store(
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 				} );
 			},
+
+			hideImage() {
+				const context = getContext< { isHidden: boolean } >();
+				context.isHidden = true;
+			},
 		},
 
 		callbacks: {
