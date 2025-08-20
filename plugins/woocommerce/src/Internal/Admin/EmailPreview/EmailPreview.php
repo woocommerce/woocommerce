@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Throwable;
 use WC_Email;
 use WC_Order;
@@ -85,6 +84,13 @@ class EmailPreview {
 	 * @var object
 	 */
 	protected static $instance = null;
+
+	/**
+	 * Whether the locale has been switched when rendering the preview.
+	 *
+	 * @var bool
+	 */
+	private bool $locale_switched = false;
 
 	/**
 	 * Get class instance.
@@ -483,6 +489,12 @@ class EmailPreview {
 	 * Set up filters for email preview.
 	 */
 	public function set_up_filters() {
+		// This is to ensure the email is displayed in the store's language,
+		// as the customer would see it, not the admin's language.
+		if ( ! $this->locale_switched ) {
+			wc_switch_to_site_locale();
+			$this->locale_switched = true;
+		}
 		// Always show shipping address in the preview email.
 		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		// Email templates fetch product from the database to show additional information, which are not
@@ -502,6 +514,11 @@ class EmailPreview {
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
 		remove_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
+		// Restore the original locale after email preview.
+		if ( $this->locale_switched ) {
+			wc_restore_locale();
+			$this->locale_switched = false;
+		}
 	}
 
 	/**
