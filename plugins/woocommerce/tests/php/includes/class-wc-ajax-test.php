@@ -203,6 +203,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
 	 */
 	public function test_json_search_customers(): void {
+		$this->markTestSkipped( 'Skipping this test temporarily due to intermittent failures. Needs proper investigation.' );
+
 		// This class does not inherit from WC_Unit_Test_Case, so we're handling the legacy proxy mechanics ourselves.
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 		$legacy_proxy->reset();

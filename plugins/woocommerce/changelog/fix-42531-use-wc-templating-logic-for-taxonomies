@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Hide Products by Category, by Tag and by Brand templates from the default list if they hadn't been customized

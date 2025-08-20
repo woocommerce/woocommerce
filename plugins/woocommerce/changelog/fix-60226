@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix warnings in `WC_Admin_Tests_Admin_Helper` unit test.

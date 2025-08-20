@@ -538,6 +538,23 @@ const productGallery = {
 				resizeObserver.disconnect();
 			};
 		},
+		// There's this issue with the scrollbar on the thumbnails block,
+		// that in certain cases thumbnails overflow slightly the container.
+		// This triggers the overflow and scrollbar makes thumbnails smaller
+		// so they no longer overflow resulting in a ghost scrollbar (no scroll).
+		// scrollbar-gutter doesn't work well in flexbox and doesn't solve it,
+		// hence programmatic solution.
+		// See https://github.com/woocommerce/woocommerce/issues/59810.
+		hideGhostOverflow: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) return;
+
+			const { clientWidth, scrollWidth } = element;
+
+			if ( clientWidth >= scrollWidth ) {
+				element.style.scrollbarWidth = 'none';
+			}
+		},
 	},
 };
 

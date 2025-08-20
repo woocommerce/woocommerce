@@ -11,7 +11,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './modals.scss';
 import {
 	getWooPaymentsSetupLiveAccountLink,
 	recordPaymentsEvent,
@@ -110,7 +109,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										components: {
 											link: (
 												<Link
-													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
+													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
 													target="_blank"
 													rel="noreferrer"
 													type="external"

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Provide more detailed error messages for plugin connection failures, along with error-specific actions

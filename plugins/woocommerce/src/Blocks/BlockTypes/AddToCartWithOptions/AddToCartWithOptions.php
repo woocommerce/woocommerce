@@ -178,14 +178,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_part_contents = file_get_contents( $template_part_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			}
 
-			/**
-			 * Filter the default quantity to add to cart.
-			 *
-			 * @since 10.0.0
-			 * @param number $default_quantity The default quantity.
-			 * @param \WC_Product $product The product object.
-			 */
-			$default_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
+			$default_quantity = $product->get_min_purchase_quantity();
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
@@ -193,7 +186,8 @@ class AddToCartWithOptions extends AbstractBlock {
 					'isFormValid' => function () {
 						$context = wp_interactivity_get_context();
 						$product = wc_get_product( $context['productId'] );
-						if ( $product instanceof \WC_Product && $product->is_type( 'variable' ) ) {
+
+						if ( $product instanceof \WC_Product && ( $product->is_type( 'grouped' ) || $product->has_options() ) ) {
 							return false;
 						}
 						return true;
@@ -202,42 +196,42 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
-			wp_interactivity_state(
-				'woocommerce',
+			wp_interactivity_config(
+				'woocommerce/add-to-cart-with-options',
 				array(
-					// Use camelCase for error messages generated from the frontend,
-					// and snake_case for error messages generated from the backend.
 					'errorMessages' => array(
-						'groupedProductAddToCartMissingItems' => __(
+						'groupedProductAddToCartMissingItems' => esc_html__(
 							'Please select some products to add to the cart.',
 							'woocommerce'
 						),
-						'woocommerce_rest_missing_attributes' => __(
+						'variableProductMissingAttributes' => esc_html__(
 							'Please select product attributes before adding to cart.',
 							'woocommerce'
+						),
+						'variableProductOutOfStock'        => sprintf(
+							/* translators: %s: product name */
+							esc_html__(
+								'You cannot add &quot;%s&quot; to the cart because the product is out of stock.',
+								'woocommerce'
+							),
+							$product->get_name()
 						),
 					),
 				)
 			);
 
 			$context = array(
-				'productId'   => $product->get_id(),
-				'productType' => $product->get_type(),
-				'quantity'    => array( $product->get_id() => $default_quantity ),
+				'productId'        => $product->get_id(),
+				'productType'      => $product->get_type(),
+				'quantity'         => array( $product->get_id() => $default_quantity ),
+				'validationErrors' => array(),
 			);
 
 			if ( $product->is_type( 'variable' ) ) {
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
-					/**
-					 * Filter the default quantity to add to cart.
-					 *
-					 * @since 10.1.0
-					 * @param number $default_variation_quantity The default quantity.
-					 * @param WC_Variation_Product $variation The variation object.
-					 */
-					$default_variation_quantity                  = apply_filters( 'woocommerce_quantity_input_min', $variation->get_min_purchase_quantity(), $variation );
+					$default_variation_quantity                  = $variation->get_min_purchase_quantity();
 					$context['quantity'][ $variation->get_id() ] = $default_variation_quantity;
 					$context['availableVariations'][]            = array(
 						'variation_id' => $variation->get_id(),
@@ -274,7 +268,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				// Add quantity context for purchasable child products.
 				$context['quantity'] = array_fill_keys(
 					$context['groupedProductIds'],
-					$default_quantity
+					0
 				);
 
 				// Set default quantity for each child product.

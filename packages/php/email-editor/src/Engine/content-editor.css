@@ -177,3 +177,11 @@ ol {
 	background-color:#000;
 	color:#fff;
 }
+
+/**
+ * Override the default overflow-x for the iframe in the editor.
+ * This is needed because we do want allow scrolling on small screens such as mobile devices.
+ */
+.block-editor-iframe__body {
+	overflow-x: auto;
+}
