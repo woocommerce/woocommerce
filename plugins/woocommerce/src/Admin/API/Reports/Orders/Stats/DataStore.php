@@ -117,8 +117,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'taxes'               => "SUM({$table_name}.tax_total) AS taxes",
 			'shipping'            => "SUM({$table_name}.shipping_total) AS shipping",
 			'net_revenue'         => "SUM({$table_name}.net_total) AS net_revenue",
-			'avg_items_per_order' => "SUM( {$table_name}.num_items_sold ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
-			'avg_order_value'     => "SUM( {$table_name}.net_total ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
+			'avg_items_per_order' => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$table_name}.num_items_sold ELSE 0 END ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
+			'avg_order_value'     => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$table_name}.net_total ELSE 0 END ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
 			'total_customers'     => "COUNT( DISTINCT( {$table_name}.customer_id ) ) as total_customers",
 		);
 	}
@@ -353,6 +353,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->total_query->add_sql_clause( 'select', $selections );
 		$this->total_query->add_sql_clause( 'left_join', $coupon_join );
 		$this->total_query->add_sql_clause( 'where_time', $where_time );
+		error_log( $this->total_query->get_query_statement() );
 		$totals = $wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->total_query->get_query_statement(),
