@@ -37,9 +37,9 @@ class WC_Install {
 	 * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
 	 *
 	 * IMPORTANT:
-	 * If your update targets a version that already has a key in this array (and we're past feature freeze),
-	 * add your update under a new key by appending a suffix like `-1`, `-2`, etc. (e.g., use `10.2.0-1` if `10.2.0` exists).
-	 * This ensures updates are applied for users upgrading from beta or RC versions to the final release.
+	 * When adding new update callbacks after feature freeze, always use a unique version key with a suffix (e.g. `10.2.0-1`)
+	 * if the base version already exists in the array.
+	 * This ensures all users, including those on beta or RC versions, receive the update.
 	 *
 	 * @var array
 	 */
@@ -693,7 +693,7 @@ class WC_Install {
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, self::get_last_db_update_version(), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, array_key_last( self::$db_updates ), '<' );
 	}
 
 	/**
@@ -776,25 +776,11 @@ class WC_Install {
 	}
 
 	/**
-	 * Get the version of the last DB update.
-	 *
-	 * @since 10.2.0
-	 *
-	 * @return string
-	 */
-	public static function get_last_db_update_version(): string {
-		return self::$db_updates
-			? array_key_last( self::$db_updates )
-			: WC()->version();
-	}
-
-	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$updates            = self::get_db_update_callbacks();
-		$wc_db_version      = array_key_last( $updates );
 		$scheduled_time     = time();
 
 		wc_get_logger()->info(
@@ -846,7 +832,10 @@ class WC_Install {
 			}
 		}
 
-		// After the callbacks finish, update the db version to the current WC version.
+		// After the callbacks finish, update the db version to the current WC db version.
+		$wc_db_version = array_key_last( $updates );
+		$wc_db_version = version_compare( WC()->version, $wc_db_version, '>' ) ? WC()->version : $wc_db_version;
+
 		$success = true;
 		if ( version_compare( $current_db_version, $wc_db_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
@@ -881,7 +870,12 @@ class WC_Install {
 	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		update_option( 'woocommerce_db_version', is_null( $version ) ? self::get_last_db_update_version() : $version );
+		if ( is_null( $version ) ) {
+			$last_db_version = array_key_last( self::$db_updates );
+			$version         = version_compare( WC()->version, $last_db_version, '>' ) ? WC()->version : $last_db_version;
+		}
+
+		update_option( 'woocommerce_db_version', $version );
 	}
 
 	/**
