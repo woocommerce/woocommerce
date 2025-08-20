@@ -353,7 +353,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->total_query->add_sql_clause( 'select', $selections );
 		$this->total_query->add_sql_clause( 'left_join', $coupon_join );
 		$this->total_query->add_sql_clause( 'where_time', $where_time );
-		error_log( $this->total_query->get_query_statement() );
 		$totals = $wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->total_query->get_query_statement(),
