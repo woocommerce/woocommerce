@@ -30,7 +30,7 @@ For easy local development environments, we recommend [Studio](https://developer
 
 ### wp-env
 
-[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) is a command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with [Docker](https://www.docker.com/) and JSON manifests. The repository includes a `.wp-env` file specifically for contributing to WooCommerce core.
+[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) is a command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with [Docker](https://www.docker.com/) and JSON manifests. The repository includes a `.wp-env.json` file specifically for contributing to WooCommerce core.
 
 ### General PHP-based web stack tools
 
