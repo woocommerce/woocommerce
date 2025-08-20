@@ -27,7 +27,11 @@ const ShippingProviderListItem = ( {
 		>
 			{ item.icon && (
 				<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
-					<img src={ item.icon } alt={ item.label } />
+					<img
+						src={ item.icon }
+						alt={ item.label }
+						aria-hidden="true"
+					/>
 				</div>
 			) }
 			<div className="woocommerce-fulfillment-shipping-provider-list-item-label">

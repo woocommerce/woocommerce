@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 /**
@@ -34,16 +35,17 @@ jest.mock( '../../../context/fulfillment-context', () => ( {
 
 // Mock ToggleControl to make testing easier
 jest.mock( '@wordpress/components', () => ( {
-	ToggleControl: ( props ) => (
+	ToggleControl: React.forwardRef( ( props, ref ) => (
 		<div data-testid="toggle-control">
 			<input
+				ref={ ref }
 				type="checkbox"
 				checked={ props.checked }
 				onChange={ () => props.onChange( ! props.checked ) }
 				data-testid="toggle-input"
 			/>
 		</div>
-	),
+	) ),
 } ) );
 
 describe( 'CustomerNotificationBox component', () => {

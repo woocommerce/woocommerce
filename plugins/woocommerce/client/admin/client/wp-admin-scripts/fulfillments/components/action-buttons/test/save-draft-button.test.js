@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -98,11 +98,13 @@ describe( 'SaveAsDraftButton component', () => {
 		render( <SaveAsDraftButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Save as draft' ) );
 
-		expect( mockSaveFulfillment ).toHaveBeenCalledWith(
-			123,
-			mockFulfillment,
-			true
-		);
+		await waitFor( () => {
+			expect( mockSaveFulfillment ).toHaveBeenCalledWith(
+				123,
+				mockFulfillment,
+				true
+			);
+		} );
 	} );
 
 	it( 'should not call saveFulfillment when fulfillment is undefined', () => {
@@ -118,5 +120,71 @@ describe( 'SaveAsDraftButton component', () => {
 		fireEvent.click( screen.getByText( 'Save as draft' ) );
 
 		expect( mockSaveFulfillment ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'Accessibility', () => {
+		it( 'should have proper ARIA label when not executing', () => {
+			render( <SaveAsDraftButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).toHaveAttribute(
+				'aria-label',
+				'Save fulfillment as draft'
+			);
+		} );
+
+		it( 'should have aria-describedby attribute', () => {
+			render( <SaveAsDraftButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).toHaveAttribute(
+				'aria-describedby',
+				'save-draft-description'
+			);
+		} );
+
+		it( 'should have hidden description for screen readers', () => {
+			render( <SaveAsDraftButton setError={ setError } /> );
+
+			const description = screen.getByText(
+				'Saves the fulfillment without marking items as fulfilled'
+			);
+			expect( description ).toBeInTheDocument();
+			expect( description ).toHaveAttribute(
+				'id',
+				'save-draft-description'
+			);
+			expect( description ).toHaveClass( 'screen-reader-text' );
+		} );
+
+		it( 'should update ARIA label and button text when executing', () => {
+			const mockSaveFulfillment = jest.fn(
+				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
+			);
+			useDispatch.mockReturnValue( {
+				saveFulfillment: mockSaveFulfillment,
+			} );
+
+			render( <SaveAsDraftButton setError={ setError } /> );
+			const button = screen.getByRole( 'button' );
+
+			fireEvent.click( button );
+
+			// Check that the button text and aria-label update during execution
+			expect( screen.getByText( 'Saving…' ) ).toBeInTheDocument();
+			expect( button ).toHaveAttribute(
+				'aria-label',
+				'Saving draft, please wait'
+			);
+			expect( button ).toBeDisabled();
+		} );
+
+		it( 'should be keyboard accessible', () => {
+			render( <SaveAsDraftButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			button.focus();
+			expect( document.activeElement ).toBe( button );
+		} );
 	} );
 } );

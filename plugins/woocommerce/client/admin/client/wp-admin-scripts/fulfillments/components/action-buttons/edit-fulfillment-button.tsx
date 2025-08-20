@@ -10,8 +10,23 @@ export default function EditFulfillmentButton( {
 	onClick: () => void;
 } ) {
 	return (
-		<Button variant="secondary" onClick={ onClick } __next40pxDefaultSize>
+		<Button
+			variant="secondary"
+			onClick={ onClick }
+			__next40pxDefaultSize
+			aria-label={ __( 'Edit fulfillment details', 'woocommerce' ) }
+			aria-describedby="edit-fulfillment-description"
+		>
 			{ __( 'Edit fulfillment', 'woocommerce' ) }
+			<span
+				id="edit-fulfillment-description"
+				className="screen-reader-text"
+			>
+				{ __(
+					'Opens the fulfillment editor to modify fulfillment details',
+					'woocommerce'
+				) }
+			</span>
 		</Button>
 	);
 }

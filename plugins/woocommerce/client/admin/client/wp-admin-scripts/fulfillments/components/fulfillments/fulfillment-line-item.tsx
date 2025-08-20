@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useContext, useState } from 'react';
-import { CheckboxControl, Icon } from '@wordpress/components';
+import { Button, CheckboxControl, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import CurrencyFactory, {
 	CurrencyContext,
@@ -96,8 +96,7 @@ export default function FulfillmentLineItem( {
 					</div>
 				) }
 				{ editMode && quantity > 1 && (
-					<button
-						type="button"
+					<Button
 						onClick={ () => {
 							setItemExpanded( ! itemExpanded );
 						} }
@@ -115,9 +114,10 @@ export default function FulfillmentLineItem( {
 									? 'arrow-up-alt2'
 									: 'arrow-down-alt2'
 							}
+							aria-hidden="true"
 							size={ 16 }
 						/>
-					</button>
+					</Button>
 				) }
 				<div className="woocommerce-fulfillment-item-title">
 					<div className="woocommerce-fulfillment-item-image-container">

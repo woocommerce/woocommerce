@@ -62,8 +62,22 @@ export default function UpdateButton( {
 			disabled={ isExecuting }
 			isBusy={ isExecuting }
 			__next40pxDefaultSize
+			aria-label={
+				isExecuting
+					? __( 'Updating fulfillment, please wait', 'woocommerce' )
+					: __( 'Update fulfillment with changes', 'woocommerce' )
+			}
+			aria-describedby="update-button-description"
 		>
-			{ __( 'Update', 'woocommerce' ) }
+			{ isExecuting
+				? __( 'Updating…', 'woocommerce' )
+				: __( 'Update', 'woocommerce' ) }
+			<span id="update-button-description" className="screen-reader-text">
+				{ __(
+					'Applies changes to the existing fulfillment',
+					'woocommerce'
+				) }
+			</span>
 		</Button>
 	);
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -77,15 +77,19 @@ describe( 'FulfillItemsButton component', () => {
 		} );
 
 		render( <FulfillItemsButton setError={ setError } /> );
+
 		fireEvent.click( screen.getByText( 'Fulfill items' ) );
+
+		await waitFor( () => {
+			expect( mockSaveFulfillment ).toHaveBeenCalledWith(
+				123,
+				mockFulfillment,
+				true
+			);
+		} );
 
 		expect( mockFulfillment.is_fulfilled ).toBe( true );
 		expect( mockFulfillment.status ).toBe( 'fulfilled' );
-		expect( await mockSaveFulfillment ).toHaveBeenCalledWith(
-			123,
-			mockFulfillment,
-			true
-		);
 	} );
 
 	it( 'should not call saveFulfillment when fulfillment is undefined', () => {
@@ -102,5 +106,100 @@ describe( 'FulfillItemsButton component', () => {
 		fireEvent.click( screen.getByText( 'Fulfill items' ) );
 
 		expect( mockSaveFulfillment ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'Accessibility', () => {
+		it( 'should have proper ARIA label when not executing', () => {
+			render( <FulfillItemsButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).toHaveAttribute(
+				'aria-label',
+				'Mark selected items as fulfilled'
+			);
+		} );
+
+		it( 'should have aria-describedby attribute', () => {
+			render( <FulfillItemsButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).toHaveAttribute(
+				'aria-describedby',
+				'fulfill-items-description'
+			);
+		} );
+
+		it( 'should have aria-live attribute for status updates', () => {
+			render( <FulfillItemsButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).toHaveAttribute( 'aria-live', 'polite' );
+		} );
+
+		it( 'should have hidden description for screen readers', () => {
+			render( <FulfillItemsButton setError={ setError } /> );
+
+			const description = screen.getByText(
+				'Marks the selected items as fulfilled and updates their status'
+			);
+			expect( description ).toBeInTheDocument();
+			expect( description ).toHaveAttribute(
+				'id',
+				'fulfill-items-description'
+			);
+			expect( description ).toHaveClass( 'screen-reader-text' );
+		} );
+
+		it( 'should update ARIA label and button text when executing', () => {
+			const mockSaveFulfillment = jest.fn(
+				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
+			);
+			useDispatch.mockReturnValue( {
+				saveFulfillment: mockSaveFulfillment,
+			} );
+
+			const mockFulfillment = {
+				id: 456,
+				meta_data: [
+					{
+						id: 1,
+						key: '_items',
+						value: [
+							{
+								id: 1,
+								name: 'Item 1',
+								quantity: 2,
+							},
+						],
+					},
+				],
+			};
+			useFulfillmentContext.mockReturnValue( {
+				order: { id: 123 },
+				fulfillment: mockFulfillment,
+				notifyCustomer: true,
+			} );
+
+			render( <FulfillItemsButton setError={ setError } /> );
+			const button = screen.getByRole( 'button' );
+
+			fireEvent.click( button );
+
+			// Check that the button text and aria-label update during execution
+			expect( screen.getByText( 'Fulfilling…' ) ).toBeInTheDocument();
+			expect( button ).toHaveAttribute(
+				'aria-label',
+				'Fulfilling items, please wait'
+			);
+			expect( button ).toBeDisabled();
+		} );
+
+		it( 'should be keyboard accessible', () => {
+			render( <FulfillItemsButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			button.focus();
+			expect( document.activeElement ).toBe( button );
+		} );
 	} );
 } );

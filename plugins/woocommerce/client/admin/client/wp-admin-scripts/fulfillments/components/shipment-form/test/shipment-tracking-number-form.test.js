@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -24,9 +25,10 @@ jest.mock( '@wordpress/api-fetch' );
 
 jest.mock( '@wordpress/components', () => ( {
 	...jest.requireActual( '@wordpress/components' ),
-	TextControl: ( { value, onChange, placeholder, onKeyDown } ) => (
+	TextControl: React.forwardRef( ( { value, onChange, placeholder, onKeyDown }, ref ) => (
 		<div data-testid="text-control">
 			<input
+				ref={ ref }
 				type="text"
 				value={ value }
 				placeholder={ placeholder }
@@ -34,7 +36,7 @@ jest.mock( '@wordpress/components', () => ( {
 				onKeyDown={ onKeyDown }
 			/>
 		</div>
-	),
+	) ),
 } ) );
 
 describe( 'ShipmentTrackingNumberForm', () => {
@@ -193,6 +195,27 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
 		).toBeInTheDocument();
+	} );
+
+	it( 'focuses input when tracking number label is clicked', () => {
+		mockContext.trackingNumber = '1Z12345E0291980793';
+		const { container } = render( <ShipmentTrackingNumberForm /> );
+		
+		const trackingNumberSpan = screen.getAllByLabelText( 'Edit tracking number' )[ 0 ];
+		fireEvent.click( trackingNumberSpan );
+
+		const input = container.querySelector( 'input' );
+		expect( input ).toHaveFocus();
+	} );
+
+	it( 'focuses input when edit button is clicked', () => {
+		mockContext.trackingNumber = '1Z12345E0291980793';
+		const { container } = render( <ShipmentTrackingNumberForm /> );
+		
+		fireEvent.click( screen.getByTestId( 'edit-icon' ) );
+
+		const input = container.querySelector( 'input' );
+		expect( input ).toHaveFocus();
 	} );
 
 	it( 'shows ambiguous provider message when possibilities have low confidence scores', async () => {

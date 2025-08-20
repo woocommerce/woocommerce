@@ -62,8 +62,23 @@ export default function FulfillItemsButton( {
 			__next40pxDefaultSize
 			isBusy={ isExecuting }
 			disabled={ isExecuting }
+			aria-label={
+				isExecuting
+					? __( 'Fulfilling items, please wait', 'woocommerce' )
+					: __( 'Mark selected items as fulfilled', 'woocommerce' )
+			}
+			aria-describedby="fulfill-items-description"
+			aria-live="polite"
 		>
-			{ __( 'Fulfill items', 'woocommerce' ) }
+			{ isExecuting
+				? __( 'Fulfilling…', 'woocommerce' )
+				: __( 'Fulfill items', 'woocommerce' ) }
+			<span id="fulfill-items-description" className="screen-reader-text">
+				{ __(
+					'Marks the selected items as fulfilled and updates their status',
+					'woocommerce'
+				) }
+			</span>
 		</Button>
 	);
 }

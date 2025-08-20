@@ -68,8 +68,29 @@ export default function RemoveButton( {
 				onClick={ handleRemoveButtonClick }
 				isBusy={ isExecuting }
 				__next40pxDefaultSize
+				aria-label={
+					isExecuting
+						? __(
+								'Removing fulfillment, please wait',
+								'woocommerce'
+						  )
+						: __( 'Remove this fulfillment', 'woocommerce' )
+				}
+				aria-describedby="remove-button-description"
+				disabled={ isExecuting }
 			>
-				{ __( 'Remove', 'woocommerce' ) }
+				{ isExecuting
+					? __( 'Removing…', 'woocommerce' )
+					: __( 'Remove', 'woocommerce' ) }
+				<span
+					id="remove-button-description"
+					className="screen-reader-text"
+				>
+					{ __(
+						'Deletes this fulfillment permanently',
+						'woocommerce'
+					) }
+				</span>
 			</Button>
 			{ isOpen && (
 				<Modal
@@ -91,6 +112,10 @@ export default function RemoveButton( {
 							variant="link"
 							onClick={ closeModal }
 							__next40pxDefaultSize
+							aria-label={ __(
+								'Cancel removal and close dialog',
+								'woocommerce'
+							) }
 						>
 							{ __( 'Cancel', 'woocommerce' ) }
 						</Button>
@@ -102,8 +127,22 @@ export default function RemoveButton( {
 							} }
 							isBusy={ isExecuting }
 							__next40pxDefaultSize
+							disabled={ isExecuting }
+							aria-label={
+								isExecuting
+									? __(
+											'Removing fulfillment, please wait',
+											'woocommerce'
+									  )
+									: __(
+											'Confirm removal of fulfillment',
+											'woocommerce'
+									  )
+							}
 						>
-							{ __( 'Remove fulfillment', 'woocommerce' ) }
+							{ isExecuting
+								? __( 'Removing…', 'woocommerce' )
+								: __( 'Remove fulfillment', 'woocommerce' ) }
 						</Button>
 					</div>
 				</Modal>

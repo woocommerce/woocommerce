@@ -54,8 +54,23 @@ export default function SaveAsDraftButton( {
 			onClick={ handleFulfillItems }
 			__next40pxDefaultSize
 			isBusy={ isExecuting }
+			disabled={ isExecuting }
+			aria-label={
+				isExecuting
+					? __( 'Saving draft, please wait', 'woocommerce' )
+					: __( 'Save fulfillment as draft', 'woocommerce' )
+			}
+			aria-describedby="save-draft-description"
 		>
-			{ __( 'Save as draft', 'woocommerce' ) }
+			{ isExecuting
+				? __( 'Saving…', 'woocommerce' )
+				: __( 'Save as draft', 'woocommerce' ) }
+			<span id="save-draft-description" className="screen-reader-text">
+				{ __(
+					'Saves the fulfillment without marking items as fulfilled',
+					'woocommerce'
+				) }
+			</span>
 		</Button>
 	);
 }

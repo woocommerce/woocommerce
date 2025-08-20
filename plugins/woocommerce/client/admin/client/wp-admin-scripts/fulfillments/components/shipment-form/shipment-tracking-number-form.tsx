@@ -3,7 +3,7 @@
  */
 import { Button, ExternalLink, Flex, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
 import { speak } from '@wordpress/a11y';
@@ -57,6 +57,7 @@ export default function ShipmentTrackingNumberForm() {
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
+	const inputRef = useRef< HTMLInputElement >( null );
 	const { order } = useFulfillmentContext();
 	const {
 		trackingNumber,
@@ -147,6 +148,17 @@ export default function ShipmentTrackingNumberForm() {
 		}
 	}, [ trackingNumber ] );
 
+	useEffect( () => {
+		if ( editMode && inputRef.current ) {
+			inputRef.current.focus();
+		}
+	}, [ editMode ] );
+
+	const handleEditModeToggle = () => {
+		setEditMode( true );
+		setTrackingNumberTemp( trackingNumber );
+	};
+
 	return (
 		<>
 			<p className="woocommerce-fulfillment-description">
@@ -159,6 +171,7 @@ export default function ShipmentTrackingNumberForm() {
 				<div className="woocommerce-fulfillment-input-container">
 					<div className="woocommerce-fulfillment-input-group">
 						<TextControl
+							ref={ inputRef }
 							type="text"
 							label={ __( 'Tracking Number', 'woocommerce' ) }
 							placeholder={ __(
@@ -226,10 +239,7 @@ export default function ShipmentTrackingNumberForm() {
 						<h4>{ __( 'Tracking Number', 'woocommerce' ) }</h4>
 						<div className="woocommerce-fulfillment-input-group space-between">
 							<span
-								onClick={ () => {
-									setEditMode( true );
-									setTrackingNumberTemp( trackingNumber );
-								} }
+								onClick={ handleEditModeToggle }
 								role="button"
 								tabIndex={ 0 }
 								onKeyDown={ ( event ) => {
@@ -237,8 +247,7 @@ export default function ShipmentTrackingNumberForm() {
 										event.key === 'Enter' ||
 										event.key === ' '
 									) {
-										setEditMode( true );
-										setTrackingNumberTemp( trackingNumber );
+										handleEditModeToggle();
 									}
 								} }
 								style={ { cursor: 'pointer' } }
@@ -255,10 +264,7 @@ export default function ShipmentTrackingNumberForm() {
 									'Edit tracking number',
 									'woocommerce'
 								) }
-								onClick={ () => {
-									setEditMode( true );
-									setTrackingNumberTemp( trackingNumber );
-								} }
+								onClick={ handleEditModeToggle }
 							>
 								<EditIcon />
 							</Button>

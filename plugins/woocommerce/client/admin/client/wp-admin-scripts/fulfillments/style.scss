@@ -173,6 +173,28 @@
 			line-height: 20px;
 		}
 
+		.woocommerce-fulfillment-item-expand-button {
+			width: 24px;
+			height: 24px;
+			border: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+
+			svg {
+				fill: #949494;
+			}
+
+			&:hover svg {
+				fill: #000;
+			}
+		}
+
 		.woocommerce-fulfillment-item-price {
 			min-width: 52px;
 			text-align: right;
