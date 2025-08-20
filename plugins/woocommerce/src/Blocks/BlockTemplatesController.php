@@ -31,6 +31,16 @@ class BlockTemplatesController {
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
+	}
+
+	/**
+	 * Dequeue legacy scripts that have no usage with block themes.
+	 */
+	public function dequeue_legacy_scripts() {
+		if ( is_product() ) {
+			wp_dequeue_script( 'wc-single-product' );
+		}
 	}
 
 	/**

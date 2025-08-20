@@ -452,6 +452,7 @@ class WC_Frontend_Scripts {
 				self::enqueue_style( 'photoswipe-default-skin' );
 				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
+
 			self::enqueue_script( 'wc-single-product' );
 		}
 
