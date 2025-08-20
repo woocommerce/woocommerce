@@ -25,7 +25,7 @@ let hiddenElements: Element[] = [],
  * - has `data-keep-visible`
  * - has a live region role (`alert`, `status`, `log`, `marquee`, or `timer`)
  *
- * @return {boolean} Whether the element should not be hidden from screen-readers.
+ * @return {boolean} Whether the element should be hidden from screen-readers.
  */
 export function elementShouldBeHidden( element: Element ) {
 	const role = element.getAttribute( 'role' );
