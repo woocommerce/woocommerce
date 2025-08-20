@@ -42,6 +42,7 @@ class WC_Admin {
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+		add_filter( 'update_footer', array( $this, 'update_footer_version' ), 20 );
 
 		// Disable WXR export of schedule action posts.
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
@@ -142,14 +143,12 @@ class WC_Admin {
 
 	/**
 	 * Handle redirects:
-	 * 1. To setup/welcome page after install and updates.
-	 * 2. To offline payment gateway(s) new settings page.
+	 * 1. Nonced plugin install redirects.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
-		// That means OBW would never be shown.
+		// Don't run this fn from Action Scheduler requests.
 		if ( wc_is_running_from_async_action_scheduler() ) {
 			return;
 		}
@@ -169,38 +168,6 @@ class WC_Admin {
 			wp_safe_redirect( $url );
 			exit;
 		}
-
-		// Check if we have a section parameter for offline payment gateways and redirect to the new path.
-		if ( ! empty( $_GET['section'] ) ) {
-			$section = wc_clean( wp_unslash( $_GET['section'] ) );
-
-			// Handle offline payment gateway(s) redirections.
-			if ( 'offline' === $section || WC_Gateway_BACS::ID === $section || WC_Gateway_COD::ID === $section || WC_Gateway_Cheque::ID === $section ) {
-				// Get current URL and remove source parameter.
-				$current_url = remove_query_arg( 'section' );
-
-				if ( 'offline' === $section ) {
-					$redirect_url = add_query_arg(
-						array(
-							'path' => '/offline',
-						),
-						$current_url,
-					);
-				} else {
-					$redirect_url = add_query_arg(
-						array(
-							'path' => '/offline/' . strtolower( $section ),
-						),
-						$current_url,
-					);
-				}
-
-				// Perform the redirect.
-				wp_safe_redirect( $redirect_url );
-				exit;
-			}
-		}
-
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -341,8 +308,9 @@ class WC_Admin {
 	/**
 	 * Change the admin footer text on WooCommerce admin pages.
 	 *
-	 * @since  2.3
-	 * @param  string $footer_text text to be rendered in the footer.
+	 * @since 2.3
+	 *
+	 * @param string $footer_text Footer text to be rendered.
 	 * @return string
 	 */
 	public function admin_footer_text( $footer_text ) {
@@ -350,12 +318,11 @@ class WC_Admin {
 			return $footer_text;
 		}
 		$current_screen = get_current_screen();
-		$wc_pages       = wc_get_screen_ids();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
 
 		// Set only WC pages.
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
-		// Check to make sure we're on a WooCommerce admin page.
 		/**
 		 * Filter to determine if admin footer text should be displayed.
 		 *
@@ -381,7 +348,43 @@ class WC_Admin {
 			}
 		}
 
-		return $footer_text;
+		return '<span id="footer-thankyou">' . $footer_text . '</span>';
+	}
+
+	/**
+	 * Update the footer version text.
+	 *
+	 * @since $VID:$
+	 *
+	 * @param string $version The current version string.
+	 * @return string
+	 */
+	public function update_footer_version( $version ) {
+		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
+			return $version;
+		}
+		$current_screen = get_current_screen();
+		$wc_pages       = array_merge( wc_get_screen_ids(), array( 'woocommerce_page_wc-admin' ) );
+
+		// Set only WC pages.
+		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
+
+		// Check to make sure we're on a WooCommerce admin page.
+		/**
+		 * Filter to determine if update footer text should be displayed.
+		 *
+		 * @since 2.3
+		 */
+		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_update_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
+			// Replace WordPress version with WooCommerce version.
+			$version = sprintf(
+				/* translators: %s: WooCommerce version */
+				__( 'Version %s', 'woocommerce' ),
+				esc_html( WC()->version )
+			);
+		}
+
+		return $version;
 	}
 
 	/**

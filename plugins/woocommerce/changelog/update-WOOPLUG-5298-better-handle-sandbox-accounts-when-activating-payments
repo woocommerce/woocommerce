@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Show the WooPayments NOX in-context business verification activate sub-step when a sandbox account is in use.
+
+

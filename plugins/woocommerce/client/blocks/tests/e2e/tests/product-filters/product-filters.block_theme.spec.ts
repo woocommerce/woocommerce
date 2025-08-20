@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -48,7 +48,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
+			postId: `${ BLOCK_THEME_SLUG }//${ blockData.slug }`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -393,11 +393,9 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		} );
 
 		[
-			'woocommerce/woocommerce//archive-product',
-			'woocommerce/woocommerce//taxonomy-product_cat',
-			'woocommerce/woocommerce//taxonomy-product_tag',
-			'woocommerce/woocommerce//taxonomy-product_attribute',
-			'woocommerce/woocommerce//product-search-results',
+			`${ BLOCK_THEME_SLUG }//archive-product`,
+			`${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
+			`${ BLOCK_THEME_SLUG }//product-search-results`,
 		].forEach( ( slug ) => {
 			test( `should be visible in archive template: ${ slug }`, async ( {
 				pageObject,
@@ -418,9 +416,47 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		} );
 
 		[
-			'woocommerce/woocommerce//single-product',
-			'twentytwentyfour//home',
-			'twentytwentyfour//index',
+			{
+				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+				title: 'Products by Category',
+			},
+			{
+				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+				title: 'Products by Tag',
+			},
+			{
+				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+				title: 'Products by Brand',
+			},
+		].forEach( ( template ) => {
+			test( `should be visible in archive template: ${ template.slug }`, async ( {
+				admin,
+				pageObject,
+				editor,
+			} ) => {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+				await editor.createTemplate( {
+					templateName: template.title,
+				} );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate();
+				await pageObject.focusProductCollection();
+				await editor.openDocumentSettingsSidebar();
+
+				await expect(
+					pageObject
+						.locateSidebarSettings()
+						.getByLabel( SELECTORS.usePageContextControl )
+				).toBeVisible();
+			} );
+		} );
+
+		[
+			`${ BLOCK_THEME_SLUG }//single-product`,
+			`${ BLOCK_THEME_SLUG }//home`,
+			`${ BLOCK_THEME_SLUG }//index`,
 		].forEach( ( slug ) => {
 			test( `should be visible in non-archive template: ${ slug }`, async ( {
 				pageObject,

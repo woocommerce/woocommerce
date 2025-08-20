@@ -6,4 +6,5 @@ export type Entity = {
 	plural: string;
 	key: string;
 	supportsPagination: boolean;
+	getTitle: ( record: unknown ) => string;
 };

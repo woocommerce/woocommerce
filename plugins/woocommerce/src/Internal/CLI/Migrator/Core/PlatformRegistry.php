@@ -149,12 +149,13 @@ class PlatformRegistry {
 	 * Retrieves and instantiates the mapper class for a given platform.
 	 *
 	 * @param string $platform_id The ID of the platform.
+	 * @param array  $args Optional arguments to pass to the mapper constructor.
 	 *
 	 * @return PlatformMapperInterface An instance of the platform's mapper class.
 	 *
 	 * @throws InvalidArgumentException If the platform is not found or the mapper class is invalid.
 	 */
-	public function get_mapper( string $platform_id ): PlatformMapperInterface {
+	public function get_mapper( string $platform_id, array $args = array() ): PlatformMapperInterface {
 		$platform = $this->get_platform( $platform_id );
 
 		if ( ! $platform ) {
@@ -203,9 +204,14 @@ class PlatformRegistry {
 			);
 		}
 
-		// Use the WooCommerce DI container to properly inject dependencies.
-		$container = wc_get_container();
-		return $container->get( $mapper_class );
+		// If arguments are provided, instantiate manually to pass constructor args.
+		// Otherwise, use the WooCommerce DI container for dependency injection.
+		if ( ! empty( $args ) ) {
+			return new $mapper_class( $args );
+		} else {
+			$container = wc_get_container();
+			return $container->get( $mapper_class );
+		}
 	}
 
 	/**

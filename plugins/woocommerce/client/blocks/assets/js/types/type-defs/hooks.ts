@@ -38,31 +38,31 @@ export interface StoreCartCoupon {
 }
 
 export interface StoreCart {
+	billingAddress: CartResponseBillingAddress;
+	/** @deprecated Use billingAddress instead */
+	billingData: CartResponseBillingAddress;
 	cartCoupons: CartResponseCoupons;
-	cartItems: CartResponseItem[];
-	crossSellsProducts: ProductResponseItem[];
+	cartErrors: ApiErrorResponse[];
 	cartFees: CartResponseFeeItem[];
+	cartHasCalculatedShipping: boolean;
+	cartIsLoading: boolean;
+	cartItemErrors: CartResponseErrorItem[];
+	cartItems: CartResponseItem[];
 	cartItemsCount: number;
 	cartItemsWeight: number;
 	cartNeedsPayment: boolean;
 	cartNeedsShipping: boolean;
-	cartItemErrors: CartResponseErrorItem[];
 	cartTotals: CartResponseTotals;
-	cartIsLoading: boolean;
-	cartErrors: ApiErrorResponse[];
-	/** @deprecated Use billingAddress instead */
-	billingData: CartResponseBillingAddress;
-	billingAddress: CartResponseBillingAddress;
-	shippingAddress: CartResponseShippingAddress;
-	shippingRates: CartResponseShippingRate[];
+	crossSellsProducts: ProductResponseItem[];
 	extensions: Record< string, unknown >;
+	hasPendingItemsOperations: boolean;
 	isLoadingRates: boolean;
-	cartHasCalculatedShipping: boolean;
 	paymentMethods: string[];
 	paymentRequirements: string[];
 	receiveCart: ( cart: CartResponse ) => void;
 	receiveCartContents: ( cart: CartResponse ) => void;
-	hasPendingItemsOperations: boolean;
+	shippingAddress: CartResponseShippingAddress;
+	shippingRates: CartResponseShippingRate[];
 }
 
 export type Query = {
