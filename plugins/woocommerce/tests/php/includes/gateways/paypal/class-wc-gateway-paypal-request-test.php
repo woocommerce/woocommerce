@@ -15,6 +15,29 @@ require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-pa
 class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Set up the test environment.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Mock Jetpack options to return a valid site ID.
+		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
+
+		// Return a Jetpack blog token.
+		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
+		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test create_paypal_order when API returns error.
 	 */
 	public function test_create_paypal_order_error() {
@@ -152,5 +175,27 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	public function create_paypal_order_error( $value, $parsed_url ) {
 		// Return a 500 error.
 		return array( 'response' => array( 'code' => 500 ) );
+	}
+
+	/**
+	 * Helper method to return valid site ID for Jetpack options.
+	 *
+	 * @param mixed $value The option value.
+	 *
+	 * @return int
+	 */
+	public function return_valid_site_id( $value ) {
+		return array( 'id' => 12345 );
+	}
+
+	/**
+	 * Helper method to return valid blog token for Jetpack options.
+	 *
+	 * @param mixed $value The option value.
+	 *
+	 * @return array
+	 */
+	public function return_blog_token( $value ) {
+		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
 }
