@@ -10,8 +10,15 @@ import { isEmpty, mapValues } from 'lodash';
  */
 import { useOnboardingContext } from '../../../../data/onboarding-context';
 import { useStepperContext } from '../stepper';
-import { Item as SelectItem } from '../../../../components/custom-select-control';
 import { ListItem as GroupedSelectItem } from '../../../../components/grouped-select-control';
+
+// Define SelectItem interface to match @wordpress/components CustomSelectControl
+interface SelectItem {
+	key: string;
+	name?: string;
+	className?: string;
+	style?: React.CSSProperties;
+}
 import {
 	GroupedSelectField,
 	GroupedSelectFieldProps,

@@ -9,7 +9,14 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { useBusinessVerificationContext } from '../data/business-verification-context';
 import { useOnboardingContext } from '../../../data/onboarding-context';
-import { Item } from '../../../components/custom-select-control';
+
+// Define Item interface to match @wordpress/components CustomSelectControl
+interface Item {
+	key: string;
+	name?: string;
+	className?: string;
+	style?: React.CSSProperties;
+}
 import { OnboardingFields, BusinessType, MccsDisplayTreeItem } from '../types';
 import {
 	OnboardingGroupedSelectField,

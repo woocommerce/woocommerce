@@ -2,16 +2,12 @@
  * External dependencies
  */
 import React, { ComponentProps, forwardRef } from 'react';
-import { TextControl } from '@wordpress/components';
+import { TextControl, CustomSelectControl } from '@wordpress/components';
 import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import CustomSelectControl, {
-	ControlProps as SelectControlProps,
-	Item as SelectItem,
-} from '../../../../components/custom-select-control';
 import GroupedSelectControl, {
 	GroupedSelectControlProps,
 	ListItem as GroupedSelectItem,
@@ -21,8 +17,16 @@ interface CommonProps {
 	error?: string;
 }
 
+// Define SelectItem interface to match @wordpress/components CustomSelectControl
+interface SelectItem {
+	key: string;
+	name?: string;
+	className?: string;
+	style?: React.CSSProperties;
+}
+
 export type TextFieldProps = ComponentProps< typeof TextControl > & CommonProps;
-export type SelectFieldProps< ItemType > = SelectControlProps< ItemType > &
+export type SelectFieldProps< ItemType > = ComponentProps< typeof CustomSelectControl > &
 	CommonProps;
 export type GroupedSelectFieldProps< ItemType > =
 	GroupedSelectControlProps< ItemType > & CommonProps;
@@ -62,7 +66,13 @@ export const TextField = forwardRef< HTMLInputElement, TextFieldProps >(
 
 export const SelectField = < ItemType extends SelectItem >(
 	props: SelectFieldProps< ItemType >
-): JSX.Element => makeField( CustomSelectControl, props );
+): JSX.Element => {
+	const propsWithClassName = {
+		...props,
+		className: clsx( 'woopayments', props.className )
+	};
+	return makeField( CustomSelectControl, propsWithClassName );
+};
 
 export const GroupedSelectField = < ItemType extends GroupedSelectItem >(
 	props: GroupedSelectControlProps< ItemType >
