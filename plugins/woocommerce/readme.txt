@@ -179,6 +179,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix spacing in tax line in the order summary [#60469](https://github.com/woocommerce/woocommerce/pull/60469)
 * Fix - Prevent skeleton display when an express payment method is active to avoid unmounting express buttons [#60394](https://github.com/woocommerce/woocommerce/pull/60394)
 * Fix - Use dynamically-generated URLs for resetting accounts and switching to live accounts in the Payments NOX. [#60329](https://github.com/woocommerce/woocommerce/pull/60329)
+* Fix - Fix flat shipping rate validation breaking advanced shipping rate formula input [#60348](https://github.com/woocommerce/woocommerce/pull/60348)
 * Enhancement - Set the ‘Set up payments’ task to in-progress state upon starting live WooPayments onboarding. [#60329](https://github.com/woocommerce/woocommerce/pull/60329)
 
 
