@@ -46,9 +46,14 @@ export class Editor extends CoreEditor {
 	}
 
 	/**
-	 * Opens the global inserter.
+	 * Clicks the global block inserter for given action.
+	 *
+	 * @param action - The action to perform on the global block inserter ( 'toggle' | 'open' | 'close' ).
+	 * @default 'toggle'
 	 */
-	async openGlobalBlockInserter() {
+	async clickGlobalBlockInserter(
+		action: 'toggle' | 'open' | 'close' = 'toggle'
+	) {
 		const toggleButton = this.page.getByRole( 'button', {
 			name:
 				this.wpCoreVersion >= 6.8
@@ -60,9 +65,27 @@ export class Editor extends CoreEditor {
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
 
-		if ( ! isOpen ) {
+		if (
+			action === 'toggle' ||
+			( action === 'open' && ! isOpen ) ||
+			( action === 'close' && isOpen )
+		) {
 			await toggleButton.click();
 		}
+	}
+
+	/**
+	 * Opens the global inserter.
+	 */
+	async openGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'open' );
+	}
+
+	/**
+	 * Closes the global inserter.
+	 */
+	async closeGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'close' );
 	}
 
 	async transformIntoBlocks() {

@@ -3,15 +3,7 @@
  */
 import { Gridicon } from '@automattic/components';
 import { Button, Placeholder, SelectControl } from '@wordpress/components';
-import { paymentSettingsStore } from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
-import React, {
-	useState,
-	lazy,
-	Suspense,
-	useCallback,
-	useEffect,
-} from '@wordpress/element';
+import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,
@@ -20,7 +12,6 @@ import {
 } from 'react-router-dom';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { __, sprintf } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -28,10 +19,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Header } from './components/header/header';
 import { BackButton } from './components/buttons/back-button';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
-import {
-	getWooPaymentsTestDriveAccountLink,
-	getWooPaymentsFromProviders,
-} from '~/settings-payments/utils';
 import './settings-payments-main.scss';
 
 /**
@@ -41,16 +28,6 @@ const SettingsPaymentsMainChunk = lazy(
 	() =>
 		import(
 			/* webpackChunkName: "settings-payments-main" */ './settings-payments-main'
-		)
-);
-
-/**
- * Lazy-loaded chunk for the recommended payment methods settings page.
- */
-const SettingsPaymentsMethodsChunk = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "settings-payments-methods" */ './settings-payments-methods'
 		)
 );
 
@@ -225,132 +202,6 @@ const SettingsPaymentsMain = () => {
 };
 
 /**
- * Renders the recommended payment methods settings page with a fallback while loading.
- */
-export const SettingsPaymentsMethods = () => {
-	const location = useLocation();
-	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
-		[ key: string ]: boolean;
-	} >( {} );
-	const [ isCompleted, setIsCompleted ] = useState( false );
-	const { providers } = useSelect( ( select ) => {
-		return {
-			isFetching: select( paymentSettingsStore ).isFetching(),
-			providers:
-				select( paymentSettingsStore ).getPaymentProviders(
-					window.wcSettings?.admin?.woocommerce_payments_nox_profile
-						?.business_country_code || null
-				) || [],
-		};
-	}, [] );
-
-	// Retrieve the WooPayments gateway.
-	const wooPayments = getWooPaymentsFromProviders( providers );
-
-	const onPaymentMethodsContinueClick = useCallback( () => {
-		// Record the event along with payment methods selected.
-		recordEvent( 'wcpay_settings_payment_methods_continue', {
-			displayed_payment_methods:
-				Object.keys( paymentMethodsState ).join( ', ' ),
-			selected_payment_methods: Object.keys( paymentMethodsState )
-				.filter(
-					( paymentMethod ) => paymentMethodsState[ paymentMethod ]
-				)
-				.join( ', ' ),
-			deselected_payment_methods: Object.keys( paymentMethodsState )
-				.filter(
-					( paymentMethod ) => ! paymentMethodsState[ paymentMethod ]
-				)
-				.join( ', ' ),
-			business_country:
-				window.wcSettings?.admin?.woocommerce_payments_nox_profile
-					?.business_country_code ?? 'unknown',
-		} );
-
-		setIsCompleted( true );
-
-		// Get the onboarding URL or fallback to the test drive account link.
-		const onboardUrl =
-			wooPayments?.onboarding?._links?.onboard?.href ||
-			getWooPaymentsTestDriveAccountLink();
-
-		// Combine the onboard URL with the query string and redirect to the onboard URL.
-		window.location.href =
-			onboardUrl +
-			'&capabilities=' +
-			encodeURIComponent( JSON.stringify( paymentMethodsState ) );
-	}, [ paymentMethodsState, wooPayments ] );
-
-	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top-left corner of the page.
-
-		if ( location.pathname === '/payment-methods' ) {
-			hideWooCommerceNavTab( 'none' );
-			recordEvent( 'wcpay_settings_payment_methods_pageview' );
-		}
-	}, [ location ] );
-
-	return (
-		<>
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<BackButton
-						href={ getNewPath( {}, '' ) }
-						title={ __(
-							'Return to payments settings',
-							'woocommerce'
-						) }
-						isRoute={ true }
-						from={ 'woopayments_payment_methods' }
-					/>
-					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-						<span className="woocommerce-settings-payments-header__title">
-							{ __(
-								'Choose your payment methods',
-								'woocommerce'
-							) }
-						</span>
-					</h1>
-					<Button
-						className="components-button is-primary"
-						onClick={ onPaymentMethodsContinueClick }
-						isBusy={ isCompleted }
-						disabled={ isCompleted }
-					>
-						{ __( 'Continue', 'woocommerce' ) }
-					</Button>
-					<div className="woocommerce-settings-payments-header__description">
-						{ __(
-							"Select which payment methods you'd like to offer to your shoppers. You can update these here at any time.",
-							'woocommerce'
-						) }
-					</div>
-				</div>
-			</div>
-			<Suspense
-				fallback={
-					<>
-						<div className="settings-payments-recommended__container">
-							<div className="settings-payment-gateways">
-								<ListPlaceholder
-									rows={ 3 }
-									hasDragIcon={ false }
-								/>
-							</div>
-						</div>
-					</>
-				}
-			>
-				<SettingsPaymentsMethodsChunk
-					paymentMethodsState={ paymentMethodsState }
-					setPaymentMethodsState={ setPaymentMethodsState }
-				/>
-			</Suspense>
-		</>
-	);
-};
-
-/**
  * Wraps the offline payment gateways settings page.
  */
 export const SettingsPaymentsOfflineWrapper = () => {
@@ -442,10 +293,6 @@ export const SettingsPaymentsMainWrapper = () => {
 			/>
 			<HistoryRouter history={ getHistory() }>
 				<Routes>
-					<Route
-						path="/payment-methods"
-						element={ <SettingsPaymentsMethods /> }
-					/>
 					<Route
 						path="/offline"
 						element={ <SettingsPaymentsOfflineWrapper /> }

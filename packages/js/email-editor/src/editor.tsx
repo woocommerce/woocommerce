@@ -27,7 +27,11 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
-import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
+import {
+	useContentValidation,
+	useRemoveSavingFailedNotices,
+	useFilterEditorContentStylesheets,
+} from './hooks';
 
 function Editor( {
 	postId,
@@ -55,6 +59,8 @@ function Editor( {
 		setIsInitialized( true );
 	}, [ postId, postType, setEmailPost ] );
 
+	const contentRef = useFilterEditorContentStylesheets();
+
 	if ( ! isInitialized ) {
 		return null;
 	}
@@ -72,6 +78,7 @@ function Editor( {
 				postId={ postId }
 				postType={ postType }
 				settings={ editorSettings }
+				contentRef={ contentRef }
 			/>
 		</StrictMode>
 	);
