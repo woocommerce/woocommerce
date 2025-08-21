@@ -87,11 +87,15 @@ class ProductPrice extends AbstractBlock {
 				$formatted_variations_data = array();
 				$has_variation_price_html  = false;
 				foreach ( $variations_data as $variation ) {
-					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) || empty( $variation['price_html'] ) ) {
-							continue;
+					if (
+						empty( $variation['variation_id'] )
+						|| ! array_key_exists( 'price_html', $variation )
+						|| '' === $variation['price_html']
+					) {
+						continue;
 					}
-					// Core behavior: variation['price_html'] is empty iff all variation prices are identical.
-					// Therefore, any non-empty price_html indicates differences that warrant interactivity.
+					// Core behavior: when all variation prices are identical, Core returns '' for variation['price_html'].
+					// Therefore, the presence of any non-empty price_html implies price differences and warrants interactivity.
 					$has_variation_price_html                                = true;
 					$formatted_variations_data[ $variation['variation_id'] ] = array(
 						'price_html' => $variation['price_html'],
