@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2](https://github.com/woocommerce/email-editor/releases/tag/1.4.2) - 2025-08-21 
+
+-   Patch - Filter unnecessary stylesheets from iframe assets [#60354]
+-   Patch - Fix Email editor conflict with the site editor. [#60465]
+-   Patch - Fix horizontal scrolling issue in the email editor on mobile devices. [#60355]
+-   Patch - Use custom log filepath defined in WP_DEBUG_LOG when specified. [#60255]
+
+## [1.4.1](https://github.com/woocommerce/email-editor/releases/tag/1.4.1) - 2025-08-08 
+
+-   Patch - Introduce new class Assets_Manager to simplify integration. [#60165]
+
 ## [1.4.0](https://github.com/woocommerce/email-editor/releases/tag/1.4.0) - 2025-07-31 
 
 -   Minor - Enable Site Logo and Site Title blocks for the Email Editor [#59624]

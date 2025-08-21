@@ -38,6 +38,7 @@ export type ExperimentalSettings = {
 export type EmailEditorSettings = EditorSettings &
 	ExperimentalSettings & {
 		isPreviewMode: boolean;
+		allowedIframeStyleHandles?: string[];
 	};
 
 export type EmailTheme = {

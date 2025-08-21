@@ -26,6 +26,8 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	CartResponseCouponItem,
+	CartShippingRate,
+	CartShippingPackageShippingRate,
 } from '@woocommerce/types';
 import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 
@@ -82,6 +84,7 @@ const decodeValues = <
 		| Record< string, unknown >
 		| CartResponseBillingAddress
 		| CartResponseShippingAddress
+		| CartShippingPackageShippingRate
 >(
 	object: T
 ): T => {
@@ -93,31 +96,77 @@ const decodeValues = <
 	) as T;
 };
 
+// Normalize address fields to ensure they are always in the same format and update the ref to track the latest value.
+const normalizeAddress = <
+	T extends CartResponseBillingAddress | CartResponseShippingAddress
+>(
+	address: T,
+	addressRef: React.MutableRefObject< T >
+): T => {
+	const normalizedAddress = emptyHiddenAddressFields(
+		decodeValues( address )
+	);
+	if ( ! fastDeepEqual( addressRef.current, normalizedAddress ) ) {
+		addressRef.current = normalizedAddress;
+	}
+	return addressRef.current;
+};
+
+const normalizeCoupons = ( coupons: CartResponseCouponItem[] ) => {
+	return coupons.length > 0
+		? coupons.map( ( coupon: CartResponseCouponItem ) => ( {
+				...coupon,
+				label: decodeEntities( coupon.code ),
+		  } ) )
+		: EMPTY_CART_COUPONS;
+};
+
+const normalizeFees = ( fees: CartResponseFeeItem[] ) => {
+	return fees.length > 0
+		? fees.map( ( fee: CartResponseFeeItem ) => decodeValues( fee ) )
+		: EMPTY_CART_FEES;
+};
+
+const normalizeShippingRates = ( shippingRates: CartShippingRate[] ) => {
+	return shippingRates.length > 0
+		? shippingRates.map( ( shippingRate: CartShippingRate ) => ( {
+				...shippingRate,
+				shipping_rates:
+					shippingRate.shipping_rates.length > 0
+						? shippingRate.shipping_rates.map(
+								( rate: CartShippingPackageShippingRate ) =>
+									decodeValues( rate )
+						  )
+						: [],
+		  } ) )
+		: [];
+};
+
 export const defaultCartData: StoreCart = {
+	billingAddress: defaultBillingAddress,
+	billingData: defaultBillingAddress,
 	cartCoupons: EMPTY_CART_COUPONS,
-	cartItems: EMPTY_CART_ITEMS,
+	cartErrors: EMPTY_CART_ERRORS,
 	cartFees: EMPTY_CART_FEES,
+	cartHasCalculatedShipping: false,
+	cartIsLoading: true,
+	cartItemErrors: EMPTY_CART_ITEM_ERRORS,
+	cartItems: EMPTY_CART_ITEMS,
 	cartItemsCount: 0,
 	cartItemsWeight: 0,
-	crossSellsProducts: EMPTY_CART_CROSS_SELLS,
 	cartNeedsPayment: true,
 	cartNeedsShipping: true,
-	cartItemErrors: EMPTY_CART_ITEM_ERRORS,
 	cartTotals: defaultCartTotals,
-	cartIsLoading: true,
-	cartErrors: EMPTY_CART_ERRORS,
-	billingData: defaultBillingAddress,
-	billingAddress: defaultBillingAddress,
-	shippingAddress: defaultShippingAddress,
-	shippingRates: EMPTY_SHIPPING_RATES,
+	crossSellsProducts: EMPTY_CART_CROSS_SELLS,
+	extensions: EMPTY_EXTENSIONS,
+	hasPendingItemsOperations: false,
 	isLoadingRates: false,
-	cartHasCalculatedShipping: false,
 	paymentMethods: EMPTY_PAYMENT_METHODS,
 	paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 	receiveCart: () => undefined,
 	receiveCartContents: () => undefined,
-	extensions: EMPTY_EXTENSIONS,
-	hasPendingItemsOperations: false,
+	shippingAddress: defaultShippingAddress,
+	shippingRates: EMPTY_SHIPPING_RATES,
 };
 
 /**
@@ -165,64 +214,40 @@ export const useStoreCart = (
 		return defaultCartData;
 	}
 
-	const nextBillingAddress = emptyHiddenAddressFields(
-		decodeValues( cartData.billingAddress )
+	const billingAddress = normalizeAddress(
+		cartData.billingAddress,
+		billingAddressRef
 	);
 
-	if ( ! fastDeepEqual( billingAddressRef.current, nextBillingAddress ) ) {
-		billingAddressRef.current = nextBillingAddress;
-	}
-
-	const billingAddress = billingAddressRef.current;
-
-	const nextShippingAddress = cartData.needsShipping
-		? emptyHiddenAddressFields( decodeValues( cartData.shippingAddress ) )
+	const shippingAddress = cartData.needsShipping
+		? normalizeAddress( cartData.shippingAddress, shippingAddressRef )
 		: billingAddress;
 
-	if ( ! fastDeepEqual( shippingAddressRef.current, nextShippingAddress ) ) {
-		shippingAddressRef.current = nextShippingAddress;
-	}
-
-	const shippingAddress = shippingAddressRef.current;
-
 	const storeCart: StoreCart = {
-		cartCoupons:
-			cartData.coupons.length > 0
-				? cartData.coupons.map(
-						( coupon: CartResponseCouponItem ) => ( {
-							...coupon,
-							label: decodeEntities( coupon.code ),
-						} )
-				  )
-				: EMPTY_CART_COUPONS,
+		billingAddress,
+		billingData: billingAddress,
+		cartCoupons: normalizeCoupons( cartData.coupons ),
+		cartErrors,
+		cartFees: normalizeFees( cartData.fees ),
+		cartHasCalculatedShipping: cartData.hasCalculatedShipping,
+		cartIsLoading,
+		cartItemErrors: cartData.errors,
 		cartItems: cartData.items,
-		crossSellsProducts: cartData.crossSells,
-		cartFees:
-			cartData.fees.length > 0
-				? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
-						decodeValues( fee )
-				  )
-				: EMPTY_CART_FEES,
 		cartItemsCount: cartData.itemsCount,
 		cartItemsWeight: cartData.itemsWeight,
 		cartNeedsPayment: cartData.needsPayment,
 		cartNeedsShipping: cartData.needsShipping,
-		cartItemErrors: cartData.errors,
 		cartTotals,
-		cartIsLoading,
-		cartErrors,
-		billingData: billingAddress,
-		billingAddress,
-		shippingAddress,
+		crossSellsProducts: cartData.crossSells,
 		extensions: cartData.extensions,
-		shippingRates: cartData.shippingRates,
+		hasPendingItemsOperations,
 		isLoadingRates,
-		cartHasCalculatedShipping: cartData.hasCalculatedShipping,
-		paymentRequirements: cartData.paymentRequirements,
 		paymentMethods: cartData.paymentMethods,
+		paymentRequirements: cartData.paymentRequirements,
 		receiveCart,
 		receiveCartContents,
-		hasPendingItemsOperations,
+		shippingAddress,
+		shippingRates: normalizeShippingRates( cartData.shippingRates ),
 	};
 
 	if (

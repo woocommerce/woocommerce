@@ -8,6 +8,7 @@
 	],
 	"moduleDirectories": [ "node_modules" ],
 	"moduleNameMapper": {
+		"\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$": "<rootDir>/tests/js/config/file-mock.js",
 		"@wordpress/private-apis": "<rootDir>/node_modules/@wordpress/private-apis",
 		"@wordpress/core-data/build/(.*)$": "<rootDir>/node_modules/@wordpress/core-data/build/$1",
 		"@wordpress/core-data": "<rootDir>/node_modules/@wordpress/core-data",

@@ -47,16 +47,16 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = [] ) {
+	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
 		// Indicate to interactivity powered components that this block is on the page
 		// and needs refresh to update data.
 		wp_interactivity_config(
 			'woocommerce',
-			[
+			array(
 				'needsRefreshForInteractivityAPI' => true,
-			]
+			)
 		);
 	}
 
@@ -82,6 +82,49 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			}
 		}
 	}
+
+	/**
+	 * Enqueue assets specific to this block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 */
+	protected function enqueue_assets( $attributes, $content, $block ) {
+		parent::enqueue_assets( $attributes, $content, $block );
+
+		if ( is_product() ) {
+			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
+		}
+	}
+
+	/**
+	 * Enqueue legacy assets when this block is used as we don't enqueue them for block themes anymore.
+	 *
+	 * Note: This enqueue logic is intentionally duplicated in ProductImageGallery.php
+	 * to keep legacy blocks independent and allow for separate deprecation paths.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/60223
+	 */
+	public function enqueue_legacy_assets() {
+		// Legacy script dependencies for backward compatibility.
+		wp_enqueue_script( 'zoom' );
+		wp_enqueue_script( 'flexslider' );
+		wp_enqueue_script( 'photoswipe-ui-default' );
+		wp_enqueue_style( 'photoswipe-default-skin' );
+		wp_enqueue_script( 'wc-single-product' );
+
+		add_action(
+			'wp_footer',
+			function () {
+				wc_get_template( 'single-product/photoswipe.php' );
+			}
+		);
+		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+	}
+
 
 	/**
 	 * Render method for the Classic Template block. This method will determine which template to render.
@@ -170,7 +213,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 
 		echo '<div class="wp-block-group">';
 
-		echo sprintf(
+		printf(
 			'<%1$s %2$s>%3$s</%1$s>',
 			'h1',
 			get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

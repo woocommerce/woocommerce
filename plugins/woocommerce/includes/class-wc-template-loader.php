@@ -44,11 +44,6 @@ class WC_Template_Loader {
 		if ( self::$theme_support ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
-
-			// Loads gallery scripts on Product page for FSE themes.
-			if ( wp_is_block_theme() ) {
-				self::add_support_for_product_page_gallery();
-			}
 		} else {
 			// Unsupported themes.
 			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
@@ -134,36 +129,12 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		$has_template      = false;
-		$template_filename = $template_name . '.html';
-		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
-		// we should check both these possible directories for backwards-compatibility.
-		$possible_templates_dirs = array( 'templates', 'block-templates' );
-
-		// Combine the possible root directory names with either the template directory
-		// or the stylesheet directory for child themes, getting all possible block templates
-		// locations combinations.
-		$filepath        = DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template_filename;
-		$legacy_filepath = DIRECTORY_SEPARATOR . 'block-templates' . DIRECTORY_SEPARATOR . $template_filename;
-		$possible_paths  = array(
-			get_stylesheet_directory() . $filepath,
-			get_stylesheet_directory() . $legacy_filepath,
-			get_template_directory() . $filepath,
-			get_template_directory() . $legacy_filepath,
-		);
-
-		// Check the first matching one.
-		foreach ( $possible_paths as $path ) {
-			if ( is_readable( $path ) ) {
-				$has_template = true;
-				break;
-			}
-		}
+		$has_template = WP_Block_Templates_Registry::get_instance()->is_registered( 'woocommerce//' . $template_name );
 
 		/**
 		 * Filters the value of the result of the block template check.
 		 *
-		 * @since x.x.x
+		 * @since 10.2.0
 		 *
 		 * @param boolean $has_template value to be filtered.
 		 * @param string $template_name The name of the template.

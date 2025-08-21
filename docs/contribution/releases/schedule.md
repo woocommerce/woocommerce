@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce Release Schedule
 sidebar_label: Release Schedule
+sidebar_position: 6
 ---
 
 # WooCommerce Release Schedule
