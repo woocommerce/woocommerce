@@ -254,16 +254,45 @@ class EmailPreview {
 	 * @return string
 	 */
 	public function ensure_links_open_in_new_tab( string $content ) {
-		return (string) preg_replace_callback(
-			'/<a\s+([^>]*?)(target=["\']?[^"\']*["\']?)?([^>]*)>/i',
-			function ( $matches ) {
-				$before = $matches[1];
-				$target = 'target="_blank"';
-				$after  = $matches[3];
-				return "<a $before $target $after>";
-			},
-			$content
-		);
+		if ( empty( $content ) || strpos( $content, '<a' ) === false ) {
+			return $content;
+		}
+
+		if ( ! class_exists( 'DOMDocument' ) ) {
+			return $content;
+		}
+
+		// Suppress libxml errors to prevent them from being displayed.
+		$previous_use_internal_errors = libxml_use_internal_errors( true );
+
+		try {
+			$dom = new \DOMDocument();
+
+			// Add UTF-8 encoding and load with error suppression flags.
+			$html_with_encoding = '<?xml encoding="UTF-8">' . $content;
+			$dom->loadHTML(
+				$html_with_encoding,
+				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOWARNING | LIBXML_NOERROR
+			);
+
+			$links = $dom->getElementsByTagName( 'a' );
+			foreach ( $links as $link ) {
+				$link->setAttribute( 'target', '_blank' );
+				$link->setAttribute( 'rel', 'noopener' );
+			}
+
+			$result = $dom->saveHTML();
+
+			// Remove the XML declaration we added earlier, it's not meant to be used in an HTML document.
+			$result = preg_replace( '/<\?xml[^>]*>\s*/i', '', $result );
+
+			return $result;
+		} catch ( \Exception $e ) {
+			return $content;
+		} finally {
+			libxml_use_internal_errors( $previous_use_internal_errors );
+			libxml_clear_errors();
+		}
 	}
 
 	/**
