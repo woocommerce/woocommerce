@@ -192,6 +192,11 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 							'description' => __( 'Specific product IDs to export.', 'woocommerce' ),
 							'type'        => 'string',
 						),
+						'max_num_batches' => array(
+							'description' => __( 'Maximum number of batches to process (safety limit for client-side development).', 'woocommerce' ),
+							'type'        => 'integer',
+							'default'     => 1000,
+						),
 						'filename' => array(
 							'description' => __( 'Export filename.', 'woocommerce' ),
 							'type'        => 'string',
@@ -282,6 +287,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'export_types' => $request->get_param( 'export_types' ),
 			'export_category' => $request->get_param( 'export_category' ),
 			'export_product_ids' => $request->get_param( 'export_product_ids' ),
+			'max_num_batches' => $request->get_param( 'max_num_batches' ) ?: 1000,
 			'created_at' => current_time( 'mysql' ),
 		);
 
@@ -478,9 +484,10 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 	 *
 	 * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
 	 * @param string $format Export format (json or csv).
+	 * @param int $max_num_batches Maximum number of batches (of 250 products) to process.
 	 * @return array Response with status and next step info.
 	 */
-	private function stream_export_all_products( $exporter, $format ) {
+	private function stream_export_all_products( $exporter, $format, $max_num_batches = 1000 ) {
 		// Get file path using upload directory
 		$upload_dir = wp_upload_dir();
 		$filename = $exporter->get_filename();
@@ -488,7 +495,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 		// Process all batches in one API call by creating new exporters
 		$step = 1;
-		$max_steps = 1000; // Safety limit
+		$max_steps = $max_num_batches; // Safety limit, configurable via API
 		$total_exported = 0;
 
 		while ( $step <= $max_steps ) {
@@ -1077,7 +1084,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 
 			// Use the existing streaming approach
 			$controller = new self();
-			$export_status = $controller->stream_export_all_products( $exporter, $format );
+			$export_status = $controller->stream_export_all_products( $exporter, $format, $export_params['max_num_batches'] );
 
 			// Update job status based on export result
 			$completion_data = array_merge( $job_data_current, array(
