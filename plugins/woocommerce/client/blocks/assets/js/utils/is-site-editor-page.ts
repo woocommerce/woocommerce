@@ -10,8 +10,6 @@ export const isSiteEditorPage = (): boolean => {
 
 	return (
 		editedPostType === 'wp_template' ||
-		editedPostType === 'wp_template_part' ||
-		// Synced patterns.
-		editedPostType === 'wp_block'
+		editedPostType === 'wp_template_part'
 	);
 };
