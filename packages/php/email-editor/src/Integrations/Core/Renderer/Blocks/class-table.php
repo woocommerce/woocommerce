@@ -28,6 +28,11 @@ class Table extends Abstract_Block_Renderer {
 		// Extract table content from figure wrapper if present.
 		$table_content = $this->extract_table_from_figure( $block_content );
 
+		// Validate that we have actual table content.
+		if ( ! $this->is_valid_table_content( $table_content ) ) {
+			return '';
+		}
+
 		// Do not render empty blocks or tables with no content.
 		$stripped_content = trim( wp_strip_all_tags( $table_content ) );
 		if ( empty( $stripped_content ) ) {
@@ -79,8 +84,10 @@ class Table extends Abstract_Block_Renderer {
 
 		// Add fallback text color when no custom text color or preset text color is set.
 		if ( empty( $block_styles['declarations']['color'] ) ) {
-			$email_styles               = $rendering_context->get_theme_styles();
-			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+			$email_styles = $rendering_context->get_theme_styles();
+			$color        = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
+			// Sanitize color value to ensure it's a valid hex color.
+			$additional_styles['color'] = $this->sanitize_color( $color );
 		}
 
 		$additional_styles['text-align'] = 'left';
@@ -122,7 +129,8 @@ class Table extends Abstract_Block_Renderer {
 
 		// Get theme styles once to avoid repeated calls.
 		$email_styles = $rendering_context->get_theme_styles();
-		$border_color = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
+		$color        = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
+		$border_color = $this->sanitize_color( $color );
 
 		// Process table elements.
 		while ( $html->next_tag() ) {
@@ -181,5 +189,50 @@ class Table extends Abstract_Block_Renderer {
 
 		// If no figure wrapper found, return original content.
 		return $block_content;
+	}
+
+	/**
+	 * Validate if the content is a valid table HTML.
+	 *
+	 * @param string $content The content to validate.
+	 * @return bool True if it's a valid table, false otherwise.
+	 */
+	private function is_valid_table_content( string $content ): bool {
+		// Check if the content is a table element.
+		if ( ! preg_match( '/<table[^>]*>.*?<\/table>/s', $content ) ) {
+			return false;
+		}
+
+		// Validate that content only contains allowed table-related tags.
+		$allowed_tags = array( 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col' );
+		$html         = new \WP_HTML_Tag_Processor( $content );
+
+		while ( $html->next_tag() ) {
+			$tag_name = strtolower( $html->get_tag() );
+			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize color value to ensure it's a valid hex color.
+	 *
+	 * @param string $color The color value to sanitize.
+	 * @return string Sanitized color value.
+	 */
+	private function sanitize_color( string $color ): string {
+		// Remove any whitespace and convert to lowercase.
+		$color = strtolower( trim( $color ) );
+
+		// Check if it's a valid hex color (3 or 6 characters).
+		if ( preg_match( '/^#([a-f0-9]{3}){1,2}$/i', $color ) ) {
+			return $color;
+		}
+
+		// If not a valid hex color, return a safe default.
+		return '#000000';
 	}
 }
