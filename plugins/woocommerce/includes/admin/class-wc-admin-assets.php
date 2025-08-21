@@ -40,7 +40,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Add warnings for deprecated script handles.
 		 */
 		public function add_legacy_script_warnings() {
-			global $wp_scripts;
 			$scripts = $this->get_scripts();
 			foreach ( $scripts as $script ) {
 				if ( ! isset( $script['legacy_handle'] ) ) {
@@ -64,8 +63,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Enqueue styles.
 		 */
 		public function admin_styles() {
-			global $wp_scripts;
-
 			$version   = Constants::get_constant( 'WC_VERSION' );
 			$screen    = get_current_screen();
 			$screen_id = $screen ? $screen->id : '';
@@ -301,8 +298,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'version'      => $version,
 				),
 				array(
-					'legacy_handle' => 'wc-js-cookie',
-					'handle'        => 'js-cookie',
+					'legacy_handle' => 'js-cookie',
+					'handle'        => 'wc-js-cookie',
 					'path'          => WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js',
 					'dependencies'  => array(),
 					'version'       => '2.1.4',
