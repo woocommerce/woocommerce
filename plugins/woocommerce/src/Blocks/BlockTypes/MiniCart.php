@@ -541,7 +541,7 @@ class MiniCart extends AbstractBlock {
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
-					'shouldShowTaxLabel' => ! $cart->is_empty(),
+					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
