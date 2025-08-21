@@ -223,6 +223,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 		} );
+
+		await test.step( 'child simple product values can be decreased down to 0', async () => {
+			const decreaseQuantityButton = page.getByLabel(
+				'Decrease quantity of Beanie'
+			);
+			await decreaseQuantityButton.click();
+			await decreaseQuantityButton.click();
+
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '0' );
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -365,6 +377,25 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await quantityInput.fill( '8' );
 
 			await expect( increaseQuantityButton ).toBeDisabled();
+
+			// Values can be decreased down to 0.
+			const decreaseQuantityButton = page.getByLabel(
+				'Decrease quantity of T-Shirt'
+			);
+
+			await decreaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '6' );
+
+			await quantityInput.fill( '5' );
+
+			await decreaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			await decreaseQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '0' );
 		} );
 	} );
 
