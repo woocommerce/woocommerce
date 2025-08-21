@@ -170,7 +170,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				),
 				array(
 					'legacy_handle' => 'jquery-tiptip',
-					'handle'        => 'wc-jquery-blockui',
+					'handle'        => 'wc-jquery-tiptip',
 					'path'          => WC()->plugin_url() . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js',
 					'dependencies'  => array( 'jquery', 'dompurify' ),
 					'version'       => $version,
@@ -309,11 +309,18 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'in_footer'     => true,
 				),
 				array(
-					'legacy_handle' => 'wc-dompurify',
-					'handle'        => 'dompurify',
+					'legacy_handle' => 'dompurify',
+					'handle'        => 'wc-dompurify',
 					'path'          => WC()->plugin_url() . '/assets/js/dompurify/purify' . $suffix . '.js',
 					'dependencies'  => array(),
 					'version'       => $version,
+				),
+				array(
+					'legacy_handle' => 'accounting',
+					'handle'        => 'wc-accounting',
+					'path'          => WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js',
+					'dependencies'  => array( 'jquery' ),
+					'version'       => '0.4.2',
 				),
 			);
 		}
@@ -334,21 +341,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					wp_register_script( $script['legacy_handle'], $script['path'], $script['dependencies'] ?? array(), $script['version'] ?? null, $script['in_footer'] ?? false );
 				}
 			}
-		}
-
-
-		/**
-		 * Enqueue scripts.
-		 */
-		public function admin_scripts() {
-			global $wp_query, $post, $theorder;
-
-			$screen       = get_current_screen();
-			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = 'woocommerce';
-			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
-			$version      = Constants::get_constant( 'WC_VERSION' );
-
 
 			wp_localize_script(
 				'wc-enhanced-select',
@@ -375,14 +367,27 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				)
 			);
 
-			wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2' );
 			wp_localize_script(
-				'accounting',
+				'wc-accounting',
 				'accounting_params',
 				array(
 					'mon_decimal_point' => wc_get_price_decimal_separator(),
 				)
 			);
+		}
+
+
+		/**
+		 * Enqueue scripts.
+		 */
+		public function admin_scripts() {
+			global $wp_query, $post, $theorder;
+
+			$screen       = get_current_screen();
+			$screen_id    = $screen ? $screen->id : '';
+			$wc_screen_id = 'woocommerce';
+			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version      = Constants::get_constant( 'WC_VERSION' );
 
 			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui' ), $version );
 			wp_localize_script(
@@ -521,7 +526,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), $version );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
