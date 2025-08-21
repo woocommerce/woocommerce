@@ -54,9 +54,9 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woo/email-content {"lock":{"move":false,"remove":true}} -->
+<!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
 <div class="wp-block-woo-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
-<!-- /wp:woo/email-content -->
+<!-- /wp:woocommerce/email-content -->
 
 <!-- wp:paragraph -->
 <p> <?php echo esc_html__( 'Thanks for reading.', 'woocommerce' ); ?> </p>

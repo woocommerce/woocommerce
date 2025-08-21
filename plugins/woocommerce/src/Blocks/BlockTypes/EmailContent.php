@@ -10,13 +10,6 @@ use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
  */
 class EmailContent extends AbstractBlock {
 	/**
-	 * Block namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'woo';
-
-	/**
 	 * Block name.
 	 *
 	 * @var string
