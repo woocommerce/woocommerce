@@ -60,7 +60,7 @@ class Table extends Abstract_Block_Renderer {
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
 			// Remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = (string) str_replace( 'has-background', '', $block_classes );
+			$block_classes = str_replace( 'has-background', '', $block_classes );
 			// Remove border related classes because we handle border on wrapping table cell.
 			$block_classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
 			$block_classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
@@ -70,7 +70,7 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		// Also remove classes from the wrapper classes.
-		$classes = (string) str_replace( 'has-background', '', $classes );
+		$classes = str_replace( 'has-background', '', $classes );
 		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
 		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
 		$classes = (string) preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
@@ -158,7 +158,7 @@ class Table extends Abstract_Block_Renderer {
 
 				// Remove problematic classes from the table.
 				$class_attr = $html->get_attribute( 'class' ) ?? '';
-				$class_attr = (string) str_replace( 'has-background', '', $class_attr );
+				$class_attr = str_replace( 'has-background', '', $class_attr );
 				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
 				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
 				$class_attr = (string) preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
@@ -239,7 +239,7 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' );
-		if ( ! str_contains( $figure_class, 'wp-block-table' ) ) {
+		if ( false === strpos( $figure_class, 'wp-block-table' ) ) {
 			// If figure doesn't have wp-block-table class, return original content.
 			return $block_content;
 		}
@@ -251,9 +251,6 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		$table_html = $dom_helper->get_outer_html( $table_tag );
-		if ( null === $table_html ) {
-			return $block_content;
-		}
 
 		// Extract figcaption if present and convert to caption.
 		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
@@ -283,12 +280,12 @@ class Table extends Abstract_Block_Renderer {
 	 */
 	private function is_striped_table( string $block_content, array $parsed_block ): bool {
 		// Check for is-style-stripes in block attributes.
-		if ( isset( $parsed_block['attrs']['className'] ) && str_contains( $parsed_block['attrs']['className'], 'is-style-stripes' ) ) {
+		if ( isset( $parsed_block['attrs']['className'] ) && false !== strpos( $parsed_block['attrs']['className'], 'is-style-stripes' ) ) {
 			return true;
 		}
 
 		// Check for is-style-stripes in figure classes.
-		if ( str_contains( $block_content, 'is-style-stripes' ) ) {
+		if ( false !== strpos( $block_content, 'is-style-stripes' ) ) {
 			return true;
 		}
 
