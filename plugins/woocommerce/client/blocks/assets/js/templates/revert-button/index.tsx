@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { PluginDocumentSettingPanel } from '@wordpress/editor';
+import {
+	PluginDocumentSettingPanel,
+	store as editorStore,
+} from '@wordpress/editor';
 import { subscribe, select, useSelect, useDispatch } from '@wordpress/data';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
@@ -10,6 +13,7 @@ import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useEntityRecord } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { isSiteEditorPage } from '@woocommerce/utils';
+import { isString } from '@woocommerce/types';
 
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -137,23 +141,25 @@ const templateSlugs = [
 
 const REVERT_BUTTON_PLUGIN_NAME = 'woocommerce-blocks-revert-button-templates';
 
-let currentTemplateId: string | undefined;
+let currentTemplateSlug: string | undefined;
 subscribe( () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
+	const previousTemplateSlug = currentTemplateSlug;
 
-	if ( ! isSiteEditorPage( store ) ) {
+	if ( ! isSiteEditorPage() ) {
 		return;
 	}
 
-	currentTemplateId = store?.getEditedPostId();
+	// @ts-expect-error getEditedPostSlug is not typed
+	currentTemplateSlug = select( editorStore ).getEditedPostSlug();
 
-	if ( previousTemplateId === currentTemplateId ) {
+	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;
 	}
 
 	const isWooTemplate = templateSlugs.some( ( slug ) =>
-		currentTemplateId?.includes( slug )
+		isString( currentTemplateSlug )
+			? currentTemplateSlug.includes( slug )
+			: false
 	);
 
 	const hasSupportForPluginDocumentSettingPanel =
