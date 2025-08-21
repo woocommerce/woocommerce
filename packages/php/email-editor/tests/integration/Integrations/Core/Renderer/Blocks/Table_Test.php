@@ -186,6 +186,146 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it preserves figcaption content as table caption
+	 */
+	public function testItPreservesFigcaptionAsCaption(): void {
+		$table_with_caption = '
+		<figure class="wp-block-table">
+			<table>
+				<thead>
+					<tr>
+						<th>Header 1</th>
+						<th>Header 2</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Cell 1</td>
+						<td>Cell 2</td>
+					</tr>
+				</tbody>
+			</table>
+			<figcaption>Table caption text</figcaption>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table_with_caption;
+
+				$rendered = $this->table_renderer->render( $table_with_caption, $parsed_table, $this->rendering_context );
+
+		// Check that the caption content is preserved with proper styling.
+		$this->assertStringContainsString( '<caption style="caption-side: bottom; text-align: center; margin-top: 8px;">Table caption text</caption>', $rendered );
+		// Check that the caption appears after the table content (before closing </table>).
+		$this->assertStringContainsString( 'Table caption text</caption></table>', $rendered );
+	}
+
+	/**
+	 * Test it renders tables with rich content (links, paragraphs, etc.)
+	 */
+	public function testItRendersTablesWithRichContent(): void {
+		$table_with_rich_content = '
+		<figure class="wp-block-table">
+			<table>
+				<thead>
+					<tr>
+						<th>Header with <strong>bold</strong></th>
+						<th>Header with <em>italic</em></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Cell with <a href="https://example.com">link</a></td>
+						<td>Cell with <span style="color: red;">styled text</span></td>
+					</tr>
+					<tr>
+						<td>Cell with <p>paragraph</p></td>
+						<td>Cell with <code>code</code></td>
+					</tr>
+				</tbody>
+			</table>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table_with_rich_content;
+
+		$rendered = $this->table_renderer->render( $table_with_rich_content, $parsed_table, $this->rendering_context );
+
+		// Check that rich content is preserved.
+		$this->assertStringContainsString( '<strong>bold</strong>', $rendered );
+		$this->assertStringContainsString( '<em>italic</em>', $rendered );
+		$this->assertStringContainsString( '<a href="https://example.com">link</a>', $rendered );
+		$this->assertStringContainsString( '<span style="color: red;">styled text</span>', $rendered );
+		$this->assertStringContainsString( '<p>paragraph</p>', $rendered );
+		$this->assertStringContainsString( '<code>code</code>', $rendered );
+	}
+
+	/**
+	 * Test it renders striped tables with thicker borders
+	 */
+	public function testItRendersStripedTablesWithThickerBorders(): void {
+		$striped_table_content = '
+		<!-- wp:table {"className":"is-style-stripes","backgroundColor":"light-green-cyan"} -->
+		<figure class="wp-block-table is-style-stripes">
+			<table class="has-light-green-cyan-background-color has-background has-fixed-layout">
+				<thead>
+					<tr>
+						<th>Header</th>
+						<th>Number</th>
+						<th>Col 3</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Test</td>
+						<td>One</td>
+						<td>Photo</td>
+					</tr>
+					<tr>
+						<td>Test</td>
+						<td>Two</td>
+						<td>Test</td>
+					</tr>
+					<tr>
+						<td>Test</td>
+						<td>Three</td>
+						<td>This</td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td>Footer</td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tfoot>
+			</table>
+			<figcaption class="wp-element-caption">Table caption.</figcaption>
+		</figure>
+		<!-- /wp:table -->
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $striped_table_content;
+		$parsed_table['attrs']     = array(
+			'className'       => 'is-style-stripes',
+			'backgroundColor' => 'light-green-cyan',
+		);
+
+		$rendered = $this->table_renderer->render( $striped_table_content, $parsed_table, $this->rendering_context );
+
+		// Check that the table renders with thicker borders for striped style (header separation).
+		$this->assertStringContainsString( 'border-bottom: 3px solid', $rendered );
+		// Check that footer has thicker top border.
+		$this->assertStringContainsString( 'border-top: 3px solid', $rendered );
+		// Check that striped rows have background color.
+		$this->assertStringContainsString( 'background-color: #f8f9fa', $rendered );
+		// Check that caption is preserved.
+		$this->assertStringContainsString( 'Table caption.', $rendered );
+	}
+
+	/**
 	 * Test it renders text alignment
 	 */
 	public function testItRendersTextAlignment(): void {

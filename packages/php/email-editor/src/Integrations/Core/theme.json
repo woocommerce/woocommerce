@@ -61,7 +61,7 @@
 					"width": "1px",
 					"color": "currentColor"
 				},
-				"css": "table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid currentColor; padding: 8px; text-align: left; } th { background-color: #f9f9f9; font-weight: bold; }",
+				"css": "& table { border-collapse: collapse; width: 100%; } & th, & td { border: 1px solid currentColor; padding: 8px; text-align: left; } & thead th { background-color: #f9f9f9; font-weight: bold; }",
 				"variations": {}
 			}
 		}

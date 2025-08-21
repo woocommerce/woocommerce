@@ -3,4 +3,4 @@ significance: minor
 type: add
 ---
 
-Add support for core/table block.
+Add support for the core/table block.
