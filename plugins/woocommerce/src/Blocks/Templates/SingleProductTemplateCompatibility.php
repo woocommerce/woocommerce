@@ -262,9 +262,8 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @return string
 	 */
 	public static function add_compatibility_layer( $template_content ) {
-		// Check if we have already run the compatibility layer. In that case,
-		// return early.
-		if ( str_contains( $template_content, self::IS_FIRST_BLOCK ) ) {
+		// Return early if we've already applied the compatibility layer.
+		if ( false !== strpos( $template_content, self::IS_FIRST_BLOCK ) ) {
 			return $template_content;
 		}
 
