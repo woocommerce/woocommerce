@@ -57,7 +57,6 @@ class Table extends Abstract_Block_Renderer {
 		$classes = 'email-table-block';
 
 		if ( $html->next_tag() ) {
-			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
 			// Remove has-background to prevent double padding applied for wrapper and inner element.
@@ -66,7 +65,6 @@ class Table extends Abstract_Block_Renderer {
 			$block_classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
 			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
 			$block_classes = preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
-			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$html->set_attribute( 'class', trim( $block_classes ) );
 			$table_content = $html->get_updated_html();
 		}
@@ -240,7 +238,7 @@ class Table extends Abstract_Block_Renderer {
 			return $block_content;
 		}
 
-		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' ) ?? '';
+		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' );
 		if ( ! str_contains( $figure_class, 'wp-block-table' ) ) {
 			// If figure doesn't have wp-block-table class, return original content.
 			return $block_content;
@@ -253,12 +251,15 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		$table_html = $dom_helper->get_outer_html( $table_tag );
+		if ( null === $table_html ) {
+			return $block_content;
+		}
 
 		// Extract figcaption if present and convert to caption.
 		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
 		if ( $figcaption_tag ) {
 			$caption_content = $dom_helper->get_element_inner_html( $figcaption_tag );
-			if ( '' !== $caption_content ) {
+			if ( null !== $caption_content && '' !== $caption_content ) {
 				// Append <caption> as the last child of <table> using regex replacement.
 				// Add CSS to ensure caption appears below the table.
 				$table_html = preg_replace(
