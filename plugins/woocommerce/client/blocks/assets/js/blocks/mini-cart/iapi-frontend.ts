@@ -674,17 +674,20 @@ const { state: cartItemState } = store(
 
 		callbacks: {
 			itemShortDescription() {
-				const el = getElement();
+				const { ref } = getElement();
 
-				if ( el.ref ) {
-					const innerEl = el.ref.querySelector(
+				if ( ref ) {
+					const innerEl = ref.querySelector(
 						'.wc-block-components-product-metadata__description'
 					);
+					const { short_description, description } =
+						cartItemState.cartItem;
 
-					// A workaround for the lack of dangerous set HTML directive in interactivity API
-					if ( innerEl ) {
+					// A workaround for the lack of dangerous set HTML directive
+					// in interactivity API.
+					if ( innerEl && ( short_description || description ) ) {
 						innerEl.innerHTML = trimWords(
-							cartItemState.cartItem.short_description || ''
+							short_description || description
 						);
 					}
 				}
