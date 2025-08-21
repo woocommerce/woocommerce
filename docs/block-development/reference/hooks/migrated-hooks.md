@@ -1,14 +1,12 @@
 ---
-post_title: Legacy hooks
-sidebar_label: Legacy hooks
-
+sidebar_label:  Migrated legacy hooks
 ---
 
-# Legacy hooks
+# Migrated legacy hooks
 
-Below are the hooks that exist in WooCommerce core and that were brough over to WooCommerce Blocks.
+Below are the hooks that exist in WooCommerce core and that were brought over to WooCommerce Blocks.
 
-Please note that the actions and filters here run on the server side. The client-side blocks won't necessarily change based on a callback added to a server side hook. [Please see our documentation relating to APIs for manipulating the blocks on the client-side](/docs/category/extensible-blocks/).
+Please note that the actions and filters here run on the server side. The client-side blocks won't necessarily change based on a callback added to a server side hook. [Please see our documentation relating to APIs for manipulating the blocks on the client-side](./README.md).
 
 ## Legacy Filters
 
@@ -18,6 +16,7 @@ Please note that the actions and filters here run on the server side. The client
 - [woocommerce_add_cart_item_data](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_add_cart_item_data)
 - [woocommerce_add_to_cart_quantity](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_add_to_cart_quantity)
 - [woocommerce_add_to_cart_sold_individually_quantity](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_add_to_cart_sold_individually_quantity)
+- [woocommerce_add_to_cart_validation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_add_to_cart_validation)
 - [woocommerce_adjust_non_base_location_prices](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_adjust_non_base_location_prices)
 - [woocommerce_apply_base_tax_for_local_pickup](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_apply_base_tax_for_local_pickup)
 - [woocommerce_apply_individual_use_coupon](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_apply_individual_use_coupon)
