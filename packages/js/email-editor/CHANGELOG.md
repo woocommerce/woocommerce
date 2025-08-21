@@ -62,7 +62,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update email editor email preview, switch to template modal and style preview componets [#58078]
 -   Minor - Update telemetry tracking to restore events removed by refactoring components [#58294]
 -   Minor - Added email status toggle in the email editor sidebar. Added the ability to enable/disable transactional emails directly from the email editor [#57953]
--    - Refactor email editor to work on top of wordpress/editor Editor component [#57775]
--    - Refactor the package and its build to be prepared for publishing [#58874]
+-   Refactor email editor to work on top of wordpress/editor Editor component [#57775]
+-   Refactor the package and its build to be prepared for publishing [#58874]
 
 [See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/email-editor/CHANGELOG.md).
