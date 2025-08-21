@@ -61,7 +61,7 @@ const updateiFrameSource = (
 
 const DEFAULT_EMAIL_TYPE = 'WC_Email_Customer_Processing_Order';
 
-export function WooContentPlaceholderEditContent() {
+export default function Edit() {
 	const { postSlug } = useSelect(
 		( select ) => ( {
 			postSlug: select( editorStore ).getCurrentPost()?.slug,
