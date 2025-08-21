@@ -626,8 +626,8 @@ class MiniCart extends AbstractBlock {
 
 	/**
 	 * Echoes the Interactivity API Mini Cart overlay markup.
-	 * 
-	 * @return string The processed template contents.
+	 *
+	 * @return void
 	 */
 	public function render_experimental_iapi_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
