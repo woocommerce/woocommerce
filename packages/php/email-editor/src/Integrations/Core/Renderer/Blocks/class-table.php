@@ -60,20 +60,20 @@ class Table extends Abstract_Block_Renderer {
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
 			// Remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = str_replace( 'has-background', '', $block_classes );
+			$block_classes = (string) str_replace( 'has-background', '', $block_classes );
 			// Remove border related classes because we handle border on wrapping table cell.
-			$block_classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
-			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
-			$block_classes = preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
+			$block_classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
+			$block_classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
+			$block_classes = (string) preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
 			$html->set_attribute( 'class', trim( $block_classes ) );
 			$table_content = $html->get_updated_html();
 		}
 
 		// Also remove classes from the wrapper classes.
-		$classes = str_replace( 'has-background', '', $classes );
-		$classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
-		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
-		$classes = preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
+		$classes = (string) str_replace( 'has-background', '', $classes );
+		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
+		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
+		$classes = (string) preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
 		$classes = trim( $classes );
 
 		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
@@ -158,10 +158,10 @@ class Table extends Abstract_Block_Renderer {
 
 				// Remove problematic classes from the table.
 				$class_attr = $html->get_attribute( 'class' ) ?? '';
-				$class_attr = str_replace( 'has-background', '', $class_attr );
-				$class_attr = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
-				$class_attr = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
-				$class_attr = preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
+				$class_attr = (string) str_replace( 'has-background', '', $class_attr );
+				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
+				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
+				$class_attr = (string) preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
 				$html->set_attribute( 'class', trim( $class_attr ) );
 			} elseif ( 'THEAD' === $tag_name ) {
 				$current_section = 'thead';
@@ -259,10 +259,10 @@ class Table extends Abstract_Block_Renderer {
 		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
 		if ( $figcaption_tag ) {
 			$caption_content = $dom_helper->get_element_inner_html( $figcaption_tag );
-			if ( null !== $caption_content && '' !== $caption_content ) {
+			if ( '' !== $caption_content ) {
 				// Append <caption> as the last child of <table> using regex replacement.
 				// Add CSS to ensure caption appears below the table.
-				$table_html = preg_replace(
+				$table_html = (string) preg_replace(
 					'/<\/table>/',
 					'<caption style="caption-side: bottom; text-align: center; margin-top: 8px;">' . $caption_content . '</caption></table>',
 					$table_html,
