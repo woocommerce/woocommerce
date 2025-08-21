@@ -9,9 +9,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a table block.
@@ -29,92 +28,134 @@ class Table extends Abstract_Block_Renderer {
 		// Extract table content from figure wrapper if present.
 		$table_content = $this->extract_table_from_figure( $block_content );
 
-		// Do not render empty blocks.
-		if ( empty( trim( wp_strip_all_tags( $table_content ) ) ) ) {
+		// Do not render empty blocks or tables with no content.
+		$stripped_content = trim( wp_strip_all_tags( $table_content ) );
+		if ( empty( $stripped_content ) ) {
 			return '';
 		}
 
-		return $this->get_block_wrapper( $table_content, $parsed_block, $rendering_context );
-	}
+		// Check for empty table structures - tables with no th or td elements.
+		if ( ! preg_match( '/<(th|td)/i', $table_content ) ) {
+			return '';
+		}
 
-	/**
-	 * Returns the block wrapper.
-	 *
-	 * @param string            $table_content    Table content.
-	 * @param array             $parsed_block     Parsed block.
-	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return string
-	 */
-	private function get_block_wrapper( string $table_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$original_classname = ( new Dom_Document_Helper( $table_content ) )->get_attribute_value_by_tag_name( 'table', 'class' ) ?? '';
-		$block_attributes   = wp_parse_args(
+		$block_attributes = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'style'           => array(),
-				'backgroundColor' => '',
-				'textColor'       => '',
-				'borderColor'     => '',
+				'textAlign' => 'left',
+				'style'     => array(),
 			)
 		);
 
-		// Layout, background, borders need to be on the outer table element.
-		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
-		$table_styles = Styles_Helper::extend_block_styles(
-			$table_styles,
-			array(
-				'border-collapse' => 'separate',
-				'background-size' => $table_styles['declarations']['background-size'] ?? 'cover',
-			)
+		$html    = new \WP_HTML_Tag_Processor( $table_content );
+		$classes = 'email-table-block';
+
+		if ( $html->next_tag() ) {
+			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+			$block_classes = $html->get_attribute( 'class' ) ?? '';
+			$classes      .= ' ' . $block_classes;
+			// Remove has-background to prevent double padding applied for wrapper and inner element.
+			$block_classes = str_replace( 'has-background', '', $block_classes );
+			// Remove border related classes because we handle border on wrapping table cell.
+			$block_classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
+			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
+			$block_classes = preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
+			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+			$html->set_attribute( 'class', trim( $block_classes ) );
+			$table_content = $html->get_updated_html();
+		}
+
+		// Also remove classes from the wrapper classes.
+		$classes = str_replace( 'has-background', '', $classes );
+		$classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
+		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
+		$classes = preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
+		$classes = trim( $classes );
+
+		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
+		$additional_styles = array(
+			'min-width' => '100%', // Prevent Gmail App from shrinking the table on mobile devices.
 		);
 
-		// Padding properties need to be added to the table cell.
-		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
+		// Add fallback text color when no custom text color or preset text color is set.
+		if ( empty( $block_styles['declarations']['color'] ) ) {
+			$email_styles               = $rendering_context->get_theme_styles();
+			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+		}
+
+		$additional_styles['text-align'] = 'left';
+		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // In this case, textAlign needs to be one of 'left', 'center', 'right'.
+			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
+		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
+			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
+		}
+
+		$block_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );
+
+		// Process the table content to ensure email compatibility BEFORE wrapping.
+		$table_content = $this->process_table_content( $table_content, $parsed_block, $rendering_context );
 
 		$table_attrs = array(
-			'class' => 'email-table-block ' . $original_classname,
-			'style' => $table_styles['css'],
+			'style' => 'border-collapse: separate;', // Needed because of border radius.
 			'width' => '100%',
 		);
 
 		$cell_attrs = array(
-			'class' => 'email-table-block-content',
-			'style' => $cell_styles['css'],
-			'width' => '100%',
+			'class' => $classes,
+			'style' => $block_styles['css'],
+			'align' => $additional_styles['text-align'],
 		);
-
-		// Add basic table styling to ensure it renders properly.
-		$table_content = $this->add_table_styling( $table_content, $rendering_context );
 
 		return Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs, $cell_attrs );
 	}
 
 	/**
-	 * Add basic table styling to ensure proper rendering.
+	 * Process table content to ensure email client compatibility.
 	 *
-	 * @param string            $table_content Table content.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function add_table_styling( string $table_content, Rendering_Context $rendering_context ): string {
-		// Get the theme's text color to use for borders.
-		$theme_styles = $rendering_context->get_theme_styles();
-		$border_color = $theme_styles['color']['text'] ?? '#333';
+	private function process_table_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$html = new \WP_HTML_Tag_Processor( $block_content );
 
-		$html = new \WP_HTML_Tag_Processor( $table_content );
+		// Get theme styles once to avoid repeated calls.
+		$email_styles = $rendering_context->get_theme_styles();
+		$border_color = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
 
 		// Process table elements.
 		while ( $html->next_tag() ) {
 			$tag_name = $html->get_tag();
 
 			if ( 'TABLE' === $tag_name ) {
-				// Ensure table has proper email attributes for compatibility.
+				// Ensure table has proper email attributes.
+				$html->set_attribute( 'border', '1' );
+				$html->set_attribute( 'cellpadding', '8' );
+				$html->set_attribute( 'cellspacing', '0' );
 				$html->set_attribute( 'role', 'presentation' );
 				$html->set_attribute( 'width', '100%' );
-				$html->set_attribute( 'style', 'border-collapse: collapse; width: 100%;' );
+
+				// Get existing style and add email-specific styles with borders.
+				$existing_style     = $html->get_attribute( 'style' ) ?? '';
+				$email_table_styles = "border-collapse: collapse; width: 100%; border: 1px solid {$border_color};";
+				$html->set_attribute( 'style', $existing_style . '; ' . $email_table_styles );
+
+				// Remove problematic classes from the table.
+				$class_attr = $html->get_attribute( 'class' ) ?? '';
+				$class_attr = str_replace( 'has-background', '', $class_attr );
+				$class_attr = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
+				$class_attr = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
+				$class_attr = preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
+				$html->set_attribute( 'class', trim( $class_attr ) );
 			} elseif ( 'TD' === $tag_name || 'TH' === $tag_name ) {
-				// Ensure table cells have proper email attributes.
+				// Ensure table cells have proper email attributes with borders and padding.
 				$html->set_attribute( 'valign', 'top' );
-				$html->set_attribute( 'style', "border: 1px solid {$border_color}; padding: 8px; text-align: left;" );
+
+				// Get existing style and add email-specific styles with borders and padding.
+				$existing_style    = $html->get_attribute( 'style' ) ?? '';
+				$email_cell_styles = "vertical-align: top; border: 1px solid {$border_color}; padding: 8px; text-align: left;";
+				$html->set_attribute( 'style', $existing_style . '; ' . $email_cell_styles );
 			}
 		}
 

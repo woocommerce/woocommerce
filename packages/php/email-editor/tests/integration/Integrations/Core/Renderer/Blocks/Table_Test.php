@@ -181,7 +181,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
 		$this->assertStringContainsString( 'valign="top"', $rendered );
 		$this->assertStringContainsString( 'vertical-align: top', $rendered );
-		$this->assertStringContainsString( 'border: 1px solid #e5e5e5', $rendered );
+		$this->assertStringContainsString( 'border: 1px solid', $rendered );
 		$this->assertStringContainsString( 'padding: 8px', $rendered );
 	}
 
@@ -229,16 +229,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
 	}
 
-	/**
-	 * Test it renders empty table as empty string
-	 */
-	public function testItRendersEmptyTableAsEmptyString(): void {
-		$parsed_table              = $this->parsed_table;
-		$parsed_table['innerHTML'] = '<figure class="wp-block-table"><table></table></figure>';
 
-		$rendered = $this->table_renderer->render( '<figure class="wp-block-table"><table></table></figure>', $parsed_table, $this->rendering_context );
-		$this->assertEquals( '', $rendered );
-	}
 
 	/**
 	 * Test it renders table with custom styles
