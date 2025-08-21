@@ -369,6 +369,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			)
 		);
 
+		// Sync again so the variable product reflects the new variation.
+		\WC_Product_Variable::sync( $product_id );
+
 		// Assert that Product Price block has a `data-wp-watch` attribute.
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-price /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 

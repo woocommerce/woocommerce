@@ -85,23 +85,20 @@ class ProductPrice extends AbstractBlock {
 			if ( $is_interactive ) {
 				$variations_data           = $product->get_available_variations();
 				$formatted_variations_data = array();
-				$is_price_html_different   = false;
-				$last_price_html           = '';
+				$has_variation_price_html  = false;
 				foreach ( $variations_data as $variation ) {
-					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) ) {
+					if ( ! isset( $variation['variation_id'] ) || ! isset( $variation['price_html'] ) || empty( $variation['price_html'] ) ) {
 							continue;
 					}
-					if ( $variation['price_html'] !== $last_price_html ) {
-						$is_price_html_different = true;
-					} else {
-						$last_price_html = $variation['price_html'];
-					}
+					// Core behavior: variation['price_html'] is empty iff all variation prices are identical.
+					// Therefore, any non-empty price_html indicates differences that warrant interactivity.
+					$has_variation_price_html                                = true;
 					$formatted_variations_data[ $variation['variation_id'] ] = array(
 						'price_html' => $variation['price_html'],
 					);
 				}
 
-				if ( ! $is_price_html_different ) {
+				if ( ! $has_variation_price_html ) {
 					$is_interactive = false;
 				} else {
 					wp_interactivity_state(
