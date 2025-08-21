@@ -817,32 +817,34 @@ class OrderController {
 	/**
 	 * Update address data from cart and/or customer session data.
 	 *
-	 * @param \WC_Order $order The order object to update.
+	 * @param \WC_Order    $order    The order object to update.
+	 * @param \WC_Customer $customer The customer to copy the address data from.
 	 */
-	protected function update_addresses_from_cart( \WC_Order $order ) {
+	protected function update_addresses_from_cart( \WC_Order $order, $customer = null ) {
+		$customer_to_copy = $customer instanceof \WC_Customer ? $customer : WC()->customer;
 		$order->set_props(
 			array(
-				'billing_first_name'  => wc()->customer->get_billing_first_name(),
-				'billing_last_name'   => wc()->customer->get_billing_last_name(),
-				'billing_company'     => wc()->customer->get_billing_company(),
-				'billing_address_1'   => wc()->customer->get_billing_address_1(),
-				'billing_address_2'   => wc()->customer->get_billing_address_2(),
-				'billing_city'        => wc()->customer->get_billing_city(),
-				'billing_state'       => wc()->customer->get_billing_state(),
-				'billing_postcode'    => wc()->customer->get_billing_postcode(),
-				'billing_country'     => wc()->customer->get_billing_country(),
-				'billing_email'       => wc()->customer->get_billing_email(),
-				'billing_phone'       => wc()->customer->get_billing_phone(),
-				'shipping_first_name' => wc()->customer->get_shipping_first_name(),
-				'shipping_last_name'  => wc()->customer->get_shipping_last_name(),
-				'shipping_company'    => wc()->customer->get_shipping_company(),
-				'shipping_address_1'  => wc()->customer->get_shipping_address_1(),
-				'shipping_address_2'  => wc()->customer->get_shipping_address_2(),
-				'shipping_city'       => wc()->customer->get_shipping_city(),
-				'shipping_state'      => wc()->customer->get_shipping_state(),
-				'shipping_postcode'   => wc()->customer->get_shipping_postcode(),
-				'shipping_country'    => wc()->customer->get_shipping_country(),
-				'shipping_phone'      => wc()->customer->get_shipping_phone(),
+				'billing_first_name'  => $customer_to_copy->get_billing_first_name(),
+				'billing_last_name'   => $customer_to_copy->get_billing_last_name(),
+				'billing_company'     => $customer_to_copy->get_billing_company(),
+				'billing_address_1'   => $customer_to_copy->get_billing_address_1(),
+				'billing_address_2'   => $customer_to_copy->get_billing_address_2(),
+				'billing_city'        => $customer_to_copy->get_billing_city(),
+				'billing_state'       => $customer_to_copy->get_billing_state(),
+				'billing_postcode'    => $customer_to_copy->get_billing_postcode(),
+				'billing_country'     => $customer_to_copy->get_billing_country(),
+				'billing_email'       => $customer_to_copy->get_billing_email(),
+				'billing_phone'       => $customer_to_copy->get_billing_phone(),
+				'shipping_first_name' => $customer_to_copy->get_shipping_first_name(),
+				'shipping_last_name'  => $customer_to_copy->get_shipping_last_name(),
+				'shipping_company'    => $customer_to_copy->get_shipping_company(),
+				'shipping_address_1'  => $customer_to_copy->get_shipping_address_1(),
+				'shipping_address_2'  => $customer_to_copy->get_shipping_address_2(),
+				'shipping_city'       => $customer_to_copy->get_shipping_city(),
+				'shipping_state'      => $customer_to_copy->get_shipping_state(),
+				'shipping_postcode'   => $customer_to_copy->get_shipping_postcode(),
+				'shipping_country'    => $customer_to_copy->get_shipping_country(),
+				'shipping_phone'      => $customer_to_copy->get_shipping_phone(),
 			)
 		);
 		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, wc()->customer );
