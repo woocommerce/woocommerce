@@ -46,10 +46,12 @@ const pickBlockClientIds = ( blocks: Array< BlockInstance > ) =>
 	}, [] );
 
 const RevertClassicTemplateButton = () => {
-	const { blocks, editedPostId } = useSelect( ( sel ) => {
+	const { blocks, currentPostId } = useSelect( ( sel ) => {
 		return {
+			// @ts-expect-error getBlocks is not typed
 			blocks: sel( blockEditorStore ).getBlocks(),
-			editedPostId: sel( 'core/edit-site' ).getEditedPostId(),
+			// @ts-expect-error getCurrentPostId is not typed
+			currentPostId: sel( editorStore ).getCurrentPostId(),
 		};
 	}, [] );
 
@@ -61,7 +63,7 @@ const RevertClassicTemplateButton = () => {
 			rendered?: string;
 			row: string;
 		};
-	} >( 'postType', 'wp_template', editedPostId );
+	} >( 'postType', 'wp_template', currentPostId );
 
 	const isLegacyTemplateBlockAdded = useMemo(
 		() => hasLegacyTemplateBlock( blocks ),
