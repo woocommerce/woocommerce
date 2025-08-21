@@ -684,7 +684,7 @@ const { state: cartItemState } = store(
 					// A workaround for the lack of dangerous set HTML directive in interactivity API
 					if ( innerEl ) {
 						innerEl.innerHTML = trimWords(
-							cartItemState.cartItem.short_description
+							cartItemState.cartItem.short_description || ''
 						);
 					}
 				}
