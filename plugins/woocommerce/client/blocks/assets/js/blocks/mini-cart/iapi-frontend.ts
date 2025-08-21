@@ -680,14 +680,14 @@ const { state: cartItemState } = store(
 					const innerEl = ref.querySelector(
 						'.wc-block-components-product-metadata__description'
 					);
-					const { short_description, description } =
+					const { short_description: shortDescription, description } =
 						cartItemState.cartItem;
 
 					// A workaround for the lack of dangerous set HTML directive
 					// in interactivity API.
-					if ( innerEl && ( short_description || description ) ) {
+					if ( innerEl && ( shortDescription || description ) ) {
 						innerEl.innerHTML = trimWords(
-							short_description || description
+							shortDescription || description
 						);
 					}
 				}
