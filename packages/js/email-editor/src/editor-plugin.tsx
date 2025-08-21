@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useLayoutEffect, useState } from 'react';
-import { select, dispatch } from '@wordpress/data';
+import { useLayoutEffect, useEffect, useState } from 'react';
+import { select, dispatch, useDispatch } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
 /**
@@ -12,6 +12,32 @@ import { SendPreview } from './components/preview';
 import { StylesSidebar } from './components/styles-sidebar';
 import { initBlocks } from './blocks';
 import { createStore, storeName } from './store';
+import { useEmailCss } from './hooks';
+
+const Editor = () => {
+	// Push email styles to editor settings.// Push email styles to editor settings.
+	// Set styles directly to settings overwriting the automatically loaded theme styles
+	const [ styles ] = useEmailCss();
+	const { updateEditorSettings } = useDispatch( editorStore );
+	useEffect( () => {
+		console.log( 'UPDATING Styles', styles );
+		if ( ! styles ) {
+			return;
+		}
+		const editorSettings = select( editorStore ).getEditorSettings();
+		updateEditorSettings( {
+			...editorSettings,
+			styles,
+		} );
+	}, [ styles ] );
+
+	return (
+		<>
+			<SendPreview />
+			<StylesSidebar />
+		</>
+	);
+};
 
 export const EditorPlugin = () => {
 	const [ isInitialized, setIsInitialized ] = useState( false );
@@ -46,10 +72,5 @@ export const EditorPlugin = () => {
 		return null;
 	}
 
-	return (
-		<>
-			<SendPreview />
-			<StylesSidebar />
-		</>
-	);
+	return <Editor />;
 };
