@@ -26,9 +26,9 @@ class Table extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		// Extract table content from figure wrapper if present
+		// Extract table content from figure wrapper if present.
 		$table_content = $this->extract_table_from_figure( $block_content );
-		
+
 		// Do not render empty blocks.
 		if ( empty( trim( wp_strip_all_tags( $table_content ) ) ) ) {
 			return '';
@@ -40,8 +40,8 @@ class Table extends Abstract_Block_Renderer {
 	/**
 	 * Returns the block wrapper.
 	 *
-	 * @param string            $table_content Table content.
-	 * @param array             $parsed_block Parsed block.
+	 * @param string            $table_content    Table content.
+	 * @param array             $parsed_block     Parsed block.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
@@ -82,7 +82,7 @@ class Table extends Abstract_Block_Renderer {
 			'width' => '100%',
 		);
 
-		// Add basic table styling to ensure it renders properly
+		// Add basic table styling to ensure it renders properly.
 		$table_content = $this->add_table_styling( $table_content, $rendering_context );
 
 		return Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs, $cell_attrs );
@@ -91,15 +91,15 @@ class Table extends Abstract_Block_Renderer {
 	/**
 	 * Add basic table styling to ensure proper rendering.
 	 *
-	 * @param string $table_content Table content.
+	 * @param string            $table_content Table content.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
 	private function add_table_styling( string $table_content, Rendering_Context $rendering_context ): string {
-		// Get the theme's text color to use for borders
+		// Get the theme's text color to use for borders.
 		$theme_styles = $rendering_context->get_theme_styles();
 		$border_color = $theme_styles['color']['text'] ?? '#333';
-		
+
 		$html = new \WP_HTML_Tag_Processor( $table_content );
 
 		// Process table elements.
@@ -128,17 +128,17 @@ class Table extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function extract_table_from_figure( string $block_content ): string {
-		// Simple regex approach to extract table from figure
+		// Simple regex approach to extract table from figure.
 		if ( preg_match( '/<figure[^>]*class="[^"]*wp-block-table[^"]*"[^>]*>(.*?)<\/figure>/s', $block_content, $matches ) ) {
 			$figure_content = $matches[1];
-			
-			// Extract just the table element
+
+			// Extract just the table element.
 			if ( preg_match( '/<table[^>]*>.*?<\/table>/s', $figure_content, $table_matches ) ) {
 				return $table_matches[0];
 			}
 		}
-		
-		// If no figure wrapper found, return original content
+
+		// If no figure wrapper found, return original content.
 		return $block_content;
 	}
 }
