@@ -8,6 +8,7 @@ import {
 	InspectorControls,
 	RichText,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 import {
 	RangeControl,
 	ToggleControl,
@@ -18,7 +19,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
