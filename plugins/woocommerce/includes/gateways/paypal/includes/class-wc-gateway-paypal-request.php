@@ -172,6 +172,9 @@ class WC_Gateway_Paypal_Request {
 	 * @return array|null
 	 */
 	public function update_paypal_order( $order, $paypal_order_id ) {
+		error_log( 'update_paypal_order' );
+		error_log( wc_print_r( $this->get_shipping_options( $order ), true ) );
+
 		$request_body = array(
 			'test_mode' => $this->gateway->testmode,
 			'updates'   => array(
@@ -213,6 +216,11 @@ class WC_Gateway_Paypal_Request {
 						),
 					),
 				),
+				array(
+					'op'    => 'add',
+					'path'  => "/purchase_units/@reference_id=='default'/shipping/options",
+					'value' => $this->get_shipping_options( $order ),
+				),
 			),
 		);
 
@@ -223,6 +231,47 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		return $response;
+	}
+
+	private function get_shipping_options( $order ) {
+		wc_load_cart();
+		WC()->cart->get_cart();
+		WC()->cart->calculate_shipping();
+
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen_shipping_method  = $chosen_shipping_methods[0] ?? false;
+
+		$country  = $order->get_billing_country();
+		$state    = $order->get_billing_state();
+		$postcode = $order->get_billing_postcode();
+		$city     = $order->get_billing_city();
+		WC()->customer->set_location( $country, $state, $postcode, $city );
+		WC()->customer->set_shipping_location( $country, $state, $postcode, $city );
+		WC()->customer->set_calculated_shipping( true );
+		WC()->customer->save();
+
+		$packages = WC()->shipping()->get_packages();
+		$options  = array();
+		foreach ( $packages as $package ) {
+			$rates = $package['rates'] ?? array();
+			foreach ( $rates as $rate ) {
+				if ( ! $rate instanceof \WC_Shipping_Rate ) {
+					continue;
+				}
+				$options[] = array(
+					'id'       => $rate->get_id(),
+					'type'     => 'SHIPPING',
+					'amount'   => array(
+						'currency_code' => $order->get_currency(),
+						'value'         => $rate->get_cost(),
+					),
+					'label'    => $rate->get_label(),
+					'selected' => $rate->get_id() === $chosen_shipping_method,
+				);
+			}
+		}
+
+		return $options;
 	}
 
 	/**

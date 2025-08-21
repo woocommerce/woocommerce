@@ -91,6 +91,26 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 				),
 			),
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/update-shipping-options',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'update_shipping_options' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'wc_order_id'     => array(
+						'type'        => 'integer',
+						'description' => __( 'Order ID.', 'woocommerce' ),
+					),
+					'paypal_order_id' => array(
+						'type'        => 'string',
+						'description' => __( 'PayPal order ID.', 'woocommerce' ),
+					),
+				),
+			),
+		);
 	}
 
 	/**
@@ -149,7 +169,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$gateway        = WC_Gateway_Paypal::get_instance();
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 		$response       = $paypal_request->update_paypal_order( $order, $paypal_order_id );
-		error_log( 'Shipping address updated: ' . wc_print_r( $response, true ) );
+		// error_log( 'Shipping address updated: ' . wc_print_r( $response, true ) );
 
 		return new WP_REST_Response( $response, 200 );
 	}

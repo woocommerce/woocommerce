@@ -6,6 +6,7 @@
 
 	paypal.Buttons({
 		async createOrder() {
+			console.log( 'createOrder' );
 			// Create WooCommerce order via Store API.
 			// This needs to be a client-side request.
 			const wcOrder = await fetch( window.PayPalStandardButtons.endpoints.storeAPICheckout, {
@@ -36,6 +37,7 @@
 			return paypalOrderData.id;
 		},
 		async onShippingAddressChange(data, actions) {
+			console.log( 'onShippingAddressChange' );
 			// Now we have access to wcOrderId from the closure
 			console.log( 'WooCommerce Order ID:', wcOrderId );
 			console.log( 'PayPal shipping address data:', data );
