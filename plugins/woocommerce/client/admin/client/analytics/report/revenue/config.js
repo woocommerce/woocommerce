@@ -51,10 +51,6 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		orderby: 'net_revenue',
 		type: 'currency',
 		isReverseTrend: false,
-		labelTooltipText: __(
-			'Full refunds are not deducted from tax or net sales totals',
-			'woocommerce'
-		),
 	},
 	{
 		key: 'taxes',
@@ -63,10 +59,6 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		orderby: 'taxes',
 		type: 'currency',
 		isReverseTrend: false,
-		labelTooltipText: __(
-			'Full refunds are not deducted from tax or net sales totals',
-			'woocommerce'
-		),
 	},
 	{
 		key: 'shipping',
