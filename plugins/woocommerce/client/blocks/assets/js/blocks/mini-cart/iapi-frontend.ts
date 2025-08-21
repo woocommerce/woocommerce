@@ -63,6 +63,7 @@ type MiniCart = {
 		drawerRole: string | null;
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
+		shouldShowTaxLabel: boolean;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -171,6 +172,15 @@ store< MiniCart >(
 					.replace( '%d', state.totalItemsInCart )
 					.replace( '%1$d', state.totalItemsInCart )
 					.replace( '%2$s', state.formattedSubtotal );
+			},
+
+			get shouldShowTaxLabel(): boolean {
+				return (
+					parseInt(
+						woocommerceState.cart.totals.total_items_tax,
+						10
+					) > 0
+				);
 			},
 		},
 
