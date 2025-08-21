@@ -33,7 +33,7 @@ function Placeholder( { layoutClassNames } ) {
 function Content( props ) {
 	const { context: { postType, postId } = {}, layoutClassNames } = props;
 
-	const [ , , content ] = useEntityProp(
+	const [ rawContent, , content ] = useEntityProp(
 		'postType',
 		postType,
 		'content',
@@ -50,7 +50,7 @@ function Content( props ) {
 	) : (
 		<div
 			{ ...blockProps }
-			dangerouslySetInnerHTML={ { __html: content?.rendered } }
+			dangerouslySetInnerHTML={ { __html: rawContent } }
 		></div>
 	);
 }
