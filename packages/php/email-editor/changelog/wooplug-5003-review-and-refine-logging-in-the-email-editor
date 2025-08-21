@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use custom log filepath defined in WP_DEBUG_LOG when specified.
