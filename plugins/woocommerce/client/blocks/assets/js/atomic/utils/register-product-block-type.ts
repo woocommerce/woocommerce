@@ -11,6 +11,7 @@ import {
 	BlockConfiguration,
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
+import { store } from '@wordpress/editor';
 import { isNumber, isEmpty } from '@woocommerce/types';
 
 /**
@@ -107,6 +108,7 @@ export class BlockRegistrationManager {
 		const parsedTemplateId = isNumber( templateId )
 			? undefined
 			: templateId;
+
 		return parsedTemplateId?.split( '//' )[ 1 ];
 	}
 
@@ -121,43 +123,23 @@ export class BlockRegistrationManager {
 
 		// Main store subscription to detect which editor we're in
 		const unsubscribe = subscribe( () => {
-			const editSiteStore = select( 'core/edit-site' );
-			const editPostStore = select( 'core/edit-post' );
+			const editorStore = select( store );
 
-			// Return if neither store is available yet
-			if ( ! editSiteStore && ! editPostStore ) {
+			// Return if editor store is not available yet
+			if ( ! editorStore ) {
 				return;
 			}
 
-			// Site Editor Context
-			if ( editSiteStore ) {
-				const postId = editSiteStore.getEditedPostId();
+			// @ts-expect-error getCurrentPostType is not typed
+			const postType = editorStore.getCurrentPostType();
 
-				// Unsubscribe from the main subscription since we've detected our context
-				unsubscribe();
-
-				// Set initial template ID
-				this.currentTemplateId =
-					typeof postId === 'string'
-						? this.parseTemplateId( postId )
-						: undefined;
-
-				// Set up the template change listener
-				subscribe( () => {
-					const previousTemplateId = this.currentTemplateId;
-					this.currentTemplateId = this.parseTemplateId(
-						editSiteStore.getEditedPostId()
-					);
-
-					if ( previousTemplateId !== this.currentTemplateId ) {
-						this.handleTemplateChange( previousTemplateId );
-					}
-				}, 'core/edit-site' );
-
-				this.initialized = true;
+			// Return if post type is not available yet
+			if ( ! postType ) {
+				return;
 			}
-			// Post Editor Context
-			else if ( editPostStore ) {
+
+			// Site Editor Context (template or template part)
+			if ( postType === 'post' || postType === 'page' ) {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
 
@@ -170,6 +152,36 @@ export class BlockRegistrationManager {
 						}
 					}
 				} );
+
+				this.initialized = true;
+			} else {
+				// @ts-expect-error getCurrentPostId is not typed
+				const postId = editorStore.getCurrentPostId();
+
+				// Unsubscribe from the main subscription since we've detected our context
+				unsubscribe();
+
+				// Set initial template ID
+				this.currentTemplateId =
+					typeof postId === 'string'
+						? this.parseTemplateId( postId )
+						: undefined;
+
+				// Handle the initial template change
+				this.handleTemplateChange( undefined );
+
+				// Set up the template change listener
+				subscribe( () => {
+					const previousTemplateId = this.currentTemplateId;
+					this.currentTemplateId = this.parseTemplateId(
+						// @ts-expect-error getCurrentPostId is not typed
+						editorStore.getCurrentPostId()
+					);
+
+					if ( previousTemplateId !== this.currentTemplateId ) {
+						this.handleTemplateChange( previousTemplateId );
+					}
+				}, editorStore );
 
 				this.initialized = true;
 			}
@@ -270,10 +282,13 @@ export class BlockRegistrationManager {
 				return;
 			}
 
-			const editSiteStore = select( 'core/edit-site' );
+			const editorStore = select( store );
+			// @ts-expect-error getCurrentPostType is not typed
+			const postType = editorStore?.getCurrentPostType();
+			const isPostEditor = postType === 'post' || postType === 'page';
 
 			// Don't register if we're in post editor context and block isn't available there
-			if ( ! editSiteStore && ! isAvailableOnPostEditor ) {
+			if ( isPostEditor && ! isAvailableOnPostEditor ) {
 				return;
 			}
 
@@ -289,7 +304,7 @@ export class BlockRegistrationManager {
 
 				// Only remove ancestor if we're in site editor AND in single-product template
 				const shouldRemoveAncestor =
-					editSiteStore &&
+					! isPostEditor &&
 					this.currentTemplateId?.includes( 'single-product' );
 
 				// @ts-expect-error - blockName can be either string or object
