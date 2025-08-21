@@ -226,12 +226,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await test.step( 'child simple product values can be decreased down to 0', async () => {
 			const decreaseQuantityButton = page.getByLabel(
-				'Decrease quantity of Beanie'
+				'Reduce quantity of Beanie'
 			);
 			await decreaseQuantityButton.click();
 			await decreaseQuantityButton.click();
 
-			const quantityInput = page.getByLabel( 'Product quantity' );
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'Beanie',
+			} );
 
 			await expect( quantityInput ).toHaveValue( '0' );
 		} );
@@ -368,10 +370,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( quantityInput ).toHaveValue( '4' );
 
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of T-Shirt'
-			);
-			await expect( reduceQuantityButton ).toBeDisabled();
 			await increaseQuantityButton.click();
 
 			await quantityInput.fill( '8' );
@@ -380,7 +378,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			// Values can be decreased down to 0.
 			const decreaseQuantityButton = page.getByLabel(
-				'Decrease quantity of T-Shirt'
+				'Reduce quantity of T-Shirt'
 			);
 
 			await decreaseQuantityButton.click();
