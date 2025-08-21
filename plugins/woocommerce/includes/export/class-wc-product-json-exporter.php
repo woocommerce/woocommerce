@@ -595,64 +595,103 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 	 */
 	protected function prepare_attributes_for_export( $product, &$row ) {
 		if ( $this->is_column_exporting( 'attributes' ) ) {
-			$attributes         = $product->get_attributes();
-			$default_attributes = $product->get_default_attributes();
+			$attributes = $this->get_attributes( $product );
+			$row['attributes'] = $attributes;
+		}
+	}
 
-			if ( count( $attributes ) ) {
-				$attributes_data = array();
-				foreach ( $attributes as $attribute_name => $attribute ) {
-					$attribute_data = array();
+	/**
+	 * NOTE: from WC_REST_Products_V1_Controller
+	 * Get the attributes for a product or product variation.
+	 *
+	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @return array
+	 */
+	protected function get_attributes( $product ) {
+		$attributes = array();
 
-					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-						$attribute_data['name'] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
+		if ( $product->is_type( ProductType::VARIATION ) ) {
+			// Variation attributes.
+			foreach ( $product->get_variation_attributes() as $attribute_name => $attribute ) {
+				$name = str_replace( 'attribute_', '', $attribute_name );
 
-						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
-							$values = array();
-
-							foreach ( $terms as $term ) {
-								$values[] = $term->name;
-							}
-
-							$attribute_data['value']    = $values;
-							$attribute_data['taxonomy'] = true;
-						} else {
-							$attribute_data['value']    = $attribute->get_options();
-							$attribute_data['taxonomy'] = false;
-						}
-
-						$attribute_data['visible'] = $attribute->get_visible();
-					} else {
-						$attribute_data['name'] = html_entity_decode( wc_attribute_label( $attribute_name, $product ), ENT_QUOTES );
-
-						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
-							$option_term = get_term_by( 'slug', $attribute, $attribute_name );
-							$attribute_data['value']    = array( $option_term && ! is_wp_error( $option_term ) ? html_entity_decode( $option_term->name, ENT_QUOTES ) : html_entity_decode( $attribute, ENT_QUOTES ) );
-							$attribute_data['taxonomy'] = true;
-						} else {
-							$attribute_data['value']    = array( html_entity_decode( $attribute, ENT_QUOTES ) );
-							$attribute_data['taxonomy'] = false;
-						}
-
-						$attribute_data['visible'] = null;
-					}
-
-					if ( $product->is_type( ProductType::VARIABLE ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
-						$default_value = $default_attributes[ sanitize_title( $attribute_name ) ];
-
-						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
-							$option_term = get_term_by( 'slug', $default_value, $attribute_name );
-							$attribute_data['default'] = $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $default_value;
-						} else {
-							$attribute_data['default'] = $default_value;
-						}
-					}
-
-					$attributes_data[] = $attribute_data;
+				if ( ! $attribute ) {
+					continue;
 				}
-				$row['attributes'] = $attributes_data;
+
+				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
+				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
+					$option_term = get_term_by( 'slug', $attribute, $name );
+					$attributes[] = array(
+						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
+						'name'   => $this->get_attribute_taxonomy_label( $name ),
+						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+					);
+				} else {
+					$attributes[] = array(
+						'id'     => 0,
+						'name'   => $name,
+						'option' => $attribute,
+					);
+				}
+			}
+		} else {
+			foreach ( $product->get_attributes() as $attribute ) {
+				if ( $attribute['is_taxonomy'] ) {
+					$attributes[] = array(
+						'id'        => wc_attribute_taxonomy_id_by_name( $attribute['name'] ),
+						'name'      => $this->get_attribute_taxonomy_label( $attribute['name'] ),
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
+					);
+				} else {
+					$attributes[] = array(
+						'id'        => 0,
+						'name'      => $attribute['name'],
+						'position'  => (int) $attribute['position'],
+						'visible'   => (bool) $attribute['is_visible'],
+						'variation' => (bool) $attribute['is_variation'],
+						'options'   => $this->get_attribute_options( $product->get_id(), $attribute ),
+					);
+				}
 			}
 		}
+
+		return $attributes;
+	}
+
+	/**
+	 * NOTE: from WC_REST_Products_V1_Controller
+	 * Get attribute taxonomy label.
+	 *
+	 * @param  string $name Taxonomy name.
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_label( $name ) {
+		$tax    = get_taxonomy( $name );
+		$labels = get_taxonomy_labels( $tax );
+
+		return $labels->singular_name;
+	}
+
+	/**
+	 * NOTE: from WC_REST_Products_V1_Controller
+	 * Get attribute options.
+	 *
+	 * @param int   $product_id Product ID.
+	 * @param array $attribute  Attribute data.
+	 * @return array
+	 */
+	protected function get_attribute_options( $product_id, $attribute ) {
+		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
+			return wc_get_product_terms( $product_id, $attribute['name'], array( 'fields' => 'names' ) );
+		} elseif ( isset( $attribute['value'] ) ) {
+			return array_map( 'trim', explode( '|', $attribute['value'] ) );
+		}
+
+		return array();
 	}
 
 	/**
