@@ -615,7 +615,7 @@ class MiniCart extends AbstractBlock {
 							<small
 								data-wp-bind--hidden="!state.shouldShowTaxLabel"
 								class="wc-block-mini-cart__tax-label"
-								style="color:'<?php echo esc_attr( $price_color ); ?>'"
+								style="color:<?php echo esc_attr( $price_color ); ?>"
 							>
 								<?php echo esc_html( $this->tax_label ); ?>
 							</small>
