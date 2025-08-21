@@ -630,9 +630,9 @@ const { state: cartItemState } = store(
 
 			*changeQuantity(): Generator< unknown, void > {
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute, ...rest } ) => ( {
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
 						...rest,
-						attribute: raw_attribute,
+						attribute: rawAttribute,
 					} )
 				);
 				yield actions.addCartItem( {
@@ -650,9 +650,9 @@ const { state: cartItemState } = store(
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute, ...rest } ) => ( {
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
 						...rest,
-						attribute: raw_attribute,
+						attribute: rawAttribute,
 					} )
 				);
 				yield actions.addCartItem( {
@@ -666,9 +666,9 @@ const { state: cartItemState } = store(
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute, ...rest } ) => ( {
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
 						...rest,
-						attribute: raw_attribute,
+						attribute: rawAttribute,
 					} )
 				);
 				yield actions.addCartItem( {
