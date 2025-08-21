@@ -213,6 +213,12 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		$customer->save();
 
+		// Force immediate session persistence to database to prevent race conditions
+		// with subsequent requests that might read stale session data.
+		if ( WC()->session && WC()->session instanceof \WC_Session_Handler ) {
+			WC()->session->save_data();
+		}
+
 		$this->cart_controller->calculate_totals();
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
