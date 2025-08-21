@@ -19,7 +19,7 @@ import {
 import { Options } from '../types';
 import { getToday } from '../../get-version/lib';
 
-const appendSortedChangelog = (nextLog: string, readme: string): string => {
+const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 	const changelogEntries = nextLog
 		.replace(
 			/^= \d+\.\d+\.\d+ \d{4}-\d{2}-\d{2} =\n\n\*\*WooCommerce\*\*\n\n/,
@@ -27,32 +27,40 @@ const appendSortedChangelog = (nextLog: string, readme: string): string => {
 		)
 		.trim();
 
-	const newEntries = changelogEntries.split('\n').filter(line => line.trim());
+	const newEntries = changelogEntries
+		.split( '\n' )
+		.filter( ( line ) => line.trim() );
 	let updatedReadme = readme;
 
-	newEntries.forEach(entry => {
-		const match = entry.match(/^\* (Fix|Add|Dev|Enhancement|Update|Tweak|Performance)/i);
-		if (!match) return;
+	newEntries.forEach( ( entry ) => {
+		const match = entry.match(
+			/^\* (Fix|Add|Dev|Enhancement|Update|Tweak|Performance)/i
+		);
+		if ( ! match ) return;
 
-		const entryType = match[1];
+		const entryType = match[ 1 ];
 
 		// Find all existing entries of the same type
-		const typeRegex = new RegExp(`\\* ${entryType}.*`, 'gi');
-		const matches = [...updatedReadme.matchAll(typeRegex)];
+		const typeRegex = new RegExp( `\\* ${ entryType }.*`, 'gi' );
+		const matches = [ ...updatedReadme.matchAll( typeRegex ) ];
 
-		if (matches.length > 0) {
+		if ( matches.length > 0 ) {
 			// Find the last match and insert after it
-			const lastMatch = matches[matches.length - 1];
-			const insertIndex = lastMatch.index + lastMatch[0].length;
-			updatedReadme = updatedReadme.slice(0, insertIndex) + '\n' + entry + updatedReadme.slice(insertIndex);
+			const lastMatch = matches[ matches.length - 1 ];
+			const insertIndex = lastMatch.index + lastMatch[ 0 ].length;
+			updatedReadme =
+				updatedReadme.slice( 0, insertIndex ) +
+				'\n' +
+				entry +
+				updatedReadme.slice( insertIndex );
 		} else {
 			// No existing entries of this type, insert at the end, before the "See changelog" link
 			updatedReadme = updatedReadme.replace(
 				/\n+(\[See changelog for all versions\])/,
-				`\n${entry}\n\n$1`
+				`\n${ entry }\n\n$1`
 			);
 		}
-	});
+	} );
 
 	return updatedReadme;
 };
