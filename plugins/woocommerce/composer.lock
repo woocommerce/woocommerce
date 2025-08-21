@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e039832f270436551634c6da823bf1c1",
+    "content-hash": "29db8a30d754cc58b0209d4c5b435de8",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1486,11 +1486,15 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "1.4.1",
+            "version": "1.4.2",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
+<<<<<<< HEAD
                 "reference": "77bb8b9fbfcc7c1e940c8b1f3bf8eb2de19ab0d6"
+=======
+                "reference": "b38ddd6bd4dfc5f89fbb763177b4f473e6dd361f"
+>>>>>>> 30b7cce0e3 (Update composer lock file)
             },
             "require": {
                 "pelago/emogrifier": "^8.0",
