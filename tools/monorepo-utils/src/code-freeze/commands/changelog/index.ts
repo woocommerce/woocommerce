@@ -82,7 +82,8 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = branch || `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(

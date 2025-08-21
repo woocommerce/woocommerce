@@ -166,13 +166,6 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "Generating changelog for version: $VERSION"
 
-          # Normalize version for use with changelog command.
-          VERSION=$(echo "$VERSION" | grep -oP '\d+\.\d+\.\d+')
-
-          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
-            VERSION=${VERSION%.0}
-          fi
-
           APPEND_CHANGELOG=""
           if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
             APPEND_CHANGELOG="--append-changelog"
