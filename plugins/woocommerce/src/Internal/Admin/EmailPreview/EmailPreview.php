@@ -258,6 +258,10 @@ class EmailPreview {
 			return $content;
 		}
 
+		if ( ! class_exists( 'DOMDocument' ) ) {
+			return $content;
+		}
+
 		// Suppress libxml errors to prevent them from being displayed.
 		$previous_use_internal_errors = libxml_use_internal_errors( true );
 
