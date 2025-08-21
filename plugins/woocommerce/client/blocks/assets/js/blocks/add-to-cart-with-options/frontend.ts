@@ -95,7 +95,7 @@ const getProductData = (
 		return null;
 	}
 
-	const min = typeof productData.min === 'number' ? productData.min : 0;
+	const min = typeof productData.min === 'number' ? productData.min : 1;
 	const max =
 		typeof productData.max === 'number' && productData.max >= 1
 			? productData.max
