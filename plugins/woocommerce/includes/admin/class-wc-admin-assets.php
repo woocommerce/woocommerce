@@ -29,7 +29,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * Hook in tabs.
 		 */
 		public function __construct() {
-			add_action( 'plugins_loaded', array( $this, 'register_scripts' ) );
+			add_action( 'admin_init', array( $this, 'register_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
