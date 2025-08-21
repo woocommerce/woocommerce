@@ -155,6 +155,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
+			'price'              => __( 'Current price', 'woocommerce' ),
 			'sale_price'         => __( 'Sale price', 'woocommerce' ),
 			'regular_price'      => __( 'Regular price', 'woocommerce' ),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
@@ -171,6 +172,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'button_text'        => __( 'Button text', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 			'attributes'         => __( 'Attributes', 'woocommerce' ),
+			'downloadable'       => __( 'Downloadable', 'woocommerce' ),
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
@@ -294,12 +296,26 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 				continue;
 			}
 
-			if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
-				$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
-			} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
-				$value = $this->{"get_column_value_{$column_id}"}( $product );
-			} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
-				$value = $product->{"get_{$column_id}"}( 'edit' );
+			// Handle custom column values with switch case
+			switch ( $column_id ) {
+				case 'price':
+					$value = $product->get_price();
+					break;
+				case 'type':
+					$value = $product->get_type();
+					break;
+				case 'downloadable':
+					$value = $product->is_downloadable();
+					break;
+				default:
+					if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
+						$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
+					} elseif ( is_callable( array( $this, "get_column_value_{$column_id}" ) ) ) {
+						$value = $this->{"get_column_value_{$column_id}"}( $product );
+					} elseif ( is_callable( array( $product, "get_{$column_id}" ) ) ) {
+						$value = $product->{"get_{$column_id}"}( 'edit' );
+					}
+					break;
 			}
 
 			$row[ $column_id ] = $value;
@@ -388,6 +404,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'purchase_note',
 			'product_url',
 			'global_unique_id',
+			'type',
 		);
 
 		// Array fields that should always be arrays
@@ -398,7 +415,6 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'upsell_ids',
 			'cross_sell_ids',
 			'grouped_products',
-			'type',
 		);
 
 		if ( in_array( $column_id, $boolean_fields, true ) ) {
@@ -514,29 +530,6 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 		}
 
 		return $images;
-	}
-
-	/**
-	 * Get type value.
-	 *
-	 * @param WC_Product $product Product being exported.
-	 *
-	 * @since  3.1.0
-	 * @return array
-	 */
-	protected function get_column_value_type( $product ) {
-		$types   = array();
-		$types[] = $product->get_type();
-
-		if ( $product->is_downloadable() ) {
-			$types[] = 'downloadable';
-		}
-
-		if ( $product->is_virtual() ) {
-			$types[] = 'virtual';
-		}
-
-		return $types;
 	}
 
 	/**
