@@ -570,6 +570,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$refund_type = $order->get_meta( '_refund_type' );
 				if ( 'full' === $refund_type ) {
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
+					$data['tax_total']      = -1 * $parent_order->get_total_tax();
+					$data['net_total']      = -1 * self::get_net_total( $parent_order );
 				}
 			}
 			/**
