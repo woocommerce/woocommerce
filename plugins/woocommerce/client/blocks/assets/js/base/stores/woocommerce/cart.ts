@@ -141,7 +141,7 @@ const getInfoNoticesFromCartUpdates = (
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
 			old.key &&
-			! isCartItem( old ) &&
+			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key ) &&
 			! pendingDelete.includes( old.key )
 	);
