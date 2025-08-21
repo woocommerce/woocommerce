@@ -1,6 +1,4 @@
----
-significance: minor
-type: add
----
+Significance: minor
+Type: add
 
-Add support for the core/table block.
+Add email block renderer for the Table core block.

@@ -60,7 +60,7 @@ class Table extends Abstract_Block_Renderer {
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
 			// Remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = str_replace( 'has-background', '', $block_classes );
+			$block_classes = (string) str_replace( 'has-background', '', $block_classes );
 			// Remove border related classes because we handle border on wrapping table cell.
 			$block_classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
 			$block_classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
@@ -70,7 +70,7 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		// Also remove classes from the wrapper classes.
-		$classes = str_replace( 'has-background', '', $classes );
+		$classes = (string) str_replace( 'has-background', '', $classes );
 		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
 		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
 		$classes = (string) preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
@@ -158,7 +158,7 @@ class Table extends Abstract_Block_Renderer {
 
 				// Remove problematic classes from the table.
 				$class_attr = $html->get_attribute( 'class' ) ?? '';
-				$class_attr = str_replace( 'has-background', '', $class_attr );
+				$class_attr = (string) str_replace( 'has-background', '', $class_attr );
 				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
 				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
 				$class_attr = (string) preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
