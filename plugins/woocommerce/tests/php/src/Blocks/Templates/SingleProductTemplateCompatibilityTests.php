@@ -1,8 +1,9 @@
 <?php
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
-use \WP_UnitTestCase;
+use WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 
 /**
@@ -435,10 +436,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		$this->assertEquals( $result_without_whitespace, $expected_single_product_template_without_whitespace, '' );
 	}
 
-		/**
-		 *  @group failing
-		 * Test that the Single Product Template doesn't remove any blocks if those aren't grouped in a a core/group block
-		 */
+	/**
+	 * @group failing
+	 * Test that the Single Product Template doesn't remove any blocks if those aren't grouped in a a core/group block
+	 */
 	public function test_add_compatibility_layer_if_contains_blocks_not_related_to_the_single_product_template_and_not_grouped() {
 		$default_single_product_template = '
 		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
@@ -467,6 +468,43 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+
+		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
+		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
+
+		$this->assertEquals( $result_without_whitespace, $expected_single_product_template_without_whitespace, '' );
+	}
+
+	/**
+	 * Test that the Single Product Template has the compatibility layer when queried using the `get_templates()` function.
+	 */
+	public function test_add_compatibility_layer_only_once() {
+		$templates                       = get_block_templates();
+		$default_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
+		<div class="wp-block-group">
+		   <!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:group {"className":"woocommerce product", "__wooCommerceIsFirstBlock":true,"__wooCommerceIsLastBlock":true} -->
+		<div class="wp-block-group woocommerce product">
+		   <!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
+		   <div class="wp-block-group">
+			  <!-- wp:woocommerce/product-image-gallery /-->
+		   </div>
+		   <!-- /wp:group -->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		// Run `add_compatibility_layer` twice to make sure we only add it once.
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $result );
 
 		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
 		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
