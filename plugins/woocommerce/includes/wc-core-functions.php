@@ -1658,7 +1658,7 @@ function wc_back_header( $title, $label, $url ) {
 	$arrow = is_rtl() ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-left-alt2';
 
 	echo '<h2 class="wc-admin-header">';
-	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons ' . esc_attr( $arrow ) . '"></span></a></small>';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons ' . esc_attr( $arrow ) . '" aria-hidden="true"></span></a></small>';
 	echo esc_html( $title );
 	echo '</h2>';
 }
