@@ -136,15 +136,20 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'catalog_visibility' => __( 'Visibility in catalog', 'woocommerce' ),
 			'short_description'  => __( 'Short description', 'woocommerce' ),
 			'description'        => __( 'Description', 'woocommerce' ),
+			'status'             => __( 'Status', 'woocommerce' ),
 			'date_on_sale_from'  => __( 'Date sale price starts', 'woocommerce' ),
 			'date_on_sale_to'    => __( 'Date sale price ends', 'woocommerce' ),
+			'on_sale'            => __( 'On sale?', 'woocommerce' ),
 			'tax_status'         => __( 'Tax status', 'woocommerce' ),
 			'tax_class'          => __( 'Tax class', 'woocommerce' ),
 			'stock_status'       => __( 'In stock?', 'woocommerce' ),
 			'stock'              => __( 'Stock', 'woocommerce' ),
 			'low_stock_amount'   => __( 'Low stock amount', 'woocommerce' ),
 			'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
+			'backorders_allowed' => __( 'Backorders allowed?', 'woocommerce' ),
 			'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
+			'manage_stock'       => __( 'Manage stock?', 'woocommerce' ),
+			'stock_quantity'     => __( 'Stock quantity', 'woocommerce' ),
 			/* translators: %s: weight */
 			'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
 			/* translators: %s: length */
@@ -307,6 +312,24 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 				case 'downloadable':
 					$value = $product->is_downloadable();
 					break;
+				case 'status':
+					$value = $product->get_status();
+					break;
+				case 'on_sale':
+					$value = $product->is_on_sale();
+					break;
+				case 'manage_stock':
+					$value = $product->managing_stock();
+					break;
+				case 'stock_quantity':
+					$value = $product->get_stock_quantity();
+					break;
+				case 'backorders':
+					$value = $product->get_backorders();
+					break;
+				case 'backorders_allowed':
+					$value = $product->backorders_allowed();
+					break;
 				default:
 					if ( has_filter( "woocommerce_product_export_{$this->export_type}_column_{$column_id}" ) ) {
 						$value = apply_filters( "woocommerce_product_export_{$this->export_type}_column_{$column_id}", '', $product, $column_id );
@@ -360,6 +383,8 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'manage_stock',
 			'sold_individually',
 			'reviews_allowed',
+			'on_sale',
+			'backorders_allowed',
 		);
 
 		// Integer/numeric fields
@@ -372,6 +397,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 			'download_limit',
 			'download_expiry',
 			'shipping_class_id',
+			'stock_quantity',
 		);
 
 		// Float/decimal fields
@@ -386,6 +412,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 		$price_fields = array(
 			'regular_price',
 			'sale_price',
+			'price',
 		);
 
 		// String fields that should always be strings
@@ -575,7 +602,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 				$attributes_data = array();
 				foreach ( $attributes as $attribute_name => $attribute ) {
 					$attribute_data = array();
-					
+
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 						$attribute_data['name'] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
@@ -657,7 +684,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 
 					$meta_export[ $meta->key ] = $meta_value;
 				}
-				
+
 				if ( ! empty( $meta_export ) ) {
 					$row['meta'] = $meta_export;
 				}
@@ -675,7 +702,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 		if ( is_a( $data, 'WC_Datetime' ) ) {
 			return $data->date( 'Y-m-d H:i:s' );
 		}
-		
+
 		// Don't auto-convert numeric strings to numbers - preserve our type casting
 		return $data;
 	}
