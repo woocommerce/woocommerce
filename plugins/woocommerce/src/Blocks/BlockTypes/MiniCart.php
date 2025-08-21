@@ -541,6 +541,7 @@ class MiniCart extends AbstractBlock {
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
+					'cartIsEmpty'        => $cart->is_empty(),
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
@@ -554,17 +555,17 @@ class MiniCart extends AbstractBlock {
 			);
 
 			$context = array(
-				'productCountVisibility'       => $product_count_visibility,
-				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+				'productCountVisibility' => $product_count_visibility,
 			);
 
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour'    => $on_cart_click_behaviour,
-					'checkoutUrl'             => wc_get_checkout_url(),
-					'buttonAriaLabelTemplate' => $button_aria_label_template,
+					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'         => $on_cart_click_behaviour,
+					'checkoutUrl'                  => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate'      => $button_aria_label_template,
 				)
 			);
 
@@ -610,10 +611,15 @@ class MiniCart extends AbstractBlock {
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
-						?>
+						<?php if ( ! empty( $this->tax_label ) ) : ?>
+							<small
+								data-wp-bind--hidden="state.cartIsEmpty"
+								class="wc-block-mini-cart__tax-label"
+								style="color:'<?php echo esc_attr( $price_color ); ?>'"
+							>
+								<?php echo esc_html( $this->tax_label ); ?>
+							</small>
+						<?php endif; ?>
 					<?php endif; ?>
 				</button>
 			</div>
@@ -621,14 +627,14 @@ class MiniCart extends AbstractBlock {
 			return ob_get_clean();
 		}
 
-		return '';
+			return '';
 	}
 
-	/**
-	 * Echoes the Interactivity API Mini Cart overlay markup.
-	 *
-	 * @return void
-	 */
+			/**
+			 * Echoes the Interactivity API Mini Cart overlay markup.
+			 *
+			 * @return void
+			 */
 	public function render_experimental_iapi_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
 		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
@@ -650,30 +656,30 @@ class MiniCart extends AbstractBlock {
 			>
 				<div class="wc-block-components-drawer__content">
 					<div class="wc-block-mini-cart__template-part">
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $template_part_contents;
-						?>
+				<?php
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo $template_part_contents;
+				?>
 					</div>
 				</div>
 			</div>
 		</div>				
-		<?php
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo wp_interactivity_process_directives( ob_get_clean() );
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo wp_interactivity_process_directives( ob_get_clean() );
 	}
 
-	/**
-	 * Process template contents to remove unwanted div wrappers.
-	 *
-	 * The old Mini Cart template had extra divs nested within the block tags
-	 * that are no longer necessary since we don't render the Mini Cart with
-	 * React anymore. To maintain compatibility with user saved templates that
-	 * have these wrapper divs, we must remove them.
-	 *
-	 * @param string $template_contents The template contents to process.
-	 * @return string The processed template contents.
-	 */
+			/**
+			 * Process template contents to remove unwanted div wrappers.
+			 *
+			 * The old Mini Cart template had extra divs nested within the block tags
+			 * that are no longer necessary since we don't render the Mini Cart with
+			 * React anymore. To maintain compatibility with user saved templates that
+			 * have these wrapper divs, we must remove them.
+			 *
+			 * @param string $template_contents The template contents to process.
+			 * @return string The processed template contents.
+			 */
 	protected function process_template_contents( $template_contents ) {
 		$p               = new \WP_HTML_Tag_Processor( $template_contents );
 		$is_old_template = $p->next_tag(
@@ -722,12 +728,12 @@ class MiniCart extends AbstractBlock {
 		return $output;
 	}
 
-	/**
-	 * Get the mini cart template part contents to render inside the drawer.
-	 *
-	 * @param bool $do_blocks Whether to apply do_blocks() to the template part contents.
-	 * @return string The contents of the template part.
-	 */
+			/**
+			 * Get the mini cart template part contents to render inside the drawer.
+			 *
+			 * @param bool $do_blocks Whether to apply do_blocks() to the template part contents.
+			 * @return string The contents of the template part.
+			 */
 	protected function get_template_part_contents( $do_blocks = true ) {
 		$template_name          = 'mini-cart';
 		$template_part_contents = '';
@@ -765,13 +771,13 @@ class MiniCart extends AbstractBlock {
 		return $template_part_contents;
 	}
 
-	/**
-	 * Render the markup for the Mini-Cart block.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return string The HTML markup.
-	 */
+			/**
+			 * Render the markup for the Mini-Cart block.
+			 *
+			 * @param array $attributes Block attributes.
+			 *
+			 * @return string The HTML markup.
+			 */
 	protected function get_markup( $attributes ) {
 		if ( is_admin() || WC()->is_rest_api_request() ) {
 			// In the editor we will display the placeholder, so no need to load
@@ -815,19 +821,19 @@ class MiniCart extends AbstractBlock {
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
-					. wp_kses_post( $template_part_contents ) .
-					'</div>
+			. wp_kses_post( $template_part_contents ) .
+			'</div>
 					</div>
 				</div>
 			</div>
 		</div>';
 	}
 
-	/**
-	 * Return the main instance of WC_Cart class.
-	 *
-	 * @return \WC_Cart CartController class instance.
-	 */
+			/**
+			 * Return the main instance of WC_Cart class.
+			 *
+			 * @return \WC_Cart CartController class instance.
+			 */
 	protected function get_cart_instance() {
 		$cart = WC()->cart;
 
@@ -838,13 +844,13 @@ class MiniCart extends AbstractBlock {
 		return null;
 	}
 
-	/**
-	 * Get array with data for handle the tax label.
-	 * the entire logic of this function is was taken from:
-	 * https://github.com/woocommerce/woocommerce/blob/e730f7463c25b50258e97bf56e31e9d7d3bc7ae7/includes/class-wc-cart.php#L1582
-	 *
-	 * @return array;
-	 */
+			/**
+			 * Get array with data for handle the tax label.
+			 * the entire logic of this function is was taken from:
+			 * https://github.com/woocommerce/woocommerce/blob/e730f7463c25b50258e97bf56e31e9d7d3bc7ae7/includes/class-wc-cart.php#L1582
+			 *
+			 * @return array;
+			 */
 	protected function get_tax_label() {
 		$cart = $this->get_cart_instance();
 
@@ -877,9 +883,9 @@ class MiniCart extends AbstractBlock {
 		);
 	}
 
-	/**
-	 * Prepare translations for inner blocks and dependencies.
-	 */
+			/**
+			 * Prepare translations for inner blocks and dependencies.
+			 */
 	protected function get_inner_blocks_translations() {
 		$wp_scripts   = wp_scripts();
 		$translations = array();
@@ -900,9 +906,9 @@ class MiniCart extends AbstractBlock {
 		return implode( '', $translations );
 	}
 
-	/**
-	 * Register block pattern for Empty Cart Message to make it translatable.
-	 */
+			/**
+			 * Register block pattern for Empty Cart Message to make it translatable.
+			 */
 	public function register_empty_cart_message_block_pattern() {
 		register_block_pattern(
 			'woocommerce/mini-cart-empty-cart-message',
@@ -914,13 +920,13 @@ class MiniCart extends AbstractBlock {
 		);
 	}
 
-	/**
-	 * Returns whether the Mini-Cart should be rendered or not.
-	 *
-	 * @param array $attributes Block attributes.
-	 *
-	 * @return bool
-	 */
+			/**
+			 * Returns whether the Mini-Cart should be rendered or not.
+			 *
+			 * @param array $attributes Block attributes.
+			 *
+			 * @return bool
+			 */
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
 	}
