@@ -138,7 +138,7 @@ export class BlockRegistrationManager {
 				return;
 			}
 
-			// Post Editor Context
+			// Post Editor Context (Posts, Pages)
 			if ( postType === 'post' || postType === 'page' ) {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
@@ -154,7 +154,7 @@ export class BlockRegistrationManager {
 				} );
 
 				this.initialized = true;
-				// Everything else (Templates, etc.)
+				// Site Editor Context (Templates, Patterns, etc.)
 			} else {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
