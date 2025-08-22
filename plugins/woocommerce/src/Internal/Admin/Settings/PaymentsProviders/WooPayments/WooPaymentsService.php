@@ -2361,11 +2361,11 @@ class WooPaymentsService {
 		}
 
 		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
-		// First check if apple_google is explicitly stored, otherwise fallback to combining individual states
+		// First check if apple_google is explicitly stored, otherwise fallback to combining individual states.
 		if ( isset( $step_pms_data['apple_google'] ) ) {
 			$apple_google_enabled = wc_string_to_bool( $step_pms_data['apple_google'] );
 		} else {
-			// Fallback to OR logic for backward compatibility
+			// Fallback to OR logic for backward compatibility.
 			$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
 		}
 
