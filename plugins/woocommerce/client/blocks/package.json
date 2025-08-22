@@ -434,19 +434,19 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
-				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
-				"node_modules/@woocommerce/tracks/build-types",
-				"node_modules/@woocommerce/customer-effort-score/build",
-				"node_modules/@woocommerce/customer-effort-score/build-module",
-				"node_modules/@woocommerce/customer-effort-score/build-style",
-				"node_modules/@woocommerce/customer-effort-score/build-types",
-				"node_modules/@woocommerce/data/build",
-				"node_modules/@woocommerce/data/build-module",
-				"node_modules/@woocommerce/data/build-types",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js"
+				"node_modules\\@woocommerce\\tracks\\build",
+				"node_modules\\@woocommerce\\tracks\\build-module",
+				"node_modules\\@woocommerce\\tracks\\build-types",
+				"node_modules\\@woocommerce\\customer-effort-score\\build",
+				"node_modules\\@woocommerce\\customer-effort-score\\build-module",
+				"node_modules\\@woocommerce\\customer-effort-score\\build-style",
+				"node_modules\\@woocommerce\\customer-effort-score\\build-types",
+				"node_modules\\@woocommerce\\data\\build",
+				"node_modules\\@woocommerce\\data\\build-module",
+				"node_modules\\@woocommerce\\data\\build-types",
+				"node_modules\\@woocommerce\\eslint-plugin\\configs",
+				"node_modules\\@woocommerce\\eslint-plugin\\rules",
+				"node_modules\\@woocommerce\\eslint-plugin\\index.js"
 			]
 		}
 	}

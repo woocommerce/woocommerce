@@ -183,11 +183,17 @@ const ExpressPaymentMethods = () => {
 			</li>
 		);
 
+	// Dynamically select the wrapper element. Use <ul> for lists with more than one item, otherwise use a <div>.
+	const Wrapper =
+		entries.length > 1
+			? 'ul'
+			: 'div';
+
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ul className="wc-block-components-express-payment__event-buttons">
+			<Wrapper className="wc-block-components-express-payment__event-buttons">
 				{ content }
-			</ul>
+			</Wrapper>
 		</PaymentMethodErrorBoundary>
 	);
 };

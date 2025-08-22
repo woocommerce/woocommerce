@@ -131,9 +131,9 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js"
+				"node_modules\\@woocommerce\\eslint-plugin\\configs",
+				"node_modules\\@woocommerce\\eslint-plugin\\rules",
+				"node_modules\\@woocommerce\\eslint-plugin\\index.js"
 			]
 		}
 	}
