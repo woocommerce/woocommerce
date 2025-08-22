@@ -8477,6 +8477,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						// Avoid unused parameter warnings in static analysis.
+						unset( $step_id, $location );
+						
 						if ( isset( $stored_step_data[ $entry ] ) ) {
 							return $stored_step_data[ $entry ];
 						}
@@ -8523,6 +8526,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						// Avoid unused parameter warnings in static analysis.
+						unset( $step_id, $location );
+						
 						if ( isset( $stored_step_data[ $entry ] ) ) {
 							return $stored_step_data[ $entry ];
 						}
@@ -8571,6 +8577,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				Utils::class => array(
 					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						// Avoid unused parameter warnings in static analysis.
+						unset( $step_id, $location );
+						
 						if ( isset( $stored_step_data[ $entry ] ) ) {
 							return $stored_step_data[ $entry ];
 						}
