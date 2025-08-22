@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent skeletons when active express payment in cn the cart block
+ Prevent skeletons when an express payment method is active in the Cart block
