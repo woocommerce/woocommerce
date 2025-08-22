@@ -14,7 +14,7 @@ Point releases are patch releases that address specific issues without adding su
 - **Security patches** for urgent vulnerabilities
 - **Compatibility fixes** for WordPress, theme, or plugin conflicts
 
-## When to do a Point Release
+## Timing a Point Release
 
 When considering a point release, use your best judgement based on the urgency and severity of the issue:
 
