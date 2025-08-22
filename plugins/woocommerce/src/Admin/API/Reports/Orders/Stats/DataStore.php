@@ -567,6 +567,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
 					$data['tax_total']      = -1 * $parent_order->get_total_tax();
 					$data['net_total']      = -1 * self::get_net_total( $parent_order );
+					$data['shipping_total'] = -1 * $parent_order->get_shipping_total();
 				}
 			}
 			/**
