@@ -58,7 +58,7 @@ const updateIFrameBackgroundColor = (
 };
 
 const getEmailType = ( value: string ) => {
-	return window.WooCommerceEmailEditor?.email_types.find(
+	return window.WooCommerceEmailEditor?.email_types?.find(
 		( emailType ) => emailType.value === value
 	)?.id;
 };
