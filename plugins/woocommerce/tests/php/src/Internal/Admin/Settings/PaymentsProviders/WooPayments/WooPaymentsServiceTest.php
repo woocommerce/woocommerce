@@ -8439,4 +8439,229 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'PR' => 'Puerto Rico',
 		);
 	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state respects stored apple_pay and google_pay states.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_respects_stored_apple_google_states() {
+		$location = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'card',
+				'enabled'  => true,
+				'required' => true,
+			),
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+		);
+
+		// Mock the NOX profile data with stored apple_pay and google_pay states
+		$stored_step_data = array(
+			'apple_pay'   => false,
+			'google_pay'  => false,
+			'card'        => true,
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location ) use ( $stored_step_data ) {
+						return $stored_step_data;
+					},
+				),
+			)
+		);
+
+		// Mock the provider to return recommended payment methods
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $location )
+			->willReturn( $recommended_pms );
+
+		// Act
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+
+		// Assert: apple_google should be false since both individual states are false
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertFalse( $result['apple_google'], 'apple_google should be false when both apple_pay and google_pay are disabled' );
+		$this->assertFalse( $result['apple_pay'] ?? true, 'apple_pay should be false from stored state' );
+		$this->assertFalse( $result['google_pay'] ?? true, 'google_pay should be false from stored state' );
+	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state respects explicitly stored apple_google value.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_respects_explicit_apple_google_state() {
+		$location = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+		);
+
+		// Mock the NOX profile data with explicit apple_google state
+		$stored_step_data = array(
+			'apple_pay'    => true,
+			'google_pay'   => true,
+			'apple_google' => false, // Explicitly disabled despite individual states being true
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location ) use ( $stored_step_data ) {
+						return $stored_step_data;
+					},
+				),
+			)
+		);
+
+		// Mock the provider to return recommended payment methods
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $location )
+			->willReturn( $recommended_pms );
+
+		// Act
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+
+		// Assert: apple_google should respect the explicit false value
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertFalse( $result['apple_google'], 'apple_google should respect explicit stored value of false' );
+	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state falls back to OR logic when no explicit apple_google stored.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_fallback_or_logic() {
+		$location = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+
+		// Mock the NOX profile data without explicit apple_google state
+		$stored_step_data = array(
+			'apple_pay'  => true,
+			'google_pay' => false,
+			// No apple_google key - should fall back to OR logic
+		);
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location ) use ( $stored_step_data ) {
+						return $stored_step_data;
+					},
+				),
+			)
+		);
+
+		// Mock the provider to return recommended payment methods
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $location )
+			->willReturn( $recommended_pms );
+
+		// Act
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+
+		// Assert: apple_google should be true due to OR logic (true || false = true)
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using OR fallback logic (apple_pay=true || google_pay=false)' );
+	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state uses recommended values when no stored state.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_uses_recommended_when_no_stored_state() {
+		$location = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+
+		// Mock the NOX profile data as empty (no stored state)
+		$stored_step_data = array();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location ) use ( $stored_step_data ) {
+						return $stored_step_data;
+					},
+				),
+			)
+		);
+
+		// Mock the provider to return recommended payment methods
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $location )
+			->willReturn( $recommended_pms );
+
+		// Act
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+
+		// Assert: should use recommended values with OR logic
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using recommended values with OR logic (true || false = true)' );
+	}
+
+	/**
+	 * Helper method to invoke private methods for testing.
+	 *
+	 * @param string $method_name The name of the private method.
+	 * @param array  $args        The arguments to pass to the method.
+	 * @return mixed The result of the method call.
+	 */
+	private function invoke_private_method( string $method_name, array $args = array() ) {
+		$reflection = new \ReflectionClass( $this->sut );
+		$method = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( $this->sut, $args );
+	}
 }
