@@ -138,7 +138,7 @@ export class BlockRegistrationManager {
 				return;
 			}
 
-			// Site Editor Context (template or template part)
+			// Post Editor Context
 			if ( postType === 'post' || postType === 'page' ) {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
@@ -154,12 +154,13 @@ export class BlockRegistrationManager {
 				} );
 
 				this.initialized = true;
+				// Everything else (Templates, etc.)
 			} else {
-				// @ts-expect-error getCurrentPostId is not typed
-				const postId = editorStore.getCurrentPostId();
-
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
+
+				// @ts-expect-error getCurrentPostId is not typed
+				const postId = editorStore.getCurrentPostId();
 
 				// Set initial template ID
 				this.currentTemplateId =
