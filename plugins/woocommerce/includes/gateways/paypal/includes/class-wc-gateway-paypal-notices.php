@@ -47,7 +47,7 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		echo '<div class="notice notice-warning is-dismissible">';
-		echo '<p>We will be upgrading your store to switch from PayPal Standard to PayPal Payments (PPCP) in the next version of WooCommerce (10.2.0), for a more reliable, modern checkout experience. If you prefer not to migrate, you can use <a href="https://woocommerce.com/products/woocommerce-paypal-payments/" target="_blank">PayPal Payments for WooCommerce</a> extension.</p>';
+		echo '<p>WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version 10.3.0, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommed upgrading to <a href="https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/" target="_blank">PayPal Payments</a> extension.</p>';
 		echo '</div>';
 	}
 }
