@@ -331,7 +331,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			$job_data['total_batches'] = 0;
 			update_option( "wc_product_export_job_{$job_id}", $job_data );
 
-			// Trigger processing in a background thread using non-blocking HTTP request
+			// Trigger first batch in background (non-blocking) to allow API response
 			$this->trigger_background_processing( $action_id );
 
 		} else {
@@ -967,9 +967,9 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		try {
 			// Multiple approaches to force immediate processing
 
-			// Approach 1: Trigger the queue runner hook directly
-			error_log( "WooCommerce Product Export: Triggering action_scheduler_run_queue hook" );
-			do_action( 'action_scheduler_run_queue', 'WooCommerce Export' );
+			// // Approach 1: Trigger the queue runner hook directly
+			// error_log( "WooCommerce Product Export: Triggering action_scheduler_run_queue hook" );
+			// do_action( 'action_scheduler_run_queue', 'WooCommerce Export' );
 
 			// Approach 2: Force ActionScheduler runner directly (most reliable)
 			if ( class_exists( 'ActionScheduler' ) && method_exists( 'ActionScheduler', 'runner' ) ) {
@@ -981,14 +981,14 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 				}
 			}
 
-			// Approach 3: If we have QueueRunner class, use it directly
-			if ( class_exists( 'ActionScheduler_QueueRunner' ) ) {
-				error_log( "WooCommerce Product Export: Using ActionScheduler_QueueRunner directly" );
-				$queue_runner = ActionScheduler_QueueRunner::instance();
-				if ( method_exists( $queue_runner, 'run' ) ) {
-					$queue_runner->run( 'WooCommerce Export' );
-				}
-			}
+			// // Approach 3: If we have QueueRunner class, use it directly
+			// if ( class_exists( 'ActionScheduler_QueueRunner' ) ) {
+			// 	error_log( "WooCommerce Product Export: Using ActionScheduler_QueueRunner directly" );
+			// 	$queue_runner = ActionScheduler_QueueRunner::instance();
+			// 	if ( method_exists( $queue_runner, 'run' ) ) {
+			// 		$queue_runner->run( 'WooCommerce Export' );
+			// 	}
+			// }
 		} catch ( Exception $e ) {
 			error_log( "WooCommerce Product Export: Failed to trigger immediate processing: " . $e->getMessage() );
 		}
@@ -1268,6 +1268,9 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 					update_option( "wc_product_export_job_{$job_id}", $job_data );
 
 					error_log( "WooCommerce Product Export: Scheduled batch {$next_batch} with action {$next_action_id} for job {$job_id}" );
+
+					// Force immediate execution of next batch to avoid 30s delay
+					$this->run_action_immediately( $next_action_id );
 				} else {
 					error_log( "WooCommerce Product Export: Cannot schedule next batch - ActionScheduler not available" );
 					// Mark as failed
