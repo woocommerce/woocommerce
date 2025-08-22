@@ -24,8 +24,8 @@ class WC_Gateway_Paypal_Notices {
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'add_paypal_migration_notice' ) );
 
-        // Use admin_head to inject notice on payments settings page.
-		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page
+		// Use admin_head to inject notice on payments settings page.
+		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
 		// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
 		add_action( 'admin_head', array( $this, 'add_paypal_migration_notice_on_payments_settings_page' ) );
 	}
@@ -51,15 +51,15 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-        $notice_html = '<div class="notice notice-warning is-dismissible">' .
-            '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'paypal_migration' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ) . '"></a>' .
-            '<p>WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version 10.3.0, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend upgrading to <a href="https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/" target="_blank">PayPal Payments</a> extension.</p>' .
-            '</div>';
+		$notice_html = '<div class="notice notice-warning is-dismissible">' .
+			'<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'paypal_migration' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ) . '"></a>' .
+			'<p>WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version 10.3.0, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend upgrading to <a href="https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/" target="_blank">PayPal Payments</a> extension.</p>' .
+			'</div>';
 
-        echo wp_kses_post( $notice_html );
+		echo wp_kses_post( $notice_html );
 	}
 
-    /**
+	/**
 	 * Add notice warning about the migration to PayPal Payments on the Payments settings page.
 	 *
 	 * @return void
@@ -75,7 +75,7 @@ class WC_Gateway_Paypal_Notices {
 		$this->add_paypal_migration_notice();
 	}
 
-    /**
+	/**
 	 * Check if the installation notice has been dismissed.
 	 *
 	 * @return bool
