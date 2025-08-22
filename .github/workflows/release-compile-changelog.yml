@@ -87,7 +87,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+            ref: trunk
 
       - name: Check the necessary branch exists
         id: check-branch
@@ -123,7 +123,8 @@ jobs:
           VERSION: ${{ steps.validate-version.outputs.version }}
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
         run: |
-          git checkout $SELECTED_BRANCH
+          git fetch origin ${SELECTED_BRANCH}
+          git checkout ${SELECTED_BRANCH}
           current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
 
           echo "Current version from woocommerce.php: '$current_version'"
@@ -135,6 +136,9 @@ jobs:
           fi
 
           echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
+          # Go back to trunk.
+          git checkout trunk
 
       - name: Setup PNPM
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0

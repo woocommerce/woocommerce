@@ -230,8 +230,8 @@ class WooPaymentsService {
 					}
 					break;
 				case self::ONBOARDING_STEP_TEST_ACCOUNT:
-					// If the account is a valid, working test account, the step is completed.
-					if ( $this->has_test_account() && $this->has_valid_account() && $this->has_working_account() ) {
+					// If the account is a valid, working test or sandbox account, the step is completed.
+					if ( ( $this->has_test_account() || $this->has_sandbox_account() ) && $this->has_valid_account() && $this->has_working_account() ) {
 						// Since it takes a while for the account to be fully working after the test account initialization,
 						// we will force mark the step as completed here, if it is not already.
 						// This is a fail-safe to guard against the case when the frontend doesn't mark the step as completed.
@@ -275,7 +275,11 @@ class WooPaymentsService {
 			case self::ONBOARDING_STEP_BUSINESS_VERIFICATION:
 				// The step can only be completed if the requirements are met. Otherwise, ignore the stored completed status.
 				// Sanity check: we only report the completed status if there is a live account and the account is valid (i.e. completed KYC).
-				if ( $meets_requirements && $this->has_valid_account() && $this->has_live_account() && $this->was_onboarding_step_marked_completed( $step_id, $location ) ) {
+				if ( $meets_requirements &&
+					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
+					$this->has_valid_account() &&
+					( $this->has_live_account() || $this->has_sandbox_account() )
+				) {
 					return self::ONBOARDING_STEP_STATUS_COMPLETED;
 				}
 				break;
@@ -1156,11 +1160,9 @@ class WooPaymentsService {
 		// Add the user locale to the account session data to allow for localized KYC sessions.
 		$response['locale'] = $this->proxy->call_function( 'get_user_locale' );
 
-		// For sanity, make sure the test account step is completed if not already,
+		// For sanity, make sure the test account step is marked as completed, if not already,
 		// since we are doing live account KYC.
-		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, );
-		}
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
 
 		// Record an event for the KYC session being created.
 		$event_props = array(
@@ -1268,6 +1270,10 @@ class WooPaymentsService {
 			);
 		}
 
+		// For sanity, make sure the test account step is marked as completed, if not already,
+		// since we are doing live account KYC.
+		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, $source );
+
 		// Record an event for the KYC session being finished.
 		$event_props = array(
 			'successful_kyc'    => filter_var( $response['success'] ?? false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false,
@@ -1284,12 +1290,6 @@ class WooPaymentsService {
 
 		// Mark the business verification step as completed.
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, false, $source );
-
-		// For sanity, make sure the test account step is completed, if not already,
-		// since we are doing live account KYC.
-		if ( ! $this->is_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-			$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
-		}
 
 		return $response;
 	}
@@ -1564,6 +1564,12 @@ class WooPaymentsService {
 		$this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		// Clear the NOX profile data for the business verification step sub-step data.
+		// This way the user will be prompted to complete ALL the business verification sub-steps.
+		$business_verification_sub_step_data = $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps', array() );
+		if ( ! empty( $business_verification_sub_step_data ) ) {
+			$this->save_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'sub_steps', array() );
+		}
 
 		// Record an event for the test account being disabled.
 		$this->record_event(
@@ -1897,10 +1903,11 @@ class WooPaymentsService {
 			array(
 				'id'      => self::ONBOARDING_STEP_BUSINESS_VERIFICATION,
 				'context' => array(
-					'fields'           => array(),
-					'sub_steps'        => $business_verification_step_sub_steps,
-					'self_assessment'  => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment', array() ),
-					'has_test_account' => $this->has_test_account(),
+					'fields'              => array(),
+					'sub_steps'           => $business_verification_step_sub_steps,
+					'self_assessment'     => $this->get_nox_profile_onboarding_step_data_entry( self::ONBOARDING_STEP_BUSINESS_VERIFICATION, $location, 'self_assessment', array() ),
+					'has_test_account'    => $this->has_test_account(),
+					'has_sandbox_account' => $this->has_sandbox_account(),
 				),
 			),
 			$location,
