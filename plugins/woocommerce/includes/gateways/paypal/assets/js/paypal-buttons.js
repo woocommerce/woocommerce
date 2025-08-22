@@ -81,6 +81,22 @@
 			});
 			const paypalOrderData = await paypalOrder.json();
 			console.log( 'paypalOrderData', paypalOrderData );
+		},
+		async onShippingOptionsChange(data, actions) {
+			console.log( 'onShippingOptionsChange' );
+			console.log( 'PayPal shipping options data:', data );
+
+			// Update the WooCommerce order via Store API.
+			const wcOrder = await fetch( window.PayPalStandardButtons.endpoints.storeAPICheckout, {
+				method: 'PUT', // Use PUT for updating Draft orders.
+				headers: {
+					'Nonce': window.PayPalStandardButtons.nonce,
+				},
+				body: JSON.stringify({
+					order_id: wcOrderId,
+					shipping_method: data.shippingOption.id,
+				}),
+			} );
 		}
 	}).render('#woocommerce-paypal-standard-buttons-container');
 })( jQuery, window );
