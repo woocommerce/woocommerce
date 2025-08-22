@@ -16,6 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Gateway_Paypal_Helper {
 	/**
+	 * Check if the PayPal gateway is enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_paypal_gateway_enabled() {
+		$settings = get_option( 'woocommerce_paypal_settings', array() );
+		return isset( $settings['enabled'] ) && 'yes' === $settings['enabled'];
+	}
+
+	/**
 	 * Check if the merchant is eligible for migration from WPS to PPCP.
 	 *
 	 * @return bool
