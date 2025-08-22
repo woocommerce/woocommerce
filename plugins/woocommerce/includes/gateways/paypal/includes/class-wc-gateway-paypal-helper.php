@@ -38,7 +38,8 @@ class WC_Gateway_Paypal_Helper {
 		$is_test_mode = isset( $settings['testmode'] ) && 'yes' === $settings['testmode'];
 		$api_username = $is_test_mode ? ( $settings['sandbox_api_username'] ?? null ) : ( $settings['api_username'] ?? null );
 		$api_password = $is_test_mode ? ( $settings['sandbox_api_password'] ?? null ) : ( $settings['api_password'] ?? null );
+		$api_signature = $is_test_mode ? ( $settings['sandbox_api_signature'] ?? null ) : ( $settings['api_signature'] ?? null );
 
-		return empty( $api_username ) && empty( $api_password );
+		return empty( $api_username ) && empty( $api_password ) && empty( $api_signature );
 	}
 }
