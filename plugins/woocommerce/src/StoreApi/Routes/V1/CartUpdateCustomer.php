@@ -220,8 +220,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		// If no draft order exists yet, create one so the data is properly stored.
 		if ( ! $draft_order && ! WC()->cart->is_empty() ) {
-			$order_controller = new \Automattic\WooCommerce\StoreApi\Utilities\OrderController();
-			$draft_order      = $order_controller->create_order_from_cart();
+			$draft_order = $this->order_controller->create_order_from_cart();
 			$this->set_draft_order_id( $draft_order->get_id() );
 		}
 
