@@ -848,6 +848,6 @@ class OrderController {
 				'shipping_phone'      => $customer_to_copy->get_shipping_phone(),
 			)
 		);
-		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, wc()->customer );
+		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, $customer_to_copy );
 	}
 }
