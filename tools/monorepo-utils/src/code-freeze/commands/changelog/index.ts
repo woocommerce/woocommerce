@@ -38,7 +38,7 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
