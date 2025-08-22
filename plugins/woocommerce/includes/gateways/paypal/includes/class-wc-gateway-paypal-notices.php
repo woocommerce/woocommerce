@@ -41,8 +41,8 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		// Skip if the gateway is disabled or the merchant is not eligible for migration.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_enabled() || ! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ) {
+		// Skip if the gateway is not available or the merchant is not eligible for migration.
+		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ) {
 			return;
 		}
 

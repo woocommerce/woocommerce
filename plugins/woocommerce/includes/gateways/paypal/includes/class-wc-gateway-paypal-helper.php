@@ -20,9 +20,11 @@ class WC_Gateway_Paypal_Helper {
 	 *
 	 * @return bool
 	 */
-	public static function is_paypal_gateway_enabled() {
-		$settings = get_option( 'woocommerce_paypal_settings', array() );
-		return isset( $settings['enabled'] ) && 'yes' === $settings['enabled'];
+	public static function is_paypal_gateway_available() {
+		$settings    = get_option( 'woocommerce_paypal_settings', array() );
+		$enabled     = isset( $settings['enabled'] ) && 'yes' === $settings['enabled'];
+		$should_load = isset( $settings['_should_load'] ) && 'yes' === $settings['_should_load'];
+		return $enabled && $should_load;
 	}
 
 	/**
