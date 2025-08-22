@@ -398,8 +398,11 @@ class WC_Session_Handler extends WC_Session {
 	 * Set session expiration.
 	 */
 	public function set_session_expiration() {
-		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = 2 * DAY_IN_SECONDS;
+		$default_expiring_seconds   = DAY_IN_SECONDS;
+		$default_expiration_seconds = is_user_logged_in() ? WEEK_IN_SECONDS : 2 * DAY_IN_SECONDS;
+		$max_expiration_seconds     = MONTH_IN_SECONDS;
+		$max_expiring_seconds       = $max_expiration_seconds - DAY_IN_SECONDS;
+		$session_limit_exceeded     = false;
 
 		/**
 		 * Filters the session expiration.
