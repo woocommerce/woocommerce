@@ -607,6 +607,17 @@ function wc_create_attribute( $args ) {
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
+
+			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
+			// use the correct info.
+			global $wc_product_attributes;
+			if ( isset( $wc_product_attributes[ $old_taxonomy_name ] ) && ! isset( $wc_product_attributes[ $new_taxonomy_name ] ) ) {
+				$wc_product_attributes[ $new_taxonomy_name ] = $wc_product_attributes[ $old_taxonomy_name ];
+			}
+			global $wp_taxonomies;
+			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
+				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
 		}
 	}
 

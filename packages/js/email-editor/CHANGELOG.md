@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.4) - 2025-08-21 
+
+-   Patch - Filter unnecessary stylesheets from Editor iframe [#60354]
+-   Patch - Fix site logo not rendered properly. In the email editor if the site logo was in a group block the right alignment didn't work. [#60290]
+-   Patch - Ensure the email editor obtains and utilizes the site theme styles as part of its default values. [#60465]
+
 ## [1.0.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.3) - 2025-08-11 
 
 -   Patch - Fixed a possible infinite loading of templates when editing emails. [#60196]
@@ -56,7 +62,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update email editor email preview, switch to template modal and style preview componets [#58078]
 -   Minor - Update telemetry tracking to restore events removed by refactoring components [#58294]
 -   Minor - Added email status toggle in the email editor sidebar. Added the ability to enable/disable transactional emails directly from the email editor [#57953]
--   Major [ **BREAKING CHANGE** ] - Refactor email editor to work on top of wordpress/editor Editor component [#57775]
--   Major [ **BREAKING CHANGE** ] - Refactor the package and its build to be prepared for publishing [#58874]
+-   Refactor email editor to work on top of wordpress/editor Editor component [#57775]
+-   Refactor the package and its build to be prepared for publishing [#58874]
 
 [See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/email-editor/CHANGELOG.md).
