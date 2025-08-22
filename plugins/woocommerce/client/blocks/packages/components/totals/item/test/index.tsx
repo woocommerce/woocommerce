@@ -83,6 +83,7 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
+		expect( screen.queryByText( '$1.00' ) ).not.toBeInTheDocument();
 	} );
 
 	it( 'does not show skeleton when showSkeleton is false', () => {
@@ -108,6 +109,8 @@ describe( 'TotalsItem', () => {
 			code: 'JPY',
 			symbol: '¥',
 			minorUnit: 0,
+			prefix: '¥',
+			suffix: '',
 		};
 
 		render(
@@ -115,7 +118,7 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Total' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$1,000' ) ).toBeInTheDocument();
+		expect( screen.getByText( '¥1,000' ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders without currency when not provided', () => {
