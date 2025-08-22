@@ -298,7 +298,6 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'filename' => $filename,
 			'created_at' => current_time( 'mysql' ),
 			'progress' => 0,
-			'total_products' => 0,
 			'columns' => $export_params['columns'],
 			'selected_columns' => $export_params['selected_columns'],
 			'export_meta' => $export_params['export_meta'],
@@ -311,13 +310,14 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		error_log( "WooCommerce Product Export: Created job {$job_id} for {$format} export" );
 
 		// Use ActionScheduler with batched processing - start with batch 1
-		if ( function_exists( 'as_enqueue_async_action' ) ) {
+		if ( function_exists( 'as_schedule_single_action' ) ) {
 			// Add batch tracking to export params
 			$export_params['current_batch'] = 1;
 			$export_params['total_batches'] = 0; // Will be calculated in first batch
 
-			// Enqueue the first batch action
-			$action_id = as_enqueue_async_action(
+			// Schedule the first batch action for immediate execution
+			$action_id = as_schedule_single_action(
+				time(), // Schedule for immediate execution
 				'woocommerce_product_export_batch_process',
 				array( $export_params ),
 				'wc_product_export'
@@ -328,7 +328,6 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
 			$job_data['action_id'] = $action_id;
 			$job_data['current_batch'] = 1;
-			$job_data['total_batches'] = 0;
 			update_option( "wc_product_export_job_{$job_id}", $job_data );
 
 			// Trigger first batch in background (non-blocking) to allow API response
@@ -396,9 +395,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'filename' => $job_data['filename'],
 			'created_at' => $job_data['created_at'],
 			'progress' => isset( $job_data['progress'] ) ? $job_data['progress'] : 0,
-			'total_products' => isset( $job_data['total_products'] ) ? $job_data['total_products'] : 0,
 			'current_batch' => isset( $job_data['current_batch'] ) ? $job_data['current_batch'] : 0,
-			'total_batches' => isset( $job_data['total_batches'] ) ? $job_data['total_batches'] : 0,
 			'action_scheduler_status' => $action_status, // Debug info
 		);
 
@@ -487,77 +484,77 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		}
 	}
 
-	/**
-	 * Stream export all products to avoid memory accumulation.
-	 *
-	 * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
-	 * @param string $format Export format (json or csv).
-	 * @param int $max_num_batches Maximum number of batches (of 250 products) to process.
-	 * @return array Response with status and next step info.
-	 */
-	private function stream_export_all_products( $exporter, $format, $max_num_batches = 1000 ) {
-		// Get file path using upload directory
-		$upload_dir = wp_upload_dir();
-		$filename = $exporter->get_filename();
-		$file_path = trailingslashit( $upload_dir['basedir'] ) . $filename;
+	// /**
+	//  * Stream export all products to avoid memory accumulation.
+	//  *
+	//  * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
+	//  * @param string $format Export format (json or csv).
+	//  * @param int $max_num_batches Maximum number of batches (of 250 products) to process.
+	//  * @return array Response with status and next step info.
+	//  */
+	// private function stream_export_all_products( $exporter, $format, $max_num_batches = 1000 ) {
+	// 	// Get file path using upload directory
+	// 	$upload_dir = wp_upload_dir();
+	// 	$filename = $exporter->get_filename();
+	// 	$file_path = trailingslashit( $upload_dir['basedir'] ) . $filename;
 
-		// Process all batches in one API call by creating new exporters
-		$step = 1;
-		$max_steps = $max_num_batches; // Safety limit, configurable via API
-		$total_exported = 0;
+	// 	// Process all batches in one API call by creating new exporters
+	// 	$step = 1;
+	// 	$max_steps = $max_num_batches; // Safety limit, configurable via API
+	// 	$total_exported = 0;
 
-		while ( $step <= $max_steps ) {
-			// Clear WordPress object cache like a new request would
-			wp_cache_flush();
+	// 	while ( $step <= $max_steps ) {
+	// 		// Clear WordPress object cache like a new request would
+	// 		wp_cache_flush();
 
-			// Log memory usage before each batch
-			$memory_before = memory_get_usage();
-			$peak_before = memory_get_peak_usage();
-			error_log( "REST Export: Starting batch {$step}, Memory: " . round($memory_before / 1024 / 1024, 2) . " MB, Peak: " . round($peak_before / 1024 / 1024, 2) . " MB" );
+	// 		// Log memory usage before each batch
+	// 		$memory_before = memory_get_usage();
+	// 		$peak_before = memory_get_peak_usage();
+	// 		error_log( "REST Export: Starting batch {$step}, Memory: " . round($memory_before / 1024 / 1024, 2) . " MB, Peak: " . round($peak_before / 1024 / 1024, 2) . " MB" );
 
-			// Create a new exporter for this batch to ensure clean memory
-			$batch_exporter = $this->create_exporter_for_batch( $exporter, $step );
+	// 		// Create a new exporter for this batch to ensure clean memory
+	// 		$batch_exporter = $this->create_exporter_for_batch( $exporter, $step );
 
-			// Set a smaller batch size for better memory management
-			$batch_exporter->set_limit( 250 ); // Use 250 instead of default 1000
+	// 		// Set a smaller batch size for better memory management
+	// 		$batch_exporter->set_limit( 250 ); // Use 250 instead of default 1000
 
-			// Use the exporter's built-in pagination like AJAX export does
-			$batch_exporter->set_page( $step );
+	// 		// Use the exporter's built-in pagination like AJAX export does
+	// 		$batch_exporter->set_page( $step );
 
-			// Use the exporter's generate_file method like AJAX export does
-			$batch_exporter->generate_file();
+	// 		// Use the exporter's generate_file method like AJAX export does
+	// 		$batch_exporter->generate_file();
 
-			// Check if we're done
-			if ( 100 === $batch_exporter->get_percent_complete() ) {
-				break;
-			}
+	// 		// Check if we're done
+	// 		if ( 100 === $batch_exporter->get_percent_complete() ) {
+	// 			break;
+	// 		}
 
-			// Log memory usage after each batch
-			$memory_after = memory_get_usage();
-			$peak_after = memory_get_peak_usage();
-			error_log( "REST Export: Completed batch {$step}, Memory: " . round($memory_after / 1024 / 1024, 2) . " MB, Peak: " . round($peak_after / 1024 / 1024, 2) . " MB" );
+	// 		// Log memory usage after each batch
+	// 		$memory_after = memory_get_usage();
+	// 		$peak_after = memory_get_peak_usage();
+	// 		error_log( "REST Export: Completed batch {$step}, Memory: " . round($memory_after / 1024 / 1024, 2) . " MB, Peak: " . round($peak_after / 1024 / 1024, 2) . " MB" );
 
-			// Check memory limit but don't stop early - let it fail naturally
-			$memory_limit = $this->get_memory_limit_bytes();
-			$current_memory = memory_get_usage();
-			$memory_usage_percent = ( $current_memory / $memory_limit ) * 100;
-			error_log( "REST Export: Memory usage at {$memory_usage_percent}% of limit" );
+	// 		// Check memory limit but don't stop early - let it fail naturally
+	// 		$memory_limit = $this->get_memory_limit_bytes();
+	// 		$current_memory = memory_get_usage();
+	// 		$memory_usage_percent = ( $current_memory / $memory_limit ) * 100;
+	// 		error_log( "REST Export: Memory usage at {$memory_usage_percent}% of limit" );
 
-			// Clear the batch exporter to free memory
-			unset( $batch_exporter );
+	// 		// Clear the batch exporter to free memory
+	// 		unset( $batch_exporter );
 
-			$step++;
-		}
+	// 		$step++;
+	// 	}
 
-		// Export is complete
-		return array(
-			'status' => 'complete',
-			'total_exported' => $total_exported,
-			'percentage' => 100,
-			'download_url' => rest_url( 'wc/v3/catalog/download' ) . '?filename=' . urlencode( $exporter->get_filename() ) . '&format=' . $format,
-			'filename' => $exporter->get_filename()
-		);
-	}
+	// 	// Export is complete
+	// 	return array(
+	// 		'status' => 'complete',
+	// 		'total_exported' => $total_exported,
+	// 		'percentage' => 100,
+	// 		'download_url' => rest_url( 'wc/v3/catalog/download' ) . '?filename=' . urlencode( $exporter->get_filename() ) . '&format=' . $format,
+	// 		'filename' => $exporter->get_filename()
+	// 	);
+	// }
 
 	/**
 	 * Create a new exporter for a specific batch to ensure clean memory.
@@ -612,44 +609,6 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		$batch_exporter->set_columns_to_export( $original_exporter->get_columns_to_export() );
 
 		return $batch_exporter;
-	}
-
-	/**
-	 * Get products for a specific batch using the exporter's methods.
-	 *
-	 * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
-	 * @param int $step The batch step.
-	 * @return array Products for this batch.
-	 */
-	private function get_products_for_batch( $exporter, $step ) {
-		// Use the exporter's built-in pagination
-		$exporter->set_page( $step );
-
-		// Prepare data using the exporter's method
-		$exporter->prepare_data_to_export();
-
-		// Get the prepared data using reflection to access protected method
-		$reflection = new ReflectionClass( $exporter );
-		$get_data_method = $reflection->getMethod( 'get_data_to_export' );
-		$get_data_method->setAccessible( true );
-		$data = $get_data_method->invoke( $exporter );
-
-		if ( empty( $data ) ) {
-			return array();
-		}
-
-		// Convert the data back to product objects for processing
-		$products = array();
-		foreach ( $data as $row_data ) {
-			if ( isset( $row_data['id'] ) ) {
-				$product = wc_get_product( $row_data['id'] );
-				if ( $product ) {
-					$products[] = $product;
-				}
-			}
-		}
-
-		return $products;
 	}
 
 	/**
@@ -777,12 +736,6 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 				'format' => array(
 					'description' => __( 'Export format used.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'total_products' => array(
-					'description' => __( 'Total number of products exported.', 'woocommerce' ),
-					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -981,14 +934,14 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 				}
 			}
 
-			// // Approach 3: If we have QueueRunner class, use it directly
-			// if ( class_exists( 'ActionScheduler_QueueRunner' ) ) {
-			// 	error_log( "WooCommerce Product Export: Using ActionScheduler_QueueRunner directly" );
-			// 	$queue_runner = ActionScheduler_QueueRunner::instance();
-			// 	if ( method_exists( $queue_runner, 'run' ) ) {
-			// 		$queue_runner->run( 'WooCommerce Export' );
-			// 	}
-			// }
+			// Approach 3: If we have QueueRunner class, use it directly (more reliable)
+			if ( class_exists( 'ActionScheduler_QueueRunner' ) ) {
+				error_log( "WooCommerce Product Export: Using ActionScheduler_QueueRunner directly" );
+				$queue_runner = ActionScheduler_QueueRunner::instance();
+				if ( method_exists( $queue_runner, 'run' ) ) {
+					$queue_runner->run( 'WooCommerce Export' );
+				}
+			}
 		} catch ( Exception $e ) {
 			error_log( "WooCommerce Product Export: Failed to trigger immediate processing: " . $e->getMessage() );
 		}
@@ -1224,21 +1177,9 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			$percent_complete = $exporter->get_percent_complete();
 			$is_complete = ( 100 === $percent_complete );
 
-			// Calculate total batches on first run
-			if ( 1 === $current_batch && 0 === intval( $job_data['total_batches'] ) ) {
-				// Estimate total batches based on total products and batch size (1000)
-				$total_products = $this->get_total_products_count( $exporter );
-				$batch_size = 250; // Same as AJAX version
-				$total_batches = ceil( $total_products / $batch_size );
+			// Use exporter's built-in progress calculation
+			$progress = $percent_complete;
 
-				$job_data['total_batches'] = $total_batches;
-				$job_data['total_products'] = $total_products;
-				error_log( "WooCommerce Product Export: Job {$job_id} will process {$total_batches} batches for {$total_products} products" );
-			}
-
-			// Update progress
-			$total_batches = intval( $job_data['total_batches'] );
-			$progress = $total_batches > 0 ? min( 100, round( ( $current_batch / $total_batches ) * 100 ) ) : $percent_complete;
 
 			$job_data['current_batch'] = $current_batch;
 			$job_data['progress'] = $progress;
@@ -1256,8 +1197,9 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 				$next_export_params = $export_params;
 				$next_export_params['current_batch'] = $next_batch;
 
-				if ( function_exists( 'as_enqueue_async_action' ) ) {
-					$next_action_id = as_enqueue_async_action(
+				if ( function_exists( 'as_schedule_single_action' ) ) {
+					$next_action_id = as_schedule_single_action(
+						time(), // Schedule for immediate execution
 						'woocommerce_product_export_batch_process',
 						array( $next_export_params ),
 						'wc_product_export'
@@ -1296,32 +1238,4 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			error_log( "WooCommerce Product Export: Released lock for job {$job_id} batch {$current_batch}" );
 		}
 	}
-
-	/**
-	 * Get total products count for progress calculation.
-	 *
-	 * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
-	 * @return int Total products count.
-	 */
-	private function get_total_products_count( $exporter ) {
-		// Use reflection to access the protected method that counts total products
-		try {
-			$reflection = new ReflectionClass( $exporter );
-			$method = $reflection->getMethod( 'get_total_rows' );
-			$method->setAccessible( true );
-			return $method->invoke( $exporter );
-		} catch ( Exception $e ) {
-			error_log( 'WooCommerce Product Export: Could not get total rows count: ' . $e->getMessage() );
-			// Fallback to a basic product count
-			$args = array(
-				'post_type' => 'product',
-				'post_status' => 'publish',
-				'posts_per_page' => -1,
-				'fields' => 'ids',
-			);
-			$products = get_posts( $args );
-			return count( $products );
-		}
-	}
-
 }
