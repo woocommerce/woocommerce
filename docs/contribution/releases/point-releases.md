@@ -15,6 +15,7 @@ Point releases are patch releases that address specific issues without adding su
 - **Compatibility fixes** for WordPress, theme, or plugin conflicts
 
 ## When to do a Point Release
+
 When considering a point release, use your best judgement based on the urgency and severity of the issue:
 
 - If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This helps consolidate fixes and reduces the number of patch releases.
