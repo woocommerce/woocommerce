@@ -58,4 +58,41 @@ class ValidationUtils {
 
 		return $state;
 	}
+
+	/**
+	 * Validate and correct country and state values based on allowed countries.
+	 *
+	 * If the provided country is not in the allowed countries list, it will be replaced
+	 * with the first available country and the state will be reset.
+	 *
+	 * @param string $country Current country code.
+	 * @param string $state Current state code.
+	 * @param string $address_type Address type: 'billing' or 'shipping'.
+	 * @return array Array with 'country' and 'state' keys containing validated values.
+	 */
+	public function validate_and_correct_country( $country, $state, $address_type = 'billing' ) {
+		// Determine which countries list to use based on address type.
+		if ( 'shipping' === $address_type ) {
+			$allowed_countries = \WC()->countries->get_shipping_countries();
+		} else {
+			$allowed_countries = \WC()->countries->get_allowed_countries();
+		}
+
+		// Check if the current country is in the allowed countries list.
+		if ( $country && ! array_key_exists( $country, $allowed_countries ) ) {
+			// Reset to first available country if current country is not allowed.
+			$country = array_key_first( $allowed_countries );
+			$state   = ''; // Reset state when country changes.
+		}
+
+		// Validate the state for the (possibly corrected) country.
+		if ( ! $this->validate_state( $state, $country ) ) {
+			$state = '';
+		}
+
+		return [
+			'country' => $country,
+			'state'   => $state,
+		];
+	}
 }
