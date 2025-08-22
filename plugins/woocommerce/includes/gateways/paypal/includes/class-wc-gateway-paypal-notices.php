@@ -37,7 +37,7 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	public function add_paypal_migration_notice() {
 		// Show only to users who can manage the site.
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
