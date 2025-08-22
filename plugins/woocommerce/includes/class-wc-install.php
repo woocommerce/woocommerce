@@ -295,6 +295,9 @@ class WC_Install {
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
 		),
+		'10.2.0' => array(
+			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
+		),
 	);
 
 	/**
@@ -1548,6 +1551,12 @@ class WC_Install {
 			}
 		}
 
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_product_lookup';" ) ) {
+			if ( 2 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+			}
+		}
+
 		/**
 		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
 		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
@@ -1889,7 +1898,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id),
+	PRIMARY KEY  (order_item_id, order_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
