@@ -447,7 +447,7 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			// If failed, try to get the failure reason
 			if ( 'failed' === $status ) {
 				try {
-					$logs = $store->get_logs( $action_id );
+					$logs = ActionScheduler_Logger::instance()->get_logs( $action_id );
 					foreach ( $logs as $log ) {
 						error_log( "Action Scheduler Log for action {$action_id} (job {$job_id}): " . $log->get_message() );
 					}
