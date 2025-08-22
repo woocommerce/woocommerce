@@ -60,7 +60,7 @@ class WC_Gateway_Paypal_Notices {
 		);
 		$message     = sprintf(
 			/* translators: 1: opening <a> tag, 2: closing </a> tag, 3: opening <a> tag, 4: closing </a> tag */
-			esc_html__( 'WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version %1$s10.3.0%2$s, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend upgrading to %3$sPayPal Payments%4$s extension.', 'woocommerce' ),
+			esc_html__( 'WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version %1$s10.3.0%2$s, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend switching to %3$sPayPal Payments%4$s extension.', 'woocommerce' ),
 			'<a href="' . esc_url( $release_url ) . '" target="_blank" rel="noopener noreferrer">',
 			'</a>',
 			'<a href="' . esc_url( $doc_url ) . '" target="_blank" rel="noopener noreferrer">',
