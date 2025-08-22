@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Product Variations: Move post_excerpt updates from view time to write time

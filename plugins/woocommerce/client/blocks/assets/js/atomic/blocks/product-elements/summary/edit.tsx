@@ -8,6 +8,7 @@ import {
 	InspectorControls,
 	RichText,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 import {
 	RangeControl,
 	ToggleControl,
@@ -186,9 +187,11 @@ const Edit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<div { ...blockProps }>
-			<Block { ...attributes } />
+			<Block isAdmin={ true } { ...attributes } product={ product } />
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Settings', 'woocommerce' ) }

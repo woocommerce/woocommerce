@@ -128,7 +128,7 @@ jobs:
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION \3 =/" readme.txt
 
           if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
             perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
@@ -141,7 +141,7 @@ jobs:
           done
 
           # Update $version property in class-woocommerce.php.
-          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+';/public \\\$version = '$NEXT_STABLE'\;/" includes/class-woocommerce.php
+          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
 
           if git diff --quiet; then
             echo "::error::No changes to commit."
@@ -170,7 +170,8 @@ jobs:
             --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
-            --head ${branch_name}
+            --head ${branch_name} \
+            --label Release
 
       - name: Ensure milestone for dev version exists
         if: ${{ inputs.bump-type == 'dev' }}

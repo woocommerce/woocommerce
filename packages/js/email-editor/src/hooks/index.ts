@@ -7,3 +7,4 @@ export * from './use-preview-templates';
 export * from './use-editor-mode';
 export * from './use-remove-saving-failed-notices';
 export * from './use-is-email-editor';
+export * from './use-filter-editor-content-stylesheets';
