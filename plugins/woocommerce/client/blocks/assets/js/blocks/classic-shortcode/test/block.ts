@@ -13,6 +13,13 @@ import '../';
 import '../../cart';
 import '../../checkout';
 import '../../product-new';
+import '../../../atomic/blocks/product-elements/sale-badge/index';
+import '../../../atomic/blocks/product-elements/image/index';
+import '../../../atomic/blocks/product-elements/price/index';
+import '../../../atomic/blocks/product-elements/button/index';
+import '../../../atomic/blocks/product-elements/title/index';
+import '../../product-template/index.tsx';
+import '../../product-collection/index.tsx';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 
 async function setup( attributes: BlockAttributes ) {
