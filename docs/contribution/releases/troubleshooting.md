@@ -11,7 +11,7 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ## Scenarios / FAQ
 
-### A workflow failed while building the release.
+### A workflow failed while building the release
 
 1. **Open the workflow run details** in GitHub (under the **Actions** tab) to see exactly where and why the failure occurred. Most of the time, the workflow will display a clear error message.
 2. **Read the error message carefully.** Sometimes the problem is as simple as a missing workflow configuration or skipped step.
@@ -34,12 +34,12 @@ If, after downloading and unzipping the generated artifact, something seems off 
    - In **Code > Tags**, delete the tag for the incorrect version. _If you skip this, the final release may point to the wrong commit in history._
 2. Check the status of the `release/X.Y` branch (either in the GitHub UI or locally after pulling the latest changes).
 3. Figure out which step failed. For example, if the plugin header version is correct but the changelog is missing, only the changelog step needs to be re-run.
-3. Review any [auto-generated PRs](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr+author%3Aapp%2Fgithub-actions+label%3ARelease): if there are open PRs that weren't merged and are no longer needed, close them and delete their branches.
+4. Review any [auto-generated PRs](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr+author%3Aapp%2Fgithub-actions+label%3ARelease): if there are open PRs that weren't merged and are no longer needed, close them and delete their branches.
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
 
-### A serious bug was detected during internal checks / monitoring.
+### A serious bug was detected during internal checks / monitoring
 
 If you find a serious bug during internal checks or monitoring **before** the release is marked stable on WordPress.org:
 
@@ -62,15 +62,15 @@ On the Release mechanics side:
 - Merge any auto-generated PRs that should be merged, as if the release had been marked stable.
 - Do not delete any draft GitHub releases or tags for the problematic version.
 - After a fixed release is deployed and marked as stable:
-  - Publish all GitHub releases for any skipped versions, in order.
-  - Only mark the actual valid release as "latest release".
+    - Publish all GitHub releases for any skipped versions, in order.
+    - Only mark the actual valid release as "latest release".
 
-### A critical bug surfaced after the release was marked stable on WordPress.org.
+### A critical bug surfaced after the release was marked stable on WordPress.org
 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 
 1. Immediately notify the relevant engineering team(s).
-2. Prepare to do a [Point Release](/docs/point-releases).
+2. Prepare to do a [Point Release](/docs/contribution/releases/point-releases).
 3. Temporarily move the stable tag on WordPress.org back to the previous known-good version:
    - Identify the correct previous version and note its exact number.
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
