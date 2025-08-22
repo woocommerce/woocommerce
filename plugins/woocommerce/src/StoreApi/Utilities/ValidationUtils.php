@@ -81,8 +81,11 @@ class ValidationUtils {
 		// Check if the current country is in the allowed countries list.
 		if ( $country && ! array_key_exists( $country, $allowed_countries ) ) {
 			// Reset to first available country if current country is not allowed.
-			$country = array_key_first( $allowed_countries );
-			$state   = ''; // Reset state when country changes.
+			$first_available = array_key_first( $allowed_countries );
+			if ( $first_available ) {
+				$country = $first_available;
+				$state   = ''; // Reset state when country changes.
+			}
 		}
 
 		// Validate the state for the (possibly corrected) country.
