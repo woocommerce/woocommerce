@@ -629,9 +629,16 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
+					variation,
 				} );
 			},
 
@@ -642,18 +649,32 @@ const { state: cartItemState } = store(
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
+					variation,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+					variation,
 				} );
 			},
 

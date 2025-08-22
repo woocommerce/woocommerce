@@ -214,23 +214,6 @@
 	}
 }
 
-// Fade out skeleton animation before content is loaded
-.wp-block-woocommerce-cart.is-loading.is-fading {
-	.wp-block-woocommerce-cart-order-summary-block,
-	.wp-block-woocommerce-cart-express-payment-block,
-	.wp-block-woocommerce-proceed-to-checkout-block,
-	.wp-block-woocommerce-cart-accepted-payment-methods-block,
-	.wp-block-woocommerce-cart-line-items-block {
-		background-color: transparent;
-		&::after {
-			background: transparent;
-		}
-	}
-	div.wp-block-woocommerce-cart-order-summary-totals-block {
-		border-top: none;
-	}
-}
-
 // Skeleton is shown before mobile classes are appended.
 @include cart-checkout-below-large-container {
 	.wp-block-woocommerce-cart.is-loading {
