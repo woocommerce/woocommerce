@@ -35,12 +35,15 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 	public function get_item_response( $address ) {
 		$validation_util = new ValidationUtils();
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
-			$shipping_country = $address->get_shipping_country();
-			$shipping_state   = $address->get_shipping_state();
+			// Validate and correct country/state if needed.
+			$validated_address = $validation_util->validate_and_correct_country(
+				$address->get_shipping_country(),
+				$address->get_shipping_state(),
+				'shipping'
+			);
 
-			if ( ! $validation_util->validate_state( $shipping_state, $shipping_country ) ) {
-				$shipping_state = '';
-			}
+			$shipping_country = $validated_address['country'];
+			$shipping_state   = $validated_address['state'];
 
 			$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_object( $address, 'shipping' );
 

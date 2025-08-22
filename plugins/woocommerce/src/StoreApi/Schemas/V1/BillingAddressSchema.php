@@ -94,12 +94,15 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	public function get_item_response( $address ) {
 		$validation_util = new ValidationUtils();
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
-			$billing_country = $address->get_billing_country();
-			$billing_state   = $address->get_billing_state();
+			// Validate and correct country/state if needed.
+			$validated_address = $validation_util->validate_and_correct_country(
+				$address->get_billing_country(),
+				$address->get_billing_state(),
+				'billing'
+			);
 
-			if ( ! $validation_util->validate_state( $billing_state, $billing_country ) ) {
-				$billing_state = '';
-			}
+			$billing_country = $validated_address['country'];
+			$billing_state   = $validated_address['state'];
 
 			$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_object( $address, 'billing' );
 
