@@ -24,13 +24,13 @@ describe( 'TotalsItem', () => {
 		render(
 			<TotalsItem
 				label="Subtotal"
-				value={ 25.99 }
+				value={ 2599 }
 				currency={ mockCurrency }
 			/>
 		);
 
 		expect( screen.getByText( 'Subtotal' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$0.26' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$25.99' ) ).toBeInTheDocument();
 	} );
 
 	it( 'renders value of 0 correctly', () => {
@@ -61,14 +61,14 @@ describe( 'TotalsItem', () => {
 		render(
 			<TotalsItem
 				label="Tax"
-				value={ 5.99 }
+				value={ 599 }
 				currency={ mockCurrency }
 				description="Including VAT"
 			/>
 		);
 
 		expect( screen.getByText( 'Tax' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$0.06' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$5.99' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Including VAT' ) ).toBeInTheDocument();
 	} );
 
@@ -76,7 +76,7 @@ describe( 'TotalsItem', () => {
 		render(
 			<TotalsItem
 				label="Loading"
-				value={ 10.0 }
+				value={ 100 }
 				currency={ mockCurrency }
 				showSkeleton={ true }
 			/>
@@ -89,14 +89,14 @@ describe( 'TotalsItem', () => {
 		render(
 			<TotalsItem
 				label="Loaded"
-				value={ 15.5 }
+				value={ 155 }
 				currency={ mockCurrency }
 				showSkeleton={ false }
 			/>
 		);
 
 		expect( screen.getByText( 'Loaded' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$0.15' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$1.55' ) ).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText( 'Loading price…' )
 		).not.toBeInTheDocument();
@@ -111,11 +111,7 @@ describe( 'TotalsItem', () => {
 		};
 
 		render(
-			<TotalsItem
-				label="Total"
-				value={ 1000.0 }
-				currency={ jpyCurrency }
-			/>
+			<TotalsItem label="Total" value={ 1000 } currency={ jpyCurrency } />
 		);
 
 		expect( screen.getByText( 'Total' ) ).toBeInTheDocument();
