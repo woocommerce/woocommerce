@@ -77,6 +77,17 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
+type CartItemData = {
+	name: string;
+	value: string;
+};
+
+type CartItemVariationAttr = {
+	attribute: string;
+	raw_attribute: string;
+	value: string;
+};
+
 const trimWords = ( html: string, maxWords = 15 ): string => {
 	const words = html.trim().split( /\s+/ );
 	if ( words.length <= maxWords ) {
@@ -612,14 +623,27 @@ const { state: cartItemState } = store(
 					.toLowerCase() }`;
 			},
 
-			get cartItemDataName(): string {
+			get cartItemData(): CartItemData {
 				const context = getContext< {
-					itemData: { attribute: string };
+					itemData: CartItemVariationAttr;
 				} >();
-				return context.itemData.attribute + ':';
+
+				// Use the context if it is in a loop, otherwise use the unique variation if it exists.
+				const variationAttr: CartItemVariationAttr =
+					context.itemData || cartItemState.cartItem.variation[ 0 ];
+
+				return {
+					name: variationAttr.attribute,
+					value: variationAttr.value,
+				};
 			},
 
-			get variationHasMultipleAttrs(): boolean {
+			get cartItemDataName(): string {
+				// TODO: Not sure why this is not displayed when there is only one attribute.
+				return cartItemState.cartItemData.name + ':';
+			},
+
+			get itemDataHasMultipleAttributes(): boolean {
 				const { variation = [] } = cartItemState.cartItem;
 				return variation.length > 1;
 			},
