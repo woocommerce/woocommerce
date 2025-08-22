@@ -1,4 +1,4 @@
 Significance: patch
-Type: enhancement
+Type: fix
 
-Resolved Apple Pay & Google Pay combined toggle state not persisting when disabled by users.
+Comment: Resolve an issue where the combined Apple Pay & Google Pay toggle state did not persist when disabled.
