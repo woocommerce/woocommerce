@@ -600,6 +600,29 @@ const { state: cartItemState } = store(
 					  } )
 					: true;
 			},
+
+			get productAttributeClass(): string {
+				const context = getContext< {
+					itemData: { attribute: string };
+				} >();
+				// Transform attribute name to a valid CSS class name.
+				return `wc-block-components-product-details__${ context.itemData.attribute
+					.replace( /([a-z])([A-Z])/g, '$1-$2' )
+					.replace( /[\s_]+/g, '-' )
+					.toLowerCase() }`;
+			},
+
+			get cartItemDataName(): string {
+				const context = getContext< {
+					itemData: { attribute: string };
+				} >();
+				return context.itemData.attribute + ':';
+			},
+
+			get variationHasMultipleAttrs(): boolean {
+				const { variation = [] } = cartItemState.cartItem;
+				return variation.length > 1;
+			},
 		},
 
 		actions: {

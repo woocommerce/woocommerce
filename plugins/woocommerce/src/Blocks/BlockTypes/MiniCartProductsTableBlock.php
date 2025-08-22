@@ -174,6 +174,17 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
+										<ul class="wc-block-components-product-details">
+											<template
+												data-wp-each--item-data="state.cartItem.variation"
+												data-wp-each-key="context.itemData.raw_attribute"
+											>
+												<li data-wp-bind--class="state.productAttributeClass">
+													<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataName"></span>
+													<span class="wc-block-components-product-details__value" data-wp-text="context.itemData.value"></span>
+												</li>
+											</template>
+										</ul>
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
