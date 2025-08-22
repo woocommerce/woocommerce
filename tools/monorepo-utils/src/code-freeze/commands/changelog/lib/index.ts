@@ -382,13 +382,12 @@ function getTargetBranches(
 		.split( '.' )
 		.map( Number );
 
-	// Check if the target is greater than the trunk version
 	if (
 		targetMajor > currentMajor ||
 		( targetMajor === currentMajor && targetMinor >= currentMinor )
 	) {
 		Logger.notice(
-			`Target version ${ targetVersion } is not greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
 		);
 		return [];
 	}
