@@ -8466,29 +8466,30 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$stored_step_data = array(
-			'apple_pay'  => 'false',
-			'google_pay' => 'false',
-			'card'       => 'true',
+			'payment_methods' => array(
+				'apple_pay'  => 'false',
+				'google_pay' => 'false',
+				'card'       => 'true',
+			),
 		);
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function () use ( $stored_step_data ) {
-						return $stored_step_data;
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						if ( isset( $stored_step_data[ $entry ] ) ) {
+							return $stored_step_data[ $entry ];
+						}
+						return $default_value;
 					},
 				),
 			)
 		);
 
-		$this->mock_provider
-			->expects( $this->once() )
-			->method( 'get_recommended_payment_methods' )
-			->with( $location )
-			->willReturn( $recommended_pms );
-
+		// Act: Call method directly with recommended PMs (no provider call needed)
 		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
 
+		// Assert: apple_google should be false since both recommended states are false
 		$this->assertArrayHasKey( 'apple_google', $result );
 		$this->assertFalse( $result['apple_google'], 'apple_google should be false when both apple_pay and google_pay are disabled in recommended PMs' );
 	}
@@ -8499,7 +8500,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_onboarding_payment_methods_state_respects_explicit_apple_google_state() {
-		$location = 'US';
+		$location        = 'US';
 		$recommended_pms = array(
 			array(
 				'id'       => 'apple_pay',
@@ -8514,29 +8515,30 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$stored_step_data = array(
-			'apple_pay'    => 'true',
-			'google_pay'   => 'true',
-			'apple_google' => 'false', // Explicitly disabled despite individual states being true.
+			'payment_methods' => array(
+				'apple_pay'    => 'true',
+				'google_pay'   => 'true',
+				'apple_google' => 'false', // Explicitly disabled despite individual states being true.
+			),
 		);
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function () use ( $stored_step_data ) {
-						return $stored_step_data;
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						if ( isset( $stored_step_data[ $entry ] ) ) {
+							return $stored_step_data[ $entry ];
+						}
+						return $default_value;
 					},
 				),
 			)
 		);
 
-		$this->mock_provider
-			->expects( $this->once() )
-			->method( 'get_recommended_payment_methods' )
-			->with( $location )
-			->willReturn( $recommended_pms );
-
+		// Act: Call method directly with recommended PMs (no provider call needed)
 		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
 
+		// Assert: apple_google should respect the explicit false value
 		$this->assertArrayHasKey( 'apple_google', $result );
 		$this->assertFalse( $result['apple_google'], 'apple_google should respect explicit stored value of false' );
 	}
@@ -8547,7 +8549,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_onboarding_payment_methods_state_fallback_or_logic() {
-		$location = 'US';
+		$location        = 'US';
 		$recommended_pms = array(
 			array(
 				'id'       => 'apple_pay',
@@ -8562,16 +8564,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		);
 
 		$stored_step_data = array(
-			'apple_pay'  => 'true',
-			'google_pay' => 'false',
-			// No apple_google key - should fall back to OR logic.
+			'payment_methods' => array(
+				'apple_pay'  => 'true',
+				'google_pay' => 'false',
+				// No apple_google key - should fall back to OR logic.
+			),
 		);
 
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function () use ( $stored_step_data ) {
-						return $stored_step_data;
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						if ( isset( $stored_step_data[ $entry ] ) ) {
+							return $stored_step_data[ $entry ];
+						}
+						return $default_value;
 					},
 				),
 			)
@@ -8596,7 +8603,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_onboarding_payment_methods_state_uses_recommended_when_no_stored_state() {
-		$location = 'US';
+		$location        = 'US';
 		$recommended_pms = array(
 			array(
 				'id'       => 'apple_pay',
@@ -8615,8 +8622,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function () use ( $stored_step_data ) {
-						return $stored_step_data;
+					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
+						if ( isset( $stored_step_data[ $entry ] ) ) {
+							return $stored_step_data[ $entry ];
+						}
+						return $default_value;
 					},
 				),
 			)
@@ -8643,7 +8653,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	private function invoke_private_method( string $method_name, array $args = array() ) {
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( $method_name );
+		$method     = $reflection->getMethod( $method_name );
 		$method->setAccessible( true );
 		return $method->invokeArgs( $this->sut, $args );
 	}
