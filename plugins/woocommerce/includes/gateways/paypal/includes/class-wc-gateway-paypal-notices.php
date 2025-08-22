@@ -47,13 +47,16 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		// Skip if the notice has been dismissed.
-		if ( get_option( 'show_woocommerce_paypal_migration_notice' ) === 'no' ) {
+		if ( $this->paypal_migration_notice_dismissed() ) {
 			return;
 		}
 
-		echo '<div class="notice notice-warning is-dismissible">';
-		echo '<p>WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version 10.3.0, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend upgrading to <a href="https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/" target="_blank">PayPal Payments</a> extension.</p>';
-		echo '</div>';
+        $notice_html = '<div class="notice notice-warning is-dismissible">' .
+            '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'paypal_migration' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ) . '"></a>' .
+            '<p>WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version 10.3.0, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend upgrading to <a href="https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/" target="_blank">PayPal Payments</a> extension.</p>' .
+            '</div>';
+
+        echo wp_kses_post( $notice_html );
 	}
 
     /**
@@ -70,5 +73,14 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 		$this->add_paypal_migration_notice();
+	}
+
+    /**
+	 * Check if the installation notice has been dismissed.
+	 *
+	 * @return bool
+	 */
+	protected static function paypal_migration_notice_dismissed() {
+		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_notice', true );
 	}
 }
