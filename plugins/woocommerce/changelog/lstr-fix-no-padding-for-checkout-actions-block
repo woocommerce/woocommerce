@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix missing padding for checkout actions block
