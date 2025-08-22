@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure customer country gets reset to a valid option when allowed countries changes
