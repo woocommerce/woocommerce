@@ -37,7 +37,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		type: 'currency',
 		isReverseTrend: true,
 		labelTooltipText: __(
-			'Refunds include refunded shipping and tax amounts.',
+			'Returns include returned shipping and tax amounts.',
 			'woocommerce'
 		),
 	},
