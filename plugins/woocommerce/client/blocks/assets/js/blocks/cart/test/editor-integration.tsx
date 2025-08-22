@@ -10,18 +10,6 @@ import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
-// Mock problematic dependencies that cause SVG parsing issues
-jest.mock( '@automattic/tour-kit', () => ( {
-	__esModule: true,
-	default: () => null,
-	TourKit: () => null,
-} ) );
-
-jest.mock( '@automattic/components', () => ( {
-	__esModule: true,
-	Card: ( { children }: { children: React.ReactNode } ) => children,
-} ) );
-
 /**
  * Internal dependencies
  */
