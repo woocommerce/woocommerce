@@ -174,8 +174,8 @@ class OrderController {
 
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
-		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
 		$this->validate_addresses( $order, $needs_shipping );
+		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
 
 		// Perform custom validations.
 		$this->perform_custom_order_validation( $order );
