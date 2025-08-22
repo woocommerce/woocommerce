@@ -564,3 +564,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
 	}
 }
+
+// Initialize PayPal admin notices handler on 'init' hook to ensure the class loads before admin_init and admin_notices hooks fire.
+add_action(
+	'init',
+	function () {
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+		new WC_Gateway_Paypal_Notices();
+	}
+);
