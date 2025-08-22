@@ -49,7 +49,7 @@ const updateReleaseChangelogs = async (
 		'NEXT_CHANGELOG.md'
 	);
 
-	var readme  = await readFile( readmeFile, 'utf-8' );
+	let readme = await readFile( readmeFile, 'utf-8' );
 	let nextLog = await readFile( nextLogFile, 'utf-8' );
 
 	nextLog = nextLog.replace(
@@ -84,7 +84,9 @@ const updateReleaseChangelogs = async (
 	}
 
 	// Ensure there are exactly two empty lines between entries and 'See changelog for all versions'.
-	readme = readme.trim().replace( /\n+(\[See changelog for all versions\])/, `\n\n\n$1` );
+	readme = readme
+		.trim()
+		.replace( /\n+(\[See changelog for all versions\])/, `\n\n\n$1` );
 
 	await writeFile( readmeFile, readme );
 };
