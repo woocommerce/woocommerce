@@ -52,3 +52,4 @@ class EmailContent extends AbstractBlock {
 		return BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER;
 	}
 }
+
