@@ -310,19 +310,25 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 		// Log for debugging
 		error_log( "WooCommerce Product Export: Created job {$job_id} for {$format} export" );
 
-		// Use ActionScheduler with immediate processing trigger
+		// Use ActionScheduler with batched processing - start with batch 1
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			// Enqueue the async action
+			// Add batch tracking to export params
+			$export_params['current_batch'] = 1;
+			$export_params['total_batches'] = 0; // Will be calculated in first batch
+
+			// Enqueue the first batch action
 			$action_id = as_enqueue_async_action(
-				'woocommerce_product_export_background_process',
+				'woocommerce_product_export_batch_process',
 				array( $export_params ),
 				'wc_product_export'
 			);
-			error_log( "WooCommerce Product Export: Scheduled async action {$action_id} for job {$job_id}" );
+			error_log( "WooCommerce Product Export: Scheduled batch 1 action {$action_id} for job {$job_id}" );
 
 			// Store ActionScheduler ID for status tracking
 			$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
 			$job_data['action_id'] = $action_id;
+			$job_data['current_batch'] = 1;
+			$job_data['total_batches'] = 0;
 			update_option( "wc_product_export_job_{$job_id}", $job_data );
 
 			// Trigger processing in a background thread using non-blocking HTTP request
@@ -391,6 +397,8 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			'created_at' => $job_data['created_at'],
 			'progress' => isset( $job_data['progress'] ) ? $job_data['progress'] : 0,
 			'total_products' => isset( $job_data['total_products'] ) ? $job_data['total_products'] : 0,
+			'current_batch' => isset( $job_data['current_batch'] ) ? $job_data['current_batch'] : 0,
+			'total_batches' => isset( $job_data['total_batches'] ) ? $job_data['total_batches'] : 0,
 			'action_scheduler_status' => $action_status, // Debug info
 		);
 
@@ -1114,6 +1122,202 @@ class WC_REST_Product_Export_Controller extends WC_REST_Controller {
 			// Always release the lock
 			delete_option( $lock_key );
 			error_log( "WooCommerce Product Export: Released lock for job {$job_id}" );
+		}
+	}
+
+	/**
+	 * Process product export batch in background.
+	 * This processes one batch at a time, similar to AJAX approach.
+	 *
+	 * @param array $export_params Export parameters including job_id and current_batch.
+	 */
+	public function process_export_batch( $export_params ) {
+		error_log( 'WooCommerce Product Export: Batch process handler called with params: ' . wp_json_encode( $export_params ) );
+
+		// Get job ID and batch info from export parameters
+		$job_id = isset( $export_params['job_id'] ) ? $export_params['job_id'] : null;
+		$current_batch = isset( $export_params['current_batch'] ) ? intval( $export_params['current_batch'] ) : 1;
+
+		if ( ! $job_id ) {
+			error_log( 'WooCommerce Product Export: No job ID provided in batch export parameters' );
+			return;
+		}
+
+		// Implement mutex lock to prevent duplicate execution
+		$lock_key = "wc_export_batch_lock_{$job_id}_{$current_batch}";
+		$lock_value = time();
+		$lock_timeout = 300; // 5 minutes
+
+		// Try to acquire lock
+		if ( ! add_option( $lock_key, $lock_value, '', 'no' ) ) {
+			// Lock exists, check if it's stale
+			$existing_lock = get_option( $lock_key );
+			if ( $existing_lock && ( time() - $existing_lock ) < $lock_timeout ) {
+				error_log( "WooCommerce Product Export: Batch {$current_batch} for job {$job_id} is already running, skipping duplicate execution" );
+				return;
+			}
+			// Stale lock, update it
+			update_option( $lock_key, $lock_value );
+		}
+
+		try {
+			// Get current job data
+			$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
+
+			// Update job status to processing for first batch
+			if ( 1 === $current_batch && ( ! isset( $job_data['status'] ) || 'pending' === $job_data['status'] ) ) {
+				$job_data['status'] = 'processing';
+				$job_data['started_at'] = current_time( 'mysql' );
+				update_option( "wc_product_export_job_{$job_id}", $job_data );
+				error_log( "WooCommerce Product Export: Starting job {$job_id}, batch {$current_batch}" );
+			}
+
+			$format = $export_params['format'];
+
+			// Create the appropriate exporter
+			if ( 'json' === $format ) {
+				include_once WC_ABSPATH . 'includes/export/class-wc-product-json-exporter.php';
+				$exporter = new WC_Product_JSON_Exporter();
+			} else {
+				include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
+				$exporter = new WC_Product_CSV_Exporter();
+			}
+
+			// Set up the exporter with the provided parameters (same as before)
+			if ( ! empty( $export_params['columns'] ) ) {
+				$exporter->set_column_names( $export_params['columns'] );
+			}
+
+			if ( ! empty( $export_params['selected_columns'] ) ) {
+				$exporter->set_columns_to_export( $export_params['selected_columns'] );
+			}
+
+			if ( ! empty( $export_params['export_meta'] ) ) {
+				$exporter->enable_meta_export( true );
+			}
+
+			if ( ! empty( $export_params['export_types'] ) ) {
+				$exporter->set_product_types_to_export( $export_params['export_types'] );
+			}
+
+			if ( ! empty( $export_params['export_category'] ) ) {
+				$exporter->set_product_category_to_export( $export_params['export_category'] );
+			}
+
+			if ( ! empty( $export_params['export_product_ids'] ) ) {
+				$ids_raw = explode( ',', sanitize_text_field( $export_params['export_product_ids'] ) );
+				if ( ! empty( $ids_raw ) ) {
+					$exporter->set_product_ids_to_export( $ids_raw );
+				}
+			}
+
+			$exporter->set_filename( $export_params['filename'] );
+
+			// Set the current batch/page for this exporter
+			$exporter->set_page( $current_batch );
+
+			// Process this single batch
+			error_log( "WooCommerce Product Export: Processing batch {$current_batch} for job {$job_id}" );
+			$exporter->generate_file();
+
+			// Check if this batch completed the export
+			$percent_complete = $exporter->get_percent_complete();
+			$is_complete = ( 100 === $percent_complete );
+
+			// Calculate total batches on first run
+			if ( 1 === $current_batch && 0 === intval( $job_data['total_batches'] ) ) {
+				// Estimate total batches based on total products and batch size (1000)
+				$total_products = $this->get_total_products_count( $exporter );
+				$batch_size = 250; // Same as AJAX version
+				$total_batches = ceil( $total_products / $batch_size );
+
+				$job_data['total_batches'] = $total_batches;
+				$job_data['total_products'] = $total_products;
+				error_log( "WooCommerce Product Export: Job {$job_id} will process {$total_batches} batches for {$total_products} products" );
+			}
+
+			// Update progress
+			$total_batches = intval( $job_data['total_batches'] );
+			$progress = $total_batches > 0 ? min( 100, round( ( $current_batch / $total_batches ) * 100 ) ) : $percent_complete;
+
+			$job_data['current_batch'] = $current_batch;
+			$job_data['progress'] = $progress;
+
+			if ( $is_complete ) {
+				// Export is complete
+				$job_data['status'] = 'complete';
+				$job_data['completed_at'] = current_time( 'mysql' );
+				$job_data['progress'] = 100;
+				update_option( "wc_product_export_job_{$job_id}", $job_data );
+				error_log( "WooCommerce Product Export: Job {$job_id} completed after {$current_batch} batches" );
+			} else {
+				// Schedule next batch
+				$next_batch = $current_batch + 1;
+				$next_export_params = $export_params;
+				$next_export_params['current_batch'] = $next_batch;
+
+				if ( function_exists( 'as_enqueue_async_action' ) ) {
+					$next_action_id = as_enqueue_async_action(
+						'woocommerce_product_export_batch_process',
+						array( $next_export_params ),
+						'wc_product_export'
+					);
+
+					// Update job data with next action ID
+					$job_data['action_id'] = $next_action_id;
+					update_option( "wc_product_export_job_{$job_id}", $job_data );
+
+					error_log( "WooCommerce Product Export: Scheduled batch {$next_batch} with action {$next_action_id} for job {$job_id}" );
+				} else {
+					error_log( "WooCommerce Product Export: Cannot schedule next batch - ActionScheduler not available" );
+					// Mark as failed
+					$job_data['status'] = 'failed';
+					$job_data['error_message'] = 'ActionScheduler not available for next batch';
+					update_option( "wc_product_export_job_{$job_id}", $job_data );
+				}
+			}
+
+		} catch ( Exception $e ) {
+			// Update job status to failed
+			$job_data = get_option( "wc_product_export_job_{$job_id}", array() );
+			$job_data['status'] = 'failed';
+			$job_data['failed_at'] = current_time( 'mysql' );
+			$job_data['error_message'] = $e->getMessage();
+			$job_data['current_batch'] = $current_batch;
+			update_option( "wc_product_export_job_{$job_id}", $job_data );
+
+			error_log( "WooCommerce Product Export Batch {$current_batch} Failed: " . $e->getMessage() );
+		} finally {
+			// Always release the lock
+			delete_option( $lock_key );
+			error_log( "WooCommerce Product Export: Released lock for job {$job_id} batch {$current_batch}" );
+		}
+	}
+
+	/**
+	 * Get total products count for progress calculation.
+	 *
+	 * @param WC_Product_CSV_Exporter|WC_Product_JSON_Exporter $exporter The exporter instance.
+	 * @return int Total products count.
+	 */
+	private function get_total_products_count( $exporter ) {
+		// Use reflection to access the protected method that counts total products
+		try {
+			$reflection = new ReflectionClass( $exporter );
+			$method = $reflection->getMethod( 'get_total_rows' );
+			$method->setAccessible( true );
+			return $method->invoke( $exporter );
+		} catch ( Exception $e ) {
+			error_log( 'WooCommerce Product Export: Could not get total rows count: ' . $e->getMessage() );
+			// Fallback to a basic product count
+			$args = array(
+				'post_type' => 'product',
+				'post_status' => 'publish',
+				'posts_per_page' => -1,
+				'fields' => 'ids',
+			);
+			$products = get_posts( $args );
+			return count( $products );
 		}
 	}
 

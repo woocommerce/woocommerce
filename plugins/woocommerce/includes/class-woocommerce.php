@@ -879,6 +879,7 @@ final class WooCommerce {
 		// Must be registered here so it's available when Action Scheduler runs via cron
 		// Registering in `WC_REST_Product_Export_Controller` constructor did not work
 		add_action( 'woocommerce_product_export_background_process', array( $this, 'handle_product_export_background' ) );
+		add_action( 'woocommerce_product_export_batch_process', array( $this, 'handle_product_export_batch' ) );
 
 		/**
 		 * Action triggered after WooCommerce initialization finishes.
@@ -1497,6 +1498,23 @@ final class WooCommerce {
 		// Create an instance and call the processing method
 		$controller = new WC_REST_Product_Export_Controller();
 		$controller->process_export_background( $export_params );
+	}
+
+	/**
+	 * Handle product export batch processing.
+	 * This ensures the export controller is loaded when Action Scheduler runs.
+	 *
+	 * @param array $export_params Export parameters.
+	 */
+	public function handle_product_export_batch( $export_params ) {
+		// Ensure the export controller class is loaded
+		if ( ! class_exists( 'WC_REST_Product_Export_Controller' ) ) {
+			include_once WC_ABSPATH . 'includes/rest-api/Controllers/Version3/class-wc-rest-product-export-controller.php';
+		}
+
+		// Create an instance and call the batch processing method
+		$controller = new WC_REST_Product_Export_Controller();
+		$controller->process_export_batch( $export_params );
 	}
 
 	/**
