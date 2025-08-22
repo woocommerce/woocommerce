@@ -225,7 +225,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		}
 
 		if ( $draft_order ) {
-			$this->order_controller->update_order_from_cart( $draft_order, $customer );
+			$this->order_controller->update_order_from_cart( $draft_order, true, $customer );
 
 			// Save the draft order with fresh data immediately.
 			$draft_order->save();

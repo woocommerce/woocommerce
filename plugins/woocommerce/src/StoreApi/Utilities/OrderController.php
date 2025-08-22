@@ -64,10 +64,11 @@ class OrderController {
 	/**
 	 * Update an order using data from the current cart.
 	 *
-	 * @param \WC_Order $order The order object to update.
-	 * @param boolean   $update_totals Whether to update totals or not.
+	 * @param \WC_Order         $order The order object to update.
+	 * @param boolean           $update_totals Whether to update totals or not.
+	 * @param \WC_Customer|null $customer A customer object to use as the source of billing and shipping addresses. If null, will use the current session customer.
 	 */
-	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
+	public function update_order_from_cart( \WC_Order $order, $update_totals = true, \WC_Customer $customer = null ) {
 		/**
 		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
 		 * calculate tax for an order to match the current address of the customer.
@@ -111,7 +112,7 @@ class OrderController {
 
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
-		$this->update_addresses_from_cart( $order );
+		$this->update_addresses_from_cart( $order, $customer );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 		$order->set_customer_id( get_current_user_id() );
