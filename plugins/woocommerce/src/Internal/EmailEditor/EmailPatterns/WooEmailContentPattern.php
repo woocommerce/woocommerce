@@ -68,7 +68,7 @@ class WooEmailContentPattern extends Abstract_Pattern {
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woo-email-content">##WOO_CONTENT##</div>
+<div class="wp-block-woocommerce-email-content">##WOO_CONTENT##</div>
 <!-- /wp:woocommerce/email-content -->
 
 <!-- wp:buttons {"layout":{"justifyContent":"center"}} -->
