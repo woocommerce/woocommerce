@@ -824,3 +824,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->transact_onboarding_complete = true;
 	}
 }
+
+// Initialize PayPal admin notices handler on 'init' hook to ensure the class loads before admin_init and admin_notices hooks fire.
+add_action(
+	'init',
+	function () {
+		if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+			return;
+		}
+
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+		new WC_Gateway_Paypal_Notices();
+	}
+);

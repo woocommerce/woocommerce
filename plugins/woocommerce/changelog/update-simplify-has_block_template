@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Simplify has_block_template function
+
+

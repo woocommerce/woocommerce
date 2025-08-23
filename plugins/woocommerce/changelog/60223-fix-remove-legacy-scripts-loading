@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit loading legacy single product scripts only for legacy blocks
