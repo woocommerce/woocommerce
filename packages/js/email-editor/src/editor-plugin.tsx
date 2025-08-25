@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useLayoutEffect, useEffect, useState } from 'react';
-import { select, dispatch, useDispatch } from '@wordpress/data';
+import { select, dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
 /**
@@ -19,17 +19,29 @@ const Editor = () => {
 	// Set styles directly to settings overwriting the automatically loaded theme styles
 	const [ styles ] = useEmailCss();
 	const { updateEditorSettings } = useDispatch( editorStore );
+	const currentPost = useSelect( ( select ) => select( editorStore ).getCurrentPost() );
+
 	useEffect( () => {
 		console.log( 'UPDATING Styles', styles );
 		if ( ! styles ) {
 			return;
 		}
 		const editorSettings = select( editorStore ).getEditorSettings();
+		const stylesCallbacks = {
+			[ currentPost.type ]: () => {
+				return styles;
+			},
+		};
 		updateEditorSettings( {
 			...editorSettings,
-			styles,
+		// @ts-expect-error - stylesCallbacks is not typed
+			stylesCallbacks: {
+				// @ts-expect-error - stylesCallbacks is not typed
+				...editorSettings.stylesCallbacks || {},
+				...stylesCallbacks,
+			},
 		} );
-	}, [ styles ] );
+	}, [ styles, currentPost.type, updateEditorSettings] );
 
 	return (
 		<>
