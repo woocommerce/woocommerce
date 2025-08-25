@@ -250,10 +250,6 @@ const { actions, state } = store<
 
 				const { id, min, step } = productObject;
 
-				if ( typeof step !== 'number' || typeof min !== 'number' ) {
-					return true;
-				}
-
 				const currentQuantity = quantity[ id ] || 0;
 
 				return currentQuantity - step >= min;
@@ -280,10 +276,6 @@ const { actions, state } = store<
 				}
 
 				const { id, max, step } = productObject;
-
-				if ( typeof step !== 'number' || typeof max !== 'number' ) {
-					return true;
-				}
 
 				const currentQuantity = quantity[ id ] || 0;
 
@@ -394,14 +386,6 @@ const { actions, state } = store<
 
 				const { max, min, step } = productObject;
 
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
-
 				const newValue = currentValue + step;
 
 				if ( newValue <= max ) {
@@ -439,15 +423,7 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { min, max, step } = productObject;
-
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
+				const { min, step } = productObject;
 
 				let newValue = currentValue - step;
 
