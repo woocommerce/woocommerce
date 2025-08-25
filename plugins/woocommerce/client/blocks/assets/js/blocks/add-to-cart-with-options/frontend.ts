@@ -218,11 +218,6 @@ const { actions, state } = store<
 				return [];
 			},
 			get isFormValid(): boolean {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return true;
-				}
-
 				return state.validationErrors.length === 0;
 			},
 			get allowsDecrease() {
