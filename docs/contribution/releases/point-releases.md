@@ -21,6 +21,7 @@ When considering the exact time to create a point release, use your best judgeme
 - If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This helps consolidate fixes and reduces the number of patch releases.
 - For high-severity or critical issues, prioritize releasing as soon as possible to minimize impact on users.
 - For security issues, coordinate with the team that implemented the security fix to help determine urgency if it is not clear.
+- Consider whether other known issues are already being worked on that could be included in the same release.
 
 ## The Point Release Requests (PRR) flow
 
