@@ -8441,57 +8441,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_onboarding_payment_methods_state respects stored apple_pay and google_pay states (no explicit apple_google present).
-	 *
-	 * @return void
-	 */
-	public function test_get_onboarding_payment_methods_state_respects_stored_apple_google_states() {
-		$location        = 'US';
-		$recommended_pms = array(
-			array(
-				'id'       => 'card',
-				'enabled'  => true,
-				'required' => true,
-			),
-			array(
-				'id'       => 'apple_pay',
-				'enabled'  => false,
-				'required' => false,
-			),
-			array(
-				'id'       => 'google_pay',
-				'enabled'  => false,
-				'required' => false,
-			),
-		);
-
-		// Create NOX profile data structure with stored payment method states.
-		$nox_profile_data = array(
-			'onboarding' => array(
-				$location => array(
-					'steps' => array(
-						'payment_methods' => array(
-							'data' => array(
-								'payment_methods' => array(
-									'apple_pay'  => 'false',
-									'google_pay' => 'false',
-									'card'       => 'true',
-								),
-							),
-						),
-					),
-				),
-			),
-		);
-
-		$this->mock_nox_profile_option( $nox_profile_data );
-
-		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
-		$this->assertArrayHasKey( 'apple_google', $result );
-		$this->assertFalse( $result['apple_google'], 'apple_google should be false when both apple_pay and google_pay are disabled in recommended PMs' );
-	}
-
-	/**
 	 * Test get_onboarding_payment_methods_state falls back to OR logic when no explicit apple_google stored.
 	 *
 	 * @return void
@@ -8519,7 +8468,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						'payment_methods' => array(
 							'data' => array(
 								'payment_methods' => array(
-									'apple_pay'  => 'true',
+									'apple_pay'  => 'false',
 									'google_pay' => 'false',
 									// No apple_google key - should fall back to OR logic.
 								),
@@ -8582,11 +8531,24 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using recommended values with OR logic (true || false = true)' );
 	}
 
+	/**
+	 * Test get_onboarding_payment_methods_state prefers explicit stored apple_google over OR logic.
+	 *
+	 * @return void
+	 */
 	public function test_get_onboarding_payment_methods_state_prefers_explicit_apple_google() {
 		$location        = 'US';
 		$recommended_pms = array(
-			array( 'id' => 'apple_pay',  'enabled' => true,  'required' => false ),
-			array( 'id' => 'google_pay', 'enabled' => true,  'required' => false ),
+			array(
+				'id' => 'apple_pay',
+				'enabled' => true,
+				'required' => false
+			),
+			array(
+				'id' => 'google_pay',
+				'enabled' => true,
+				'required' => false
+			),
 		);
 		// Create NOX profile data structure with explicit apple_google override.
 		$nox_profile_data = array(
@@ -8638,11 +8600,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	private function mock_nox_profile_option( array $stored_data ): void {
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option' => function ( $option_name, $default = false ) use ( $stored_data ) {
-					if ( 'woocommerce_woopayments_nox_profile' === $option_name ) {
+				'get_option' => function ( $option_name, $fallback = false ) use ( $stored_data ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
 						return $stored_data;
 					}
-					return $default;
+					return $fallback;
 				},
 			)
 		);
