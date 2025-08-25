@@ -217,20 +217,10 @@ class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Migrates a guest session to a user session.
-	 *
-	 * @param int $user_id The user ID to migrate to.
 	 */
-<<<<<<< HEAD
-	private function migrate_guest_session_to_user_session( int $user_id ) {
-		$guest_session_id   = $this->_customer_id;
-		$user_session_id    = strval( $user_id );
-		$guest_session_data = (array) $this->_data;
-		$user_session_data  = (array) $this->get_session( $user_session_id, array() );
-=======
 	private function migrate_guest_session_to_user_session() {
 		$guest_session_id = $this->_customer_id;
 		$user_session_id  = (string) get_current_user_id();
->>>>>>> b2e8cb1d81 (Revert "Remove persistent carts in favour of longer duration sessions" (#60595))
 
 		$this->_data        = $this->get_session( $guest_session_id, array() );
 		$this->_dirty       = true;
