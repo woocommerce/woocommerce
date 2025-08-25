@@ -158,7 +158,7 @@ jobs:
         with:
           script: |
             const { run } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
-            run( `${{ inputs.branch }}`, { github, context } );
+            await run( `${{ inputs.branch }}`, { github, context } );
 
   build:
     name: Build release zip file

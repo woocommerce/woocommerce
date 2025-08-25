@@ -48,8 +48,6 @@ const findPreviousVersion = async ( version, { github, context } ) => {
     allTags.push( version );
   }
 
-  console.log( allTags );
-
   // Sort tags.
   allTags.sort( (a, b) => Number( a.split( '.' ).at( -1 ) ) - Number( b.split( '.' ).at( -1 ) ) );
 
@@ -108,6 +106,48 @@ const readFileFromRef = async ( ref, path, { github, context } ) => {
 };
 
 /**
+ * Parses a db update key into its components.
+ *
+ * @param {string} key
+ * @returns {{ mainVersion: number, patch: number, suffix: number }}
+ */
+const parseDbUpdateKey = ( key ) => {
+  const m = key.match( /(?<main>\d+\.\d+)\.(?<patch>\d+)(-(?<suffix>\d+))?/ );
+
+  if ( ! m ) {
+    throw new Error( `Could not parse db update key '${ key }'.` );
+  }
+
+  return {
+    mainVersion: Number( m.groups['main'] ),
+    patch: parseInt( m.groups['patch'] || 0 ),
+    suffix: parseInt( m.groups['suffix'] || 0 ),
+  };
+};
+
+/**
+ * Checks if a db update key is greater than another.
+ *
+ * @param {string} key1
+ * @param {string} key2
+ * @returns {boolean} True if key1 is greater than key2.
+ */
+const dbUpdateKeyGreaterThan = ( key1, key2 ) => {
+  const v1 = parseDbUpdateKey( key1 );
+  const v2 = parseDbUpdateKey( key2 );
+
+  if ( v1.mainVersion !== v2.mainVersion ) {
+    return v1.mainVersion > v2.mainVersion;
+  }
+
+  if ( v1.patch !== v2.patch ) {
+    return v1.patch > v2.patch;
+  }
+
+  return v1.suffix > v2.suffix;
+};
+
+/**
  * Performs a check to ensure db udpates are correct in a given ref.
  *
  * @param {string} currentRef
@@ -138,15 +178,20 @@ const run = async ( currentRef, { github, context } ) => {
 
   // Compare db updates.
   const key1 = Array.from( previousDbUpdates.keys() ).pop();
-  const [ base1, suffix1 ] = key1.split( '-' );
-
   const key2 = Array.from( currentDbUpdates.keys() ).pop();
-  const [ base2, suffix2 ] = key2.split( '-' );
+
+  // key2 shouldn't be truly ahead of version.
+  if ( dbUpdateKeyGreaterThan( key2.replace( /-.*$/, '' ), version.replace( /-.*$/, '' ) ) ) {
+    throw new Error(
+      `DB update key '${ key2 }' is ahead of the plugin version '${ version.replace( /-.*$/, '' ) }'.`
+    );
+  }
 
   // If the keys are identical, ensure no new callback was added. Removing callbacks is allowed.
   if ( key1 === key2 ) {
     const updates1 = previousDbUpdates.get( key1 );
-    const updates2 = currentDbUpdates.get( key2 );
+    const updates2 = currentDbUpdates.get( key2 )
+    const [ base1, suffix1 ] = key1.split( '-' );
 
     updates2.forEach(
       ( e ) => {
@@ -159,17 +204,13 @@ const run = async ( currentRef, { github, context } ) => {
     return;
   }
 
-  // If the basis are different, the new one must have a higher patch number.
-  if ( base1 !== base2 && ( Number( base2.split( '.' ).at( -1 )  ) > Number( base1.split( '.' ).at( -1 ) ) ) ) {
-    return;
+  // If the keys are different, key2 must be > key1.
+  if ( ! dbUpdateKeyGreaterThan( key2, key1 ) ) {
+    throw new Error(
+      `In order to preserve the correct order of db updates, an update key greater than '${ key1 }' is required in version '${ version }'. Found '${ key2 }' instead. An empty array is allowed to skip removed db updates.`
+    );
   }
 
-  // If the basis are equal, the new one must have a higher suffix.
-  if ( base1 === base2 && ( Number( suffix2 || 0 ) > Number( suffix1 || 0 ) ) ) {
-    return;
-  }
-
-  throw new Error( `DB update callbacks under key '${ key1 }' were removed in version '${ version }'. Use an empty array if necessary to maintain the correct order.` );
 };
 
 module.exports = { readDbUpdatesFromString, run };
