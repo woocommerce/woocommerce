@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -66,16 +66,20 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
-const getProductData = (
+export const getProductData = (
 	id: number,
 	productType: string,
-	availableVariations: AvailableVariation[],
-	selectedAttributes: SelectedAttributes[]
-): ( ProductData & { id: number } ) | null => {
+	availableVariations?: AvailableVariation[],
+	selectedAttributes?: SelectedAttributes[]
+) => {
 	let productId = id;
 	let productData: ProductData | undefined;
 
-	if ( productType === 'variable' ) {
+	if (
+		productType === 'variable' &&
+		availableVariations &&
+		selectedAttributes
+	) {
 		const matchedVariation = getMatchedVariation(
 			availableVariations,
 			selectedAttributes
@@ -171,6 +175,7 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 	};
 	actions: {
+		validateQuantity: ( value: number ) => void;
 		setQuantity: ( value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
@@ -212,17 +217,10 @@ const { actions, state } = store<
 
 				return [];
 			},
-
 			get isFormValid(): boolean {
 				const context = getContext< Context >();
 				if ( ! context ) {
 					return true;
-				}
-
-				const { productType, quantity } = context;
-
-				if ( productType === 'grouped' ) {
-					return Object.values( quantity ).some( ( qty ) => qty > 0 );
 				}
 
 				return state.validationErrors.length === 0;
@@ -298,6 +296,30 @@ const { actions, state } = store<
 			},
 		},
 		actions: {
+			validateQuantity( value: number ) {
+				actions.clearErrors( 'invalid-quantities' );
+
+				const context = getContext< Context >();
+
+				// If selected quantity is invalid, add an error.
+				const { variationId } = state;
+				const id = variationId || context.productId;
+				const product = getProductData( id, 'grouped' );
+
+				if (
+					value === 0 ||
+					( product &&
+						( value < product.min || value > product.max ) )
+				) {
+					const { errorMessages } = getConfig();
+
+					actions.addError( {
+						code: 'invalidQuantities',
+						message: errorMessages?.invalidQuantities || '',
+						group: 'invalid-quantities',
+					} );
+				}
+			},
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
 
@@ -319,6 +341,8 @@ const { actions, state } = store<
 						[ id ]: value,
 					};
 				}
+
+				actions.validateQuantity( value );
 			},
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
@@ -461,20 +485,21 @@ const { actions, state } = store<
 			handleQuantityChange: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
-					return;
-				}
-
-				const { childProductId } = getContext< Context >();
-				const { currentValue } = inputData;
-
 				const {
+					childProductId,
 					productType,
 					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
+
+				// In grouped products, we allow resetting the inputs to ''.
+				if (
+					event.target.value.trim() === '' &&
+					productType === 'grouped'
+				) {
+					return;
+				}
 
 				const id = childProductId || productId;
 				const productObject = getProductData(
@@ -488,26 +513,13 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { min, max, step } = productObject;
+				const { min } = productObject;
 
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
-
-				let newValue = Math.min(
-					max ?? Infinity,
-					Math.max( min, currentValue )
-				);
-
-				// In grouped product children, we allow decreasing the value
-				// down to 0, even if the minimum value is greater than 0.
-				if ( productType === 'grouped' && currentValue < min ) {
-					newValue = 0;
-				}
+				const newValue =
+					event.target.value.trim() !== '' &&
+					isFinite( event.target.value )
+						? event.target.value
+						: min;
 
 				if ( event.target.value !== newValue.toString() ) {
 					actions.setQuantity( newValue );

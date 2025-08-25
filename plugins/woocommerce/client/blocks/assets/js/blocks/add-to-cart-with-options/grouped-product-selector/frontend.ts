@@ -11,8 +11,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-
-import { getNewQuantity } from '../frontend';
+import { getNewQuantity, getProductData } from '../frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -21,11 +20,11 @@ const universalLock =
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
-			setQuantity: ( value: number ) => void;
+			validateQuantity: () => void;
 			addToCart: () => void;
 		};
 		callbacks: {
-			validateGrouped: () => void;
+			validateQuantities: () => void;
 		};
 	};
 
@@ -33,6 +32,50 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
+			validateQuantity() {
+				actions.clearErrors( 'invalid-quantities' );
+
+				const { errorMessages } = getConfig();
+				const context =
+					getContext< AddToCartWithOptionsStoreContext >();
+
+				// Validate that at least one product quantity is above 0.
+				const hasNonZeroQuantity = Object.values(
+					context.quantity
+				).some( ( qty ) => qty > 0 );
+
+				if ( ! hasNonZeroQuantity ) {
+					actions.addError( {
+						code: 'groupedProductAddToCartMissingItems',
+						message:
+							errorMessages?.groupedProductAddToCartMissingItems ||
+							'',
+						group: 'invalid-quantities',
+					} );
+
+					return;
+				}
+
+				// Validate that all product quantities are within the min and max (or 0).
+				const hasInvalidQuantity = Object.entries(
+					context.quantity
+				).some( ( [ id, qty ] ) => {
+					const product = getProductData( Number( id ), 'grouped' );
+					return (
+						qty !== 0 &&
+						( qty < ( product?.min ?? 0 ) ||
+							qty > ( product?.max ?? Infinity ) )
+					);
+				} );
+
+				if ( hasInvalidQuantity ) {
+					actions.addError( {
+						code: 'invalidQuantities',
+						message: errorMessages?.invalidQuantities || '',
+						group: 'invalid-quantities',
+					} );
+				}
+			},
 			*addToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
@@ -75,27 +118,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 			},
 		},
 		callbacks: {
-			validateGrouped: () => {
-				actions.clearErrors( 'grouped-product' );
-
-				const { errorMessages } = getConfig();
-
-				const { quantity } =
-					getContext< AddToCartWithOptionsStoreContext >();
-
-				const hasNonZeroQuantity = Object.values( quantity ).some(
-					( val ) => val > 0
-				);
-
-				if ( ! hasNonZeroQuantity ) {
-					actions.addError( {
-						code: 'groupedProductAddToCartMissingItems',
-						message:
-							errorMessages?.groupedProductAddToCartMissingItems ||
-							'',
-						group: 'grouped-product',
-					} );
-				}
+			validateQuantities() {
+				actions.validateQuantity();
 			},
 		},
 	},

@@ -355,6 +355,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await quantityInput.fill( '8' );
 
 			await expect( increaseQuantityButton ).toBeDisabled();
+
+			// Make sure quantities below min are not allowed even when manually filled.
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart: “T-Shirt”',
+			} );
+
+			await quantityInput.fill( '3' );
+			await expect( addToCartButton ).toHaveClass( /disabled/ );
+			await expect( reduceQuantityButton ).toBeDisabled();
+			await expect( increaseQuantityButton ).toBeEnabled();
+
+			// Verify setting the input to an empty string resets the value to the min.
+			await quantityInput.fill( '' );
+			await quantityInput.blur();
+			await expect( quantityInput ).toHaveValue( '4' );
 		} );
 
 		await test.step( 'in grouped products', async () => {
@@ -400,10 +415,19 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( reduceQuantityButton ).toBeDisabled();
 
 			// Make sure quantities below min are not allowed even when manually filled.
-			await quantityInput.fill( '3' );
-			await quantityInput.blur();
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
 
-			await expect( quantityInput ).toHaveValue( '0' );
+			await quantityInput.fill( '3' );
+			await expect( addToCartButton ).toHaveClass( /disabled/ );
+			await expect( reduceQuantityButton ).toBeEnabled();
+			await expect( increaseQuantityButton ).toBeEnabled();
+
+			// Verify empty strings are not reset in grouped products.
+			await quantityInput.fill( '' );
+			await quantityInput.blur();
+			await expect( quantityInput ).toHaveValue( '' );
 		} );
 	} );
 
