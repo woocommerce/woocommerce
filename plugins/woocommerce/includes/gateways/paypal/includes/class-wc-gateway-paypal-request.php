@@ -154,6 +154,9 @@ class WC_Gateway_Paypal_Request {
 
 			$redirect_url = $this->get_approve_link( $http_code, $response_data );
 
+			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
+			$order->save();
+
 			return array(
 				'id'           => $response_data['id'],
 				'redirect_url' => $redirect_url,
@@ -231,47 +234,6 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		return $response;
-	}
-
-	private function get_shipping_options( $order ) {
-		wc_load_cart();
-		WC()->cart->get_cart();
-		WC()->cart->calculate_shipping();
-
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
-		$chosen_shipping_method  = $chosen_shipping_methods[0] ?? false;
-
-		$country  = $order->get_billing_country();
-		$state    = $order->get_billing_state();
-		$postcode = $order->get_billing_postcode();
-		$city     = $order->get_billing_city();
-		WC()->customer->set_location( $country, $state, $postcode, $city );
-		WC()->customer->set_shipping_location( $country, $state, $postcode, $city );
-		WC()->customer->set_calculated_shipping( true );
-		WC()->customer->save();
-
-		$packages = WC()->shipping()->get_packages();
-		$options  = array();
-		foreach ( $packages as $package ) {
-			$rates = $package['rates'] ?? array();
-			foreach ( $rates as $rate ) {
-				if ( ! $rate instanceof \WC_Shipping_Rate ) {
-					continue;
-				}
-				$options[] = array(
-					'id'       => $rate->get_id(),
-					'type'     => 'SHIPPING',
-					'amount'   => array(
-						'currency_code' => $order->get_currency(),
-						'value'         => $rate->get_cost(),
-					),
-					'label'    => $rate->get_label(),
-					'selected' => $rate->get_id() === $chosen_shipping_method,
-				);
-			}
-		}
-
-		return $options;
 	}
 
 	/**
@@ -436,6 +398,10 @@ class WC_Gateway_Paypal_Request {
 						'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
 						'locale'              => str_replace( '_', '-', get_locale() ),
+						'order_update_callback_config' => array(
+							'callback_events' => array( 'SHIPPING_ADDRESS' ),
+							'callback_url'    => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/shipping-callback' ),
+						),
 					),
 				),
 			),

@@ -93,7 +93,6 @@ class WC_Gateway_Paypal_Buttons {
 					'storeAPICart'          => get_site_url( null, '/wp-json/wc/store/v1/cart' ),
 					'storeAPICheckout'      => get_site_url( null, '/wp-json/wc/store/v1/checkout' ),
 					'createPayPalOrder'     => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/create-paypal-order' ),
-					'updateShippingAddress' => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/update-shipping-address' ),
 				),
 				'nonce'     => wp_create_nonce( 'wc_store_api' ),
 			),
