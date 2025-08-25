@@ -659,7 +659,8 @@
 					"changes": [
 						"src/Blocks/**",
 						"templates/**",
-						"patterns/**"
+						"patterns/**",
+						"client/blocks/tests/e2e/**"
 					],
 					"testEnv": {
 						"start": "env:start:blocks",
@@ -694,7 +695,9 @@
 						"--shard=9/10",
 						"--shard=10/10"
 					],
-					"changes": [],
+					"changes": [
+						"client/blocks/tests/e2e/**"
+					],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
