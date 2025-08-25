@@ -630,7 +630,7 @@ const { state: cartItemState } = store(
 
 				// Use the context if it is in a loop, otherwise use the unique variation if it exists.
 				const variationAttr: CartItemVariationAttr =
-					context.itemData || cartItemState.cartItem.variation[ 0 ];
+					context?.itemData || cartItemState.cartItem.variation[ 0 ];
 
 				return {
 					name: variationAttr.attribute,
