@@ -164,7 +164,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Note: The button is always enabled for accessibility reasons.
 			// Instead, we check directly for the "disabled" class, which grays
 			// out the button.
-			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 			await addToCartButton.click();
 
@@ -362,14 +362,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 
 			await quantityInput.fill( '3' );
-			await expect( addToCartButton ).toHaveClass( /disabled/ );
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect( reduceQuantityButton ).toBeDisabled();
 			await expect( increaseQuantityButton ).toBeEnabled();
+			await quantityInput.blur();
+			await expect( quantityInput ).toHaveValue( '3' );
 
 			// Verify setting the input to an empty string resets the value to the min.
 			await quantityInput.fill( '' );
 			await quantityInput.blur();
 			await expect( quantityInput ).toHaveValue( '4' );
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 		} );
 
 		await test.step( 'in grouped products', async () => {
@@ -420,14 +423,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 
 			await quantityInput.fill( '3' );
-			await expect( addToCartButton ).toHaveClass( /disabled/ );
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect( reduceQuantityButton ).toBeEnabled();
 			await expect( increaseQuantityButton ).toBeEnabled();
+			await quantityInput.blur();
+			await expect( quantityInput ).toHaveValue( '3' );
 
 			// Verify empty strings are not reset in grouped products.
 			await quantityInput.fill( '' );
 			await quantityInput.blur();
 			await expect( quantityInput ).toHaveValue( '' );
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 		} );
 	} );
 

@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import type { ClientCartItem } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	ClientCartItem,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -20,7 +23,7 @@ const universalLock =
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
-			validateQuantity: () => void;
+			validateQuantity: ( value: number ) => void;
 			addToCart: () => void;
 		};
 		callbacks: {
@@ -32,7 +35,10 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
-			validateQuantity() {
+			// The `validateQuantity` action usually gets a `value` parameter,
+			// but we don't need it in Grouped products, as validation is done
+			// based on the quantities of all child products.
+			validateQuantity( _: number ) {
 				actions.clearErrors( 'invalid-quantities' );
 
 				const { errorMessages } = getConfig();
@@ -60,11 +66,14 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const hasInvalidQuantity = Object.entries(
 					context.quantity
 				).some( ( [ id, qty ] ) => {
-					const product = getProductData( Number( id ), 'grouped' );
+					const productObject = getProductData(
+						Number( id ),
+						context.productType
+					);
 					return (
 						qty !== 0 &&
-						( qty < ( product?.min ?? 0 ) ||
-							qty > ( product?.max ?? Infinity ) )
+						( qty < ( productObject?.min ?? 0 ) ||
+							qty > ( productObject?.max ?? Infinity ) )
 					);
 				} );
 
@@ -119,7 +128,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			validateQuantities() {
-				actions.validateQuantity();
+				actions.validateQuantity( 0 );
 			},
 		},
 	},

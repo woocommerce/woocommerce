@@ -124,7 +124,7 @@ const getInputData = (
 		return;
 	}
 
-	const parsedValue = parseInt( inputElement.value, 10 );
+	const parsedValue = Number( inputElement.value );
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
@@ -299,12 +299,13 @@ const { actions, state } = store<
 				// If selected quantity is invalid, add an error.
 				const { variationId } = state;
 				const id = variationId || context.productId;
-				const product = getProductData( id, 'grouped' );
+				const productObject = getProductData( id, context.productType );
 
 				if (
 					value === 0 ||
-					( product &&
-						( value < product.min || value > product.max ) )
+					( productObject &&
+						( value < productObject.min ||
+							value > productObject.max ) )
 				) {
 					const { errorMessages } = getConfig();
 
@@ -513,7 +514,7 @@ const { actions, state } = store<
 				const newValue =
 					event.target.value.trim() !== '' &&
 					isFinite( event.target.value )
-						? event.target.value
+						? Number( event.target.value )
 						: min;
 
 				if ( event.target.value !== newValue.toString() ) {
