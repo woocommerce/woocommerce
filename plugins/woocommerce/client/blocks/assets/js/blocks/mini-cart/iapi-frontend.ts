@@ -63,6 +63,7 @@ type MiniCart = {
 		drawerRole: string | null;
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
+		shouldShowTaxLabel: boolean;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -171,6 +172,15 @@ store< MiniCart >(
 					.replace( '%d', state.totalItemsInCart )
 					.replace( '%1$d', state.totalItemsInCart )
 					.replace( '%2$s', state.formattedSubtotal );
+			},
+
+			get shouldShowTaxLabel(): boolean {
+				return (
+					parseInt(
+						woocommerceState.cart.totals.total_items_tax,
+						10
+					) > 0
+				);
 			},
 		},
 
@@ -629,9 +639,16 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
+					variation,
 				} );
 			},
 
@@ -642,18 +659,32 @@ const { state: cartItemState } = store(
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
+					variation,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+					variation,
 				} );
 			},
 

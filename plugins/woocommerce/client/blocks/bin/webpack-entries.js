@@ -59,6 +59,7 @@ const blocks = {
 	'catalog-sorting': {},
 	'coming-soon': {},
 	'customer-account': {},
+	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
 	},

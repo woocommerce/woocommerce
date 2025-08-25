@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+ Prevent skeletons when an express payment method is active in the Cart block
