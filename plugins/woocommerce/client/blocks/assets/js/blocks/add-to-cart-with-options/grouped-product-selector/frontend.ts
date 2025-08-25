@@ -38,6 +38,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 			// The `validateQuantity` action usually gets a `value` parameter,
 			// but we don't need it in Grouped products, as validation is done
 			// based on the quantities of all child products.
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			validateQuantity( _: number ) {
 				actions.clearErrors( 'invalid-quantities' );
 
