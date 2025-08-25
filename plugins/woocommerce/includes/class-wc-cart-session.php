@@ -514,6 +514,12 @@ final class WC_Cart_Session {
 	private function get_saved_cart() {
 		$saved_cart = array();
 
+		/**
+		 * Filters whether the persistent cart is enabled.
+		 *
+		 * @since 3.4.0
+		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 */
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
 
