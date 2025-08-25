@@ -55,7 +55,7 @@ If a bug forces you to skip marking a version as stable on WordPress.org:
 
 - Notify the relevant engineering team(s) so they're aware and can provide an ETA for a fix.
 - Loop in **Dev Advocacy** so they can help with public communications.
-- If the bug is found on Monday and a fix won't be ready for Tuesday, work with Dev Advocacy to announce a delay. Remember: [avoid releasing close to the weekend](#release-delay-weekend-id).
+- If the bug is found on Monday and a fix won't be ready for Tuesday, work with Dev Advocacy to announce a delay. Read more [on delays below](#release-delay).
 
 On the Release mechanics side:
 
@@ -76,7 +76,15 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 
-### Release was delayed. Can we still release after a Tuesday? {#release-delay-weekend-id}
+### Release needs to be delayed. What to do? {#release-delay}
+
+1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
+2. Ask Dev Advocacy to communicate the delay publicly.
+3. If there's a clear ETA on the patch release with a fix, [update the release calendar](https://developer.woocommerce.com/release-calendar/) with the new dates.
+
+Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
+
+### Release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 
