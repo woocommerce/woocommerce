@@ -45,15 +45,6 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$min_value = $product->get_min_purchase_quantity();
 		$max_value = $product->get_max_purchase_quantity();
 
-		// By default, products have a min value of 1. In that case, we can
-		// safely override it to 0 when they are a child of a grouped product.
-		// The main benefit is that the the decrease quantity button will be
-		// enabled even when the quantity is 1, which is a small quality of life
-		// enhancement for shoppers.
-		if ( 1 === $min_value ) {
-			$min_value = 0;
-		}
-
 		if ( $min_value === $max_value && $min_value > 0 ) {
 			add_filter( 'woocommerce_quantity_input_type', array( $this, 'set_quantity_input_type' ) );
 		}
@@ -63,7 +54,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'input_name'  => 'quantity[' . $product->get_id() . ']',
 				'input_id'    => 'quantity_' . $product->get_id(),
 				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				'min_value'   => $min_value,
+				'min_value'   => 0,
 				'max_value'   => $max_value,
 				/**
 				 * Filter the placeholder value allowed for the product.
