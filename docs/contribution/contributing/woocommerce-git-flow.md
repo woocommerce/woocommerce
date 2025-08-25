@@ -18,6 +18,6 @@ In particular, when creating a **fix branch**, use the correct prefix and the is
 
 For core development, we use the following structure and flow.
 
-<img src="/img/doc_images/release-branches.png" width="800" />
+![Release Cycle flow chart](/img/doc_images/release-branches.png)
 
 Refer to the [release schedule](/docs/contribution/releases/schedule) document for more details.
