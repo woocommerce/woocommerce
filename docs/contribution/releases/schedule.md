@@ -6,11 +6,16 @@ sidebar_position: 6
 
 # WooCommerce Release Schedule
 
-WooCommerce follows a regular release schedule designed to deliver new features, improvements, and fixes approximately every five weeks.
+WooCommerce operates on a predictable release schedule, delivering updates with new features, enhancements, and bug fixes roughly every five weeks.
+This page summarizes the main stages of our release process, such as feature freeze, beta and release candidate periods, and the timing of final and patch releases.
 
-This document outlines the key milestones in our release process, including feature freeze, beta and release candidate phases, and final and patch releases.
+Additional details on how the release cycle looks inside the monorepo can be found on our [Git Flow docs](/docs/contribution/contributing/woocommerce-git-flow)
 
-For the latest details on upcoming or current releases, please visit our [release calendar](https://developer.woocommerce.com/release-calendar/).
+:::tip
+
+To view the actual schedule for current and upcoming releases, see our [release calendar](https://developer.woocommerce.com/release-calendar/).
+
+:::
 
 ![Release Cycle flow chart](/img/doc_images/release-cycle.png)
 
