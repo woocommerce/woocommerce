@@ -12,6 +12,33 @@ declare(strict_types=1);
 class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 
 	/**
+	 * Original hold stock minutes option value.
+	 *
+	 * @var int
+	 */
+	public $original_hold_stock_minutes = 0;
+
+	/**
+	 * Original manage stock option value.
+	 *
+	 * @var int
+	 */
+	public $original_manage_stock_option = 0;
+
+	/**
+	 * Set up test environment.
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Don't allow actual order cancellations during tests.
+		add_filter( 'woocommerce_cancel_unpaid_orders', '__return_false' );
+		$this->original_hold_stock_minutes  = get_option( 'woocommerce_hold_stock_minutes', 0 );
+		$this->original_manage_stock_option = get_option( 'woocommerce_manage_stock', 'yes' );
+	}
+
+	/**
 	 * Test that wc_cancel_unpaid_orders reschedules itself after running.
 	 *
 	 * This test protects against the regression where the action was marked as unique,
@@ -159,10 +186,11 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
 		}
-		delete_option( 'woocommerce_hold_stock_minutes' );
-		delete_option( 'woocommerce_manage_stock' );
+		update_option( 'woocommerce_hold_stock_minutes', $this->original_hold_stock_minutes );
+		update_option( 'woocommerce_manage_stock', $this->original_manage_stock_option );
 
 		// Remove any filters that might have been added.
 		remove_all_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes' );
+		remove_all_filters( 'woocommerce_cancel_unpaid_orders' );
 	}
 }
