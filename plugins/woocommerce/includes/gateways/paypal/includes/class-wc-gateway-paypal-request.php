@@ -305,51 +305,6 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Get the PayPal create-order request URL.
-	 *
-	 * @return string
-	 */
-	private function get_paypal_create_order_request_url() {
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
-		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/create-order' );
-	}
-
-	/**
-	 * Get the PayPal capture-payment request URL.
-	 *
-	 * @return string
-	 */
-	private function get_paypal_capture_payment_request_url() {
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
-		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/capture-payment' );
-	}
-
-	/**
-	 * Get the PayPal authorize-payment request URL.
-	 *
-	 * @return string
-	 */
-	private function get_paypal_authorize_payment_request_url() {
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
-		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/authorize-payment' );
-	}
-
-	/**
-	 * Get the PayPal capture-authorized-payment request URL.
-	 *
-	 * @param string $authorization_id The PayPal authorization ID.
-	 * @return string
-	 */
-	private function get_paypal_capture_authorized_payment_request_url( $authorization_id ) {
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// TODO: This will be replaced with a constant pointing to the wpcom endpoint.
-		return get_site_url( null, 'wp-json/wc/v3/paypal-proxy/capture-authorized-payment/' . $authorization_id );
-	}
-
-	/**
 	 * Build the request parameters for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
