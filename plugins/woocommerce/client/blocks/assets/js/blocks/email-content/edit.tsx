@@ -82,10 +82,7 @@ export default function Edit() {
 		>
 			<ServerSideRender
 				block={ metadata.name }
-				attributes={ {
-					...blockProps,
-					emailType,
-				} }
+				attributes={ { emailType } }
 			></ServerSideRender>
 
 			{ isHovered && (
