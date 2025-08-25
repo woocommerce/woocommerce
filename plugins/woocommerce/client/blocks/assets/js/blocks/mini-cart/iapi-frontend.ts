@@ -613,7 +613,7 @@ const { state: cartItemState } = store(
 					dataProperty: 'item_data' | 'variation';
 				} >();
 
-				// Use the context if it is in a loop, otherwise use the unique variation if it exists.
+				// Use the context if it is in a loop, otherwise use the unique item if it exists.
 				const dataItemAttr =
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
