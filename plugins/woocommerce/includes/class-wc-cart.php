@@ -652,17 +652,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Empties the cart and optionally the persistent cart too.
 	 *
 	 * @since 9.7.0 Also clears shipping methods and packages since the items they are linked to are cleared.
-	 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+	 *
+	 * @param bool $clear_persistent_cart Should the persistent cart be cleared too. Defaults to true.
 	 */
-	public function empty_cart( $deprecated = true ) {
+	public function empty_cart( $clear_persistent_cart = true ) {
 		/**
 		 * Fires before the cart is emptied.
 		 *
 		 * @since 9.7.0
 		 *
-		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 * @param bool $clear_persistent_cart Whether the persistent cart will be cleared too.
 		 */
-		do_action( 'woocommerce_before_cart_emptied', $deprecated );
+		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
 
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
@@ -671,6 +672,11 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
 		$this->totals                     = $this->default_totals;
+
+		if ( $clear_persistent_cart ) {
+			$this->session->persistent_cart_destroy();
+		}
+
 		$this->fees_api->remove_all_fees();
 		WC()->shipping()->reset_shipping();
 
@@ -678,9 +684,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * Fires after the cart is emptied.
 		 *
 		 * @since 9.7.0
-		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 *
+		 * @param bool $clear_persistent_cart Whether the persistent cart was cleared too.
 		 */
-		do_action( 'woocommerce_cart_emptied', $deprecated );
+		do_action( 'woocommerce_cart_emptied', $clear_persistent_cart );
 	}
 
 	/**
