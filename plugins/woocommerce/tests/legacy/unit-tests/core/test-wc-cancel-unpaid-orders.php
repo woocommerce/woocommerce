@@ -23,9 +23,9 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Original manage stock option value.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	public $original_manage_stock_option = 0;
+	public $original_manage_stock_option = 'yes';
 
 	/**
 	 * Set up test environment.
@@ -35,7 +35,7 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Don't allow actual order cancellations during tests.
-		add_filter( 'woocommerce_cancel_unpaid_orders', '__return_false' );
+		add_filter( 'woocommerce_cancel_unpaid_orders', '__return_false', 10, 0 );
 		$this->original_hold_stock_minutes  = get_option( 'woocommerce_hold_stock_minutes', 0 );
 		$this->original_manage_stock_option = get_option( 'woocommerce_manage_stock', 'yes' );
 	}
@@ -69,19 +69,27 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		);
 
 		// Invoke the function that should schedule the action.
+		$now = time();
 		wc_cancel_unpaid_orders();
 
 		// Assert that the action is now scheduled for the future.
 		$next_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 		$this->assertIsInt( $next_scheduled, 'Action should be scheduled and return a timestamp' );
-		$this->assertGreaterThan(
-			time(),
+		$this->assertGreaterThanOrEqual(
+			$now,
 			$next_scheduled,
 			'Action should be scheduled for a future time'
 		);
 
 		// Verify the scheduled time is approximately correct (1 minute + 30 seconds buffer).
-		$expected_time = time() + ( 1 * MINUTE_IN_SECONDS );
+		$expected_time = $now + ( 1 * MINUTE_IN_SECONDS );
+		$expected_time = $now + ( 1 * MINUTE_IN_SECONDS );
+		$this->assertGreaterThanOrEqual(
+			$expected_time - 30,
+			$next_scheduled,
+			'Action should not be scheduled too early'
+		);
+
 		$this->assertLessThan(
 			$expected_time + 30,
 			$next_scheduled,
@@ -110,6 +118,7 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		$this->assertIsInt( $old_scheduled, 'Initial action should be scheduled' );
 
 		// Run the function which should clear and reschedule.
+		$now = time();
 		wc_cancel_unpaid_orders();
 
 		// Verify action is still scheduled but at a different time.
@@ -118,7 +127,7 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		$this->assertNotEquals( $old_scheduled, $new_scheduled, 'New scheduled time should be different from the old one' );
 
 		// The new scheduled time should be based on current time + 60 minutes.
-		$expected_time = time() + ( 60 * MINUTE_IN_SECONDS );
+		$expected_time = $now + ( 60 * MINUTE_IN_SECONDS );
 		$this->assertLessThan(
 			$expected_time + 60,
 			$new_scheduled,
@@ -159,13 +168,14 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		);
 
 		// Run the function.
+		$now = time();
 		wc_cancel_unpaid_orders();
 
 		// Verify the scheduled time reflects the filtered interval.
 		$next_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 		$this->assertIsInt( $next_scheduled );
 
-		$expected_time = time() + ( $custom_interval * MINUTE_IN_SECONDS );
+		$expected_time = $now + ( $custom_interval * MINUTE_IN_SECONDS );
 		$this->assertLessThan(
 			$expected_time + 60,
 			$next_scheduled,
