@@ -8441,7 +8441,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_onboarding_payment_methods_state respects stored apple_pay and google_pay states.
+	 * Test get_onboarding_payment_methods_state respects stored apple_pay and google_pay states (no explicit apple_google present).
 	 *
 	 * @return void
 	 */
@@ -8465,29 +8465,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$stored_step_data = array(
-			'payment_methods' => array(
-				'apple_pay'  => 'false',
-				'google_pay' => 'false',
-				'card'       => 'true',
+		// Create NOX profile data structure with stored payment method states.
+		$nox_profile_data = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						'payment_methods' => array(
+							'data' => array(
+								'payment_methods' => array(
+									'apple_pay'  => 'false',
+									'google_pay' => 'false',
+									'card'       => 'true',
+								),
+							),
+						),
+					),
+				),
 			),
 		);
 
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
-						// Avoid unused parameter warnings in static analysis.
-						unset( $step_id, $location );
-
-						if ( isset( $stored_step_data[ $entry ] ) ) {
-							return $stored_step_data[ $entry ];
-						}
-						return $default_value;
-					},
-				),
-			)
-		);
+		$this->mock_nox_profile_option( $nox_profile_data );
 
 		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
 		$this->assertArrayHasKey( 'apple_google', $result );
@@ -8514,29 +8511,26 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$stored_step_data = array(
-			'payment_methods' => array(
-				'apple_pay'  => 'true',
-				'google_pay' => 'false',
-				// No apple_google key - should fall back to OR logic.
+		// Create NOX profile data structure with apple_pay and google_pay but no apple_google key.
+		$nox_profile_data = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						'payment_methods' => array(
+							'data' => array(
+								'payment_methods' => array(
+									'apple_pay'  => 'true',
+									'google_pay' => 'false',
+									// No apple_google key - should fall back to OR logic.
+								),
+							),
+						),
+					),
+				),
 			),
 		);
 
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
-						// Avoid unused parameter warnings in static analysis.
-						unset( $step_id, $location );
-
-						if ( isset( $stored_step_data[ $entry ] ) ) {
-							return $stored_step_data[ $entry ];
-						}
-						return $default_value;
-					},
-				),
-			)
-		);
+		$this->mock_nox_profile_option( $nox_profile_data );
 
 		// Mock the provider to return recommended payment methods.
 		$this->mock_provider
@@ -8571,23 +8565,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$stored_step_data = array();
+		// Create empty NOX profile data structure (no stored state).
+		$nox_profile_data = array();
 
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				Utils::class => array(
-					'get_nox_profile_onboarding_step_data_entry' => function ( $step_id, $location, $entry = null, $default_value = false ) use ( $stored_step_data ) {
-						// Avoid unused parameter warnings in static analysis.
-						unset( $step_id, $location );
-
-						if ( isset( $stored_step_data[ $entry ] ) ) {
-							return $stored_step_data[ $entry ];
-						}
-						return $default_value;
-					},
-				),
-			)
-		);
+		$this->mock_nox_profile_option( $nox_profile_data );
 
 		$this->mock_provider
 			->expects( $this->once() )
@@ -8601,6 +8582,36 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using recommended values with OR logic (true || false = true)' );
 	}
 
+	public function test_get_onboarding_payment_methods_state_prefers_explicit_apple_google() {
+		$location        = 'US';
+		$recommended_pms = array(
+			array( 'id' => 'apple_pay',  'enabled' => true,  'required' => false ),
+			array( 'id' => 'google_pay', 'enabled' => true,  'required' => false ),
+		);
+		// Create NOX profile data structure with explicit apple_google override.
+		$nox_profile_data = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						'payment_methods' => array(
+							'data' => array(
+								'payment_methods' => array(
+									'apple_google' => 'false',
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$this->mock_nox_profile_option( $nox_profile_data );
+
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertFalse( $result['apple_google'], 'Explicit stored apple_google should take precedence over OR/recommended.' );
+	}
+
 	/**
 	 * Helper method to invoke private methods for testing.
 	 *
@@ -8610,8 +8621,30 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	private function invoke_private_method( string $method_name, array $args = array() ) {
 		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( $method_name );
+		if ( ! $reflection->hasMethod( $method_name ) ) {
+			$this->fail( sprintf( 'Method %s not found on %s', $method_name, get_class( $this->sut ) ) );
+		}
+		$method = $reflection->getMethod( $method_name );
 		$method->setAccessible( true );
 		return $method->invokeArgs( $this->sut, $args );
+	}
+
+	/**
+	 * Helper method to mock data entry in the NOX profile.
+	 *
+	 * @param array $stored_data The step data to mock.
+	 * @return void
+	 */
+	private function mock_nox_profile_option( array $stored_data ): void {
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default = false ) use ( $stored_data ) {
+					if ( 'woocommerce_woopayments_nox_profile' === $option_name ) {
+						return $stored_data;
+					}
+					return $default;
+				},
+			)
+		);
 	}
 }
