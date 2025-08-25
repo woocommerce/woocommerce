@@ -174,20 +174,53 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
-										<div class="wc-block-components-product-details" data-wp-bind--hidden="state.itemDataHasMultipleAttributes">
-											<div data-wp-bind--class="state.productAttributeClass">
-												<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataName"></span>
-												<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemData.value"></span>
+										<div
+											<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => 'variation' ) ); ?>
+											class="wc-block-components-product-details"
+											data-wp-bind--hidden="state.itemDataHasMultipleAttributes"
+										>
+											<div data-wp-bind--class="state.cartItemDataAttr.className">
+												<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+												<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 											</div>
 										</div>
-										<ul class="wc-block-components-product-details" data-wp-bind--hidden="!state.itemDataHasMultipleAttributes">
+										<ul
+											<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => 'variation' ) ); ?>
+											class="wc-block-components-product-details"
+											data-wp-bind--hidden="!state.itemDataHasMultipleAttributes"
+										>
 											<template
 												data-wp-each--item-data="state.cartItem.variation"
 												data-wp-each-key="context.itemData.raw_attribute"
 											>
-												<li data-wp-bind--class="state.productAttributeClass">
-													<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataName"></span>
-													<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemData.value"></span>
+												<li data-wp-bind--class="state.cartItemDataAttr.className">
+													<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+													<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
+												</li>
+											</template>
+										</ul>
+										<div
+											<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => 'item_data' ) ); ?>
+											class="wc-block-components-product-details"
+											data-wp-bind--hidden="state.itemDataHasMultipleAttributes"
+										>
+											<div data-wp-bind--class="state.cartItemDataAttr.className">
+												<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+												<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
+											</div>
+										</div>
+										<ul
+											<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => 'item_data' ) ); ?>
+											class="wc-block-components-product-details"
+											data-wp-bind--hidden="!state.itemDataHasMultipleAttributes"
+										>
+											<template
+												data-wp-each--item-data="state.cartItem.item_data"
+												data-wp-each-key="context.itemData.key"
+											>
+												<li data-wp-bind--class="state.cartItemDataAttr.className">
+													<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+													<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 												</li>
 											</template>
 										</ul>

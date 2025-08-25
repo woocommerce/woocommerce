@@ -77,15 +77,10 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-type CartItemData = {
+type CartItemDataAttr = {
 	name: string;
 	value: string;
-};
-
-type CartItemVariationAttr = {
-	attribute: string;
-	raw_attribute: string;
-	value: string;
+	className: string;
 };
 
 const trimWords = ( html: string, maxWords = 15 ): string => {
@@ -612,40 +607,34 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get productAttributeClass(): string {
-				const context = getContext< {
-					itemData: { attribute: string };
-				} >();
-				// Transform attribute name to a valid CSS class name.
-				return `wc-block-components-product-details__${ context.itemData.attribute
-					.replace( /([a-z])([A-Z])/g, '$1-$2' )
-					.replace( /[\s_]+/g, '-' )
-					.toLowerCase() }`;
-			},
-
-			get cartItemData(): CartItemData {
-				const context = getContext< {
-					itemData: CartItemVariationAttr;
+			get cartItemDataAttr(): CartItemDataAttr {
+				const { itemData, dataProperty } = getContext< {
+					itemData: { key: string; attribute: string; value: string };
+					dataProperty: 'item_data' | 'variation';
 				} >();
 
 				// Use the context if it is in a loop, otherwise use the unique variation if it exists.
-				const variationAttr: CartItemVariationAttr =
-					context?.itemData || cartItemState.cartItem.variation[ 0 ];
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				const dataItemAttrKey =
+					dataItemAttr.key || dataItemAttr.attribute;
 
 				return {
-					name: variationAttr.attribute,
-					value: variationAttr.value,
+					name: dataItemAttrKey + ':',
+					value: dataItemAttr.value,
+					className: `wc-block-components-product-details__${ dataItemAttrKey
+						.replace( /([a-z])([A-Z])/g, '$1-$2' )
+						.replace( /[\s_]+/g, '-' )
+						.toLowerCase() }`,
 				};
 			},
 
-			get cartItemDataName(): string {
-				// TODO: Not sure why this is not displayed when there is only one attribute.
-				return cartItemState.cartItemData.name + ':';
-			},
-
 			get itemDataHasMultipleAttributes(): boolean {
-				const { variation = [] } = cartItemState.cartItem;
-				return variation.length > 1;
+				const { dataProperty } = getContext< {
+					dataProperty: 'item_data' | 'variation';
+				} >();
+				return cartItemState.cartItem[ dataProperty ]?.length > 1;
 			},
 		},
 
