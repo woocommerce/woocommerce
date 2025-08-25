@@ -8540,14 +8540,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$location        = 'US';
 		$recommended_pms = array(
 			array(
-				'id' => 'apple_pay',
-				'enabled' => true,
-				'required' => false
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
 			),
 			array(
-				'id' => 'google_pay',
-				'enabled' => true,
-				'required' => false
+				'id'       => 'google_pay',
+				'enabled'  => true,
+				'required' => false,
 			),
 		);
 		// Create NOX profile data structure with explicit apple_google override.
