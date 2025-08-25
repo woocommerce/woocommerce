@@ -6,47 +6,60 @@ sidebar_position: 6
 
 # WooCommerce Release Schedule
 
-The schedule can be found on [this page](https://developer.woocommerce.com/release-calendar/), which also explains the types 
-of events in the calendar like `Releases`, `Release Candidates (RC)` and `Feature Freeze Dates`.
+WooCommerce follows a regular release schedule designed to deliver new features, improvements, and fixes approximately every five weeks.
 
-While the calendar reflects the events made public, there are specific steps in the release process that are internal, 
-and this page aims to provide necessary context about those events.
+This document outlines the key milestones in our release process, including feature freeze, beta and release candidate phases, and final and patch releases.
 
-## Detailed release schedule
+For the latest details on upcoming or current releases, please visit our [release calendar](https://developer.woocommerce.com/release-calendar/).
 
-This section will use the publicly available release schedule as anchors and clarify where the internal events fit in.
+#### Example release cycle
+<img src="/img/doc_images/release-cycle.png" width="500" />
 
-### Feature Freeze (start of the release cycle)
+## Milestones
 
-This step is mostly automated and creates a dedicated release branch where the future release undergoes testing and stabilization.
-At this point, the Developer Advocacy team publishes pre-release updates ([example](https://developer.woocommerce.com/2025/05/12/woocommerce-9-9-pre-release-updates/))
+### Feature Freeze & `-dev` release (day 1)
+As a result of the code freeze automation, a few things happen:
 
-### RC1 (Feature Freeze + 1 week)
+- A dedicated release branch is created (`release/x.y`), where the future release undergoes testing and stabilization. No new features are included on this branch, only bug fixes.
+- A `-dev` release is built and made available on GitHub.
+- Development of new features continues on `trunk`.
+- A pre-release post is published on our developer website ([example](https://developer.woocommerce.com/2025/05/12/woocommerce-9-9-pre-release-updates/)).
 
-This step is where various testing processes are happening:
+### Beta 1 (+1 week)
+At this stage, various testing processes take place:
 
-- internally: regression testing with Woo maintained extensions, regression testing in multiple environments, and exploration testing (including by the contributing teams).
-- community: the Developer Advocacy team updates the pre-release announcement so the community can [begin testing](/docs/contribution/testing/beta-testing/) the release.
+- (Internally) Regression testing with Woo-maintained extensions, regression testing in multiple environments, and exploratory testing (including by contributing teams).
+- (Community) The pre-release is announced so the community can [begin testing](/docs/contribution/testing/beta-testing/).
 
-### RC2 (RC1 + 1 week)
+Any issues found during the beta period are addressed either directly against the release branch or by backporting fixes from `trunk` (preferred). Refer to the [backporting guide](/docs/contribution/releases/backporting) for more details.
 
-This step is where we release regressions fixes discovered in RC1, as part of the release stabilization.
-At this point, the Developer Advocacy team continues to update the pre-release announcement.
+`release/x.y` remains the source of truth for anything going into the upcoming release.
 
-### Final Release (RC2 + 1 week)
+### Beta 2 (+1 week)
+At this stage, we release regression fixes discovered in `-beta.1` as part of release stabilization. The pre-release announcement continues to be updated.
 
-This step is where the stable release version becomes available to everyone.
-At this point, the Developer Advocacy team publishes release highlights that are prepared in-advance ([example](https://developer.woocommerce.com/2025/06/09/woocommerce-9-9-its-fast-period/)).
+### RC 1 (+1 week)
+
+Last round of (internal) checks before the final release.
+
+If anything is found at this stage, a fix is merged into the release branch (`release/x.y`) as in the beta phase.
+
+### Final Release (+1 day)
+We make the stable release version available to everyone.
+At this point, the Developer Advocacy team publishes release highlights that are prepared in advance ([example](https://developer.woocommerce.com/2025/06/09/woocommerce-9-9-its-fast-period/)).
+
+### Point/Patch Releases
+Patch releases are used to ship important bug fixes to our users, which were  detected after the final release. They are versioned `x.y.z` where `z` is non-zero.
+
+We follow the same convention as during the beta and RC phases for merging any fixes:
+- Bugs that are only present on the release branch are fixed against the release branch `release/x.y`.
+- Bugs that have a working fix on `trunk` are [backported](/docs/contribution/releases/backporting).
+
 
 ## Delays
 
-Due to business needs, the release dates may be subject to change. Below we will describe some of the internal processes for how we wrangling this situation.
+Due to business needs or any critical bugs discovered during testing, the release dates may be subject to change.
 
-Once the need for changes in the release schedule is confirmed, the Woo team creates an internal Slack thread to communicate the necessary details. This thread provides an opportunity for teams to share additional context, which may help verify or challenge schedule changes.
+We do not take this decision lightly and only do so to guarantee the stability of a release. When this happens, we will always communicate the situation ([example](https://developer.woocommerce.com/2025/06/02/woocommerce-9-9-release-is-delayed/)) and update the release calendar.
 
-Once the feedback and release schedule changes have been finalized, we procced to:
-
-- ask the Developer Advocacy team to communicate the changes publicly ([example](https://developer.woocommerce.com/2025/06/02/woocommerce-9-9-release-is-delayed/))
-- update [the calendar](https://developer.woocommerce.com/release-calendar/) with the new release dates
-
-> Note: To reduce disruption for internal teams and contributors, we avoid changing the time between release candidates (RCs) and the final release. Instead, we adjust the overall release schedule. These intervals are based on several factors, including team capacity.
+For details on how a delay is managed, refer to the [release troubleshooting guide](/docs/contribution/releases/troubleshooting#release-delay).
