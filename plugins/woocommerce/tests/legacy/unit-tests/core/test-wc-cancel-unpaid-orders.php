@@ -1,0 +1,168 @@
+<?php
+declare(strict_types=1);
+/**
+ * Tests for WC Cancel Unpaid Orders functionality.
+ *
+ * @package WooCommerce\Tests\Core
+ */
+
+/**
+ * Class WC_Tests_Cancel_Unpaid_Orders.
+ */
+class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
+
+	/**
+	 * Test that wc_cancel_unpaid_orders reschedules itself after running.
+	 *
+	 * This test protects against the regression where the action was marked as unique,
+	 * preventing it from re-queuing itself while still running (introduced in PR #59325,
+	 * fixed in PR #60607).
+	 */
+	public function test_cancel_unpaid_orders_reschedules_itself() {
+		// Skip if Action Scheduler is not available.
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			$this->markTestSkipped( 'Action Scheduler not available' );
+		}
+
+		// Enable hold stock functionality with a short interval (1 minute).
+		update_option( 'woocommerce_hold_stock_minutes', 1 );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		// Clear any existing scheduled actions to start clean.
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		}
+
+		// Verify no action is currently scheduled.
+		$this->assertFalse(
+			as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' ),
+			'No cancel unpaid orders action should be scheduled initially'
+		);
+
+		// Invoke the function that should schedule the action.
+		wc_cancel_unpaid_orders();
+
+		// Assert that the action is now scheduled for the future.
+		$next_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+		$this->assertIsInt( $next_scheduled, 'Action should be scheduled and return a timestamp' );
+		$this->assertGreaterThan(
+			time(),
+			$next_scheduled,
+			'Action should be scheduled for a future time'
+		);
+
+		// Verify the scheduled time is approximately correct (1 minute + 30 seconds buffer).
+		$expected_time = time() + ( 1 * MINUTE_IN_SECONDS );
+		$this->assertLessThan(
+			$expected_time + 30,
+			$next_scheduled,
+			'Action should be scheduled within the expected time range'
+		);
+	}
+
+	/**
+	 * Test that existing actions are cleared before scheduling new ones.
+	 */
+	public function test_cancel_unpaid_orders_clears_existing_actions() {
+		// Skip if Action Scheduler is not available.
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			$this->markTestSkipped( 'Action Scheduler not available' );
+		}
+
+		// Enable hold stock functionality.
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		// Manually schedule an action first, in the past so it is "past-due" - this prevents race conditions in the test.
+		as_schedule_single_action( time() - 3600, 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+
+		// Verify action is scheduled.
+		$old_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+		$this->assertIsInt( $old_scheduled, 'Initial action should be scheduled' );
+
+		// Run the function which should clear and reschedule.
+		wc_cancel_unpaid_orders();
+
+		// Verify action is still scheduled but at a different time.
+		$new_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+		$this->assertIsInt( $new_scheduled, 'Action should still be scheduled after clearing and rescheduling' );
+		$this->assertNotEquals( $old_scheduled, $new_scheduled, 'New scheduled time should be different from the old one' );
+
+		// The new scheduled time should be based on current time + 60 minutes.
+		$expected_time = time() + ( 60 * MINUTE_IN_SECONDS );
+		$this->assertLessThan(
+			$expected_time + 60,
+			$new_scheduled,
+			'New scheduled action should be based on current settings'
+		);
+		$this->assertGreaterThan(
+			$expected_time - 60,
+			$new_scheduled,
+			'New scheduled action should be approximately at the expected time'
+		);
+	}
+
+	/**
+	 * Test that the woocommerce_cancel_unpaid_orders_interval_minutes filter works.
+	 */
+	public function test_cancel_unpaid_orders_respects_interval_filter() {
+		// Skip if Action Scheduler is not available.
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			$this->markTestSkipped( 'Action Scheduler not available' );
+		}
+
+		// Set up test conditions.
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		// Clear existing actions.
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		}
+
+		// Add filter to change the interval.
+		$custom_interval = 30; // 30 minutes instead of 60.
+		add_filter(
+			'woocommerce_cancel_unpaid_orders_interval_minutes',
+			function () use ( $custom_interval ) {
+				return $custom_interval;
+			}
+		);
+
+		// Run the function.
+		wc_cancel_unpaid_orders();
+
+		// Verify the scheduled time reflects the filtered interval.
+		$next_scheduled = as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
+		$this->assertIsInt( $next_scheduled );
+
+		$expected_time = time() + ( $custom_interval * MINUTE_IN_SECONDS );
+		$this->assertLessThan(
+			$expected_time + 60,
+			$next_scheduled,
+			'Action should be scheduled based on filtered interval'
+		);
+		$this->assertGreaterThan(
+			$expected_time - 60,
+			$next_scheduled,
+			'Action should be scheduled approximately at the filtered interval time'
+		);
+	}
+
+	/**
+	 * Clean up after tests.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Clean up scheduled actions and settings.
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		}
+		delete_option( 'woocommerce_hold_stock_minutes' );
+		delete_option( 'woocommerce_manage_stock' );
+
+		// Remove any filters that might have been added.
+		remove_all_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes' );
+	}
+}
