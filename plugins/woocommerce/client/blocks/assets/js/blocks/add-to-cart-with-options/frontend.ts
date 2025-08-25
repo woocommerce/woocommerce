@@ -175,7 +175,7 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 	};
 	actions: {
-		validateQuantity: ( value: number ) => void;
+		validateQuantity: ( value?: number ) => void;
 		setQuantity: ( value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
@@ -283,8 +283,12 @@ const { actions, state } = store<
 			},
 		},
 		actions: {
-			validateQuantity( value: number ) {
+			validateQuantity( value?: number ) {
 				actions.clearErrors( 'invalid-quantities' );
+
+				if ( typeof value !== 'number' ) {
+					return;
+				}
 
 				const context = getContext< Context >();
 

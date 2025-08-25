@@ -23,7 +23,7 @@ const universalLock =
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
-			validateQuantity: ( value: number ) => void;
+			validateQuantity: ( value?: number ) => void;
 			addToCart: () => void;
 		};
 		callbacks: {
@@ -35,11 +35,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
-			// The `validateQuantity` action usually gets a `value` parameter,
-			// but we don't need it in Grouped products, as validation is done
-			// based on the quantities of all child products.
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			validateQuantity( _: number ) {
+			validateQuantity() {
 				actions.clearErrors( 'invalid-quantities' );
 
 				const { errorMessages } = getConfig();
@@ -129,7 +125,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			validateQuantities() {
-				actions.validateQuantity( 0 );
+				actions.validateQuantity();
 			},
 		},
 	},
