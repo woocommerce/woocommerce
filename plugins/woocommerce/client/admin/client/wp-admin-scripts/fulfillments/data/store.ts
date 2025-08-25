@@ -39,13 +39,6 @@ const actionTypes = {
 	DELETE_FULFILLMENT: 'DELETE_FULFILLMENT',
 } as const;
 
-interface ResponseWithFulfillment {
-	fulfillment: Fulfillment & { id: number };
-}
-interface ResponseWithFulfillments {
-	fulfillments: Fulfillment[];
-}
-
 interface OrderState {
 	order: Order | null;
 	refunds: Refund[];
@@ -112,16 +105,15 @@ const publicActions = {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
-				const saved = await apiFetch< ResponseWithFulfillment >( {
+				const saved = await apiFetch< Fulfillment >( {
 					path: `/wc/v3/orders/${ orderId }/fulfillments?notify_customer=${ notify_customer }`,
 					method: 'POST',
 					data: fulfillment,
 				} );
-				dispatch.setFulfillment(
-					orderId,
-					saved.fulfillment.id,
-					saved.fulfillment
-				);
+				if ( ! saved.id ) {
+					throw new Error( 'Fulfillment ID is missing in response' );
+				}
+				dispatch.setFulfillment( orderId, saved.id, saved );
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
@@ -145,16 +137,15 @@ const publicActions = {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
-				const updated = await apiFetch< ResponseWithFulfillment >( {
+				const updated = await apiFetch< Fulfillment >( {
 					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }?notify_customer=${ notifyCustomer }`,
 					method: 'PUT',
 					data: fulfillment,
 				} );
-				dispatch.setFulfillment(
-					orderId,
-					updated.fulfillment.id,
-					updated.fulfillment
-				);
+				if ( ! updated.id ) {
+					throw new Error( 'Fulfillment ID is missing in response' );
+				}
+				dispatch.setFulfillment( orderId, updated.id, updated );
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
@@ -357,11 +348,10 @@ const resolvers = {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
-				const { fulfillments } =
-					await apiFetch< ResponseWithFulfillments >( {
-						path: `/wc/v3/orders/${ orderId }/fulfillments`,
-						method: 'GET',
-					} );
+				const fulfillments = await apiFetch< Fulfillment[] >( {
+					path: `/wc/v3/orders/${ orderId }/fulfillments`,
+					method: 'GET',
+				} );
 				dispatch.setFulfillments( orderId, fulfillments );
 			} catch ( error: unknown ) {
 				dispatch.setError(

@@ -24,12 +24,10 @@ interface TrackingNumberParsingPossibility {
 }
 
 interface TrackingNumberParsingResponse {
-	tracking_number_details: {
-		tracking_number: string;
-		tracking_url: string;
-		shipping_provider: string;
-		possibilities?: Record< string, TrackingNumberParsingPossibility >;
-	};
+	tracking_number: string;
+	tracking_url: string;
+	shipping_provider: string;
+	possibilities?: Record< string, TrackingNumberParsingPossibility >;
 }
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
@@ -73,7 +71,7 @@ export default function ShipmentTrackingNumberForm() {
 		setError( null );
 		try {
 			setIsLoading( true );
-			const { tracking_number_details } =
+			const tracking_number_details =
 				await apiFetch< TrackingNumberParsingResponse >( {
 					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
 					method: 'GET',
