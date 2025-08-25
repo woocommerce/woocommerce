@@ -1490,11 +1490,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-<<<<<<< HEAD
-                "reference": "77bb8b9fbfcc7c1e940c8b1f3bf8eb2de19ab0d6"
-=======
                 "reference": "b38ddd6bd4dfc5f89fbb763177b4f473e6dd361f"
->>>>>>> 30b7cce0e3 (Update composer lock file)
             },
             "require": {
                 "pelago/emogrifier": "^8.0",
