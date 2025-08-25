@@ -148,7 +148,7 @@ const dbUpdateKeyGreaterThan = ( key1, key2 ) => {
 };
 
 /**
- * Performs a check to ensure db udpates are correct in a given ref.
+ * Performs a check to ensure db updates are correct in a given ref.
  *
  * @param {string} currentRef
  * @param {{ github: Octokit, context: { repo: { owner: string, repo: string } } }} options
