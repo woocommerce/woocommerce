@@ -1,10 +1,12 @@
 <?php
-declare(strict_types=1);
 /**
  * Tests for WC Cancel Unpaid Orders functionality.
  *
  * @package WooCommerce\Tests\Core
  */
+
+declare(strict_types=1);
+
 
 /**
  * Class WC_Tests_Cancel_Unpaid_Orders.
