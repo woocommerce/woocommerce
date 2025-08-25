@@ -69,8 +69,8 @@ const getInputElementFromEvent = (
 export const getProductData = (
 	id: number,
 	productType: string,
-	availableVariations?: AvailableVariation[],
-	selectedAttributes?: SelectedAttributes[]
+	availableVariations: AvailableVariation[],
+	selectedAttributes: SelectedAttributes[]
 ) => {
 	let productId = id;
 	let productData: ProductData | undefined;
@@ -295,7 +295,12 @@ const { actions, state } = store<
 				// If selected quantity is invalid, add an error.
 				const { variationId } = state;
 				const id = variationId || context.productId;
-				const productObject = getProductData( id, context.productType );
+				const productObject = getProductData(
+					id,
+					context.productType,
+					context.availableVariations,
+					context.selectedAttributes
+				);
 
 				if (
 					value === 0 ||

@@ -65,7 +65,9 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						context.productType
+						context.productType,
+						context.availableVariations,
+						context.selectedAttributes
 					);
 					return (
 						qty !== 0 &&
