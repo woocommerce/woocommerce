@@ -66,6 +66,7 @@ class WC_Gateway_Paypal_Buttons {
 			'enable-funding' => 'venmo,paylater',
 			'currency'       => get_woocommerce_currency(),
 			'intent'         => $intent,
+			'merchant-id'    => $this->gateway->email,
 		);
 
 		wp_enqueue_script(
