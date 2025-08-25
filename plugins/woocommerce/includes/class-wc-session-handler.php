@@ -219,13 +219,13 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Migrates a guest session to the current user session.
 	 */
-	private function migrate_guest_session_to_user_session( int $user_id ) {
-		$guest_session_id   = $this->_customer_id;
-		$this->_customer_id = strval( $user_id );
-		$this->set_customer_session_cookie( true );
+	private function migrate_guest_session_to_user_session() {
+		$guest_session_id = $this->_customer_id;
+		$user_session_id  = (string) get_current_user_id();
 
-		$this->_data  = $this->get_session( $guest_session_id, array() );
-		$this->_dirty = true;
+		$this->_data        = $this->get_session( $guest_session_id, array() );
+		$this->_dirty       = true;
+		$this->_customer_id = $user_session_id;
 		$this->save_data( $guest_session_id );
 
 		/**
