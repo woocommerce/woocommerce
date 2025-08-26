@@ -110,6 +110,20 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( array_values( $product_ids ), array_values( $cart_product_ids ) );
+
+		// Check that the variable product in cart has the expected variations.
+		foreach ( $cart_contents as $cart_item ) {
+			if ( isset( $cart_item['variation'] ) && ! empty( $cart_item['variation'] ) ) {
+				// The first variation should have pa_size=small, pa_colour and pa_number should be empty.
+				$expected_variation = [
+					'attribute_pa_size'   => 'small',
+					'attribute_pa_colour' => '',
+					'attribute_pa_number' => '',
+				];
+				$this->assertEquals( $expected_variation, $cart_item['variation'] );
+			}
+		}
+		
 		$this->assertEquals( array_values( [ 'test-coupon' ] ), array_values( $applied_coupon_codes ) );
 		$this->assertStringContainsString( 'session=', $url );
 
