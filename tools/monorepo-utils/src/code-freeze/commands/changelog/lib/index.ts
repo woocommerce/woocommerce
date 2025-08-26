@@ -387,7 +387,7 @@ function getTargetBranches(
 		( targetMajor === currentMajor && targetMinor >= currentMinor )
 	) {
 		Logger.notice(
-			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches.`
 		);
 		return [];
 	}
