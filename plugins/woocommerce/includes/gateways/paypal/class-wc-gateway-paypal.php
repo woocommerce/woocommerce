@@ -180,26 +180,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
 
 			// Hook for plugin upgrades.
-			add_action( 'upgrader_process_complete', array( $this, 'maybe_onboard_on_upgrade' ), 10, 2 );
-		}
-	}
-
-	/**
-	 * Handle onboarding on plugin upgrade.
-	 *
-	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
-	 * @param array       $options Array of bulk item update data.
-	 *
-	 * @return void
-	 */
-	public function maybe_onboard_on_upgrade( $upgrader_object, $options ) {
-		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
-			foreach ( $options['plugins'] as $plugin ) {
-				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
-					$this->maybe_onboard_with_transact();
-					break;
-				}
-			}
+			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
 		}
 	}
 
@@ -208,7 +189,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	private function maybe_onboard_with_transact() {
+	public function maybe_onboard_with_transact() {
 		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
