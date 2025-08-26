@@ -91,7 +91,10 @@ const baseMockCheckoutAddress = {
 };
 
 describe( 'BillingCustomerAddress (Billing)', () => {
-	let mockGetValidationError: jest.Mock;
+	let mockValidationErrors: Record<
+		string,
+		FieldValidationStatus | undefined
+	>;
 
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -107,19 +110,19 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Create fresh mock for each test
-		mockGetValidationError = jest.fn();
+		mockValidationErrors = {};
 
 		// Set up useSelect mock with the validation store pattern
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
 			return callback( () => ( {
-				getValidationError: mockGetValidationError,
+				getValidationErrors: () => mockValidationErrors,
 			} ) );
 		} );
 	} );
 
 	it( 'should not be in editing mode when there are no validation errors', () => {
 		// Mock the validation store to return no errors
-		mockGetValidationError.mockImplementation( () => undefined );
+		mockValidationErrors = {};
 
 		render( <CustomerAddress /> );
 
@@ -156,15 +159,12 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return error for billing_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'billing_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			billing_city: {
+				message: 'Please enter a valid city',
+				hidden: false,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 
@@ -196,15 +196,12 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return hidden error for billing_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'billing_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: true,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			billing_city: {
+				message: 'Please enter a valid city',
+				hidden: true,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 
@@ -236,21 +233,16 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return mixed errors for billing fields
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'billing_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: true,
-				} as FieldValidationStatus;
-			}
-			if ( key === 'billing_postcode' ) {
-				return {
-					message: 'Please enter a valid postcode',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			billing_city: {
+				message: 'Please enter a valid city',
+				hidden: true,
+			} as FieldValidationStatus,
+			billing_postcode: {
+				message: 'Please enter a valid postcode',
+				hidden: false,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 
@@ -259,7 +251,7 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 
 	it( 'should handle empty validation errors object', () => {
 		// Mock the validation store to return no errors for any field
-		mockGetValidationError.mockImplementation( () => undefined );
+		mockValidationErrors = {};
 
 		render( <CustomerAddress /> );
 
@@ -296,15 +288,12 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return error for billing_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'billing_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			billing_city: {
+				message: 'Please enter a valid city',
+				hidden: false,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 
@@ -340,21 +329,16 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return email error for contact_email but no billing errors
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'contact_email' ) {
-				return {
-					message: 'Please enter a valid email address',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			// No errors for billing fields (billing_first_name, billing_last_name, etc.)
-			return undefined;
-		} );
+		mockValidationErrors = {
+			contact_email: {
+				message: 'Please enter a valid email address',
+				hidden: false,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 
 		// Should not enter editing mode since email errors don't affect billing form
-		// (email is filtered out by the `if ( key !== 'email' )` condition)
 		expect( mockSetEditing ).not.toHaveBeenCalled();
 		expect( screen.getByTestId( 'is-editing' ) ).toHaveTextContent(
 			'false'
@@ -397,33 +381,48 @@ describe( 'BillingCustomerAddress (Billing)', () => {
 		} );
 
 		// Mock the validation store to return errors for all empty required fields
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			// Check if it's a billing field that should have validation errors
-			if ( key.startsWith( 'billing_' ) ) {
-				const fieldName = key.replace( 'billing_', '' );
-				const errorMessages: Record< string, string > = {
-					first_name: 'First name is required',
-					last_name: 'Last name is required',
-					address_1: 'Address is required',
-					address_2: 'Address is required',
-					city: 'City is required',
-					state: 'State is required',
-					postcode: 'Postcode is required',
-					country: 'Country is required',
-					phone: 'Phone is required',
-					email: 'Email is required',
-				};
-
-				if ( errorMessages[ fieldName ] ) {
-					return {
-						message: errorMessages[ fieldName ],
-						hidden: false,
-					} as FieldValidationStatus;
-				}
-			}
-
-			return undefined;
-		} );
+		mockValidationErrors = {
+			billing_first_name: {
+				message: 'First name is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_last_name: {
+				message: 'Last name is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_address_1: {
+				message: 'Address is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_address_2: {
+				message: 'Address is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_city: {
+				message: 'City is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_state: {
+				message: 'State is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_postcode: {
+				message: 'Postcode is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_country: {
+				message: 'Country is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_phone: {
+				message: 'Phone is required',
+				hidden: false,
+			} as FieldValidationStatus,
+			billing_email: {
+				message: 'Email is required',
+				hidden: false,
+			} as FieldValidationStatus,
+		};
 
 		render( <CustomerAddress /> );
 

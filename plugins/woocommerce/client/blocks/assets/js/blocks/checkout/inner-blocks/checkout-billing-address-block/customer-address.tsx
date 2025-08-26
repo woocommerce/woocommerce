@@ -31,22 +31,27 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isInitialized } = useCustomerData();
 
-	const hasValidationErrors = useSelect(
+	const { validationErrors } = useSelect(
 		( select ) => {
-			const store = select( validationStore );
-			const billingFieldKeys = Object.keys( billingAddress ).filter(
-				( key ) => key !== 'email'
-			);
-			// Check if any billing field has validation errors
-			return billingFieldKeys.some( ( key ) => {
-				const error = store.getValidationError( 'billing_' + key );
-				return error !== undefined;
-			} );
+			return {
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
+			};
 		},
 		[ billingAddress ]
 	);
 
 	useEffect( () => {
+		// Check if any billing field has validation errors
+		const hasValidationErrors = Object.keys( validationErrors ).some(
+			( key ) => {
+				if ( key.startsWith( 'billing_' ) && key !== 'billing_email' ) {
+					return validationErrors[ key ] !== undefined;
+				}
+				return false;
+			}
+		);
+
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
 		if (
@@ -58,9 +63,9 @@ const CustomerAddress = () => {
 		}
 	}, [
 		editingBillingAddress,
-		hasValidationErrors,
 		billingAddress,
 		isInitialized,
+		validationErrors,
 	] );
 
 	const onChangeAddress = useCallback(

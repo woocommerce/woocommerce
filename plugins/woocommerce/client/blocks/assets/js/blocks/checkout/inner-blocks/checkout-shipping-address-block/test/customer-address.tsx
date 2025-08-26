@@ -92,7 +92,10 @@ const baseMockCheckoutAddress = {
 };
 
 describe( 'CustomerAddress (Shipping)', () => {
-	let mockGetValidationError: jest.Mock;
+	let mockValidationErrors: Record<
+		string,
+		FieldValidationStatus | undefined
+	>;
 
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -108,19 +111,19 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Create fresh mock for each test
-		mockGetValidationError = jest.fn();
+		mockValidationErrors = {};
 
 		// Set up useSelect mock with the validation store pattern
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
 			return callback( () => ( {
-				getValidationError: mockGetValidationError,
+				getValidationErrors: () => mockValidationErrors,
 			} ) );
 		} );
 	} );
 
 	it( 'should not be in editing mode when there are no validation errors', () => {
 		// Mock the validation store to return no errors for any field
-		mockGetValidationError.mockImplementation( () => undefined );
+		mockValidationErrors = {};
 
 		render( <CustomerAddress /> );
 
@@ -157,15 +160,12 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Mock the validation store to return error for shipping_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'shipping_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			shipping_city: {
+				message: 'Please enter a valid city',
+				hidden: false,
+			},
+		};
 
 		render( <CustomerAddress /> );
 
@@ -198,15 +198,12 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Mock the validation store to return hidden error for shipping_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'shipping_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: true,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			shipping_city: {
+				message: 'Please enter a valid city',
+				hidden: true,
+			},
+		};
 
 		render( <CustomerAddress /> );
 
@@ -238,21 +235,16 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Mock the validation store to return mixed errors for shipping fields
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'shipping_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: true,
-				} as FieldValidationStatus;
-			}
-			if ( key === 'shipping_postcode' ) {
-				return {
-					message: 'Please enter a valid postcode',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			shipping_city: {
+				message: 'Please enter a valid city',
+				hidden: true,
+			},
+			shipping_postcode: {
+				message: 'Please enter a valid postcode',
+				hidden: false,
+			},
+		};
 
 		render( <CustomerAddress /> );
 
@@ -261,7 +253,7 @@ describe( 'CustomerAddress (Shipping)', () => {
 
 	it( 'should handle empty validation errors object', () => {
 		// Mock the validation store to return no errors for any field
-		mockGetValidationError.mockImplementation( () => undefined );
+		mockValidationErrors = {};
 
 		render( <CustomerAddress /> );
 
@@ -284,15 +276,12 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Mock the validation store to return error for shipping_city
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'shipping_city' ) {
-				return {
-					message: 'Please enter a valid city',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			return undefined;
-		} );
+		mockValidationErrors = {
+			shipping_city: {
+				message: 'Please enter a valid city',
+				hidden: false,
+			},
+		};
 
 		render( <CustomerAddress /> );
 
@@ -329,16 +318,12 @@ describe( 'CustomerAddress (Shipping)', () => {
 
 		// Mock the validation store to return email error for contact_email
 		// Shipping address doesn't contain email field, so this shouldn't trigger editing
-		mockGetValidationError.mockImplementation( ( key: string ) => {
-			if ( key === 'contact_email' ) {
-				return {
-					message: 'Please enter a valid email address',
-					hidden: false,
-				} as FieldValidationStatus;
-			}
-			// No errors for shipping fields (shipping_first_name, shipping_last_name, etc.)
-			return undefined;
-		} );
+		mockValidationErrors = {
+			contact_email: {
+				message: 'Please enter a valid email address',
+				hidden: false,
+			},
+		};
 
 		render( <CustomerAddress /> );
 
@@ -382,30 +367,45 @@ describe( 'CustomerAddress (Shipping)', () => {
 		} );
 
 		// Mock the validation store to return errors for all empty required fields
-		mockGetValidationError.mockImplementation( ( key: string ) => {
+		mockValidationErrors = {
 			// Check if it's a shipping field that should have validation errors
-			if ( key.startsWith( 'shipping_' ) ) {
-				const fieldName = key.replace( 'shipping_', '' );
-				const errorMessages: Record< string, string > = {
-					first_name: 'First name is required',
-					last_name: 'Last name is required',
-					address_1: 'Address is required',
-					city: 'City is required',
-					state: 'State is required',
-					postcode: 'Postcode is required',
-					country: 'Country is required',
-					phone: 'Phone is required',
-					email: 'Email is required',
-				};
-
-				if ( errorMessages[ fieldName ] ) {
-					return {
-						message: errorMessages[ fieldName ],
-						hidden: false,
-					} as FieldValidationStatus;
-				}
-			}
-		} );
+			shipping_first_name: {
+				message: 'First name is required',
+				hidden: false,
+			},
+			shipping_last_name: {
+				message: 'Last name is required',
+				hidden: false,
+			},
+			shipping_address_1: {
+				message: 'Address is required',
+				hidden: false,
+			},
+			shipping_city: {
+				message: 'City is required',
+				hidden: false,
+			},
+			shipping_state: {
+				message: 'State is required',
+				hidden: false,
+			},
+			shipping_postcode: {
+				message: 'Postcode is required',
+				hidden: false,
+			},
+			shipping_country: {
+				message: 'Country is required',
+				hidden: false,
+			},
+			shipping_phone: {
+				message: 'Phone is required',
+				hidden: false,
+			},
+			shipping_email: {
+				message: 'Email is required',
+				hidden: false,
+			},
+		};
 
 		render( <CustomerAddress /> );
 

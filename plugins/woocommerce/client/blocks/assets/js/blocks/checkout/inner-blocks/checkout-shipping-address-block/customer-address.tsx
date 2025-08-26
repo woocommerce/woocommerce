@@ -33,22 +33,30 @@ const CustomerAddress = () => {
 
 	const { isInitialized } = useCustomerData();
 
-	const hasValidationErrors = useSelect(
+	const { validationErrors } = useSelect(
 		( select ) => {
-			const store = select( validationStore );
-			const shippingFieldKeys = Object.keys( shippingAddress ).filter(
-				( key ) => key !== 'email'
-			);
-			// Check if any shipping field has validation errors
-			return shippingFieldKeys.some( ( key ) => {
-				const error = store.getValidationError( 'shipping_' + key );
-				return error !== undefined;
-			} );
+			return {
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
+			};
 		},
 		[ shippingAddress ]
 	);
 
 	useEffect( () => {
+		// Check if any shipping field has validation errors
+		const hasValidationErrors = Object.keys( validationErrors ).some(
+			( key ) => {
+				if (
+					key.startsWith( 'shipping_' ) &&
+					key !== 'shipping_email'
+				) {
+					return validationErrors[ key ] !== undefined;
+				}
+				return false;
+			}
+		);
+
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
 		if (
@@ -60,9 +68,9 @@ const CustomerAddress = () => {
 		}
 	}, [
 		editingShippingAddress,
-		hasValidationErrors,
 		shippingAddress,
 		isInitialized,
+		validationErrors,
 	] );
 
 	const onChangeAddress = useCallback(
