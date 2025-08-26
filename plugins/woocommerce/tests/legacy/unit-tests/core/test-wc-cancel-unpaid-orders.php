@@ -148,7 +148,9 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 			'woocommerce_cancel_unpaid_orders_interval_minutes',
 			function () use ( $custom_interval ) {
 				return $custom_interval;
-			}
+			},
+			10,
+			0
 		);
 
 		// Run the function.
@@ -251,7 +253,9 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 			'woocommerce_cancel_unpaid_orders_interval_minutes',
 			function () {
 				return 0;
-			}
+			},
+			10,
+			0
 		);
 
 		// Run the function.
@@ -329,6 +333,8 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
 		}
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
 		update_option( 'woocommerce_hold_stock_minutes', $this->original_hold_stock_minutes );
 		update_option( 'woocommerce_manage_stock', $this->original_manage_stock_option );
 
