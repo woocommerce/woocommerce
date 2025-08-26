@@ -235,12 +235,11 @@ final class WooCommerce {
 	/**
 	 * Get the WooCommerce version.
 	 *
-	 * @since 10.2.0
+	 * @since 10.3.0
 	 *
-	 * @param bool $include_prerelease_info Whether to include pre-release information in the version string.
 	 * @return string The WooCommerce version.
 	 */
-	public function version( ?bool $include_prerelease_info = false ): string {
+	public function stable_version(): string {
 		return explode( '-', $this->version, 2 )[0];
 	}
 

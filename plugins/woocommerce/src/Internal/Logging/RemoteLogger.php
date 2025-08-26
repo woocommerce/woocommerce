@@ -297,8 +297,8 @@ class RemoteLogger extends \WC_Log_Handler {
 			}
 		}
 
-		if ( function_exists( 'WC' ) && method_exists( WC(), 'version' ) ) {
-			return WC()->version();
+		if ( function_exists( 'WC' ) && method_exists( WC(), 'stable_version' ) ) {
+			return WC()->stable_version();
 		}
 
 		if ( defined( 'WC_VERSION' ) ) {
