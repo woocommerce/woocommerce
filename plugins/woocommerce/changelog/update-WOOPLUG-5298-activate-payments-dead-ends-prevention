@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Prevent WooPayments activate payments dead-ends and allow for NOX profile reset regardless of the presence of a connected account.
-
-

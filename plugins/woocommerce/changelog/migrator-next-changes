@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move the resposibility of cred inputs from Registry to Platforms

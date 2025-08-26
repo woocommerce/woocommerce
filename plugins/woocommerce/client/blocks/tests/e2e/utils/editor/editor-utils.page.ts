@@ -46,9 +46,14 @@ export class Editor extends CoreEditor {
 	}
 
 	/**
-	 * Opens the global inserter.
+	 * Clicks the global block inserter for given action.
+	 *
+	 * @param action - The action to perform on the global block inserter ( 'toggle' | 'open' | 'close' ).
+	 * @default 'toggle'
 	 */
-	async openGlobalBlockInserter() {
+	async clickGlobalBlockInserter(
+		action: 'toggle' | 'open' | 'close' = 'toggle'
+	) {
 		const toggleButton = this.page.getByRole( 'button', {
 			name:
 				this.wpCoreVersion >= 6.8
@@ -60,9 +65,27 @@ export class Editor extends CoreEditor {
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
 
-		if ( ! isOpen ) {
+		if (
+			action === 'toggle' ||
+			( action === 'open' && ! isOpen ) ||
+			( action === 'close' && isOpen )
+		) {
 			await toggleButton.click();
 		}
+	}
+
+	/**
+	 * Opens the global inserter.
+	 */
+	async openGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'open' );
+	}
+
+	/**
+	 * Closes the global inserter.
+	 */
+	async closeGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'close' );
 	}
 
 	async transformIntoBlocks() {
@@ -99,7 +122,7 @@ export class Editor extends CoreEditor {
 
 		// Wait for the search to finish.
 		await expect(
-			this.page.getByRole( 'button', { name: 'Reset' } )
+			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
 	}
@@ -158,7 +181,11 @@ export class Editor extends CoreEditor {
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {
-		await this.page.getByLabel( 'Add Template' ).click();
+		// We need to take into account two versions of WordPress where label has changed.
+		await this.page
+			.getByLabel( 'Add Template' )
+			.or( this.page.getByText( 'Add New Template' ) )
+			.click();
 
 		const dialog = this.page.getByRole( 'dialog' );
 		await dialog.getByRole( 'button', { name: templateName } ).click();

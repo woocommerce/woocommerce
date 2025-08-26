@@ -257,15 +257,11 @@ class PlatformRegistry {
 	 * @return array Array of field_name => prompt_text pairs.
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
-
-		// Default field mappings for known platforms.
-		$default_fields = array(
-			'shopify' => array(
-				'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
-				'access_token' => 'Enter access token:',
-			),
-		);
-
-		return $default_fields[ $platform_slug ] ?? array();
+		$platform = $this->get_platform( $platform_slug );
+		if ( ! is_array( $platform ) ) {
+			return array();
+		}
+		$credentials = $platform['credentials'] ?? array();
+		return is_array( $credentials ) ? $credentials : array();
 	}
 }

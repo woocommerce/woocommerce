@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+This change moves extensibility documentation from GitHub markdown pages to the central /docs folder for display on developer.woocommerce.com/docs

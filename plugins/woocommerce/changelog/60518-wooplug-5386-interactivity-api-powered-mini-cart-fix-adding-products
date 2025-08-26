@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini Cart - Avoid error when adding products without a description.

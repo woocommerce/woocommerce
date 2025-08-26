@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure iAPI powered Mini-Cart shows all product values when used with certain other blocks on the same page
