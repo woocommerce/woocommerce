@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix Single Product template compatibility layer not loaded if there were several results of the same template
+
+
