@@ -20,6 +20,10 @@
 	align-items: flex-start;
 }
 
+.wc-block-checkout__terms-checkbox-wrapper {
+	margin-right: $gap-small;
+}
+
 .wc-block-checkout__terms_notice {
 	margin: 0;
 	.components-notice__content {

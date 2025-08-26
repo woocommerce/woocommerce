@@ -30,7 +30,7 @@ export const Edit = ( {
 }: {
 	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ) => {
 	const blockProps = useBlockProps();
 
 	const defaultText = checkbox
@@ -145,10 +145,9 @@ export const Edit = ( {
 			>
 				{ checkbox ? (
 					<>
-						<CheckboxControl
-							id="terms-condition"
-							checked={ false }
-						/>
+						<div className="wc-block-checkout__terms-checkbox-wrapper">
+							<CheckboxControl checked={ false } />
+						</div>
 						<RichText
 							value={ currentText }
 							onChange={ ( value ) =>
@@ -170,6 +169,6 @@ export const Edit = ( {
 	);
 };
 
-export const Save = (): JSX.Element => {
+export const Save = () => {
 	return <div { ...useBlockProps.save() } />;
 };
