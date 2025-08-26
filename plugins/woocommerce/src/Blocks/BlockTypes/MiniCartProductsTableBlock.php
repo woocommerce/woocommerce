@@ -257,20 +257,19 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	 * @return string Rendered product details output.
 	 */
 	protected function render_experimental_iapi_product_details_markup( $property ) {
+		$context = array( 'dataProperty' => $property );
+
 		ob_start();
 		?>
 		<div
-			<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => $property ) ); ?>
+			<?php wp_interactivity_data_wp_context( $context ); ?>
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="state.itemDataHasMultipleAttributes"
 		>
-			<div data-wp-bind--class="state.cartItemDataAttr.className">
-				<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
-				<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
-			</div>
+			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div' ); ?>
 		</div>
 		<ul
-			<?php echo wp_interactivity_data_wp_context( array( 'dataProperty' => $property ) ); ?>
+			<?php wp_interactivity_data_wp_context( $context ); ?>
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="!state.itemDataHasMultipleAttributes"
 		>
@@ -278,12 +277,26 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
 				data-wp-each-key="context.itemData.raw_attribute"
 			>
-				<li data-wp-bind--class="state.cartItemDataAttr.className">
-					<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
-					<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
-				</li>
+				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li' ); ?>
 			</template>
 		</ul>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render markup for a single product detail item.
+	 *
+	 * @param string $tag_name The HTML tag to use for the item.
+	 * @return string Rendered product detail item output.
+	 */
+	private function render_experimental_iapi_product_details_item_markup( $tag_name ) {
+		ob_start();
+		?>
+		<<?php echo $tag_name; ?> data-wp-bind--class="state.cartItemDataAttr.className">
+			<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
+		</<?php echo $tag_name; ?>>
 		<?php
 		return ob_get_clean();
 	}
