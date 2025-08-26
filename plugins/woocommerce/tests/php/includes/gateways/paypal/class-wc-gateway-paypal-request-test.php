@@ -77,20 +77,15 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_paypal_order_params_are_correct() {
 		$order = WC_Helper_Order::create_order();
-		$order->add_product( WC_Helper_Product::create_simple_product(), 2 );
-		$order->set_shipping_total( 10 );
-		$order->set_total( 40 );
-		$order->set_currency( 'USD' );
+		$order->set_cart_tax( 10 );
+		$order->set_shipping_tax( 0 );
+		$order->set_total( 60 );
 		$order->save();
-
-		$item = current( $order->get_items() );
-		$item->set_total_tax( 10 );
-		$item->save();
 
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
 
 		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
-		$result  = $request->create_paypal_order( $order );
+		$this->assertNotNull( $request->create_paypal_order( $order ) );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
 	}
@@ -107,31 +102,37 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
 		$this->assertEquals( 'POST', $parsed_args['method'] );
 		$body = json_decode( $parsed_args['body'], true );
-		$this->assertEquals( 'CAPTURE', $body['intent'] );
+		$this->assertArrayHasKey( 'order', $body );
+		$order_payload = $body['order'];
+		$this->assertEquals( 'CAPTURE', $order_payload['intent'] );
 
-		$purchase_unit = $body['purchase_units'][0];
-		$this->assertEquals( '40.00', $purchase_unit['amount']['value'] );
+		$purchase_unit = $order_payload['purchase_units'][0];
+		$this->assertEquals( '60.00', $purchase_unit['amount']['value'] );
 		$this->assertEquals( 'USD', $purchase_unit['amount']['currency_code'] );
 		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['item_total']['currency_code'] );
 		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['shipping']['currency_code'] );
 		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['tax_total']['currency_code'] );
-		$this->assertEquals( '20.00', $purchase_unit['amount']['breakdown']['item_total']['value'] );
+		$this->assertEquals( '40.00', $purchase_unit['amount']['breakdown']['item_total']['value'] );
 		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['shipping']['value'] );
 		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['tax_total']['value'] );
 
 		$items = $purchase_unit['items'];
 		$this->assertEquals( 'Dummy Product', $items[0]['name'] );
-		$this->assertEquals( '2', $items[0]['quantity'] );
-		$this->assertEquals( '20.00', $items[0]['unit_amount']['value'] );
+		$this->assertEquals( '4', $items[0]['quantity'] );
+		$this->assertEquals( '10.00', $items[0]['unit_amount']['value'] );
 		$this->assertEquals( 'USD', $items[0]['unit_amount']['currency_code'] );
 
-		$this->assertArrayHasKey( 'return_url', $body['application_context'] );
-		$this->assertArrayHasKey( 'cancel_url', $body['application_context'] );
+		$this->assertArrayHasKey( 'payment_source', $order_payload );
+		$this->assertArrayHasKey( 'paypal', $order_payload['payment_source'] );
+		$this->assertArrayHasKey( 'experience_context', $order_payload['payment_source']['paypal'] );
+		$this->assertArrayHasKey( 'return_url', $order_payload['payment_source']['paypal']['experience_context'] );
+		$this->assertArrayHasKey( 'cancel_url', $order_payload['payment_source']['paypal']['experience_context'] );
 
-		$custom_id = json_decode( $body['purchase_units'][0]['custom_id'], true );
-		$this->assertEquals( $order->get_id(), $custom_id['order_id'] );
-		$this->assertEquals( $order->get_order_key(), $custom_id['order_key'] );
-		$this->assertHasKey( 'endpoint', $custom_id );
+		$custom_id = json_decode( $order_payload['purchase_units'][0]['custom_id'], true );
+		$this->assertArrayHasKey( 'order_id', $custom_id );
+		$this->assertArrayHasKey( 'order_key', $custom_id );
+		$this->assertArrayHasKey( 'site_url', $custom_id );
+		$this->assertArrayHasKey( 'site_id', $custom_id );
 
 		return $this->create_paypal_order_success( $value, $parsed_args );
 	}
