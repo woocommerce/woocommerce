@@ -538,6 +538,7 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 
 	/**
 	 * Get images value.
+	 * TODO: copied from WC_REST_Products_V1_Controller. Find a better way to do this.
 	 *
 	 * @param WC_Product $product Product being exported.
 	 *
@@ -545,15 +546,44 @@ class WC_Product_JSON_Exporter extends WC_JSON_Batch_Exporter {
 	 * @return array
 	 */
 	protected function get_column_value_images( $product ) {
-		$image_ids = array_merge( array( $product->get_image_id( 'edit' ) ), $product->get_gallery_image_ids( 'edit' ) );
-		$images    = array();
+		$images         = array();
+		$attachment_ids = array();
 
-		foreach ( $image_ids as $image_id ) {
-			$image = wp_get_attachment_image_src( $image_id, 'full' );
+		// Add featured image.
+		if ( $product->get_image_id() ) {
+			$attachment_ids[] = $product->get_image_id();
+		}
 
-			if ( $image ) {
-				$images[] = $image[0];
+		// Add gallery images.
+		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+
+		// Build image data.
+		foreach ( $attachment_ids as $attachment_id ) {
+			$attachment_post = get_post( $attachment_id );
+			if ( is_null( $attachment_post ) ) {
+				continue;
 			}
+
+			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+
+			if ( ! is_array( $attachment ) ) {
+				continue;
+			}
+			$thumbnail = wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+
+			$images[] = array(
+				'id'                => (int) $attachment_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
+				'src'               => current( $attachment ),
+				'name'              => get_the_title( $attachment_id ),
+				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
+				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+				'thumbnail'         => current( $thumbnail ),
+			);
 		}
 
 		return $images;
