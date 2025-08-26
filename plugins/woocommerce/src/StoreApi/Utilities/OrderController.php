@@ -110,16 +110,24 @@ class OrderController {
 			wc()->cart->calculate_totals();
 		}
 
+		// Determine which customer to use for operations.
+		$customer_to_copy = $customer instanceof \WC_Customer ? $customer : WC()->customer;
+
+		// If no valid customer context exists, return early to prevent fatals.
+		if ( ! $customer_to_copy instanceof \WC_Customer ) {
+			return;
+		}
+
 		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
-		$this->update_addresses_from_cart( $order, $customer );
+		$this->update_addresses_from_cart( $order, $customer_to_copy );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
-		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
+		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( $customer_to_copy->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
 
@@ -821,38 +829,30 @@ class OrderController {
 	 * @param \WC_Order    $order    The order object to update.
 	 * @param \WC_Customer $customer The customer to copy the address data from.
 	 */
-	protected function update_addresses_from_cart( \WC_Order $order, ?\WC_Customer $customer = null ) {
-		// Determine which customer to use for copying address data.
-		$customer_to_copy = $customer instanceof \WC_Customer ? $customer : WC()->customer;
-
-		// If no valid customer context exists, return early to prevent fatals.
-		if ( ! $customer_to_copy instanceof \WC_Customer ) {
-			return;
-		}
-
+	protected function update_addresses_from_cart( \WC_Order $order, \WC_Customer $customer ) {
 		$order->set_props(
 			array(
-				'billing_first_name'  => $customer_to_copy->get_billing_first_name(),
-				'billing_last_name'   => $customer_to_copy->get_billing_last_name(),
-				'billing_company'     => $customer_to_copy->get_billing_company(),
-				'billing_address_1'   => $customer_to_copy->get_billing_address_1(),
-				'billing_address_2'   => $customer_to_copy->get_billing_address_2(),
-				'billing_city'        => $customer_to_copy->get_billing_city(),
-				'billing_state'       => $customer_to_copy->get_billing_state(),
-				'billing_postcode'    => $customer_to_copy->get_billing_postcode(),
-				'billing_country'     => $customer_to_copy->get_billing_country(),
-				'billing_email'       => $customer_to_copy->get_billing_email(),
-				'billing_phone'       => $customer_to_copy->get_billing_phone(),
-				'shipping_first_name' => $customer_to_copy->get_shipping_first_name(),
-				'shipping_last_name'  => $customer_to_copy->get_shipping_last_name(),
-				'shipping_company'    => $customer_to_copy->get_shipping_company(),
-				'shipping_address_1'  => $customer_to_copy->get_shipping_address_1(),
-				'shipping_address_2'  => $customer_to_copy->get_shipping_address_2(),
-				'shipping_city'       => $customer_to_copy->get_shipping_city(),
-				'shipping_state'      => $customer_to_copy->get_shipping_state(),
-				'shipping_postcode'   => $customer_to_copy->get_shipping_postcode(),
-				'shipping_country'    => $customer_to_copy->get_shipping_country(),
-				'shipping_phone'      => $customer_to_copy->get_shipping_phone(),
+				'billing_first_name'  => $customer->get_billing_first_name(),
+				'billing_last_name'   => $customer->get_billing_last_name(),
+				'billing_company'     => $customer->get_billing_company(),
+				'billing_address_1'   => $customer->get_billing_address_1(),
+				'billing_address_2'   => $customer->get_billing_address_2(),
+				'billing_city'        => $customer->get_billing_city(),
+				'billing_state'       => $customer->get_billing_state(),
+				'billing_postcode'    => $customer->get_billing_postcode(),
+				'billing_country'     => $customer->get_billing_country(),
+				'billing_email'       => $customer->get_billing_email(),
+				'billing_phone'       => $customer->get_billing_phone(),
+				'shipping_first_name' => $customer->get_shipping_first_name(),
+				'shipping_last_name'  => $customer->get_shipping_last_name(),
+				'shipping_company'    => $customer->get_shipping_company(),
+				'shipping_address_1'  => $customer->get_shipping_address_1(),
+				'shipping_address_2'  => $customer->get_shipping_address_2(),
+				'shipping_city'       => $customer->get_shipping_city(),
+				'shipping_state'      => $customer->get_shipping_state(),
+				'shipping_postcode'   => $customer->get_shipping_postcode(),
+				'shipping_country'    => $customer->get_shipping_country(),
+				'shipping_phone'      => $customer->get_shipping_phone(),
 			)
 		);
 
