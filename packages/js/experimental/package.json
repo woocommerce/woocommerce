@@ -71,6 +71,7 @@
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
 		"rimraf": "5.0.5",
