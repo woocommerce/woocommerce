@@ -36,10 +36,10 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * Clears the cart session when called.
  */
 function wc_empty_cart() {
-	if ( ! WC()->cart instanceof WC_Cart ) {
+	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart();
+	WC()->cart->empty_cart( false );
 }
 
 /**
