@@ -27,6 +27,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
+		if ( ! is_array( $data ) || empty( $data['event_type'] ) || empty( $data['resource'] ) ) {
+			WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
+			return;
+		}
+
 		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( $data, true ) );
 
 		switch ( $data['event_type'] ) {
