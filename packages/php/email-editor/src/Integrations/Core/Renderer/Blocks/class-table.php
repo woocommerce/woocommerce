@@ -36,11 +36,7 @@ class Table extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		// Do not render empty blocks or tables with no content.
-		$stripped_content = trim( wp_strip_all_tags( $table_content ) );
-		if ( empty( $stripped_content ) ) {
-			return '';
-		}
+
 
 		// Check for empty table structures - tables with no th or td elements.
 		if ( ! preg_match( '/<(th|td)/i', $table_content ) ) {
@@ -78,6 +74,12 @@ class Table extends Abstract_Block_Renderer {
 		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes ) ?? '';
 		$classes = preg_replace( '/\s+/', ' ', $classes ) ?? ''; // Clean up multiple spaces.
 		$classes = trim( $classes );
+
+		// Preserve core table class from the original wrapper so theme styles apply.
+		if ( false !== strpos( $block_content, 'wp-block-table' ) && false === strpos( $classes, 'wp-block-table' ) ) {
+			$classes .= ' wp-block-table';
+			$classes = trim( preg_replace( '/\s+/', ' ', $classes ) ?? '' );
+		}
 
 		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'color', 'typography' ) );
 		$additional_styles = array(
