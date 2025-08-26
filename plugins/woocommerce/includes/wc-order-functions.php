@@ -1098,6 +1098,11 @@ function wc_cancel_unpaid_orders() {
 	 */
 	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 
+	// Don't reschedule if the interval is 0 to prevent endless loops.
+	if ( $cancel_unpaid_interval < 1 ) {
+		return;
+	}
+
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
 		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
