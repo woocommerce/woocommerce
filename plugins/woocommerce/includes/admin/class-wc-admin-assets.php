@@ -184,7 +184,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				array(
 					'handle'       => 'wc-admin-meta-boxes',
 					'path'         => $plugin_url . '/assets/js/admin/meta-boxes' . $suffix . '.js',
-					'dependencies' => array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'wc-accounting', 'wc-round', 'wc-enhanced-select', 'plupload-all', 'wc-stupidtable', 'wc-jquery-tiptip' ),
+					'dependencies' => array( 'jquery', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'wc-accounting', 'wc-round', 'wc-enhanced-select', 'plupload-all', 'wc-stupidtable', 'wc-jquery-tiptip', 'wc-jquery-blockui' ),
 					'version'      => $version,
 				),
 				array(
