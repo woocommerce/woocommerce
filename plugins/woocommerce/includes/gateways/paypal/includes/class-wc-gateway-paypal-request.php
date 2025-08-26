@@ -154,6 +154,7 @@ class WC_Gateway_Paypal_Request {
 
 			$redirect_url = $this->get_approve_link( $http_code, $response_data );
 
+			// Save the PayPal order ID. This is different from the WooCommerce order ID.
 			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
 			$order->save();
 
@@ -244,18 +245,13 @@ class WC_Gateway_Paypal_Request {
 	 * @param WC_Order $order Order object.
 	 * @param string   $action_url The URL to authorize or capture the payment.
 	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
-	 * @return void
+	 * @return array|null The response data.
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( $order, $action_url, $action = 'capture' ) {
+	public function authorize_or_capture_payment( $order, $action = 'capture' ) {
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
 			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
-			return;
-		}
-
-		if ( ! $action_url ) {
-			WC_Gateway_Paypal::log( 'Action URL not found. Cannot ' . $action . ' payment.' );
 			return;
 		}
 
@@ -269,14 +265,12 @@ class WC_Gateway_Paypal_Request {
 			if ( 'capture' === $action ) {
 				$endpoint     = self::WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT;
 				$request_body = array(
-					'capture_url'     => $action_url,
 					'paypal_order_id' => $paypal_order_id,
 					'test_mode'       => $this->gateway->testmode,
 				);
 			} else {
 				$endpoint     = self::WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT;
 				$request_body = array(
-					'authorize_url'   => $action_url,
 					'paypal_order_id' => $paypal_order_id,
 					'test_mode'       => $this->gateway->testmode,
 				);
@@ -294,6 +288,8 @@ class WC_Gateway_Paypal_Request {
 			if ( 200 !== $http_code && 201 !== $http_code ) {
 				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
+
+			return json_decode( $body, true );
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			$order->add_order_note(
@@ -527,7 +523,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	private function get_paypal_shipping_preference( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! WC()->cart->needs_shipping_address() ) {
 			return 'NO_SHIPPING';
 		}
 
@@ -542,7 +538,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_paypal_order_shipping( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! WC()->cart->needs_shipping_address() ) {
 			return null;
 		}
 
@@ -767,7 +763,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_shipping_args( $order ) {
 		$shipping_args = array();
-		if ( $order->needs_shipping_address() ) {
+		if ( WC()->cart->needs_shipping_address() ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
 			$shipping_args['no_shipping']      = 0;
 			if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {

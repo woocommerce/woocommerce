@@ -57,21 +57,27 @@ class WC_Gateway_Paypal_Buttons {
 	 * Enqueues the scripts.
 	 */
 	public function scripts() {
+		if ( ! is_checkout() && ! is_cart() && ! is_product() ) {
+			return;
+		}
+
 		// TODO: Get client ID from the proxy?
 		$client_id = 'sb';
 
 		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
 		$params = array(
-			'components'     => 'buttons,funding-eligibility',
-			'enable-funding' => 'venmo,paylater',
-			'currency'       => get_woocommerce_currency(),
-			'intent'         => $intent,
-			'merchant-id'    => $this->gateway->email,
+			'client-id'       => $client_id,
+			'components'      => 'buttons,funding-eligibility,messages',
+			'disable-funding' => 'card',
+			'enable-funding'  => 'venmo,paylater',
+			'currency'        => get_woocommerce_currency(),
+			'intent'          => $intent,
+			'merchant-id'     => $this->gateway->email,
 		);
 
 		wp_enqueue_script(
 			'paypal-jssdk',
-			'https://www.paypal.com/sdk/js?client-id=' . $client_id . '&' . http_build_query( $params ),
+			add_query_arg( $params, 'https://www.paypal.com/sdk/js' ),
 			array(),
 			null, // PayPal does not like version numbers in the URL.
 			true
@@ -80,7 +86,7 @@ class WC_Gateway_Paypal_Buttons {
 		wp_enqueue_script(
 			'paypal-standard-buttons',
 			WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-buttons.js',
-			array( 'paypal-jssdk' ),
+			array( 'paypal-jssdk', 'jquery' ),
 			WC_VERSION,
 			true
 		);
@@ -90,9 +96,10 @@ class WC_Gateway_Paypal_Buttons {
 			'PayPalStandardButtons',
 			array(
 				'endpoints' => array(
-					'storeAPICart'          => get_site_url( null, '/wp-json/wc/store/v1/cart' ),
-					'storeAPICheckout'      => get_site_url( null, '/wp-json/wc/store/v1/checkout' ),
-					'createPayPalOrder'     => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/create-paypal-order' ),
+					'storeAPICart'      => get_site_url( null, '/wp-json/wc/store/v1/cart' ),
+					'storeAPICheckout'  => get_site_url( null, '/wp-json/wc/store/v1/checkout' ),
+					'createPayPalOrder' => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/create-paypal-order' ),
+					'capturePayment'    => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/capture-payment' ),
 				),
 				'nonce'     => wp_create_nonce( 'wc_store_api' ),
 			),

@@ -1,9 +1,9 @@
-/* global ajaxurl */
-
 (function ( $, window ) {
-	// Store WooCommerce order ID for use across PayPal button callbacks
-	let wcOrderId = null;
+	if ( ! document.getElementById( 'woocommerce-paypal-standard-buttons-container' ) ) {
+		return;
+	}
 
+	let wcOrderId = null;
 	paypal.Buttons({
 		async createOrder() {
 			console.log( 'createOrder' );
@@ -35,6 +35,32 @@
 
 			console.log( 'paypalOrderData', paypalOrderData );
 			return paypalOrderData.id;
+		},
+		onShippingAddressChange(data) {
+			// TODO: Invoked only when there is no server-side shipping callback.
+			console.log( 'onShippingAddressChange', data, wcOrderId );
+		},
+		onShippingOptionsChange(data) {
+			// TODO: Invoked only when there is no server-side shipping callback.
+			console.log( 'onShippingOptionChange', data, wcOrderId );
+		},
+		async onApprove(data) {
+			console.log( 'onApprove', data, wcOrderId );
+			const response = await fetch(window.PayPalStandardButtons.endpoints.capturePayment, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					order_id: wcOrderId,
+					paypal_order_id: data.orderID,
+					action: 'capture', // TODO: Add support for authorize.
+				}),
+			});
+
+			const responseData = await response.json();
+			console.log( 'approve response', responseData );
+			window.location.href = responseData.return_url;
 		},
 	}).render('#woocommerce-paypal-standard-buttons-container');
 })( jQuery, window );
