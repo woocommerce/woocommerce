@@ -66,6 +66,7 @@ class Table extends Abstract_Block_Renderer {
 			// Remove border related classes because we handle border on wrapping table cell.
 			$block_classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
 			$block_classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
+			// Keep alignment classes for editor UI compatibility.
 			$block_classes = (string) preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
 			$html->set_attribute( 'class', trim( $block_classes ) );
 			$table_content = $html->get_updated_html();
@@ -181,7 +182,7 @@ class Table extends Abstract_Block_Renderer {
 				$email_table_styles = "{$table_layout}border-collapse: collapse; width: 100%;";
 				$html->set_attribute( 'style', $existing_style . '; ' . $email_table_styles );
 
-				// Remove problematic classes from the table but keep has-fixed-layout for reference.
+				// Remove problematic classes from the table but keep has-fixed-layout and alignment classes for editor UI.
 				$class_attr = (string) str_replace( 'has-background', '', (string) $class_attr );
 				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', (string) $class_attr );
 				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', (string) $class_attr );

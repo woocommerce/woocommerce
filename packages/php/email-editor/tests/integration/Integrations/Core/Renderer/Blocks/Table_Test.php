@@ -459,8 +459,8 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders table with border color attribute
 	 */
 	public function testItRendersTableWithBorderColorAttribute(): void {
-		$parsed_table              = $this->parsed_table;
-		$parsed_table['innerHTML'] = $this->simple_table_content;
+		$parsed_table                         = $this->parsed_table;
+		$parsed_table['innerHTML']            = $this->simple_table_content;
 		$parsed_table['attrs']['borderColor'] = 'vivid-purple';
 
 		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
@@ -658,5 +658,42 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 
 		// Check that table-layout: fixed is NOT applied.
 		$this->assertStringNotContainsString( 'table-layout: fixed;', $rendered );
+	}
+
+	/**
+	 * Test it preserves alignment classes for editor UI compatibility
+	 */
+	public function testItPreservesAlignmentClassesForEditorUI(): void {
+		$table_with_alignment_classes = '
+		<figure class="wp-block-table">
+			<table>
+				<thead>
+					<tr>
+						<th class="has-text-align-center">Centered Header</th>
+						<th class="has-text-align-right">Right Header</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="has-text-align-center">Centered Cell</td>
+						<td class="has-text-align-right">Right Cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table_with_alignment_classes;
+
+		$rendered = $this->table_renderer->render( $table_with_alignment_classes, $parsed_table, $this->rendering_context );
+
+		// Check that alignment classes are preserved for editor UI compatibility.
+		$this->assertStringContainsString( 'has-text-align-center', $rendered );
+		$this->assertStringContainsString( 'has-text-align-right', $rendered );
+
+		// Check that alignment styles are also applied correctly.
+		$this->assertStringContainsString( 'text-align: center;', $rendered );
+		$this->assertStringContainsString( 'text-align: right;', $rendered );
 	}
 }
