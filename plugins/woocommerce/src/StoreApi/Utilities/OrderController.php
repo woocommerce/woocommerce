@@ -824,12 +824,12 @@ class OrderController {
 	protected function update_addresses_from_cart( \WC_Order $order, ?\WC_Customer $customer = null ) {
 		// Determine which customer to use for copying address data.
 		$customer_to_copy = $customer instanceof \WC_Customer ? $customer : WC()->customer;
-		
+
 		// If no valid customer context exists, return early to prevent fatals.
 		if ( ! $customer_to_copy instanceof \WC_Customer ) {
 			return;
 		}
-		
+
 		$order->set_props(
 			array(
 				'billing_first_name'  => $customer_to_copy->get_billing_first_name(),
@@ -855,7 +855,7 @@ class OrderController {
 				'shipping_phone'      => $customer_to_copy->get_shipping_phone(),
 			)
 		);
-		
+
 		// Only sync additional fields when we have a valid WC_Customer.
 		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, $customer_to_copy );
 	}
