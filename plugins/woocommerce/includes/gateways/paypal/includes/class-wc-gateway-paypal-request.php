@@ -270,7 +270,7 @@ class WC_Gateway_Paypal_Request {
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
 
-		if ( 200 !== $http_code ) {
+		if ( 200 !== $http_code && 201 !== $http_code ) {
 			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 		}
 
