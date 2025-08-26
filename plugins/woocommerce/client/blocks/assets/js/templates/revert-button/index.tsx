@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	PluginDocumentSettingPanel,
-	store as editorStore,
-} from '@wordpress/editor';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { subscribe, select, useSelect, useDispatch } from '@wordpress/data';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
@@ -13,7 +10,6 @@ import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useEntityRecord } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { isString } from '@woocommerce/types';
 
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -46,12 +42,10 @@ const pickBlockClientIds = ( blocks: Array< BlockInstance > ) =>
 	}, [] );
 
 const RevertClassicTemplateButton = () => {
-	const { blocks, currentPostId } = useSelect( ( sel ) => {
+	const { blocks, editedPostId } = useSelect( ( sel ) => {
 		return {
-			// @ts-expect-error getBlocks is not typed
 			blocks: sel( blockEditorStore ).getBlocks(),
-			// @ts-expect-error getCurrentPostId is not typed
-			currentPostId: sel( editorStore ).getCurrentPostId(),
+			editedPostId: sel( 'core/edit-site' ).getEditedPostId(),
 		};
 	}, [] );
 
@@ -63,7 +57,7 @@ const RevertClassicTemplateButton = () => {
 			rendered?: string;
 			row: string;
 		};
-	} >( 'postType', 'wp_template', currentPostId );
+	} >( 'postType', 'wp_template', editedPostId );
 
 	const isLegacyTemplateBlockAdded = useMemo(
 		() => hasLegacyTemplateBlock( blocks ),
@@ -143,25 +137,23 @@ const templateSlugs = [
 
 const REVERT_BUTTON_PLUGIN_NAME = 'woocommerce-blocks-revert-button-templates';
 
-let currentTemplateSlug: string | undefined;
+let currentTemplateId: string | undefined;
 subscribe( () => {
-	const previousTemplateSlug = currentTemplateSlug;
+	const previousTemplateId = currentTemplateId;
+	const store = select( 'core/edit-site' );
 
-	if ( ! isSiteEditorPage() ) {
+	if ( ! isSiteEditorPage( store ) ) {
 		return;
 	}
 
-	// @ts-expect-error getEditedPostSlug is not typed
-	currentTemplateSlug = select( editorStore ).getEditedPostSlug();
+	currentTemplateId = store?.getEditedPostId();
 
-	if ( previousTemplateSlug === currentTemplateSlug ) {
+	if ( previousTemplateId === currentTemplateId ) {
 		return;
 	}
 
 	const isWooTemplate = templateSlugs.some( ( slug ) =>
-		isString( currentTemplateSlug )
-			? currentTemplateSlug.includes( slug )
-			: false
+		currentTemplateId?.includes( slug )
 	);
 
 	const hasSupportForPluginDocumentSettingPanel =
