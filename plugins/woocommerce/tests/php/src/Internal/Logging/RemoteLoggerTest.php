@@ -109,7 +109,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					'setup'     => function () {
 						$version = WC()->version;
 						// Next major version. (e.g. 9.0.1 -> 10.0.0).
-						$next_version = sprintf( '%d.0.0', explode( '.', $version )[0] + 1 );
+						$next_version = sprintf( '%d.0.0', explode( '.', $version, 2 )[0] + 1 );
 
 						set_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT, $next_version, WEEK_IN_SECONDS );
 					},

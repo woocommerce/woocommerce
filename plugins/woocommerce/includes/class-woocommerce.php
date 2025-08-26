@@ -241,7 +241,7 @@ final class WooCommerce {
 	 * @return string The WooCommerce version.
 	 */
 	public function version( ?bool $include_prerelease_info = false ): string {
-		return $include_prerelease_info ? $this->version : preg_replace( '/-.*/', '', $this->version );
+		return explode( '-', $this->version, 2 )[0];
 	}
 
 	/**
