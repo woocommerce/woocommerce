@@ -54,7 +54,7 @@
 				},
 				"typography": {},
 				"border": {},
-				"css": "& table { border-collapse: collapse; width: 100%; } & th, & td { border: 1px solid currentColor; padding: 8px; } & thead th { background-color: var(--wp--preset--color--light-gray, #f9f9f9); font-weight: bold; } & .has-text-align-left { text-align: left; } & .has-text-align-center { text-align: center; } & .has-text-align-right { text-align: right; }",
+				"css": "& table { border-collapse: collapse; width: 100%; } & th, & td { border: 1px solid currentColor; padding: 8px; } & thead th { font-weight: bold; } & .has-text-align-left { text-align: left; } & .has-text-align-center { text-align: center; } & .has-text-align-right { text-align: right; }",
 				"variations": {}
 			}
 		}

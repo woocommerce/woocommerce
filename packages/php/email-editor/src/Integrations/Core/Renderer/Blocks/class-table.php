@@ -36,8 +36,6 @@ class Table extends Abstract_Block_Renderer {
 			return '';
 		}
 
-
-
 		// Check for empty table structures - tables with no th or td elements.
 		if ( ! preg_match( '/<(th|td)/i', $table_content ) ) {
 			return '';
@@ -70,24 +68,35 @@ class Table extends Abstract_Block_Renderer {
 
 		// Also remove classes from the wrapper classes.
 		$classes = preg_replace( '/has-background/', '', $classes ) ?? '';
+		$classes = preg_replace( '/has-[a-z-]*background[a-z-]*/', '', $classes ) ?? '';
+		$classes = preg_replace( '/[a-z-]+-background-[a-z-]+/', '', $classes ) ?? '';
 		$classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes ) ?? '';
 		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes ) ?? '';
 		$classes = preg_replace( '/\s+/', ' ', $classes ) ?? ''; // Clean up multiple spaces.
 		$classes = trim( $classes );
 
-		// Preserve core table class from the original wrapper so theme styles apply.
-		if ( false !== strpos( $block_content, 'wp-block-table' ) && false === strpos( $classes, 'wp-block-table' ) ) {
-			$classes .= ' wp-block-table';
-			$classes = trim( preg_replace( '/\s+/', ' ', $classes ) ?? '' );
-		}
+		// Don't add wp-block-table to wrapper classes - it will be added to the table element directly.
 
-		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'color', 'typography' ) );
+		// Get spacing styles for wrapper and table-specific styles separately.
+		$spacing_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing' ) );
+		$table_styles   = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'background-color', 'color', 'typography' ) );
+
+		// Ensure background styles are completely removed from spacing styles and force transparent background.
+		$spacing_css = $spacing_styles['css'] ?? '';
+		$spacing_css = preg_replace( '/background[^;]*;?/', '', $spacing_css ) ?? '';
+		$spacing_css = preg_replace( '/\s*;\s*;/', ';', $spacing_css ) ?? ''; // Clean up double semicolons.
+		$spacing_css = trim( is_string( $spacing_css ) ? $spacing_css : '', '; ' );
+
+		// Force transparent background on wrapper to prevent any background leakage.
+		$spacing_css           = $spacing_css ? $spacing_css . '; background: transparent !important;' : 'background: transparent !important;';
+		$spacing_styles['css'] = $spacing_css;
+
 		$additional_styles = array(
 			'min-width' => '100%', // Prevent Gmail App from shrinking the table on mobile devices.
 		);
 
 		// Add fallback text color when no custom text color or preset text color is set.
-		if ( empty( $block_styles['declarations']['color'] ) ) {
+		if ( empty( $table_styles['declarations']['color'] ) ) {
 			$email_styles = $rendering_context->get_theme_styles();
 			$color        = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
 			// Sanitize color value to ensure it's a valid hex color.
@@ -101,7 +110,7 @@ class Table extends Abstract_Block_Renderer {
 			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
 		}
 
-		$block_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );
+		$table_styles = Styles_Helper::extend_block_styles( $table_styles, $additional_styles );
 
 		// Check if this is a striped table style.
 		$is_striped_table = $this->is_striped_table( $block_content, $parsed_block );
@@ -109,23 +118,37 @@ class Table extends Abstract_Block_Renderer {
 		// Process the table content to ensure email compatibility BEFORE wrapping.
 		$table_content = $this->process_table_content( $table_content, $parsed_block, $rendering_context, $is_striped_table );
 
+		// Apply table-specific styles (background, color, typography) directly to the table element.
+		$table_content_with_styles = $this->apply_styles_to_table_element( $table_content, $table_styles['css'] );
+
+		// Add wp-block-table class to the table element for theme.json CSS rules.
+		if ( false !== strpos( $block_content, 'wp-block-table' ) ) {
+			$table_content_with_styles = $this->add_class_to_table_element( $table_content_with_styles, 'wp-block-table' );
+		}
+
+		// Build complete content (table + caption).
+		$complete_content = $table_content_with_styles;
+		if ( ! empty( $caption ) ) {
+			// Use HTML API to safely allow specific tags in caption.
+			$sanitized_caption = $this->sanitize_caption_html( $caption );
+			// Extract typography styles from table styles (not spacing styles) and apply to caption.
+			$caption_styles    = $this->extract_typography_styles_for_caption( $table_styles['css'] );
+			$complete_content .= '<div style="text-align: center; margin-top: 8px; ' . $caption_styles . '">' . $sanitized_caption . '</div>';
+		}
+
 		$table_attrs = array(
 			'style' => 'border-collapse: separate;', // Needed because of border radius.
 			'width' => '100%',
 		);
 
+		// Use spacing styles only for the wrapper.
 		$cell_attrs = array(
 			'class' => $classes,
-			'style' => $block_styles['css'],
+			'style' => $spacing_styles['css'],
 			'align' => $additional_styles['text-align'],
 		);
 
-		$rendered_table = Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs, $cell_attrs );
-
-		// Add caption outside the table if present.
-		if ( ! empty( $caption ) ) {
-			$rendered_table .= '<div style="text-align: center; margin-top: 8px; font-size: 0.9em; color: #666;">' . wp_kses_post( $caption ) . '</div>';
-		}
+		$rendered_table = Table_Wrapper_Helper::render_table_wrapper( $complete_content, $table_attrs, $cell_attrs );
 
 		return $rendered_table;
 	}
@@ -398,6 +421,128 @@ class Table extends Abstract_Block_Renderer {
 			'table'   => $table_html,
 			'caption' => $caption,
 		);
+	}
+
+	/**
+	 * Apply CSS styles directly to the table element.
+	 *
+	 * @param string $table_content Table HTML content.
+	 * @param string $styles CSS styles to apply.
+	 * @return string Table content with styles applied.
+	 */
+	private function apply_styles_to_table_element( string $table_content, string $styles ): string {
+		if ( empty( $styles ) ) {
+			return $table_content;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $table_content );
+		if ( $html->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
+			$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
+			$existing_style = rtrim( $existing_style, "; \t\n\r\0\x0B" );
+			$new_style      = ( '' !== $existing_style ? $existing_style . '; ' : '' ) . $styles;
+			$html->set_attribute( 'style', $new_style );
+			return $html->get_updated_html();
+		}
+		return $table_content;
+	}
+
+	/**
+	 * Add a CSS class to the table element.
+	 *
+	 * @param string $table_content Table HTML content.
+	 * @param string $class_name CSS class to add.
+	 * @return string Table content with class added.
+	 */
+	private function add_class_to_table_element( string $table_content, string $class_name ): string {
+		$html = new \WP_HTML_Tag_Processor( $table_content );
+		if ( $html->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
+			$existing_class = (string) ( $html->get_attribute( 'class' ) ?? '' );
+			$existing_class = trim( $existing_class );
+
+			// Only add if not already present.
+			if ( false === strpos( $existing_class, $class_name ) ) {
+				$new_class = $existing_class ? $existing_class . ' ' . $class_name : $class_name;
+				$html->set_attribute( 'class', $new_class );
+			}
+			return $html->get_updated_html();
+		}
+		return $table_content;
+	}
+
+	/**
+	 * Sanitize caption HTML to allow only specific tags and attributes.
+	 *
+	 * @param string $caption_html Raw caption HTML.
+	 * @return string Sanitized caption HTML.
+	 */
+	private function sanitize_caption_html( string $caption_html ): string {
+		// If no HTML tags, return as-is.
+		if ( false === strpos( $caption_html, '<' ) ) {
+			return $caption_html;
+		}
+
+		$html               = new \WP_HTML_Tag_Processor( $caption_html );
+		$allowed_tags       = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup' );
+		$allowed_attributes = array(
+			'href',
+			'data-type',
+			'data-id',
+			'style',
+			'class',
+		);
+
+		while ( $html->next_tag() ) {
+			$tag_name = strtolower( (string) $html->get_tag() );
+
+			// Remove disallowed tags.
+			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
+				$html->set_attribute( 'style', 'display: none;' );
+				continue;
+			}
+
+			// Remove disallowed attributes.
+			$attributes = $html->get_attribute_names_with_prefix( '' );
+			if ( is_array( $attributes ) ) {
+				foreach ( $attributes as $attr_name ) {
+					if ( ! in_array( $attr_name, $allowed_attributes, true ) ) {
+						$html->remove_attribute( $attr_name );
+					}
+				}
+			}
+		}
+
+		return $html->get_updated_html();
+	}
+
+	/**
+	 * Extract typography styles from CSS string for caption.
+	 *
+	 * @param string $css CSS string to extract typography from.
+	 * @return string Typography CSS for caption.
+	 */
+	private function extract_typography_styles_for_caption( string $css ): string {
+		$typography_properties = array(
+			'font-family',
+			'font-size',
+			'font-weight',
+			'font-style',
+			'line-height',
+			'letter-spacing',
+			'text-decoration',
+			'text-transform',
+			'color',
+		);
+
+		$caption_styles = array();
+
+		foreach ( $typography_properties as $property ) {
+			// Use regex to extract each typography property.
+			if ( preg_match( '/' . preg_quote( $property, '/' ) . '\s*:\s*([^;]+)/i', $css, $matches ) ) {
+				$caption_styles[] = $property . ': ' . trim( $matches[1] );
+			}
+		}
+
+		return implode( '; ', $caption_styles );
 	}
 
 	/**

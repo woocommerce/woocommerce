@@ -74,6 +74,14 @@
 	margin: 0;
 }
 
+/*
+ * Table block enhancements
+ */
+.wp-block-table figcaption {
+	/* Center-align table captions like core WordPress */
+	text-align: center;
+}
+
 .wp-block-image.alignleft,
 .wp-block-image.alignright {
 	margin-inline: 0 0;
