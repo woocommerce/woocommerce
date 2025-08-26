@@ -35,7 +35,7 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Don't allow actual order cancellations during tests.
-		add_filter( 'woocommerce_cancel_unpaid_orders', '__return_false', 10, 0 );
+		add_filter( 'woocommerce_cancel_unpaid_order', '__return_false', 10, 0 );
 		$this->original_hold_stock_minutes  = get_option( 'woocommerce_hold_stock_minutes', 0 );
 		$this->original_manage_stock_option = get_option( 'woocommerce_manage_stock', 'yes' );
 	}
@@ -204,5 +204,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 		// Remove any filters that might have been added.
 		remove_all_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes' );
 		remove_all_filters( 'woocommerce_cancel_unpaid_orders' );
+		remove_all_filters( 'woocommerce_cancel_unpaid_order' );
 	}
 }
