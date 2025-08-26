@@ -26,8 +26,10 @@ class Table extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		// Extract table content from figure wrapper if present.
-		$table_content = $this->extract_table_from_figure( $block_content );
+		// Extract table content and caption from figure wrapper if present.
+		$extracted_data = $this->extract_table_and_caption_from_figure( $block_content );
+		$table_content  = $extracted_data['table'];
+		$caption        = $extracted_data['caption'];
 
 		// Validate that we have actual table content.
 		if ( ! $this->is_valid_table_content( $table_content ) ) {
@@ -71,12 +73,12 @@ class Table extends Abstract_Block_Renderer {
 
 		// Also remove classes from the wrapper classes.
 		$classes = (string) str_replace( 'has-background', '', (string) $classes );
-		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes );
-		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes );
-		$classes = (string) preg_replace( '/\s+/', ' ', $classes ); // Clean up multiple spaces.
+		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', (string) $classes );
+		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', (string) $classes );
+		$classes = (string) preg_replace( '/\s+/', ' ', (string) $classes ); // Clean up multiple spaces.
 		$classes = trim( $classes );
 
-		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
+		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'color', 'typography' ) );
 		$additional_styles = array(
 			'min-width' => '100%', // Prevent Gmail App from shrinking the table on mobile devices.
 		);
@@ -115,7 +117,14 @@ class Table extends Abstract_Block_Renderer {
 			'align' => $additional_styles['text-align'],
 		);
 
-		return Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs, $cell_attrs );
+		$rendered_table = Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs, $cell_attrs );
+
+		// Add caption outside the table if present.
+		if ( ! empty( $caption ) ) {
+			$rendered_table .= '<div style="text-align: center; margin-top: 8px; font-size: 0.9em; color: #666;">' . $caption . '</div>';
+		}
+
+		return $rendered_table;
 	}
 
 	/**
@@ -135,6 +144,15 @@ class Table extends Abstract_Block_Renderer {
 		$color        = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
 		$border_color = $this->sanitize_color( $color );
 
+		// Extract custom border color and width from block attributes.
+		$custom_border_color = $this->get_custom_border_color( $parsed_block, $rendering_context );
+		$custom_border_width = $this->get_custom_border_width( $parsed_block );
+
+		// Use custom border color if available, otherwise fall back to default.
+		if ( $custom_border_color ) {
+			$border_color = $custom_border_color;
+		}
+
 		// Track row context for striped styling.
 		$current_section = ''; // Table sections: thead, tbody, tfoot.
 		$row_count       = 0;
@@ -151,17 +169,23 @@ class Table extends Abstract_Block_Renderer {
 				$html->set_attribute( 'role', 'presentation' );
 				$html->set_attribute( 'width', '100%' );
 
-				// Get existing style and add email-specific styles with borders.
-				$existing_style     = $html->get_attribute( 'style' ) ?? '';
-				$email_table_styles = "border-collapse: collapse; width: 100%; border: 1px solid {$border_color};";
+				// Get existing style and add email-specific styles.
+				$existing_style = $html->get_attribute( 'style' ) ?? '';
+				$border_width   = $custom_border_width ? $custom_border_width : '1px';
+
+				// Check for fixed layout class and apply table-layout: fixed.
+				$class_attr   = (string) ( $html->get_attribute( 'class' ) ?? '' );
+				$table_layout = $this->has_fixed_layout( $class_attr ) ? 'table-layout: fixed; ' : '';
+
+				// Use border-collapse: collapse to ensure consistent borders between table and cells.
+				$email_table_styles = "{$table_layout}border-collapse: collapse; width: 100%;";
 				$html->set_attribute( 'style', $existing_style . '; ' . $email_table_styles );
 
-				// Remove problematic classes from the table.
-				$class_attr = $html->get_attribute( 'class' ) ?? '';
+				// Remove problematic classes from the table but keep has-fixed-layout for reference.
 				$class_attr = (string) str_replace( 'has-background', '', (string) $class_attr );
-				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr );
-				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr );
-				$class_attr = (string) preg_replace( '/\s+/', ' ', $class_attr ); // Clean up multiple spaces.
+				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', (string) $class_attr );
+				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', (string) $class_attr );
+				$class_attr = (string) preg_replace( '/\s+/', ' ', (string) $class_attr ); // Clean up multiple spaces.
 				$html->set_attribute( 'class', trim( $class_attr ) );
 			} elseif ( 'THEAD' === $tag_name ) {
 				$current_section = 'thead';
@@ -179,11 +203,16 @@ class Table extends Abstract_Block_Renderer {
 				$html->set_attribute( 'valign', 'top' );
 
 				// Get existing style and add email-specific styles with borders and padding.
-				$existing_style    = $html->get_attribute( 'style' ) ?? '';
-				$email_cell_styles = "vertical-align: top; border: 1px solid {$border_color}; padding: 8px; text-align: left;";
+				$existing_style = $html->get_attribute( 'style' ) ?? '';
+				$border_width   = $custom_border_width ? $custom_border_width : '1px';
 
-				// Add thicker borders for header and footer cells.
-				$email_cell_styles = $this->add_header_footer_borders( $html, $email_cell_styles, $border_color, $current_section );
+				// Extract cell-specific text alignment.
+				$cell_text_align = $this->get_cell_text_alignment( $html );
+
+				$email_cell_styles = "vertical-align: top; border: {$border_width} solid {$border_color}; padding: 8px; text-align: {$cell_text_align};";
+
+				// Add thicker borders for header and footer cells when no custom border is set.
+				$email_cell_styles = $this->add_header_footer_borders( $html, $email_cell_styles, $border_color, $current_section, $custom_border_width );
 
 				// Add striped styling for tbody rows (first row gets background, then alternates).
 				if ( $is_striped_table && 'tbody' === $current_section && 1 === $row_count % 2 ) {
@@ -198,16 +227,61 @@ class Table extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Add thicker borders for table headers and footers.
+	 * Get custom border color from block attributes.
+	 *
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string|null Custom border color or null if not set.
+	 */
+	private function get_custom_border_color( array $parsed_block, Rendering_Context $rendering_context ): ?string {
+		$block_attributes = $parsed_block['attrs'] ?? array();
+
+		if ( ! empty( $block_attributes['borderColor'] ) ) {
+			$border_color = $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] );
+			return $this->sanitize_color( $border_color );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get custom border width from block attributes.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 * @return string|null Custom border width or null if not set.
+	 */
+	private function get_custom_border_width( array $parsed_block ): ?string {
+		$block_attributes = $parsed_block['attrs'] ?? array();
+
+		if ( ! empty( $block_attributes['style']['border']['width'] ) ) {
+			$border_width = $block_attributes['style']['border']['width'];
+			// Ensure the border width has a unit, default to px if not specified.
+			if ( is_numeric( $border_width ) ) {
+				return $border_width . 'px';
+			}
+			return $border_width;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Add thicker borders for table headers and footers when no custom border is set.
 	 *
 	 * @param \WP_HTML_Tag_Processor $html HTML tag processor.
 	 * @param string                 $base_styles Base cell styles.
 	 * @param string                 $border_color Border color.
 	 * @param string                 $current_section Current table section (thead, tbody, tfoot).
+	 * @param string|null            $custom_border_width Custom border width if set.
 	 * @return string Updated cell styles.
 	 */
-	private function add_header_footer_borders( \WP_HTML_Tag_Processor $html, string $base_styles, string $border_color, string $current_section = '' ): string {
+	private function add_header_footer_borders( \WP_HTML_Tag_Processor $html, string $base_styles, string $border_color, string $current_section = '', ?string $custom_border_width = null ): string {
 		$tag_name = $html->get_tag();
+
+		// Only add thicker borders if no custom border width is set.
+		if ( $custom_border_width ) {
+			return $base_styles;
+		}
 
 		// Add thicker bottom border to all TH elements (headers).
 		if ( 'TH' === $tag_name ) {
@@ -223,52 +297,105 @@ class Table extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Get text alignment for a table cell.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html HTML tag processor.
+	 * @return string Text alignment value (left, center, right).
+	 */
+	private function get_cell_text_alignment( \WP_HTML_Tag_Processor $html ): string {
+		// Check for data-align attribute first.
+		$data_align = $html->get_attribute( 'data-align' );
+		if ( $data_align && in_array( $data_align, array( 'left', 'center', 'right' ), true ) ) {
+			return $data_align;
+		}
+
+		// Check for has-text-align-* classes.
+		$class_attr = (string) ( $html->get_attribute( 'class' ) ?? '' );
+		if ( false !== strpos( $class_attr, 'has-text-align-center' ) ) {
+			return 'center';
+		}
+		if ( false !== strpos( $class_attr, 'has-text-align-right' ) ) {
+			return 'right';
+		}
+		if ( false !== strpos( $class_attr, 'has-text-align-left' ) ) {
+			return 'left';
+		}
+
+		// Default to left alignment.
+		return 'left';
+	}
+
+	/**
+	 * Check if table has fixed layout class.
+	 *
+	 * @param string $class_attr Class attribute string.
+	 * @return bool True if has-fixed-layout class is present.
+	 */
+	private function has_fixed_layout( string $class_attr ): bool {
+		return false !== strpos( $class_attr, 'has-fixed-layout' );
+	}
+
+	/**
+	 * Extract table content and caption from figure wrapper if present.
+	 *
+	 * @param string $block_content Block content.
+	 * @return array Array with 'table' and 'caption' keys.
+	 */
+	private function extract_table_and_caption_from_figure( string $block_content ): array {
+		$dom_helper = new Dom_Document_Helper( $block_content );
+
+		// Look for figure element with wp-block-table class.
+		$figure_tag = $dom_helper->find_element( 'figure' );
+		if ( ! $figure_tag ) {
+			// If no figure wrapper found, return original content as table.
+			return array(
+				'table'   => $block_content,
+				'caption' => '',
+			);
+		}
+
+		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' );
+		if ( false === strpos( $figure_class, 'wp-block-table' ) ) {
+			// If figure doesn't have wp-block-table class, return original content as table.
+			return array(
+				'table'   => $block_content,
+				'caption' => '',
+			);
+		}
+
+		// Extract table element.
+		$table_tag = $dom_helper->find_element( 'table' );
+		if ( ! $table_tag ) {
+			return array(
+				'table'   => $block_content,
+				'caption' => '',
+			);
+		}
+
+		$table_html = $dom_helper->get_outer_html( $table_tag );
+
+		// Extract figcaption if present.
+		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
+		$caption        = '';
+		if ( $figcaption_tag ) {
+			$caption = $dom_helper->get_element_inner_html( $figcaption_tag );
+		}
+
+		return array(
+			'table'   => $table_html,
+			'caption' => $caption,
+		);
+	}
+
+	/**
 	 * Extract table content from figure wrapper if present.
 	 *
 	 * @param string $block_content Block content.
 	 * @return string
 	 */
 	private function extract_table_from_figure( string $block_content ): string {
-		$dom_helper = new Dom_Document_Helper( $block_content );
-
-		// Look for figure element with wp-block-table class.
-		$figure_tag = $dom_helper->find_element( 'figure' );
-		if ( ! $figure_tag ) {
-			// If no figure wrapper found, return original content.
-			return $block_content;
-		}
-
-		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' );
-		if ( false === strpos( $figure_class, 'wp-block-table' ) ) {
-			// If figure doesn't have wp-block-table class, return original content.
-			return $block_content;
-		}
-
-		// Extract table element.
-		$table_tag = $dom_helper->find_element( 'table' );
-		if ( ! $table_tag ) {
-			return $block_content;
-		}
-
-		$table_html = $dom_helper->get_outer_html( $table_tag );
-
-		// Extract figcaption if present and convert to caption.
-		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
-		if ( $figcaption_tag ) {
-			$caption_content = $dom_helper->get_element_inner_html( $figcaption_tag );
-			if ( '' !== $caption_content ) {
-				// Append <caption> as the last child of <table> using regex replacement.
-				// Add CSS to ensure caption appears below the table.
-				$table_html = (string) preg_replace(
-					'/<\/table>/',
-					'<caption style="caption-side: bottom; text-align: center; margin-top: 8px;">' . $caption_content . '</caption></table>',
-					$table_html,
-					1
-				);
-			}
-		}
-
-		return $table_html;
+		$extracted_data = $this->extract_table_and_caption_from_figure( $block_content );
+		return $extracted_data['table'];
 	}
 
 	/**
