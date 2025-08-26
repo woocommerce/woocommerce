@@ -6,7 +6,7 @@ import type {
 	ValidationData,
 	ValidationContextError,
 } from '@woocommerce/types';
-import { useDispatch, useSelect, select } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import deprecated from '@wordpress/deprecated';
 
@@ -34,19 +34,24 @@ export const useValidation = (): ValidationData => {
 
 	const prefix = 'extensions-errors';
 
-	const { hasValidationErrors } = useSelect( ( selectStore ) => {
-		const store = selectStore( validationStore );
-		return {
-			hasValidationErrors: store.hasValidationErrors(),
-		};
-	}, [] );
-
-	const getValidationError = useCallback(
-		( validationErrorId: string ) => {
+	const {
+		hasValidationErrors,
+		getValidationError,
+	}: {
+		hasValidationErrors: boolean;
+		getValidationError: (
+			validationErrorId: string
+		) => ValidationContextError;
+	} = useSelect(
+		( select ) => {
 			const store = select( validationStore );
-			return store.getValidationError(
-				`${ prefix }-${ validationErrorId }`
-			);
+			return {
+				hasValidationErrors: store.hasValidationErrors(),
+				getValidationError: ( validationErrorId: string ) =>
+					store.getValidationError(
+						`${ prefix }-${ validationErrorId }`
+					),
+			};
 		},
 		[ prefix ]
 	);
