@@ -207,7 +207,9 @@ const InboxNoteCard = ( {
 					</H>
 					<Section className="woocommerce-inbox-message__text">
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTMLForReact( content ) }
+							dangerouslySetInnerHTML={ sanitizeHTMLForReact(
+								content
+							) }
 							ref={ linkCallbackRef }
 						/>
 					</Section>
