@@ -59,22 +59,27 @@ const customSanitized = sanitizeHTML(
 ### Functions
 
 #### `sanitizeHTML(html: string, config?: SanitizeConfig): string`
+
 Sanitizes HTML content using default allowed tags and attributes.
 
 #### `initializeTrustedTypesPolicy(): void`
+
 Manually initialize the trusted types policy (usually called automatically).
 
 ### Constants
 
 #### `DEFAULT_ALLOWED_TAGS`
+
 Default array of allowed HTML tags for basic sanitization.
 
 #### `DEFAULT_ALLOWED_ATTR`
+
 Default array of allowed HTML attributes for basic sanitization.
 
 ### Types
 
 #### `SanitizeConfig`
+
 ```typescript
 interface SanitizeConfig {
   tags?: readonly string[];
