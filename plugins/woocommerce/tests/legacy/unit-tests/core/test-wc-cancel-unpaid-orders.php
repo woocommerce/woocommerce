@@ -78,7 +78,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 
 		// Verify the scheduled time is approximately correct (1 minute + 30 seconds buffer).
 		$expected_time = $now + ( 1 * MINUTE_IN_SECONDS );
-		$expected_time = $now + ( 1 * MINUTE_IN_SECONDS );
 		$this->assertGreaterThanOrEqual(
 			$expected_time - 30,
 			$next_scheduled,
