@@ -40,7 +40,7 @@ class VariationDescription extends AbstractBlock {
 		$formatted_variations_data = array();
 		foreach ( $variations as $variation ) {
 			$formatted_variations_data[ $variation->get_id() ] = array(
-				'variation_description' => wp_kses_post( (string) wc_format_content( $variation->get_description() ) ),
+				'variation_description' => wp_kses_post( wc_format_content( $variation->get_description() ) ),
 			);
 		}
 
