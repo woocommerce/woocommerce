@@ -388,17 +388,6 @@ class Table extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Extract table content from figure wrapper if present.
-	 *
-	 * @param string $block_content Block content.
-	 * @return string
-	 */
-	private function extract_table_from_figure( string $block_content ): string {
-		$extracted_data = $this->extract_table_and_caption_from_figure( $block_content );
-		return $extracted_data['table'];
-	}
-
-	/**
 	 * Check if the table has striped styling.
 	 *
 	 * @param string $block_content Block content.
