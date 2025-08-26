@@ -188,7 +188,7 @@ export type AddToCartWithOptionsStore = {
 		handleQuantityInput: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
-		handleQuantityChange: (
+		handleQuantityBlur: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
 		handleQuantityCheckboxChange: (
@@ -463,7 +463,10 @@ const { actions, state } = store<
 
 				actions.setQuantity( currentValue );
 			},
-			handleQuantityChange: (
+			// We need to listen to blur events instead of change events because
+			// the change event isn't triggered in invalid numbers (ie: writting
+			// letters) if the current value is already invalid or an empty string.
+			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const {
@@ -474,14 +477,19 @@ const { actions, state } = store<
 					selectedAttributes,
 				} = getContext< Context >();
 
-				// In grouped products, we allow resetting the inputs to ''.
+				// In grouped products, we reset invalid inputs to ''.
 				if (
-					event.target.value.trim() === '' &&
+					( Number.isNaN( event.target.valueAsNumber ) ||
+						event.target.valueAsNumber === 0 ) &&
 					productType === 'grouped'
 				) {
+					actions.setQuantity( 0 );
+					if ( Number.isNaN( event.target.valueAsNumber ) ) {
+						event.target.value = '';
+					}
+					dispatchChangeEvent( event.target );
 					return;
 				}
-
 				const id = childProductId || productId;
 				const productObject = getProductData(
 					id,
@@ -494,12 +502,14 @@ const { actions, state } = store<
 					return;
 				}
 
+				// In other product types, we reset inputs to `min` if they are
+				// 0 or NaN.
 				const { min } = productObject;
 
 				const newValue =
-					event.target.value.trim() !== '' &&
-					isFinite( event.target.value )
-						? Number( event.target.value )
+					Number.isFinite( event.target.valueAsNumber ) &&
+					event.target.valueAsNumber > 0
+						? event.target.valueAsNumber
 						: min;
 
 				if ( event.target.value !== newValue.toString() ) {
