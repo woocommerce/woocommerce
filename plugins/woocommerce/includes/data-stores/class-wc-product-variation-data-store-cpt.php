@@ -435,26 +435,37 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$catalog_visibility = CatalogVisibility::VISIBLE;
 		}
 
-		$product->set_parent_data(
-			array(
-				'title'              => $parent_object ? $parent_object->post_title : '',
-				'status'             => $parent_object ? $parent_object->post_status : '',
-				'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
-				'global_unique_id'   => get_post_meta( $product->get_parent_id(), '_global_unique_id', true ),
-				'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
-				'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
-				'stock_quantity'     => wc_stock_amount( get_post_meta( $product->get_parent_id(), '_stock', true ) ),
-				'weight'             => get_post_meta( $product->get_parent_id(), '_weight', true ),
-				'length'             => get_post_meta( $product->get_parent_id(), '_length', true ),
-				'width'              => get_post_meta( $product->get_parent_id(), '_width', true ),
-				'height'             => get_post_meta( $product->get_parent_id(), '_height', true ),
-				'tax_class'          => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
-				'shipping_class_id'  => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
-				'image_id'           => get_post_thumbnail_id( $product->get_parent_id() ),
-				'purchase_note'      => get_post_meta( $product->get_parent_id(), '_purchase_note', true ),
-				'catalog_visibility' => $catalog_visibility,
-			)
+		$parent_post_meta_values = get_post_meta( $product->get_parent_id() );
+
+		$parent_meta_key_to_props = array(
+			'_sku'              => 'sku',
+			'_global_unique_id' => 'global_unique_id',
+			'_manage_stock'     => 'manage_stock',
+			'_backorders'       => 'backorders',
+			'_stock'            => 'stock_quantity',
+			'_weight'           => 'weight',
+			'_length'           => 'length',
+			'_width'            => 'width',
+			'_height'           => 'height',
+			'_tax_class'        => 'tax_class',
+			'_purchase_note'    => 'purchase_note',
 		);
+
+		$parent_data = array();
+
+		foreach ( $parent_meta_key_to_props as $meta_key => $prop ) {
+			$meta_value           = $parent_post_meta_values[ $meta_key ][0] ?? null;
+			$parent_data[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+		}
+
+		$parent_data['title']              = $parent_object ? $parent_object->post_title : '';
+		$parent_data['status']             = $parent_object ? $parent_object->post_status : '';
+		$parent_data['shipping_class_id']  = absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) );
+		$parent_data['catalog_visibility'] = $catalog_visibility;
+		$parent_data['stock_quantity']     = wc_stock_amount( $parent_data['stock_quantity'] );
+		$parent_data['image_id']           = get_post_thumbnail_id( $product->get_parent_id() );
+
+		$product->set_parent_data( $parent_data );
 
 		// Pull data from the parent when there is no user-facing way to set props.
 		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
