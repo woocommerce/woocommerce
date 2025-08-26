@@ -55,18 +55,19 @@ class VariationDescription extends AbstractBlock {
 			)
 		);
 
-		$context = array(
-			'productElementKey' => 'variation_description',
+		$context_directive = wp_interactivity_data_wp_context(
+			array(
+				'productElementKey' => 'variation_description',
+			)
 		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-context'      => wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-bind--hidden' => '!state.productData.variation_description',
 			'aria-live'            => 'polite',
 			'aria-atomic'          => 'true',
 		);
 
-		return '<div ' . get_block_wrapper_attributes( $wrapper_attributes ) . ' data-wp-watch="callbacks.updateValue"></div>';
+		return '<div ' . $context_directive . ' ' . get_block_wrapper_attributes( $wrapper_attributes ) . ' data-wp-watch="callbacks.updateValue"></div>';
 	}
 }
