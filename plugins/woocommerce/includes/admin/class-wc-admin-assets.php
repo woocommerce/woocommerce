@@ -159,6 +159,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			return array(
 				array(
+					'handle'       => 'woocommerce_admin',
+					'path'         => $plugin_url . '/assets/js/admin/woocommerce_admin' . $suffix . '.js',
+					'dependencies' => array( 'jquery', 'wc-jquery-blockui', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'wc-jquery-tiptip' ),
+					'version'      => $version,
+				),
+				array(
 					'legacy_handle' => 'jquery-blockui',
 					'handle'        => 'wc-jquery-blockui',
 					'path'          => $plugin_url . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js',
