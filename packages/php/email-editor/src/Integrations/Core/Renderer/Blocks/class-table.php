@@ -59,24 +59,24 @@ class Table extends Abstract_Block_Renderer {
 		$classes = 'email-table-block';
 
 		if ( $html->next_tag() ) {
-			$block_classes = $html->get_attribute( 'class' ) ?? '';
+			$block_classes = (string) ( $html->get_attribute( 'class' ) ?? '' );
 			$classes      .= ' ' . $block_classes;
 			// Remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = (string) str_replace( 'has-background', '', (string) $block_classes );
+			$block_classes = preg_replace( '/has-background/', '', $block_classes ) ?? '';
 			// Remove border related classes because we handle border on wrapping table cell.
-			$block_classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes );
-			$block_classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
+			$block_classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes ) ?? '';
+			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes ) ?? '';
 			// Keep alignment classes for editor UI compatibility.
-			$block_classes = (string) preg_replace( '/\s+/', ' ', $block_classes ); // Clean up multiple spaces.
+			$block_classes = preg_replace( '/\s+/', ' ', $block_classes ) ?? ''; // Clean up multiple spaces.
 			$html->set_attribute( 'class', trim( $block_classes ) );
 			$table_content = $html->get_updated_html();
 		}
 
 		// Also remove classes from the wrapper classes.
-		$classes = (string) str_replace( 'has-background', '', (string) $classes );
-		$classes = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', (string) $classes );
-		$classes = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', (string) $classes );
-		$classes = (string) preg_replace( '/\s+/', ' ', (string) $classes ); // Clean up multiple spaces.
+		$classes = preg_replace( '/has-background/', '', $classes ) ?? '';
+		$classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes ) ?? '';
+		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes ) ?? '';
+		$classes = preg_replace( '/\s+/', ' ', $classes ) ?? ''; // Clean up multiple spaces.
 		$classes = trim( $classes );
 
 		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'background-color', 'color', 'typography' ) );
@@ -122,7 +122,7 @@ class Table extends Abstract_Block_Renderer {
 
 		// Add caption outside the table if present.
 		if ( ! empty( $caption ) ) {
-			$rendered_table .= '<div style="text-align: center; margin-top: 8px; font-size: 0.9em; color: #666;">' . $caption . '</div>';
+			$rendered_table .= '<div style="text-align: center; margin-top: 8px; font-size: 0.9em; color: #666;">' . wp_kses_post( $caption ) . '</div>';
 		}
 
 		return $rendered_table;
@@ -171,8 +171,7 @@ class Table extends Abstract_Block_Renderer {
 				$html->set_attribute( 'width', '100%' );
 
 				// Get existing style and add email-specific styles.
-				$existing_style = $html->get_attribute( 'style' ) ?? '';
-				$border_width   = $custom_border_width ? $custom_border_width : '1px';
+				$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
 
 				// Check for fixed layout class and apply table-layout: fixed.
 				$class_attr   = (string) ( $html->get_attribute( 'class' ) ?? '' );
@@ -180,13 +179,17 @@ class Table extends Abstract_Block_Renderer {
 
 				// Use border-collapse: collapse to ensure consistent borders between table and cells.
 				$email_table_styles = "{$table_layout}border-collapse: collapse; width: 100%;";
-				$html->set_attribute( 'style', $existing_style . '; ' . $email_table_styles );
+				$existing_style     = rtrim( $existing_style, "; \t\n\r\0\x0B" );
+				$html->set_attribute(
+					'style',
+					( '' !== $existing_style ? $existing_style . '; ' : '' ) . $email_table_styles
+				);
 
 				// Remove problematic classes from the table but keep has-fixed-layout and alignment classes for editor UI.
-				$class_attr = (string) str_replace( 'has-background', '', (string) $class_attr );
-				$class_attr = (string) preg_replace( '/has-[a-z-]*border[a-z-]*/', '', (string) $class_attr );
-				$class_attr = (string) preg_replace( '/[a-z-]+-border-[a-z-]+/', '', (string) $class_attr );
-				$class_attr = (string) preg_replace( '/\s+/', ' ', (string) $class_attr ); // Clean up multiple spaces.
+				$class_attr = preg_replace( '/has-background/', '', $class_attr ) ?? '';
+				$class_attr = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr ) ?? '';
+				$class_attr = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr ) ?? '';
+				$class_attr = preg_replace( '/\s+/', ' ', $class_attr ) ?? ''; // Clean up multiple spaces.
 				$html->set_attribute( 'class', trim( $class_attr ) );
 			} elseif ( 'THEAD' === $tag_name ) {
 				$current_section = 'thead';
@@ -260,7 +263,12 @@ class Table extends Abstract_Block_Renderer {
 			if ( is_numeric( $border_width ) ) {
 				return $border_width . 'px';
 			}
-			return $border_width;
+			// Validate that the border width contains only valid CSS units and numbers.
+			if ( preg_match( '/^[0-9]+\.?[0-9]*(px|em|rem|%|pt|pc|in|cm|mm|ex|ch|vw|vh|vmin|vmax)$/', $border_width ) ) {
+				return $border_width;
+			}
+			// If invalid, return null to use default.
+			return null;
 		}
 
 		return null;
@@ -355,7 +363,8 @@ class Table extends Abstract_Block_Renderer {
 			);
 		}
 
-		$figure_class = $dom_helper->get_attribute_value( $figure_tag, 'class' );
+		$figure_class_attr = $dom_helper->get_attribute_value( $figure_tag, 'class' );
+		$figure_class      = (string) ( $figure_class_attr ? $figure_class_attr : '' );
 		if ( false === strpos( $figure_class, 'wp-block-table' ) ) {
 			// If figure doesn't have wp-block-table class, return original content as table.
 			return array(
@@ -364,22 +373,23 @@ class Table extends Abstract_Block_Renderer {
 			);
 		}
 
-		// Extract table element.
-		$table_tag = $dom_helper->find_element( 'table' );
-		if ( ! $table_tag ) {
+		// Extract table element from within the matched figure only.
+		$figure_html = $dom_helper->get_outer_html( $figure_tag );
+
+		// Use regex to extract table from within the figure to avoid document conflicts.
+		if ( ! preg_match( '/<table[^>]*>.*?<\/table>/is', $figure_html, $table_matches ) ) {
 			return array(
 				'table'   => $block_content,
 				'caption' => '',
 			);
 		}
+		$table_html = $table_matches[0];
 
-		$table_html = $dom_helper->get_outer_html( $table_tag );
-
-		// Extract figcaption if present.
-		$figcaption_tag = $dom_helper->find_element( 'figcaption' );
-		$caption        = '';
-		if ( $figcaption_tag ) {
-			$caption = $dom_helper->get_element_inner_html( $figcaption_tag );
+		// Extract figcaption if present (scoped to the figure).
+		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/is', $figure_html, $figcaption_matches ) ) {
+			$caption = $figcaption_matches[1];
+		} else {
+			$caption = '';
 		}
 
 		return array(

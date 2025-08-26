@@ -452,7 +452,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
 		$this->assertStringContainsString( 'email-table-block', $rendered );
 		$this->assertStringContainsString( 'border-collapse: separate', $rendered );
-		$this->assertStringContainsString( 'min-width:100%', $rendered );
+		$this->assertMatchesRegularExpression( '/min-width:\s*100%/i', $rendered );
 	}
 
 	/**
@@ -695,5 +695,16 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		// Check that alignment styles are also applied correctly.
 		$this->assertStringContainsString( 'text-align: center;', $rendered );
 		$this->assertStringContainsString( 'text-align: right;', $rendered );
+	}
+
+	/**
+	 * Test it handles figure without class attribute gracefully
+	 */
+	public function testItHandlesFigureWithoutClassAttribute(): void {
+		$input               = '<figure><table><tbody><tr><td>Cell</td></tr></tbody></table></figure>';
+		$parsed              = $this->parsed_table;
+		$parsed['innerHTML'] = $input;
+		$rendered            = $this->table_renderer->render( $input, $parsed, $this->rendering_context );
+		$this->assertStringContainsString( '<table', $rendered );
 	}
 }
