@@ -182,7 +182,7 @@ export class BlockRegistrationManager {
 					if ( previousTemplateId !== this.currentTemplateId ) {
 						this.handleTemplateChange( previousTemplateId );
 					}
-				}, editorStore );
+				}, 'core/editor' );
 
 				this.initialized = true;
 			}
@@ -283,13 +283,10 @@ export class BlockRegistrationManager {
 				return;
 			}
 
-			const editorStore = select( store );
-			// @ts-expect-error getCurrentPostType is not typed
-			const postType = editorStore?.getCurrentPostType();
-			const isPostEditor = postType === 'post' || postType === 'page';
+			const editSiteStore = select( 'core/edit-site' );
 
 			// Don't register if we're in post editor context and block isn't available there
-			if ( isPostEditor && ! isAvailableOnPostEditor ) {
+			if ( ! editSiteStore && ! isAvailableOnPostEditor ) {
 				return;
 			}
 
@@ -305,7 +302,7 @@ export class BlockRegistrationManager {
 
 				// Only remove ancestor if we're in site editor AND in single-product template
 				const shouldRemoveAncestor =
-					! isPostEditor &&
+					editSiteStore &&
 					this.currentTemplateId?.includes( 'single-product' );
 
 				// @ts-expect-error - blockName can be either string or object
