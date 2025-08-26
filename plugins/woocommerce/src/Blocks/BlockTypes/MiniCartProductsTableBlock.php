@@ -174,8 +174,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
-										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); ?>
-										<?php echo $this->render_experimental_iapi_product_details_markup( 'item_data' ); ?>
+										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo $this->render_experimental_iapi_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
@@ -266,7 +266,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="state.itemDataHasMultipleAttributes"
 		>
-			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div' ); ?>
+			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<ul
 			<?php wp_interactivity_data_wp_context( $context ); ?>
@@ -277,7 +277,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
 				data-wp-each-key="context.itemData.raw_attribute"
 			>
-				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li' ); ?>
+				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</template>
 		</ul>
 		<?php
@@ -293,10 +293,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	private function render_experimental_iapi_product_details_item_markup( $tag_name ) {
 		ob_start();
 		?>
-		<<?php echo $tag_name; ?> data-wp-bind--class="state.cartItemDataAttr.className">
+		<<?php echo tag_escape( $tag_name ); ?> data-wp-bind--class="state.cartItemDataAttr.className">
 			<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
 			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
-		</<?php echo $tag_name; ?>>
+		</<?php echo tag_escape( $tag_name ); ?>>
 		<?php
 		return ob_get_clean();
 	}
