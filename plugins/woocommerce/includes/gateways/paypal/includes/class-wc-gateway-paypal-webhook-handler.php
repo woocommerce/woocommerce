@@ -150,8 +150,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return WC_Order|null
 	 */
 	private function get_wc_order( $custom_id ) {
-		$data     = json_decode( $custom_id );
-		$order_id = $data->order_id ?? null;
+		$data = json_decode( $custom_id, true );
+		if ( ! is_array( $data ) ) {
+			return null;
+		}
+
+		$order_id = $data['order_id'] ?? null;
 		if ( ! $order_id ) {
 			return null;
 		}
@@ -162,7 +166,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Validate the order key.
-		$order_key = $data->order_key ?? null;
+		$order_key = $data['order_key'] ?? null;
 		if ( $order_key !== $order->get_order_key() ) {
 			return null;
 		}
