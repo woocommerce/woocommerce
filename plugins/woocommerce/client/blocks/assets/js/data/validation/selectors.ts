@@ -36,3 +36,11 @@ export const getValidationErrorId = ( state: State, errorId: string ) => {
 export const hasValidationErrors = ( state: State ) => {
 	return Object.keys( state ).length > 0;
 };
+
+/**
+ * Gets all validation errors.
+ *
+ * @param { State } state The current state.
+ * @return { Record<string, any> } All validation errors.
+ */
+export const getValidationErrors = ( state: State ) => state;
