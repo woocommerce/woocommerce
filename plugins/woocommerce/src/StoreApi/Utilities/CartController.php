@@ -108,7 +108,8 @@ class CartController {
 			]
 		);
 
-		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
+		$request = $this->filter_request_data( $this->parse_variation_data( $this->parse_sku( $request ) ) );
+
 		$product = $this->get_product_for_cart( $request );
 		$cart_id = $cart->generate_cart_id(
 			$this->get_product_id( $product ),
@@ -1347,6 +1348,38 @@ class CartController {
 		ksort( $request['variation'] );
 
 		return $request;
+	}
+
+	/**
+	 * If product ID is found but does not match a product, check for a SKU match.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param array $request Add to cart request params.
+	 * @return array Updated request array.
+	 */
+	protected function parse_sku( $request ) {
+		$product = wc_get_product( $request['id'] );
+
+		// Get a product by SKU if no product found by ID.
+		if ( ! $product ) {
+			$product_id = wc_get_product_id_by_sku( $request['id'] );
+			if ( ! $product_id ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_invalid_product',
+					sprintf(
+						/* translators: %s: product ID */
+						esc_html__( 'Product with SKU "%s" was not found and cannot be added to the cart.', 'woocommerce' ),
+						esc_html( $request['id'] )
+					),
+					400
+				);
+			}
+			$request['id'] = wc_get_product_id_by_sku( $request['id'] );
+		}
+
+		return $request;
+
 	}
 
 	/**
