@@ -10,7 +10,6 @@ import {
 	unregisterBlockVariation,
 	BlockConfiguration,
 } from '@wordpress/blocks';
-import { store as editorStore } from '@wordpress/editor';
 import { subscribe, select } from '@wordpress/data';
 import { isNumber, isEmpty } from '@woocommerce/types';
 
@@ -132,11 +131,7 @@ export class BlockRegistrationManager {
 
 			// Site Editor Context
 			if ( editSiteStore ) {
-				// Even though we subscribe to core/edit-site store, majority of its methods
-				// are deprecated hence we use getCurrentPostId from core/editor store to get the current post id.
-				// @ts-expect-error getCurrentPostId is not typed
-				const { getCurrentPostId } = select( editorStore );
-				const postId = getCurrentPostId();
+				const postId = editSiteStore.getEditedPostId();
 
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
@@ -151,7 +146,7 @@ export class BlockRegistrationManager {
 				subscribe( () => {
 					const previousTemplateId = this.currentTemplateId;
 					this.currentTemplateId = this.parseTemplateId(
-						getCurrentPostId()
+						editSiteStore.getEditedPostId()
 					);
 
 					if ( previousTemplateId !== this.currentTemplateId ) {
