@@ -105,10 +105,52 @@ class WC_Autoloader {
 			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class ), 15 ) . '/';
 		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
 			$path = $this->include_path . 'admin/notes/';
+		} elseif ( 0 === strpos( $class, 'wc_rest_' ) ) {
+			// Handle REST API controllers in subdirectories
+			$rest_controller_paths = array(
+				'rest-api/Controllers/Version4/',
+			);
+			
+			foreach ( $rest_controller_paths as $rest_path ) {
+				if ( $this->load_file( $this->include_path . $rest_path . $file ) ) {
+					return;
+				}
+			}
+			
+			// For Version4, also check subdirectories recursively
+			if ( false !== strpos( $class, '_v4_' ) ) {
+				$this->load_rest_v4_controller_recursively( $file );
+			}
 		}
 
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
 			$this->load_file( $this->include_path . $file );
+		}
+	}
+
+	/**
+	 * Recursively load REST API V4 controllers from subdirectories.
+	 *
+	 * @param string $file File name to search for.
+	 */
+	private function load_rest_v4_controller_recursively( $file ) {
+		$v4_base_path = $this->include_path . 'rest-api/Controllers/Version4/';
+		
+		// Use RecursiveDirectoryIterator to search subdirectories
+		if ( is_dir( $v4_base_path ) ) {
+			$iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( $v4_base_path, RecursiveDirectoryIterator::SKIP_DOTS ),
+				RecursiveIteratorIterator::SELF_FIRST
+			);
+			
+			foreach ( $iterator as $dir_info ) {
+				if ( $dir_info->isDir() ) {
+					$subdir_path = $dir_info->getPathname() . '/';
+					if ( $this->load_file( $subdir_path . $file ) ) {
+						return;
+					}
+				}
+			}
 		}
 	}
 }
