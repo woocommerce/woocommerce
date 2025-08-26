@@ -363,42 +363,52 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
 
-		$product->set_props(
-			array(
-				'description'       => get_post_meta( $id, '_variation_description', true ),
-				'regular_price'     => get_post_meta( $id, '_regular_price', true ),
-				'sale_price'        => get_post_meta( $id, '_sale_price', true ),
-				'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
-				'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
-				'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
-				'stock_status'      => get_post_meta( $id, '_stock_status', true ),
-				'low_stock_amount'  => get_post_meta( $id, '_low_stock_amount', true ),
-				'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
-				'virtual'           => get_post_meta( $id, '_virtual', true ),
-				'downloadable'      => get_post_meta( $id, '_downloadable', true ),
-				'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-				'download_limit'    => get_post_meta( $id, '_download_limit', true ),
-				'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
-				'image_id'          => get_post_thumbnail_id( $id ),
-				'backorders'        => get_post_meta( $id, '_backorders', true ),
-				'sku'               => get_post_meta( $id, '_sku', true ),
-				'global_unique_id'  => get_post_meta( $id, '_global_unique_id', true ),
-				'stock_quantity'    => get_post_meta( $id, '_stock', true ),
-				'weight'            => get_post_meta( $id, '_weight', true ),
-				'length'            => get_post_meta( $id, '_length', true ),
-				'width'             => get_post_meta( $id, '_width', true ),
-				'height'            => get_post_meta( $id, '_height', true ),
-				'tax_class'         => ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : get_post_meta( $id, '_tax_class', true ),
-			)
+		$post_meta_values = get_post_meta( $id );
+
+		$meta_key_to_props = array(
+			'_variation_description' => 'description',
+			'_regular_price'         => 'regular_price',
+			'_sale_price'            => 'sale_price',
+			'_sale_price_dates_from' => 'date_on_sale_from',
+			'_sale_price_dates_to'   => 'date_on_sale_to',
+			'_manage_stock'          => 'manage_stock',
+			'_stock_status'          => 'stock_status',
+			'_virtual'               => 'virtual',
+			'_product_image_gallery' => 'gallery_image_ids',
+			'_download_limit'        => 'download_limit',
+			'_download_expiry'       => 'download_expiry',
+			'_downloadable'          => 'downloadable',
+			'_sku'                   => 'sku',
+			'_global_unique_id'      => 'global_unique_id',
+			'_stock'                 => 'stock_quantity',
+			'_weight'                => 'weight',
+			'_length'                => 'length',
+			'_width'                 => 'width',
+			'_height'                => 'height',
+			'_low_stock_amount'      => 'low_stock_amount',
+			'_backorders'            => 'backorders',
 		);
 
+		$set_props = array();
+
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+		}
+
+		$set_props['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
+		$set_props['image_id']          = get_post_thumbnail_id( $id );
+		$set_props['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $post_meta_values['_tax_class'][0] ?? null;
+
+		$product->set_props( $set_props );
+
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value = get_post_meta( $id, '_cogs_total_value', true );
+			$cogs_value = $post_meta_values['_cogs_value'][0] ?? '';
 			$cogs_value = '' === $cogs_value ? null : (float) $cogs_value;
 			$product->set_props(
 				array(
 					'cogs_value'             => $cogs_value,
-					'cogs_value_is_additive' => 'yes' === get_post_meta( $id, '_cogs_value_is_additive', true ),
+					'cogs_value_is_additive' => 'yes' === $post_meta_values['_cogs_value_is_additive'][0] ?? '',
 				)
 			);
 		}

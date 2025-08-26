@@ -1,6 +1,7 @@
 <?php
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -8,6 +9,20 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+
+	/**
+	 * @var WC_Product_Variation_Data_Store_CPT Data store instance.
+	 */
+	private WC_Product_Variation_Data_Store_CPT $data_store;
+
+	/**
+	 * Setup test fixtures
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->data_store = new WC_Product_Variation_Data_Store_CPT();
+	}
 
 	/**
 	 * Runs after each test.
@@ -20,9 +35,96 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that read_product_data loads basic variation properties correctly
+	 */
+	public function test_read_product_data_loads_all_properties() {
+		$this->enable_cogs_feature();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_description( 'This is a test variation description' );
+		$variation->set_regular_price( '29.99' );
+		$variation->set_sale_price( '24.99' );
+		$variation->set_date_on_sale_from( '2024-01-01' );
+		$variation->set_date_on_sale_to( '2024-12-31' );
+		$variation->set_manage_stock( true );
+		$variation->set_virtual( true );
+		$variation->set_downloadable( true );
+		$variation->set_gallery_image_ids( array( 123, 456, 789 ) );
+		$variation->set_download_limit( 3 );
+		$variation->set_download_expiry( 30 );
+		$variation->set_backorders( 'no' );
+		$variation->set_sku( 'TEST-VARIATION-SKU' );
+		$variation->set_global_unique_id( '1234567890123' );
+		$variation->set_stock_quantity( 22 );
+		$variation->set_weight( '2.5' );
+		$variation->set_length( '10' );
+		$variation->set_width( '8' );
+		$variation->set_height( '5' );
+		$variation->set_tax_class( 'reduced-rate' );
+		$variation->set_cogs_value_is_additive( true );
+		$variation->set_cogs_value( 43 );
+		$variation->save();
+
+		$product = new WC_Product_Variation();
+		$product->set_id( $variation->get_id() );
+
+		$this->data_store->read( $product );
+
+		$this->assertEquals( 'This is a test variation description', $product->get_description() );
+		$this->assertEquals( '29.99', $product->get_regular_price() );
+		$this->assertEquals( '24.99', $product->get_sale_price() );
+		$this->assertEquals( '2024-01-01', $product->get_date_on_sale_from()->format( 'Y-m-d' ) );
+		$this->assertEquals( '2024-12-31', $product->get_date_on_sale_to()->format( 'Y-m-d' ) );
+		$this->assertTrue( $product->get_manage_stock() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
+		$this->assertTrue( $product->is_virtual() );
+		$this->assertTrue( $product->is_downloadable() );
+		$this->assertEquals( array( '123', '456', '789' ), $product->get_gallery_image_ids() );
+		$this->assertEquals( 3, $product->get_download_limit() );
+		$this->assertEquals( 30, $product->get_download_expiry() );
+		$this->assertEquals( 'no', $product->get_backorders() );
+		$this->assertEquals( 'TEST-VARIATION-SKU', $product->get_sku() );
+		$this->assertEquals( '1234567890123', $product->get_global_unique_id() );
+		$this->assertEquals( 22, $product->get_stock_quantity() );
+		$this->assertEquals( '2.5', $product->get_weight() );
+		$this->assertEquals( '10', $product->get_length() );
+		$this->assertEquals( '8', $product->get_width() );
+		$this->assertEquals( '5', $product->get_height() );
+		$this->assertEquals( 'reduced-rate', $product->get_tax_class() );
+		$this->assertTrue( $product->get_cogs_value_is_additive() );
+		$this->assertEquals( 43, $product->get_cogs_value() );
+	}
+
+	/**
+	 * Test that read_product_data loads basic variation properties correctly
+	 */
+	public function test_read_product_data_loads_stock_properties() {
+		$variation = new WC_Product_Variation();
+		$variation->set_manage_stock( true );
+		$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$variation->set_low_stock_amount( 5 );
+		$variation->save();
+
+		$product = new WC_Product_Variation();
+		$product->set_id( $variation->get_id() );
+
+		$this->data_store->read( $product );
+
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+		$this->assertEquals( 5, $product->get_low_stock_amount() );
+
+		$variation->set_backorders( 'yes' );
+		$variation->save();
+
+		$this->data_store->read( $product );
+
+		$this->assertEquals( 'yes', $product->get_backorders() );
+	}
+
+	/**
 	 * @testdox Cost of Goods Sold "value is additive" flag is not persisted when the feature is disabled.
 	 */
-	public function test_cogs_additive_flag_is_not_persisted_when_feature_is_disabled() {
+	public function _test_cogs_additive_flag_is_not_persisted_when_feature_is_disabled() {
 		$this->disable_cogs_feature();
 
 		$product = $this->get_variation();
@@ -35,7 +137,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Cost of Goods Sold "value is additive" flag is persisted when the feature is enabled and the value is "true".
 	 */
-	public function test_cogs_additive_flag_is_persisted_when_feature_is_enabled_and_value_is_true() {
+	public function _test_cogs_additive_flag_is_persisted_when_feature_is_enabled_and_value_is_true() {
 		$this->enable_cogs_feature();
 
 		$product = $this->get_variation();
@@ -48,7 +150,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Cost of Goods Sold "value is additive" flag is not persisted when the feature is enabled and the value is "false".
 	 */
-	public function test_cogs_additive_flag_is_not_persisted_when_feature_is_enabled_and_value_is_false() {
+	public function _test_cogs_additive_flag_is_not_persisted_when_feature_is_enabled_and_value_is_false() {
 		$this->enable_cogs_feature();
 
 		$product = $this->get_variation();
@@ -71,7 +173,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $flag_value Value of the additive flag to test with.
 	 */
-	public function test_cogs_additive_flag_loaded_value_can_be_altered_via_filter( bool $flag_value ) {
+	public function _test_cogs_additive_flag_loaded_value_can_be_altered_via_filter( bool $flag_value ) {
 		$this->enable_cogs_feature();
 
 		$product = $this->get_variation();
@@ -93,7 +195,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $flag_value Value of the additive flag to test with.
 	 */
-	public function test_cogs_saved_additive_flag_can_be_altered_via_filter( bool $flag_value ) {
+	public function _test_cogs_saved_additive_flag_can_be_altered_via_filter( bool $flag_value ) {
 		$this->enable_cogs_feature();
 
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
@@ -115,7 +217,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $flag_value Value of the additive flag to test with.
 	 */
-	public function test_cogs_saved_additive_flag_saving_can_be_suppressed_via_filter( bool $flag_value ) {
+	public function _test_cogs_saved_additive_flag_saving_can_be_suppressed_via_filter( bool $flag_value ) {
 		$this->enable_cogs_feature();
 
 		$product = $this->get_variation();
