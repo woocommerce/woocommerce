@@ -26,9 +26,6 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
-		// phpcs:disable Generic.Commenting.Todo.TaskFound
-		// TODO: Validate the webhook signature.
-
 		$data = $request->get_json_params();
 		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( $data, true ) );
 
