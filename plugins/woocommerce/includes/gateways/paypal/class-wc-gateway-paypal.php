@@ -195,7 +195,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// Do not run if PayPal Standard is not enabled.
-		if ( ! $this->enabled ) {
+		if ( 'yes' !== $this->enabled ) {
 			return;
 		}
 
