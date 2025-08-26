@@ -14,18 +14,15 @@
 	&:focus {
 		background-color: $input-background-light;
 		color: $input-text-light;
-		border: 1.5px solid currentColor;
+		// Keep border at 1px to prevent layout shift, use box-shadow for the extra
+		// 0.5px thickness
+		border: 1px solid currentColor;
+		box-shadow: inset 0 0 0 0.5px currentColor;
 	}
 
 	.has-dark-controls & {
 		background-color: $input-background-dark;
 		border-color: $input-border-dark;
 		color: $input-text-dark;
-
-		&:focus {
-			background-color: $input-background-dark;
-			color: $input-text-dark;
-			border: 1.5px solid currentColor;
-		}
 	}
 }
