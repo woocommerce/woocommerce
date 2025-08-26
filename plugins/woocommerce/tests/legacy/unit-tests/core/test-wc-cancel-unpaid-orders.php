@@ -48,11 +48,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 	 * fixed in PR #60607).
 	 */
 	public function test_cancel_unpaid_orders_reschedules_itself() {
-		// Skip if Action Scheduler is not available.
-		if ( ! function_exists( 'as_schedule_single_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler not available' );
-		}
-
 		// Enable hold stock functionality with a short interval (1 minute).
 		update_option( 'woocommerce_hold_stock_minutes', 1 );
 		update_option( 'woocommerce_manage_stock', 'yes' );
@@ -101,11 +96,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 	 * Test that existing actions are cleared before scheduling new ones.
 	 */
 	public function test_cancel_unpaid_orders_clears_existing_actions() {
-		// Skip if Action Scheduler is not available.
-		if ( ! function_exists( 'as_schedule_single_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler not available' );
-		}
-
 		// Enable hold stock functionality.
 		update_option( 'woocommerce_hold_stock_minutes', 60 );
 		update_option( 'woocommerce_manage_stock', 'yes' );
@@ -144,11 +134,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 	 * Test that the woocommerce_cancel_unpaid_orders_interval_minutes filter works.
 	 */
 	public function test_cancel_unpaid_orders_respects_interval_filter() {
-		// Skip if Action Scheduler is not available.
-		if ( ! function_exists( 'as_schedule_single_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler not available' );
-		}
-
 		// Set up test conditions.
 		update_option( 'woocommerce_hold_stock_minutes', 60 );
 		update_option( 'woocommerce_manage_stock', 'yes' );
