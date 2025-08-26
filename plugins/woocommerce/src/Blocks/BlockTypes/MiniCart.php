@@ -541,6 +541,7 @@ class MiniCart extends AbstractBlock {
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
+					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
@@ -554,17 +555,17 @@ class MiniCart extends AbstractBlock {
 			);
 
 			$context = array(
-				'productCountVisibility'       => $product_count_visibility,
-				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+				'productCountVisibility' => $product_count_visibility,
 			);
 
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour'    => $on_cart_click_behaviour,
-					'checkoutUrl'             => wc_get_checkout_url(),
-					'buttonAriaLabelTemplate' => $button_aria_label_template,
+					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'         => $on_cart_click_behaviour,
+					'checkoutUrl'                  => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate'      => $button_aria_label_template,
 				)
 			);
 
@@ -610,10 +611,15 @@ class MiniCart extends AbstractBlock {
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
-						?>
+						<?php if ( ! empty( $this->tax_label ) ) : ?>
+							<small
+								data-wp-bind--hidden="!state.shouldShowTaxLabel"
+								class="wc-block-mini-cart__tax-label"
+								style="color:<?php echo esc_attr( $price_color ); ?>"
+							>
+								<?php echo esc_html( $this->tax_label ); ?>
+							</small>
+						<?php endif; ?>
 					<?php endif; ?>
 				</button>
 			</div>

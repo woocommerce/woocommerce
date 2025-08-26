@@ -7,9 +7,21 @@ import { useSelect } from '@wordpress/data';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
-// @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { store as editorStore } from '@wordpress/editor';
+
+declare global {
+	interface Window {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		WooCommerceEmailEditor?: {
+			email_types: Array< {
+				value: string;
+				id: string;
+			} >;
+			block_preview_url?: string;
+		};
+	}
+}
 
 function HoverContent() {
 	return (
@@ -46,8 +58,8 @@ const updateIFrameBackgroundColor = (
 };
 
 const getEmailType = ( value: string ) => {
-	return window.WooCommerceEmailEditor.email_types.find(
-		( email_type ) => email_type.value === value
+	return window.WooCommerceEmailEditor?.email_types?.find(
+		( emailType ) => emailType.value === value
 	)?.id;
 };
 
@@ -61,10 +73,10 @@ const updateiFrameSource = (
 
 const DEFAULT_EMAIL_TYPE = 'WC_Email_Customer_Processing_Order';
 
-export function WooContentPlaceholderEditContent() {
+export default function Edit() {
 	const { postSlug } = useSelect(
 		( select ) => ( {
-			postSlug: select( editorStore ).getCurrentPost()?.slug,
+			postSlug: select( editorStore ).getCurrentPost?.()?.slug,
 		} ),
 		[]
 	);

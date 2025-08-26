@@ -1020,6 +1020,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
 			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
+
+			/**
+			 * Fires after WooCommerce product attributes have been updated.
+			 *
+			 * @since 10.2.0
+			 * @param WC_Product $product The product object whose attributes were updated.
+			 * @param bool $force Indicates if the update was forced.
+			 */
+			do_action( 'woocommerce_product_attributes_updated', $product, $force );
 		}
 	}
 

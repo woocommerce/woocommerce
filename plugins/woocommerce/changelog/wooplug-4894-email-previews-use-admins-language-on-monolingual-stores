@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Use store's locale when rendering email preview in settings

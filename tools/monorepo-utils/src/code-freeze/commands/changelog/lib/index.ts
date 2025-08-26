@@ -382,21 +382,20 @@ function getTargetBranches(
 		.split( '.' )
 		.map( Number );
 
-	// Check if the target is greater than the trunk version
 	if (
-		targetMajor < currentMajor ||
-		( targetMajor === currentMajor && targetMinor <= currentMinor )
+		targetMajor > currentMajor ||
+		( targetMajor === currentMajor && targetMinor >= currentMinor )
 	) {
 		Logger.notice(
-			`Target version ${ targetVersion } is not greater than trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches.`
 		);
 		return [];
 	}
 
 	const branches = [];
-	let version = getNextVersion( trunkVersion );
+	let version = getNextVersion( targetVersion );
 
-	while ( version !== targetVersion ) {
+	while ( version !== trunkVersion ) {
 		Logger.notice( `Adding intermediate branch for version ${ version }` );
 		branches.push( `release/${ version }` );
 		version = getNextVersion( version );
@@ -429,7 +428,7 @@ export const updateIntermediateBranches = async (
 		return;
 	}
 
-	const targetBranches = getTargetBranches( trunkVersion, options.version );
+	const targetBranches = getTargetBranches( options.version, trunkVersion );
 	Logger.notice(
 		`Target branches to update: ${ targetBranches.join( ', ' ) }`
 	);
