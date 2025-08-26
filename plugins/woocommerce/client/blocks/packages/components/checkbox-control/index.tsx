@@ -13,7 +13,7 @@ import './style.scss';
 
 export type CheckboxControlProps = {
 	label?: string | React.ReactNode;
-	onChange: ( value: boolean ) => void;
+	onChange?: ( value: boolean ) => void;
 	children?: ReactNode | null | undefined;
 	hasError?: boolean;
 	errorId?: string;
@@ -74,7 +74,7 @@ export const CheckboxControl = forwardRef<
 						className="wc-block-components-checkbox__input"
 						type="checkbox"
 						onChange={ ( event ) =>
-							onChange( event.target.checked )
+							onChange?.( event.target.checked )
 						}
 						aria-invalid={ hasError === true }
 						checked={ checked }
