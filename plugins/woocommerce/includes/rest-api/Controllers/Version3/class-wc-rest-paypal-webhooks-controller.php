@@ -40,21 +40,6 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 * @return void
 	 */
 	public function register_routes() {
-		// phpcs:disable Generic.Commenting.Todo.TaskFound
-		// TODO: Remove me before merging the feature branch.
-		// GET /v3/paypal-webhooks/test-webhook.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/test-webhook',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'test_webhook' ),
-					'permission_callback' => array( $this, 'validate_webhook' ),
-				),
-			)
-		);
-
 		// POST /v3/paypal-webhooks.
 		register_rest_route(
 			$this->namespace,
@@ -65,20 +50,6 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 				'permission_callback' => array( $this, 'validate_webhook' ),
 			)
 		);
-	}
-
-	/**
-	 * Test the webhook.
-	 *
-	 * phpcs:disable Generic.Commenting.Todo.TaskFound
-	 * TODO: Remove me before merging the feature branch.
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response The response object.
-	 */
-	public function test_webhook( WP_REST_Request $request ) {
-		$data = $request->get_json_params();
-		return new WP_REST_Response( 'Test webhook processed', 200 );
 	}
 
 	/**
