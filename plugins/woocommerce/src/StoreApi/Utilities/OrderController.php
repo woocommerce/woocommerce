@@ -68,7 +68,7 @@ class OrderController {
 	 * @param boolean           $update_totals Whether to update totals or not.
 	 * @param \WC_Customer|null $customer A customer object to use as the source of billing and shipping addresses. If null, will use the current session customer.
 	 */
-	public function update_order_from_cart( \WC_Order $order, $update_totals = true, \WC_Customer $customer = null ) {
+	public function update_order_from_cart( \WC_Order $order, $update_totals = true, ?\WC_Customer $customer = null ) {
 		/**
 		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
 		 * calculate tax for an order to match the current address of the customer.
@@ -821,7 +821,7 @@ class OrderController {
 	 * @param \WC_Order    $order    The order object to update.
 	 * @param \WC_Customer $customer The customer to copy the address data from.
 	 */
-	protected function update_addresses_from_cart( \WC_Order $order, $customer = null ) {
+	protected function update_addresses_from_cart( \WC_Order $order, ?\WC_Customer $customer = null ) {
 		$customer_to_copy = $customer instanceof \WC_Customer ? $customer : WC()->customer;
 		$order->set_props(
 			array(
