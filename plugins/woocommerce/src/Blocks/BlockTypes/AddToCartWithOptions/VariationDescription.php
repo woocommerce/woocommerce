@@ -63,7 +63,7 @@ class VariationDescription extends AbstractBlock {
 			'data-wp-interactive'  => 'woocommerce/product-elements',
 			'data-wp-context'      => wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-bind--hidden' => '!state.productData.variation_description',
-			'aria-live'            => 'assertive',
+			'aria-live'            => 'polite',
 			'aria-atomic'          => 'true',
 		);
 
