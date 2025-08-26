@@ -4,6 +4,7 @@
  */
 .woocommerce :where(div[data-block-name="woocommerce/legacy-template"]) div.product form.cart div.quantity {
 	display: inline-block;
+	vertical-align: middle;
 
 	.input-text {
 		padding: 0.9rem 1.1rem;
