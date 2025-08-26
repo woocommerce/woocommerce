@@ -7,6 +7,30 @@
 	paypal.Buttons({
 		async createOrder() {
 			console.log( 'createOrder' );
+			if ( window.PayPalStandardButtons.isProductPage ) {
+				// Empty cart.
+				await fetch( window.PayPalStandardButtons.endpoints.storeAPICartItems, {
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+						'Nonce': window.PayPalStandardButtons.nonce,
+					},
+				} );
+
+				// Add current product to cart.
+				await fetch( window.PayPalStandardButtons.endpoints.storeAPICartAddItem, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Nonce': window.PayPalStandardButtons.nonce,
+					},
+					body: JSON.stringify({
+						id: $( '[name="add-to-cart"]').val(),
+						quantity: $( '[name="quantity"]').val(),
+					}),
+				} );
+			}
+
 			// Create WooCommerce order via Store API.
 			// This needs to be a client-side request.
 			const wcOrder = await fetch( window.PayPalStandardButtons.endpoints.storeAPICheckout, {

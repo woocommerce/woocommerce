@@ -96,12 +96,15 @@ class WC_Gateway_Paypal_Buttons {
 			'PayPalStandardButtons',
 			array(
 				'endpoints' => array(
-					'storeAPICart'      => get_site_url( null, '/wp-json/wc/store/v1/cart' ),
-					'storeAPICheckout'  => get_site_url( null, '/wp-json/wc/store/v1/checkout' ),
-					'createPayPalOrder' => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/create-paypal-order' ),
-					'capturePayment'    => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/capture-payment' ),
+					'storeAPICart'        => get_site_url( null, '/wp-json/wc/store/v1/cart' ),
+					'storeAPICartItems'   => get_site_url( null, '/wp-json/wc/store/v1/cart/items' ),
+					'storeAPICartAddItem' => get_site_url( null, '/wp-json/wc/store/v1/cart/add-item' ),
+					'storeAPICheckout'    => get_site_url( null, '/wp-json/wc/store/v1/checkout' ),
+					'createPayPalOrder'   => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/create-paypal-order' ),
+					'capturePayment'      => get_site_url( null, '/wp-json/wc/v3/paypal-buttons/capture-payment' ),
 				),
 				'nonce'     => wp_create_nonce( 'wc_store_api' ),
+				'isProductPage' => is_product(),
 			),
 		);
 	}
