@@ -464,14 +464,12 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		global $wp;
 
 		// phpcs:ignore WordPress.Security
-		$query_arg = wp_unslash( $_GET['wc-transient-file-name'] ?? null );
-		if ( ! is_null( $query_arg ) ) {
-			$wp->query_vars['wc-transient-file-name'] = $query_arg;
-		}
-
-		if ( is_null( $wp->query_vars['wc-transient-file-name'] ?? null ) ) {
+		$query_arg = isset( $_GET['wc-transient-file-name'] ) ? wp_unslash( $_GET['wc-transient-file-name'] ) : null;
+		if ( is_null( $query_arg ) ) {
 			return;
 		}
+
+		$wp->query_vars['wc-transient-file-name'] = $query_arg;
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? null ) ) {
