@@ -2,12 +2,7 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import {
-	store,
-	getContext,
-	getConfig,
-	getElement,
-} from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,

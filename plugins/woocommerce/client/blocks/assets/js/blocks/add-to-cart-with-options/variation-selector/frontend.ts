@@ -311,8 +311,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
-			// Quantity constraints might change dynamically, like when switching
-			// variations. Based on this, we need to update the quantity.
+			// Quantity constraints might change dynamically when switching
+			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
 				const {
 					productId,
