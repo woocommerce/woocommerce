@@ -18,6 +18,10 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  */
 class Table extends Abstract_Block_Renderer {
 	/**
+	 * Valid text alignment values.
+	 */
+	private const VALID_TEXT_ALIGNMENTS = array( 'left', 'center', 'right' );
+	/**
 	 * Renders the block content.
 	 *
 	 * @param string            $block_content Block content.
@@ -55,27 +59,14 @@ class Table extends Abstract_Block_Renderer {
 		if ( $html->next_tag() ) {
 			$block_classes = (string) ( $html->get_attribute( 'class' ) ?? '' );
 			$classes      .= ' ' . $block_classes;
-			// Remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = preg_replace( '/has-background/', '', $block_classes ) ?? '';
-			// Remove border related classes because we handle border on wrapping table cell.
-			$block_classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $block_classes ) ?? '';
-			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes ) ?? '';
-			// Keep alignment classes for editor UI compatibility.
-			$block_classes = preg_replace( '/\s+/', ' ', $block_classes ) ?? ''; // Clean up multiple spaces.
-			$html->set_attribute( 'class', trim( $block_classes ) );
+			// Clean classes for table element.
+			$block_classes = $this->clean_css_classes( $block_classes );
+			$html->set_attribute( 'class', $block_classes );
 			$table_content = $html->get_updated_html();
 		}
 
-		// Also remove classes from the wrapper classes.
-		$classes = preg_replace( '/has-background/', '', $classes ) ?? '';
-		$classes = preg_replace( '/has-[a-z-]*background[a-z-]*/', '', $classes ) ?? '';
-		$classes = preg_replace( '/[a-z-]+-background-[a-z-]+/', '', $classes ) ?? '';
-		$classes = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $classes ) ?? '';
-		$classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $classes ) ?? '';
-		$classes = preg_replace( '/\s+/', ' ', $classes ) ?? ''; // Clean up multiple spaces.
-		$classes = trim( $classes );
-
-		// Don't add wp-block-table to wrapper classes - it will be added to the table element directly.
+		// Clean wrapper classes.
+		$classes = $this->clean_css_classes( $classes );
 
 		// Get spacing styles for wrapper and table-specific styles separately.
 		$spacing_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing' ) );
@@ -83,13 +74,12 @@ class Table extends Abstract_Block_Renderer {
 
 		// Ensure background styles are completely removed from spacing styles and force transparent background.
 		$spacing_css = $spacing_styles['css'] ?? '';
-		$spacing_css = preg_replace( '/background[^;]*;?/', '', $spacing_css ) ?? '';
-		$spacing_css = preg_replace( '/\s*;\s*;/', ';', $spacing_css ) ?? ''; // Clean up double semicolons.
-		$spacing_css = trim( is_string( $spacing_css ) ? $spacing_css : '', '; ' );
+		$spacing_css = (string) ( preg_replace( '/background[^;]*;?/', '', $spacing_css ) ?? '' );
+		$spacing_css = (string) ( preg_replace( '/\s*;\s*;/', ';', $spacing_css ) ?? '' ); // Clean up double semicolons.
+		$spacing_css = trim( $spacing_css, '; ' );
 
 		// Force transparent background on wrapper to prevent any background leakage.
-		$spacing_css           = $spacing_css ? $spacing_css . '; background: transparent !important;' : 'background: transparent !important;';
-		$spacing_styles['css'] = $spacing_css;
+		$spacing_styles['css'] = $spacing_css ? $spacing_css . '; background: transparent !important;' : 'background: transparent !important;';
 
 		$additional_styles = array(
 			'min-width' => '100%', // Prevent Gmail App from shrinking the table on mobile devices.
@@ -105,8 +95,11 @@ class Table extends Abstract_Block_Renderer {
 
 		$additional_styles['text-align'] = 'left';
 		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // In this case, textAlign needs to be one of 'left', 'center', 'right'.
-			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
+			$text_align = $parsed_block['attrs']['textAlign'];
+			if ( in_array( $text_align, self::VALID_TEXT_ALIGNMENTS, true ) ) {
+				$additional_styles['text-align'] = $text_align;
+			}
+		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, self::VALID_TEXT_ALIGNMENTS, true ) ) {
 			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
 		}
 
@@ -154,6 +147,27 @@ class Table extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Clean CSS classes by removing background and border related classes.
+	 *
+	 * @param string $classes CSS classes to clean.
+	 * @return string Cleaned CSS classes.
+	 */
+	private function clean_css_classes( string $classes ): string {
+		// Limit input length to prevent DoS attacks.
+		if ( strlen( $classes ) > 1000 ) {
+			$classes = substr( $classes, 0, 1000 );
+		}
+
+		// Remove generic background classes but keep specific color classes.
+		$classes = (string) ( preg_replace( '/\bhas-background\b/', '', $classes ) ?? '' );
+		// Remove border classes.
+		$classes = (string) ( preg_replace( '/\bhas-[a-z-]*border[a-z-]*\b/', '', $classes ) ?? '' );
+		$classes = (string) ( preg_replace( '/\b[a-z-]+-border-[a-z-]+\b/', '', $classes ) ?? '' );
+		$classes = (string) ( preg_replace( '/\s+/', ' ', $classes ) ?? '' ); // Clean up multiple spaces.
+		return trim( $classes );
+	}
+
+	/**
 	 * Process table content to ensure email client compatibility.
 	 *
 	 * @param string            $block_content Block content.
@@ -165,11 +179,6 @@ class Table extends Abstract_Block_Renderer {
 	private function process_table_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context, bool $is_striped_table = false ): string {
 		$html = new \WP_HTML_Tag_Processor( $block_content );
 
-		// Get theme styles once to avoid repeated calls.
-		$email_styles = $rendering_context->get_theme_styles();
-		$color        = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000';
-		$border_color = $this->sanitize_color( $color );
-
 		// Extract custom border color and width from block attributes.
 		$custom_border_color = $this->get_custom_border_color( $parsed_block, $rendering_context );
 		$custom_border_width = $this->get_custom_border_width( $parsed_block );
@@ -177,6 +186,10 @@ class Table extends Abstract_Block_Renderer {
 		// Use custom border color if available, otherwise fall back to default.
 		if ( $custom_border_color ) {
 			$border_color = $custom_border_color;
+		} else {
+			// Get theme styles once to avoid repeated calls.
+			$email_styles = $rendering_context->get_theme_styles();
+			$border_color = $this->sanitize_color( $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000' );
 		}
 
 		// Track row context for striped styling.
@@ -205,17 +218,12 @@ class Table extends Abstract_Block_Renderer {
 				// Use border-collapse: collapse to ensure consistent borders between table and cells.
 				$email_table_styles = "{$table_layout}border-collapse: collapse; width: 100%;";
 				$existing_style     = rtrim( $existing_style, "; \t\n\r\0\x0B" );
-				$html->set_attribute(
-					'style',
-					( '' !== $existing_style ? $existing_style . '; ' : '' ) . $email_table_styles
-				);
+				$new_style          = $existing_style ? $existing_style . '; ' . $email_table_styles : $email_table_styles;
+				$html->set_attribute( 'style', $new_style );
 
 				// Remove problematic classes from the table but keep has-fixed-layout and alignment classes for editor UI.
-				$class_attr = preg_replace( '/has-background/', '', $class_attr ) ?? '';
-				$class_attr = preg_replace( '/has-[a-z-]*border[a-z-]*/', '', $class_attr ) ?? '';
-				$class_attr = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $class_attr ) ?? '';
-				$class_attr = preg_replace( '/\s+/', ' ', $class_attr ) ?? ''; // Clean up multiple spaces.
-				$html->set_attribute( 'class', trim( $class_attr ) );
+				$class_attr = $this->clean_css_classes( $class_attr );
+				$html->set_attribute( 'class', $class_attr );
 			} elseif ( 'THEAD' === $tag_name ) {
 				$current_section = 'thead';
 				$row_count       = 0;
@@ -232,7 +240,8 @@ class Table extends Abstract_Block_Renderer {
 				$html->set_attribute( 'valign', 'top' );
 
 				// Get existing style and add email-specific styles with borders and padding.
-				$existing_style = $html->get_attribute( 'style' ) ?? '';
+				$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
+				$existing_style = rtrim( $existing_style, "; \t\n\r\0\x0B" );
 				$border_width   = $custom_border_width ? $custom_border_width : '1px';
 
 				// Extract cell-specific text alignment.
@@ -248,7 +257,8 @@ class Table extends Abstract_Block_Renderer {
 					$email_cell_styles .= '; background-color: #f8f9fa;';
 				}
 
-				$html->set_attribute( 'style', $existing_style . '; ' . $email_cell_styles );
+				$new_cell_style = $existing_style ? $existing_style . '; ' . $email_cell_styles : $email_cell_styles;
+				$html->set_attribute( 'style', $new_cell_style );
 			}
 		}
 
@@ -284,6 +294,13 @@ class Table extends Abstract_Block_Renderer {
 
 		if ( ! empty( $block_attributes['style']['border']['width'] ) ) {
 			$border_width = $block_attributes['style']['border']['width'];
+
+			// Sanitize the border width value.
+			$border_width = $this->sanitize_css_value( $border_width );
+			if ( empty( $border_width ) ) {
+				return null;
+			}
+
 			// Ensure the border width has a unit, default to px if not specified.
 			if ( is_numeric( $border_width ) ) {
 				return $border_width . 'px';
@@ -339,7 +356,7 @@ class Table extends Abstract_Block_Renderer {
 	private function get_cell_text_alignment( \WP_HTML_Tag_Processor $html ): string {
 		// Check for data-align attribute first.
 		$data_align = $html->get_attribute( 'data-align' );
-		if ( $data_align && in_array( $data_align, array( 'left', 'center', 'right' ), true ) ) {
+		if ( $data_align && in_array( $data_align, self::VALID_TEXT_ALIGNMENTS, true ) ) {
 			return $data_align;
 		}
 
@@ -411,10 +428,9 @@ class Table extends Abstract_Block_Renderer {
 		$table_html = $table_matches[0];
 
 		// Extract figcaption if present (scoped to the figure).
+		$caption = '';
 		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/is', $figure_html, $figcaption_matches ) ) {
 			$caption = $figcaption_matches[1];
-		} else {
-			$caption = '';
 		}
 
 		return array(
@@ -439,7 +455,7 @@ class Table extends Abstract_Block_Renderer {
 		if ( $html->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
 			$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
 			$existing_style = rtrim( $existing_style, "; \t\n\r\0\x0B" );
-			$new_style      = ( '' !== $existing_style ? $existing_style . '; ' : '' ) . $styles;
+			$new_style      = $existing_style ? $existing_style . '; ' . $styles : $styles;
 			$html->set_attribute( 'style', $new_style );
 			return $html->get_updated_html();
 		}
@@ -454,6 +470,11 @@ class Table extends Abstract_Block_Renderer {
 	 * @return string Table content with class added.
 	 */
 	private function add_class_to_table_element( string $table_content, string $class_name ): string {
+		// Validate class name to prevent XSS.
+		if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', $class_name ) ) {
+			return $table_content;
+		}
+
 		$html = new \WP_HTML_Tag_Processor( $table_content );
 		if ( $html->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
 			$existing_class = (string) ( $html->get_attribute( 'class' ) ?? '' );
@@ -500,12 +521,15 @@ class Table extends Abstract_Block_Renderer {
 				continue;
 			}
 
-			// Remove disallowed attributes.
+			// Remove disallowed attributes and validate allowed ones.
 			$attributes = $html->get_attribute_names_with_prefix( '' );
 			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attr_name ) {
 					if ( ! in_array( $attr_name, $allowed_attributes, true ) ) {
 						$html->remove_attribute( $attr_name );
+					} else {
+						// Validate specific attributes for security.
+						$this->validate_caption_attribute( $html, $attr_name );
 					}
 				}
 			}
@@ -515,34 +539,178 @@ class Table extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Validate and sanitize specific caption attributes for security.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html HTML tag processor.
+	 * @param string                 $attr_name Attribute name to validate.
+	 */
+	private function validate_caption_attribute( \WP_HTML_Tag_Processor $html, string $attr_name ): void {
+		$attr_value = $html->get_attribute( $attr_name );
+		if ( null === $attr_value ) {
+			return;
+		}
+
+		switch ( $attr_name ) {
+			case 'href':
+				// Only allow http, https, mailto, and tel protocols.
+				if ( ! preg_match( '/^(https?:\/\/|mailto:|tel:)/i', (string) $attr_value ) ) {
+					$html->remove_attribute( $attr_name );
+				}
+				break;
+
+			case 'style':
+				// Only allow safe CSS properties for typography and basic styling.
+				$safe_properties  = $this->get_safe_css_properties();
+				$sanitized_styles = array();
+				$style_parts      = explode( ';', (string) $attr_value );
+
+				foreach ( $style_parts as $style_part ) {
+					$style_part = trim( $style_part );
+					if ( empty( $style_part ) ) {
+						continue;
+					}
+
+					$property_parts = explode( ':', $style_part, 2 );
+					if ( count( $property_parts ) !== 2 ) {
+						continue;
+					}
+
+					$property = trim( strtolower( $property_parts[0] ) );
+					$value    = trim( $property_parts[1] );
+
+					// Only allow safe properties.
+					if ( in_array( $property, $safe_properties, true ) ) {
+						// Use centralized CSS value sanitization.
+						$sanitized_value = $this->sanitize_css_value( $value );
+						if ( ! empty( $sanitized_value ) ) {
+							$sanitized_styles[] = $property . ': ' . $sanitized_value;
+						}
+					}
+				}
+
+				if ( empty( $sanitized_styles ) ) {
+					$html->remove_attribute( $attr_name );
+				} else {
+					$html->set_attribute( $attr_name, implode( '; ', $sanitized_styles ) );
+				}
+				break;
+
+			case 'class':
+				// Only allow alphanumeric characters, hyphens, and underscores.
+				if ( ! preg_match( '/^[a-zA-Z0-9\s\-_]+$/', (string) $attr_value ) ) {
+					$html->remove_attribute( $attr_name );
+				}
+				break;
+
+			case 'data-type':
+			case 'data-id':
+				// Only allow alphanumeric characters, hyphens, and underscores.
+				if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', (string) $attr_value ) ) {
+					$html->remove_attribute( $attr_name );
+				}
+				break;
+		}
+	}
+
+	/**
+	 * Get list of safe CSS properties for typography and basic styling.
+	 *
+	 * @return array Array of safe CSS property names.
+	 */
+	private function get_safe_css_properties(): array {
+		return array(
+			'color',
+			'background-color',
+			'font-family',
+			'font-size',
+			'font-weight',
+			'font-style',
+			'text-decoration',
+			'text-align',
+			'line-height',
+			'letter-spacing',
+			'text-transform',
+		);
+	}
+
+	/**
+	 * Get list of safe CSS properties for caption typography (excludes background properties).
+	 *
+	 * @return array Array of safe CSS property names for captions.
+	 */
+	private function get_caption_css_properties(): array {
+		return array(
+			'color',
+			'font-family',
+			'font-size',
+			'font-weight',
+			'font-style',
+			'text-decoration',
+			'line-height',
+			'letter-spacing',
+			'text-transform',
+		);
+	}
+
+	/**
 	 * Extract typography styles from CSS string for caption.
 	 *
 	 * @param string $css CSS string to extract typography from.
 	 * @return string Typography CSS for caption.
 	 */
 	private function extract_typography_styles_for_caption( string $css ): string {
-		$typography_properties = array(
-			'font-family',
-			'font-size',
-			'font-weight',
-			'font-style',
-			'line-height',
-			'letter-spacing',
-			'text-decoration',
-			'text-transform',
-			'color',
-		);
+		$typography_properties = $this->get_caption_css_properties();
 
 		$caption_styles = array();
 
 		foreach ( $typography_properties as $property ) {
 			// Use regex to extract each typography property.
 			if ( preg_match( '/' . preg_quote( $property, '/' ) . '\s*:\s*([^;]+)/i', $css, $matches ) ) {
-				$caption_styles[] = $property . ': ' . trim( $matches[1] );
+				$value = trim( $matches[1] );
+				// Sanitize the CSS value to prevent injection.
+				$sanitized_value = $this->sanitize_css_value( $value );
+				if ( ! empty( $sanitized_value ) ) {
+					$caption_styles[] = $property . ': ' . $sanitized_value;
+				}
 			}
 		}
 
 		return implode( '; ', $caption_styles );
+	}
+
+	/**
+	 * Sanitize CSS value to prevent injection attacks.
+	 *
+	 * @param string $value CSS value to sanitize.
+	 * @return string Sanitized CSS value or empty string if invalid.
+	 */
+	private function sanitize_css_value( string $value ): string {
+		// Remove any potential script injection characters.
+		$value = (string) ( preg_replace( '/[<>"\']/', '', $value ) ?? '' );
+
+		// Remove dangerous CSS functions and expressions.
+		$dangerous_patterns = array(
+			'/expression\s*\(/i',
+			'/url\s*\(\s*javascript\s*:/i',
+			'/url\s*\(\s*data\s*:/i',
+			'/url\s*\(\s*vbscript\s*:/i',
+			'/import\s*\(/i',
+			'/behavior\s*:/i',
+			'/binding\s*:/i',
+			'/filter\s*:/i',
+			'/progid\s*:/i',
+		);
+
+		foreach ( $dangerous_patterns as $pattern ) {
+			if ( preg_match( $pattern, $value ) ) {
+				return '';
+			}
+		}
+
+		// Remove any remaining potentially dangerous content.
+		$value = (string) ( preg_replace( '/[^\w\s\-\.\,\#\(\)\%\*\+\-\/]/', '', $value ) ?? '' );
+
+		return trim( $value );
 	}
 
 	/**
