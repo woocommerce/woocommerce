@@ -170,17 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.1.1 2025-08-20 =
-
-**WooCommerce**
-
-* Fix - Ensure recurring actions are registered and dependent classes are loaded as needed [#60417](https://github.com/woocommerce/woocommerce/pull/60417)
-* Fix - Fix filtering offline payment methods settings pages to be rendered in legacy mode. [#60432](https://github.com/woocommerce/woocommerce/pull/60432)
-* Fix - Fix spacing in tax line in the order summary [#60469](https://github.com/woocommerce/woocommerce/pull/60469)
-* Fix - Prevent skeleton display when an express payment method is active to avoid unmounting express buttons [#60394](https://github.com/woocommerce/woocommerce/pull/60394)
-* Fix - Use dynamically-generated URLs for resetting accounts and switching to live accounts in the Payments NOX. [#60329](https://github.com/woocommerce/woocommerce/pull/60329)
-* Fix - Fix flat shipping rate validation breaking advanced shipping rate formula input [#60348](https://github.com/woocommerce/woocommerce/pull/60348)
-* Enhancement - Set the ‘Set up payments’ task to in-progress state upon starting live WooPayments onboarding. [#60329](https://github.com/woocommerce/woocommerce/pull/60329)
-
+= 10.1.2 2025-08-20 =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
