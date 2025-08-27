@@ -641,6 +641,30 @@ const { state: cartItemState } = store(
 				} >();
 				return cartItemState.cartItem[ dataProperty ]?.length > 1;
 			},
+
+			get shouldHideProductDetails(): boolean {
+				const { dataProperty } = getContext< {
+					dataProperty: 'item_data' | 'variation';
+				} >();
+				return (
+					dataProperty === 'variation' &&
+					cartItemState.cartItem.type !== 'variation'
+				);
+			},
+
+			get shouldHideSingleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					cartItemState.itemDataHasMultipleAttributes
+				);
+			},
+
+			get shouldHideMultipleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					! cartItemState.itemDataHasMultipleAttributes
+				);
+			},
 		},
 
 		actions: {
