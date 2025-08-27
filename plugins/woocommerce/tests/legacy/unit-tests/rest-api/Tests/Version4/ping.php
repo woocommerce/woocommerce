@@ -30,13 +30,6 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 	protected $user;
 
 	/**
-	 * Original rest_api_v4 feature option value.
-	 *
-	 * @var string
-	 */
-	private $original_rest_api_v4_option;
-
-	/**
 	 * Setup our test server, endpoints, and user info.
 	 *
 	 * @since 4.0.0
