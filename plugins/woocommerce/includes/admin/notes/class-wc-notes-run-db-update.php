@@ -78,8 +78,11 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		$note = new Note( $note_id );
-		$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
-		$note->save();
+
+		if ( Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
+			$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
+			$note->save();
+		}
 	}
 
 	/**
