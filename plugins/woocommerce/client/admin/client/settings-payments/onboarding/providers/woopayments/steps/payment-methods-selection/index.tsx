@@ -123,7 +123,7 @@ export default function PaymentMethodsSelection() {
 		const saveUrl = currentStep?.actions?.save?.href;
 
 		// Store the previous state for potential rollback
-		const previousState = paymentMethodsState;
+		const previousState = { ...paymentMethodsState };
 
 		// Set loading state for the specific method if provided
 		if ( changedMethodId ) {
