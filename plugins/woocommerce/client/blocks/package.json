@@ -286,6 +286,7 @@
 		"fast-deep-equal": "^3.1.3",
 		"fast-sort": "^3.4.0",
 		"html-react-parser": "3.0.4",
+		"@paypal/react-paypal-js": "^8.8.3",
 		"postcode-validator": "3.9.2",
 		"preact": "^10.24.2",
 		"prop-types": "^15.8.1",
