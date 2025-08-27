@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * Tests for the Ping REST API in Version 4.
  *
@@ -18,6 +21,11 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	public function tearDown(): void {
+		unset( $this->endpoint, $this->user );
+		parent::tearDown();
 	}
 
 	/**
