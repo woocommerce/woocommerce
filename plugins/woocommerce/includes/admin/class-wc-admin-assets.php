@@ -170,7 +170,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'path'          => $plugin_url . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js',
 					'dependencies'  => array( 'jquery' ),
 					'version'       => '2.70',
-					'in_footer'     => true,
+					'args'          => array(
+						'in_footer' => true,
+					),
 				),
 				array(
 					'legacy_handle' => 'jquery-tiptip',
@@ -178,7 +180,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'path'          => $plugin_url . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js',
 					'dependencies'  => array( 'jquery', 'dompurify' ),
 					'version'       => $version,
-					'in_footer'     => true,
+					'args'          => array(
+						'in_footer' => true,
+					),
 				),
 				array(
 					'legacy_handle' => 'round',
@@ -310,7 +314,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'path'          => $plugin_url . '/assets/js/js-cookie/js.cookie' . $suffix . '.js',
 					'dependencies'  => array(),
 					'version'       => '2.1.4',
-					'in_footer'     => true,
+					'args'          => array(
+						'in_footer' => true,
+					),
 				),
 				array(
 					'legacy_handle' => 'dompurify',
@@ -339,10 +345,22 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$scripts = $this->get_scripts();
 
 			foreach ( $scripts as $script ) {
-				wp_register_script( $script['handle'], $script['path'], $script['dependencies'] ?? array(), $script['version'] ?? null, $script['in_footer'] ?? false );
+				wp_register_script(
+					$script['handle'],
+					$script['path'],
+					$script['dependencies'] ?? array(),
+					$script['version'] ?? null,
+					$script['args'] ?? array( 'in_footer' => false )
+				);
 
 				if ( isset( $script['legacy_handle'] ) ) {
-					wp_register_script( $script['legacy_handle'], $script['path'], $script['dependencies'] ?? array(), $script['version'] ?? null, $script['in_footer'] ?? false );
+					wp_register_script(
+						$script['legacy_handle'],
+						$script['path'],
+						$script['dependencies'] ?? array(),
+						$script['version'] ?? null,
+						$script['args'] ?? array( 'in_footer' => false )
+					);
 				}
 			}
 
@@ -393,7 +411,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
-			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui' ), $version );
+			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui' ), $version, array( 'in_footer' => false ) );
 			wp_localize_script(
 				'wc-orders',
 				'wc_orders_params',
