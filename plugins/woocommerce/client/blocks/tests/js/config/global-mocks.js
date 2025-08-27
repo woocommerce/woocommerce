@@ -12,6 +12,7 @@ global.TextDecoder = require( 'util' ).TextDecoder;
 global.wp = {};
 
 require( '@wordpress/data' );
+require( '@wordpress/editor' );
 
 /**
  * wcSettings is required by @woocommerce/* packages.
