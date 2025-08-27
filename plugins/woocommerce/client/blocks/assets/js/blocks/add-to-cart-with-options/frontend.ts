@@ -2,7 +2,12 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import { store, getContext, getConfig } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getConfig,
+	getElement,
+} from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -161,7 +166,7 @@ export const getNewQuantity = (
 	return currentQuantity + quantity;
 };
 
-const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
+export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );
 };
@@ -185,9 +190,6 @@ export type AddToCartWithOptionsStore = {
 		decreaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
-		handleQuantityInput: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
 		handleQuantityBlur: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
@@ -196,6 +198,9 @@ export type AddToCartWithOptionsStore = {
 		) => void;
 		addToCart: () => void;
 		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
+	};
+	callbacks: {
+		watchQuantityConstraints: () => void;
 	};
 };
 
@@ -326,8 +331,9 @@ const { actions, state } = store<
 					const variationIds = context.availableVariations.map(
 						( variation ) => variation.variation_id
 					);
+					const idsToUpdate = [ context.productId, ...variationIds ];
 
-					variationIds.forEach( ( id ) => {
+					idsToUpdate.forEach( ( id ) => {
 						context.quantity[ id ] = value;
 					} );
 				} else {
@@ -448,20 +454,10 @@ const { actions, state } = store<
 
 				if ( newValue !== currentValue ) {
 					actions.setQuantity( newValue );
+
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
-			},
-			handleQuantityInput: (
-				event: HTMLElementEvent< HTMLInputElement >
-			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
-					return;
-				}
-				const { currentValue } = inputData;
-
-				actions.setQuantity( currentValue );
 			},
 			// We need to listen to blur events instead of change events because
 			// the change event isn't triggered in invalid numbers (ie: writting
@@ -490,21 +486,19 @@ const { actions, state } = store<
 					dispatchChangeEvent( event.target );
 					return;
 				}
-				const id = childProductId || productId;
+
+				// In other product types, we reset inputs to `min` if they are
+				// 0 or NaN.
+				let min = 1;
 				const productObject = getProductData(
-					id,
+					childProductId || productId,
 					productType,
 					availableVariations,
 					selectedAttributes
 				);
-
-				if ( ! productObject ) {
-					return;
+				if ( productObject ) {
+					min = productObject.min;
 				}
-
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
-				const { min } = productObject;
 
 				const newValue =
 					Number.isFinite( event.target.valueAsNumber ) &&
@@ -512,11 +506,9 @@ const { actions, state } = store<
 						? event.target.valueAsNumber
 						: min;
 
-				if ( event.target.value !== newValue.toString() ) {
-					actions.setQuantity( newValue );
-					event.target.value = newValue.toString();
-					dispatchChangeEvent( event.target );
-				}
+				actions.setQuantity( newValue );
+				event.target.value = newValue.toString();
+				dispatchChangeEvent( event.target );
 			},
 			handleQuantityCheckboxChange: (
 				event: HTMLElementEvent< HTMLInputElement >

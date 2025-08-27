@@ -101,14 +101,54 @@ class QuantitySelector extends AbstractBlock {
 			)
 		);
 
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'class' => $classes,
-				'style' => esc_attr( $classes_and_styles['styles'] ),
-			)
+		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
+		$is_interactive                            = ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
+
+		$input_attributes = array();
+
+		if ( $is_interactive ) {
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+
+			$variations_data           = $product->get_available_variations( 'objects' );
+			$formatted_variations_data = array();
+			foreach ( $variations_data as $variation ) {
+				$variation_quantity_constraints                    = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
+				$formatted_variations_data[ $variation->get_id() ] = array(
+					'min'  => $variation_quantity_constraints['min'],
+					'max'  => $variation_quantity_constraints['max'],
+					'step' => $variation_quantity_constraints['step'],
+				);
+			}
+
+			$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
+
+			wp_interactivity_state(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'min'        => $product_quantity_constraints['min'],
+							'max'        => $product_quantity_constraints['max'],
+							'step'       => $product_quantity_constraints['step'],
+							'variations' => $formatted_variations_data,
+						),
+					),
+				)
+			);
+
+			$input_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+			$input_attributes['data-wp-bind--min']   = 'state.productData.min';
+			$input_attributes['data-wp-bind--max']   = 'state.productData.max';
+			$input_attributes['data-wp-bind--step']  = 'state.productData.step';
+			$input_attributes['data-wp-watch']       = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
+		}
+
+		$wrapper_attributes = array(
+			'class' => $classes,
+			'style' => esc_attr( $classes_and_styles['styles'] ),
 		);
 
-		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
 
 		$product = $previous_product;
 

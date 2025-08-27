@@ -33,7 +33,8 @@ class GroupedProductItem extends AbstractBlock {
 	public function set_is_descendant_of_grouped_product_selector_context( $context, $block ) {
 		if (
 			'woocommerce/product-price' === $block['blockName'] ||
-			'woocommerce/product-stock-indicator' === $block['blockName']
+			'woocommerce/product-stock-indicator' === $block['blockName'] ||
+			'woocommerce/add-to-cart-with-options-quantity-selector' === $block['blockName']
 		) {
 			$context['isDescendantOfGroupedProductSelector'] = true;
 		}
