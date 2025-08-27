@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import {
+	registerExpressPaymentMethod,
+	registerPaymentMethod,
+} from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 import { getPaymentMethodData, WC_ASSET_URL } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sanitizeHTML } from '@woocommerce/utils';
-import { RawHTML } from '@wordpress/element';
-
+import { lazy, Suspense, RawHTML } from '@wordpress/element';
 /**
  * Internal dependencies
  */
@@ -45,3 +47,46 @@ const paypalPaymentMethod = {
 };
 
 registerPaymentMethod( paypalPaymentMethod );
+
+if ( settings.isButtonsEnabled ) {
+	// Dynamically import the PayPal wrapper component
+	const PayPalButtonsContainer = lazy( () => import( './buttons' ) );
+	const LazyPayPalButtonsContainer = () => {
+		const options = settings?.buttonsOptions;
+		if ( ! options ) {
+			return null;
+		}
+
+		const params = {
+			clientId: options[ 'client-id' ],
+			merchantId: options[ 'merchant-id' ],
+			partnerAttributionId: options[ 'partner-attribution-id' ],
+			components: options.components,
+			disableFunding: options[ 'disable-funding' ],
+			enableFunding: options[ 'enable-funding' ],
+			currency: options.currency,
+			intent: options.intent,
+			pageType: options[ 'page-type' ],
+		};
+
+		return (
+			<Suspense fallback={ null }>
+				<PayPalButtonsContainer { ...params } />
+			</Suspense>
+		);
+	};
+
+	registerExpressPaymentMethod( {
+		name: __( 'PayPal', 'woocommerce' ),
+		title: `PayPal`,
+		description: `PayPal Buttons`,
+		gatewayId: 'paypal',
+		paymentMethodId: 'paypal',
+		content: <LazyPayPalButtonsContainer />,
+		edit: <LazyPayPalButtonsContainer />,
+		canMakePayment: () => true,
+		supports: {
+			features: [ 'products' ],
+		},
+	} );
+}
