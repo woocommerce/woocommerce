@@ -76,7 +76,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 
-### Release needs to be delayed. What to do? {#release-delay}
+### The release needs to be delayed. What should we do? {#release-delay}
 
 1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
 2. Ask Dev Advocacy to communicate the delay publicly.
