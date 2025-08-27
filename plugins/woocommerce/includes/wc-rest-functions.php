@@ -458,3 +458,13 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
+
+/**
+ * Check if the WooCommerce REST API v4 feature is enabled.
+ *
+ * @return bool True if the REST API v4 feature is enabled, false otherwise.
+ */
+function wc_rest_api_v4_is_enabled(): bool {
+	$features_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+	return $features_controller->feature_is_enabled( 'rest_api_v4' );
+}
