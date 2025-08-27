@@ -243,11 +243,12 @@ class Table extends Abstract_Block_Renderer {
 				$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
 				$existing_style = rtrim( $existing_style, "; \t\n\r\0\x0B" );
 				$border_width   = $custom_border_width ? $custom_border_width : '1px';
+				$border_style   = $this->get_custom_border_style( $parsed_block );
 
 				// Extract cell-specific text alignment.
 				$cell_text_align = $this->get_cell_text_alignment( $html );
 
-				$email_cell_styles = "vertical-align: top; border: {$border_width} solid {$border_color}; padding: 8px; text-align: {$cell_text_align};";
+				$email_cell_styles = "vertical-align: top; border: {$border_width} {$border_style} {$border_color}; padding: 8px; text-align: {$cell_text_align};";
 
 				// Add thicker borders for header and footer cells when no custom border is set.
 				$email_cell_styles = $this->add_header_footer_borders( $html, $email_cell_styles, $border_color, $current_section, $custom_border_width );
@@ -314,6 +315,18 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get custom border style from block attributes.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 * @return string Custom border style or 'solid' as default.
+	 */
+	private function get_custom_border_style( array $parsed_block ): string {
+		$style   = strtolower( (string) ( $parsed_block['attrs']['style']['border']['style'] ?? '' ) );
+		$allowed = array( 'solid', 'dashed', 'dotted' ); // Email-safe subset.
+		return in_array( $style, $allowed, true ) ? $style : 'solid';
 	}
 
 	/**
@@ -502,38 +515,41 @@ class Table extends Abstract_Block_Renderer {
 			return $caption_html;
 		}
 
-		$html               = new \WP_HTML_Tag_Processor( $caption_html );
-		$allowed_tags       = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
-		$allowed_attributes = array(
-			'href',
-			'title',
-			'target',
-			'rel',
-			'data-type',
-			'data-id',
-			'style',
-			'class',
+		// Hard-drop executable/style content before further processing.
+		$caption_html = (string) preg_replace( '/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
+
+		// Use wp_kses for proper tag removal and sanitization.
+		$allowed_tags = array(
+			'strong' => array(),
+			'em'     => array(),
+			'a'      => array(
+				'href'   => array(),
+				'title'  => array(),
+				'target' => array(),
+				'rel'    => array(),
+			),
+			'mark'   => array(),
+			'kbd'    => array(),
+			's'      => array(),
+			'sub'    => array(),
+			'sup'    => array(),
+			'span'   => array(
+				'style' => array(),
+				'class' => array(),
+			),
+			'br'     => array(),
 		);
 
+		$sanitized_html = wp_kses( $caption_html, $allowed_tags );
+
+		// Additional validation for specific attributes.
+		$html = new \WP_HTML_Tag_Processor( $sanitized_html );
 		while ( $html->next_tag() ) {
-			$tag_name = strtolower( (string) $html->get_tag() );
-
-			// Remove disallowed tags.
-			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
-				$html->set_attribute( 'style', 'display: none;' );
-				continue;
-			}
-
-			// Remove disallowed attributes and validate allowed ones.
 			$attributes = $html->get_attribute_names_with_prefix( '' );
 			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attr_name ) {
-					if ( ! in_array( $attr_name, $allowed_attributes, true ) ) {
-						$html->remove_attribute( $attr_name );
-					} else {
-						// Validate specific attributes for security.
-						$this->validate_caption_attribute( $html, $attr_name );
-					}
+					// Validate specific attributes for security.
+					$this->validate_caption_attribute( $html, $attr_name );
 				}
 			}
 		}
