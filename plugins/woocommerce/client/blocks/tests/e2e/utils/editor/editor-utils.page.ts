@@ -122,7 +122,7 @@ export class Editor extends CoreEditor {
 
 		// Wait for the search to finish.
 		await expect(
-			this.page.getByRole( 'button', { name: 'Reset' } )
+			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
 	}
