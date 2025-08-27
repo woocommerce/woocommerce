@@ -151,7 +151,7 @@ class WC_Autoloader {
 	 *
 	 * @param string $file File name to search for.
 	 */
-	private function load_rest_v4_controller_recursively( $file ) {
+	private function load_rest_v4_controller_recursively( $file ): bool {
 		$v4_base_path = $this->include_path . 'rest-api/Controllers/Version4/';
 		
 		// Use RecursiveDirectoryIterator to search subdirectories
@@ -165,11 +165,12 @@ class WC_Autoloader {
 				if ( $dir_info->isDir() ) {
 					$subdir_path = $dir_info->getPathname() . '/';
 					if ( $this->load_file( $subdir_path . $file ) ) {
-						return;
+						return true;
 					}
 				}
 			}
 		}
+		return false;
 	}
 }
 
