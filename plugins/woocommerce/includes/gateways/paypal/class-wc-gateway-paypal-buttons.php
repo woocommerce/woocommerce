@@ -62,7 +62,7 @@ class WC_Gateway_Paypal_Buttons {
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			'client-id'              => 'sb', // TODO: Get the client ID.
 			'components'             => 'buttons,funding-eligibility,messages',
-			'disable-funding'        => 'card',
+			'disable-funding'        => 'card,applepay',
 			'enable-funding'         => 'venmo,paylater',
 			'currency'               => get_woocommerce_currency(),
 			'intent'                 => $intent,
