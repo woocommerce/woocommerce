@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { FieldValidationStatus } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import type { State } from './reducers';
