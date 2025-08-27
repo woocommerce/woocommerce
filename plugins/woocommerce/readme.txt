@@ -170,6 +170,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.1.2 2025-08-20 =
+= 10.1.2 2025-08-27 =
+
+**WooCommerce**
+
+* Fix - Prevent woocommerce_cancel_unpaid_orders being queued as unique so it recurs after the stock hold limit [#60626](https://github.com/woocommerce/woocommerce/pull/60626)
+* Fix - Revert to using usermeta to store persistent carts [#60605](https://github.com/woocommerce/woocommerce/pull/60605)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
