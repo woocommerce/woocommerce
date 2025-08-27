@@ -262,14 +262,14 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		ob_start();
 		?>
 		<div
-			<?php wp_interactivity_data_wp_context( $context ); ?>
+			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="state.itemDataHasMultipleAttributes"
 		>
 			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<ul
-			<?php wp_interactivity_data_wp_context( $context ); ?>
+			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="!state.itemDataHasMultipleAttributes"
 		>
