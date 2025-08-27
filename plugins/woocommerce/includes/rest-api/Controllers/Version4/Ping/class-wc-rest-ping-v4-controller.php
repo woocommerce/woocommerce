@@ -66,14 +66,12 @@ class WC_REST_Ping_V4_Controller extends WC_REST_V4_Controller {
 	public function get_ping( $request ) {
 		$data = array(
 			'message'   => 'pong',
-			'timestamp' => current_time( 'mysql' ),
 			'version'   => 'v4',
 		);
 
 		/**
 		 * Filter the ping response data.
 		 *
-		 * @since 4.0.0
 		 * @param array           $data    The ping response data.
 		 * @param WP_REST_Request $request The request object.
 		 */
