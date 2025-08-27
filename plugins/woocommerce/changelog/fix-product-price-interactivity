@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't make Product Price block interactive if all variations have the same price

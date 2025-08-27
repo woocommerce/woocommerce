@@ -1077,8 +1077,18 @@ add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 function wc_cancel_unpaid_orders() {
 	$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
 
-	// Re-schedule the event before cancelling orders
-	// this way in case of a DB timeout or (plugin) crash the event is always scheduled for retry.
+	// Clear existing scheduled events (both Action Scheduler and WP-Cron).
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	}
+	// Always clear WP-Cron events as well in case they exist.
+	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+
+	// Check if we should reschedule. Don't reschedule if stock management is disabled or hold duration is not set.
+	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
+		return;
+	}
+
 	/**
 	 * Filters the interval at which to cancel unpaid orders in minutes.
 	 *
@@ -1088,22 +1098,16 @@ function wc_cancel_unpaid_orders() {
 	 */
 	$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
 
-	// Clear existing scheduled events.
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
-		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-	} else {
-		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	// Don't reschedule if the interval is 0 to prevent endless loops.
+	if ( $cancel_unpaid_interval < 1 ) {
+		return;
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
-	}
-
-	if ( $held_duration < 1 || 'yes' !== get_option( 'woocommerce_manage_stock' ) ) {
-		return;
 	}
 
 	$data_store    = WC_Data_Store::load( 'order' );

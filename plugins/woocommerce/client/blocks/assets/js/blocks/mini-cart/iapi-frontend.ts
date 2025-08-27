@@ -49,12 +49,12 @@ const { itemsInCartTextTemplate } = getConfig(
 setStyles();
 
 type MiniCartContext = {
-	isOpen: boolean;
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
 
 type MiniCart = {
 	state: {
+		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
 		drawerOverlayClass: string;
@@ -63,6 +63,7 @@ type MiniCart = {
 		drawerRole: string | null;
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
+		shouldShowTaxLabel: boolean;
 	};
 	callbacks: {
 		openDrawer: () => void;
@@ -134,23 +135,18 @@ store< MiniCart >(
 			},
 
 			get drawerRole() {
-				const { isOpen } = getContext< MiniCartContext >();
-
-				return isOpen ? 'dialog' : null;
+				return state.isOpen ? 'dialog' : null;
 			},
 
 			get drawerTabIndex() {
-				const { isOpen } = getContext< MiniCartContext >();
-
-				return isOpen ? '-1' : null;
+				return state.isOpen ? '-1' : null;
 			},
 
 			get drawerOverlayClass() {
-				const { isOpen } = getContext< MiniCartContext >();
 				const baseClasses =
 					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
 
-				return isOpen
+				return state.isOpen
 					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
 					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
@@ -177,6 +173,15 @@ store< MiniCart >(
 					.replace( '%1$d', state.totalItemsInCart )
 					.replace( '%2$s', state.formattedSubtotal );
 			},
+
+			get shouldShowTaxLabel(): boolean {
+				return (
+					parseInt(
+						woocommerceState.cart.totals.total_items_tax,
+						10
+					) > 0
+				);
+			},
 		},
 
 		callbacks: {
@@ -201,26 +206,22 @@ store< MiniCart >(
 					window.location.href = checkoutUrl;
 					return;
 				}
-				const ctx = getContext< MiniCartContext >();
-				ctx.isOpen = true;
+				state.isOpen = true;
 			},
 
 			closeDrawer() {
-				const ctx = getContext< MiniCartContext >();
-				ctx.isOpen = false;
+				state.isOpen = false;
 			},
 
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
-					const ctx = getContext< MiniCartContext >();
-					ctx.isOpen = false;
+					state.isOpen = false;
 				}
 			},
 
 			disableScrollingOnBody() {
-				const { isOpen } = getContext< MiniCartContext >();
-				if ( isOpen ) {
+				if ( state.isOpen ) {
 					Object.assign( document.body.style, {
 						overflow: 'hidden',
 						paddingRight:
@@ -638,9 +639,16 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
+					variation,
 				} );
 			},
 
@@ -651,18 +659,32 @@ const { state: cartItemState } = store(
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
+					variation,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+					variation,
 				} );
 			},
 
@@ -674,17 +696,20 @@ const { state: cartItemState } = store(
 
 		callbacks: {
 			itemShortDescription() {
-				const el = getElement();
+				const { ref } = getElement();
 
-				if ( el.ref ) {
-					const innerEl = el.ref.querySelector(
+				if ( ref ) {
+					const innerEl = ref.querySelector(
 						'.wc-block-components-product-metadata__description'
 					);
+					const { short_description: shortDescription, description } =
+						cartItemState.cartItem;
 
-					// A workaround for the lack of dangerous set HTML directive in interactivity API
-					if ( innerEl ) {
+					// A workaround for the lack of dangerous set HTML directive
+					// in interactivity API.
+					if ( innerEl && ( shortDescription || description ) ) {
 						innerEl.innerHTML = trimWords(
-							cartItemState.cartItem.short_description
+							shortDescription || description
 						);
 					}
 				}

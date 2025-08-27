@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Move iAPI mini-cart overlay to the `body`

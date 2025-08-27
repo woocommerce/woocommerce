@@ -95,10 +95,7 @@ const getProductData = (
 		return null;
 	}
 
-	// Add default quantity constraint values.
-	const defaultMinValue = productType === 'grouped' ? 0 : 1;
-	const min =
-		typeof productData.min === 'number' ? productData.min : defaultMinValue;
+	const min = typeof productData.min === 'number' ? productData.min : 1;
 	const max =
 		typeof productData.max === 'number' && productData.max >= 1
 			? productData.max
@@ -239,6 +236,13 @@ const { actions, state } = store<
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
+
+				if (
+					productType === 'grouped' &&
+					quantity[ childProductId ] > 0
+				) {
+					return true;
+				}
 
 				const productObject = getProductData(
 					childProductId || productId,
@@ -425,12 +429,21 @@ const { actions, state } = store<
 					return;
 				}
 
-				const newValue = currentValue - step;
+				let newValue = currentValue - step;
 
-				if ( newValue >= min ) {
-					const updatedValue = Math.min( max ?? Infinity, newValue );
-					actions.setQuantity( updatedValue );
-					inputElement.value = updatedValue.toString();
+				// In grouped product children, we allow decreasing the value
+				// down to 0, even if the minimum value is greater than 0.
+				if ( productType === 'grouped' && newValue < min ) {
+					if ( currentValue > min ) {
+						newValue = min;
+					} else {
+						newValue = 0;
+					}
+				}
+
+				if ( newValue !== currentValue ) {
+					actions.setQuantity( newValue );
+					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -485,10 +498,16 @@ const { actions, state } = store<
 					return;
 				}
 
-				const newValue = Math.min(
+				let newValue = Math.min(
 					max ?? Infinity,
 					Math.max( min, currentValue )
 				);
+
+				// In grouped product children, we allow decreasing the value
+				// down to 0, even if the minimum value is greater than 0.
+				if ( productType === 'grouped' && currentValue < min ) {
+					newValue = 0;
+				}
 
 				if ( event.target.value !== newValue.toString() ) {
 					actions.setQuantity( newValue );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Fixed scroll position issue by ensuring the Offline Gateways page always loads at the top.
