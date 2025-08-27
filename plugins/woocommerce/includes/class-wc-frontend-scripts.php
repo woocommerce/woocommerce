@@ -208,12 +208,12 @@ class WC_Frontend_Scripts {
 			),
 			'wc-add-to-cart'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-blockui' ),
+				'deps'    => array( 'jquery', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
 			'wc-add-to-cart-variation'   => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wp-util', 'jquery-blockui' ),
+				'deps'    => array( 'jquery', 'wp-util', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
 			'wc-address-i18n'            => array(
@@ -233,7 +233,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-cart-fragments'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart-fragments' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'js-cookie' ),
+				'deps'    => array( 'jquery', 'wc-js-cookie' ),
 				'version' => $version,
 			),
 			'wc-checkout'                => array(
@@ -248,7 +248,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-credit-card-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-payment' ),
+				'deps'    => array( 'jquery', 'wc-jquery-payment' ),
 				'version' => $version,
 			),
 			'wc-dompurify'               => array(
@@ -313,7 +313,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-photoswipe-ui-default'   => array(
 				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
-				'deps'          => array( 'photoswipe' ),
+				'deps'          => array( 'wc-photoswipe' ),
 				'version'       => '4.1.1-wc.' . $version,
 				'legacy_handle' => 'photoswipe-ui-default',
 			),
@@ -325,7 +325,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-prettyPhoto-init'        => array( // deprecated.
 				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
-				'deps'          => array( 'jquery', 'prettyPhoto' ),
+				'deps'          => array( 'jquery', 'wc-prettyPhoto' ),
 				'version'       => $version,
 				'legacy_handle' => 'prettyPhoto-init',
 			),
@@ -348,7 +348,7 @@ class WC_Frontend_Scripts {
 			),
 			'woocommerce'                => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-blockui', 'js-cookie' ),
+				'deps'    => array( 'jquery', 'wc-jquery-blockui', 'wc-js-cookie' ),
 				'version' => $version,
 			),
 		);
@@ -474,10 +474,10 @@ class WC_Frontend_Scripts {
 				self::enqueue_script( 'wc-zoom' );
 			}
 			if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
-				self::enqueue_script( 'flexslider' );
+				self::enqueue_script( 'wc-flexslider' );
 			}
 			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
-				self::enqueue_script( 'photoswipe-ui-default' );
+				self::enqueue_script( 'wc-photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
 				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
