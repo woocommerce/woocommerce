@@ -45,15 +45,10 @@ const CustomerAddress = () => {
 
 	useEffect( () => {
 		// Check if any shipping field has validation errors
-		const hasValidationErrors = Object.keys( validationErrors ).some(
+		const hasValidationErrors = Object.keys( shippingAddress ).some(
 			( key ) => {
-				if (
-					key.startsWith( 'shipping_' ) &&
-					key !== 'shipping_email'
-				) {
-					return validationErrors[ key ] !== undefined;
-				}
-				return false;
+				// Check if 'shipping_' + key exists in validationErrors
+				return validationErrors[ `shipping_${ key }` ] !== undefined;
 			}
 		);
 

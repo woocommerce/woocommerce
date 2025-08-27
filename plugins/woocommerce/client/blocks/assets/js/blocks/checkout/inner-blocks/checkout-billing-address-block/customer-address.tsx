@@ -43,12 +43,10 @@ const CustomerAddress = () => {
 
 	useEffect( () => {
 		// Check if any billing field has validation errors
-		const hasValidationErrors = Object.keys( validationErrors ).some(
+		const hasValidationErrors = Object.keys( billingAddress ).some(
 			( key ) => {
-				if ( key.startsWith( 'billing_' ) && key !== 'billing_email' ) {
-					return validationErrors[ key ] !== undefined;
-				}
-				return false;
+				// Check if 'billing_' + key exists in validationErrors
+				return validationErrors[ `billing_${ key }` ] !== undefined;
 			}
 		);
 
