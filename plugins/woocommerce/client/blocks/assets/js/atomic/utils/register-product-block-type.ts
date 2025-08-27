@@ -11,7 +11,7 @@ import {
 	BlockConfiguration,
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
-import { store } from '@wordpress/editor';
+import { store as editorStore } from '@wordpress/editor';
 import { isNumber, isEmpty } from '@woocommerce/types';
 
 /**
@@ -123,15 +123,15 @@ export class BlockRegistrationManager {
 
 		// Main store subscription to detect which editor we're in
 		const unsubscribe = subscribe( () => {
-			const editorStore = select( store );
+			const editorSelectors = select( editorStore );
 
 			// Return if editor store is not available yet
-			if ( ! editorStore ) {
+			if ( ! editorSelectors ) {
 				return;
 			}
 
 			// @ts-expect-error getCurrentPostType is not typed
-			const postType = editorStore.getCurrentPostType();
+			const postType = editorSelectors.getCurrentPostType();
 
 			// Return if post type is not available yet
 			if ( ! postType ) {
@@ -160,7 +160,7 @@ export class BlockRegistrationManager {
 				unsubscribe();
 
 				// @ts-expect-error getCurrentPostId is not typed
-				const postId = editorStore.getCurrentPostId();
+				const postId = editorSelectors.getCurrentPostId();
 
 				// Set initial template ID
 				this.currentTemplateId =
@@ -176,13 +176,13 @@ export class BlockRegistrationManager {
 					const previousTemplateId = this.currentTemplateId;
 					this.currentTemplateId = this.parseTemplateId(
 						// @ts-expect-error getCurrentPostId is not typed
-						editorStore.getCurrentPostId()
+						editorSelectors.getCurrentPostId()
 					);
 
 					if ( previousTemplateId !== this.currentTemplateId ) {
 						this.handleTemplateChange( previousTemplateId );
 					}
-				}, 'core/editor' );
+				}, editorStore );
 
 				this.initialized = true;
 			}
