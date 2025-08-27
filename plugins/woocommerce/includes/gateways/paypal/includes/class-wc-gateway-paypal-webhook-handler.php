@@ -26,10 +26,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
-		// phpcs:disable Generic.Commenting.Todo.TaskFound
-		// TODO: Validate the webhook signature.
-
 		$data = $request->get_json_params();
+		if ( ! is_array( $data ) || empty( $data['event_type'] ) || empty( $data['resource'] ) ) {
+			WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
+			return;
+		}
+
 		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( $data, true ) );
 
 		switch ( $data['event_type'] ) {
@@ -150,8 +152,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return WC_Order|null
 	 */
 	private function get_wc_order( $custom_id ) {
-		$data     = json_decode( $custom_id );
-		$order_id = $data->order_id ?? null;
+		$data = json_decode( $custom_id, true );
+		if ( ! is_array( $data ) ) {
+			return null;
+		}
+
+		$order_id = $data['order_id'] ?? null;
 		if ( ! $order_id ) {
 			return null;
 		}
@@ -162,7 +168,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Validate the order key.
-		$order_key = $data->order_key ?? null;
+		$order_key = $data['order_key'] ?? null;
 		if ( $order_key !== $order->get_order_key() ) {
 			return null;
 		}

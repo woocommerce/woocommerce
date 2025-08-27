@@ -101,7 +101,7 @@ class WC_Payment_Gateways {
 				$gateway = new $gateway();
 			}
 
-			if ( 'WC_Gateway_Paypal' === $gateway && ! $this->should_load_paypal_standard() ) {
+			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) && ! $this->should_load_paypal_standard() ) {
 				continue;
 			}
 

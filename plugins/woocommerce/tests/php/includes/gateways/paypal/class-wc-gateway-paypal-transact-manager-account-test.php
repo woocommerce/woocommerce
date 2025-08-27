@@ -125,7 +125,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Should do nothing. Should not throw any errors.
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
@@ -161,7 +161,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Should do nothing. Should not throw any errors.
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
@@ -347,7 +347,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
 		$reflection      = new ReflectionClass( $account_manager );
@@ -375,7 +375,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return a successful response.
-		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
 		$reflection      = new ReflectionClass( $account_manager );
@@ -403,7 +403,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Create a real account manager instance.
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
@@ -433,7 +433,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return a successful response.
-		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
 		$reflection      = new ReflectionClass( $account_manager );
@@ -461,7 +461,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Create a real account manager instance.
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
@@ -493,7 +493,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return a successful response.
-		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
 		// Create a real account manager instance.
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
@@ -525,7 +525,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return an error.
-		add_filter( 'pre_http_request', array( $this, 'return_api_error' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
 		$reflection      = new ReflectionClass( $account_manager );
@@ -553,7 +553,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		// Mock the HTTP request to return a successful response.
-		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
 		$reflection      = new ReflectionClass( $account_manager );

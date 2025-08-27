@@ -270,7 +270,7 @@ class WC_Gateway_Paypal_Request {
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
 
-		if ( 200 !== $http_code ) {
+		if ( 200 !== $http_code && 201 !== $http_code ) {
 			WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 		}
 
@@ -334,23 +334,23 @@ class WC_Gateway_Paypal_Request {
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => array(
 						'currency_code' => $currency,
-						'value'         => $order->get_total(),
+						'value'         => wc_format_decimal( $order->get_total(), wc_get_price_decimals() ),
 						'breakdown'     => array(
 							'item_total' => array(
 								'currency_code' => $currency,
-								'value'         => $this->get_paypal_order_items_subtotal( $order ),
+								'value'         => wc_format_decimal( $this->get_paypal_order_items_subtotal( $order ), wc_get_price_decimals() ),
 							),
 							'shipping'   => array(
 								'currency_code' => $currency,
-								'value'         => $order->get_shipping_total(),
+								'value'         => wc_format_decimal( $order->get_shipping_total(), wc_get_price_decimals() ),
 							),
 							'tax_total'  => array(
 								'currency_code' => $currency,
-								'value'         => $order->get_total_tax(),
+								'value'         => wc_format_decimal( $order->get_total_tax(), wc_get_price_decimals() ),
 							),
 							'discount'   => array(
 								'currency_code' => $currency,
-								'value'         => $order->get_discount_total(),
+								'value'         => wc_format_decimal( $order->get_discount_total(), wc_get_price_decimals() ),
 							),
 						),
 					),

@@ -258,7 +258,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 
 		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $response_data['public_id'] ) ) {
-			WC_Gateway_Paypal::log( 'Transact merchant account creation failed. Response body: ' . $response_data );
+			WC_Gateway_Paypal::log( 'Transact merchant account creation failed. Response body: ' . wc_print_r( $response_data, true ) );
 			return null;
 		}
 
