@@ -306,7 +306,7 @@ class Table extends Abstract_Block_Renderer {
 				return $border_width . 'px';
 			}
 			// Validate that the border width contains only valid CSS units and numbers.
-			if ( preg_match( '/^[0-9]+\.?[0-9]*(px|em|rem|%|pt|pc|in|cm|mm|ex|ch|vw|vh|vmin|vmax)$/', $border_width ) ) {
+			if ( preg_match( '/^[0-9]+\.?[0-9]*(px|em|rem|pt|pc|in|cm|mm|ex|ch|vw|vh|vmin|vmax)$/', $border_width ) ) {
 				return $border_width;
 			}
 			// If invalid, return null to use default.
@@ -503,9 +503,12 @@ class Table extends Abstract_Block_Renderer {
 		}
 
 		$html               = new \WP_HTML_Tag_Processor( $caption_html );
-		$allowed_tags       = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup' );
+		$allowed_tags       = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
 		$allowed_attributes = array(
 			'href',
+			'title',
+			'target',
+			'rel',
 			'data-type',
 			'data-id',
 			'style',
@@ -555,6 +558,30 @@ class Table extends Abstract_Block_Renderer {
 				// Only allow http, https, mailto, and tel protocols.
 				if ( ! preg_match( '/^(https?:\/\/|mailto:|tel:)/i', (string) $attr_value ) ) {
 					$html->remove_attribute( $attr_name );
+				}
+				break;
+
+			case 'target':
+				// Allow only common safe targets.
+				$allowed_targets = array( '_blank', '_self' );
+				if ( ! in_array( strtolower( (string) $attr_value ), $allowed_targets, true ) ) {
+					$html->remove_attribute( $attr_name );
+				}
+				break;
+
+			case 'rel':
+				// Keep only safe relationship tokens.
+				$tokens         = preg_split( '/\s+/', (string) $attr_value );
+				$allowed_tokens = array( 'noopener', 'noreferrer', 'nofollow', 'external' );
+				if ( false === $tokens ) {
+					$html->remove_attribute( $attr_name );
+				} else {
+					$safe_tokens = array_values( array_intersect( array_map( 'strtolower', $tokens ), $allowed_tokens ) );
+					if ( empty( $safe_tokens ) ) {
+						$html->remove_attribute( $attr_name );
+					} else {
+						$html->set_attribute( $attr_name, implode( ' ', $safe_tokens ) );
+					}
 				}
 				break;
 
