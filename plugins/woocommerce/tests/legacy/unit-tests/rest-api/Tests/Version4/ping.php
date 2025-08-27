@@ -1,20 +1,52 @@
 <?php
-
-declare(strict_types=1);
-
 /**
  * Tests for the Ping REST API in Version 4.
  *
  * @package WooCommerce\Tests\API
  */
 
+declare(strict_types=1);
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Ping REST API testing class.
+ *
+ * @package WooCommerce\Tests\API
+ */
 class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
+	/**
+	 * The ping controller endpoint.
+	 *
+	 * @var WC_REST_Ping_V4_Controller
+	 */
+	protected $endpoint;
+
+	/**
+	 * The test user ID.
+	 *
+	 * @var int
+	 */
+	protected $user;
+
+	/**
+	 * Original rest_api_v4 feature option value.
+	 *
+	 * @var string
+	 */
+	private $original_rest_api_v4_option;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
+	 *
+	 * @since 4.0.0
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// Enable the rest_api_v4 feature for testing.
+		update_option( 'woocommerce_feature_rest_api_v4_enabled', 'yes' );
+
 		$this->endpoint = new WC_REST_Ping_V4_Controller();
 		$this->user     = $this->factory->user->create(
 			array(
@@ -23,7 +55,15 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Tear down the test environment.
+	 *
+	 * @since 4.0.0
+	 */
 	public function tearDown(): void {
+		// Disable the rest_api_v4 feature after testing.
+		update_option( 'woocommerce_feature_rest_api_v4_enabled', 'no' );
+
 		unset( $this->endpoint, $this->user );
 		parent::tearDown();
 	}
@@ -42,7 +82,7 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 	 * @since 4.0.0
 	 */
 	public function test_get_ping() {
-		// Test without authentication (should work since ping is public)
+		// Test without authentication (should work since ping is public).
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/ping' ) );
 		$data     = $response->get_data();
 
@@ -71,20 +111,20 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 	 * @since 4.0.0
 	 */
 	public function test_v4_independence() {
-		// Verify that V4 controller is different from V3 controllers
+		// Verify that V4 controller is different from V3 controllers.
 		$v4_ping = new WC_REST_Ping_V4_Controller();
 		$this->assertEquals( 'wc/v4', $v4_ping->get_namespace() );
-		
-		// Verify this is not inheriting from any versioned controller
+
+		// Verify this is not inheriting from any versioned controller.
 		$reflection = new ReflectionClass( 'WC_REST_Ping_V4_Controller' );
-		$parent = $reflection->getParentClass();
-		
-		// Should extend WC_REST_V4_Controller, not any versioned controller
+		$parent     = $reflection->getParentClass();
+
+		// Should extend WC_REST_V4_Controller, not any versioned controller.
 		$this->assertEquals( 'WC_REST_V4_Controller', $parent->getName() );
-		
-		// Verify V4 base controller extends WordPress REST directly, not WC legacy
+
+		// Verify V4 base controller extends WordPress REST directly, not WC legacy.
 		$v4_base_reflection = new ReflectionClass( 'WC_REST_V4_Controller' );
-		$v4_base_parent = $v4_base_reflection->getParentClass();
+		$v4_base_parent     = $v4_base_reflection->getParentClass();
 		$this->assertEquals( 'WP_REST_Controller', $v4_base_parent->getName() );
 	}
 }

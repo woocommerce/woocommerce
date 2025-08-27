@@ -6,6 +6,8 @@
  * @version 2.3.0
  */
 
+declare(strict_types=1);
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -106,33 +108,33 @@ class WC_Autoloader {
 		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
 			$path = $this->include_path . 'admin/notes/';
 		} elseif ( 0 === strpos( $class, 'wc_rest_' ) ) {
-			// Handle REST API controllers in subdirectories
-			// For V4 controllers, check if the feature is enabled first
+			// Handle REST API controllers in subdirectories.
+			// For V4 controllers, check if the feature is enabled first.
 			if ( false !== strpos( $class, '_v4_' ) ) {
-				// Only load V4 controllers if the feature is enabled
+				// Only load V4 controllers if the feature is enabled.
 				if ( function_exists( 'wc_rest_api_v4_is_enabled' ) && wc_rest_api_v4_is_enabled() ) {
 					$rest_controller_paths = array(
 						'rest-api/Controllers/Version4/',
 					);
-					
+
 					foreach ( $rest_controller_paths as $rest_path ) {
 						if ( $this->load_file( $this->include_path . $rest_path . $file ) ) {
 							return;
 						}
 					}
-					
-					// Also check subdirectories recursively for V4
+
+					// Also check subdirectories recursively for V4.
 					$this->load_rest_v4_controller_recursively( $file );
 				}
 			} else {
-				// For non-V4 controllers, load normally
+				// For non-V4 controllers, load normally.
 				$rest_controller_paths = array(
 					'rest-api/Controllers/Version1/',
 					'rest-api/Controllers/Version2/',
 					'rest-api/Controllers/Version3/',
 					'rest-api/Controllers/Telemetry/',
 				);
-				
+
 				foreach ( $rest_controller_paths as $rest_path ) {
 					if ( $this->load_file( $this->include_path . $rest_path . $file ) ) {
 						return;
@@ -153,14 +155,14 @@ class WC_Autoloader {
 	 */
 	private function load_rest_v4_controller_recursively( $file ): bool {
 		$v4_base_path = $this->include_path . 'rest-api/Controllers/Version4/';
-		
-		// Use RecursiveDirectoryIterator to search subdirectories
+
+		// Use RecursiveDirectoryIterator to search subdirectories.
 		if ( is_dir( $v4_base_path ) ) {
 			$iterator = new RecursiveIteratorIterator(
 				new RecursiveDirectoryIterator( $v4_base_path, RecursiveDirectoryIterator::SKIP_DOTS ),
 				RecursiveIteratorIterator::SELF_FIRST
 			);
-			
+
 			foreach ( $iterator as $dir_info ) {
 				if ( $dir_info->isDir() ) {
 					$subdir_path = $dir_info->getPathname() . '/';

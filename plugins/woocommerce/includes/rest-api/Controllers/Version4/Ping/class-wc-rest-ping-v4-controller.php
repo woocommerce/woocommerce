@@ -5,8 +5,9 @@
  * Handles requests to the /ping endpoint for API v4.
  *
  * @package WooCommerce\RestApi
- * @since   4.0.0
  */
+
+declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,7 +53,7 @@ class WC_REST_Ping_V4_Controller extends WC_REST_V4_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_ping_permissions_check( $request ) {
-		// Allow ping to be accessible without authentication for basic connectivity testing
+		// Allow ping to be accessible without authentication for basic connectivity testing.
 		return true;
 	}
 
@@ -65,17 +66,9 @@ class WC_REST_Ping_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	public function get_ping( $request ) {
 		$data = array(
-			'message'   => 'pong',
-			'version'   => 'v4',
+			'message' => 'pong',
+			'version' => 'v4',
 		);
-
-		/**
-		 * Filter the ping response data.
-		 *
-		 * @param array           $data    The ping response data.
-		 * @param WP_REST_Request $request The request object.
-		 */
-		$data = apply_filters( 'woocommerce_rest_ping_response', $data, $request );
 
 		return rest_ensure_response( $data );
 	}
@@ -91,20 +84,13 @@ class WC_REST_Ping_V4_Controller extends WC_REST_V4_Controller {
 
 		$schema['title']      = 'ping';
 		$schema['properties'] = array(
-			'message'   => array(
+			'message' => array(
 				'description' => __( 'The ping response message.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view' ),
 				'readonly'    => true,
 			),
-			'timestamp' => array(
-				'description' => __( 'The server timestamp when the ping was processed.', 'woocommerce' ),
-				'type'        => 'string',
-				'format'      => 'date-time',
-				'context'     => array( 'view' ),
-				'readonly'    => true,
-			),
-			'version'   => array(
+			'version' => array(
 				'description' => __( 'The API version responding to the ping.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view' ),
