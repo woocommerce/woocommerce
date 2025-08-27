@@ -84,7 +84,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
 
 Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
 
-### Release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
+### The release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 
