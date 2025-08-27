@@ -33,15 +33,13 @@ const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 	let updatedReadme = readme;
 
 	newEntries.forEach( ( entry ) => {
-		const match = entry.match(
-			/^\* (Fix|Add|Dev|Enhancement|Update|Tweak|Performance)/i
-		);
+		const match = entry.match( /^\* (\w+)/ );
 		if ( ! match ) return;
 
 		const entryType = match[ 1 ];
 
 		// Find all existing entries of the same type
-		const typeRegex = new RegExp( `\\* ${ entryType }.*`, 'gi' );
+		const typeRegex = new RegExp( `\\* ${ entryType }\\b.*`, 'gi' );
 		const matches = [ ...updatedReadme.matchAll( typeRegex ) ];
 
 		if ( matches.length > 0 ) {
