@@ -83,6 +83,8 @@ type CartItemDataAttr = {
 	className: string;
 };
 
+type DataProperty = 'item_data' | 'variation';
+
 const trimWords = ( html: string, maxWords = 15 ): string => {
 	const words = html.trim().split( /\s+/ );
 	if ( words.length <= maxWords ) {
@@ -607,15 +609,19 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr {
+			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
 					itemData: { key: string; attribute: string; value: string };
-					dataProperty: 'item_data' | 'variation';
+					dataProperty: DataProperty;
 				} >();
 
 				// Use the context if it is in a loop, otherwise use the unique item if it exists.
 				const dataItemAttr =
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return null;
+				}
 
 				const dataItemAttrKey =
 					dataItemAttr.key || dataItemAttr.attribute;
