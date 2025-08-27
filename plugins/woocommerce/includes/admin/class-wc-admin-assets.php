@@ -152,7 +152,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 *
 		 * @return array
 		 */
-		private function get_scripts() {
+		private function get_scripts(): array {
 			$suffix     = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version    = Constants::get_constant( 'WC_VERSION' );
 			$plugin_url = WC()->plugin_url();
@@ -178,7 +178,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'legacy_handle' => 'jquery-tiptip',
 					'handle'        => 'wc-jquery-tiptip',
 					'path'          => $plugin_url . '/assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js',
-					'dependencies'  => array( 'jquery', 'dompurify' ),
+					'dependencies'  => array( 'jquery', 'wc-dompurify' ),
 					'version'       => $version,
 					'args'          => array(
 						'in_footer' => true,
