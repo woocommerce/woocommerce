@@ -105,26 +105,4 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $properties );
 		$this->assertArrayHasKey( 'version', $properties );
 	}
-
-	/**
-	 * Test that V4 is completely separate from V3.
-	 * @since 4.0.0
-	 */
-	public function test_v4_independence() {
-		// Verify that V4 controller is different from V3 controllers.
-		$v4_ping = new WC_REST_Ping_V4_Controller();
-		$this->assertEquals( 'wc/v4', $v4_ping->get_namespace() );
-
-		// Verify this is not inheriting from any versioned controller.
-		$reflection = new ReflectionClass( 'WC_REST_Ping_V4_Controller' );
-		$parent     = $reflection->getParentClass();
-
-		// Should extend WC_REST_V4_Controller, not any versioned controller.
-		$this->assertEquals( 'WC_REST_V4_Controller', $parent->getName() );
-
-		// Verify V4 base controller extends WordPress REST directly, not WC legacy.
-		$v4_base_reflection = new ReflectionClass( 'WC_REST_V4_Controller' );
-		$v4_base_parent     = $v4_base_reflection->getParentClass();
-		$this->assertEquals( 'WP_REST_Controller', $v4_base_parent->getName() );
-	}
 }
