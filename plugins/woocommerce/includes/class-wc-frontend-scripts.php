@@ -27,7 +27,7 @@ class WC_Frontend_Scripts {
 	 *
 	 * @var array
 	 */
-	private static $scripts = array();
+	private static $registered_scripts = array();
 
 	/**
 	 * Contains an array of script handles registered by WC.
@@ -50,6 +50,31 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
+	}
+
+	/**
+	 * Add warnings for deprecated script handles.
+	 */
+	public static function add_legacy_script_warnings() {
+		$scripts = self::get_scripts();
+
+		foreach ( $scripts as $handle => $script ) {
+			if ( ! isset( $script['legacy_handle'] ) ) {
+				continue;
+			}
+
+			$exists = wp_script_is( $script['legacy_handle'] );
+
+			if ( $exists ) {
+				wc_deprecated_argument(
+					'wp_enqueue_script',
+					'10.3.0',
+					/* translators: %1$s: new script handle, %2$s: previous script handle */
+					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
+				);
+			}
+		}
 	}
 
 	/**
@@ -124,7 +149,7 @@ class WC_Frontend_Scripts {
 	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
-		self::$scripts[] = $handle;
+		self::$registered_scripts[] = $handle;
 		wp_register_script( $handle, $path, $deps, $version, $in_footer );
 	}
 
@@ -139,7 +164,7 @@ class WC_Frontend_Scripts {
 	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
-		if ( ! in_array( $handle, self::$scripts, true ) && $path ) {
+		if ( ! in_array( $handle, self::$registered_scripts, true ) && $path ) {
 			self::register_script( $handle, $path, $deps, $version, $in_footer );
 		}
 		wp_enqueue_script( $handle );
@@ -184,13 +209,15 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Register all WC scripts.
+	 * Get scripts for the frontend.
+	 *
+	 * @return array
 	 */
-	private static function register_scripts() {
+	private static function get_scripts(): array {
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		$register_scripts = array(
+		$scripts = array(
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
@@ -285,9 +312,10 @@ class WC_Frontend_Scripts {
 				'version' => '3.0.0-wc.' . $version,
 			),
 			'wc-jquery-tiptip'           => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wc-dompurify' ),
-				'version' => $version,
+				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
+				'deps'          => array( 'jquery', 'wc-dompurify' ),
+				'version'       => $version,
+				'legacy_handle' => 'jquery-tiptip',
 			),
 			'wc-js-cookie'               => array(
 				'src'           => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
@@ -354,12 +382,21 @@ class WC_Frontend_Scripts {
 		);
 
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$register_scripts['wc-address-autocomplete'] = array(
+			$scripts['wc-address-autocomplete'] = array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			);
 		}
+
+		return $scripts;
+	}
+
+	/**
+	 * Register all WC scripts.
+	 */
+	private static function register_scripts() {
+		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
@@ -723,7 +760,7 @@ class WC_Frontend_Scripts {
 	 * Localize scripts only when enqueued.
 	 */
 	public static function localize_printed_scripts() {
-		foreach ( self::$scripts as $handle ) {
+		foreach ( self::$registered_scripts as $handle ) {
 			self::localize_script( $handle );
 		}
 	}

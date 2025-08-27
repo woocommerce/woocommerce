@@ -51,7 +51,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				if ( $exists ) {
 					wc_deprecated_argument(
 						'wp_enqueue_script',
-						'10.2.0',
+						'10.3.0',
 						/* translators: %1$s: new script handle, %2$s: previous script handle */
 						sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $script['handle'], $script['legacy_handle'] )
 					);
