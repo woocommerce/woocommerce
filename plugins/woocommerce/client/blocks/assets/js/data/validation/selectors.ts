@@ -44,8 +44,7 @@ export const hasValidationErrors = ( state: State ) => {
 
 /**
  * Gets all validation errors.
- *
- * @param { State } state The current state.
- * @return { Record<string, FieldValidationStatus> } All validation errors.
  */
-export const getValidationErrors = ( state: State ) => state;
+export const getValidationErrors = (
+	state: State
+): Record< string, FieldValidationStatus > => state;
