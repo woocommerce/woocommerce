@@ -643,14 +643,14 @@ const { state: cartItemState } = store(
 
 			get itemDataHasMultipleAttributes(): boolean {
 				const { dataProperty } = getContext< {
-					dataProperty: 'item_data' | 'variation';
+					dataProperty: DataProperty;
 				} >();
 				return cartItemState.cartItem[ dataProperty ]?.length > 1;
 			},
 
 			get shouldHideProductDetails(): boolean {
 				const { dataProperty } = getContext< {
-					dataProperty: 'item_data' | 'variation';
+					dataProperty: DataProperty;
 				} >();
 				return (
 					dataProperty === 'variation' &&
