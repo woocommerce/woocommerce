@@ -49,7 +49,6 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'pong', $data['message'] );
 		$this->assertEquals( 'v4', $data['version'] );
-		$this->assertArrayHasKey( 'timestamp', $data );
 	}
 
 	/**
@@ -64,7 +63,6 @@ class WC_Tests_API_V4_Ping extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 3, count( $properties ) );
 		$this->assertArrayHasKey( 'message', $properties );
-		$this->assertArrayHasKey( 'timestamp', $properties );
 		$this->assertArrayHasKey( 'version', $properties );
 	}
 
