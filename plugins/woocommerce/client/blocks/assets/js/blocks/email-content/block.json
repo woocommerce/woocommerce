@@ -8,7 +8,11 @@
 		"inserter": false,
 		"email": true
 	},
-	"attributes": {},
+	"attributes": {
+		"emailType": {
+			"type": "string"
+		}
+	},
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
