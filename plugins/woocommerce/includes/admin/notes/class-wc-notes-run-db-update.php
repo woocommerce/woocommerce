@@ -19,20 +19,41 @@ class WC_Notes_Run_Db_Update {
 	const NOTE_NAME = 'wc-update-db-reminder';
 
 	/**
-	 * Attach hooks.
+	 * Checks whether the note needs an update based on the current db update status.
+	 * Hooked onto the 'woocommerce_get_note_from_db' filter. See {@see \WC_Install}.
+	 *
+	 * @since 10.3.0
+	 *
+	 * @param Note $note
+	 * @return Note
 	 */
-	public function __construct() {
-		// If the old notice gets dismissed, also hide this new one.
-		add_action( 'woocommerce_hide_update_notice', array( __CLASS__, 'set_notice_actioned' ) );
-
-		// Not using Jetpack\Constants here as it can run before 'plugin_loaded' is done.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX
-			|| defined( 'DOING_CRON' ) && DOING_CRON
-			|| ! is_admin() ) {
-			return;
+	public static function maybe_update_notice( $note ) {
+		if ( ! $note instanceof Note || $note->get_name() !== self::NOTE_NAME ) {
+			return $note;
 		}
 
-		add_action( 'current_screen', array( __CLASS__, 'show_reminder' ) );
+		if ( ! in_array( 'update', \WC_Admin_Notices::get_notices(), true ) ) {
+			// Note is being loaded despite not being necessary.
+			// TODO: remove here.
+		}
+
+		$needs_db_update = \WC_Install::needs_db_update();
+
+		if ( ! $needs_db_update ) {
+			if ( Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
+				self::update_done_notice( $note );
+			}
+		} else {
+			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
+
+			if ( $next_scheduled_date ) {
+				self::update_in_progress_notice( $note );
+			} else {
+				self::update_needed_notice( $note );
+			}
+		}
+
+		return $note;
 	}
 
 	/**
@@ -72,7 +93,6 @@ class WC_Notes_Run_Db_Update {
 	 */
 	public static function set_notice_actioned() {
 		$note_id = self::get_current_notice();
-
 		if ( ! $note_id ) {
 			return;
 		}
@@ -108,15 +128,17 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * If a $note_id is given, the method updates the note instead of creating a new one.
 	 *
-	 * @param integer $note_id Note db record to update.
+	 * @param int|Note $note_id Note db record to update.
 	 * @return int Created/Updated note id
 	 */
 	private static function update_needed_notice( $note_id = null ) {
+		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
+
 		$update_url =
 			add_query_arg(
 				array(
 					'do_update_woocommerce' => 'true',
-					'return_url'            => wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' ),
+					'return_url'            => 'wc-admin-referer',
 				),
 				admin_url()
 			);
@@ -140,15 +162,9 @@ class WC_Notes_Run_Db_Update {
 			),
 		);
 
-		if ( $note_id ) {
-			$note = new Note( $note_id );
-		} else {
-			$note = new Note();
-		}
-
 		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
-		if ( self::note_up_to_date( $note, $update_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
-			return $note_id;
+		if ( Note::E_WC_ADMIN_NOTE_UNACTIONED === $note->get_status() && self::note_up_to_date( $note, $update_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
+			return $note;
 		}
 
 		$note->set_title( __( 'WooCommerce database update required', 'woocommerce' ) );
@@ -175,7 +191,9 @@ class WC_Notes_Run_Db_Update {
 			}
 		}
 
-		return $note->save();
+		$note->save();
+
+		return $note->get_id();
 	}
 
 	/**
@@ -183,15 +201,16 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * This is the second out of 3 notices displayed to the user.
 	 *
-	 * @param int $note_id Note id to update.
+	 * @param int|Note $note_id Note id to update.
 	 */
 	private static function update_in_progress_notice( $note_id ) {
+		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
+
 		// Same actions as in includes/admin/views/html-notice-updating.php. This just redirects, performs no action, so without nonce.
 		$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_run_update&status=pending' );
 		$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
 		$cron_cta            = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress →', 'woocommerce' );
 
-		$note = new Note( $note_id );
 		$note->set_title( __( 'WooCommerce database update in progress', 'woocommerce' ) );
 		$note->set_content( __( 'WooCommerce is updating the database in the background. The database update process may take a little while, so please be patient.', 'woocommerce' ) );
 
@@ -205,6 +224,8 @@ class WC_Notes_Run_Db_Update {
 		);
 
 		$note->save();
+
+		return $note->get_id();
 	}
 
 	/**
@@ -212,15 +233,17 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * This is the last notice (3 out of 3 notices) displayed to the user.
 	 *
-	 * @param int $note_id Note id to update.
+	 * @param int|Note $note_id Note id to update.
 	 */
 	private static function update_done_notice( $note_id ) {
+		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
+
 		$hide_notices_url = html_entity_decode( // to convert &amp;s to normal &, otherwise produces invalid link.
 			add_query_arg(
 				array(
 					'wc-hide-notice' => 'update',
 				),
-				wc_get_current_admin_url() ? remove_query_arg( 'do_update_woocommerce', wc_get_current_admin_url() ) : admin_url( 'admin.php?page=wc-settings' )
+				admin_url( 'admin.php?page=wc-settings' )
 			)
 		);
 
@@ -236,11 +259,9 @@ class WC_Notes_Run_Db_Update {
 			),
 		);
 
-		$note = new Note( $note_id );
-
 		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
 		if ( self::note_up_to_date( $note, $hide_notices_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
-			return $note_id;
+			return $note;
 		}
 
 		$note->set_title( __( 'WooCommerce database update done', 'woocommerce' ) );
@@ -256,6 +277,21 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		$note->save();
+
+		return $note->get_id();
+	}
+
+	/**
+	 * Creates the db update note if needed.
+	 *
+	 * @return Note
+	 */
+	public static function add_notice() {
+		$note_id = self::get_current_notice();
+		$note    = new Note( $note_id ?? '' );
+
+		self::maybe_update_notice( $note );
+		return $note;
 	}
 
 	/**
@@ -268,6 +304,8 @@ class WC_Notes_Run_Db_Update {
 	 * store owner hasn't acknowledged the successful db update), still show the Thanks notice.
 	 * If the db does not need an update, and the notice has been actioned, then notice should *not* be shown.
 	 * The notice should also be hidden if the db does not need an update and the notice does not exist.
+	 *
+	 * @deprecated 10.3.0
 	 */
 	public static function show_reminder() {
 		$needs_db_update = \WC_Install::needs_db_update();
