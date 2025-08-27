@@ -619,10 +619,15 @@ const { state: cartItemState } = store(
 
 				const dataItemAttrKey =
 					dataItemAttr.key || dataItemAttr.attribute;
+				// Decode entities.
+				const nameTxt = document.createElement( 'textarea' );
+				nameTxt.innerHTML = dataItemAttrKey + ':';
+				const valueTxt = document.createElement( 'textarea' );
+				valueTxt.innerHTML = dataItemAttr.value;
 
 				return {
-					name: dataItemAttrKey + ':',
-					value: dataItemAttr.value,
+					name: nameTxt.value,
+					value: valueTxt.value,
 					className: `wc-block-components-product-details__${ dataItemAttrKey
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
 						.replace( /[\s_]+/g, '-' )
