@@ -165,6 +165,13 @@ class WC_Email extends WC_Settings_API {
 	protected $customer_email = false;
 
 	/**
+	 * Email group.
+	 *
+	 * @var String
+	 */
+	public $email_group;
+
+	/**
 	 *  List of preg* regular expression patterns to search for,
 	 *  used in conjunction with $plain_replace.
 	 *  https://raw.github.com/ushahidi/wp-silcc/master/class.html2text.inc
