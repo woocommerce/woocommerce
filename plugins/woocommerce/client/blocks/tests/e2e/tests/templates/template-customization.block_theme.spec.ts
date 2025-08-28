@@ -27,6 +27,7 @@ test.describe( 'Template customization', () => {
 			editor,
 			page,
 			requestUtils,
+			wpCoreVersion,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
@@ -38,8 +39,16 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
+
+			// Cart template behaves differently in WP 6.8 and requires special handling.
+			// For every other template, we use true.
+			const isOnlyCurrentEntityDirty =
+				testData.templateName === 'Page: Cart' && wpCoreVersion <= 6.8
+					? false
+					: true;
+
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+				isOnlyCurrentEntityDirty,
 			} );
 
 			// Verify template name didn't change.
@@ -146,6 +155,7 @@ test.describe( 'Template customization', () => {
 			editor,
 			requestUtils,
 			frontendUtils,
+			wpCoreVersion,
 		} ) => {
 			// Edit the WooCommerce default template
 			await admin.visitSiteEditor( {
@@ -177,8 +187,16 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
+
+			// Cart template behaves differently in WP 6.8 and requires special handling.
+			// For every other template, we use true.
+			const isOnlyCurrentEntityDirty =
+				testData.templateName === 'Page: Cart' && wpCoreVersion <= 6.8
+					? false
+					: true;
+
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+				isOnlyCurrentEntityDirty,
 			} );
 
 			// Verify the template is the one modified by the user based on the theme.
