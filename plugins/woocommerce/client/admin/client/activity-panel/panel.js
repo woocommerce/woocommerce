@@ -26,12 +26,32 @@ export const Panel = ( {
 	const containerRef = useRef( null );
 
 	const handleFocusOutside = ( event ) => {
+		console.log('handleFocusOutside called:', {
+			event: event.type,
+			target: event.target,
+			relatedTarget: event.relatedTarget,
+			isPanelOpen
+		});
+
+		// Check if there are any Stripe notification banner components rendered.
+		const hasStripeComponents = document.querySelector( '.stripe-notifications-banner-wrapper' ) ||
+			document.querySelector( '.woocommerce-embedded-connect-notification-banner' );
+		
+		if ( hasStripeComponents ) {
+			// If Stripe components are present, don't close on blur events
+			// as they use iframes which cause blur but shouldn't close the panel.
+			return;
+		}
+
+		// Check both event.relatedTarget and event.target for better coverage.
+		const targetElement = event.relatedTarget || event.target;
 		const isClickOnModalOrSnackbar =
-			event.relatedTarget &&
-			( event.relatedTarget.closest(
-				'.woocommerce-inbox-dismiss-confirmation_modal'
-			) ||
-				event.relatedTarget.closest( '.components-snackbar__action' ) );
+			targetElement &&
+			( targetElement.closest &&
+				( targetElement.closest(
+					'.woocommerce-inbox-dismiss-confirmation_modal'
+				) ||
+					targetElement.closest( '.components-snackbar__action' ) ) );
 
 		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
 			closePanel();
