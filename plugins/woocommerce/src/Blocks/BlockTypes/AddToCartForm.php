@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * CatalogSorting class.
@@ -119,7 +120,7 @@ class AddToCartForm extends AbstractBlock {
 	 */
 	private function has_all_attributes_set( $product ) {
 		// If it's not a variation product, return true.
-		if ( ! $product->is_type( 'variation' ) ) {
+		if ( ! $product->is_type( ProductType::VARIATION ) ) {
 			return true;
 		}
 
@@ -168,7 +169,7 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		// Check if all attributes are set for variation product.
-		if ( $product->is_type( 'variation' ) && ! $this->has_all_attributes_set( $product ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) && ! $this->has_all_attributes_set( $product ) ) {
 			$product = $previous_product;
 
 			return '';

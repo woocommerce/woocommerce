@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductButton class.
@@ -154,7 +155,7 @@ class ProductButton extends AbstractBlock {
 			'hasPressedButton' => false,
 		);
 
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$context['groupedProductIds'] = $product->get_children();
 		}
 
@@ -325,7 +326,7 @@ class ProductButton extends AbstractBlock {
 	 * @return boolean The product is purchasable.
 	 */
 	private function is_product_purchasable( $product ) {
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$grouped_product_ids = $product->get_children();
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
@@ -350,7 +351,7 @@ class ProductButton extends AbstractBlock {
 	 * @return string The inTheCartText string.
 	 */
 	private function get_in_the_cart_text( $product ) {
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			return __( 'Added to cart', 'woocommerce' );
 		}
 
