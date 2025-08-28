@@ -85,27 +85,9 @@ class Universal {
 			$data = WC()->session->get( 'wca_session_data' );
 			if ( ! empty( $data ) ) {
 				foreach ( $data as $data_instance ) {
-					$event_props = array(
-						'pq' => $data_instance['quantity'] ?? null,
-					);
-
-					// Attach the session ID, engagement status and landing_page to this event in case it's saved in the Data Instance.
-					// Otherwise, keep it unset to allow override.
-					if ( isset( $data_instance['session_id'] ) && $data_instance['session_id'] ) {
-						$event_props['session_id'] = $data_instance['session_id'];
-					}
-
-					if ( isset( $data_instance['is_engaged'] ) && $data_instance['is_engaged'] ) {
-						$event_props['is_engaged'] = $data_instance['is_engaged'];
-					}
-
-					if ( isset( $data_instance['landing_page'] ) && $data_instance['landing_page'] ) {
-						$event_props['landing_page'] = $data_instance['landing_page'];
-					}
-
 					$this->record_event(
 						$data_instance['event'],
-						$event_props,
+						$data_instance['properties'] ?? array(),
 						$data_instance['product_id']
 					);
 				}
@@ -493,7 +475,7 @@ class Universal {
 
 		$event_properties = array_merge(
 			array(
-				'quantity'     => (string) $quantity,
+				'pq'           => isset( $quantity ) ? (string) $quantity : null,
 				'session_id'   => $this->get_session_id(),
 				'landing_page' => $this->get_landing_page(),
 				'is_engaged'   => $this->is_engaged_session(),
