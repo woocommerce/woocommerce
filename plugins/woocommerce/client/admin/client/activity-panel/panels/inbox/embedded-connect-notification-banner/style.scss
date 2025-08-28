@@ -1,0 +1,58 @@
+.woocommerce-embedded-connect-notification-banner {
+	&.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 20px;
+		gap: 12px;
+		
+		p {
+			margin: 0;
+			color: #50575e;
+			font-size: 13px;
+		}
+	}
+
+	&.error {
+		padding: 16px;
+		background-color: #fcf0f1;
+		border: 1px solid #cc1818;
+		border-radius: 2px;
+		
+		p {
+			margin: 0;
+			color: #8a2424;
+			font-size: 13px;
+		}
+	}
+
+	.stripe-component-loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 20px;
+		gap: 12px;
+		
+		p {
+			margin: 0;
+			color: #50575e;
+			font-size: 13px;
+		}
+	}
+}
+
+// Stripe spinner animation
+.stripe-spinner {
+	animation: stripe-spin 1s linear infinite;
+}
+
+@keyframes stripe-spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
