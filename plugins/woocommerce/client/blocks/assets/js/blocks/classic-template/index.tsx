@@ -22,6 +22,7 @@ import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -186,9 +187,10 @@ const Edit = ( {
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
 	const blockProps = useBlockProps();
-	const { editedPostId } = useSelect( ( sel ) => {
+	const { currentPostId } = useSelect( ( sel ) => {
 		return {
-			editedPostId: sel( 'core/edit-site' ).getEditedPostId(),
+			// @ts-expect-error getCurrentPostId is not typed
+			currentPostId: sel( editorStore ).getCurrentPostId(),
 		};
 	}, [] );
 
@@ -198,7 +200,7 @@ const Edit = ( {
 			rendered?: string;
 			row: string;
 		};
-	} >( 'postType', 'wp_template', editedPostId );
+	} >( 'postType', 'wp_template', currentPostId );
 
 	const templateDetails = getTemplateDetailsBySlug(
 		attributes.template,
