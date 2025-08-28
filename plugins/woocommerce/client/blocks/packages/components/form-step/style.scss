@@ -125,6 +125,11 @@
 			}
 		}
 
+		.wc-block-components-checkout-step__description,
+		.wc-block-components-checkout-step__content {
+			position: relative;
+		}
+
 		.wc-block-components-checkout-step__description::before,
 		.wc-block-components-checkout-step__content::before {
 			content: "";
