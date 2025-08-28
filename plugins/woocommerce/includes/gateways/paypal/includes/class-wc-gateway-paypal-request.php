@@ -150,7 +150,7 @@ class WC_Gateway_Paypal_Request {
 			$response_data = json_decode( $body, true );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
-				$paypal_debug_id = isset( $response_data['data']['debug_id'] ) ? $response_data['data']['debug_id'] : null;
+				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
