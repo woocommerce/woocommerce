@@ -438,13 +438,4 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		$pattern_get_class = '/(?<=class=\"|\')[^"|\']+(?=\"|\')/';
 		return preg_replace( $pattern_get_class, '$0 ' . $align_class_and_style['class'], $content, 1 );
 	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 }
