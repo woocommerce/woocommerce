@@ -265,6 +265,7 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return void
+	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
 		if ( ! $order || ! $order->get_transaction_id() ) {
