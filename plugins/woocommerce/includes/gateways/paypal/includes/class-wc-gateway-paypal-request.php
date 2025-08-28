@@ -228,8 +228,8 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
-			$http_code = wp_remote_retrieve_response_code( $response );
-			$body      = wp_remote_retrieve_body( $response );
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
@@ -289,8 +289,7 @@ class WC_Gateway_Paypal_Request {
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				WC_Gateway_Paypal::log( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
-				return;
+				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -299,7 +298,7 @@ class WC_Gateway_Paypal_Request {
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				WC_Gateway_Paypal::log( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
 			// set custom status for successful capture response.
@@ -308,7 +307,7 @@ class WC_Gateway_Paypal_Request {
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			$note_message = sprintf(
-				__( 'PayPal capture payment failed', 'woocommerce' ),
+				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
 			);
 			if ( $paypal_debug_id ) {
 				$note_message .= sprintf(
