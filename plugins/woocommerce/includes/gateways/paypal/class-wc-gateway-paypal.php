@@ -157,6 +157,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
@@ -638,6 +639,33 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
 		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
+	}
+
+	/**
+	 * Enqueue scripts.
+	 */
+	public function enqueue_scripts() {
+		if ( 'no' === $this->enabled ) {
+			return;
+		}
+
+		if ( ! is_checkout() ) {
+			return;
+		}
+
+		$version  = Constants::get_constant( 'WC_VERSION' );
+
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', [ 'jquery' ], $version, true );
+
+		wp_localize_script( 'wc-paypal-frontend', 'paypal_standard', [
+			'gateway_id'           => $this->id,
+			'ajax_url'             => admin_url( 'admin-ajax.php' ),
+			'wc_ajax_url'          => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+			'create_order_nonce'   => wp_create_nonce( 'ppjs_checkout' ),
+			'capture_order_nonce'  => wp_create_nonce( 'ppjs_checkout' ),
+		]);
+
+		wp_enqueue_script( 'wc-paypal-frontend' );
 	}
 
 	/**
