@@ -894,11 +894,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 add_action(
 	'init',
 	function () {
-		if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
-			return;
+		if ( is_admin() || ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+			new WC_Gateway_Paypal_Notices();
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-ajax-handler.php';
+		new WC_Gateway_Paypal_Ajax_Handler();
 	}
 );
