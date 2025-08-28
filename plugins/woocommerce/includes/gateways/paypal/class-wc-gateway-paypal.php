@@ -63,6 +63,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public $debug;
 
 	/**
+	 * The intent of the payment (capture or authorize).
+	 *
+	 * @var string
+	 */
+	public $intent;
+
+	/**
 	 * Email address to send payments to.
 	 *
 	 * @var string
@@ -139,6 +146,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->title                        = $this->get_option( 'title' );
 		$this->description                  = $this->get_option( 'description' );
 		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->intent                       = 'sale' === $this->get_option( 'paymentaction', 'sale' ) ? 'capture' : 'authorize';
 		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
 		$this->email                        = $this->get_option( 'email' );
 		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
@@ -649,11 +657,35 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		if ( ! is_checkout() ) {
+		$version   = Constants::get_constant( 'WC_VERSION' );
+		$page_type = is_checkout() ? 'checkout' : ( is_cart() ? 'cart' : null );
+		$client_id = get_option( 'paypal_client_id' );
+
+		if ( ! $client_id || ! $page_type ) {
 			return;
 		}
 
-		$version  = Constants::get_constant( 'WC_VERSION' );
+		// Load PayPal JS SDK dynamically with params.
+		$query = [
+			'client-id'       => $client_id,
+			'intent'          => $this->intent,
+			'buyer-country'   => 'US',
+			'locale'          => get_locale(),
+			'merchant-id'     => $this->email,
+			'components'      => 'buttons,funding-eligibility,messages',
+			'disable-funding' => 'card,applepay',
+			'enable-funding'  => 'venmo,paylater',
+			'currency'        => get_woocommerce_currency(),
+		];
+
+		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+		
+		// Add PayPal JS SDK script.
+		wp_register_script( 'paypal-sdk', add_query_arg( $query, $sdk_host ), [], null, false );
+		wp_enqueue_script( 'paypal-sdk' );
+
+		wp_script_add_data( 'paypal-sdk', 'data-page-type', $page_type );
+		wp_script_add_data( 'paypal-sdk', 'data-partner-attribution-id', 'Woo_Cart_CoreUpgrade' );
 
 		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', [ 'jquery' ], $version, true );
 
@@ -661,8 +693,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'gateway_id'           => $this->id,
 			'ajax_url'             => admin_url( 'admin-ajax.php' ),
 			'wc_ajax_url'          => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'create_order_nonce'   => wp_create_nonce( 'ppjs_checkout' ),
-			'capture_order_nonce'  => wp_create_nonce( 'ppjs_checkout' ),
+			'create_order_nonce'   => wp_create_nonce( 'create_order' ),
+			'capture_order_nonce'  => wp_create_nonce( 'capture_order' ),
 		]);
 
 		wp_enqueue_script( 'wc-paypal-frontend' );
