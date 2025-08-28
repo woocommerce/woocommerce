@@ -39,8 +39,7 @@ test.describe( 'Template customization', () => {
 				attributes: { content: userText },
 			} );
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty:
-					testData.templateName === 'Page: Cart' ? false : true,
+				isOnlyCurrentEntityDirty: true,
 			} );
 
 			// Verify template name didn't change.
@@ -179,8 +178,7 @@ test.describe( 'Template customization', () => {
 				attributes: { content: userText },
 			} );
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty:
-					testData.templateName === 'Page: Cart' ? false : true,
+				isOnlyCurrentEntityDirty: true,
 			} );
 
 			// Verify the template is the one modified by the user based on the theme.
