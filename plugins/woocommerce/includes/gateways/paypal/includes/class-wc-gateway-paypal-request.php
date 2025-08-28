@@ -188,6 +188,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	public function authorize_or_capture_payment( $order, $action_url, $action = 'capture' ) {
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		$paypal_debug_id = null;
 		if ( ! $paypal_order_id ) {
 			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
 			return;
@@ -229,20 +230,31 @@ class WC_Gateway_Paypal_Request {
 
 			$http_code = wp_remote_retrieve_response_code( $response );
 			$body      = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
+				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
-			$order->add_order_note(
-				sprintf(
-					/* translators: %1$s: Action, %2$s: PayPal order ID */
-					__( 'PayPal %1$s payment failed. PayPal Order ID: %2$s', 'woocommerce' ),
-					$action,
-					$paypal_order_id
-				)
+			$note_message = sprintf(
+				/* translators: %1$s: Action, %2$s: PayPal order ID */
+				__( 'PayPal %1$s payment failed. PayPal Order ID: %2$s', 'woocommerce' ),
+				$action,
+				$paypal_order_id
 			);
+
+			// Add debug ID to the note if available.
+			if ( $paypal_debug_id ) {
+				$note_message .= sprintf(
+					/* translators: %s: PayPal debug ID */
+					__( '. PayPal debug ID: %s', 'woocommerce' ),
+					$paypal_debug_id
+				);
+			}
+
+			$order->add_order_note( $note_message );
 			$order->update_status( OrderStatus::FAILED );
 			$order->save();
 		}
