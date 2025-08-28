@@ -38,7 +38,10 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty:
+					testData.templateName === 'Page: Cart' ? false : true,
+			} );
 
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
@@ -157,7 +160,8 @@ test.describe( 'Template customization', () => {
 				attributes: { content: woocommerceTemplateUserText },
 			} );
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+				isOnlyCurrentEntityDirty:
+					testData.templateName === 'Page: Cart' ? false : true,
 			} );
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
@@ -175,7 +179,10 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty:
+					testData.templateName === 'Page: Cart' ? false : true,
+			} );
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( {
