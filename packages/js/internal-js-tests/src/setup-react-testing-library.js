@@ -21,3 +21,9 @@ const consoleErrorSpy = jest
 		// Otherwise, call the original console.error
 		consoleErrorSpy.mock.calls.push( [ message, ...args ] );
 	} );
+
+const consoleWarnSpy = jest
+	.spyOn( console, 'info' )
+	.mockImplementation( ( message, ...args ) => {
+		return;
+	} );

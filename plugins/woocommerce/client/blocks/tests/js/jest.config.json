@@ -57,7 +57,7 @@
 		"<rootDir>/docs/",
 		"<rootDir>/node_modules/",
 		"<rootDir>/vendor/",
-		"<rootDir>/tests/"
+		"<rootDir>/tests/e2e/"
 	],
 	"roots": [ "<rootDir>", "<rootDir>/../legacy/js" ],
 	"resolver": "<rootDir>/tests/js/scripts/resolver.js",

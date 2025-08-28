@@ -378,6 +378,7 @@ export const registerProductBlockType = < T extends BlockAttributes >(
 	blockNameOrMetadata: string | Partial< BlockConfiguration< T > >,
 	settings?: ProductBlockRegistrationConfig< BlockConfiguration< T > >
 ): void => {
+	console.log( 'Ci entro' );
 	const blockName =
 		typeof blockNameOrMetadata === 'string'
 			? blockNameOrMetadata
