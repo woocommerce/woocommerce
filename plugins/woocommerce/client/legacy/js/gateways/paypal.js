@@ -1,38 +1,13 @@
 jQuery(function ($) {
-	// PayPal JS SDK script
-	// eslint-disable-next-line max-len
-	var PAYPAL_SCRIPT = 'https://www.sandbox.paypal.com/sdk/js?client-id=' + paypal_standard.client_id + '&currency=USD&intent=capture&buyer-country=US&locale=en_US&merchant-id=sb-reivw44753332@business.example.com';
-	var script = document.createElement('script');
-	script.setAttribute('src', PAYPAL_SCRIPT);
-	script.setAttribute('data-page-type', 'checkout')
-	document.head.appendChild(script);
+	const containerSelector = 'paypal-standard-container';
 
-	// Check if the container exists
-	const container = document.getElementById('paypal-standard-container');
-	if ( !container ) {
-		return;
-	}
+	function renderButtons() {
+		const container = document.getElementById( containerSelector );
+		if ( ! container ) {
+			return;
+		}
 
-	// Wait for PayPal SDK to be loaded.
-	function waitForPayPal() {
-		return new Promise((resolve) => {
-			if ( typeof paypal !== 'undefined' ) {
-				resolve();
-				return;
-			} 
-
-			const checkPayPal = setInterval(() => {
-				if ( typeof paypal !== 'undefined' ) {
-					clearInterval(checkPayPal);
-					resolve();
-				}
-			}, 5000);
-		});
-	}
-
-	waitForPayPal().then(() => {
-
-		paypal.Buttons({
+		const buttons = paypal.Buttons( {
 			style: {
 				layout: 'vertical',
 				color: 'gold',
@@ -44,27 +19,43 @@ jQuery(function ($) {
 				// TODO: Add createOrder logic here
 			},
 
-			async onApprove(data) {
+			async onApprove( data ) {
 				// TODO: Add onApprove logic here
 			},
 
-			onError: function (err) {
+			onError: function ( err ) {
 				// TODO: Add onError logic here
 				console.error( 'PayPal error:', err );
 			},
 
-			onCancel(data) {
+			onCancel( data ) {
 				// TODO: Add onCancel logic here
+			},
+
+			onInit( data, actions ) {
+				// TODO: Add onInit logic here
 			},
 
 			onClick() {
 				// TODO: Add onClick logic here
 			},
 
-		}).render('#paypal-standard-container')
-			.catch(function (error) {
-				console.error( 'Error rendering PayPal button:', error );
-			});
-	});
+		});
 
+
+		buttons.render( container ).catch( function ( err ) {
+			console.error( 'Failed to render PayPal buttons', err );
+		});
+	}
+
+	// Re-render when WooCommerce updates the checkout.
+	$( document.body ).on( 'updated_checkout payment_method_selected', function () {
+		// If the container was replaced, re-render PayPal buttons
+		const buttonsContainer = document.getElementById( containerSelector );
+		if ( buttonsContainer && ! buttonsContainer.querySelector( 'iframe' ) ) {
+			renderButtons();
+		}
+	} );
+
+	renderButtons();
 });
