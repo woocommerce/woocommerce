@@ -669,6 +669,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Builds the PayPal payment fields area.
+	 *
+	 * @since 10.3.0
+	 */
+	public function payment_fields() {
+		echo '<div id="paypal-standard-container"></div>';
+	}
+
+	/**
 	 * Custom PayPal order received text.
 	 *
 	 * @since 3.9.0
