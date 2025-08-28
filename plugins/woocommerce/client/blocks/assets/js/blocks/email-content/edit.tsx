@@ -2,13 +2,20 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import ServerSideRender from '@wordpress/server-side-render';
+import { useBlockProps } from '@wordpress/block-editor';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { store as editorStore } from '@wordpress/editor';
+
+/**
+ * Internal dependencies
+ */
+import metadata from './block.json';
 
 declare global {
 	interface Window {
@@ -18,7 +25,6 @@ declare global {
 				value: string;
 				id: string;
 			} >;
-			block_preview_url?: string;
 		};
 	}
 }
@@ -42,101 +48,57 @@ function HoverContent() {
 	);
 }
 
-const updateIFrameBackgroundColor = (
-	iframeRef: React.RefObject< HTMLIFrameElement >,
-	isHovered: boolean
-) => {
-	if ( iframeRef?.current?.contentWindow?.document.body ) {
-		iframeRef.current.contentWindow.document.body.style.overflow = 'hidden';
-		iframeRef.current.contentWindow.document.body.style.pointerEvents =
-			'none';
-		iframeRef.current.contentWindow.document.body.style.backgroundColor =
-			isHovered
-				? '#00000059'
-				: iframeRef.current.contentWindow?.document?.bgColor;
-	}
-};
-
 const getEmailType = ( value: string ) => {
 	return window.WooCommerceEmailEditor?.email_types?.find(
 		( emailType ) => emailType.value === value
 	)?.id;
 };
 
-const updateiFrameSource = (
-	iframeRef: React.RefObject< HTMLIFrameElement >,
-	url: string
-) => {
-	// Update iframe src using replace to avoid polluting browser history
-	iframeRef?.current?.contentWindow?.location.replace( url );
-};
-
 const DEFAULT_EMAIL_TYPE = 'WC_Email_Customer_Processing_Order';
 
 export default function Edit() {
+	const [ isHovered, setIsHovered ] = useState( false );
+	const blockProps = useBlockProps();
 	const { postSlug } = useSelect(
 		( select ) => ( {
 			postSlug: select( editorStore ).getCurrentPost?.()?.slug,
 		} ),
 		[]
 	);
-
-	const iframeRef = useRef< HTMLIFrameElement | null >( null );
-	const [ isHovered, setIsHovered ] = useState( false );
-
-	const previewUrlBase = window.WooCommerceEmailEditor?.block_preview_url;
-
-	useEffect( () => {
-		if ( ! postSlug ) {
-			return;
-		}
-
-		// current email type
-		const currentEmailType = getEmailType( postSlug || '' );
-		if ( currentEmailType && iframeRef.current ) {
-			updateiFrameSource(
-				iframeRef,
-				`${ previewUrlBase }&type=${ currentEmailType }`
-			);
-		}
-	}, [ postSlug, iframeRef, previewUrlBase ] );
+	const emailType = getEmailType( postSlug || '' ) || DEFAULT_EMAIL_TYPE;
 
 	return (
 		<div
+			{ ...blockProps }
+			onMouseEnter={ () => {
+				setIsHovered( true );
+			} }
+			onMouseLeave={ () => {
+				setIsHovered( false );
+			} }
 			style={ {
 				position: 'relative',
 			} }
 		>
-			<iframe
-				style={ {
-					width: '100%',
-					height:
-						iframeRef?.current?.contentWindow?.document?.body
-							?.clientHeight || '750px',
-					backgroundColor: 'initial',
-					minHeight: '100px',
-				} }
-				ref={ iframeRef }
-				src={ `${ previewUrlBase }&type=${ DEFAULT_EMAIL_TYPE }` }
-				title={ __( 'Email preview frame', 'woocommerce' ) }
-				onMouseEnter={ () => {
-					setIsHovered( true );
-					updateIFrameBackgroundColor( iframeRef, true );
-				} }
-				onMouseLeave={ () => {
-					setIsHovered( false );
-					updateIFrameBackgroundColor( iframeRef, false );
-				} }
-			/>
+			<ServerSideRender
+				block={ metadata.name }
+				attributes={ { emailType } }
+			></ServerSideRender>
+
 			{ isHovered && (
 				<div
 					style={ {
 						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
 						zIndex: 1000,
-						pointerEvents: 'none', // This ensures hover events pass through to the iframe
+						left: 0,
+						top: 0,
+						width: '100%',
+						height: '100%',
+						background: 'rgba(0,0,0,0.5)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						pointerEvents: 'none', // This ensures hover events pass through to ServerSideRender elements
 					} }
 				>
 					<HoverContent />

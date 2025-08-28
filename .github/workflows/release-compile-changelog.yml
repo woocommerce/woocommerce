@@ -6,10 +6,14 @@ on:
         description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
         required: true
       append_changelog:
-        description: 'Append changelog entries to the existing changelog file instead of replacing it.'
-        type: boolean
+        description: 'Append or replace entries in changelog?'
+        type: choice
+        options:
+          - auto
+          - replace
+          - append
         required: false
-        default: false
+        default: auto
       release_date:
         description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
         required: false
@@ -166,15 +170,24 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "Generating changelog for version: $VERSION"
 
-          # Normalize version for use with changelog command.
-          VERSION=$(echo "$VERSION" | grep -oP '\d+\.\d+\.\d+')
-
-          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
-            VERSION=${VERSION%.0}
-          fi
-
+          # Determine whether to replace or append.
           APPEND_CHANGELOG=""
-          if [[ "${{ github.event.inputs.append_changelog }}" == "true" ]]; then
+
+          # append_changelog: auto.
+          if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
+            # If a prerelease, append if there's already content in the changelog.
+            if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
+              git checkout ${SELECTED_BRANCH}
+
+              if sed -n '/== Changelog ==/,$p' plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+                APPEND_CHANGELOG="--append-changelog"
+              fi
+
+              # Go back to trunk to run the tools.
+              git checkout trunk
+            fi
+          elif [[ "${{ github.event.inputs.append_changelog }}" == "append" ]]; then
+            # append_changelog: append.
             APPEND_CHANGELOG="--append-changelog"
           fi
 

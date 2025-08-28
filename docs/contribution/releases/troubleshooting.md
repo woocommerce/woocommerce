@@ -15,7 +15,7 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 1. **Open the workflow run details** in GitHub (under the **Actions** tab) to see exactly where and why the failure occurred. Most of the time, the workflow will display a clear error message.
 2. **Read the error message carefully.** Sometimes the problem is as simple as a missing workflow configuration or skipped step.
-3. **If you're unsure what the error means or how to proceed,** don't hesitate to ask for help in Slack. It's better to get a second opinion than to guess.
+3. **If you're unsure what the error means or how to proceed,** don't hesitate to ask for help in the release Slack channel. It's better to get a second opinion than to guess.
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
@@ -76,7 +76,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 
-### Release needs to be delayed. What to do? {#release-delay}
+### The release needs to be delayed. What should we do? {#release-delay}
 
 1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
 2. Ask Dev Advocacy to communicate the delay publicly.
@@ -84,7 +84,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
 
 Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
 
-### Release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
+### The release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 
