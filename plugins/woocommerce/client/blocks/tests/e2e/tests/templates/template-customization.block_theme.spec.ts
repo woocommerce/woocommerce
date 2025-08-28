@@ -160,8 +160,7 @@ test.describe( 'Template customization', () => {
 				attributes: { content: woocommerceTemplateUserText },
 			} );
 			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty:
-					testData.templateName === 'Page: Cart' ? false : true,
+				isOnlyCurrentEntityDirty: true,
 			} );
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
