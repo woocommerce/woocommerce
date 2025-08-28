@@ -33,17 +33,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
-			setQuantity( value: number ) {
-				const context =
-					getContext< AddToCartWithOptionsStoreContext >();
-
-				const id = context.childProductId;
-
-				context.quantity = {
-					...context.quantity,
-					[ id ]: value,
-				};
-			},
 			*addToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.

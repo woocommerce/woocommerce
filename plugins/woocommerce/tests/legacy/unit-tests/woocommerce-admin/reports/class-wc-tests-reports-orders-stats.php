@@ -82,7 +82,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'orders_count'        => 1,
 				'num_items_sold'      => 4,
 				'avg_items_per_order' => 4,
-				'avg_order_value'     => 68,
+				'avg_order_value'     => 80,
 				'total_sales'         => 85,
 				'gross_sales'         => 100,
 				'coupons'             => 20,
@@ -114,7 +114,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'orders_count'        => 1,
 						'num_items_sold'      => 4,
 						'avg_items_per_order' => 4,
-						'avg_order_value'     => 68,
+						'avg_order_value'     => 80,
 						'total_customers'     => 1,
 						'segments'            => array(),
 					),
@@ -133,14 +133,14 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'net_revenue'         => 68,
-				'avg_order_value'     => 68,
+				'avg_order_value'     => 80,
 				'orders_count'        => 1,
 				'avg_items_per_order' => 4,
 				'num_items_sold'      => 4,
 				'coupons'             => 20,
 				'coupons_count'       => 1,
 				'total_customers'     => 1,
-				'products'            => '1',
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -152,7 +152,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'date_end_gmt'   => $end_time,
 					'subtotals'      => array(
 						'net_revenue'         => 68,
-						'avg_order_value'     => 68,
+						'avg_order_value'     => 80,
 						'orders_count'        => 1,
 						'avg_items_per_order' => 4,
 						'num_items_sold'      => 4,
@@ -226,9 +226,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 2,
-				'num_items_sold'      => 8,
+				'num_items_sold'      => 4, // 4 items sold in completed order, non in failed and refunded.
 				'avg_items_per_order' => 4,
-				'avg_order_value'     => 50,
+				'avg_order_value'     => 75,
 				'total_sales'         => 100,
 				'gross_sales'         => 150,
 				'coupons'             => 0,
@@ -258,9 +258,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 50,
 						'orders_count'        => 2,
-						'num_items_sold'      => 8,
+						'num_items_sold'      => 4,
 						'avg_items_per_order' => 4,
-						'avg_order_value'     => 50,
+						'avg_order_value'     => 75,
 						'total_customers'     => 1,
 						'segments'            => array(),
 					),
@@ -372,12 +372,22 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		}
 
 		// Add a partial refund on the last order.
-		$refund = wc_create_refund(
-			array(
-				'amount'   => 10,
-				'order_id' => $order->get_id(),
-			)
-		);
+		foreach ( $order->get_items() as  $item_key => $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -396,7 +406,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 0,
-				'num_items_sold'      => 0,
+				'num_items_sold'      => -4,
 				'avg_items_per_order' => 0,
 				'avg_order_value'     => 0,
 				'total_sales'         => -60,
@@ -408,7 +418,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -60,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -428,7 +438,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 60,
 						'orders_count'        => 0,
-						'num_items_sold'      => 0,
+						'num_items_sold'      => -4,
 						'avg_items_per_order' => 0,
 						'avg_order_value'     => 0,
 						'total_customers'     => 1,
@@ -522,7 +532,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -10,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -567,7 +577,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 0,
-				'num_items_sold'      => 0,
+				'num_items_sold'      => -4,
 				'avg_items_per_order' => 0,
 				'avg_order_value'     => 0,
 				'total_sales'         => -50,
@@ -579,7 +589,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -50,       // @todo - does this value make sense?
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -599,7 +609,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 50,
 						'orders_count'        => 0,
-						'num_items_sold'      => 0,
+						'num_items_sold'      => -4,
 						'avg_items_per_order' => 0,
 						'avg_order_value'     => 0,
 						'total_customers'     => 1,

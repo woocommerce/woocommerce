@@ -27,7 +27,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	name: string;
 	type: string;
 	updateOptimistically?: boolean;
 };
@@ -95,6 +94,11 @@ type BatchResponse = {
 	responses: ApiResponse< Cart >[];
 };
 
+// Guard to distinguish between optimistic and cart items.
+function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
+	return 'name' in item;
+}
+
 function isApiErrorResponse(
 	res: Response,
 	json: unknown
@@ -137,11 +141,15 @@ const getInfoNoticesFromCartUpdates = (
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
 			old.key &&
+			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key ) &&
 			! pendingDelete.includes( old.key )
 	);
 
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		if ( ! isCartItem( item ) ) {
+			return false;
+		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
 		return old
 			? ! pendingQuantity.includes( item.key ) &&
