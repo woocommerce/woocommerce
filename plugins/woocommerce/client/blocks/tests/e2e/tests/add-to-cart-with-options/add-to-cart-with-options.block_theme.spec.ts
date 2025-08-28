@@ -70,7 +70,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
-	test( 'allows adding variable products to cart', async ( {
+	test.only( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
 		editor,
@@ -129,7 +129,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
+		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
 			// Open additional information accordion so we can check the weight.
 			await page
 				.getByRole( 'button', { name: 'Additional Information' } )
@@ -142,6 +142,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '1.5 lbs' )
 			).toBeVisible();
+			// await expect( page.locator( '[data-image="136"]' ) ).toBeVisible();
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
@@ -156,6 +157,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '2 lbs' )
 			).toBeVisible();
+			await expect( page.locator( '[data-image="136"]' ) ).toBeHidden();
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {

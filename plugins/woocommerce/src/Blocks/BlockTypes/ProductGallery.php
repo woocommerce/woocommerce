@@ -157,7 +157,39 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				foreach ( $variations_data as $variation ) {
+					if (
+						empty( $variation['variation_id'] )
+						|| ! array_key_exists( 'image_id', $variation )
+						|| '' === $variation['image_id']
+					) {
+						continue;
+					}
+					$formatted_variations_data[ $variation['variation_id'] ] = array(
+						'image_id' => (int) $variation['image_id'],
+					);
+				}
+
+				if ( count( $formatted_variations_data ) > 0 ) {
+					wp_interactivity_state(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'image_id'   => (int) $product->get_image_id(),
+									'variations' => $formatted_variations_data,
+								),
+							),
+						)
+					);
+
+					// Support legacy Add to Cart with Options block.
+					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+					// Support blockified Add to Cart + Options block.
+					$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
+				}
 			}
 
 			$p->add_class( $classname );
