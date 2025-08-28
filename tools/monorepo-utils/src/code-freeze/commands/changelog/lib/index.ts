@@ -27,9 +27,14 @@ const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 		)
 		.trim();
 
+	// Split changelogEntries into individual entries by detecting lines that start with "* "
+	// This preserves multiline changelog entries.
 	const newEntries = changelogEntries
-		.split( '\n' )
-		.filter( ( line ) => line.trim() );
+		.split( /\n(?=\* )/ )
+		.filter( ( entry ) => entry.trim() )
+		.map( ( entry ) => {
+			return entry.replace( /\s+/g, ' ' ).trim();
+		} );
 	let updatedReadme = readme;
 
 	newEntries.forEach( ( entry ) => {
