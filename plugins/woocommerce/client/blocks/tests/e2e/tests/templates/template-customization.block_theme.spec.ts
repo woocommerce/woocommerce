@@ -43,7 +43,7 @@ test.describe( 'Template customization', () => {
 			// Cart template behaves differently in WP 6.8 and requires special handling.
 			// For every other template, we use true.
 			const isOnlyCurrentEntityDirty =
-				testData.templateName === 'Page: Cart' && wpCoreVersion <= 6.8
+				testData.templateName === 'Page: Cart' && wpCoreVersion < 6.8
 					? false
 					: true;
 
@@ -191,7 +191,7 @@ test.describe( 'Template customization', () => {
 			// Cart template behaves differently in WP 6.8 and requires special handling.
 			// For every other template, we use true.
 			const isOnlyCurrentEntityDirty =
-				testData.templateName === 'Page: Cart' && wpCoreVersion <= 6.8
+				testData.templateName === 'Page: Cart' && wpCoreVersion < 6.8
 					? false
 					: true;
 
