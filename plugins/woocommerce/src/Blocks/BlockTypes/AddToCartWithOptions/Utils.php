@@ -55,34 +55,6 @@ class Utils {
 	}
 
 	/**
-	 * Get standardized quantity input arguments for WooCommerce quantity input.
-	 *
-	 * @param \WC_Product $product The product object.
-	 * @return array Arguments for woocommerce_quantity_input().
-	 */
-	public static function get_quantity_input_args( $product ) {
-		return array(
-			/**
-			 * Filter the minimum quantity value allowed for the product.
-			 *
-			 * @since 10.1.0
-			 * @param int        $min_value Minimum quantity value.
-			 * @param WC_Product $product   Product object.
-			 */
-			'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-			/**
-			 * Filter the maximum quantity value allowed for the product.
-			 *
-			 * @since 10.1.0
-			 * @param int        $max_value Maximum quantity value.
-			 * @param WC_Product $product   Product object.
-			 */
-			'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
-			'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		);
-	}
-
-	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
 	 *
 	 * @param string   $quantity_html The quantity HTML.
@@ -188,24 +160,26 @@ class Utils {
 	 * @return bool True if min and max purchase quantity are the same, false otherwise.
 	 */
 	public static function is_min_max_quantity_same( $product ) {
-		/**
-		 * Filter the minimum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $min_purchase_quantity The minimum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$min_purchase_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
-		/**
-		 * Filter the maximum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $max_purchase_quantity The maximum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		$min_purchase_quantity = $product->get_min_purchase_quantity();
+		$max_purchase_quantity = $product->get_max_purchase_quantity();
 		return $min_purchase_quantity === $max_purchase_quantity;
+	}
+
+	/**
+	 * Get the quantity constraints for a product.
+	 *
+	 * @param \WC_Product $product The product to get the quantity constraints for.
+	 * @return array The quantity constraints.
+	 */
+	public static function get_product_quantity_constraints( $product ) {
+		$min  = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
+		$max  = is_numeric( $product->get_max_purchase_quantity() ) ? $product->get_max_purchase_quantity() : -1;
+		$step = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
+
+		return array(
+			'min'  => $min,
+			'max'  => $max,
+			'step' => $step,
+		);
 	}
 }

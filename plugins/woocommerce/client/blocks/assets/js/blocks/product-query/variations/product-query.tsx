@@ -29,11 +29,12 @@ import {
 } from '../constants';
 
 const ARCHIVE_PRODUCT_TEMPLATES = [
-	'woocommerce/woocommerce//archive-product',
-	'woocommerce/woocommerce//taxonomy-product_cat',
-	'woocommerce/woocommerce//taxonomy-product_tag',
-	'woocommerce/woocommerce//taxonomy-product_attribute',
-	'woocommerce/woocommerce//product-search-results',
+	'//archive-product',
+	'//taxonomy-product_cat',
+	'//taxonomy-product_tag',
+	'//taxonomy-product_brand',
+	'//taxonomy-product_attribute',
+	'//product-search-results',
 ];
 
 const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
@@ -77,7 +78,9 @@ subscribe( () => {
 	}
 
 	if ( isSiteEditorPage( store ) ) {
-		const inherit = ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId );
+		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
+			currentTemplateId?.includes( template )
+		);
 
 		const inheritQuery: Partial< ProductQueryBlockQuery > = {
 			inherit,

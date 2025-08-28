@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix flaky test test_json_search_customers

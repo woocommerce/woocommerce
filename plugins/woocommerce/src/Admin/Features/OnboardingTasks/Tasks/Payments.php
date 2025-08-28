@@ -115,7 +115,12 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	public function is_in_progress() {
-		return $this->has_woopayments_test_account() && ! $this->is_complete();
+		// If the task is already complete, it's not in progress.
+		if ( $this->is_complete() ) {
+			return false;
+		}
+
+		return ( $this->has_woopayments_live_account_in_progress() || $this->has_woopayments_test_account() );
 	}
 
 	/**
@@ -124,6 +129,11 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function in_progress_label() {
+		// If WooPayments live account onboarding is in progress, show "Action needed" label.
+		if ( $this->has_woopayments_live_account_in_progress() ) {
+			return esc_html__( 'Action needed', 'woocommerce' );
+		}
+
 		return esc_html__( 'Test account', 'woocommerce' );
 	}
 
@@ -213,6 +223,35 @@ class Payments extends Task {
 
 		// Check the provider's state to determine if it is onboarded.
 		if ( ! empty( $woopayments_provider['onboarding']['state']['completed'] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if WooPayments has a live account onboarding in progress.
+	 *
+	 * @return bool
+	 */
+	private function has_woopayments_live_account_in_progress() {
+		if ( $this->is_woopayments_onboarded() ) {
+			return false;
+		}
+
+		$woopayments_provider = $this->get_woopayments_provider();
+		// We should have the WooPayments provider, but if not, return false.
+		if ( ! $woopayments_provider ) {
+			return false;
+		}
+
+		// If we have a test account, we are not in live account onboarding.
+		if ( $this->has_woopayments_test_account() ) {
+			return false;
+		}
+
+		// Check the provider's state to determine if a live account onboarding is started.
+		if ( ! empty( $woopayments_provider['onboarding']['state']['started'] ) ) {
 			return true;
 		}
 

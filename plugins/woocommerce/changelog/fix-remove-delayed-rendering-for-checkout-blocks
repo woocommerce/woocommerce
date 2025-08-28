@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert delayed initial rendering for checkout blocks

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show appender when the Add to Cart + Options have no inner blocks and make the Add to Cart Button count update when selecting an out-of-stock variation

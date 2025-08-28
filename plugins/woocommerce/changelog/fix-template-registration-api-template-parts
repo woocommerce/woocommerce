@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix template parts not being listed in the Site Editor after migrating to the Template registration API
+
+
