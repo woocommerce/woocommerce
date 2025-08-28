@@ -281,8 +281,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Ensures that the versions in `WC_Install::$db_update_callbacks` are correct.
-	 *
-	 * @since 10.3.0
 	 */
 	public function test_db_update_callbacks_versions(): void {
 		$callbacks = \WC_Install::get_db_update_callbacks();
