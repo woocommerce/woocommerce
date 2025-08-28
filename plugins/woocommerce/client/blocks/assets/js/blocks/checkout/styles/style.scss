@@ -138,19 +138,6 @@
 	}
 }
 
-.wp-block-woocommerce-checkout.is-loading.is-fading {
-	div.wp-block-woocommerce-checkout-totals-block,
-	div.wp-block-woocommerce-checkout-fields-block {
-		> div {
-			background-color: transparent;
-
-			&::after {
-				background: transparent;
-			}
-		}
-	}
-}
-
 // Skeleton is shown before mobile classes are appended.
 @media only screen and (max-width: 700px) {
 	.wp-block-woocommerce-checkout.is-loading {

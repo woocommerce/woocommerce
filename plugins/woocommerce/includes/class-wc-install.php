@@ -36,6 +36,11 @@ class WC_Install {
 	 * via dbDelta at both install and update time. If any other kind of database change is required
 	 * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
 	 *
+	 * IMPORTANT:
+	 * When adding new update callbacks after feature freeze, always use a unique version key with a suffix (e.g. `10.2.0-1`)
+	 * if the base version already exists in the array.
+	 * This ensures all users, including those on beta or RC versions, receive the update.
+	 *
 	 * @var array
 	 */
 	private static $db_updates = array(
@@ -294,6 +299,9 @@ class WC_Install {
 		'10.0.0' => array(
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
+		),
+		'10.2.0' => array(
+			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
 	);
 
@@ -684,11 +692,8 @@ class WC_Install {
 	 */
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
-		$updates            = self::get_db_update_callbacks();
-		$update_versions    = array_keys( $updates );
-		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, array_key_last( self::$db_updates ), '<' );
 	}
 
 	/**
@@ -775,11 +780,11 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$current_wc_version = WC()->version;
+		$updates            = self::get_db_update_callbacks();
 		$scheduled_time     = time();
 
 		wc_get_logger()->info(
-			sprintf( 'Scheduling database updates (from %s to %s)...', $current_db_version, $current_wc_version ),
+			sprintf( 'Scheduling database updates (from %s)...', $current_db_version ),
 			array( 'source' => 'wc-updater' )
 		);
 
@@ -804,36 +809,41 @@ class WC_Install {
 		}
 
 		$loop = 0;
-		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
-			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				foreach ( $update_callbacks as $update_callback ) {
-					WC()->queue()->schedule_single(
-						$scheduled_time + $loop,
-						'woocommerce_run_update_callback',
-						array(
-							'update_callback' => $update_callback,
-						),
-						'woocommerce-db-updates'
-					);
-					++$loop;
-				}
+		foreach ( $updates as $version => $update_callbacks ) {
+			if ( version_compare( $current_db_version, $version, '>=' ) ) {
+				continue;
+			}
+
+			foreach ( $update_callbacks as $update_callback ) {
+				WC()->queue()->schedule_single(
+					$scheduled_time + $loop,
+					'woocommerce_run_update_callback',
+					array(
+						'update_callback' => $update_callback,
+					),
+					'woocommerce-db-updates'
+				);
+				++$loop;
 
 				wc_get_logger()->info(
-					sprintf( '  Updates from version %s scheduled.', $version ),
+					sprintf( '  [%s] Scheduled \'%s\'.', $version, $update_callback ),
 					array( 'source' => 'wc-updater' )
 				);
 			}
 		}
 
-		// After the callbacks finish, update the db version to the current WC version.
+		// After the callbacks finish, update the db version to the current WC db version.
+		$wc_db_version = array_key_last( $updates );
+		$wc_db_version = version_compare( WC()->version, $wc_db_version, '>' ) ? WC()->version : $wc_db_version;
+
 		$success = true;
-		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
+		if ( version_compare( $current_db_version, $wc_db_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
 			$success = WC()->queue()->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
-					'version' => $current_wc_version,
+					'version' => $wc_db_version,
 				),
 				'woocommerce-db-updates'
 			) > 0;
@@ -860,7 +870,12 @@ class WC_Install {
 	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		update_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
+		if ( is_null( $version ) ) {
+			$last_db_version = array_key_last( self::$db_updates );
+			$version         = version_compare( WC()->version, $last_db_version, '>' ) ? WC()->version : $last_db_version;
+		}
+
+		update_option( 'woocommerce_db_version', $version );
 	}
 
 	/**
@@ -1548,6 +1563,12 @@ class WC_Install {
 			}
 		}
 
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_product_lookup';" ) ) {
+			if ( 2 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_product_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_product_lookup DROP PRIMARY KEY, ADD PRIMARY KEY (order_item_id, order_id)" );
+			}
+		}
+
 		/**
 		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
 		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
@@ -1889,7 +1910,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	tax_amount double DEFAULT 0 NOT NULL,
 	shipping_amount double DEFAULT 0 NOT NULL,
 	shipping_tax_amount double DEFAULT 0 NOT NULL,
-	PRIMARY KEY  (order_item_id),
+	PRIMARY KEY  (order_item_id, order_id),
 	KEY order_id (order_id),
 	KEY product_id (product_id),
 	KEY customer_id (customer_id),
@@ -2854,15 +2875,25 @@ EOT;
 <div class="wp-block-woocommerce-cart-line-items-block"></div>
 <!-- /wp:woocommerce/cart-line-items-block -->
 
-<!-- wp:woocommerce/cart-cross-sells-block -->
-<div class="wp-block-woocommerce-cart-cross-sells-block"><!-- wp:heading {"fontSize":"large"} -->
-<h2 class="wp-block-heading has-large-font-size">' . __( 'You may be interested in…', 'woocommerce' ) . '</h2>
+<!-- wp:woocommerce/product-collection {"query":{"queryId":0,"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":true,"previewMessage":"Actual products will vary depending on the page being viewed."}} -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
+<h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
+
 <!-- /wp:heading -->
 
-<!-- wp:woocommerce/cart-cross-sells-products-block -->
-<div class="wp-block-woocommerce-cart-cross-sells-products-block"></div>
-<!-- /wp:woocommerce/cart-cross-sells-products-block --></div>
-<!-- /wp:woocommerce/cart-cross-sells-block --></div>
+<!-- wp:woocommerce/product-template -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+<!-- /wp:woocommerce/product-image -->
+
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+
+<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection --></div>
+
 <!-- /wp:woocommerce/cart-items-block -->
 
 <!-- wp:woocommerce/cart-totals-block -->

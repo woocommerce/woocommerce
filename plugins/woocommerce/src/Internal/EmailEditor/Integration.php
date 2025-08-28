@@ -80,7 +80,6 @@ class Integration {
 	public function initialize() {
 		$this->init_logger();
 		$this->init_hooks();
-		$this->register_blocks();
 		$this->extend_post_api();
 		$this->extend_template_post_api();
 		$this->register_hooks();
@@ -123,14 +122,6 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
-	}
-
-	/**
-	 * Registers blocks for the integration.
-	 */
-	public function register_blocks(): void {
-		$woo_content = new WooContent();
-		$woo_content->register();
 	}
 
 	/**

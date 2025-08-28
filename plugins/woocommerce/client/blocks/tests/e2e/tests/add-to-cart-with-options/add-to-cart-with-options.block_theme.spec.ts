@@ -223,6 +223,22 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 		} );
+
+		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of Beanie'
+			);
+			await reduceQuantityButton.click();
+			await reduceQuantityButton.click();
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'Beanie',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '0' );
+
+			await expect( reduceQuantityButton ).toBeDisabled();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
@@ -356,15 +372,38 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( quantityInput ).toHaveValue( '4' );
 
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of T-Shirt'
-			);
-			await expect( reduceQuantityButton ).toBeDisabled();
 			await increaseQuantityButton.click();
 
 			await quantityInput.fill( '8' );
 
 			await expect( increaseQuantityButton ).toBeDisabled();
+
+			// Values can be decreased down to 0.
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '6' );
+
+			await quantityInput.fill( '5' );
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '0' );
+
+			await expect( reduceQuantityButton ).toBeDisabled();
+
+			// Make sure quantities below min are not allowed even when manually filled.
+			await quantityInput.fill( '3' );
+			await quantityInput.blur();
+
+			await expect( quantityInput ).toHaveValue( '0' );
 		} );
 	} );
 

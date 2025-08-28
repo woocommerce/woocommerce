@@ -22,7 +22,7 @@ import { getToday } from '../../get-version/lib';
 const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 	const changelogEntries = nextLog
 		.replace(
-			/^= \d+\.\d+\.\d+ \d{4}-\d{2}-\d{2} =\n\n\*\*WooCommerce\*\*\n\n/,
+			/^= \d+\.\d+\.\d+(-.*?)? \d{4}-\d{2}-\d{2} =\n\n\*\*WooCommerce\*\*\n\n/,
 			''
 		)
 		.trim();
@@ -55,7 +55,7 @@ const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 			// No existing entries of this type, insert at the end, before the "See changelog" link
 			updatedReadme = updatedReadme.replace(
 				/\n+(\[See changelog for all versions\])/,
-				`\n${ entry }\n\n$1`
+				`\n${ changelogEntries }\n\n\n$1`
 			);
 		}
 	} );
@@ -66,11 +66,13 @@ const appendSortedChangelog = ( nextLog: string, readme: string ): string => {
 /**
  * Perform changelog adjustments after Jetpack Changelogger has run.
  *
+ * @param {string}  version         The original plugin version in the branch.
  * @param {string}  override        Time override.
  * @param {boolean} appendChangelog Whether to append the changelog or replace it.
  * @param {string}  tmpRepoPath     Path where the temporary repo is cloned.
  */
 const updateReleaseChangelogs = async (
+	version: string,
 	override: string,
 	appendChangelog: boolean,
 	tmpRepoPath: string
@@ -96,7 +98,7 @@ const updateReleaseChangelogs = async (
 
 	nextLog = nextLog.replace(
 		/= (\d+\.\d+\.\d+) YYYY-mm-dd =/,
-		`= $1 ${ releaseDate } =`
+		`= ${ version } ${ releaseDate } =`
 	);
 
 	// Convert PR number to markdown link.
@@ -115,6 +117,11 @@ const updateReleaseChangelogs = async (
 		);
 	}
 
+	// Ensure there are exactly two empty lines between entries and 'See changelog for all versions'.
+	readme = readme
+		.trim()
+		.replace( /\n+(\[See changelog for all versions\])/, `\n\n\n$1` );
+
 	await writeFile( readmeFile, readme );
 };
 
@@ -132,6 +139,8 @@ export const updateReleaseBranchChangelogs = async (
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
 	const { owner, name, version, commitDirectToBase } = options;
+	const mainVersion = version.replace( /\.\d+(-.*)?$/, '' ); // For compatibility with Jetpack changelogger which expects X.Y as version.
+
 	try {
 		// Do a full checkout so that we can find the correct PR numbers for changelog entries.
 		await checkoutRemoteBranch( tmpRepoPath, releaseBranch, false );
@@ -162,7 +171,7 @@ export const updateReleaseBranchChangelogs = async (
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 
 		execSync(
-			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n -vvv --use-version ${ version }`,
+			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n -vvv --use-version ${ mainVersion }`,
 			{
 				cwd: tmpRepoPath,
 				stdio: 'inherit',
@@ -178,6 +187,7 @@ export const updateReleaseBranchChangelogs = async (
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
 		await updateReleaseChangelogs(
+			version,
 			options.override,
 			options.appendChangelog,
 			tmpRepoPath
@@ -416,21 +426,20 @@ function getTargetBranches(
 		.split( '.' )
 		.map( Number );
 
-	// Check if the target is greater than the trunk version
 	if (
-		targetMajor < currentMajor ||
-		( targetMajor === currentMajor && targetMinor <= currentMinor )
+		targetMajor > currentMajor ||
+		( targetMajor === currentMajor && targetMinor >= currentMinor )
 	) {
 		Logger.notice(
-			`Target version ${ targetVersion } is not greater than trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches.`
 		);
 		return [];
 	}
 
 	const branches = [];
-	let version = getNextVersion( trunkVersion );
+	let version = getNextVersion( targetVersion );
 
-	while ( version !== targetVersion ) {
+	while ( version !== trunkVersion ) {
 		Logger.notice( `Adding intermediate branch for version ${ version }` );
 		branches.push( `release/${ version }` );
 		version = getNextVersion( version );
@@ -463,7 +472,7 @@ export const updateIntermediateBranches = async (
 		return;
 	}
 
-	const targetBranches = getTargetBranches( trunkVersion, options.version );
+	const targetBranches = getTargetBranches( options.version, trunkVersion );
 	Logger.notice(
 		`Target branches to update: ${ targetBranches.join( ', ' ) }`
 	);

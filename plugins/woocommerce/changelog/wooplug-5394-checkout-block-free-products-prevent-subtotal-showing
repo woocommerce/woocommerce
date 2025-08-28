@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure products with 0 price are displayed corectly in the order summary
