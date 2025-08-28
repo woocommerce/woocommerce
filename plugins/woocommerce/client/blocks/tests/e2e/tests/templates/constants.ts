@@ -129,14 +129,16 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateType: 'wp_template_part',
 		canBeOverriddenByThemes: true,
 	},
-	{
-		visitPage: async ( { frontendUtils } ) =>
-			await frontendUtils.goToCart(),
-		templateName: 'Page: Cart',
-		templatePath: 'page-cart',
-		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
-	},
+	// TODO: Fix flaky tests. Temporarily disabled, for more details see:
+	// https://github.com/woocommerce/woocommerce/issues/60663.
+	// {
+	// 	visitPage: async ( { frontendUtils } ) =>
+	// 		await frontendUtils.goToCart(),
+	// 	templateName: 'Page: Cart',
+	// 	templatePath: 'page-cart',
+	// 	templateType: 'wp_template',
+	// 	canBeOverriddenByThemes: true,
+	// },
 	{
 		visitPage: async ( { frontendUtils } ) => {
 			await frontendUtils.goToShop();
