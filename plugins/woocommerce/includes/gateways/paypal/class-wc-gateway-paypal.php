@@ -659,10 +659,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$version   = Constants::get_constant( 'WC_VERSION' );
-		$page_type = is_checkout() ? 'checkout' : ( is_cart() ? 'cart' : null );
 		$client_id = get_option( 'paypal_client_id' );
 
-		if ( ! $client_id || ! $page_type ) {
+		if ( ! $client_id || ! is_checkout() ) {
 			return;
 		}
 
@@ -706,7 +705,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
-		$page_type = is_checkout() ? 'checkout' : ( is_cart() ? 'cart' : null );
+		$page_type = is_checkout() ? 'checkout' : null;
 		
 		if ( 'paypal-sdk-js' === $attrs['id'] ) {
 			$attrs['data-page-type']              = $page_type;
