@@ -146,7 +146,10 @@ export const Edit = ( {
 				{ checkbox ? (
 					<>
 						<div className="wc-block-checkout__terms-checkbox-wrapper">
-							<CheckboxControl checked={ false } />
+							<CheckboxControl
+								id="terms-condition"
+								checked={ false }
+							/>
 						</div>
 						<RichText
 							value={ currentText }
