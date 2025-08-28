@@ -15,7 +15,7 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 1. **Open the workflow run details** in GitHub (under the **Actions** tab) to see exactly where and why the failure occurred. Most of the time, the workflow will display a clear error message.
 2. **Read the error message carefully.** Sometimes the problem is as simple as a missing workflow configuration or skipped step.
-3. **If you're unsure what the error means or how to proceed,** don't hesitate to ask for help in Slack. It's better to get a second opinion than to guess.
+3. **If you're unsure what the error means or how to proceed,** don't hesitate to ask for help in the release Slack channel. It's better to get a second opinion than to guess.
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
