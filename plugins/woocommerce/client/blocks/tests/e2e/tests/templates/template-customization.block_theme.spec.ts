@@ -38,9 +38,7 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await editor.saveSiteEditorEntities();
 
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
@@ -177,9 +175,7 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await editor.saveSiteEditorEntities();
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( {

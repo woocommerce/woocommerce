@@ -47,8 +47,11 @@ test.describe( 'Template customization', () => {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
+
 				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
+					isOnlyCurrentEntityDirty:
+						// In case of Cart: Page: Cart template and Cart block are edited entities.
+						testData.templateName === 'Page: Cart' ? false : true,
 				} );
 
 				// Verify template name didn't change.
