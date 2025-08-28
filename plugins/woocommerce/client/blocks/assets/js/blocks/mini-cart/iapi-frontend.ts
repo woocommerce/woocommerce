@@ -653,8 +653,9 @@ const { state: cartItemState } = store(
 					dataProperty: DataProperty;
 				} >();
 				return (
-					dataProperty === 'variation' &&
-					cartItemState.cartItem.type !== 'variation'
+					cartItemState.cartItem[ dataProperty ].length === 0 ||
+					( dataProperty === 'variation' &&
+						cartItemState.cartItem.type !== 'variation' )
 				);
 			},
 
