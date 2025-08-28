@@ -11,6 +11,10 @@
 	width: 100%;
 	box-sizing: border-box;
 
+	&::placeholder {
+		color: $universal-body-low-emphasis;
+	}
+
 	&:focus {
 		background-color: $input-background-light;
 		color: $input-text-light;
@@ -24,5 +28,9 @@
 		background-color: $input-background-dark;
 		border-color: $input-border-dark;
 		color: $input-text-dark;
+
+		&::placeholder {
+			color: $input-placeholder-dark;
+		}
 	}
 }
