@@ -133,6 +133,7 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function create_paypal_order( $order ) {
+		$paypal_debug_id = null;
 		try {
 			$request_body = array(
 				'test_mode' => $this->gateway->testmode,
@@ -149,6 +150,7 @@ class WC_Gateway_Paypal_Request {
 			$response_data = json_decode( $body, true );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
+				$paypal_debug_id = isset( $response_data['data']['debug_id'] ) ? $response_data['data']['debug_id'] : null;
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
@@ -160,6 +162,15 @@ class WC_Gateway_Paypal_Request {
 			);
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
+			if ( $paypal_debug_id ) {
+				$order->add_order_note(
+					sprintf(
+						/* translators: %1$s: PayPal debug ID */
+						__( 'PayPal order creation failed. PayPal debug ID: %1$s', 'woocommerce' ),
+						$paypal_debug_id
+					)
+				);
+			}
 			return null;
 		}
 	}
