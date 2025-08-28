@@ -614,7 +614,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get brand ids.
 	 *
-	 * @since 10.2.0
+	 * @since 10.3.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return array
 	 */
@@ -1243,7 +1243,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set the product brands.
 	 *
-	 * @since 10.2.0
+	 * @since 10.3.0
 	 * @param array $term_ids List of terms IDs.
 	 */
 	public function set_brand_ids( $term_ids ) {
