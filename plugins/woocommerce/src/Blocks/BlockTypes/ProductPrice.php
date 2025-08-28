@@ -123,7 +123,7 @@ class ProductPrice extends AbstractBlock {
 						'productElementKey' => 'price_html',
 					);
 					$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-					$watch_attribute                           = 'data-wp-watch="callbacks.updateValue" aria-live="assertive" aria-atomic="true"';
+					$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 				}
 			}
 
