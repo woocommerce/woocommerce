@@ -63,6 +63,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
+		// Skip if the payment is already processed.
+		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+			return;
+		}
+
 		$status          = $event['resource']['status'] ?? null;
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
@@ -107,6 +112,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
+		// Skip if the payment is already processed.
+		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+			return;
+		}
+
 		$order->set_transaction_id( $event['resource']['id'] );
 		$order->update_meta_data( '_paypal_status', strtolower( $event['resource']['status'] ) );
 		$order->payment_complete();
@@ -130,6 +140,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			return;
+		}
+
+		// Skip if the payment is already processed.
+		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
