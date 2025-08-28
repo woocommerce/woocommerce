@@ -14,11 +14,11 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
-import { sanitizeHTML } from '../../utils/sanitize-html';
 
 type ContentPreviewProps = {
 	content: string;
@@ -80,10 +80,12 @@ export function ContentPreview( { content }: ContentPreviewProps ) {
 					</style>
 					<div
 						className="woocommerce-content-preview__content"
-						dangerouslySetInnerHTML={ sanitizeHTML( content, {
-							tags: CONTENT_TAGS,
-							attr: CONTENT_ATTR,
-						} ) }
+						dangerouslySetInnerHTML={ {
+							__html: sanitizeHTML( content, {
+								tags: CONTENT_TAGS,
+								attr: CONTENT_ATTR,
+							} ),
+						} }
 					/>
 				</>
 			</Iframe>

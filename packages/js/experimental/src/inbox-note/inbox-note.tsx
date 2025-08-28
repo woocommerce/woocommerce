@@ -16,12 +16,6 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 import { InboxNoteActionButton } from './action';
 import { useCallbackOnLinkClick } from './use-callback-on-link-click';
 
-const sanitizeHTMLForReact = ( html: string ) => {
-	return {
-		__html: sanitizeHTML( html ),
-	};
-};
-
 type InboxNoteAction = {
 	id: number;
 	url: string;
@@ -207,9 +201,9 @@ const InboxNoteCard = ( {
 					</H>
 					<Section className="woocommerce-inbox-message__text">
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTMLForReact(
-								content
-							) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( content ),
+							} }
 							ref={ linkCallbackRef }
 						/>
 					</Section>

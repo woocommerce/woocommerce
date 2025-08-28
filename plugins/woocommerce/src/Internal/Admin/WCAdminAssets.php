@@ -461,7 +461,6 @@ class WCAdminAssets {
 				'wc-tracks',
 				'wc-block-templates',
 				'wc-product-editor',
-				'wc-sanitize',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );

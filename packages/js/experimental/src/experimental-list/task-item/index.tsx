@@ -24,15 +24,6 @@ import { VerticalCSSTransition } from '../../vertical-css-transition';
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
 
-const sanitizeHTMLForReact = ( html: string ): { __html: string } => {
-	return {
-		__html: sanitizeHTML( html, {
-			tags: ALLOWED_TAGS,
-			attr: ALLOWED_ATTR,
-		} ),
-	};
-};
-
 type TaskLevel = 1 | 2 | 3;
 
 type ActionArgs = {
@@ -219,9 +210,12 @@ export const TaskItem = ( {
 							{ expandable && ! completed && additionalInfo && (
 								<div
 									className="woocommerce-task__additional-info"
-									dangerouslySetInnerHTML={ sanitizeHTMLForReact(
-										additionalInfo
-									) }
+									dangerouslySetInnerHTML={ {
+										__html: sanitizeHTML( additionalInfo, {
+											tags: ALLOWED_TAGS,
+											attr: ALLOWED_ATTR,
+										} ),
+									} }
 								></div>
 							) }
 							{ ! completed && showActionButton && (
@@ -246,9 +240,12 @@ export const TaskItem = ( {
 					{ ! expandable && ! completed && additionalInfo && (
 						<div
 							className="woocommerce-task__additional-info"
-							dangerouslySetInnerHTML={ sanitizeHTMLForReact(
-								additionalInfo
-							) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( additionalInfo, {
+									tags: ALLOWED_TAGS,
+									attr: ALLOWED_ATTR,
+								} ),
+							} }
 						></div>
 					) }
 					{ time && (
