@@ -435,18 +435,25 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			if ( ! productDataState?.productId ) {
-				return undefined;
+			const productId = productDataState?.productId;
+			if ( ! productId ) {
+				return;
 			}
+
 			const productData =
-				wooState?.products?.[ productDataState.productId ]
-					?.variations?.[ productDataState?.variationId || 0 ] ||
-				wooState?.products?.[ productDataState.productId ];
+				wooState?.products?.[ productId ]?.variations?.[
+					productDataState?.variationId || 0
+				] || wooState?.products?.[ productId ];
 
 			const imageId = productData?.image_id;
-			if ( imageId ) {
-				const { imageData } = getContext();
-				const imageIndex = imageData.indexOf( imageId );
+			if ( ! imageId ) {
+				return;
+			}
+
+			const { imageData } = getContext();
+			const imageIndex = imageData.indexOf( imageId );
+
+			if ( imageIndex >= 0 ) {
 				actions.selectImage( imageIndex );
 			}
 		},
