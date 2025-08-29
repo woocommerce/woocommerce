@@ -71,7 +71,7 @@ class Utils {
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
 			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInput' );
-			$processor->set_attribute( 'data-wp-on--change', 'actions.handleQuantityChange' );
+			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
 		}
 
 		$quantity_html = $processor->get_updated_html();

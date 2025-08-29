@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent, HTMLElementEvent } from 'react';
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -66,16 +66,20 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
-const getProductData = (
+export const getProductData = (
 	id: number,
 	productType: string,
 	availableVariations: AvailableVariation[],
 	selectedAttributes: SelectedAttributes[]
-): ( ProductData & { id: number } ) | null => {
+) => {
 	let productId = id;
 	let productData: ProductData | undefined;
 
-	if ( productType === 'variable' ) {
+	if (
+		productType === 'variable' &&
+		availableVariations &&
+		selectedAttributes
+	) {
 		const matchedVariation = getMatchedVariation(
 			availableVariations,
 			selectedAttributes
@@ -120,7 +124,7 @@ const getInputData = (
 		return;
 	}
 
-	const parsedValue = parseInt( inputElement.value, 10 );
+	const parsedValue = Number( inputElement.value );
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 
 	return {
@@ -171,6 +175,7 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 	};
 	actions: {
+		validateQuantity: ( value?: number ) => void;
 		setQuantity: ( value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
@@ -183,7 +188,7 @@ export type AddToCartWithOptionsStore = {
 		handleQuantityInput: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
-		handleQuantityChange: (
+		handleQuantityBlur: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
 		handleQuantityCheckboxChange: (
@@ -212,19 +217,7 @@ const { actions, state } = store<
 
 				return [];
 			},
-
 			get isFormValid(): boolean {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return true;
-				}
-
-				const { productType, quantity } = context;
-
-				if ( productType === 'grouped' ) {
-					return Object.values( quantity ).some( ( qty ) => qty > 0 );
-				}
-
 				return state.validationErrors.length === 0;
 			},
 			get allowsDecrease() {
@@ -257,10 +250,6 @@ const { actions, state } = store<
 
 				const { id, min, step } = productObject;
 
-				if ( typeof step !== 'number' || typeof min !== 'number' ) {
-					return true;
-				}
-
 				const currentQuantity = quantity[ id ] || 0;
 
 				return currentQuantity - step >= min;
@@ -288,16 +277,46 @@ const { actions, state } = store<
 
 				const { id, max, step } = productObject;
 
-				if ( typeof step !== 'number' || typeof max !== 'number' ) {
-					return true;
-				}
-
 				const currentQuantity = quantity[ id ] || 0;
 
 				return currentQuantity + step <= max;
 			},
 		},
 		actions: {
+			validateQuantity( value?: number ) {
+				actions.clearErrors( 'invalid-quantities' );
+
+				if ( typeof value !== 'number' ) {
+					return;
+				}
+
+				const context = getContext< Context >();
+
+				// If selected quantity is invalid, add an error.
+				const { variationId } = state;
+				const id = variationId || context.productId;
+				const productObject = getProductData(
+					id,
+					context.productType,
+					context.availableVariations,
+					context.selectedAttributes
+				);
+
+				if (
+					value === 0 ||
+					( productObject &&
+						( value < productObject.min ||
+							value > productObject.max ) )
+				) {
+					const { errorMessages } = getConfig();
+
+					actions.addError( {
+						code: 'invalidQuantities',
+						message: errorMessages?.invalidQuantities || '',
+						group: 'invalid-quantities',
+					} );
+				}
+			},
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
 
@@ -319,6 +338,8 @@ const { actions, state } = store<
 						[ id ]: value,
 					};
 				}
+
+				actions.validateQuantity( value );
 			},
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
@@ -374,14 +395,6 @@ const { actions, state } = store<
 
 				const { max, min, step } = productObject;
 
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
-
 				const newValue = currentValue + step;
 
 				if ( newValue <= max ) {
@@ -419,15 +432,7 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { min, max, step } = productObject;
-
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
+				const { min, step } = productObject;
 
 				let newValue = currentValue - step;
 
@@ -458,24 +463,33 @@ const { actions, state } = store<
 
 				actions.setQuantity( currentValue );
 			},
-			handleQuantityChange: (
+			// We need to listen to blur events instead of change events because
+			// the change event isn't triggered in invalid numbers (ie: writting
+			// letters) if the current value is already invalid or an empty string.
+			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
-					return;
-				}
-
-				const { childProductId } = getContext< Context >();
-				const { currentValue } = inputData;
-
 				const {
+					childProductId,
 					productType,
 					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
+				// In grouped products, we reset invalid inputs to ''.
+				if (
+					( Number.isNaN( event.target.valueAsNumber ) ||
+						event.target.valueAsNumber === 0 ) &&
+					productType === 'grouped'
+				) {
+					actions.setQuantity( 0 );
+					if ( Number.isNaN( event.target.valueAsNumber ) ) {
+						event.target.value = '';
+					}
+					dispatchChangeEvent( event.target );
+					return;
+				}
 				const id = childProductId || productId;
 				const productObject = getProductData(
 					id,
@@ -488,26 +502,15 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { min, max, step } = productObject;
+				// In other product types, we reset inputs to `min` if they are
+				// 0 or NaN.
+				const { min } = productObject;
 
-				if (
-					typeof step !== 'number' ||
-					typeof min !== 'number' ||
-					typeof max !== 'number'
-				) {
-					return;
-				}
-
-				let newValue = Math.min(
-					max ?? Infinity,
-					Math.max( min, currentValue )
-				);
-
-				// In grouped product children, we allow decreasing the value
-				// down to 0, even if the minimum value is greater than 0.
-				if ( productType === 'grouped' && currentValue < min ) {
-					newValue = 0;
-				}
+				const newValue =
+					Number.isFinite( event.target.valueAsNumber ) &&
+					event.target.valueAsNumber > 0
+						? event.target.valueAsNumber
+						: min;
 
 				if ( event.target.value !== newValue.toString() ) {
 					actions.setQuantity( newValue );

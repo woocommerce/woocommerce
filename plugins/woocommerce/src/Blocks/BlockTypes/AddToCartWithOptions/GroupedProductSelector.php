@@ -36,7 +36,7 @@ class GroupedProductSelector extends AbstractBlock {
 			$p = new \WP_HTML_Tag_Processor( $content );
 
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector' ) ) ) {
-				$p->set_attribute( 'data-wp-watch--validate', 'callbacks.validateGrouped' );
+				$p->set_attribute( 'data-wp-init', 'callbacks.validateQuantities' );
 			}
 
 			return $p->get_updated_html();

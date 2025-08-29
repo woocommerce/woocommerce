@@ -24,8 +24,8 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		product: ProductResponseItem | ProductEntityResponse;
 		isExperimentalWcRestApiEnabled: boolean;
+		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
 interface PriceProps {

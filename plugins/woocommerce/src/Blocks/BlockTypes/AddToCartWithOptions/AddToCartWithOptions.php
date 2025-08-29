@@ -200,6 +200,10 @@ class AddToCartWithOptions extends AbstractBlock {
 				'woocommerce/add-to-cart-with-options',
 				array(
 					'errorMessages' => array(
+						'invalidQuantities'                => esc_html__(
+							'Please select a valid quantity to add to the cart.',
+							'woocommerce'
+						),
 						'groupedProductAddToCartMissingItems' => esc_html__(
 							'Please select some products to add to the cart.',
 							'woocommerce'

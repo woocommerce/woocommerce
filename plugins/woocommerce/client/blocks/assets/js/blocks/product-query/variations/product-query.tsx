@@ -10,12 +10,13 @@ import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 import {
 	QueryBlockAttributes,
 	ProductQueryBlockQuery,
 } from '@woocommerce/blocks/product-query/types';
 import { isSiteEditorPage } from '@woocommerce/utils';
-import { isNumber } from '@woocommerce/types';
+import { isNumber, isString } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -29,12 +30,12 @@ import {
 } from '../constants';
 
 const ARCHIVE_PRODUCT_TEMPLATES = [
-	'//archive-product',
-	'//taxonomy-product_cat',
-	'//taxonomy-product_tag',
-	'//taxonomy-product_brand',
-	'//taxonomy-product_attribute',
-	'//product-search-results',
+	'archive-product',
+	'taxonomy-product_cat',
+	'taxonomy-product_tag',
+	'taxonomy-product_brand',
+	'taxonomy-product_attribute',
+	'product-search-results',
 ];
 
 const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
@@ -68,18 +69,20 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	} );
 };
 
-let currentTemplateId: string | undefined;
+let currentTemplateSlug: string | undefined;
 subscribe( () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
-	currentTemplateId = store?.getEditedPostId();
-	if ( previousTemplateId === currentTemplateId ) {
+	const previousTemplateSlug = currentTemplateSlug;
+	// @ts-expect-error getEditedPostSlug is not typed
+	currentTemplateSlug = select( editorStore )?.getEditedPostSlug();
+	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;
 	}
 
-	if ( isSiteEditorPage( store ) ) {
+	if ( isSiteEditorPage() ) {
 		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			currentTemplateId?.includes( template )
+			isString( currentTemplateSlug )
+				? currentTemplateSlug.includes( template )
+				: false
 		);
 
 		const inheritQuery: Partial< ProductQueryBlockQuery > = {
