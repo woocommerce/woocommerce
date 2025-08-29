@@ -73,11 +73,27 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 	const [ stripeComponents, setStripeComponents ] = useState< any >( null );
 	const [ initializationError, setInitializationError ] = useState< string | null >( null );
 	const [ loading, setLoading ] = useState( true );
+	const [ refreshKey, setRefreshKey ] = useState( 0 );
+	const [ lastNotifications, setLastNotifications ] = useState< { total: number; actionRequired: number } | null >( null );
+
+	// Listen for simple refresh event.
+	useEffect( () => {
+		const handleRefresh = () => setRefreshKey( prev => prev + 1 );
+		
+		window.addEventListener( 'stripe-refresh', handleRefresh );
+		return () => window.removeEventListener( 'stripe-refresh', handleRefresh );
+	}, [] );
 
 	useEffect( () => {
 		const initializeStripe = async () => {
 			try {
-				// Dynamic imports to avoid webpack issues
+				// Reset state on refresh.
+				setStripeConnectInstance( null );
+				setStripeComponents( null );
+				setInitializationError( null );
+				setLoading( true );
+
+				// Dynamic imports to avoid webpack issues.
 				const { loadConnectAndInitialize } = await import( '@stripe/connect-js' );
 				const stripeReactComponents = await import( '@stripe/react-connect-js' );
 				
@@ -116,7 +132,30 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 		};
 
 		initializeStripe();
-	}, [] );
+	}, [ refreshKey ] );
+
+	// Simple notification change handler.
+	const handleNotificationsChange = ( notifications ) => {
+		if ( onNotificationsChange ) {
+			onNotificationsChange( notifications );
+		}
+
+		// Only trigger refresh if notifications actually changed.
+		if ( lastNotifications ) {
+			const hasChanged = 
+				lastNotifications.total !== notifications.total ||
+				lastNotifications.actionRequired !== notifications.actionRequired;
+				
+			if ( hasChanged ) {
+				setTimeout( () => {
+					window.dispatchEvent( new Event( 'stripe-refresh' ) );
+				}, 1000 );
+			}
+		}
+
+		// Update last notifications.
+		setLastNotifications( notifications );
+	};
 
 	useEffect( () => {
 		return () => {
@@ -134,7 +173,7 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 					<stripeComponents.ConnectNotificationBanner
 						onLoaderStart={ onLoaderStart }
 						onLoadError={ onLoadError }
-						onNotificationsChange={ onNotificationsChange }
+						onNotificationsChange={ handleNotificationsChange }
 						collectionOptions={ {
 							fields: 'eventually_due',
 							futureRequirements: 'omit',

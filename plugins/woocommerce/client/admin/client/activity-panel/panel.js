@@ -26,6 +26,18 @@ export const Panel = ( {
 	const containerRef = useRef( null );
 	const iframeInteractionRef = useRef( false );
 
+	// Listen for stripe-refresh events and close panel.
+	useEffect( () => {
+		const handleStripeRefresh = () => {
+			if ( isPanelOpen ) {
+				closePanel();
+			}
+		};
+		
+		window.addEventListener( 'stripe-refresh', handleStripeRefresh );
+		return () => window.removeEventListener( 'stripe-refresh', handleStripeRefresh );
+	}, [ isPanelOpen, closePanel ] );
+
 	// Add click-based closing when Stripe iframes are present
 	useEffect( () => {
 		if ( ! isPanelOpen ) {
