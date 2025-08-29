@@ -71,7 +71,6 @@ class Utils {
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--input', 'woocommerce/add-to-cart-with-options::actions.handleQuantityInput' );
 			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options::actions.handleQuantityBlur' );
 
 			foreach ( $input_attributes as $attribute => $value ) {
