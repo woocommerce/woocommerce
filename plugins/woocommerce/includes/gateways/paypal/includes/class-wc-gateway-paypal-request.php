@@ -151,6 +151,10 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal order creation failed. Missing approval link.' );
 			}
 
+			// Save the PayPal order ID to the order.
+			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
+			$order->save();
+
 			return array(
 				'id'           => $response_data['id'],
 				'redirect_url' => $redirect_url,
@@ -347,7 +351,6 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_paypal_create_order_request_params( $order ) {
-		$currency    = $order->get_currency();
 		$payee_email = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 
 		return array(
@@ -355,48 +358,64 @@ class WC_Gateway_Paypal_Request {
 			'payment_source' => array(
 				'paypal' => array(
 					'experience_context' => array(
-						'user_action'         => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
-						'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
+						'user_action'                  => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
+						'shipping_preference'          => $this->get_paypal_shipping_preference( $order ),
 						// Customer redirected here on approval.
-						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						'return_url'                   => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
-						'cancel_url'          => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						'cancel_url'                   => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'              => str_replace( '_', '-', get_locale() ),
+						'locale'                       => str_replace( '_', '-', get_locale() ),
+						'order_update_callback_config' => array(
+							'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
+							'callback_url'    => get_site_url( null, '/wp-json/wc/v3/paypal-standard/update-shipping' ),
+						),
 					),
 				),
 			),
 			'purchase_units' => array(
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
-					'amount'     => array(
-						'currency_code' => $currency,
-						'value'         => wc_format_decimal( $order->get_total(), wc_get_price_decimals() ),
-						'breakdown'     => array(
-							'item_total' => array(
-								'currency_code' => $currency,
-								'value'         => wc_format_decimal( $this->get_paypal_order_items_subtotal( $order ), wc_get_price_decimals() ),
-							),
-							'shipping'   => array(
-								'currency_code' => $currency,
-								'value'         => wc_format_decimal( $order->get_shipping_total(), wc_get_price_decimals() ),
-							),
-							'tax_total'  => array(
-								'currency_code' => $currency,
-								'value'         => wc_format_decimal( $order->get_total_tax(), wc_get_price_decimals() ),
-							),
-							'discount'   => array(
-								'currency_code' => $currency,
-								'value'         => wc_format_decimal( $order->get_discount_total(), wc_get_price_decimals() ),
-							),
-						),
-					),
+					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $this->get_paypal_order_items( $order ),
 					'payee'      => array(
 						'email_address' => $payee_email,
 					),
 					'shipping'   => $this->get_paypal_order_shipping( $order ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get the amount data  for the PayPal order purchase unit field.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return array
+	 */
+	public function get_paypal_order_purchase_unit_amount( $order ) {
+		$currency = $order->get_currency();
+
+		return array(
+			'currency_code' => $currency,
+			'value'         => wc_format_decimal( $order->get_total(), wc_get_price_decimals() ),
+			'breakdown'     => array(
+				'item_total' => array(
+					'currency_code' => $currency,
+					'value'         => wc_format_decimal( $this->get_paypal_order_items_subtotal( $order ), wc_get_price_decimals() ),
+				),
+				'shipping'   => array(
+					'currency_code' => $currency,
+					'value'         => wc_format_decimal( $order->get_shipping_total(), wc_get_price_decimals() ),
+				),
+				'tax_total'  => array(
+					'currency_code' => $currency,
+					'value'         => wc_format_decimal( $order->get_total_tax(), wc_get_price_decimals() ),
+				),
+				'discount'   => array(
+					'currency_code' => $currency,
+					'value'         => wc_format_decimal( $order->get_discount_total(), wc_get_price_decimals() ),
 				),
 			),
 		);

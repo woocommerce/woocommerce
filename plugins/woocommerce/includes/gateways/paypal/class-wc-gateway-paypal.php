@@ -523,10 +523,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				);
 			}
 
-			// Save the PayPal order ID. This is different from the WooCommerce order ID.
-			$order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
-			$order->save();
-
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
 			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
