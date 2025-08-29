@@ -685,8 +685,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
 		
 		// Add PayPal JS SDK script.
-		wp_register_script( 'paypal-sdk', add_query_arg( $query, $sdk_host ), [], null, false );
-		wp_enqueue_script( 'paypal-sdk' );
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $query, $sdk_host ), [], null, false );
+		wp_enqueue_script( 'paypal-standard-sdk' );
 
 		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', [ 'jquery' ], $version, true );
 
@@ -711,7 +711,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function add_paypal_sdk_attributes( $attrs ) {
 		$page_type = is_checkout() ? 'checkout' : null;
 		
-		if ( 'paypal-sdk-js' === $attrs['id'] ) {
+		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
+			wc_get_logger()->debug( 'add_paypal_sdk_attributes' );
 			$attrs['data-page-type']              = $page_type;
 			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
 		}
