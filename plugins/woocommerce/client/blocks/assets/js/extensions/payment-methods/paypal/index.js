@@ -77,9 +77,9 @@ if ( settings.isButtonsEnabled ) {
 	};
 
 	registerExpressPaymentMethod( {
-		name: __( 'PayPal', 'woocommerce' ),
-		title: `PayPal`,
-		description: `PayPal Buttons`,
+		name: 'paypal',
+		title: 'PayPal',
+		description: 'PayPal Buttons',
 		gatewayId: 'paypal',
 		paymentMethodId: 'paypal',
 		content: <LazyPayPalButtonsContainer />,
