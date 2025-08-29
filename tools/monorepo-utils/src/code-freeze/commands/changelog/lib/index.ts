@@ -19,11 +19,13 @@ import {
 import { Options } from '../types';
 import { getToday } from '../../get-version/lib';
 
-const mergeChangelogEntries = (
-	readme: string,
-	nextLogEntries: string[]
-): string => {
-	let updatedReadme = readme;
+const mergeChangelogEntries = ( readme: string, nextLogTitle: string, nextLogEntries: string[] ): string => {
+	let updatedReadme =readme
+		.replace(
+			/^= \d+\.\d+\.\d+.* =\n\n\*\*WooCommerce\*\*\n\n/m,
+			nextLogTitle
+		)
+		.trim();
 
 	nextLogEntries.forEach( ( entry ) => {
 		const match = entry.match( /^\* (\w+)/ );
@@ -48,7 +50,7 @@ const mergeChangelogEntries = (
 			// No existing entries of this type, insert at the end, before the "See changelog" link
 			updatedReadme = updatedReadme.replace(
 				/\n+(\[See changelog for all versions\])/,
-				`\n${ nextLogEntries.join( '\n' ) }\n\n\n$1`
+				`\n${ entry }\n\n\n$1`
 			);
 		}
 	} );
@@ -60,18 +62,14 @@ const mergeChangelogEntries = (
  * Processes the next changelog content and extracts the header and entries.
  *
  * @param {string} nextLog     The raw changelog content from NEXT_CHANGELOG.md
- * @param {string} version     The version number to use in the changelog header
- * @param {string} releaseDate The release date in YYYY-MM-DD format
- * @return {Object}           Object containing the formatted changelog title `nextLogTitle` and entries array `nextLogEntries`
+ * @param {string} version      The version number for the changelog
+ * @param {string} releaseDate  The release date for the changelog
+ * @returns {Object}            An object containing the next log title and entries
  */
-const processNextChangelog = (
-	nextLog: string,
-	version: string,
-	releaseDate: string
-) => {
+const processNextChangelog = ( nextLog: string, version: string, releaseDate: string ) => {
 	let changelogEntries = nextLog
 		.replace(
-			/^= \d+\.\d+\.\d+(-.*?)? YYYY-mm-dd =\n\n\*\*WooCommerce\*\*\n\n/,
+			/^= \d+\.\d+\.\d+(-.*?)? YYYY-mm-dd =\n\n\*\*WooCommerce\*\*/,
 			''
 		)
 		.trim();
@@ -84,7 +82,7 @@ const processNextChangelog = (
 
 	// Split changelogEntries into individual entries by detecting lines that start with "* "
 	// This preserves multiline changelog entries.
-	const changelogEntriesArray = changelogEntries
+	const entries = changelogEntries
 		.split( /\n(?=\* )/ )
 		.filter( ( entry ) => entry.trim() )
 		.map( ( entry ) => {
@@ -92,8 +90,8 @@ const processNextChangelog = (
 		} );
 
 	return {
-		nextLogTitle: `= ${ version } ${ releaseDate } =\n\n**WooCommerce**\n\n`,
-		nextLogEntries: changelogEntriesArray,
+		nextLogTitle: `= ${version} ${releaseDate} =\n\n**WooCommerce**\n\n`,
+		nextLogEntries: entries
 	};
 };
 
@@ -128,23 +126,17 @@ const updateReleaseChangelogs = async (
 	);
 
 	let readme = await readFile( readmeFile, 'utf-8' );
-	const nextLog = await readFile( nextLogFile, 'utf-8' );
+	let nextLog = await readFile( nextLogFile, 'utf-8' );
 
-	const { nextLogTitle, nextLogEntries } = processNextChangelog(
-		nextLog,
-		version,
-		releaseDate
-	);
+	const { nextLogTitle, nextLogEntries } = processNextChangelog( nextLog, version, releaseDate );
 
 	if ( appendChangelog ) {
-		readme = mergeChangelogEntries( readme, nextLogEntries );
+		readme = mergeChangelogEntries( readme, nextLogTitle, nextLogEntries );
 	} else {
 		// Replace all existing changelog content with the new changelog
 		readme = readme.replace(
 			/== Changelog ==\n(.*?)\[See changelog for all versions\]/s,
-			`== Changelog ==\n\n${ nextLogTitle }${ nextLogEntries.join(
-				'\n'
-			) }\n\n[See changelog for all versions]`
+			`== Changelog ==\n\n${ nextLogTitle }${ nextLogEntries.join('\n') }\n\n[See changelog for all versions]`
 		);
 	}
 
