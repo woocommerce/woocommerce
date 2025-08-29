@@ -69,9 +69,9 @@ class AddToCartForm extends AbstractBlock {
 	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
-	 * @param string $product_html add-to-cart form HTML.
+	 * @param string $product_html Add to Cart form HTML.
 	 * @param string $product_name Product name.
-	 * @return stringa add-to-cart form HTML with increment and decrement buttons.
+	 * @return string Add to Cart form HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
