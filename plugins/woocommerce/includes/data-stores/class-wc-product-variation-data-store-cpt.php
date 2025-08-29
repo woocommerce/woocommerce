@@ -403,12 +403,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_props( $set_props );
 
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value = $post_meta_values['_cogs_value'][0] ?? '';
-			$cogs_value = '' === $cogs_value ? null : (float) $cogs_value;
+			$cogs_value             = $post_meta_values['cogs_value'][0] ?? '';
+			$cogs_value             = '' === $cogs_value ? null : (float) $cogs_value;
+			$cogs_value_is_additive = 'yes' === ( $post_meta_values['_cogs_value_is_additive'][0] ?? '' );
 			$product->set_props(
 				array(
 					'cogs_value'             => $cogs_value,
-					'cogs_value_is_additive' => 'yes' === $post_meta_values['_cogs_value_is_additive'][0] ?? '',
+					'cogs_value_is_additive' => $cogs_value_is_additive,
 				)
 			);
 		}
