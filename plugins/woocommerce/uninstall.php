@@ -120,6 +120,16 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 		}
 	}
 
+	// Drop custom WordPress tables indexes. See \WC_Install::create_tables() for details.
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type" );
+	}
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value'" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} DROP INDEX woo_idx_meta_key_meta_value" );
+	}
+
 	// Clear any cached data that has been removed.
 	wp_cache_flush();
 }
