@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -101,12 +102,9 @@ class QuantitySelector extends AbstractBlock {
 			)
 		);
 
-		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-		$is_interactive                            = ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
-
 		$input_attributes = array();
 
-		if ( $is_interactive ) {
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
 			$variations_data           = $product->get_available_variations( 'objects' );
