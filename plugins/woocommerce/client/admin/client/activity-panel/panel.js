@@ -51,8 +51,8 @@ export const Panel = ( {
 			// Only use click-based closing when iframes are present
 			if ( hasVisibleIframes ) {
 				// Check if click is outside the activity panel and outside Stripe banners
-				const activityPanel = document.getElementById( 'woocommerce-activity-panel' );
-				const isClickOutsidePanel = activityPanel && ! activityPanel.contains( e.target );
+				const panelEl = containerRef.current;
+				const isClickOutsidePanel = panelEl && ! panelEl.contains( e.target );
 				
 				const isClickInsideStripeBanner = e.target.closest( 
 					'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
