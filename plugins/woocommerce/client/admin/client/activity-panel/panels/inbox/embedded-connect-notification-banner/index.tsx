@@ -33,7 +33,7 @@ interface AccountSession {
  * Create an account session for notifications.
  */
 const createAccountSession = async (): Promise< AccountSession > => {
-	const response = await apiFetch< { session: AccountSession } >( {
+	const response = await apiFetch< { session?: AccountSession } >( {
 		path: '/wc-admin/settings/payments/woopayments/onboarding/step/business_verification/kyc_session',
 		method: 'POST',
 		data: {
@@ -42,6 +42,13 @@ const createAccountSession = async (): Promise< AccountSession > => {
 			self_assessment: {},
 		},
 	} );
+
+	if ( ! response?.session ) {
+		throw new Error(
+			__( 'Failed to create a WooCommerce Payments session.', 'woocommerce' )
+		);
+	}
+
 	return response.session;
 };
 
@@ -76,7 +83,7 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 				
 				const session = await createAccountSession();
 
-				if ( ! session.publishableKey ) {
+				if ( ! session.publishableKey || ! session.clientSecret ) {
 					throw new Error(
 						__( 'Unable to initialize WooCommerce Payments notifications.', 'woocommerce' )
 					);
@@ -93,16 +100,15 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 							fontFamily: "-apple-system, BlinkMacSystemFont, 'system-ui', 'Segoe UI', sans-serif",
 						},
 					},
-					locale: session.locale.replace( '_', '-' ),
+					locale: session.locale ? session.locale.replace( '_', '-' ) : undefined,
 				} );
 
 				setStripeConnectInstance( instance );
 				setStripeComponents( stripeReactComponents );
 			} catch ( err ) {
+				onLoadError?.( err );
 				setInitializationError(
-					err instanceof Error
-						? err.message
-						: __( 'Failed to initialize WooCommerce Payments notifications.', 'woocommerce' )
+					__( 'Failed to initialize WooCommerce Payments notifications.', 'woocommerce' )
 				);
 			} finally {
 				setLoading( false );
@@ -112,15 +118,17 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 		initializeStripe();
 	}, [] );
 
+	useEffect( () => {
+		return () => {
+			// @ts-ignore optional destroy API
+			stripeConnectInstance?.destroy?.();
+		};
+	}, [ stripeConnectInstance ] );
+
 	// Follow exact woocommerce-payments pattern
 	const content = (
 		<>
 			{ ( loading || ! stripeConnectInstance ) && <StripeSpinner /> }
-			{ initializationError && (
-				<div className="woocommerce-embedded-connect-notification-banner error">
-					{ initializationError }
-				</div>
-			) }
 			{ stripeConnectInstance && stripeComponents && (
 				<stripeComponents.ConnectComponentsProvider connectInstance={ stripeConnectInstance }>
 					<stripeComponents.ConnectNotificationBanner
