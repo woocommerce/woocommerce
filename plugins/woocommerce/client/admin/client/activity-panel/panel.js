@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Suspense, useRef, useCallback } from '@wordpress/element';
+import { Suspense, useRef, useCallback, useEffect } from '@wordpress/element';
 import clsx from 'clsx';
 import { Spinner } from '@woocommerce/components';
 
@@ -24,34 +24,97 @@ export const Panel = ( {
 
 	const focusOnMountRef = useFocusOnMount();
 	const containerRef = useRef( null );
+	const iframeInteractionRef = useRef( false );
+
+	// Add click-based closing when Stripe iframes are present
+	useEffect( () => {
+		if ( ! isPanelOpen ) {
+			return;
+		}
+
+		const handleDocumentClick = ( e ) => {
+			// Check if there are visible Stripe banners with iframes
+			const stripeBanners = document.querySelectorAll(
+				'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
+			);
+			
+			let hasVisibleIframes = false;
+			stripeBanners.forEach( ( banner ) => {
+				if ( banner.offsetParent !== null ) {
+					const iframes = banner.querySelectorAll( 'iframe' );
+					if ( iframes.length > 0 ) {
+						hasVisibleIframes = true;
+					}
+				}
+			} );
+
+			// Only use click-based closing when iframes are present
+			if ( hasVisibleIframes ) {
+				// Check if click is outside the activity panel and outside Stripe banners
+				const activityPanel = document.getElementById( 'woocommerce-activity-panel' );
+				const isClickOutsidePanel = activityPanel && ! activityPanel.contains( e.target );
+				
+				const isClickInsideStripeBanner = e.target.closest( 
+					'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
+				);
+
+				if ( isClickOutsidePanel && ! isClickInsideStripeBanner ) {
+					closePanel();
+				}
+			}
+		};
+
+		document.addEventListener( 'click', handleDocumentClick, true );
+		return () => {
+			document.removeEventListener( 'click', handleDocumentClick, true );
+		};
+	}, [ isPanelOpen, closePanel ] );
 
 	const handleFocusOutside = ( event ) => {
-		console.log('handleFocusOutside called:', {
-			event: event.type,
-			target: event.target,
-			relatedTarget: event.relatedTarget,
-			isPanelOpen
-		});
-
-		// Check if there are any Stripe notification banner components rendered.
-		const hasStripeComponents = document.querySelector( '.stripe-notifications-banner-wrapper' ) ||
-			document.querySelector( '.woocommerce-embedded-connect-notification-banner' );
+		// Check if there are any visible Stripe banners with iframes
+		const stripeBanners = document.querySelectorAll(
+			'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
+		);
 		
-		if ( hasStripeComponents ) {
-			// If Stripe components are present, don't close on blur events
-			// as they use iframes which cause blur but shouldn't close the panel.
+		let hasVisibleIframes = false;
+		stripeBanners.forEach( ( banner ) => {
+			// Only check if the banner itself is visible
+			if ( banner.offsetParent !== null ) {
+				const iframes = banner.querySelectorAll( 'iframe' );
+				if ( iframes.length > 0 ) {
+					hasVisibleIframes = true;
+				}
+			}
+		} );
+
+		// If there are visible Stripe iframes, don't close on any focus events
+		// This is a simple but effective approach for iframe interactions
+		if ( hasVisibleIframes ) {
 			return;
 		}
 
 		// Check both event.relatedTarget and event.target for better coverage.
 		const targetElement = event.relatedTarget || event.target;
+		
+		// Check if focus is moving to elements inside Stripe banners
+		const isInStripeBanner =
+			targetElement &&
+			targetElement.closest &&
+			targetElement.closest(
+				'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
+			);
+		if ( isInStripeBanner ) {
+			return;
+		}
+		
+		// More precise detection of elements that should prevent panel closing
 		const isClickOnModalOrSnackbar =
 			targetElement &&
-			( targetElement.closest &&
-				( targetElement.closest(
-					'.woocommerce-inbox-dismiss-confirmation_modal'
-				) ||
-					targetElement.closest( '.components-snackbar__action' ) ) );
+			targetElement.closest &&
+			( targetElement.closest( '.woocommerce-inbox-dismiss-confirmation_modal' ) ||
+			  targetElement.closest( '.components-snackbar__action' ) ||
+			  targetElement.closest( '.components-modal__screen-overlay' ) ||
+			  targetElement.closest( '.components-popover' ) );
 
 		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
 			closePanel();

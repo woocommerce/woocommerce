@@ -86,12 +86,14 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	useEffect( () => {
 		return addHistoryListener( () => {
-			// Check if there are any Stripe notification banner components rendered.
-			const hasStripeComponents = document.querySelector( '.stripe-notifications-banner-wrapper' ) ||
-				document.querySelector( '.woocommerce-embedded-connect-notification-banner' );
-
-			if ( hasStripeComponents ) {
-				// If Stripe components are present, don't close on history changes.
+			// Only skip closing when a visible Stripe banner is present.
+			const stripeBanner = document.querySelector(
+				'.woocommerce-embedded-connect-notification-banner, .stripe-notifications-banner-wrapper'
+			);
+			const isStripeBannerVisible =
+				stripeBanner &&
+				!!( stripeBanner.offsetParent || stripeBanner.getClientRects().length );
+			if ( isStripeBannerVisible ) {
 				return;
 			}
 
