@@ -654,6 +654,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Enqueue scripts.
 	 */
 	public function enqueue_scripts() {
+		if ( ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
 		if ( 'no' === $this->enabled ) {
 			return;
 		}
