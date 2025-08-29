@@ -165,11 +165,11 @@ class WC_Email extends WC_Settings_API {
 	protected $customer_email = false;
 
 	/**
-	 * Email group.
+	 * Email group slug.
 	 *
-	 * @var String
+	 * @var string
 	 */
-	public $email_group;
+	public $email_group = '';
 
 	/**
 	 *  List of preg* regular expression patterns to search for,
@@ -468,7 +468,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_email_group_title() {
 		$email_groups = $this->get_email_groups();
-		$title = isset( $email_groups[ $this->email_group ] ) ? $email_groups[ $this->email_group ] : $this->email_group;
+		$title        = isset( $email_groups[ $this->email_group ] ) ? $email_groups[ $this->email_group ] : $this->email_group;
 
 		/**
 		 * Filter the email group title.
@@ -478,7 +478,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param string $email_group The email group slug.
 		 * @param array $email_groups Associative array of email group slugs => titles.
 		 */
-		return apply_filters( 'woocommerce_email_group_title', $title, $this->email_group, $email_groups );
+		return (string) apply_filters( 'woocommerce_email_group_title', $title, $this->email_group, $email_groups );
 	}
 
 	/**
