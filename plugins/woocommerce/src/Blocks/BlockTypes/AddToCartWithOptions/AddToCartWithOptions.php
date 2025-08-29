@@ -292,21 +292,6 @@ class AddToCartWithOptions extends AbstractBlock {
 						}
 					}
 				}
-			} else {
-				$product_quantity_constraints = Utils::get_product_quantity_constraints( $product );
-
-				wp_interactivity_state(
-					'woocommerce',
-					array(
-						'products' => array(
-							$product->get_id() => array(
-								'min'  => $product_quantity_constraints['min'],
-								'max'  => $product_quantity_constraints['max'],
-								'step' => $product_quantity_constraints['step'],
-							),
-						),
-					)
-				);
 			}
 
 			$hooks_before = '';

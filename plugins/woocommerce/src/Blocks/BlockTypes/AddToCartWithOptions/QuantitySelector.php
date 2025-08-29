@@ -104,6 +104,21 @@ class QuantitySelector extends AbstractBlock {
 
 		$input_attributes = array();
 
+		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
+
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'products' => array(
+					$product->get_id() => array(
+						'min'  => $product_quantity_constraints['min'],
+						'max'  => $product_quantity_constraints['max'],
+						'step' => $product_quantity_constraints['step'],
+					),
+				),
+			)
+		);
+
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
@@ -118,16 +133,11 @@ class QuantitySelector extends AbstractBlock {
 				);
 			}
 
-			$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
-
 			wp_interactivity_state(
 				'woocommerce',
 				array(
 					'products' => array(
 						$product->get_id() => array(
-							'min'        => $product_quantity_constraints['min'],
-							'max'        => $product_quantity_constraints['max'],
-							'step'       => $product_quantity_constraints['step'],
 							'variations' => $formatted_variations_data,
 						),
 					),
