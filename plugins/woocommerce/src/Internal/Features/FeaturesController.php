@@ -523,7 +523,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default' => false,
-				'disable_ui'         => false,
+				'disable_ui'         => true,
 				'is_legacy'          => false,
 				'is_experimental'    => true,
 			),
