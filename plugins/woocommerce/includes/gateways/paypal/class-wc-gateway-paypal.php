@@ -168,6 +168,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
 
+		// Classic Checkout
+		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+		// Classic Cart
+		add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+		// Product
+		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
@@ -664,8 +671,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version   = Constants::get_constant( 'WC_VERSION' );
 		$client_id = get_option( 'paypal_client_id' );
+		$is_page_supported = is_checkout() || is_cart() || is_product();
 
-		if ( ! $client_id || ! is_checkout() ) {
+		if ( ! $client_id || ! $is_page_supported ) {
 			return;
 		}
 
@@ -725,7 +733,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @since 10.3.0
 	 */
-	public function payment_fields() {
+	public function render_buttons_container() {
 		echo '<div id="paypal-standard-container"></div>';
 	}
 
