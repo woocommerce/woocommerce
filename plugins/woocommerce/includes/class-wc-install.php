@@ -298,6 +298,9 @@ class WC_Install {
 		'10.2.0' => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
+		'10.3.0' => array(
+			'wc_update_1030_add_key_value_index_to_usermeta_table',
+		),
 	);
 
 	/**
@@ -1575,12 +1578,18 @@ class WC_Install {
 
 		$db_delta_result = dbDelta( self::get_schema() );
 
-		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+		// Add custom indexes to the WordPress tables for better WooCommerce performance.
 
-		if ( is_null( $index_exists ) ) {
-			// Add an index to the field comment_type to improve the response time of the query
-			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+		// Improve query performance in WC_Comments::wp_count_comments() (get the number of comments by type).
+		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+		if ( null === $index_exists ) {
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		}
+		// Improve query performance when searching users by meta-data (billing email, fist/last name, etc.).
+		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value'" );
+		if ( null === $index_exists ) {
+			$remaining_index_length = max( ( new DatabaseUtil() )->get_max_index_length() - 100 , 20 );
+			$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length))" );
 		}
 
 		// Clear table caches.
