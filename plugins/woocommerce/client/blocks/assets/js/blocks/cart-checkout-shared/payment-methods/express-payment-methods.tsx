@@ -161,7 +161,7 @@ const ExpressPaymentMethods = () => {
 	 * Define the elements used for the Express Payments markup.
 	 *
 	 * When multiple express payment options are available, this will use an
-	 * unordered list to display the each option.
+	 * unordered list to display each option.
 	 *
 	 * When only one express payment option is available, this will use a
 	 * non-sematic DIV for both the wrapper and the individual items. This
