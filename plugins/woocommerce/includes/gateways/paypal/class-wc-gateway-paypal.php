@@ -165,15 +165,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
-
-		// Classic Checkout
-		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
-		// Classic Cart
-		add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
-		// Product
-		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
@@ -198,6 +189,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			// Hook for plugin upgrades.
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
+
+			if ( $this->should_use_orders_v2() ) {
+				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
+		
+				// Render the buttons container to load the buttons via PayPal JS SDK.
+				// Classic checkout page.
+				add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+				// Classic cart page.
+				add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+				// Product page.
+				add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+			}
 		}
 	}
 
@@ -661,10 +665,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Enqueue scripts.
 	 */
 	public function enqueue_scripts() {
-		if ( ! $this->should_use_orders_v2() ) {
-			return;
-		}
-
 		if ( 'no' === $this->enabled ) {
 			return;
 		}
