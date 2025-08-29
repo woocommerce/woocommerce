@@ -150,6 +150,7 @@ export type VariableProductAddToCartWithOptionsStore =
 			setDefaultSelectedAttribute: () => void;
 			setSelectedVariationId: () => void;
 			validateVariation: () => void;
+			watchQuantityConstraints: () => void;
 		};
 	};
 

@@ -194,9 +194,6 @@ export type AddToCartWithOptionsStore = {
 		addToCart: () => void;
 		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
 	};
-	callbacks: {
-		watchQuantityConstraints: () => void;
-	};
 };
 
 const { actions, state } = store<
