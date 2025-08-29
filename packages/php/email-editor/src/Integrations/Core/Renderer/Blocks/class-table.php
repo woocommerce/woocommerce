@@ -460,19 +460,50 @@ class Table extends Abstract_Block_Renderer {
 	 * @return string Table content with styles applied.
 	 */
 	private function apply_styles_to_table_element( string $table_content, string $styles ): string {
-		if ( empty( $styles ) ) {
-			return $table_content;
-		}
-
 		$html = new \WP_HTML_Tag_Processor( $table_content );
 		if ( $html->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
 			$existing_style = (string) ( $html->get_attribute( 'style' ) ?? '' );
 			$existing_style = rtrim( $existing_style, "; \t\n\r\0\x0B" );
-			$new_style      = $existing_style ? $existing_style . '; ' . $styles : $styles;
+
+			// Add default border widths if individual border colors are present but no widths.
+			$border_width_styles = $this->get_default_border_widths( $existing_style );
+
+			$new_style = $existing_style;
+			if ( ! empty( $border_width_styles ) ) {
+				$new_style = $new_style ? $new_style . '; ' . $border_width_styles : $border_width_styles;
+			}
+			if ( ! empty( $styles ) ) {
+				$new_style = $new_style ? $new_style . '; ' . $styles : $styles;
+			}
+
 			$html->set_attribute( 'style', $new_style );
 			return $html->get_updated_html();
 		}
 		return $table_content;
+	}
+
+	/**
+	 * Get default border widths for table element when individual border colors are present.
+	 *
+	 * @param string $existing_style Existing style attribute of the table element.
+	 * @return string CSS border width styles or empty string if not needed.
+	 */
+	private function get_default_border_widths( string $existing_style ): string {
+		// Check if individual border colors are present but no corresponding widths.
+		$sides               = array( 'top', 'right', 'bottom', 'left' );
+		$border_width_styles = array();
+
+		foreach ( $sides as $side ) {
+			$has_color = strpos( $existing_style, "border-{$side}-color:" ) !== false;
+			$has_width = strpos( $existing_style, "border-{$side}-width:" ) !== false;
+
+			// If border color is present but no width, add default width.
+			if ( $has_color && ! $has_width ) {
+				$border_width_styles[] = "border-{$side}-width: 1.5px";
+			}
+		}
+
+		return implode( '; ', $border_width_styles );
 	}
 
 	/**
