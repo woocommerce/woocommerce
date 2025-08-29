@@ -24,7 +24,7 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * @since 10.3.0
 	 *
-	 * @param Note $note
+	 * @param Note $note Note to check.
 	 * @return Note
 	 */
 	public static function maybe_update_notice( $note ) {
@@ -33,8 +33,10 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		if ( ! in_array( 'update', \WC_Admin_Notices::get_notices(), true ) ) {
-			// Note is being loaded despite not being necessary.
-			// TODO: remove here.
+			$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
+			$note->save();
+
+			return $note;
 		}
 
 		$needs_db_update = \WC_Install::needs_db_update();
