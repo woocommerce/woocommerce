@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
- * CatalogSorting class.
+ * AddToCartForm class.
  */
 class AddToCartForm extends AbstractBlock {
 
@@ -47,7 +47,8 @@ class AddToCartForm extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( 'stepper' !== $attributes['quantitySelectorStyle'] ) {
+		$parsed_attributes = $this->parse_attributes( $attributes );
+		if ( 'stepper' !== $parsed_attributes['quantitySelectorStyle'] ) {
 			return;
 		}
 
@@ -225,7 +226,6 @@ class AddToCartForm extends AbstractBlock {
 		$product_name = $product->get_name();
 		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
 
-		$parsed_attributes  = $this->parse_attributes( $attributes );
 		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
