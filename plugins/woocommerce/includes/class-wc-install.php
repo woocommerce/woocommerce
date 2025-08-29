@@ -531,8 +531,23 @@ class WC_Install {
 			self::update();
 			self::add_update_db_notice();
 
-			if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
-				$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+			$return_url = $_GET['return_url'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below before use.
+			if ( ! empty( $return_url ) ) {
+				// Try to go back to the previus page.
+				if ( 'wc-admin-referer' === $return_url ) {
+					$return_url = preg_replace( '/^.*\/wp-admin\//i', '', wp_get_referer() ? wp_get_referer() : '' );
+
+					if ( $return_url && false === strpos( $return_url, 'do_update_woocommerce' ) ) {
+						$return_url = remove_query_arg(
+							array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ),
+							admin_url( $return_url )
+						);
+					} else {
+						$return_url = admin_url( 'admin.php?page=wc-settings' );
+					}
+				}
+
+				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url ); // WPCS: input var ok.
 			}
 		}
