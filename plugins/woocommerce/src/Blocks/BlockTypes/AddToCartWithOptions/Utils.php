@@ -55,7 +55,7 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
 	 * @param string   $quantity_html The quantity HTML.
 	 * @param array    $wrapper_attributes Optional wrapper attributes.
