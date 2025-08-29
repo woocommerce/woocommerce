@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -41,7 +42,14 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_read_product_data_loads_all_properties_for_the_variation() {
 		$this->enable_cogs_feature();
 
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sold_individually( true );
+		$parent->set_tax_status( ProductTaxStatus::SHIPPING );
+		$parent->set_cross_sell_ids( array( 1, 2, 3 ) );
+		$parent_id = $parent->save();
+
 		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent_id );
 		$variation->set_description( 'This is a test variation description' );
 		$variation->set_regular_price( '29.99' );
 		$variation->set_sale_price( '24.99' );
@@ -64,6 +72,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$variation->set_tax_class( 'reduced-rate' );
 		$variation->set_cogs_value_is_additive( true );
 		$variation->set_cogs_value( 43 );
+		$variation->set_sold_individually( true );
 		$variation->save();
 
 		$product = new WC_Product_Variation();
@@ -94,6 +103,9 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 'reduced-rate', $product->get_tax_class() );
 		$this->assertTrue( $product->get_cogs_value_is_additive() );
 		$this->assertEquals( 43, $product->get_cogs_value() );
+		$this->assertTrue( $product->get_sold_individually() );
+		$this->assertEquals( ProductTaxStatus::SHIPPING, $product->get_tax_status() );
+		$this->assertEquals( array( 1, 2, 3 ), $product->get_cross_sell_ids() );
 	}
 
 	/**

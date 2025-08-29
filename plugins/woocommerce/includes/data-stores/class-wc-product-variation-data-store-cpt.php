@@ -366,27 +366,30 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$post_meta_values = get_post_meta( $id );
 
 		$meta_key_to_props = array(
-			'_variation_description' => 'description',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'_manage_stock'          => 'manage_stock',
-			'_stock_status'          => 'stock_status',
-			'_virtual'               => 'virtual',
-			'_product_image_gallery' => 'gallery_image_ids',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_downloadable'          => 'downloadable',
-			'_sku'                   => 'sku',
-			'_global_unique_id'      => 'global_unique_id',
-			'_stock'                 => 'stock_quantity',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_low_stock_amount'      => 'low_stock_amount',
-			'_backorders'            => 'backorders',
+			'_variation_description'  => 'description',
+			'_regular_price'          => 'regular_price',
+			'_sale_price'             => 'sale_price',
+			'_sale_price_dates_from'  => 'date_on_sale_from',
+			'_sale_price_dates_to'    => 'date_on_sale_to',
+			'_manage_stock'           => 'manage_stock',
+			'_stock_status'           => 'stock_status',
+			'_virtual'                => 'virtual',
+			'_product_image_gallery'  => 'gallery_image_ids',
+			'_download_limit'         => 'download_limit',
+			'_download_expiry'        => 'download_expiry',
+			'_downloadable'           => 'downloadable',
+			'_sku'                    => 'sku',
+			'_global_unique_id'       => 'global_unique_id',
+			'_stock'                  => 'stock_quantity',
+			'_weight'                 => 'weight',
+			'_length'                 => 'length',
+			'_width'                  => 'width',
+			'_height'                 => 'height',
+			'_low_stock_amount'       => 'low_stock_amount',
+			'_backorders'             => 'backorders',
+			'_cogs_total_value'       => 'cogs_total_value',
+			'_cogs_value_is_additive' => 'cogs_value_is_additive',
+			'_tax_class'              => 'tax_class',
 		);
 
 		$set_props = array();
@@ -398,14 +401,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
 		$set_props['image_id']          = get_post_thumbnail_id( $id );
-		$set_props['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $post_meta_values['_tax_class'][0] ?? null;
+		$set_props['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $set_props['tax_class'];
 
 		$product->set_props( $set_props );
 
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value             = $post_meta_values['cogs_value'][0] ?? '';
+			$cogs_value             = $set_props['cogs_total_value'] ?? '';
 			$cogs_value             = '' === $cogs_value ? null : (float) $cogs_value;
-			$cogs_value_is_additive = 'yes' === ( $post_meta_values['_cogs_value_is_additive'][0] ?? '' );
+			$cogs_value_is_additive = 'yes' === ( $set_props['cogs_value_is_additive'] ?? '' );
 			$product->set_props(
 				array(
 					'cogs_value'             => $cogs_value,
@@ -439,17 +442,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$parent_post_meta_values = get_post_meta( $product->get_parent_id() );
 
 		$parent_meta_key_to_props = array(
-			'_sku'              => 'sku',
-			'_global_unique_id' => 'global_unique_id',
-			'_manage_stock'     => 'manage_stock',
-			'_backorders'       => 'backorders',
-			'_stock'            => 'stock_quantity',
-			'_weight'           => 'weight',
-			'_length'           => 'length',
-			'_width'            => 'width',
-			'_height'           => 'height',
-			'_tax_class'        => 'tax_class',
-			'_purchase_note'    => 'purchase_note',
+			'_sku'               => 'sku',
+			'_global_unique_id'  => 'global_unique_id',
+			'_manage_stock'      => 'manage_stock',
+			'_backorders'        => 'backorders',
+			'_stock'             => 'stock_quantity',
+			'_weight'            => 'weight',
+			'_length'            => 'length',
+			'_width'             => 'width',
+			'_height'            => 'height',
+			'_tax_class'         => 'tax_class',
+			'_purchase_note'     => 'purchase_note',
+			'_sold_individually' => 'sold_individually',
+			'_tax_status'        => 'tax_status',
+			'_crosssell_ids'     => '_crosssell_ids',
 		);
 
 		$parent_data = array();
@@ -469,9 +475,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_parent_data( $parent_data );
 
 		// Pull data from the parent when there is no user-facing way to set props.
-		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
-		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
-		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
+		$product->set_sold_individually( $parent_data['sold_individually'] );
+		$product->set_tax_status( $parent_data['tax_status'] );
+		$product->set_cross_sell_ids( $parent_data['_crosssell_ids'] );
 
 		if ( $this->cogs_feature_is_enabled() ) {
 			$this->load_cogs_data( $product );
