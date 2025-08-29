@@ -73,6 +73,7 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 	const [ stripeComponents, setStripeComponents ] = useState< any >( null );
 	const [ initializationError, setInitializationError ] = useState< string | null >( null );
 	const [ loading, setLoading ] = useState( true );
+	const [ componentReady, setComponentReady ] = useState( false );
 	const [ refreshKey, setRefreshKey ] = useState( 0 );
 	const [ lastNotifications, setLastNotifications ] = useState< { total: number; actionRequired: number } | null >( null );
 
@@ -92,6 +93,7 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 				setStripeComponents( null );
 				setInitializationError( null );
 				setLoading( true );
+				setComponentReady( false );
 
 				// Dynamic imports to avoid webpack issues.
 				const { loadConnectAndInitialize } = await import( '@stripe/connect-js' );
@@ -136,6 +138,9 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 
 	// Simple notification change handler.
 	const handleNotificationsChange = ( notifications ) => {
+		// Mark component as ready when first notification change occurs
+		setComponentReady( true );
+		
 		if ( onNotificationsChange ) {
 			onNotificationsChange( notifications );
 		}
@@ -164,10 +169,14 @@ export const EmbeddedConnectNotificationBanner: React.FC< EmbeddedAccountNotific
 		};
 	}, [ stripeConnectInstance ] );
 
-	// Follow exact woocommerce-payments pattern
+	// Follow exact woocommerce-payments pattern - show loader until component is fully ready
 	const content = (
 		<>
-			{ ( loading || ! stripeConnectInstance ) && <StripeSpinner /> }
+			{ ( loading || ! stripeConnectInstance || ! componentReady ) && (
+				<div className="stripe-notifications-banner-loader">
+					<StripeSpinner />
+				</div>
+			) }
 			{ stripeConnectInstance && stripeComponents && (
 				<stripeComponents.ConnectComponentsProvider connectInstance={ stripeConnectInstance }>
 					<stripeComponents.ConnectNotificationBanner

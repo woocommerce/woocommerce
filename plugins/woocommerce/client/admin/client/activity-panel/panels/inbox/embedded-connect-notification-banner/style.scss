@@ -1,3 +1,21 @@
+// Match woocommerce-payments styling exactly
+.stripe-notifications-banner-wrapper {
+	padding-bottom: 0.25rem; // Stripe does it in their furever.dev site too so the border is visible.
+	overflow: hidden; // Stripe does it in their furever.dev site too so the border is visible.
+	margin-bottom: 24px;
+	margin-left: -1px; // For some reason we lack 1px left and right.
+	margin-right: -1px;
+}
+
+.stripe-notifications-banner-loader {
+	width: 100%; /* Keeps it 680px max but adapts */
+	height: 160px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: white;
+}
+
 .woocommerce-embedded-connect-notification-banner {
 	&.loading {
 		display: flex;
