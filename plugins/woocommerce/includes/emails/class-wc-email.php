@@ -437,6 +437,51 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Get available email groups with their titles.
+	 *
+	 * @since 10.3.0
+	 * @return array Associative array of email group slugs => titles.
+	 */
+	public function get_email_groups() {
+		$email_groups = array(
+			'accounts'         => __( 'Accounts', 'woocommerce' ),
+			'orders'           => __( 'Orders', 'woocommerce' ),
+			'order-processing' => __( 'Order processing', 'woocommerce' ),
+			'order-exceptions' => __( 'Order exceptions', 'woocommerce' ),
+			'payments'         => __( 'Payments', 'woocommerce' ),
+		);
+
+		/**
+		 * Filter the available email groups.
+		 *
+		 * @since 10.3.0
+		 * @param array $email_groups Associative array of email group slugs => titles.
+		 */
+		return apply_filters( 'woocommerce_email_groups', $email_groups );
+	}
+
+	/**
+	 * Get the title for the current email group.
+	 *
+	 * @since 10.3.0
+	 * @return string The email group title. Falls back to the email group slug if not found.
+	 */
+	public function get_email_group_title() {
+		$email_groups = $this->get_email_groups();
+		$title = isset( $email_groups[ $this->email_group ] ) ? $email_groups[ $this->email_group ] : $this->email_group;
+
+		/**
+		 * Filter the email group title.
+		 *
+		 * @since 10.3.0
+		 * @param string $title The email group title.
+		 * @param string $email_group The email group slug.
+		 * @param array $email_groups Associative array of email group slugs => titles.
+		 */
+		return apply_filters( 'woocommerce_email_group_title', $title, $this->email_group, $email_groups );
+	}
+
+	/**
 	 * Get email subject.
 	 *
 	 * @since  3.1.0
