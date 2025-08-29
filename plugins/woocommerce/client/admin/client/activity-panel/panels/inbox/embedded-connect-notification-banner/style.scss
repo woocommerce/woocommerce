@@ -43,16 +43,24 @@
 	}
 }
 
-// Stripe spinner animation
-.stripe-spinner {
-	animation: stripe-spin 1s linear infinite;
-}
-
-@keyframes stripe-spin {
-	0% {
-		transform: rotate(0deg);
+// Stripe spinner animation with accessibility support
+.woocommerce-embedded-connect-notification-banner {
+	.stripe-spinner {
+		animation: stripe-spin 1s linear infinite;
+		color: #4F575D; // Fallback color for better theming
+		
+		// Respect user's reduced motion preference
+		@media (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
 	}
-	100% {
-		transform: rotate(360deg);
+
+	@keyframes stripe-spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 }
