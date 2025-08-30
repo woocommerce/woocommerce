@@ -49,6 +49,15 @@
 
 	/* When the pill button is hidden, we also need to hide the label (&) */
 	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input[hidden]) {
+		visibility: hidden;
+	}
+	/* Do not force a cursor for the inputs that are disabled at the browser level (:disabled) */
+	&:where(:hover:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input.disabled)) {
+		cursor: pointer;
+	}
+
+	/* When the pill button is hidden, we also need to hide the label (&) */
+	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input[hidden]) {
 		display: none;
 	}
 

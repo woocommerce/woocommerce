@@ -130,7 +130,7 @@ export default function AttributeOptionsEdit(
 				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __( 'Auto-select other attributes on user selection', 'woocommerce' ) }
-						help={ __( 'This controls whether other attributes will be auto-selected when an attribute is changed. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
+						help={ __( 'This controls whether other attributes will be auto-selected when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
 						checked={ autoselect }
 						onChange={ () => setAttributes( { autoselect: ! autoselect } ) }
 						__nextHasNoMarginBottom
@@ -147,9 +147,9 @@ export default function AttributeOptionsEdit(
 						help={ __( 'This controls what to do with attribute values that conflict with the current selection.', 'woocommerce' ) }
 						value={ disabledAttributesAction }
 						options={ [
-							{ label: __( 'Hidden',                                                                  'woocommerce' ), value: 'hide' },
-							{ label: __( 'Grayed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
-							{ label: __( 'Grayed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
+							{ label: __( 'Hidden',                                                                              'woocommerce' ), value: 'hide' },
+							{ label: __( 'Grayed-out/crossed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
+							{ label: __( 'Grayed-out/crossed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
 						] }
 						onChange={ ( value ) => setAttributes( { disabledAttributesAction: value } ) }
 						__nextHasNoMarginBottom

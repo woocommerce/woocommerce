@@ -192,8 +192,7 @@
 
 				option {
 					&.disabled,
-					&:disabled,
-					&[disabled] {
+					&:disabled {
 						// Grayed-out & disabled options
 						color: GrayText;
 					}

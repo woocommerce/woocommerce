@@ -65,14 +65,15 @@
 				let doCheckVariations = false;
 				self.$attributeFields.each( function() {
 					const $el = $( this );
-						const $options = $el.find( 'option:not([value=""], [disabled], [class*="disabled"])' );
-						if ( $options.length === 1 ) {
-							// There is only one attribute to choose from
-							$el.val( $options.val() );
-							$el.trigger( "change" ).trigger( "click" );
-						} else {
-							// More than one attribute to choose from, let the user choose
-						}
+					const $options = $el.find( 'option:not([value=""], [disabled], [class*="disabled"])' );
+					if ( $options.length === 1 ) {
+						// There is only one attribute to choose from
+						$el.val( $options.val() );
+						// The change is done, trigger change and click events to allow plugins to listen
+						$el.trigger( "change" ).trigger( "click" );
+					} else {
+						// More than one attribute to choose from, let the user choose
+					}
 				} );
 			}
 
@@ -235,6 +236,7 @@
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
 						} else {
+							// Checking variation after resetting to ensure the options are not wrongly disabled
 							form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
 							attributes.chosenCount = 0;
 
@@ -256,6 +258,7 @@
 				if ( variation ) {
 					form.$form.trigger( 'found_variation', [ variation ] );
 				} else {
+					// Checking variation after resetting to ensure the options are not wrongly disabled
 					form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
 					attributes.chosenCount = 0;
 
@@ -581,10 +584,8 @@
 					break;
 			}
 
-
 			// Finally, copy to DOM and set value.
 			current_attr_select.html( new_attr_select.html() );
-			//current_attr_select.find( 'option:not([value=""], .enabled)' ).prop( 'disabled', true );
 
 			// Choose selected value.
 			if ( selected_attr_val ) {

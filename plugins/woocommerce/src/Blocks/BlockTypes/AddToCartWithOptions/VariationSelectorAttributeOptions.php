@@ -146,7 +146,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
 
 		$wp_interactivity_directive = '';
-		$func_name = 'state.isOptionDisabled';
 		switch ( $disabled_attributes_action ) {
 			case 'hide':
 				// Hide disabled
@@ -187,7 +186,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'name'                      => $attribute_slug,
 						'value'                     => $attribute_term['value'],
 						'data-wp-bind--checked'     => 'state.isOptionSelected',
-						$wp_interactivity_directive => $func_name,
+						$wp_interactivity_directive => 'state.isOptionDisabled',
 						'data-wp-watch'             => 'callbacks.watchSelected',
 						'data-wp-on--click'         => 'actions.handlePillClick',
 						'data-wp-on--keydown'       => 'actions.handleKeyDown',
@@ -250,7 +249,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
 
 		$wp_interactivity_directive = '';
-		$func_name = 'state.isOptionDisabled';
 		switch ( $disabled_attributes_action ) {
 			case 'hide':
 				// Hide disabled
@@ -273,7 +271,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
 				'value'                     => $attribute_term['value'],
-				$wp_interactivity_directive => $func_name,
+				$wp_interactivity_directive => 'state.isOptionDisabled',
 				'data-wp-context'           => array(
 					'option'  => $attribute_term,
 					'name'    => $attribute_slug,

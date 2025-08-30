@@ -23,6 +23,8 @@ import type {
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
+var $ = jQuery;
+
 type Option = {
 	value: string;
 	label: string;
@@ -57,9 +59,9 @@ function attributesAutoselect( $variation_selectors ) {
 			fieldStyle = $current_variation_selector.data( 'style' ) || 'pill';
 		// Dropdown options or Pill inputs,
 		// that HAVE a value (Choose an Option has an empty value of ""),
-		// are NOT disabled (disabled by attribute is when you cannot click it, disabled by class is when it is simply grayed-out, but you can still click it),
+		// are NOT disabled (disabled by attribute is when you cannot click it, disabled by class is when it is simply grayed-out/crossed-out, but you can still click it),
 		// and are compatible with the possible variations
-		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], [disabled], [class*="disabled"])' ).filter( ( i, e ) => {
+		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], :disabled, .disabled)' ).filter( ( i, e ) => {
 			const $el = $( e );
 			var name = '';
 			switch ( fieldStyle ) {
@@ -109,7 +111,7 @@ function attributesAutoselect( $variation_selectors ) {
 
 function attributesAutoselectOthers() {
 	const context = getContext< Context >(),
-		$form = $( 'form.wc-block-add-to-cart-with-options.cart' ),
+		$form = $( 'form.wc-block-add-to-cart-with-options' ),
 		$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
 		autoselect =
 			$variation_selectors.first().data( 'autoselect' ) ||
@@ -316,7 +318,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					getContext< AddToCartWithOptionsStoreContext >(
 						'woocommerce/add-to-cart-with-options'
 					);
-				const $form = $( 'form.wc-block-add-to-cart-with-options.cart' ),
+				const $form = $( 'form.wc-block-add-to-cart-with-options' ),
 					$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
 					disabledAttributesAction =
 						$variation_selectors.first().data( 'disabledAttributesAction' ) ||
@@ -324,7 +326,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
-					if ( disabled ) {
+					if ( disabled && disabledAttributesAction === 'gray' ) {
+						// Before selecting this option, prepare the way by deselecting any other option that would become invalid
 						const fakeSelectedAttributes: CartVariationItem[] = [ { attribute: context.name, value: context.option.value } ];
 						for ( const attr of selectedAttributes ) {
 							const attrName = attr.attribute;
@@ -339,7 +342,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							} );
 							if ( ! valid ) {
 								// deselect this attribute by clicking on it
-								$( `form.wc-block-add-to-cart-with-options.cart input[name="${ attrName }"][value="${ attr.value }"` ).click();
+								$( `form.wc-block-add-to-cart-with-options input[name="${ attrName }"][value="${ attr.value }"` ).click();
 							}
 						}
 					}
@@ -366,7 +369,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		callbacks: {
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >(),
-					$form = $( 'form.wc-block-add-to-cart-with-options.cart' ),
+					$form = $( 'form.wc-block-add-to-cart-with-options' ),
 					$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
 					autoselectOnPageLoad =
 						$variation_selectors.first().data( 'autoselectOnPageLoad' ) ||
