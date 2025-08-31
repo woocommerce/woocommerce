@@ -1,0 +1,4 @@
+Significance: major
+Type: performance
+
+Change loading of WooCommerce Admin REST namespace to be on-demand.

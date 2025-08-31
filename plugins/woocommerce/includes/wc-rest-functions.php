@@ -457,3 +457,50 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
+
+/**
+ * Executes a callback if the current rest_route matches the namespace in order for that namespace to be loaded.  If the
+ * namespace does not match the current rest route, a callback will be registered to possibly load the namespace again on
+ * `rest_pre_dispatch`; this is done to allow the namespace to be loaded on the fly during `rest_do_request()` calls.
+ *
+ * @param string   $ns The namespace to check.
+ * @param callable $callback The callback to execute if the namespace should be loaded.
+ * @param string   $rest_route (Optional) The REST route to check against.
+ * @param string   $callback_filter_id (Internal)
+ *
+ * @return void
+ */
+function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
+	if ( '' === $rest_route ) {
+		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+	}
+
+	if ( '' !== $rest_route ) {
+		$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
+		$ns         = trailingslashit( $ns );
+		if ( str_starts_with( $rest_route, $ns ) ) {
+			if ( '' !== $callback_filter_id ) {
+				// we need to remove the filter prior the callback, because some APIs, wc-analytics, callback to its own namespace when registering.
+				remove_filter( 'rest_pre_dispatch', $callback_filter_id );
+			}
+			call_user_func( $callback );
+
+			return;
+		}
+	}
+	if ( '' === $callback_filter_id ) {
+		$callback_filter = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
+			if ( ! empty( $filter_result ) ) {
+				// A non-empty result would end up skipping the internal request, so we don't have a reason to load the namespace.
+				return $filter_result;
+			}
+			if ( $request instanceof WP_REST_Request ) {
+				wc_rest_maybe_load_namespace( $ns, $callback, false, $request->get_route() );
+			}
+
+			return $filter_result;
+		};
+		$callback_filter_id = _wp_filter_build_unique_id( 'rest_pre_dispatch', $callback_filter, 10 );
+		add_filter( 'rest_pre_dispatch', $callback_filter, 10, 3 );
+	}
+}
