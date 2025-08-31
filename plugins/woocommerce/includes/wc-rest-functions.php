@@ -480,26 +480,25 @@ function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $r
 		if ( str_starts_with( $rest_route, $ns ) ) {
 			if ( '' !== $callback_filter_id ) {
 				// we need to remove the filter prior the callback, because some APIs, wc-analytics, callback to its own namespace when registering.
-				remove_filter( 'rest_pre_dispatch', $callback_filter_id );
+				remove_filter( 'rest_pre_dispatch', $callback_filter_id, 0 );
 			}
+
 			call_user_func( $callback );
 
 			return;
 		}
 	}
+
 	if ( '' === $callback_filter_id ) {
 		$callback_filter = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
-			if ( ! empty( $filter_result ) ) {
-				// A non-empty result would end up skipping the internal request, so we don't have a reason to load the namespace.
-				return $filter_result;
-			}
-			if ( $request instanceof WP_REST_Request ) {
+			if ( is_callable( array( $request, 'get_route' ) ) ) {
 				wc_rest_maybe_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
 			}
-
 			return $filter_result;
 		};
 		$callback_filter_id = _wp_filter_build_unique_id( 'rest_pre_dispatch', $callback_filter, 10 );
-		add_filter( 'rest_pre_dispatch', $callback_filter, 10, 3 );
+		// This runs on priority 9 so that the namespace is loaded before `rest_handle_options_request()` is run.
+		// @todo, determine if we should load earlier just to be safe.
+		add_filter( 'rest_pre_dispatch', $callback_filter, 0, 3 );
 	}
 }

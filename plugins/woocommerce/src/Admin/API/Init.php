@@ -97,14 +97,13 @@ class Init {
 			 *
 			 * @since 3.5.0
 			 *
+			 * @todo Determine how to avoid extensions using this hook from loading the same controllers multiple times since it may be called more than once now.
 			 */
 			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 		}
 		foreach ( $controllers as $controller ) {
-			if ( ! isset( $this->$controller ) ) {
-				$this->$controller = new $controller();
-				$this->$controller->register_routes();
-			}
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
 		}
 	}
 
@@ -171,14 +170,13 @@ class Init {
 				 *
 				 * @since 3.5.0
 				 *
+				 * @todo Determine how to avoid extensions using this hook from loading the same controllers multiple times since it may be called more than once now.
 				 */
 				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $analytics_controllers );
 			}
 			foreach ( $analytics_controllers as $controller ) {
-				if ( ! isset( $this->$controller ) ) {
-					$this->$controller = new $controller();
-					$this->$controller->register_routes();
-				}
+				$this->$controller = new $controller();
+				$this->$controller->register_routes();
 			}
 		}
 	}
