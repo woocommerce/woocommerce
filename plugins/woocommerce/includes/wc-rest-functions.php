@@ -474,7 +474,6 @@ function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $r
 	if ( '' === $rest_route ) {
 		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 	}
-
 	if ( '' !== $rest_route ) {
 		$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
 		$ns         = trailingslashit( $ns );
@@ -495,7 +494,7 @@ function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $r
 				return $filter_result;
 			}
 			if ( $request instanceof WP_REST_Request ) {
-				wc_rest_maybe_load_namespace( $ns, $callback, false, $request->get_route() );
+				wc_rest_maybe_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
 			}
 
 			return $filter_result;
