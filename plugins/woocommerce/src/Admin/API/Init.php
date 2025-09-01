@@ -56,6 +56,12 @@ class Init {
 	public function rest_api_init() {
 		wc_rest_maybe_load_namespace( 'wc-admin', array( $this, 'rest_api_init_wc_admin' ) );
 		wc_rest_maybe_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
+		}
 	}
 
 	public function rest_api_init_wc_admin() {
@@ -84,10 +90,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
-
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-		}
 
 		if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
 			/**

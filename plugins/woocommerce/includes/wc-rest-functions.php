@@ -474,10 +474,12 @@ function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $r
 	if ( '' === $rest_route ) {
 		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 	}
+
 	if ( '' !== $rest_route ) {
 		$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
 		$ns         = trailingslashit( $ns );
-		if ( str_starts_with( $rest_route, $ns ) ) {
+		if ( '/' === $rest_route || str_starts_with( $rest_route, $ns ) ) {
+			// We match `/` so requests to the root, `/wp-json/`, load all namespaces like normal to be available for discovery requests.
 			if ( '' !== $callback_filter_id ) {
 				// we need to remove the filter prior the callback, because some APIs, wc-analytics, callback to its own namespace when registering.
 				remove_filter( 'rest_pre_dispatch', $callback_filter_id, 0 );

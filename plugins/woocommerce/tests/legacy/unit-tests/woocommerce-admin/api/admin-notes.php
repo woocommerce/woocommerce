@@ -44,8 +44,9 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
-		// @todo We should still test loading.
-		$this->markTestSkipped('No longer loading by dfeault.');
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+		$routes = $this->server->get_routes();
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
