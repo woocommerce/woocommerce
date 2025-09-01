@@ -7,13 +7,28 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
+import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 
-const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
+const test = base.extend< {
+	pageObject: AddToCartWithOptionsPage;
+	productGalleryPageObject: ProductGalleryPage;
+} >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
+		} );
+		await use( pageObject );
+	},
+	productGalleryPageObject: async (
+		{ page, editor, frontendUtils },
+		use
+	) => {
+		const pageObject = new ProductGalleryPage( {
+			page,
+			editor,
+			frontendUtils,
 		} );
 		await use( pageObject );
 	},
@@ -73,6 +88,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
+		productGalleryPageObject,
 		editor,
 	} ) => {
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -95,6 +111,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 
 		await pageObject.updateSingleProductTemplate();
+
+		// We update to the Product Gallery block to test that it scrolls to the
+		// correct variation image.
+		const productImageGalleryBlock = await editor.getBlockByName(
+			'woocommerce/product-image-gallery'
+		);
+		await editor.selectBlocks( productImageGalleryBlock );
+		await editor.transformBlockTo( 'woocommerce/product-gallery' );
 
 		// We insert the blockified Product Details block to test that it updates
 		// with the correct variation data.
@@ -129,7 +153,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
+		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
 			// Open additional information accordion so we can check the weight.
 			await page
 				.getByRole( 'button', { name: 'Additional Information' } )
@@ -142,6 +166,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '1.5 lbs' )
 			).toBeVisible();
+			const visibleImage =
+				await productGalleryPageObject.getVisibleLargeImageId();
+			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
@@ -156,6 +183,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '2 lbs' )
 			).toBeVisible();
+
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await productGalleryPageObject.getVisibleLargeImageId();
+
+				expect( newVisibleLargeImageId ).toBe( '35' );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
