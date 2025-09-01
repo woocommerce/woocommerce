@@ -15,9 +15,8 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Mock WordPress globals
-		$GLOBALS['wp'] = new stdClass();
-		$GLOBALS['wp']->query_vars = [];
+		$GLOBALS['wp']             = new stdClass(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['wp']->query_vars = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -26,8 +25,7 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		// Clean up globals
-		unset($GLOBALS['wp']);
+		unset( $GLOBALS['wp'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -153,7 +151,7 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	public function test_removes_filter_to_prevent_recursion() {
 		$callback_called_times = 0;
 		$test_callback         = function () use ( &$callback_called_times ) {
-			$callback_called_times ++;
+			++ $callback_called_times;
 		};
 
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
