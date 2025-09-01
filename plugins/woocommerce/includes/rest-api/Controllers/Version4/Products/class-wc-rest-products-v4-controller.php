@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce\RestApi
  * @extends WC_REST_Products_V2_Controller
  */
-class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
+class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
 
@@ -34,7 +34,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * The value of the 'search_sku' argument if present.
