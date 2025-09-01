@@ -395,7 +395,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value         = $post_meta_values[ $meta_key ][0] ?? '';
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -462,7 +462,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$parent_data = array();
 
 		foreach ( $parent_meta_key_to_props as $meta_key => $prop ) {
-			$meta_value           = $parent_post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value           = $parent_post_meta_values[ $meta_key ][0] ?? '';
 			$parent_data[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
