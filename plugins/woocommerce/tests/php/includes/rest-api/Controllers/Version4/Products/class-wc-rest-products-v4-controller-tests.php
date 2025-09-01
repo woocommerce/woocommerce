@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
- * Product Controller tests for V4REST API.
+ * Product Controller tests for V4 REST API.
  */
 class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
@@ -43,6 +43,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
+		$this->disable_rest_api_v4_feature();
 	}
 
 	/**
@@ -54,7 +55,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 			function ( $features ) {
 				$features[] = 'rest-api-v4';
 				return $features;
-			}
+			},
 		);
 	}
 
@@ -82,7 +83,6 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::enable_rest_api_v4_feature();
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -136,13 +136,13 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
-		self::disable_rest_api_v4_feature();
 	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
+		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new WC_REST_Products_V4_Controller();
 		$this->user     = $this->factory->user->create(
