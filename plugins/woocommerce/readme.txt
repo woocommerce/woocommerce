@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.2.0-beta.1 2025-09-16 =
+= 10.2.0-beta.1 2025-09-01 =
 
 **WooCommerce**
 
