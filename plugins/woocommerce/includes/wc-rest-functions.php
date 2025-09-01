@@ -474,5 +474,5 @@ function wc_rest_api_v4_is_enabled(): bool {
 		return false;
 	}
 	$features_controller = $container->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
-	return (bool) $features_controller->feature_is_enabled( 'rest_api_v4' );
+	return (bool) $features_controller->feature_is_enabled( 'rest-api-v4' );
 }

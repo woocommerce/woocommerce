@@ -516,7 +516,7 @@ class FeaturesController {
 				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
-			'rest_api_v4'                 => array(
+			'rest-api-v4'                 => array(
 				'name'               => __( 'REST API v4 (experimental)', 'woocommerce' ),
 				'description'        => __(
 					'Enable the new WooCommerce REST API v4.',
