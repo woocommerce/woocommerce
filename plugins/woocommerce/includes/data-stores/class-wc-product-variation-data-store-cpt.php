@@ -399,6 +399,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
+		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
 		$set_props['image_id']          = get_post_thumbnail_id( $id );
 		$set_props['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $set_props['tax_class'];
