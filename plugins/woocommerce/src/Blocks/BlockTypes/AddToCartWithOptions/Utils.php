@@ -123,9 +123,9 @@ class Utils {
 	 * @return bool True if the product is not purchasable or not in stock.
 	 */
 	public static function is_not_purchasable_product( $product ) {
-		if ( $product->is_type( 'simple' ) ) {
+		if ( $product->is_type( ProductType::SIMPLE ) ) {
 			return ! $product->is_in_stock() || ! $product->is_purchasable();
-		} elseif ( $product->is_type( 'variable' ) ) {
+		} elseif ( $product->is_type( ProductType::VARIABLE ) ) {
 			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
 		}
 

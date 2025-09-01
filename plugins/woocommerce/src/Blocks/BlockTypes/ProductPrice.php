@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductPrice class.
@@ -77,7 +78,7 @@ class ProductPrice extends AbstractBlock {
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
+			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
 
 			$wrapper_attributes = array();
 			$watch_attribute    = '';

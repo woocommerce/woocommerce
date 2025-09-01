@@ -90,12 +90,12 @@ class AddToCartWithOptions extends AbstractBlock {
 	 */
 	private function is_child_product_purchasable( \WC_Product $product ) {
 		// Skip variable products.
-		if ( $product->is_type( 'variable' ) ) {
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			return false;
 		}
 
 		// Skip grouped products.
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			return false;
 		}
 
@@ -187,7 +187,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						$context = wp_interactivity_get_context();
 						$product = wc_get_product( $context['productId'] );
 
-						if ( $product instanceof \WC_Product && ( $product->is_type( 'grouped' ) || $product->has_options() ) ) {
+						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
 						}
 						return true;
@@ -231,7 +231,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				'validationErrors' => array(),
 			);
 
-			if ( $product->is_type( 'variable' ) ) {
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
@@ -245,7 +245,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 			}
 
-			if ( $product->is_type( 'grouped' ) ) {
+			if ( $product->is_type( ProductType::GROUPED ) ) {
 				// Add context for purchasable child products.
 				$children_product_data = array();
 				foreach ( $product->get_children() as $child_product_id ) {
