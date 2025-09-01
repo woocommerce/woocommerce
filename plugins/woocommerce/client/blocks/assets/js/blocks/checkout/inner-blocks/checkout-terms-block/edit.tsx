@@ -24,6 +24,8 @@ import clsx from 'clsx';
 import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
+const noop = () => undefined;
+
 export const Edit = ( {
 	attributes: { checkbox, text, showSeparator },
 	setAttributes,
@@ -149,6 +151,7 @@ export const Edit = ( {
 							<CheckboxControl
 								id="terms-condition"
 								checked={ false }
+								onChange={ noop }
 							/>
 						</div>
 						<RichText
