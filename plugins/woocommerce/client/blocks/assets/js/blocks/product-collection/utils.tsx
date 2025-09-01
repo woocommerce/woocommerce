@@ -5,6 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select, useSelect } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import {
 	useEffect,
@@ -13,7 +14,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { ProductResponseItem } from '@woocommerce/types';
+import { isString, type ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
 import {
 	createBlock,
@@ -67,24 +68,23 @@ export function setQueryAttribute(
 
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
-		'//archive-product',
-		'//taxonomy-product_attribute',
-		'//product-search-results',
+		'archive-product',
+		'taxonomy-product_attribute',
+		'product-search-results',
 		// Custom taxonomy templates have structure:
-		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
+		// taxonomy-product_cat-<<CATEGORY>>
 		// hence we're checking if template ID includes the middle part.
 		//
 		// That includes:
-		// - woocommerce/woocommerce//taxonomy-product_cat
-		// - woocommerce/woocommerce//taxonomy-product_tag
-		'//taxonomy-product_cat',
-		'//taxonomy-product_tag',
-		'//taxonomy-product_brand',
+		// - taxonomy-product_cat
+		// - taxonomy-product_tag
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+		'taxonomy-product_brand',
 	];
 
-	const currentTemplateId = select(
-		'core/edit-site'
-	)?.getEditedPostId() as string;
+	// @ts-expect-error getEditedPostSlug is not typed
+	const currentTemplateId = select( editorStore ).getEditedPostSlug();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
@@ -93,7 +93,9 @@ const isInProductArchive = () => {
 	 */
 	if ( currentTemplateId ) {
 		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			currentTemplateId.includes( template )
+			isString( currentTemplateId )
+				? currentTemplateId.includes( template )
+				: false
 		);
 	}
 

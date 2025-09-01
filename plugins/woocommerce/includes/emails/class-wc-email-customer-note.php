@@ -37,6 +37,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 			$this->id             = 'customer_note';
 			$this->customer_email = true;
 			$this->title          = __( 'Customer note', 'woocommerce' );
+			$this->email_group    = 'order-exceptions';
 			$this->template_html  = 'emails/customer-note.php';
 			$this->template_plain = 'emails/plain/customer-note.php';
 			$this->placeholders   = array(

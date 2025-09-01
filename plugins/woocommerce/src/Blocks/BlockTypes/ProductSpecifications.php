@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * ProductSpecifications class.
  */
@@ -63,7 +65,7 @@ class ProductSpecifications extends AbstractBlock {
 			);
 		}
 
-		$is_interactive = $product->is_type( 'variable' );
+		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
 			$variations                = $product->get_available_variations( 'objects' );
