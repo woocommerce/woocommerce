@@ -265,10 +265,10 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		$privileged_users = new WP_User_Query(
 			array(
-				'fields'   => 'ID',
+				'fields'     => 'ID',
 				// Ideally, it should be `'role__in' => array( 'administrator', 'shop_manager' )`, but those queries
 				// will be using like-clauses ignoring the optimal indexes, hence we're using alternative approach.
-				'meta_query'   => array(
+				'meta_query' => array(
 					array(
 						'key'     => 'wp_user_level',
 						'value'   => array( 9, 10 ),
@@ -277,7 +277,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 				),
 			),
 		);
-		$query = new WP_User_Query(
+		$query            = new WP_User_Query(
 			apply_filters(
 				'woocommerce_admin_report_customer_list_user_query_args',
 				array(
