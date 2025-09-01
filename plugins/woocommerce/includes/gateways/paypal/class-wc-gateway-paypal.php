@@ -22,6 +22,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -670,30 +674,18 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		$version   = Constants::get_constant( 'WC_VERSION' );
-		$client_id = get_option( 'paypal_client_id' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
+		$buttons = new WC_Gateway_Paypal_Buttons( $this );
+		$options = $buttons->get_options();
 
-		if ( ! $client_id || ! $is_page_supported ) {
+		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
 			return;
 		}
-
-		// Load PayPal JS SDK dynamically with params.
-		$query = [
-			'client-id'       => $client_id,
-			'intent'          => $this->intent,
-			'buyer-country'   => 'US',
-			'locale'          => get_locale(),
-			'merchant-id'     => $this->email,
-			'components'      => 'buttons,funding-eligibility,messages',
-			'disable-funding' => 'card,applepay',
-			'enable-funding'  => 'venmo,paylater',
-			'currency'        => get_woocommerce_currency(),
-		];
 
 		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
 		
 		// Add PayPal JS SDK script.
-		wp_register_script( 'paypal-standard-sdk', add_query_arg( $query, $sdk_host ), [], null, false );
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), [], null, false );
 		wp_enqueue_script( 'paypal-standard-sdk' );
 
 		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', [ 'jquery' ], $version, true );
@@ -716,11 +708,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param string $handle Script handle.
 	 * @return array
 	 */
-	public function add_paypal_sdk_attributes( $attrs ) {
-		$page_type = is_checkout() ? 'checkout' : null;
-		
+	public function add_paypal_sdk_attributes( $attrs ) {		
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			wc_get_logger()->debug( 'add_paypal_sdk_attributes' );
+			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$page_type = $buttons->get_page_type();
+	
 			$attrs['data-page-type']              = $page_type;
 			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
 		}

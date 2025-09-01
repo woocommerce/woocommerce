@@ -51,12 +51,7 @@ class WC_Gateway_Paypal_Buttons {
 	public function get_options() {
 		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
 
-		$page_type = 'checkout';
-		if ( is_cart() || has_block( 'woocommerce/cart' ) ) {
-			$page_type = 'cart';
-		} elseif ( is_product() ) {
-			$page_type = 'product-details';
-		}
+		$page_type = $this->get_page_type();
 
 		return array(
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
@@ -70,6 +65,22 @@ class WC_Gateway_Paypal_Buttons {
 			'partner-attribution-id' => 'Woo_Cart_CoreUpgrade',
 			'page-type'              => $page_type,
 		);
+	}
+
+	/**
+	 * Get the page type for the PayPal buttons.
+	 *
+	 * @return string
+	 */
+	public function get_page_type() {
+		$page_type = 'checkout';
+		if ( is_cart() || has_block( 'woocommerce/cart' ) ) {
+			$page_type = 'cart';
+		} elseif ( is_product() ) {
+			$page_type = 'product-details';
+		}
+
+		return $page_type;
 	}
 
 	/**
