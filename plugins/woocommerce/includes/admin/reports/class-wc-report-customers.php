@@ -193,7 +193,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 				'fields'     => 'ID',
 				// Ideally, it should be `'role__in' => array( 'administrator', 'shop_manager' )`, but those queries
 				// will be using like-clauses ignoring the optimal indexes, hence we're using alternative approach.
-				'meta_query' => array(
+				'meta_query' => array( // WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => 'wp_user_level',
 						'value'   => array( 9, 10 ),
