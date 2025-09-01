@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2025-09-01
+### Fixed
+- Fix duplicate product purchase events on order confirmation page. [#44973]
+
 ## [0.6.0] - 2025-08-18
 ### Changed
 - Replace URL-based landing page tracking with breadcrumb-based hierarchical page tracking. [#44789]
@@ -14,20 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - 2025-08-13
 ### Added
-- Add Session Engagement Tracking [#44729]
-- Track Page Views [#44729]
+- Add session engagement tracking. [#44729]
+- Track page views. [#44729]
 
 ### Changed
-- Add clickhouse param to record events [#44729]
-- Set expiration time for session cookie to 30 mins or midnight UTC [#44729]
+- Add clickhouse param to record events. [#44729]
+- Set expiration time for session cookie to 30 mins or midnight UTC. [#44729]
 
 ### Fixed
-- Fix update cart not being triggered [#44729]
-- Set woocommerceanalytics_session [#44729]
+- Ensure update cart is triggered. [#44729]
+- Set woocommerceanalytics_session. [#44729]
 
 ## [0.4.9] - 2025-08-04
 ### Changed
-- Performance: improve processing of blocks during Analytics gathering. [#44544]
+- Performance: Improve processing of blocks during Analytics gathering. [#44544]
 
 ## [0.4.8] - 2025-06-16
 ### Fixed
@@ -139,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.6.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.9...v0.5.0
 [0.4.9]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.8...v0.4.9
