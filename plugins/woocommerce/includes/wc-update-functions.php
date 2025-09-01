@@ -3125,6 +3125,6 @@ function wc_update_1030_add_key_value_index_to_usermeta_table() {
 	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value'" );
 	if ( null === $index_exists ) {
 		$remaining_index_length = max( ( new DatabaseUtil() )->get_max_index_length() - 100, 20 );
-		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length))" );
+		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length))" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }
