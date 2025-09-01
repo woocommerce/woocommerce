@@ -470,7 +470,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  *
  * @return void
  */
-function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
+function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
 	if ( '' === $rest_route ) {
 		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 	}
@@ -494,7 +494,7 @@ function wc_rest_maybe_load_namespace( string $ns, callable $callback, string $r
 	if ( '' === $callback_filter_id ) {
 		$callback_filter = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
 			if ( is_callable( array( $request, 'get_route' ) ) ) {
-				wc_rest_maybe_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
+				wc_rest_lazy_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
 			}
 			return $filter_result;
 		};
