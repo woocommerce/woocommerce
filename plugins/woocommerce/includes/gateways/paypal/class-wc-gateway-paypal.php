@@ -197,7 +197,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( $this->should_use_orders_v2() ) {
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
-		
+
 				// Render the buttons container to load the buttons via PayPal JS SDK.
 				// Classic checkout page.
 				add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
@@ -673,30 +673,35 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$version   = Constants::get_constant( 'WC_VERSION' );
+		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons = new WC_Gateway_Paypal_Buttons( $this );
-		$options = $buttons->get_options();
+		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$options           = $buttons->get_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
 			return;
 		}
 
 		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
-		
+
 		// Add PayPal JS SDK script.
-		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), [], null, false );
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
 		wp_enqueue_script( 'paypal-standard-sdk' );
 
-		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', [ 'jquery' ], $version, true );
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery' ), $version, true );
 
-		wp_localize_script( 'wc-paypal-frontend', 'paypal_standard', [
-			'gateway_id'           => $this->id,
-			'ajax_url'             => admin_url( 'admin-ajax.php' ),
-			'wc_ajax_url'          => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'create_order_nonce'   => wp_create_nonce( 'create_order' ),
-			'capture_order_nonce'  => wp_create_nonce( 'capture_order' ),
-		]);
+		wp_localize_script(
+			'wc-paypal-frontend',
+			'paypal_standard',
+			array(
+				'gateway_id'          => $this->id,
+				'ajax_url'            => admin_url( 'admin-ajax.php' ),
+				'wc_ajax_url'         => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+				'create_order_nonce'  => wp_create_nonce( 'create_order' ),
+				'capture_order_nonce' => wp_create_nonce( 'capture_order' ),
+			)
+		);
 
 		wp_enqueue_script( 'wc-paypal-frontend' );
 	}
@@ -704,15 +709,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Add PayPal SDK attributes to the script.
 	 *
-	 * @param array  $attrs Attributes.
-	 * @param string $handle Script handle.
+	 * @param array $attrs Attributes.
 	 * @return array
 	 */
-	public function add_paypal_sdk_attributes( $attrs ) {		
+	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
 			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
 			$page_type = $buttons->get_page_type();
-	
+
 			$attrs['data-page-type']              = $page_type;
 			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
 		}
