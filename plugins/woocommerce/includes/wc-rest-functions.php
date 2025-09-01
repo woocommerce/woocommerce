@@ -502,7 +502,7 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 		}
 	}
 
-	// Register a filter to check again on rest_pre_dispatch for dynamic loading
+	// Register a filter to check again on rest_pre_dispatch for dynamic loading.
 	if ( '' === $callback_filter_id ) {
 		$callback_filter    = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
 			if ( is_callable( array( $request, 'get_route' ) ) ) {
@@ -517,7 +517,7 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 	}
 }
 
-/*
+/**
  * Check if the WooCommerce REST API v4 feature is enabled.
  *
  * @return bool True if the REST API v4 feature is enabled, false otherwise.

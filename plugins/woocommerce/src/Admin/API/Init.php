@@ -53,6 +53,11 @@ class Init {
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-upload-downloadable-product.php';
 	}
 
+	/**
+	 * Initialize the API namespaces under WooCommerce Admin.
+	 *
+	 * @return void
+	 */
 	public function rest_api_init() {
 		wc_rest_lazy_load_namespace( 'wc-admin', array( $this, 'rest_api_init_wc_admin' ) );
 		wc_rest_lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
@@ -64,6 +69,11 @@ class Init {
 		}
 	}
 
+	/**
+	 * Load the wc-analytics namespace controllers.
+	 *
+	 * @return void
+	 */
 	public function rest_api_init_wc_admin() {
 		$controllers = array(
 			'Automattic\WooCommerce\Admin\API\Notice',
@@ -109,6 +119,11 @@ class Init {
 		}
 	}
 
+	/**
+	 * Load the wc-analytics namespace controllers.
+	 *
+	 * @return void
+	 */
 	public function rest_api_init_wc_analytics() {
 		// Controllers in wc-analytics namespace, but loaded irrespective of analytics feature value.
 		$analytic_mu_controllers = array(

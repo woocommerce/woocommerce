@@ -72,13 +72,13 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_loads_namespace_when_route_matches_exactly() {
 		$callback_called = false;
-		$test_callback = function() use (&$callback_called) {
+		$test_callback   = function () use ( &$callback_called ) {
 			$callback_called = true;
 		};
 
-		wc_rest_lazy_load_namespace('wc/wc-rest-testing', $test_callback, 'wc/wc-rest-testing/products');
+		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback, 'wc/wc-rest-testing/products' );
 
-		$this->assertTrue($callback_called, 'Callback should be executed when route matches namespace');
+		$this->assertTrue( $callback_called, 'Callback should be executed when route matches namespace' );
 	}
 
 	/**
@@ -152,20 +152,18 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_removes_filter_to_prevent_recursion() {
 		$callback_called_times = 0;
-		$test_callback   = function () use ( &$callback_called_times ) {
-			$callback_called_times++;
+		$test_callback         = function () use ( &$callback_called_times ) {
+			$callback_called_times ++;
 		};
 
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 		$this->assertEquals( 0, $callback_called_times, 'Callback should not be executed' );
 
-		$request    = new WP_REST_Request( 'GET', '/wc/wc-rest-testing/products/' );
+		$request = new WP_REST_Request( 'GET', '/wc/wc-rest-testing/products/' );
 		$this->server->dispatch( $request );
 		$this->assertEquals( 1, $callback_called_times, 'Callback should have been executed exactly once' );
 
 		$this->server->dispatch( $request );
 		$this->assertEquals( 1, $callback_called_times, 'Callback should have only been executed once' );
-
 	}
-
 }
