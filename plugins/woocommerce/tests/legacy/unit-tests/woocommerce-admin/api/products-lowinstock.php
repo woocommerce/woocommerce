@@ -31,14 +31,13 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+		wp_set_current_user( $this->user );
 	}
 
 	/**
 	 * Test low stock query.
 	 */
 	public function test_low_stock() {
-		wp_set_current_user( $this->user );
-
 		// Create a product with stock management.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
@@ -72,8 +71,6 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 	 * Test multiple products with custom low stock amounts.
 	 */
 	public function test_multiple_products_custom_low_stock() {
-		wp_set_current_user( $this->user );
-
 		// Create three products with different stock quantities.
 		$product1 = WC_Helper_Product::create_simple_product();
 		$product1->set_manage_stock( true );
@@ -107,8 +104,6 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 	 * Test multiple products with global low stock setting.
 	 */
 	public function test_multiple_products_global_low_stock() {
-		wp_set_current_user( $this->user );
-
 		// Set global low stock amount.
 		update_option( 'woocommerce_notify_low_stock_amount', 5 );
 
