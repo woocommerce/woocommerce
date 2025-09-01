@@ -56,7 +56,7 @@ const PriceEdit = ( {
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 
 	let { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate( { isDescendentOfQueryLoop } );
+		useIsDescendentOfSingleProductTemplate();
 
 	if ( isDescendentOfQueryLoop ) {
 		isDescendentOfSingleProductTemplate = false;
@@ -88,14 +88,12 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				{ product && (
-					<Block
-						{ ...blockAttrs }
-						isAdmin={ true }
-						product={ product }
-						isExperimentalWcRestApiEnabled={ isExperimentalWcRestApiEnabled() }
-					/>
-				) }
+				<Block
+					{ ...blockAttrs }
+					isAdmin={ true }
+					product={ product }
+					isExperimentalWcRestApiEnabled={ isExperimentalWcRestApiEnabled() }
+				/>
 			</div>
 		</>
 	);

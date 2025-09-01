@@ -3,8 +3,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductStockIndicator class.
@@ -101,7 +101,7 @@ class ProductStockIndicator extends AbstractBlock {
 
 		$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product_to_render->is_type( 'variable' );
+		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product_to_render->is_type( ProductType::VARIABLE );
 
 		if ( empty( $availability['availability'] ) && ! $is_interactive ) {
 			return '';
