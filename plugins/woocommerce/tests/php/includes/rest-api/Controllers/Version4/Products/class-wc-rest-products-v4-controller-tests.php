@@ -46,6 +46,32 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Enable the REST API v4 feature.
+	 */
+	public static function enable_rest_api_v4_feature() {
+		add_filter(
+			'woocommerce_admin_features',
+			function ( $features ) {
+				$features[] = 'rest-api-v4';
+				return $features;
+			}
+		);
+	}
+
+	/**
+	 * Disable the REST API v4 feature.
+	 */
+	public static function disable_rest_api_v4_feature() {
+		add_filter(
+			'woocommerce_admin_features',
+			function ( $features ) {
+				$features = array_diff( $features, array( 'rest-api-v4' ) );
+				return $features;
+			}
+		);
+	}
+
+	/**
 	 * @var WC_Product_Simple[]
 	 */
 	protected static $products = array();
@@ -56,6 +82,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::enable_rest_api_v4_feature();
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -109,6 +136,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_rest_api_v4_feature();
 	}
 
 	/**
