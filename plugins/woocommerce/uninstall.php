@@ -50,6 +50,16 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Load WooCommerce so we can access the container, install routines, etc, during uninstall.
 	require_once __DIR__ . '/includes/class-wc-install.php';
 
+	// Drop custom WordPress tables indexes. See \WC_Install::create_tables() for details.
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type';" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type;" );
+	}
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value';" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} DROP INDEX woo_idx_meta_key_meta_value;" );
+	}
+
 	// Roles + caps.
 	WC_Install::remove_roles();
 
@@ -118,16 +128,6 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 		if ( ! empty( $wpdb->termmeta ) ) {
 			$wpdb->query( "DELETE tm FROM {$wpdb->termmeta} tm LEFT JOIN {$wpdb->term_taxonomy} tt ON tm.term_id = tt.term_id WHERE tt.term_id IS NULL;" );
 		}
-	}
-
-	// Drop custom WordPress tables indexes. See \WC_Install::create_tables() for details.
-	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
-	if ( null !== $index_exists ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type" );
-	}
-	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value'" );
-	if ( null !== $index_exists ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} DROP INDEX woo_idx_meta_key_meta_value" );
 	}
 
 	// Clear any cached data that has been removed.
