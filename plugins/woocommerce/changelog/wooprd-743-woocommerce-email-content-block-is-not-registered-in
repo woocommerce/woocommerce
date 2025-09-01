@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Register the Email Content block as a standard WC block and rename it from `woo/email-content` to `woocommerce/email-content`
