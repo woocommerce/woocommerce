@@ -34,6 +34,10 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 		// Mock the Jetpack endpoints and permissions.
 		$wp_user = get_userdata( $this->user );
 		$wp_user->add_cap( 'view_stats' );
+
+		// This namespace is lazy loaded, a discovery request is used to trigger loading allowing jetpack module mocking can be setup properly.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$this->mock_jetpack_modules();
 
 		add_filter( 'rest_post_dispatch', array( $this, 'mock_rest_responses' ), 10, 3 );
@@ -43,8 +47,6 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
-		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
-		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
