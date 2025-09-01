@@ -52,21 +52,15 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 
 		$customers_query = new WP_User_Query(
 			array(
+				'role__not_in' => array( 'administrator', 'shop_manager' ),
 				'number'       => 0,
 				'fields'       => 'ID',
 				'count_total'  => true,
-				'meta_query'   => array(
+				'meta_query'   => array( // WPCS: slow query ok.
 					array(
 						'key'     => 'paying_customer',
 						'value'   => 1,
 						'compare' => '=',
-					),
-					// Ideally, it should be `'role__not_in' => array( 'administrator', 'shop_manager' )` used, but those queries
-					// will be using like-clauses ignoring the optimal indexes, hence we're using alternative approach.
-					array(
-						'key'     => 'wp_user_level',
-						'value'   => array( 9, 10 ),
-						'compare' => 'NOT IN',
 					),
 				),
 			)
