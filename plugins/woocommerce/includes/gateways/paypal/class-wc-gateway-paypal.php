@@ -177,7 +177,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
 
 			add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
-			add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
 
 			// Hook for plugin upgrades.
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
@@ -447,7 +446,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// Additional details are added to the receiver email when subscriptions are enabled.
 		// We don't need this for Orders v2.
 		if ( $this->should_use_orders_v2() ) {
-			unset( $form_fields['receiver_email'] );
+			foreach ( $form_fields as $key => $field ) {
+				if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
+					unset( $form_fields[ $key ] );
+				}
+			}
 		}
 		return $form_fields;
 	}
@@ -774,16 +777,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
 		}
 		return $this->jetpack_connection_manager;
-	}
-
-	/**
-	 * Whether to show legacy settings. Hooked into the
-	 * `woocommerce_paypal_show_legacy_settings` filter.
-	 *
-	 * @return bool
-	 */
-	public function should_show_legacy_settings() {
-		return ! $this->should_use_orders_v2();
 	}
 
 	/**
