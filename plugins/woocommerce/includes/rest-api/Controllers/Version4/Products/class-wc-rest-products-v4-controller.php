@@ -1835,21 +1835,19 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
-		if ( Features::is_enabled( 'experimental-wc-rest-api' ) ) {
-			$schema['properties']['__experimental_min_price'] = array(
-				'description' => __( 'Product minimum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
+		$schema['properties']['min_price'] = array(
+			'description' => __( 'Product minimum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
 
-			$schema['properties']['__experimental_max_price'] = array(
-				'description' => __( 'Product maximum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
-		}
+		$schema['properties']['max_price'] = array(
+			'description' => __( 'Product maximum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
 
-		return $this->add_additional_fields_schema( $schema );
+			return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
