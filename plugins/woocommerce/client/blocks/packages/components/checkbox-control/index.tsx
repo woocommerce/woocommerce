@@ -12,9 +12,9 @@ import { forwardRef } from '@wordpress/element';
 import './style.scss';
 
 export type CheckboxControlProps = {
-	label?: string | React.ReactNode;
-	onChange?: ( value: boolean ) => void;
-	children?: ReactNode | null | undefined;
+	label?: ReactNode;
+	onChange: ( value: boolean ) => void;
+	children?: ReactNode;
 	hasError?: boolean;
 	errorId?: string;
 	errorMessage?: string;
