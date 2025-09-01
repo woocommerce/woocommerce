@@ -8,6 +8,7 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
@@ -473,6 +474,5 @@ function wc_rest_api_v4_is_enabled(): bool {
 	if ( ! is_object( $container ) ) {
 		return false;
 	}
-	$features_controller = $container->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
-	return (bool) $features_controller->feature_is_enabled( 'rest-api-v4' );
+	return (bool) Features::is_enabled( 'rest-api-v4' );
 }
