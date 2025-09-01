@@ -68,10 +68,18 @@ final class PayPal extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
+		$gateway = WC_Gateway_Paypal::get_instance();
+
+		include_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal-buttons.php';
+		$buttons = new \WC_Gateway_Paypal_Buttons( $gateway );
+		$options = $buttons->get_options();
+
 		return [
-			'title'       => $this->get_setting( 'title' ),
-			'description' => $this->get_setting( 'description' ),
-			'supports'    => $this->get_supported_features(),
+			'title'            => $this->get_setting( 'title' ),
+			'description'      => $this->get_setting( 'description' ),
+			'supports'         => $this->get_supported_features(),
+			'isButtonsEnabled' => $buttons->is_enabled(),
+			'buttonsOptions'   => $options,
 		];
 	}
 
