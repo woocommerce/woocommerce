@@ -37,6 +37,7 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 
 export type ProductData = {
 	price_html?: string;
+	image_id?: number;
 	availability?: string;
 	sku?: string;
 	weight?: string;
@@ -47,6 +48,7 @@ export type ProductData = {
 	variations?: {
 		[ variationId: number ]: {
 			price_html?: string;
+			image_id?: number;
 			availability?: string;
 			sku?: string;
 			weight?: string;

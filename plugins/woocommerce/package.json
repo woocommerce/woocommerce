@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.2.0",
+	"version": "10.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -659,7 +659,8 @@
 					"changes": [
 						"src/Blocks/**",
 						"templates/**",
-						"patterns/**"
+						"patterns/**",
+						"client/blocks/tests/e2e/**"
 					],
 					"testEnv": {
 						"start": "env:start:blocks",
@@ -668,6 +669,7 @@
 						}
 					},
 					"events": [
+						"pull_request",
 						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-pre-release"
@@ -694,7 +696,9 @@
 						"--shard=9/10",
 						"--shard=10/10"
 					],
-					"changes": [],
+					"changes": [
+						"client/blocks/tests/e2e/**"
+					],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -702,6 +706,7 @@
 						}
 					},
 					"events": [
+						"pull_request",
 						"nightly-checks",
 						"release-checks",
 						"blocks-e2e-wp-latest-1"

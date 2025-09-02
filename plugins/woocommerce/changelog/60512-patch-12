@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce `get_brand_ids` &` set_brand_ids`.

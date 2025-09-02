@@ -314,4 +314,71 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			'The "small" size option should be checked when set as the default attribute.'
 		);
 	}
+
+	/**
+	 * Tests that the Product Price block is only interactive when some variations have different prices.
+	 */
+	public function test_variable_product_price_interactivity() {
+		global $product;
+
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
+		);
+
+		$product_id = $product->get_id();
+
+		$fixtures->get_variation_product(
+			$product_id,
+			array(
+				'pa_color' => 'red-slug',
+				'pa_size'  => 'small-slug',
+			),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		// Sync the variable product to update its children list.
+		\WC_Product_Variable::sync( $product_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-price /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		// Assert that Product Price block doesn't have a `data-wp-watch` attribute.
+		$this->assertDoesNotMatchRegularExpression(
+			'/<div[^>]*class="wc-block-components-product-price[^>]*data-wp-watch=[^>]*>/',
+			$markup,
+			'The Product Price block should not be interactive when all variations have the same price.'
+		);
+
+		$fixtures->get_variation_product(
+			$product_id,
+			array(
+				'pa_color' => 'red-slug',
+				'pa_size'  => 'medium-slug',
+			),
+			array(
+				'regular_price' => 15,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		// Sync again so the variable product reflects the new variation.
+		\WC_Product_Variable::sync( $product_id );
+
+		// Assert that Product Price block has a `data-wp-watch` attribute.
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-price /--><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertMatchesRegularExpression(
+			'/<div[^>]*class="wc-block-components-product-price[^>]*data-wp-watch=[^>]*>/',
+			$markup,
+			'The Product Price block should be interactive when some variations have different prices.'
+		);
+	}
 }

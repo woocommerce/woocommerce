@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Resolved SCSS load order warnings between Payments Settings and Launch Your Store chunks.
