@@ -16,8 +16,6 @@ jQuery(function ($) {
 			},
 
 			async createOrder() {
-				console.log( 'createOrder' );
-
 				// form data
 				const formData = new FormData();
 				formData.append( 'security', paypal_standard.create_order_nonce );
@@ -31,7 +29,6 @@ jQuery(function ($) {
 						body: formData,
 					});
 					const data = await response.json();
-					console.log( 'data', data );
 					return data.id;
 				} catch (error) {
 					console.error('Error creating order:', error);
