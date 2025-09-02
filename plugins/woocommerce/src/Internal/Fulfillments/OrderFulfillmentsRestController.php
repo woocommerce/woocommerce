@@ -536,7 +536,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
-			$fulfillment->delete_meta_data( $request->get_param( 'meta_key' ) );
+			$fulfillment->delete_meta_data( esc_attr( $request->get_param( 'meta_key' ) ) );
 			$fulfillment->save();
 		} catch ( ApiException $ex ) {
 			return $this->prepare_error_response(
@@ -714,12 +714,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	private function get_schema_for_update_fulfillment(): array {
 		$schema               = $this->get_base_schema();
 		$schema['title']      = __( 'Update fulfillment response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The fulfillment object.', 'woocommerce' ),
-			'type'        => 'object',
-			'required'    => true,
-			'schema'      => $this->get_read_schema_for_fulfillment(),
-		);
+		$schema['type']       = 'object';
+		$schema['properties'] = $this->get_read_schema_for_fulfillment();
 
 		return $schema;
 	}
@@ -838,7 +834,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'items'       => array(
 					'description' => __( 'The meta data object.', 'woocommerce' ),
 					'type'        => 'object',
-					'schema'      => $this->get_schema_for_meta_data(),
+					'properties'  => $this->get_schema_for_meta_data(),
 				),
 			),
 		);
@@ -895,19 +891,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return array
 	 */
 	private function get_schema_for_delete_fulfillment_meta(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = __( 'Delete fulfillment meta data response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'meta_data' => array(
-				'description' => __( 'The meta data array.', 'woocommerce' ),
-				'type'        => 'array',
-				'required'    => true,
-				'items'       => array(
-					'description' => __( 'The meta data object.', 'woocommerce' ),
-					'type'        => 'object',
-					'schema'      => $this->get_schema_for_meta_data(),
-				),
-			),
+		$schema          = $this->get_base_schema();
+		$schema['title'] = __( 'Delete fulfillment meta data response.', 'woocommerce' );
+		$schema['type']  = 'array';
+		$schema['items'] = array(
+			'description' => __( 'The meta data object.', 'woocommerce' ),
+			'type'        => 'object',
+			'properties'  => $this->get_schema_for_meta_data(),
 		);
 
 		return $schema;
@@ -1011,7 +1001,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'context'     => array( 'view', 'edit' ),
 			),
 			'date_updated' => array(
-				'description' => __( 'The date the fulfillment was created.', 'woocommerce' ),
+				'description' => __( 'The date the fulfillment was last updated.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -1019,7 +1009,14 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			),
 			'date_deleted' => array(
 				'description' => __( 'The date the fulfillment was deleted.', 'woocommerce' ),
-				'type'        => 'string',
+				'anyOf'       => array(
+					array(
+						'type' => 'string',
+					),
+					array(
+						'type' => 'null',
+					),
+				),
 				'default'     => null,
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -1029,7 +1026,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'description' => __( 'Meta data for the fulfillment.', 'woocommerce' ),
 				'type'        => 'array',
 				'required'    => true,
-				'schema'      => $this->get_schema_for_meta_data(),
+				'items'       => $this->get_schema_for_meta_data(),
 			),
 		);
 	}

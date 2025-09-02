@@ -172,13 +172,16 @@ const publicActions = {
 		},
 
 	deleteFulfillment:
-		( orderId: number, fulfillmentId: number, notify_customer: boolean ) =>
+		( orderId: number, fulfillmentId: number, notifyCustomer: boolean ) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				await apiFetch( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }?notify_customer=${ notify_customer }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'DELETE',
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
