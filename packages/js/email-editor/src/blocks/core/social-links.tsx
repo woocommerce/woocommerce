@@ -4,9 +4,17 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { registerBlockVariation } from '@wordpress/blocks';
-import type { Block, InnerBlockTemplate } from '@wordpress/blocks';
+import type {
+	Block,
+	BlockConfiguration,
+	InnerBlockTemplate,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
 // Add support for top social networks
 const supportedVariations = [
 	'behance',
@@ -40,28 +48,20 @@ const supportedVariations = [
 ];
 
 function unregisterBlockVariations() {
-	// Remove unsupported social links
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/disable-social-link-variations',
-		( settings, name ) => {
-			if ( name === 'core/social-link' ) {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-				return {
-					...settings,
-					variations: settings.variations.filter( ( variation ) =>
-						supportedVariations.includes( variation.name )
-					),
-					supports: {
-						...settings.supports,
-						layout: false,
-					},
-				};
-			}
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-			return settings;
-		}
-	);
+	// Remove unsupported social links and disable layout support
+	updateBlockSettings( 'core/social-link', ( current ) => ( {
+		...current,
+		variations:
+			// @ts-expect-error Type BlockConfiguration is missing variations.
+			( ( current as BlockConfiguration ).variations || [] ).filter(
+				( variation: { name: string } ) =>
+					supportedVariations.includes( variation.name )
+			),
+		supports: {
+			...current.supports,
+			layout: false,
+		},
+	} ) );
 }
 
 function registerCustomSocialLinksBlockVariation() {
