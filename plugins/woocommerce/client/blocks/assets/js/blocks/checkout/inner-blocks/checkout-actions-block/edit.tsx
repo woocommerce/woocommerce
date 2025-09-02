@@ -16,7 +16,6 @@ import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
-import '@woocommerce/base-components/cart-checkout/place-order-button/style.scss';
 import clsx from 'clsx';
 
 /**
