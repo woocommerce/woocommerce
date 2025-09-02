@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-When applying and removing coupons, leave address data alone in checkout to prevent invalid values being replaced with values from server.
