@@ -40,7 +40,7 @@ class WC_Gateway_Paypal_Buttons {
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// TODO: We also want to check the settings.
-		$this->enabled = $this->gateway->should_use_orders_v2();
+		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
 	}
 
 	/**
