@@ -268,8 +268,9 @@ class WC_Tracker {
 			return $data;
 		}
 
-		$autocomplete_controller = new \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController();
+		$autocomplete_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class );
 		$autocomplete_controller->init();
+
 		// Get all registered providers.
 		$providers = $autocomplete_controller->get_providers();
 		if ( is_array( $providers ) ) {
