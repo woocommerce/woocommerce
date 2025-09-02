@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Introduce `aria-label` argument to the function `wc_dropdown_variation_attribute_options()`
