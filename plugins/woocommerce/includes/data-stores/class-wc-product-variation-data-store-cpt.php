@@ -392,24 +392,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'_tax_class'              => 'tax_class',
 		);
 
-		$set_props = array();
+		$variation_data = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? '';
-			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+			$meta_value              = $post_meta_values[ $meta_key ][0] ?? '';
+			$variation_data[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
-		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
-		$set_props['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
-		$set_props['image_id']          = get_post_thumbnail_id( $id );
-		$set_props['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $set_props['tax_class'];
+		$variation_data['gallery_image_ids'] = array_filter( explode( ',', $variation_data['gallery_image_ids'] ?? '' ) );
+		$variation_data['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
+		$variation_data['image_id']          = get_post_thumbnail_id( $id );
+		$variation_data['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $variation_data['tax_class'];
 
-		$product->set_props( $set_props );
+		$product->set_props( $variation_data );
 
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value             = $set_props['cogs_total_value'] ?? '';
+			$cogs_value             = $variation_data['cogs_total_value'] ?? '';
 			$cogs_value             = '' === $cogs_value ? null : (float) $cogs_value;
-			$cogs_value_is_additive = 'yes' === ( $set_props['cogs_value_is_additive'] ?? '' );
+			$cogs_value_is_additive = 'yes' === ( $variation_data['cogs_value_is_additive'] ?? '' );
 			$product->set_props(
 				array(
 					'cogs_value'             => $cogs_value,
