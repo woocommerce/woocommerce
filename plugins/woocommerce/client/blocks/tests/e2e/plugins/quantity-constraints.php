@@ -13,9 +13,8 @@ declare(strict_types=1);
 add_action(
 	'woocommerce_init',
 	function () {
-		// Get ID of the T-Shirt product.
 		$tshirt_id      = wc_get_product_id_by_sku( 'woo-tshirt' );
-		$blue_hoodie_id = wc_get_product_id_by_sku( 'woo-blue-hoodie' );
+		$blue_hoodie_id = wc_get_product_id_by_sku( 'woo-hoodie-blue' );
 
 		add_filter(
 			'woocommerce_quantity_input_min',
