@@ -265,7 +265,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		$privileged_users = new WP_User_Query(
 			array(
-				'fields'     => 'ID',
+				'fields'   => 'ID',
 				'role__in' => array( 'administrator', 'shop_manager' ),
 			),
 		);
