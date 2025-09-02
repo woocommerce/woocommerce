@@ -106,7 +106,7 @@ class ProductPrice extends AbstractBlock {
 				if ( ! $has_variation_price_html ) {
 					$is_interactive = false;
 				} else {
-					wp_interactivity_state(
+					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(

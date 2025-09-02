@@ -264,7 +264,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 
 				$context['groupedProductIds'] = array_keys( $children_product_data );
-				wp_interactivity_state(
+				wp_interactivity_config(
 					'woocommerce',
 					array(
 						'products' => $children_product_data,

@@ -71,9 +71,6 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
-		products?: {
-			[ productId: number ]: ProductData;
-		};
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
