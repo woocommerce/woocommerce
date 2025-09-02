@@ -73,7 +73,7 @@ const shouldPromoteOrderAttribution = (
  * which determines if the banner should be displayed, checks if it has been dismissed, and provides a function to dismiss it.
  */
 export const useOrderAttributionInstallBanner = ( { isInstalling } ) => {
-	const { currentUserCan, user } = useUser();
+	const { currentUserCan } = useUser();
 	const {
 		[ USER_META_BANNER_DISMISSED ]: bannerDismissed,
 		updateUserPreferences,
