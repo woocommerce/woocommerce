@@ -7,7 +7,6 @@ import { BlockEditProps } from '@wordpress/blocks';
 
 import { Disabled } from '@wordpress/components';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
-import { useProductDataContext } from '@woocommerce/shared-context';
 import {
 	BlockControls,
 	InspectorControls,
