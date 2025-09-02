@@ -257,7 +257,7 @@ class WC_Tracker {
 	 */
 	public static function get_address_autocomplete_info() {
 		$data = array(
-			'enabled'            => get_option( 'woocommerce_address_autocomplete_enabled', 'no' ),
+			'enabled'            => ( 'yes' === wc_bool_to_string( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) ) ? 'yes' : 'no',
 			'providers'          => array(),
 			'preferred_provider' => '',
 		);
