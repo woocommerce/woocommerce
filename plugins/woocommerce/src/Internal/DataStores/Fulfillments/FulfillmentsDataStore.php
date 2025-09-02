@@ -159,6 +159,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		}
 
 		$data->set_props( $fulfillment_data );
+		$data->set_id( $fulfillment_data['fulfillment_id'] );
 		$data->read_meta_data( true );
 		$data->set_object_read( true );
 	}

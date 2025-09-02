@@ -40,7 +40,7 @@ Authorization: Basic <base64_encoded_credentials>
 ```json
 [
     {
-        "fulfillment_id": 1,
+        "id": 1,
         "entity_type": "WC_Order",
         "entity_id": "123",
         "status": "fulfilled",
@@ -139,7 +139,7 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-    "fulfillment_id": 2,
+    "id": 2,
     "entity_type": "WC_Order",
     "entity_id": "123",
     "status": "fulfilled",
@@ -206,7 +206,7 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-    "fulfillment_id": 2,
+    "id": 2,
     "entity_type": "WC_Order",
     "entity_id": "123",
     "status": "fulfilled",
@@ -255,6 +255,7 @@ Content-Type: application/json
 Authorization: Basic <base64_encoded_credentials>
 
 {
+  "id": 2,
   "status": "fulfilled",
   "is_fulfilled": true,
   "meta_data": [
@@ -291,7 +292,7 @@ Authorization: Basic <base64_encoded_credentials>
 
 ```json
 {
-    "fulfillment_id": 2,
+    "id": 2,
     "entity_type": "WC_Order",
     "entity_id": "123",
     "status": "fulfilled",
@@ -635,7 +636,7 @@ Metadata objects have the following structure:
 | ------- | ------- | ------------------------------------------------------ |
 | `id`    | integer | Unique identifier for the metadata (0 for new entries) |
 | `key`   | string  | The metadata key                                       |
-| `value` | string  | The metadata value (string, number, array, or object)  |
+| `value` | mixed   | The metadata value (string, number, array, or object)  |
 
 **Note:** The metadata keys prefixed with underscore (`_`) are private and for internal use only. You can add as many as your application needs. The unprefixed ones will be shown to the merchant on the fulfillment metadata box, and to the customer on the fulfillment emails.
 

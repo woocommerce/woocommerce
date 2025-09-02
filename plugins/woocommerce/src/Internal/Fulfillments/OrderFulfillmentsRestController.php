@@ -554,7 +554,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 		return new WP_REST_Response(
 			$fulfillment->get_raw_meta_data(),
-			WP_Http::NO_CONTENT
+			WP_Http::OK
 		);
 	}
 
@@ -631,14 +631,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return array
 	 */
 	private function get_schema_for_get_fulfillments(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = __( 'Get fulfillments response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The fulfillment object.', 'woocommerce' ),
-			'type'        => 'array',
-			'required'    => true,
-			'schema'      => $this->get_read_schema_for_fulfillment(),
-		);
+		$schema          = $this->get_base_schema();
+		$schema['title'] = __( 'Get fulfillments response.', 'woocommerce' );
+		$schema['type']  = 'array';
+		$schema['items'] = $this->get_read_schema_for_fulfillment();
 		return $schema;
 	}
 
@@ -659,12 +655,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	private function get_schema_for_create_fulfillment(): array {
 		$schema               = $this->get_base_schema();
 		$schema['title']      = __( 'Create fulfillment response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The created fulfillment object.', 'woocommerce' ),
-			'type'        => 'object',
-			'required'    => true,
-			'schema'      => $this->get_read_schema_for_fulfillment(),
-		);
+		$schema['properties'] = $this->get_read_schema_for_fulfillment();
 		return $schema;
 	}
 
@@ -698,12 +689,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	private function get_schema_for_get_fulfillment(): array {
 		$schema               = $this->get_base_schema();
 		$schema['title']      = __( 'Get fulfillment response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The fulfillment object.', 'woocommerce' ),
-			'type'        => 'object',
-			'required'    => true,
-			'schema'      => $this->get_read_schema_for_fulfillment(),
-		);
+		$schema['properties'] = $this->get_read_schema_for_fulfillment();
 
 		return $schema;
 	}
@@ -820,7 +806,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			'items'       => array(
 				'description' => __( 'The meta data object.', 'woocommerce' ),
 				'type'        => 'object',
-				'schema'      => $this->get_schema_for_meta_data(),
+				'properties'  => $this->get_schema_for_meta_data(),
 			),
 		);
 
@@ -874,7 +860,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			'items'       => array(
 				'description' => __( 'The meta data object.', 'woocommerce' ),
 				'type'        => 'object',
-				'schema'      => $this->get_schema_for_meta_data(),
+				'items'       => $this->get_schema_for_meta_data(),
 			),
 		);
 
@@ -994,46 +980,46 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 */
 	private function get_read_schema_for_fulfillment() {
 		return array(
-			'fulfillment_id' => array(
+			'id'           => array(
 				'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'entity_type'    => array(
+			'entity_type'  => array(
 				'description' => __( 'The type of entity for which the fulfillment is created.', 'woocommerce' ),
 				'type'        => 'string',
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'entity_id'      => array(
+			'entity_id'    => array(
 				'description' => __( 'Unique identifier for the entity.', 'woocommerce' ),
 				'type'        => 'string',
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'status'         => array(
+			'status'       => array(
 				'description' => __( 'The status of the fulfillment.', 'woocommerce' ),
 				'type'        => 'string',
 				'default'     => 'unfulfilled',
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'is_fulfilled'   => array(
+			'is_fulfilled' => array(
 				'description' => __( 'Whether the fulfillment is fulfilled.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
 				'required'    => true,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'date_updated'   => array(
+			'date_updated' => array(
 				'description' => __( 'The date the fulfillment was created.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'required'    => true,
 			),
-			'date_deleted'   => array(
+			'date_deleted' => array(
 				'description' => __( 'The date the fulfillment was deleted.', 'woocommerce' ),
 				'type'        => 'string',
 				'default'     => null,
@@ -1041,7 +1027,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'readonly'    => true,
 				'required'    => true,
 			),
-			'meta_data'      => array(
+			'meta_data'    => array(
 				'description' => __( 'Meta data for the fulfillment.', 'woocommerce' ),
 				'type'        => 'array',
 				'required'    => true,

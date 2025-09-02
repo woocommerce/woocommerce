@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { createReduxStore, register } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -99,14 +100,17 @@ const publicActions = {
 		(
 			orderId: number,
 			fulfillment: Fulfillment,
-			notify_customer: boolean
+			notifyCustomer: boolean
 		) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				const saved = await apiFetch< Fulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments?notify_customer=${ notify_customer }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'POST',
 					data: fulfillment,
 				} );
@@ -138,7 +142,10 @@ const publicActions = {
 			dispatch.setError( orderId, null );
 			try {
 				const updated = await apiFetch< Fulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }?notify_customer=${ notifyCustomer }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'PUT',
 					data: fulfillment,
 				} );

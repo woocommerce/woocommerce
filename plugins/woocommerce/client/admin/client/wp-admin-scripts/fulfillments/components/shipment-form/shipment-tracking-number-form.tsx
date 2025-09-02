@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -73,7 +74,12 @@ export default function ShipmentTrackingNumberForm() {
 			setIsLoading( true );
 			const tracking_number_details =
 				await apiFetch< TrackingNumberParsingResponse >( {
-					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ order?.id }/fulfillments/lookup`,
+						{
+							tracking_number: trackingNumberTemp.trim(),
+						}
+					),
 					method: 'GET',
 				} );
 			if ( ! tracking_number_details.tracking_number ) {
