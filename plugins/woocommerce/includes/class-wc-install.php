@@ -1602,7 +1602,7 @@ class WC_Install {
 		if ( null === $index_exists ) {
 			$remaining_index_length = max( ( new DatabaseUtil() )->get_max_index_length() - 100, 20 ); // 100: allocated for `meta_key` part of the index.
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-			$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length))" );
+			$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length)), ALGORITHM=INPLACE, LOCK=NONE" );
 			/* phpcs:enable */
 		}
 

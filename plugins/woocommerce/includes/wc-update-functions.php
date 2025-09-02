@@ -3124,9 +3124,9 @@ function wc_update_1030_add_key_value_index_to_usermeta_table() {
 	// Improve query performance when searching users by meta-data (billing email, fist/last name, etc.).
 	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value'" );
 	if ( null === $index_exists ) {
-		$remaining_index_length = max( ( new DatabaseUtil() )->get_max_index_length() - 100, 20 ); / 100: allocated for `meta_key` part of the index.
+		$remaining_index_length = max( ( new DatabaseUtil() )->get_max_index_length() - 100, 20 ); // 100: allocated for `meta_key` part of the index.
 		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length))" );
+		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} ADD INDEX woo_idx_meta_key_meta_value (meta_key(100), meta_value($remaining_index_length)), ALGORITHM=INPLACE, LOCK=NONE" );
 		/* phpcs:enable */
 	}
 }
