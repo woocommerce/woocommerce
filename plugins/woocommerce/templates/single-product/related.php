@@ -19,7 +19,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( $related_products ) : ?>
+if ( $related_products ) :
+
+	// Ensure all images of related products are lazy loaded by increasing the media count
+	// to WordPress's lazy loading threshold if needed.
+	$content_media_count = wp_increase_content_media_count( 0 );
+	if ( $content_media_count < wp_omit_loading_attr_threshold() ) {
+		wp_increase_content_media_count( wp_omit_loading_attr_threshold() - $content_media_count );
+	}
+
+	?>
 
 	<section class="related products">
 
@@ -47,7 +56,7 @@ if ( $related_products ) : ?>
 		<?php woocommerce_product_loop_end(); ?>
 
 	</section>
-	<?php
+		<?php
 endif;
 
 wp_reset_postdata();
