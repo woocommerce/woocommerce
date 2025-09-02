@@ -448,7 +448,7 @@ abstract class AbstractBlock {
 						// we are borrowing from the WC Admin Features implementation. Also note we cannot
 						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
 						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-						'wcRestApiV4'               => Features::is_enabled( 'wc-rest-api-v4' ),
+						'experimentalWcRestApiV4'   => Features::is_enabled( 'wc-rest-api-v4' ),
 						'productCount'              => $published_products,
 					]
 				);
