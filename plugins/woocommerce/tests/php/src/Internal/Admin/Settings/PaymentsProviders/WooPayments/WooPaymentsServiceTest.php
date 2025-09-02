@@ -8439,4 +8439,174 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			'PR' => 'Puerto Rico',
 		);
 	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state falls back to OR logic when no explicit apple_google stored.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_fallback_or_logic() {
+		$location        = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+
+		// Create NOX profile data structure with apple_pay and google_pay but no apple_google key.
+		$nox_profile_data = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						'payment_methods' => array(
+							'data' => array(
+								'payment_methods' => array(
+									'apple_pay'  => 'false',
+									'google_pay' => 'false',
+									// No apple_google key - should fall back to OR logic.
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$this->mock_nox_profile_option( $nox_profile_data );
+
+		// Mock the provider to return recommended payment methods.
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $this->isInstanceOf( FakePaymentGateway::class ), $location )
+			->willReturn( $recommended_pms );
+
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, null ) );
+
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using OR fallback logic (apple_pay=true || google_pay=false)' );
+	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state uses recommended values when no stored state.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_uses_recommended_when_no_stored_state() {
+		$location        = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => false,
+				'required' => false,
+			),
+		);
+
+		// Create empty NOX profile data structure (no stored state).
+		$nox_profile_data = array();
+
+		$this->mock_nox_profile_option( $nox_profile_data );
+
+		$this->mock_provider
+			->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( $this->isInstanceOf( FakePaymentGateway::class ), $location )
+			->willReturn( $recommended_pms );
+
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, null ) );
+
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertTrue( $result['apple_google'], 'apple_google should be true when using recommended values with OR logic (true || false = true)' );
+	}
+
+	/**
+	 * Test get_onboarding_payment_methods_state prefers explicit stored apple_google over OR logic.
+	 *
+	 * @return void
+	 */
+	public function test_get_onboarding_payment_methods_state_prefers_explicit_apple_google() {
+		$location        = 'US';
+		$recommended_pms = array(
+			array(
+				'id'       => 'apple_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+			array(
+				'id'       => 'google_pay',
+				'enabled'  => true,
+				'required' => false,
+			),
+		);
+		// Create NOX profile data structure with explicit apple_google override.
+		$nox_profile_data = array(
+			'onboarding' => array(
+				$location => array(
+					'steps' => array(
+						'payment_methods' => array(
+							'data' => array(
+								'payment_methods' => array(
+									'apple_google' => 'false',
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$this->mock_nox_profile_option( $nox_profile_data );
+
+		$result = $this->invoke_private_method( 'get_onboarding_payment_methods_state', array( $location, $recommended_pms ) );
+		$this->assertArrayHasKey( 'apple_google', $result );
+		$this->assertFalse( $result['apple_google'], 'Explicit stored apple_google should take precedence over OR/recommended.' );
+	}
+
+	/**
+	 * Helper method to invoke private methods for testing.
+	 *
+	 * @param string $method_name The name of the private method.
+	 * @param array  $args        The arguments to pass to the method.
+	 * @return mixed The result of the method call.
+	 */
+	private function invoke_private_method( string $method_name, array $args = array() ) {
+		$reflection = new \ReflectionClass( $this->sut );
+		if ( ! $reflection->hasMethod( $method_name ) ) {
+			$this->fail( sprintf( 'Method %s not found on %s', $method_name, get_class( $this->sut ) ) );
+		}
+		$method = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( $this->sut, $args );
+	}
+
+	/**
+	 * Helper method to mock data entry in the NOX profile.
+	 *
+	 * @param array $stored_data The step data to mock.
+	 * @return void
+	 */
+	private function mock_nox_profile_option( array $stored_data ): void {
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $fallback = false ) use ( $stored_data ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $stored_data;
+					}
+					return $fallback;
+				},
+			)
+		);
+	}
 }

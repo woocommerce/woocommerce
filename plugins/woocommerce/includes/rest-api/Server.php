@@ -69,6 +69,7 @@ class Server {
 				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
 				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
 				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
+				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && $this->is_v4_feature_enabled() ) ? $this->get_v4_controllers() : array(),
 				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
 			)
 		);
@@ -198,6 +199,17 @@ class Server {
 	}
 
 	/**
+	 * List of controllers in the wc/v4 namespace.
+	 *
+	 * @return array
+	 */
+	protected function get_v4_controllers() {
+		return array(
+			'ping' => 'WC_REST_Ping_V4_Controller',
+		);
+	}
+
+	/**
 	 * List of controllers in the telemetry namespace.
 	 *
 	 * @return array
@@ -206,6 +218,15 @@ class Server {
 		return array(
 			'tracker' => 'WC_REST_Telemetry_Controller',
 		);
+	}
+
+	/**
+	 * Check if the REST API v4 feature is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_v4_feature_enabled() {
+		return function_exists( 'wc_rest_api_v4_is_enabled' ) && wc_rest_api_v4_is_enabled();
 	}
 
 	/**

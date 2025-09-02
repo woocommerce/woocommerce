@@ -15,7 +15,7 @@ import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
-import { WooPaymentsResetAccountModal } from '~/settings-payments/components/modals/woo-payments-reset-account-modal';
+import { WooPaymentsResetAccountModal } from '~/settings-payments/components/modals';
 import './style.scss';
 
 const TEST_ACCOUNT_ERROR_CODES = {
