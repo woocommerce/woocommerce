@@ -511,6 +511,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 					/\bdisabled\b/
 				);
 			} );
+
+			await test.step( 'hiddens Product Quantity input when the product is sold individually', async () => {
+				const colorGreenOption = page.locator(
+					'label:has-text("Green")'
+				);
+				await colorGreenOption.click();
+
+				await expect(
+					page.getByRole( 'spinbutton', { name: 'Product quantity' } )
+				).toBeHidden();
+			} );
 		} );
 
 		await test.step( 'in grouped products', async () => {

@@ -56,6 +56,7 @@ export type ProductData = {
 			min?: number;
 			max?: number;
 			step?: number;
+			sold_individually?: boolean;
 		};
 	};
 };
