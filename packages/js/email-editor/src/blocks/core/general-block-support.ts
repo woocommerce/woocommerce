@@ -13,6 +13,7 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import { updateBlockSettings } from '../../config-tools/block-config';
+import { unregisterBlockStyleForEmail } from '../../config-tools/block-style';
 
 // Extend the BlockSupports type to include shadow
 // The shadow is not included in WP6.4 but it is in WP6.5
@@ -59,13 +60,13 @@ function removeBlockStyles() {
 			// Skip block styles that are in the BLOCK_STYLES_TO_PRESERVE array
 			return;
 		}
-		// @ts-expect-error Type not complete.
-		const blockStyles = select( blocksStore ).getBlockStyles( blockName );
+		const blockStyles = select( 'core/blocks' ).getBlockStyles( blockName );
 		if ( ! Array.isArray( blockStyles ) || blockStyles?.length === 0 ) {
 			return;
 		}
+
 		blockStyles.forEach( ( blockStyle ) => {
-			unregisterBlockStyle( blockName, blockStyle.name );
+			unregisterBlockStyleForEmail( blockName, blockStyle.name );
 		} );
 	} );
 }
