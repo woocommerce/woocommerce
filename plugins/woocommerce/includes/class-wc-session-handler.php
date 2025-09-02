@@ -637,10 +637,10 @@ class WC_Session_Handler extends WC_Session {
 			// - deleting smaller batches is replication friendly (relevant to for clustered DB setups);
 			// - alternating between cache and DB cleanups provides some time between DB queries (might be not enough though, forcing us to use sleep later);
 			foreach ( array_chunk( $expired_sessions, $batch_size ) as $batch ) {
-				// Cleanup expired cache entries.
+				// Cleanup expired cache entries (probably unnecessary, but due to `update_session_timestamp` and need for a gap between delete SQLs it's here).
 				$expired_cache_keys = array_map( static fn( $session ) => $cache_prefix . $session->session_key, $batch );
 				wp_cache_delete_multiple( $expired_cache_keys, WC_SESSION_CACHE_GROUP );
-				// Drop expired database entries.
+				// Drop expired database entries (it'll use PK as index hence blazing fast).
 				$expired_session_ids = array_column( $batch, 'session_id' );
 				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_id IN( ' . implode( ', ', $expired_session_ids ). ' )', $this->_table ) );
 			}
