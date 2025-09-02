@@ -234,6 +234,9 @@ class WC_Tracker {
 		// Store email usage.
 		$data['store_emails'] = self::get_store_emails();
 
+		// Address autocomplete usage.
+		$data['address_autocomplete'] = self::get_address_autocomplete_info();
+
 		/**
 		 * Filter the data that's sent with the tracker.
 		 *
@@ -244,6 +247,47 @@ class WC_Tracker {
 		// Total seconds taken to generate snapshot (including filtered data).
 		$data['snapshot_generation_time'] = microtime( true ) - $start_time;
 
+		return $data;
+	}
+
+	/**
+	 * Get address autocomplete info.
+	 *
+	 * @return array Address autocomplete info.
+	 */
+	public static function get_address_autocomplete_info() {
+		$data = array(
+			'enabled'            => get_option( 'woocommerce_address_autocomplete_enabled', 'no' ),
+			'providers'          => array(),
+			'preferred_provider' => '',
+		);
+
+		if ( ! class_exists( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class ) ) {
+			// The option could still be set even if the class doesn't exist (e.g. if set manually in the DB).
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		$autocomplete_controller = new \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController();
+		$autocomplete_controller->init();
+		// Get all registered providers.
+		$providers = $autocomplete_controller->get_providers();
+		if ( is_array( $providers ) ) {
+			foreach ( $providers as $provider ) {
+				if ( ! ( $provider instanceof WC_Address_Provider ) ) {
+					continue;
+				}
+				$data['providers'][] = $provider->id;
+			}
+		}
+
+		if ( empty( $data['providers'] ) ) {
+			// If there are no providers, the feature is effectively disabled.
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		$data['preferred_provider'] = $autocomplete_controller->get_preferred_provider();
 		return $data;
 	}
 
