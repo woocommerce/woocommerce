@@ -8,6 +8,7 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
@@ -426,6 +427,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc/v1',
 		'wc/v2',
 		'wc/v3',
+		'wc/v4',
 		'wc-telemetry',
 		'wc-admin',
 		'wc-analytics',
@@ -456,4 +458,21 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 * @since 9.4
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
+}
+
+/**
+ * Check if the WooCommerce REST API v4 feature is enabled.
+ *
+ * @return bool True if the REST API v4 feature is enabled, false otherwise.
+ */
+function wc_rest_api_v4_is_enabled(): bool {
+	// Container may not be initialized yet during early autoloading.
+	if ( ! function_exists( 'wc_get_container' ) || empty( $GLOBALS['wc_container'] ) ) {
+		return false;
+	}
+	$container = wc_get_container();
+	if ( ! is_object( $container ) ) {
+		return false;
+	}
+	return (bool) Features::is_enabled( 'rest-api-v4' );
 }

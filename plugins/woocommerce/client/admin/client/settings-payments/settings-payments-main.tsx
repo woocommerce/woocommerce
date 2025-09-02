@@ -485,7 +485,7 @@ export const SettingsPaymentsMain = () => {
 		<TrackedLink
 			message={ __(
 				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment options.',
+				'{{Link}}More payment options{{/Link}}',
 				'woocommerce'
 			) }
 			onClickCallback={ trackMorePaymentsOptionsClicked }

@@ -34,14 +34,14 @@ describe( 'SettingsPaymentsMain', () => {
 		);
 	} );
 
-	it( 'should trigger event recommendations_other_options when clicking the WooCommerce Marketplace link', () => {
+	it( 'should trigger event recommendations_other_options when clicking the more payment options link', () => {
 		render(
 			<Router>
 				<SettingsPaymentsMain />
 			</Router>
 		);
 
-		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'More payment options' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_recommendations_other_options',
@@ -52,7 +52,7 @@ describe( 'SettingsPaymentsMain', () => {
 		);
 	} );
 
-	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', () => {
+	it( 'should navigate to the marketplace when clicking the more payment options link', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
@@ -71,7 +71,7 @@ describe( 'SettingsPaymentsMain', () => {
 			</Router>
 		);
 
-		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
+		fireEvent.click( screen.getByText( 'More payment options' ) );
 
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
