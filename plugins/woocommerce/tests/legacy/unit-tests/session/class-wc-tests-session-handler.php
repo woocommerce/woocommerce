@@ -282,7 +282,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 			$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", $index, 'expired', $expired ) );
 			wp_cache_set( $this->cache_prefix . $index, 'expired', WC_SESSION_CACHE_GROUP );
 		}
-		// Setup expires sessions: ensure we'll be cleaning up in two batches
+		// Setup expires sessions: an active session
 		$active   = time() + DAY_IN_SECONDS;
 		$customer = 'customer';
 		$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", $customer, 'active', $active ) );
