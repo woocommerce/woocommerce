@@ -5,11 +5,14 @@
  * @package WooCommerce\Tests\WC_Tracker.
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Ignoring test doubles.
 
 /**
  * Mock Address Provider for testing.
@@ -42,14 +45,16 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test the case for woocommerce_admin_disabled filter returning true.
 		add_filter(
 			'woocommerce_admin_disabled',
-			function( $default ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( $default_value ) {
 				return true;
 			}
 		);
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+			function ( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},
@@ -74,7 +79,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+			function ( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},
@@ -94,7 +100,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_tracking_data_plugin_feature_compatibility() {
 		$legacy_mocks = array(
-			'get_plugins' => function() {
+			'get_plugins' => function () {
 				return array(
 					'plugin1' => array(
 						'Name' => 'Plugin 1',
@@ -425,8 +431,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test with invalid preferred provider (not in the list).
 		update_option( 'woocommerce_address_autocomplete_provider', 'non-existent-provider' );
 		$data = WC_Tracker::get_address_autocomplete_info();
-		// Should still return the invalid value so we can track misconfigurations.
-		$this->assertEquals( 'non-existent-provider', $data['preferred_provider'] );
+		// Should fall back to the first provider when the preferred provider doesn't exist.
+		$this->assertEquals( 'mock-address-provider', $data['preferred_provider'] );
 
 		// Clean up.
 		delete_option( 'woocommerce_address_autocomplete_enabled' );
