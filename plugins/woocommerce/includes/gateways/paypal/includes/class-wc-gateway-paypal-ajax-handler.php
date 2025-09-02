@@ -31,7 +31,6 @@ class WC_Gateway_Paypal_Ajax_Handler {
 	 * @return void
 	 */
 	public function ajax_create_order() {
-		wc_get_logger()->debug( 'ajax_create_order' );
         check_ajax_referer( 'create_order', 'security' );
 
         $gateway = new WC_Gateway_Paypal();
