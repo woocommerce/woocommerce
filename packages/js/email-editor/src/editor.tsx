@@ -46,8 +46,8 @@ function Editor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
-		( select ) => ( {
-			settings: select( storeName ).getInitialEditorSettings(),
+		( sel ) => ( {
+			settings: sel( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
