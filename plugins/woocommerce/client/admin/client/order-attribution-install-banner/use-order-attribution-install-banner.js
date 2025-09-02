@@ -73,7 +73,7 @@ const shouldPromoteOrderAttribution = (
  * which determines if the banner should be displayed, checks if it has been dismissed, and provides a function to dismiss it.
  */
 export const useOrderAttributionInstallBanner = ( { isInstalling } ) => {
-	const { currentUserCan } = useUser();
+	const { currentUserCan, user } = useUser();
 	const {
 		[ USER_META_BANNER_DISMISSED ]: bannerDismissed,
 		updateUserPreferences,
@@ -98,7 +98,9 @@ export const useOrderAttributionInstallBanner = ( { isInstalling } ) => {
 
 			return {
 				orderAttributionInstallState: installState,
-				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
+				canUserInstallPlugins:
+					currentUserCan( 'install_plugins' ) &&
+					user.woocommerce_meta.can_modify_files,
 			};
 		},
 		[ currentUserCan ]
