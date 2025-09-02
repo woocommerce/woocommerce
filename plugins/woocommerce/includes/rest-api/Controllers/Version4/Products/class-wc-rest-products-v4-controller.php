@@ -2058,12 +2058,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
-			if ( in_array( '__experimental_min_price', $fields, true ) ) {
-				$data['__experimental_min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
+			if ( in_array( 'min_price', $fields, true ) ) {
+				$data['min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
 			}
 
-			if ( in_array( '__experimental_max_price', $fields, true ) ) {
-				$data['__experimental_max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
+			if ( in_array( 'max_price', $fields, true ) ) {
+				$data['max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

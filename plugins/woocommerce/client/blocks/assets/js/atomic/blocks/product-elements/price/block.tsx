@@ -152,15 +152,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				: {} ),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
-				product?.__experimental_max_price &&
-				product?.__experimental_min_price
+				product?.max_price && product?.min_price
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_min_price,
+								product.min_price,
 								currency
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_max_price,
+								product.max_price,
 								currency
 							),
 					  }

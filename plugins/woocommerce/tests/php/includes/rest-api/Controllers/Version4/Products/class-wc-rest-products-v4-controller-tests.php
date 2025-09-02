@@ -12,32 +12,6 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Enable the experimental REST API feature.
-	 */
-	private function enable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features[] = 'experimental-wc-rest-api';
-				return $features;
-			}
-		);
-	}
-
-	/**
-	 * Disable the experimental REST API feature.
-	 */
-	private function disable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'experimental-wc-rest-api' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -231,15 +205,12 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
+			'min_price',
+			'max_price',
 		);
 
 		if ( $with_cogs_enabled ) {
 			$fields[] = 'cost_of_goods_sold';
-		}
-
-		if ( $with_experimental_rest_api ) {
-			$fields[] = '__experimental_min_price';
-			$fields[] = '__experimental_max_price';
 		}
 
 		return $fields;
@@ -253,17 +224,10 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 *           [false, false]
 	 *
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
-	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_product_api_get_all_fields( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
-		}
-
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
-		} else {
-			$this->disable_experimental_rest_api_feature();
 		}
 
 		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
@@ -306,13 +270,9 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
 	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
-		}
-
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
 		}
 
 		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
@@ -1979,16 +1939,13 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertArrayHasKey( '__experimental_min_price', $data );
-		$this->assertArrayHasKey( '__experimental_max_price', $data );
-		$this->assertEquals( '1', $data['__experimental_min_price'] );
-		$this->assertEquals( '10', $data['__experimental_max_price'] );
+		$this->assertArrayHasKey( 'min_price', $data );
+		$this->assertArrayHasKey( 'max_price', $data );
+		$this->assertEquals( '1', $data['min_price'] );
+		$this->assertEquals( '10', $data['max_price'] );
 
-		$this->disable_experimental_rest_api_feature();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $grouped_product->get_id() ) );
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertArrayNotHasKey( '__experimental_min_price', $data );
-		$this->assertArrayNotHasKey( '__experimental_max_price', $data );
 	}
 }
