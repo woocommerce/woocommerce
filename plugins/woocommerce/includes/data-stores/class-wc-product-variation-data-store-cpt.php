@@ -424,8 +424,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
-		$parent_object   = get_post( $product->get_parent_id() );
-		$terms           = get_the_terms( $product->get_parent_id(), 'product_visibility' );
+		$parent_id       = $product->get_parent_id();
+		$parent_object   = get_post( $parent_id );
+		$terms           = get_the_terms( $parent_id, 'product_visibility' );
 		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
 		$exclude_search  = in_array( 'exclude-from-search', $term_names, true );
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
@@ -440,7 +441,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$catalog_visibility = CatalogVisibility::VISIBLE;
 		}
 
-		$parent_post_meta_values = get_post_meta( $product->get_parent_id() );
+		$parent_post_meta_values = get_post_meta( $parent_id );
 
 		$parent_meta_key_to_props = array(
 			'_sku'               => 'sku',
@@ -468,10 +469,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$parent_data['title']              = $parent_object ? $parent_object->post_title : '';
 		$parent_data['status']             = $parent_object ? $parent_object->post_status : '';
-		$parent_data['shipping_class_id']  = absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) );
+		$parent_data['shipping_class_id']  = absint( current( $this->get_term_ids( $parent_id, 'product_shipping_class' ) ) );
 		$parent_data['catalog_visibility'] = $catalog_visibility;
 		$parent_data['stock_quantity']     = wc_stock_amount( $parent_data['stock_quantity'] );
-		$parent_data['image_id']           = get_post_thumbnail_id( $product->get_parent_id() );
+		$parent_data['image_id']           = get_post_thumbnail_id( $parent_id );
 
 		$product->set_parent_data( $parent_data );
 
