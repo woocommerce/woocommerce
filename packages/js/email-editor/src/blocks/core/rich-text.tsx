@@ -14,7 +14,6 @@ import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
-import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import * as React from '@wordpress/element';
 
@@ -31,6 +30,7 @@ import { PersonalizationTagsPopover } from '../../components/personalization-tag
 import { PersonalizationTagsLinkPopover } from '../../components/personalization-tags/personalization-tags-link-popover';
 import { recordEvent } from '../../events';
 import { useIsEmailEditor } from '../../hooks/use-is-email-editor';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 /**
  * Disable Rich text formats we currently cannot support
@@ -303,7 +303,7 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
  * Replace written personalization tags with HTML comments in real-time.
  */
 function activatePersonalizationTagsReplacing() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/with-live-content-update',
 		personalizationTagsLiveContentUpdate

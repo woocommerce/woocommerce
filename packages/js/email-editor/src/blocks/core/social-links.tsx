@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { InspectorControls } from '@wordpress/block-editor';
-import { addFilter } from '@wordpress/hooks';
 import { registerBlockVariation } from '@wordpress/blocks';
 import type {
 	Block,
@@ -15,6 +14,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { updateBlockSettings } from '../../config-tools/block-config';
+import { addFilterForEmail } from '../../config-tools/filters';
+
 // Add support for top social networks
 const supportedVariations = [
 	'behance',
@@ -139,7 +140,7 @@ const disableIconColor =
 	};
 
 function removeSocialLinksIconColor(): void {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/disable-social-links-icon-color',
 		disableIconColor

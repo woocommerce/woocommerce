@@ -3,13 +3,13 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
 import { BlockSupports } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { updateBlockSettings } from '../../config-tools/block-config';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 const imageEditCallback = createHigherOrderComponent(
 	( BlockEdit ) =>
@@ -52,7 +52,7 @@ function disableImageFilter() {
 }
 
 function hideExpandOnClick() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/hide-expand-on-click',
 		imageEditCallback
