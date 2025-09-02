@@ -634,7 +634,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$schema          = $this->get_base_schema();
 		$schema['title'] = __( 'Get fulfillments response.', 'woocommerce' );
 		$schema['type']  = 'array';
-		$schema['items'] = $this->get_read_schema_for_fulfillment();
+		$schema['items'] = array(
+			'type'       => 'object',
+			'properties' => $this->get_read_schema_for_fulfillment(),
+		);
 		return $schema;
 	}
 
@@ -797,17 +800,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return array
 	 */
 	private function get_schema_for_get_fulfillment_meta(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = __( 'Get fulfillment meta data response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The meta data array.', 'woocommerce' ),
-			'type'        => 'array',
-			'required'    => true,
-			'items'       => array(
-				'description' => __( 'The meta data object.', 'woocommerce' ),
-				'type'        => 'object',
-				'properties'  => $this->get_schema_for_meta_data(),
-			),
+		$schema          = $this->get_base_schema();
+		$schema['title'] = __( 'Get fulfillment meta data response.', 'woocommerce' );
+		$schema['type']  = 'array';
+		$schema['items'] = array(
+			'description' => __( 'The meta data object.', 'woocommerce' ),
+			'type'        => 'object',
+			'properties'  => $this->get_schema_for_meta_data(),
 		);
 
 		return $schema;
@@ -851,17 +850,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return array
 	 */
 	private function get_schema_for_update_fulfillment_meta(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = __( 'Update fulfillment meta data response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'description' => __( 'The meta data array.', 'woocommerce' ),
-			'type'        => 'array',
-			'required'    => true,
-			'items'       => array(
-				'description' => __( 'The meta data object.', 'woocommerce' ),
-				'type'        => 'object',
-				'items'       => $this->get_schema_for_meta_data(),
-			),
+		$schema          = $this->get_base_schema();
+		$schema['title'] = __( 'Update fulfillment meta data response.', 'woocommerce' );
+		$schema['type']  = 'array';
+		$schema['items'] = array(
+			'description' => __( 'The meta data object.', 'woocommerce' ),
+			'type'        => 'object',
+			'properties'  => $this->get_schema_for_meta_data(),
 		);
 
 		return $schema;
@@ -949,24 +944,27 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$schema               = $this->get_base_schema();
 		$schema['title']      = __( 'The tracking number details response.', 'woocommerce' );
 		$schema['properties'] = array(
-			'description' => __( 'The tracking number details.', 'woocommerce' ),
-			'type'        => 'object',
-			'required'    => true,
-			'properties'  => array(
-				'tracking_number'   => array(
-					'description' => __( 'The tracking number.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'shipping_provider' => array(
-					'description' => __( 'The shipping provider.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'tracking_url'      => array(
-					'description' => __( 'The tracking URL.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
+			'tracking_number'   => array(
+				'description' => __( 'The tracking number.', 'woocommerce' ),
+				'type'        => 'string',
+				'required'    => true,
+			),
+			'shipping_provider' => array(
+				'description' => __( 'The shipping provider.', 'woocommerce' ),
+				'type'        => 'string',
+				'required'    => true,
+			),
+			'tracking_url'      => array(
+				'description' => __( 'The tracking URL.', 'woocommerce' ),
+				'type'        => 'string',
+				'required'    => true,
+			),
+			'possibilities'     => array(
+				'description' => __( 'Ambiguous shipping providers list.', 'woocommerce' ),
+				'type'        => 'array',
+				'required'    => false,
+				'items'       => array(
+					'type' => 'string',
 				),
 			),
 		);

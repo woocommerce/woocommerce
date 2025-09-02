@@ -140,6 +140,11 @@ const publicActions = {
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
+			if ( ! fulfillment.id ) {
+				dispatch.setError( orderId, 'Fulfillment ID is required' );
+				dispatch.setLoading( orderId, false );
+				return;
+			}
 			try {
 				const updated = await apiFetch< Fulfillment >( {
 					path: addQueryArgs(
