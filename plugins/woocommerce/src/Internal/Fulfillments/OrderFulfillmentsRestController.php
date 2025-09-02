@@ -536,7 +536,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
-			$fulfillment->delete_meta_data( esc_attr( $request->get_param( 'meta_key' ) ) );
+			$meta_key = sanitize_text_field( wp_unslash( (string) $request->get_param( 'meta_key' ) ) );
+			$fulfillment->delete_meta_data( $meta_key );
 			$fulfillment->save();
 		} catch ( ApiException $ex ) {
 			return $this->prepare_error_response(
