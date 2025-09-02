@@ -49,21 +49,32 @@ class WC_Gateway_Paypal_Buttons {
 	 * @return array
 	 */
 	public function get_options() {
-		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
+		$common_options = $this->get_common_options();
+		$options        = array(
+			'partner-attribution-id' => 'Woo_Cart_CoreUpgrade',
+			'page-type'              => $this->get_page_type(),
+		);
 
-		$page_type = $this->get_page_type();
+		return array_merge( $common_options, $options );
+	}
+
+	/**
+	 * Get the common attributes for the PayPal JS SDK script and modules.
+	 *
+	 * @return array
+	 */
+	public function get_common_options() {
+		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
 
 		return array(
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			'client-id'              => 'sb', // TODO: Get the client ID.
-			'components'             => 'buttons,funding-eligibility,messages',
-			'disable-funding'        => 'card,applepay',
-			'enable-funding'         => 'venmo,paylater',
-			'currency'               => get_woocommerce_currency(),
-			'intent'                 => $intent,
-			'merchant-id'            => $this->gateway->email,
-			'partner-attribution-id' => 'Woo_Cart_CoreUpgrade',
-			'page-type'              => $page_type,
+			'client-id'       => 'sb', // TODO: Get the client ID.
+			'components'      => 'buttons,funding-eligibility,messages',
+			'disable-funding' => 'card,applepay',
+			'enable-funding'  => 'venmo,paylater',
+			'currency'        => get_woocommerce_currency(),
+			'intent'          => $intent,
+			'merchant-id'     => $this->gateway->email,
 		);
 	}
 

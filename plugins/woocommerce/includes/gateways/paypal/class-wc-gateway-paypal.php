@@ -676,7 +676,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
 		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
-		$options           = $buttons->get_options();
+		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
 			return;
