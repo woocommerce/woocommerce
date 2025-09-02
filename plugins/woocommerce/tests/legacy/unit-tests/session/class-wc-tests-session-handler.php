@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Session
  */
 
+declare( strict_types=1 );
+
 /**
  * Tests for the WC_Session_Handler class.
  */
@@ -264,6 +266,38 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		$this->assertFalse( wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
 		$this->assertNull( $this->get_session_from_db( $this->session_key ) );
+	}
+
+	/**
+	 * Tests expired sessions cleanup: indirectly verifies that batched deletion works and targeted caches cleanup.
+	 *
+	 * @return void
+	 */
+	public function test_cleanup_sessions(): void {
+		global $wpdb;
+
+		// Setup expires sessions: ensure we'll be cleaning up in two batches
+		$expired = time() - DAY_IN_SECONDS;
+		for ( $index = 1; $index <= 150; ++$index ) {
+			$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", $index, 'expired', $expired ) );
+			wp_cache_set( $this->cache_prefix . $index, 'expired', WC_SESSION_CACHE_GROUP );
+		}
+		// Setup expires sessions: ensure we'll be cleaning up in two batches
+		$active   = time() + DAY_IN_SECONDS;
+		$customer = 'customer';
+		$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", $customer, 'active', $active ) );
+		wp_cache_set( $this->cache_prefix . $customer, 'active', WC_SESSION_CACHE_GROUP );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethodsExcept( array( 'cleanup_sessions' ) )
+			->getMock();
+		$handler->cleanup_sessions();
+
+		// Verify the DB and cache cleanup results.
+		$this->assertSame( [ [ $customer ] ], $wpdb->get_results( $wpdb->prepare( 'SELECT session_key FROM %i', "{$wpdb->prefix}woocommerce_sessions" ), ARRAY_N ) );
+		$this->assertSame( 'active', wp_cache_get( $this->cache_prefix . $customer, WC_SESSION_CACHE_GROUP ) );
+		$this->assertSame( false, wp_cache_get( $this->cache_prefix . $index, WC_SESSION_CACHE_GROUP ) );
 	}
 
 	/**
