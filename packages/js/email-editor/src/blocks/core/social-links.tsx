@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { InspectorControls } from '@wordpress/block-editor';
-import { registerBlockVariation } from '@wordpress/blocks';
 import type {
 	Block,
 	BlockConfiguration,
@@ -14,6 +13,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { updateBlockSettings } from '../../config-tools/block-config';
+import { registerBlockVariationForEmail } from '../../config-tools';
 import { addFilterForEmail } from '../../config-tools/filters';
 
 // Add support for top social networks
@@ -95,7 +95,7 @@ function registerCustomSocialLinksBlockVariation() {
 		},
 	];
 
-	registerBlockVariation( 'core/social-links', {
+	registerBlockVariationForEmail( 'core/social-links', {
 		name: 'social-links-default',
 		title: 'Social Icons',
 		attributes: {
