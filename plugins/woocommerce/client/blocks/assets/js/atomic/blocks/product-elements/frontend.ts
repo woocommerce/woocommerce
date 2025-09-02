@@ -65,6 +65,10 @@ const productElementStore = store(
 
 				const { products } = getConfig( 'woocommerce' );
 
+				if ( ! products ) {
+					return undefined;
+				}
+
 				return (
 					products?.[ productDataState.productId ]?.variations?.[
 						productDataState?.variationId || 0
