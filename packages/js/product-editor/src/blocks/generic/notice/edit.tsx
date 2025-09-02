@@ -22,9 +22,9 @@ export function Edit( {
 			<Notice
 				content={
 					<div
-											dangerouslySetInnerHTML={ {
-						__html: sanitizeHTML( attributes.message ),
-					} }
+						dangerouslySetInnerHTML={ {
+							__html: sanitizeHTML( attributes.message ),
+						} }
 					></div>
 				}
 			></Notice>

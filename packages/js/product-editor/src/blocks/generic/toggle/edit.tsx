@@ -6,11 +6,11 @@ import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { ReactNode } from 'react';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
-import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies

@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -14,11 +15,6 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { sanitizeHTML } from '@woocommerce/sanitize';
-
-/**
- * Internal dependencies
- */
 
 type ContentPreviewProps = {
 	content: string;
