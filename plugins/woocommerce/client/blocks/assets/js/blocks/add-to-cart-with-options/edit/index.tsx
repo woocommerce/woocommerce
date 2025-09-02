@@ -45,7 +45,7 @@ const AddToCartOptionsEdit = (
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const productType =
-		product?.id === 0 ? currentProductType?.slug : product?.type;
+		product?.id === undefined ? currentProductType?.slug : product?.type;
 	const isCoreProductType =
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
