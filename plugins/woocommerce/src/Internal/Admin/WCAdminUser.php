@@ -71,7 +71,11 @@ class WCAdminUser {
 	public function get_user_data_values( $user ) {
 		$values = array();
 		foreach ( $this->get_user_data_fields() as $field ) {
-			$values[ $field ] = self::get_user_data_field( $user['id'], $field );
+			if ( 'can_modify_files' === $field ) {
+				$values[ $field ] = wp_is_file_mod_allowed( 'woocommerce' );
+			} else {
+				$values[ $field ] = self::get_user_data_field( $user['id'], $field );
+			}
 		}
 		return $values;
 	}
@@ -113,7 +117,7 @@ class WCAdminUser {
 		 * @since 4.0.0
 		 * @param array $fields Array of fields to expose over the WP user endpoint.
 		 */
-		return apply_filters( 'woocommerce_admin_get_user_data_fields', array( 'variable_product_tour_shown' ) );
+		return apply_filters( 'woocommerce_admin_get_user_data_fields', array( 'variable_product_tour_shown', 'can_modify_files' ) );
 	}
 
 	/**
