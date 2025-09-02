@@ -293,7 +293,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	private function render_experimental_iapi_product_details_item_markup( $tag_name ) {
 		ob_start();
 		?>
-		<<?php echo tag_escape( $tag_name ); ?> data-wp-bind--class="state.cartItemDataAttr.className">
+		<<?php echo tag_escape( $tag_name ); ?>
+			data-wp-bind--hidden="state.cartItemDataAttr.hidden"
+			data-wp-bind--class="state.cartItemDataAttr.className"
+		>
 			<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
 			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 		</<?php echo tag_escape( $tag_name ); ?>>

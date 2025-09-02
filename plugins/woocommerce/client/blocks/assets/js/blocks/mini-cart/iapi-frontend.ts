@@ -78,9 +78,10 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
-	name: string;
-	value: string;
-	className: string;
+	name?: string;
+	value?: string;
+	className?: string;
+	hidden?: boolean;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -611,7 +612,12 @@ const { state: cartItemState } = store(
 
 			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
-					itemData: { key: string; attribute: string; value: string };
+					itemData: {
+						key: string;
+						attribute: string;
+						value: string;
+						hidden: string;
+					};
 					dataProperty: DataProperty;
 				} >();
 
@@ -620,7 +626,7 @@ const { state: cartItemState } = store(
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 				if ( ! dataItemAttr ) {
-					return null;
+					return { hidden: true };
 				}
 
 				const dataItemAttrKey =
@@ -638,6 +644,7 @@ const { state: cartItemState } = store(
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
 						.replace( /[\s_]+/g, '-' )
 						.toLowerCase() }`,
+					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
 			},
 
