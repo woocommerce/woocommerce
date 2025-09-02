@@ -22,10 +22,12 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import { useProduct } from '@woocommerce/entities';
 
-const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
-	const { product } = useProductDataContext();
-
+const AddToCartOptionsEdit = (
+	props: BlockEditProps< Attributes > & { context: { postId?: number } }
+) => {
+	const { product } = useProduct( props.context.postId );
 	const blockProps = useBlockProps();
 	const blockClientId = blockProps?.id;
 
@@ -43,7 +45,7 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const productType =
-		product.id === 0 ? currentProductType?.slug : product.type;
+		product?.id === 0 ? currentProductType?.slug : product?.type;
 	const isCoreProductType =
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
