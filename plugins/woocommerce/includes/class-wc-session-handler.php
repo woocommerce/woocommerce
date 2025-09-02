@@ -632,12 +632,12 @@ class WC_Session_Handler extends WC_Session {
 		if ( null !== $expired_sessions ) {
 			$batch_size   = 100;
 			$cache_prefix = $this->get_cache_prefix();
-			// Below we perform the table and cache cleanup in batches, what considering the following important aspects:
-			// - deleting smaller batches will lower the sessions table locking (the cleanup impact to sessions performance will be minimal);
+			// Below we perform the table and cache cleanup in batches considering the following important aspects:
+			// - deleting smaller batches will lower the sessions table locking time (the cleanup impact to sessions performance will be minimal);
 			// - deleting smaller batches is replication friendly (relevant to for clustered DB environments);
-			// - alternating between cache and DB cleanups provides some time between DB queries (might be not enough though, forcing us to use sleep later);
+			// - alternating between cache and DB cleanups provides some gap between DB queries (might be not enough though, forcing us to use sleep later);
 			foreach ( array_chunk( $expired_sessions, $batch_size ) as $batch ) {
-				// Cleanup expired cache entries (probably unnecessary, but due to `update_session_timestamp` and need for a gap between delete SQLs it's here).
+				// Cleanup expired cache entries (probably unnecessary, but due to `update_session_timestamp` and the need for a gap between delete SQLs it's here).
 				$expired_cache_keys = array_map( static fn( $session ) => $cache_prefix . $session->session_key, $batch );
 				wp_cache_delete_multiple( $expired_cache_keys, WC_SESSION_CACHE_GROUP );
 				// Drop expired database entries (it'll use PK as index hence blazing fast).
