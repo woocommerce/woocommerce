@@ -32,6 +32,7 @@ import {
 	useRemoveSavingFailedNotices,
 	useFilterEditorContentStylesheets,
 } from './hooks';
+import { cleanupConfigurationChanges } from './config-tools';
 
 function Editor( {
 	postId,
@@ -140,6 +141,10 @@ export function ExperimentalEmailEditor( {
 	useLayoutEffect( () => {
 		onInit();
 		setIsInitialized( true );
+		// Cleanup global editor settings
+		return () => {
+			cleanupConfigurationChanges();
+		};
 	}, [] );
 
 	const WrappedEditor = applyFilters(
