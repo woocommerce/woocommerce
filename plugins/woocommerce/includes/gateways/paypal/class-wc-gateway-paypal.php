@@ -449,6 +449,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( $this->should_use_orders_v2() ) {
 			unset( $form_fields['receiver_email'] );
 		}
+
+		if ( ! $this->should_use_orders_v2() ) {
+			unset( $form_fields['paypal_buttons'] );
+		}
 		return $form_fields;
 	}
 
