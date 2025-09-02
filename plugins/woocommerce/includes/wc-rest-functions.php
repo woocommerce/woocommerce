@@ -459,4 +459,3 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
-
