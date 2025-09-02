@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 /**
  * Autoloader class.
  */
@@ -112,7 +114,7 @@ class WC_Autoloader {
 			// For V4 controllers, check if the feature is enabled first.
 			if ( false !== strpos( $class, '_v4_' ) ) {
 				// Only load V4 controllers if the feature is enabled.
-				if ( Features::is_enabled( 'wc-rest-api-v4' ) ) {
+				if ( Features::is_enabled( 'rest-api-v4' ) ) {
 					$rest_controller_paths = array(
 						'rest-api/Controllers/Version4/',
 					);
