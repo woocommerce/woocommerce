@@ -438,6 +438,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_address_autocomplete_enabled' );
 		delete_option( 'woocommerce_address_autocomplete_provider' );
 		remove_all_filters( 'woocommerce_address_providers' );
+		// Re-init address providers to ensure class is clean for other tests.
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class )->init();
 	}
 
 	/**
