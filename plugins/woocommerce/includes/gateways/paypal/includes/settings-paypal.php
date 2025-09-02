@@ -70,7 +70,7 @@ $settings = array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable PayPal Buttons', 'woocommerce' ),
 		'default'     => 'yes',
-		'description' => sprintf( __( 'Enable PayPal buttons to offer PayPal, Venmo and Pay Later as express checkout options on product, cart, and checkout pages.', 'woocommerce' ) ),
+		'description' => __( 'Enable PayPal buttons to offer PayPal, Venmo and Pay Later as express checkout options on product, cart, and checkout pages.', 'woocommerce' ),
 	),
 	'invoice_prefix'   => array(
 		'title'       => __( 'Invoice prefix', 'woocommerce' ),
