@@ -32,6 +32,7 @@ import { enhanceSiteLogoBlock } from './core/site-logo';
 export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
+	registerCoreBlocks();
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
@@ -48,6 +49,5 @@ export function initBlocks() {
 	enhanceSocialLinksBlock();
 	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
-	registerCoreBlocks();
 	removeBlockStylesFromAllBlocks();
 }
