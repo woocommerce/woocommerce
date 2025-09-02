@@ -98,9 +98,7 @@ export const useOrderAttributionInstallBanner = ( { isInstalling } ) => {
 
 			return {
 				orderAttributionInstallState: installState,
-				canUserInstallPlugins:
-					currentUserCan( 'install_plugins' ) &&
-					user.woocommerce_meta.can_modify_files,
+				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
 			};
 		},
 		[ currentUserCan ]
