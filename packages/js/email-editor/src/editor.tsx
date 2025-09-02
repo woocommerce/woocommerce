@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select, dispatch } from '@wordpress/data';
 import {
 	StrictMode,
 	createRoot,
@@ -10,6 +10,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
 /**
@@ -139,11 +140,15 @@ export function ExperimentalEmailEditor( {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
+		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		onInit();
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
 			cleanupConfigurationChanges();
+			dispatch( editorStore ).updateEditorSettings(
+				backupEditorSettings
+			);
 		};
 	}, [] );
 
