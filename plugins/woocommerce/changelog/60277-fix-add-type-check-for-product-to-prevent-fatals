@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add type check for product to prevent fatals in WC_Comments::clear_transients method.

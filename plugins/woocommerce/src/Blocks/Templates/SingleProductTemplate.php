@@ -69,7 +69,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 
 			// Use the first template by default.
-			$template = $templates[0];
+			$template = reset( $templates );
 
 			// Check if there is a template matching the slug `single-product-{post_name}`.
 			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
@@ -97,8 +97,6 @@ class SingleProductTemplate extends AbstractTemplate {
 					)
 				);
 			}
-
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 
@@ -144,6 +142,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			},
 			$query_result
 		);
+
 		return $query_result;
 	}
 

@@ -37,7 +37,6 @@ class WC_Admin {
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
-		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -265,44 +264,6 @@ class WC_Admin {
 			// phpcs:enable
 			exit;
 		}
-	}
-
-	/**
-	 * Preview email editor placeholder dummy content.
-	 */
-	public function preview_email_editor_dummy_content() {
-		$message = '';
-		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
-			return;
-		}
-
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) {
-			die( 'Security check' );
-		}
-
-		/**
-		 * Email preview instance for rendering dummy content.
-		 *
-		 * @var EmailPreview $email_preview - email preview instance
-		 */
-		$email_preview = wc_get_container()->get( EmailPreview::class );
-
-		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
-		if ( isset( $_GET['type'] ) ) {
-			$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
-		}
-
-		try {
-			$message = $email_preview->generate_placeholder_content( $type_param );
-		} catch ( \Exception $e ) {
-			// Catch other potential errors during content generation.
-			wp_die( esc_html__( 'There was an error rendering the email preview.', 'woocommerce' ), 404 );
-		}
-
-		// Print the placeholder content.
-		// phpcs:ignore WordPress.Security.EscapeOutput
-		echo $message;
-		exit;
 	}
 
 	/**

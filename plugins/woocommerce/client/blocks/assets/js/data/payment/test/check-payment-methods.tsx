@@ -17,6 +17,10 @@ import { CanMakePaymentArgument } from '@woocommerce/types';
  */
 import { checkPaymentMethodsCanPay } from '../utils/check-payment-methods';
 
+jest.mock( '@woocommerce/utils', () => ( {
+	isSiteEditorPage: jest.fn().mockReturnValue( true ),
+} ) );
+
 const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 	const requiredKeys = [
 		'billingData',

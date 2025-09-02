@@ -7,13 +7,28 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
+import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 
-const test = base.extend< { pageObject: AddToCartWithOptionsPage } >( {
+const test = base.extend< {
+	pageObject: AddToCartWithOptionsPage;
+	productGalleryPageObject: ProductGalleryPage;
+} >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new AddToCartWithOptionsPage( {
 			page,
 			admin,
 			editor,
+		} );
+		await use( pageObject );
+	},
+	productGalleryPageObject: async (
+		{ page, editor, frontendUtils },
+		use
+	) => {
+		const pageObject = new ProductGalleryPage( {
+			page,
+			editor,
+			frontendUtils,
 		} );
 		await use( pageObject );
 	},
@@ -73,6 +88,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
+		productGalleryPageObject,
 		editor,
 	} ) => {
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -95,6 +111,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 
 		await pageObject.updateSingleProductTemplate();
+
+		// We update to the Product Gallery block to test that it scrolls to the
+		// correct variation image.
+		const productImageGalleryBlock = await editor.getBlockByName(
+			'woocommerce/product-image-gallery'
+		);
+		await editor.selectBlocks( productImageGalleryBlock );
+		await editor.transformBlockTo( 'woocommerce/product-gallery' );
 
 		// We insert the blockified Product Details block to test that it updates
 		// with the correct variation data.
@@ -129,7 +153,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 		} );
 
-		await test.step( 'updates stock indicator and product price when attributes are selected', async () => {
+		await test.step( 'updates blocks rendering variation data when attributes are selected', async () => {
 			// Open additional information accordion so we can check the weight.
 			await page
 				.getByRole( 'button', { name: 'Additional Information' } )
@@ -142,6 +166,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '1.5 lbs' )
 			).toBeVisible();
+			const visibleImage =
+				await productGalleryPageObject.getVisibleLargeImageId();
+			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
@@ -156,6 +183,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '2 lbs' )
 			).toBeVisible();
+
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await productGalleryPageObject.getVisibleLargeImageId();
+
+				expect( newVisibleLargeImageId ).toBe( '35' );
+			} ).toPass( { timeout: 1_000 } );
 		} );
 
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
@@ -164,7 +198,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Note: The button is always enabled for accessibility reasons.
 			// Instead, we check directly for the "disabled" class, which grays
 			// out the button.
-			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 			await addToCartButton.click();
 
@@ -222,6 +256,22 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
 			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+		} );
+
+		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of Beanie'
+			);
+			await reduceQuantityButton.click();
+			await reduceQuantityButton.click();
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'Beanie',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '0' );
+
+			await expect( reduceQuantityButton ).toBeDisabled();
 		} );
 	} );
 
@@ -337,8 +387,130 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantityInput ).toHaveValue( '6' );
 
 			await quantityInput.fill( '8' );
+			await quantityInput.blur();
 
 			await expect( increaseQuantityButton ).toBeDisabled();
+
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart: “T-Shirt”',
+			} );
+
+			await test.step( 'make sure quantities below min are not allowed even when manually filled but they persist in the input field', async () => {
+				await quantityInput.fill( '3' );
+				await quantityInput.blur();
+				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+				await expect( reduceQuantityButton ).toBeDisabled();
+				await expect( increaseQuantityButton ).toBeEnabled();
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '3' );
+			} );
+
+			await test.step( 'verify 0 is reset in simple products', async () => {
+				await quantityInput.fill( '0' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify setting the input to an empty string resets the value to the min', async () => {
+				await quantityInput.fill( '' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify letters are reset to min value in simple products', async () => {
+				// Playwright doesn't support filling a numeric input with a
+				// string, but we still want to test this case as users are able
+				// to type letters directly in the input field.
+				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
+					element.value = 'abc';
+					element.focus();
+					requestAnimationFrame( () => {
+						element.blur();
+					} );
+				} );
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+		} );
+
+		await test.step( 'in variable products', async () => {
+			await page.goto( '/product/hoodie/' );
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'Product quantity',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '1' );
+
+			const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+			const logoNoOption = page.locator( 'label:has-text("No")' );
+
+			await colorBlueOption.click();
+			await logoNoOption.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const logoYesOption = page.locator( 'label:has-text("Yes")' );
+			await logoYesOption.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			await quantityInput.fill( '10' );
+			await quantityInput.blur();
+
+			await expect( quantityInput ).toHaveValue( '10' );
+
+			await logoNoOption.click();
+
+			await expect( quantityInput ).toHaveValue( '8' );
+
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+				exact: true,
+			} );
+
+			await test.step( 'verify 0 is reset in variable products', async () => {
+				await quantityInput.fill( '0' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify setting the input to an empty string resets the value to the min', async () => {
+				await quantityInput.fill( '' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify letters are reset to min value in variable products', async () => {
+				// Playwright doesn't support filling a numeric input with a
+				// string, but we still want to test this case as users are able
+				// to type letters directly in the input field.
+				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
+					element.value = 'abc';
+					element.focus();
+					requestAnimationFrame( () => {
+						element.blur();
+					} );
+				} );
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
 		} );
 
 		await test.step( 'in grouped products', async () => {
@@ -356,15 +528,77 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( quantityInput ).toHaveValue( '4' );
 
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of T-Shirt'
-			);
-			await expect( reduceQuantityButton ).toBeDisabled();
 			await increaseQuantityButton.click();
 
 			await quantityInput.fill( '8' );
+			await quantityInput.blur();
 
 			await expect( increaseQuantityButton ).toBeDisabled();
+
+			// Values can be decreased down to 0.
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of T-Shirt'
+			);
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '6' );
+
+			await quantityInput.fill( '5' );
+			await quantityInput.blur();
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '0' );
+
+			await expect( reduceQuantityButton ).toBeDisabled();
+
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await test.step( 'make sure quantities below min are not allowed even when manually filled but they persist in the input field', async () => {
+				await quantityInput.fill( '3' );
+				await quantityInput.blur();
+				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+				await expect( reduceQuantityButton ).toBeEnabled();
+				await expect( increaseQuantityButton ).toBeEnabled();
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '3' );
+			} );
+
+			await test.step( 'verify 0 is not reset in grouped products', async () => {
+				await quantityInput.fill( '0' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '0' );
+				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+			} );
+
+			await test.step( 'verify empty strings are not reset in grouped products', async () => {
+				await quantityInput.fill( '' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '' );
+				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+			} );
+
+			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+				// Playwright doesn't support filling a numeric input with a
+				// string, but we still want to test this case as users are able
+				// to type letters directly in the input field.
+				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
+					element.value = 'abc';
+					element.focus();
+					requestAnimationFrame( () => {
+						element.blur();
+					} );
+				} );
+				await expect( quantityInput ).toHaveValue( '' );
+				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+			} );
 		} );
 	} );
 

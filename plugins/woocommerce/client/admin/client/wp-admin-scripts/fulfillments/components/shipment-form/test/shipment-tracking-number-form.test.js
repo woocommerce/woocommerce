@@ -10,6 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
 import '../../../test-helper/global-mock';
 import ShipmentTrackingNumberForm from '../shipment-tracking-number-form';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
+import { SHIPMENT_OPTION_MANUAL_ENTRY } from '../../../data/constants';
 
 jest.mock( '../../../context/shipment-form-context', () => ( {
 	useShipmentFormContext: jest.fn(),
@@ -46,6 +47,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		setTrackingUrl: jest.fn(),
 		providerName: '',
 		setProviderName: jest.fn(),
+		setSelectedOption: jest.fn(),
 	};
 
 	beforeEach( () => {
@@ -177,5 +179,202 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
 		).toBeInTheDocument();
+	} );
+
+	it( 'shows ambiguous provider message when possibilities have low confidence scores', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '1234567890123456',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1234567890123456',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 70 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
+				},
+			},
+		} );
+
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: '1234567890123456' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
+				'1234567890123456'
+			);
+		} );
+
+		expect( screen.getByText( 'Not your provider?' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Select your provider manually' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'shows ambiguous provider message when multiple possibilities have high confidence scores', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: 'AB123456789US',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=AB123456789US',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 90 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 88 },
+				},
+			},
+		} );
+
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'AB123456789US' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
+				'AB123456789US'
+			);
+		} );
+
+		expect( screen.getByText( 'Not your provider?' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Select your provider manually' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'does not show ambiguous provider message when one possibility has high confidence score', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '123456789012',
+				shipping_provider: 'ups',
+				tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 90 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
+				},
+			},
+		} );
+
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: '123456789012' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith(
+				'123456789012'
+			);
+		} );
+
+		expect(
+			screen.queryByText( 'Not your provider?' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText( 'Select your provider manually' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'calls setSelectedOption when manual provider selection button is clicked', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '1234567890123456',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1234567890123456',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 70 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
+				},
+			},
+		} );
+
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: '1234567890123456' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect(
+				screen.getByText( 'Not your provider?' )
+			).toBeInTheDocument();
+		} );
+
+		const manualButton = screen.getByText(
+			'Select your provider manually'
+		);
+		fireEvent.click( manualButton );
+
+		expect( mockContext.setSelectedOption ).toHaveBeenCalledWith(
+			SHIPMENT_OPTION_MANUAL_ENTRY
+		);
+	} );
+
+	it( 'resets ambiguous provider state when new tracking number is looked up', async () => {
+		mockContext.trackingNumber = '';
+		mockContext.shipmentProvider = '';
+
+		// First lookup with ambiguous results
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '1234567890123456',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1234567890123456',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 70 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
+				},
+			},
+		} );
+
+		render( <ShipmentTrackingNumberForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: '1234567890123456' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect(
+				screen.getByText( 'Not your provider?' )
+			).toBeInTheDocument();
+		} );
+
+		// Edit the tracking number again
+		fireEvent.click( screen.getByTestId( 'edit-icon' ) );
+
+		// Second lookup with clear results
+		apiFetch.mockResolvedValueOnce( {
+			tracking_number_details: {
+				tracking_number: '123456789012',
+				shipping_provider: 'ups',
+				tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 90 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
+				},
+			},
+		} );
+
+		const newInput = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( newInput, { target: { value: '123456789012' } } );
+		fireEvent.click( screen.getByText( 'Find info' ) );
+
+		await waitFor( () => {
+			expect( mockContext.setTrackingNumber ).toHaveBeenLastCalledWith(
+				'123456789012'
+			);
+		} );
+
+		expect(
+			screen.queryByText( 'Not your provider?' )
+		).not.toBeInTheDocument();
 	} );
 } );
