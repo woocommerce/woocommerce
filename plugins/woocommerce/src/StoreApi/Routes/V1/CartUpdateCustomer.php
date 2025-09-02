@@ -221,6 +221,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		// If no draft order exists yet, create one so the data is properly stored.
 		if ( ! $draft_order && ! WC()->cart->is_empty() ) {
 			$draft_order = $this->order_controller->create_order_from_cart();
+			wc_log_order_step( '[Store API - CartUpdateCustomer] Created draft order while updating customer', array( 'order_object' => $draft_order ) );
 			$this->set_draft_order_id( $draft_order->get_id() );
 		}
 
