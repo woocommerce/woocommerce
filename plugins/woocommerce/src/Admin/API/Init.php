@@ -109,10 +109,10 @@ class Init {
 			 *
 			 * @since 3.5.0
 			 *
-			 * @todo Determine how to avoid extensions using this hook from loading the same controllers multiple times since it may be called more than once now.
 			 */
 			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 		}
+
 		foreach ( $controllers as $controller ) {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
@@ -126,7 +126,7 @@ class Init {
 	 */
 	public function rest_api_init_wc_analytics() {
 		// Controllers in wc-analytics namespace, but loaded irrespective of analytics feature value.
-		$analytic_mu_controllers = array(
+		$controllers = array(
 			'Automattic\WooCommerce\Admin\API\Notes',
 			'Automattic\WooCommerce\Admin\API\NoteActions',
 			'Automattic\WooCommerce\Admin\API\Coupons',
@@ -177,7 +177,7 @@ class Init {
 			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 
-			$analytics_controllers = array_merge( $analytics_controllers, $analytic_mu_controllers );
+			$controllers = array_merge( $analytics_controllers, $controllers );
 
 			if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
 				/**
@@ -187,11 +187,11 @@ class Init {
 				 *
 				 * @since 3.5.0
 				 *
-				 * @todo Determine how to avoid extensions using this hook from loading the same controllers multiple times since it may be called more than once now.
 				 */
-				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $analytics_controllers );
+				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 			}
-			foreach ( $analytics_controllers as $controller ) {
+
+			foreach ( $controllers as $controller ) {
 				$this->$controller = new $controller();
 				$this->$controller->register_routes();
 			}
