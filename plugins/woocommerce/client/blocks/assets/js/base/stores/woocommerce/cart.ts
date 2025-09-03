@@ -60,6 +60,8 @@ export type ProductData = {
 	};
 };
 
+type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
+
 export type Store = {
 	state: {
 		errorMessages?: {
@@ -79,11 +81,11 @@ export type Store = {
 		removeCartItem: ( key: string ) => void;
 		addCartItem: (
 			args: ClientCartItem,
-			options?: { showCartUpdatesNotices?: boolean }
+			options?: CartUpdateOptions
 		) => void;
 		batchAddCartItems: (
 			items: ClientCartItem[],
-			options?: { showCartUpdatesNotices?: boolean }
+			options?: CartUpdateOptions
 		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
@@ -295,11 +297,7 @@ const { state, actions } = store< Store >(
 					variation,
 					updateOptimistically = true,
 				}: OptimisticCartItem,
-				{
-					showCartUpdatesNotices = true,
-				}: {
-					showCartUpdatesNotices?: boolean;
-				} = {}
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
@@ -401,11 +399,7 @@ const { state, actions } = store< Store >(
 
 			*batchAddCartItems(
 				items: OptimisticCartItem[],
-				{
-					showCartUpdatesNotices = true,
-				}: {
-					showCartUpdatesNotices?: boolean;
-				} = {}
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};

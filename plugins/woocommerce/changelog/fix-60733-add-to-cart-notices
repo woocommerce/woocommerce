@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent added to cart notices to appear unnecessarily in Product Collection and Add to Cart + Options blocks when used in two different tabs in parallel
+Prevent "Added to cart" notices from appearing unnecessarily in Product Collection and Add to Cart + Options blocks when used in two different tabs in parallel
