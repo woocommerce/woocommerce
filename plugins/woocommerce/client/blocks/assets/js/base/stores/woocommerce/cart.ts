@@ -296,7 +296,7 @@ const { state, actions } = store< Store >(
 					quantity,
 					variation,
 					updateOptimistically = true,
-				}: OptimisticCartItem,
+				}: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -398,7 +398,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*batchAddCartItems(
-				items: OptimisticCartItem[],
+				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const previousCart = JSON.stringify( state.cart );
