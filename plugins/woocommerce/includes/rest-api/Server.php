@@ -70,7 +70,7 @@ class Server {
 				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
 				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
 				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
-				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && ( class_exists( \Automattic\WooCommerce\Admin\Features\Features::class ) && Features::is_enabled( 'rest-api-v4' ) ) ) ? $this->get_v4_controllers() : array() ),
+				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && ( class_exists( \Automattic\WooCommerce\Admin\Features\Features::class ) && Features::is_enabled( 'rest-api-v4' ) ) ) ? $this->get_v4_controllers() : array(),
 				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
 			)
 		);
