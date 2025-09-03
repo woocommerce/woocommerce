@@ -136,7 +136,7 @@ class PageController {
 		if ( 'admin_menu' === current_action() ) {
 			$this->register_menu();
 		} else {
-			add_action( 'admin_menu', 'register_menu', 9 );
+			add_action( 'admin_menu', array( $this, 'register_menu' ), 9 );
 		}
 
 		// Not on an Orders page.
@@ -149,8 +149,7 @@ class PageController {
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
-
-		// Hook to all possible orders screen IDs (the compatibility layer will handle firing the right hooks).
+		// Hook to all possible orders screen IDs (the compatibility layer will handle firing the right hooks)
 		add_action( 'load-toplevel_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 
@@ -260,10 +259,8 @@ class PageController {
 	 */
 	public function register_menu(): void {
 		$order_types = wc_get_order_types( 'admin-menu' );
-
-		// Check if shop_order exists in the order types
 		$has_shop_order = in_array( 'shop_order', $order_types, true );
-		$parent_slug = null;
+		$hook_mappings = array();
 
 		if ( $has_shop_order ) {
 			// Process shop_order first to create top-level menu
@@ -278,35 +275,36 @@ class PageController {
 				}
 			}
 
-			$parent_slug = 'wc-orders';
-
-			// Create top-level Orders menu
-			add_menu_page(
+			// Create top-level Orders menu and capture the hook suffix
+			$main_hook_suffix = add_menu_page(
 				$post_type->labels->name,
 				$menu_name,
 				$post_type->cap->edit_posts,
-				$parent_slug,
+				'wc-orders',
 				array( $this, 'output' ),
 				'dashicons-text-page',
 				56
 			);
 
+			// Map the new top-level hook to the expected submenu hook for backwards compatibility
+			$hook_mappings[$main_hook_suffix] = 'woocommerce_page_wc-orders';
+
 			// Add submenu items for shop_order
 			add_submenu_page(
-				$parent_slug,
+				'wc-orders',
 				$post_type->labels->all_items,
 				__( 'All orders', 'woocommerce' ),
 				$post_type->cap->edit_posts,
-				$parent_slug,
+				'wc-orders',
 				array( $this, 'output' )
 			);
 
 			add_submenu_page(
-				$parent_slug,
+				'wc-orders',
 				$post_type->labels->add_new_item,
 				__( 'Add new order', 'woocommerce' ),
 				$post_type->cap->create_posts,
-				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . $parent_slug ) ),
+				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=wc-orders' ) ),
 				''
 			);
 		}
@@ -322,9 +320,9 @@ class PageController {
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
 			// Add as submenu under shop_order if it exists, otherwise under WooCommerce
-			$menu_parent = $has_shop_order ? $parent_slug : 'woocommerce';
+			$menu_parent = $has_shop_order ? 'wc-orders' : 'woocommerce';
 
-			add_submenu_page(
+			$sub_hook_suffix = add_submenu_page(
 				$menu_parent,
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
@@ -332,7 +330,13 @@ class PageController {
 				$page_slug,
 				array( $this, 'output' )
 			);
+
+			// Map submenu hooks - they should appear as if under woocommerce for backwards compatibility
+			$hook_mappings[$sub_hook_suffix] = 'woocommerce_page_' . $page_slug;
 		}
+
+		// Create backwards compatibility layer
+		$this->create_hook_compatibility( $hook_mappings );
 
 		// In some cases (such as if the authoritative order store was changed earlier in the current request) we
 		// need an extra step to remove the menu entry for the menu post type.
@@ -344,6 +348,52 @@ class PageController {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Create backwards compatibility hooks to ensure plugins expecting the old hook names still work.
+	 *
+	 * @param array $hook_mappings Array of actual_hook => expected_hook mappings.
+	 */
+	private function create_hook_compatibility( array $hook_mappings ): void {
+		foreach ( $hook_mappings as $actual_hook => $expected_hook ) {
+			// Fire the expected hooks when the actual hooks are triggered
+			add_action( "load-{$actual_hook}", function() use ( $expected_hook ) {
+				// Only fire if we're not already in the expected hook (prevent infinite loops)
+				if ( ! doing_action( "load-{$expected_hook}" ) ) {
+					do_action( "load-{$expected_hook}" );
+				}
+			}, 1 );
+
+			add_action( "admin_print_styles-{$actual_hook}", function() use ( $expected_hook ) {
+				if ( ! doing_action( "admin_print_styles-{$expected_hook}" ) ) {
+					do_action( "admin_print_styles-{$expected_hook}" );
+				}
+			}, 1 );
+
+			add_action( "admin_print_scripts-{$actual_hook}", function() use ( $expected_hook ) {
+				if ( ! doing_action( "admin_print_scripts-{$expected_hook}" ) ) {
+					do_action( "admin_print_scripts-{$expected_hook}" );
+				}
+			}, 1 );
+
+			// Also fire the base hook (without prefix)
+			add_action( $actual_hook, function() use ( $expected_hook ) {
+				if ( ! doing_action( $expected_hook ) ) {
+					do_action( $expected_hook );
+				}
+			}, 1 );
+		}
+
+		// Modify the screen ID for backwards compatibility
+		add_action( 'current_screen', function( $screen ) use ( $hook_mappings ) {
+			if ( isset( $hook_mappings[ $screen->id ] ) ) {
+				// Store the original ID in case something needs it
+				$screen->original_id = $screen->id;
+				// Change the screen ID to what plugins expect
+				$screen->id = $hook_mappings[ $screen->id ];
+			}
+		}, 1 );
 	}
 
 	/**
