@@ -794,6 +794,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function set_transact_onboarding_complete() {
+		if ( $this->transact_onboarding_complete ) {
+			return;
+		}
+
 		$this->update_option( 'transact_onboarding_complete', 'yes' );
 		$this->transact_onboarding_complete = true;
 	}
