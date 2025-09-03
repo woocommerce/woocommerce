@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerCoreBlocks } from '@wordpress/block-library';
-import { unregisterFormatType } from '@wordpress/rich-text';
+import { getBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -33,9 +33,11 @@ import { enhanceSiteLogoBlock } from './core/site-logo';
 export { getAllowedBlockNames } from './utils';
 
 export function initBlocks() {
-	// Footnote is registered by every register core block call as a side effect and causes warnings.
-	unregisterFormatType( 'core/footnote' );
-	registerCoreBlocks();
+	// Check if core blocks are already registered by looking for a fundamental core block
+	// 'core/paragraph' is always included in core blocks
+	if ( ! getBlockType( 'core/paragraph' ) ) {
+		registerCoreBlocks();
+	}
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
