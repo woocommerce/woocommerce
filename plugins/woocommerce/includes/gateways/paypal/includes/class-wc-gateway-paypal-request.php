@@ -155,6 +155,9 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			$redirect_url = $this->get_approve_link( $http_code, $response_data );
+			if ( empty( $redirect_url ) ) {
+				throw new Exception( 'PayPal order creation failed. Missing approval link.' );
+			}
 
 			return array(
 				'id'           => $response_data['id'],
