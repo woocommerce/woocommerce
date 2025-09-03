@@ -106,7 +106,7 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
 
-		wp_interactivity_state(
+		wp_interactivity_config(
 			'woocommerce',
 			array(
 				'products' => array(
@@ -133,7 +133,7 @@ class QuantitySelector extends AbstractBlock {
 				);
 			}
 
-			wp_interactivity_state(
+			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(
