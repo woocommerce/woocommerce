@@ -150,10 +150,10 @@ class QuantitySelector extends AbstractBlock {
 			);
 
 			$wrapper_attributes['data-wp-interactive']  = 'woocommerce/product-elements';
-			$wrapper_attributes['data-wp-bind--hidden'] = 'state.productData.sold_individually';
-			$input_attributes['data-wp-bind--min']      = 'state.productData.min';
-			$input_attributes['data-wp-bind--max']      = 'state.productData.max';
-			$input_attributes['data-wp-bind--step']     = 'state.productData.step';
+			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/product-elements::state.productData.sold_individually';
+			$input_attributes['data-wp-bind--min']      = 'woocommerce/product-elements::state.productData.min';
+			$input_attributes['data-wp-bind--max']      = 'woocommerce/product-elements::state.productData.max';
+			$input_attributes['data-wp-bind--step']     = 'woocommerce/product-elements::state.productData.step';
 			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
 		}
 
