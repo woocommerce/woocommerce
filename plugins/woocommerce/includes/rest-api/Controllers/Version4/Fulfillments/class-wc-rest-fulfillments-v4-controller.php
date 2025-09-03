@@ -703,14 +703,14 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 *
 	 * @return WP_REST_Response The error response.
 	 */
-	private function prepare_error_response( $code, $message, $status ): WP_REST_Response {
+	private function prepare_error_response( $code, $message, $status_data ): WP_REST_Response {
 		return new WP_REST_Response(
 			array(
 				'code'    => $code,
 				'message' => $message,
-				'data'    => array( 'status' => $status ),
+				'data'    => $status_data,
 			),
-			$status
+			$status_data['status']
 		);
 	}
 }
