@@ -7,16 +7,30 @@ declare( strict_types=1 );
 class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * User ID with admin capabilities.
+	 *
+	 * @var int
+	 */
+	protected $user;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Variations_Controller();
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		wp_set_current_user( 0 );
+		parent::tearDown();
 	}
 
 	/**
