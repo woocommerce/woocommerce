@@ -246,6 +246,11 @@ class WC_Admin_Menus {
 				}
 				break;
 		}
+
+		// Highlight "Add new order" submenu when on the new order page
+		if ( isset( $_GET['page'], $_GET['action'] ) && 0 === strpos( $_GET['page'], 'wc-orders' ) && 'new' === $_GET['action'] ) { // WPCS: input var okay, CSRF ok.
+			$submenu_file = add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ); // WPCS: override ok, input var okay, CSRF ok.
+		}
 	}
 
 	/**
