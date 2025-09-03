@@ -667,8 +667,9 @@ class WC_Frontend_Scripts {
 						function ( $provider ) {
 							// Sanitize provider data before sending to frontend.
 							return array(
-								'id'   => sanitize_key( $provider->id ),
-								'name' => sanitize_text_field( $provider->name ),
+								'id'            => sanitize_key( $provider->id ),
+								'name'          => sanitize_text_field( $provider->name ),
+								'branding_html' => wp_kses( $provider->branding_html, wp_kses_allowed_html( 'post' ) ),
 							);
 						},
 						$providers
