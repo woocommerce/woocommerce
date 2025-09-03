@@ -642,7 +642,7 @@ class WC_Session_Handler extends WC_Session {
 				wp_cache_delete_multiple( $expired_cache_keys, WC_SESSION_CACHE_GROUP );
 				// Drop expired database entries (it'll use PK as index, hence blazing fast).
 				$expired_session_ids = array_column( $batch, 'session_id' );
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_id IN( ' . implode( ', ', $expired_session_ids ) . ' )', $this->_table ) );
+				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_id IN( ' . implode( ', ', $expired_session_ids ) . ' )', $this->_table ) ); // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			}
 		}
 	}
