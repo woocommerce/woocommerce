@@ -41,6 +41,7 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"experimental-wc-rest-api": true
+		"experimental-wc-rest-api": true,
+		"rest-api-v4": false
 	}
 }
