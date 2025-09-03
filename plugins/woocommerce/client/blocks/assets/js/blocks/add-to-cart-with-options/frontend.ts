@@ -534,12 +534,17 @@ const { actions, state } = store<
 					{},
 					{ lock: universalLock }
 				);
-				yield wooActions.addCartItem( {
-					id,
-					quantity: newQuantity,
-					variation: selectedAttributes,
-					type: productType,
-				} );
+				yield wooActions.addCartItem(
+					{
+						id,
+						quantity: newQuantity,
+						variation: selectedAttributes,
+						type: productType,
+					},
+					{
+						showAutoUpdatedNotices: false,
+					}
+				);
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();
