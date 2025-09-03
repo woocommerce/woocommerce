@@ -24,6 +24,13 @@ As discussed in the team conversation:
 
 ## Change Log
 
+### 2025-09-02 - Move Experimental Price Fields from v3 to v4
+
+**Summary**: Moved experimental `min_price` and `max_price` fields from v3/products endpoint to v4/products endpoint. These fields were previously named `__experimental_min_price` and `__experimental_max_price` in v3 and are now available as `min_price` and `max_price` in v4. The fields are particularly useful for grouped products to display price ranges.
+**PR**: [#60703](https://github.com/woocommerce/woocommerce/pull/60703)  
+
+**Breaking Changes**: None (exact v3 copy)
+
 ### 2025-09-01 - Initial Implementation (Copy-paste from v3)
 
 **Summary**: Created v4/products/ endpoint as direct copy of v3 implementation  
