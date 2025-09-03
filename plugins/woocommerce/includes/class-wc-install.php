@@ -535,7 +535,7 @@ class WC_Install {
 			if ( ! empty( $return_url ) ) {
 				// Try to go back to the previous page.
 				if ( 'wc-admin-referer' === $return_url ) {
-					$return_url = preg_replace( '/^.*\/wp-admin\//i', '', wp_get_referer() ? wp_get_referer() : '' );
+					$return_url = preg_replace( '/^' . preg_quote( untrailingslashit( admin_url() ), '/' ) . '\/?/i', '', wp_get_referer() ? wp_get_referer() : '' );
 
 					if ( $return_url && false === strpos( $return_url, 'do_update_woocommerce' ) ) {
 						$return_url = remove_query_arg(
