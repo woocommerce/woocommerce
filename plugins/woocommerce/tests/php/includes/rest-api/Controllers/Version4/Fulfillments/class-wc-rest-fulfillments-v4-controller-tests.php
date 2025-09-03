@@ -93,6 +93,23 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Teardown test environment
+	 */
+	public function tearDown(): void {
+		// Delete the created users.
+		wp_delete_user( $this->admin_user_id );
+		wp_delete_user( $this->customer_user_id );
+
+		// Delete the created orders and their fulfillments.
+		WC_Helper_Order::delete_order( $this->test_order->get_id() );
+		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test route registration
 	 */
 	public function test_register_routes() {
@@ -394,20 +411,6 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$post_endpoint = reset( $post_endpoint );
 		$this->assertArrayHasKey( 'args', $post_endpoint );
 		$this->assertArrayHasKey( 'entity_type', $post_endpoint['args'] );
-	}
-
-	/**
-	 * Test get tracking number details endpoint (if implemented)
-	 */
-	public function test_get_tracking_number_details() {
-		wp_set_current_user( $this->admin_user_id );
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/lookup' );
-		$request->set_param( 'order_id', $this->test_order->get_id() );
-		$request->set_param( 'tracking_number', 'TEST123456' );
-
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertContains( $response->get_status(), array( 200, 404 ) );
 	}
 
 	/**

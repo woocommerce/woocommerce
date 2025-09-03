@@ -365,6 +365,14 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 				'code'    => 'woocommerce_rest_cannot_create',
 				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
 			),
+			'PUT'    => array(
+				'code'    => 'woocommerce_rest_cannot_update',
+				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
+			),
+			'PATCH'  => array(
+				'code'    => 'woocommerce_rest_cannot_update',
+				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
+			),
 			'DELETE' => array(
 				'code'    => 'woocommerce_rest_cannot_delete',
 				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
@@ -518,65 +526,6 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 			),
 		);
 
-		return $schema;
-	}
-
-
-	/**
-	 * Get the arguments for the get tracking number details endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_get_tracking_number_details(): array {
-		return array(
-			'order_id'        => array(
-				'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
-				'type'        => 'integer',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'tracking_number' => array(
-				'description' => __( 'The tracking number to look up.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-		);
-	}
-
-	/**
-	 * Get the schema for the get tracking number details endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_get_tracking_number_details(): array {
-		$schema               = $this->get_base_schema();
-		$schema['title']      = __( 'The tracking number details response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'tracking_number'   => array(
-				'description' => __( 'The tracking number.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-			),
-			'shipping_provider' => array(
-				'description' => __( 'The shipping provider.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-			),
-			'tracking_url'      => array(
-				'description' => __( 'The tracking URL.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-			),
-			'possibilities'     => array(
-				'description' => __( 'Ambiguous shipping providers list.', 'woocommerce' ),
-				'type'        => 'array',
-				'required'    => false,
-				'items'       => array(
-					'type' => 'string',
-				),
-			),
-		);
 		return $schema;
 	}
 
