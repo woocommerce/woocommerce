@@ -7,13 +7,11 @@ export * from './block-variations';
 /**
  * Internal dependencies
  */
-import {
-	resetBlockStyles,
-	resetBlockVariations,
-	resetFormats,
-	clearAllEmailHooks,
-	restoreAllModifiedBlockSettings,
-} from '.';
+import { resetBlockStyles } from './block-style';
+import { resetBlockVariations } from './block-variations';
+import { resetFormats } from './formats';
+import { clearAllEmailHooks } from './filters';
+import { restoreAllModifiedBlockSettings } from './block-config';
 
 export function cleanupConfigurationChanges(): void {
 	restoreAllModifiedBlockSettings();

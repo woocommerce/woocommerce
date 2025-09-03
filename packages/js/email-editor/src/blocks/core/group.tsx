@@ -17,7 +17,7 @@ function disableGroupVariations() {
 				( variation ) => variation.name === 'group'
 			),
 			supports: {
-				...settings.supports,
+				...( settings.supports || {} ),
 				layout: false,
 			},
 		};

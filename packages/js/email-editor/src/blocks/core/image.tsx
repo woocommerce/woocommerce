@@ -41,7 +41,7 @@ function disableImageFilter() {
 	updateBlockSettings( 'core/image', ( current ) => ( {
 		...current,
 		supports: {
-			...current.supports,
+			...( current.supports || {} ),
 			filter: {
 				// @ts-expect-error filter is not supported in the types
 				...( ( current.supports as BlockSupports )?.filter || {} ),

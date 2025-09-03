@@ -145,10 +145,13 @@ export function ExperimentalEmailEditor( {
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
-			cleanupConfigurationChanges();
-			dispatch( editorStore ).updateEditorSettings(
-				backupEditorSettings
-			);
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
 		};
 	}, [] );
 

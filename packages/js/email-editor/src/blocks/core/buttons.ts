@@ -11,7 +11,7 @@ function enhanceButtonsBlock() {
 	updateBlockSettings( 'core/buttons', ( current ) => ( {
 		...current,
 		supports: {
-			...current.supports,
+			...( current.supports ?? {} ),
 			layout: false, // disable block editor's layouts
 			// enable email editor's reduced flex email layout
 			__experimentalEmailFlexLayout: true, // eslint-disable-line

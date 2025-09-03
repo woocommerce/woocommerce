@@ -58,7 +58,7 @@ function disableColumnsLayoutAndEnhanceColumnsBlock() {
 		updateBlockSettings( blockName, ( current ) => ( {
 			...current,
 			supports: {
-				...current.supports,
+				...( current.supports || {} ),
 				layout: false,
 				background: {
 					// Preserve any existing background supports and enable backgroundImage
