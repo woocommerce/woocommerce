@@ -29,7 +29,7 @@ jQuery(function ($) {
 						body: formData,
 					});
 					const data = await response.json();
-					return data.id;
+					return data.paypal_order_id;
 				} catch (error) {
 					console.error('Error creating order:', error);
 				}
