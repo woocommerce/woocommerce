@@ -202,7 +202,7 @@ class Media_Text extends Abstract_Block_Renderer {
 	 */
 	private function wrap_media_with_link( string $media_content, string $href ): string {
 		// If media is already wrapped in a link, return as-is.
-		if ( str_contains( $media_content, '<a ' ) ) {
+		if ( false !== strpos( $media_content, '<a ' ) ) {
 			return $media_content;
 		}
 
