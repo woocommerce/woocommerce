@@ -152,7 +152,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
-				__( 'PayPal payment authorized. Transaction ID: %1$s.<\br>Change payment status to processing or complete to capture funds.', 'woocommerce' ),
+				__( 'PayPal payment authorized. Transaction ID: %1$s. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
 				$event['resource']['id']
 			)
 		);
