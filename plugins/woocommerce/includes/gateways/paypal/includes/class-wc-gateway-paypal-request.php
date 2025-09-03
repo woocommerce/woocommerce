@@ -197,8 +197,8 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		if ( ! $action_url ) {
-			WC_Gateway_Paypal::log( 'Action URL not found. Cannot ' . $action . ' payment.' );
+		if ( ! $action_url || ! filter_var( $action_url, FILTER_VALIDATE_URL ) ) {
+			WC_Gateway_Paypal::log( 'Invalid or missing action URL. Cannot ' . $action . ' payment.' );
 			return;
 		}
 
