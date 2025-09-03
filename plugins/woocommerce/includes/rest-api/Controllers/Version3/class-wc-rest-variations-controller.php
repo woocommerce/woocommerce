@@ -31,7 +31,6 @@ class WC_REST_Variations_Controller extends WC_REST_Product_Variations_Controlle
 	 * Register the routes for variations.
 	 */
 	public function register_routes() {
-		// Register the standalone variations endpoint
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -67,16 +66,16 @@ class WC_REST_Variations_Controller extends WC_REST_Product_Variations_Controlle
 	/**
 	 * Prepare a single variation output for response.
 	 *
-	 * @param  WC_Data         $object  Object data.
+	 * @param  WC_Data         $data_object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
-	public function prepare_object_for_response( $object, $request ) {
+	public function prepare_object_for_response( $data_object, $request ) {
 		$context  = empty( $request['context'] ) ? 'view' : $request['context'];
-		$response = parent::prepare_object_for_response( $object, $request );
+		$response = parent::prepare_object_for_response( $data_object, $request );
 		$data     = $response->get_data();
 
-		$data['parent_id'] = $object->get_parent_id( $context );
+		$data['parent_id'] = $data_object->get_parent_id( $context );
 
 		$response->set_data( $data );
 
