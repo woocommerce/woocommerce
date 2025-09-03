@@ -222,6 +222,15 @@ class Server {
 	}
 
 	/**
+	 * Check if the REST API v4 feature is enabled.
+	 *
+	 * @return bool
+	 */
+	private function is_v4_feature_enabled() {
+		return function_exists( 'wc_rest_api_v4_is_enabled' ) && wc_rest_api_v4_is_enabled();
+	}
+
+	/**
 	 * Return the path to the package.
 	 *
 	 * @return string
