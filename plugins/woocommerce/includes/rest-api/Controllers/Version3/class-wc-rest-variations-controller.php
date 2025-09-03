@@ -26,4 +26,11 @@ class WC_REST_Variations_Controller extends \Automattic\WooCommerce\Admin\API\Pr
 	 * @var string
 	 */
 	protected $namespace = 'wc/v3';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'variations';
 }
