@@ -279,7 +279,7 @@ class PageController {
 				$page_slug,
 				array( $this, 'output' ),
 				'dashicons-list-view',
-				'55.6'
+				56
 			);
 
 			// Add submenu items

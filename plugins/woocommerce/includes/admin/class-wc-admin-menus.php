@@ -295,16 +295,21 @@ class WC_Admin_Menus {
 		// Get index of product menu.
 		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order, true );
 
+		// Get index of orders menu.
+		$woocommerce_orders = array_search( 'wc-orders', $menu_order, true );
+
 		// Loop through menu order and do some rearranging.
 		foreach ( $menu_order as $index => $item ) {
 
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
+				$woocommerce_menu_order[] = 'wc-orders';
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				unset( $menu_order[ $woocommerce_separator ] );
+				unset( $menu_order[ $woocommerce_orders ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ), true ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', 'wc-orders' ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
