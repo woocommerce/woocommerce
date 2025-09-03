@@ -45,4 +45,21 @@ class WC_REST_Variations_Controller extends WC_REST_Product_Variations_Controlle
 			)
 		);
 	}
+
+	/**
+	 * Prepare objects query.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
+
+		// Retrieve variations without specifying a parent product.
+		if ( "/{$this->namespace}/variations" === $request->get_route() ) {
+			unset( $args['post_parent'] );
+		}
+
+		return $args;
+	}
 }
