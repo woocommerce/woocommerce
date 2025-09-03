@@ -120,13 +120,23 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Get the default selected attribute.
 	 *
-	 * @param array $attribute_terms The attribute's.
+	 * @param string $attribute_slug The attribute's slug.
+	 * @param array  $attribute_terms The attribute's terms.
 	 * @return string|null The default selected attribute.
 	 */
-	protected function get_default_selected_attribute( $attribute_terms ) {
-		foreach ( $attribute_terms as $attribute_term ) {
-			if ( $attribute_term['isSelected'] ) {
-				return $attribute_term['value'];
+	protected function get_default_selected_attribute( $attribute_slug, $attribute_terms ) {
+		if ( isset( $_GET[ $attribute_slug ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$attribute_slug_from_request = sanitize_title( wp_unslash( $_GET[ $attribute_slug ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			foreach ( $attribute_terms as $attribute_term ) {
+				if ( sanitize_title( $attribute_term['value'] ) === $attribute_slug_from_request ) {
+					return $attribute_term['value'];
+				}
+			}
+		} else {
+			foreach ( $attribute_terms as $attribute_term ) {
+				if ( $attribute_term['isSelected'] ) {
+					return $attribute_term['value'];
+				}
 			}
 		}
 
@@ -152,7 +162,18 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'isOptionSelected' =>
 				function () {
 					$context = wp_interactivity_get_context();
-					return $context['option']['isSelected'];
+
+					if ( isset( $_GET[ $context['name'] ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						$selected_attribute = $this->get_default_selected_attribute( $context['name'], $context['options'] );
+
+						if ( $context['option']['value'] === $selected_attribute ) {
+							return true;
+						}
+					} else {
+						return $context['option']['isSelected'];
+					}
+
+					return false;
 				},
 			)
 		);
@@ -192,7 +213,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'data-wp-context' => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
+						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
 					),
 					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
@@ -237,7 +258,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				),
 			);
 
-			if ( $attribute_term['isSelected'] ) {
+			$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+
+			if ( $attribute_term['value'] === $selected_attribute || ( ! isset( $_GET[ $attribute_slug ] ) && $attribute_term['isSelected'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$option_attributes['selected'] = 'selected';
 			}
 
@@ -259,7 +282,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'data-wp-context'    => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
+						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 					),
 					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
 					'data-wp-on--change' => 'actions.handleDropdownChange',
