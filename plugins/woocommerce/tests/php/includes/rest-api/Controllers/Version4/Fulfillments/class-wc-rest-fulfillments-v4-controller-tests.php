@@ -281,6 +281,11 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $fulfillment->get_id() );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify the fulfillment is deleted.
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $fulfillment->get_id() );
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertEquals( 400, $get_response->get_status() );
 	}
 
 	/**
@@ -290,7 +295,6 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/99999' );
-		$request->set_param( 'fulfillment_id', 99999 );
 
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
@@ -452,8 +456,7 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 401, $response->get_status() );
 
 		// Test DELETE error.
-		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
-		$request->set_param( 'fulfillment_id', $this->test_fulfillment->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
 	}

@@ -699,18 +699,18 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 *
 	 * @param string $code The error code.
 	 * @param string $message The error message.
-	 * @param int    $status The HTTP status code.
+	 * @param array  $data Additional error data, including 'status' key for HTTP status code.
 	 *
 	 * @return WP_REST_Response The error response.
 	 */
-	private function prepare_error_response( $code, $message, $status_data ): WP_REST_Response {
+	private function prepare_error_response( $code, $message, $data ): WP_REST_Response {
 		return new WP_REST_Response(
 			array(
 				'code'    => $code,
 				'message' => $message,
-				'data'    => $status_data,
+				'data'    => $data,
 			),
-			$status_data['status']
+			$data['status'] ?? WP_Http::BAD_REQUEST
 		);
 	}
 }
