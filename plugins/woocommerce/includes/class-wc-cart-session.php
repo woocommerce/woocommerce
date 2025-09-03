@@ -316,6 +316,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_tax_totals', null );
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
+		$wc_session->set( 'store_api_draft_order', null );
 	}
 
 	/**
@@ -411,6 +412,9 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		if ( empty( $cart ) ) {
+			$wc_session->set( 'store_api_draft_order', null );
+		}
 
 		/**
 		 * Fires when cart is updated.
