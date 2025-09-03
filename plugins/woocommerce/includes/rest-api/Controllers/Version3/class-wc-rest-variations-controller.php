@@ -45,40 +45,4 @@ class WC_REST_Variations_Controller extends WC_REST_Product_Variations_Controlle
 			)
 		);
 	}
-
-	/**
-	 * Get the Product's schema, conforming to JSON Schema.
-	 *
-	 * @return array
-	 */
-	public function get_item_schema() {
-		$schema = parent::get_item_schema();
-
-		$schema['properties']['parent_id'] = array(
-			'description' => __( 'Product parent ID.', 'woocommerce' ),
-			'type'        => 'integer',
-			'context'     => array( 'view', 'edit' ),
-		);
-
-		return $schema;
-	}
-
-	/**
-	 * Prepare a single variation output for response.
-	 *
-	 * @param  WC_Data         $data_object  Object data.
-	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
-	 */
-	public function prepare_object_for_response( $data_object, $request ) {
-		$context  = empty( $request['context'] ) ? 'view' : $request['context'];
-		$response = parent::prepare_object_for_response( $data_object, $request );
-		$data     = $response->get_data();
-
-		$data['parent_id'] = $data_object->get_parent_id( $context );
-
-		$response->set_data( $data );
-
-		return $response;
-	}
 }
