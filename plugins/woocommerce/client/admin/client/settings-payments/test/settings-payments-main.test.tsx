@@ -56,25 +56,24 @@ describe( 'SettingsPaymentsMain', () => {
 		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
 		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
-		const mockLocation = {
-			href: 'test',
-		} as Location;
-
-		mockLocation.href = 'test';
-		Object.defineProperty( global.window, 'location', {
-			value: mockLocation,
-		} );
-
 		render(
 			<Router>
 				<SettingsPaymentsMain />
 			</Router>
 		);
 
-		fireEvent.click( screen.getByText( 'More payment options' ) );
+		const morePaymentOptionsLink = screen.getByText( 'More payment options' );
 
-		expect( mockLocation.href ).toContain(
-			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+		// Verify the link has the correct href attribute for external navigation
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations'
+		);
+
+		// Verify the link opens in a new tab
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+			'target',
+			'_blank'
 		);
 	} );
 } );
