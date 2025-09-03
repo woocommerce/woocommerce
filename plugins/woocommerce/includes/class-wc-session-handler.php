@@ -117,7 +117,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	private function init_session_from_request() {
-		$session_token = wc_clean( wp_unslash( $_GET['session'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$session_token = is_string( $_GET['session'] ?? '' ) ? wc_clean( wp_unslash( $_GET['session'] ?? '' ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $session_token ) || ! CartTokenUtils::validate_cart_token( $session_token ) ) {
 			return false;
