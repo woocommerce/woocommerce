@@ -79,11 +79,11 @@ export type Store = {
 		removeCartItem: ( key: string ) => void;
 		addCartItem: (
 			args: ClientCartItem,
-			options?: { showAutoUpdatedNotices?: boolean }
+			options?: { showCartUpdatesNotices?: boolean }
 		) => void;
 		batchAddCartItems: (
 			items: ClientCartItem[],
-			options?: { showAutoUpdatedNotices?: boolean }
+			options?: { showCartUpdatesNotices?: boolean }
 		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
@@ -296,9 +296,9 @@ const { state, actions } = store< Store >(
 					updateOptimistically = true,
 				}: OptimisticCartItem,
 				{
-					showAutoUpdatedNotices = true,
+					showCartUpdatesNotices = true,
 				}: {
-					showAutoUpdatedNotices?: boolean;
+					showCartUpdatesNotices?: boolean;
 				} = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -366,7 +366,7 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					const infoNotices = showAutoUpdatedNotices
+					const infoNotices = showCartUpdatesNotices
 						? getInfoNoticesFromCartUpdates(
 								state.cart,
 								json,
@@ -402,9 +402,9 @@ const { state, actions } = store< Store >(
 			*batchAddCartItems(
 				items: OptimisticCartItem[],
 				{
-					showAutoUpdatedNotices = true,
+					showCartUpdatesNotices = true,
 				}: {
-					showAutoUpdatedNotices?: boolean;
+					showCartUpdatesNotices?: boolean;
 				} = {}
 			) {
 				const previousCart = JSON.stringify( state.cart );
@@ -506,7 +506,7 @@ const { state, actions } = store< Store >(
 							successfulResponses.length - 1
 						]?.body as Cart;
 
-						const infoNotices = showAutoUpdatedNotices
+						const infoNotices = showCartUpdatesNotices
 							? getInfoNoticesFromCartUpdates(
 									state.cart,
 									lastSuccessfulCartResponse,

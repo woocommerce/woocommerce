@@ -123,7 +123,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				);
 
 				yield wooActions.batchAddCartItems( addedItems, {
-					showAutoUpdatedNotices: false,
+					showCartUpdatesNotices: false,
 				} );
 			},
 		},

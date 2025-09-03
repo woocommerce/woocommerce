@@ -542,7 +542,7 @@ const { actions, state } = store<
 						type: productType,
 					},
 					{
-						showAutoUpdatedNotices: false,
+						showCartUpdatesNotices: false,
 					}
 				);
 			},

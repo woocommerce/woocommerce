@@ -162,7 +162,7 @@ const productButtonStore = {
 					type: context.productType,
 				},
 				{
-					showAutoUpdatedNotices: false,
+					showCartUpdatesNotices: false,
 				}
 			);
 
