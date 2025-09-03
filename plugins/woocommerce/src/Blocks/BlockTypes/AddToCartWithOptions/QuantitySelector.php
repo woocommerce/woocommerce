@@ -134,7 +134,7 @@ class QuantitySelector extends AbstractBlock {
 					'min'               => $variation_quantity_constraints['min'],
 					'max'               => $variation_quantity_constraints['max'],
 					'step'              => $variation_quantity_constraints['step'],
-					'sold_individually' => $variation->is_sold_individually(),
+					'sold_individually' => (bool) $variation->is_sold_individually(),
 				);
 			}
 

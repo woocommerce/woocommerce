@@ -530,15 +530,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 				);
 			} );
 
-			await test.step( 'hiddens Product Quantity input when the product is sold individually', async () => {
+			await test.step( 'hides Product Quantity input when the product is sold individually', async () => {
+				await expect( quantityInput ).toBeVisible();
+
 				const colorGreenOption = page.locator(
 					'label:has-text("Green")'
 				);
 				await colorGreenOption.click();
 
-				await expect(
-					page.getByRole( 'spinbutton', { name: 'Product quantity' } )
-				).toBeHidden();
+				await expect( quantityInput ).toBeHidden();
 			} );
 		} );
 
