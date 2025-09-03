@@ -1,10 +1,16 @@
 /**
  * External dependencies
  */
-import { addFilter, removeFilter } from '@wordpress/hooks';
+import {
+	addFilter,
+	removeFilter,
+	addAction,
+	removeAction,
+} from '@wordpress/hooks';
 
-// Store registered email filters so they can be removed on cleanup
+// Store registered email filters and actions so they can be removed on cleanup
 const emailFiltersRegistry = new Set< string >();
+const emailActionsRegistry = new Set< string >();
 
 function makeKey( hookName: string, namespace: string ): string {
 	return `${ hookName }||${ namespace }`;
@@ -28,6 +34,23 @@ export function addFilterForEmail<
 }
 
 /**
+ * Adds an action and stores the pair (hookName, namespace) for later cleanup.
+ * Mirrors addAction API.
+ */
+export function addActionForEmail<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	TCallback extends ( ...args: any[] ) => any
+>(
+	hookName: string,
+	namespace: string,
+	callback: TCallback,
+	priority?: number
+): void {
+	addAction( hookName, namespace, callback, priority );
+	emailActionsRegistry.add( makeKey( hookName, namespace ) );
+}
+
+/**
  * Removes all filters that were registered via addFilterForEmail.
  */
 export function clearEmailFilters(): void {
@@ -36,4 +59,23 @@ export function clearEmailFilters(): void {
 		removeFilter( hookName, namespace );
 		emailFiltersRegistry.delete( key );
 	}
+}
+
+/**
+ * Removes all actions that were registered via addActionForEmail.
+ */
+export function clearEmailActions(): void {
+	for ( const key of emailActionsRegistry ) {
+		const [ hookName, namespace ] = key.split( '||' );
+		removeAction( hookName, namespace );
+		emailActionsRegistry.delete( key );
+	}
+}
+
+/**
+ * Removes all filters and actions that were registered via addFilterForEmail and addActionForEmail.
+ */
+export function clearAllEmailHooks(): void {
+	clearEmailFilters();
+	clearEmailActions();
 }
