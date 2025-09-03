@@ -247,7 +247,9 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						hideSuggestions( type );
 						// Remove branding element when country changes
 						if ( suggestionsContainers[ type ] ) {
-							const brandingElement = suggestionsContainers[ type ].querySelector(
+							const brandingElement = suggestionsContainers[
+								type
+							].querySelector(
 								'.woocommerce-address-autocomplete-branding'
 							);
 							if ( brandingElement ) {
@@ -516,6 +518,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							);
 						if ( ! brandingElement ) {
 							brandingElement = document.createElement( 'div' );
+							brandingElement.removeAttribute( 'aria-hidden' );
 							brandingElement.className =
 								'woocommerce-address-autocomplete-branding';
 							suggestionsContainer.appendChild( brandingElement );
@@ -593,6 +596,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			);
 			if ( brandingElement ) {
 				brandingElement.style.display = 'none';
+				brandingElement.style.setAttribute( 'aria-hidden', true );
 			}
 
 			suggestionsContainer.style.display = 'none';
