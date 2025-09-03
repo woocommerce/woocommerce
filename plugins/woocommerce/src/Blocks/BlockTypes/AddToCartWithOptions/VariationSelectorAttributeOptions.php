@@ -58,35 +58,30 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 
-		if ( isset( $attribute_slug ) ) {
+		$attributes = $this->parse_attributes( $attributes );
 
-			$attributes = $this->parse_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$field_style = $attributes['style'];
 
-			$field_style = $attributes['style'];
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => esc_attr( $classes_and_styles['classes'] ),
+				'style' => esc_attr( $classes_and_styles['styles'] ),
+			)
+		);
 
-			$wrapper_attributes = get_block_wrapper_attributes(
-				array(
-					'class' => esc_attr( $classes_and_styles['classes'] ),
-					'style' => esc_attr( $classes_and_styles['styles'] ),
-				)
-			);
-
-			if ( 'dropdown' === $field_style ) {
-				$content = $this->render_dropdown( $attributes, $content, $block );
-			} else {
-				$content = $this->render_pills( $attributes, $content, $block );
-			}
-
-			return sprintf(
-				'<div %s>%s</div>',
-				$wrapper_attributes,
-				$content
-			);
+		if ( 'dropdown' === $field_style ) {
+			$content = $this->render_dropdown( $attributes, $content, $block );
+		} else {
+			$content = $this->render_pills( $attributes, $content, $block );
 		}
 
-		return '';
+		return sprintf(
+			'<div %s>%s</div>',
+			$wrapper_attributes,
+			$content
+		);
 	}
 
 	/**
@@ -126,10 +121,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 */
 	protected function get_default_selected_attribute( $attribute_slug, $attribute_terms ) {
 		if ( isset( $_GET[ $attribute_slug ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$attribute_slug_from_request = sanitize_title( wp_unslash( $_GET[ $attribute_slug ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			foreach ( $attribute_terms as $attribute_term ) {
-				if ( sanitize_title( $attribute_term['value'] ) === $attribute_slug_from_request ) {
-					return $attribute_term['value'];
+			$raw = wp_unslash( $_GET[ $attribute_slug ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( is_string( $raw ) ) {
+				$attribute_slug_from_request = sanitize_title( $raw );
+				foreach ( $attribute_terms as $attribute_term ) {
+					if ( sanitize_title( $attribute_term['value'] ) === $attribute_slug_from_request ) {
+						return $attribute_term['value'];
+					}
 				}
 			}
 		} else {
