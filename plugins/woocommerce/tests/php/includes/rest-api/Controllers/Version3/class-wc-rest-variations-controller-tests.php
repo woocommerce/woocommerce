@@ -202,6 +202,57 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test variations endpoint supports modified_after parameter.
+	 */
+	public function test_get_variations_with_modified_after_parameter_returns_variations_modified_after_the_date() {
+		// Given.
+		wp_set_current_user( $this->user );
+
+		// Creates a variable product with 6 variations.
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+
+		// Sets an explicit modified date in the past using direct database update.
+		// This bypasses WooCommerce data store logic that overwrites custom dates.
+		$past_time_string = '2023-01-01T10:00:00';
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => $past_time_string,
+				'post_modified_gmt' => get_gmt_from_date( $past_time_string ),
+			),
+			array( 'ID' => $variation_id )
+		);
+		clean_post_cache( $variation_id );
+
+		// When filtering by modified_after with a time before modification.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'modified_after', '2023-01-01T09:59:59' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then should include the variation.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 6, $variations ); // 6 variations per product from `create_variation_product`.
+		$variation_ids = array_column( $variations, 'id' );
+		$this->assertContains( $variation_id, $variation_ids );
+
+		// When filtering by modified_after with a time after modification.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'modified_after', '2023-01-01T10:00:01' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then should not include the variation modified before the date.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 5, $variations );
+		$variation_ids = array_column( $variations, 'id' );
+		$this->assertNotContains( $variation_id, $variation_ids );
+	}
+
+	/**
 	 * Test the variation schema.
 	 */
 	public function test_variation_schema() {
