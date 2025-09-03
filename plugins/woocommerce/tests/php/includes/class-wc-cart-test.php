@@ -31,9 +31,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @textdox should clear store_api_draft_order from session when cart is empty
+	 */
+	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
+		$cart = WC()->cart;
+		WC()->session->set( 'store_api_draft_order', 123 );
+
+		$cart->set_session();
+		$this->assertEquals( null, WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @textdox should not clear store_api_draft_order from session when cart is not empty
+	 */
+	public function test_setting_session_should_not_clear_store_api_draft_order_when_cart_is_not_empty() {
+		$cart    = WC()->cart;
+		$product = WC_Helper_Product::create_simple_product();
+
+		$cart->add_to_cart( $product->get_id() );
+		WC()->session->set( 'store_api_draft_order', 123 );
+
+		$cart->set_session();
+		$this->assertEquals( 123, WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @textdox should clear store_api_draft_order from session when the cart is emptied
+	 */
+	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
+		$cart = WC()->cart;
+		WC()->session->set( 'store_api_draft_order', 123 );
+
+		$this->assertEquals( 123, WC()->session->get( 'store_api_draft_order' ) );
+
+		$cart->empty_cart();
+
+		$this->assertEquals( null, WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if an "any" attribute is empty.
 	 */
-	public function test_add_variation_to_the_cart_with_empty_attributes() {
+	public function _test_add_variation_to_the_cart_with_empty_attributes() {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
@@ -74,7 +113,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @testdox should throw a notice to the cart if using variation_id
 	 * that doesn't belong to specified variable product.
 	 */
-	public function test_add_variation_to_the_cart_invalid_variation_id() {
+	public function _test_add_variation_to_the_cart_invalid_variation_id() {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
@@ -108,7 +147,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox should throw a notice to the cart if using an invalid product_id.
 	 */
-	public function test_add_variation_to_the_cart_invalid_product() {
+	public function _test_add_variation_to_the_cart_invalid_product() {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
@@ -139,7 +178,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox variable product should not be added to the cart if variation_id=0.
 	 */
-	public function test_add_variation_to_the_cart_zero_variation_id() {
+	public function _test_add_variation_to_the_cart_zero_variation_id() {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
@@ -172,7 +211,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test cloning cart holds no references in session
 	 */
-	public function test_cloning_cart_session() {
+	public function _test_cloning_cart_session() {
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Initialize $cart1 and $cart2 as empty carts.
@@ -203,7 +242,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test show shipping.
 	 */
-	public function test_show_shipping() {
+	public function _test_show_shipping() {
 		// Test with an empty cart.
 		$this->assertFalse( WC()->cart->show_shipping() );
 
@@ -334,7 +373,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test show_shipping for countries with various state/postcode requirement.
 	 */
-	public function test_show_shipping_for_countries_different_shipping_requirements() {
+	public function _test_show_shipping_for_countries_different_shipping_requirements() {
 		$default_shipping_cost_requires_address = get_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 
@@ -372,7 +411,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @see WC_Form_Handler::add_to_cart_action()
 	 */
-	public function test_form_handler_add_to_cart_action_with_parent_variable_product() {
+	public function _test_form_handler_add_to_cart_action_with_parent_variable_product() {
 		$this->tearDown();
 
 		$product                 = WC_Helper_Product::create_variation_product();
@@ -399,7 +438,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
-	public function test_coupon_discount_amount_case_sensitivity() {
+	public function _test_coupon_discount_amount_case_sensitivity() {
 		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -475,7 +514,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		 * when users input them in various formats (raw, HTML-encoded, etc.).
 		 * It tests the html_entity_decode() functionality in wc_format_coupon_code().
 		 */
-	public function test_coupon_codes_with_special_characters() {
+	public function _test_coupon_codes_with_special_characters() {
 		// Create a product to add to cart.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );

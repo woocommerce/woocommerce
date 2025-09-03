@@ -65,3 +65,13 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
+
+function display_woocommerce_session_in_header() {
+	$session = WC()->session;
+
+	if ( $session ) {
+		echo '<pre style="margin: 5px 0; font-size: 11px; max-height: 200px; overflow-y: auto;">' . print_r( $session->get_session_data(), true ) . '</pre>';
+	}
+}
+
+add_action( 'wp_head', 'display_woocommerce_session_in_header' );
