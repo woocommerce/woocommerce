@@ -1,0 +1,681 @@
+<?php
+/**
+ * REST API General Settings controller
+ *
+ * Handles requests to the /settings/general endpoints for WooCommerce API v4.
+ *
+ * @package WooCommerce\RestApi
+ * @since   4.0.0
+ */
+
+declare(strict_types=1);
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * REST API General Settings controller class.
+ *
+ * @package WooCommerce\RestApi
+ * @extends WC_REST_V4_Controller
+ */
+class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'settings/general';
+
+	/**
+	 * Register routes.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_update_args(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
+
+	/**
+	 * Check permissions for reading general settings.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function get_item_permissions_check( $request ) {
+		return true;
+		return $this->check_permissions( $request, 'read' );
+	}
+
+	/**
+	 * Get update arguments for the endpoint.
+	 *
+	 * @return array
+	 */
+	private function get_update_args() {
+		$args = array();
+		
+		// Get valid setting IDs and their types
+		$settings_general = new WC_Settings_General();
+		$settings = $settings_general->get_settings_for_section( '' );
+
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
+				$setting_id = $setting['id'];
+				$setting_type = $setting['type'] ?? 'text';
+				
+				$args[ $setting_id ] = array(
+					'description' => $setting['title'] ?? $setting_id,
+					'type'        => $this->map_wc_type_to_rest_type( $setting_type ),
+					'required'    => false,
+				);
+
+				// Add validation for specific setting types
+				if ( 'number' === $setting_type ) {
+					$args[ $setting_id ]['minimum'] = 0;
+				}
+			}
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Map WooCommerce setting types to REST API types.
+	 *
+	 * @param string $wc_type WooCommerce setting type.
+	 * @return string REST API type.
+	 */
+	private function map_wc_type_to_rest_type( $wc_type ) {
+		switch ( $wc_type ) {
+			case 'number':
+				return 'number';
+			case 'checkbox':
+				return 'boolean';
+			case 'multiselect':
+			case 'multi_select_countries':
+				return 'array';
+			default:
+				return 'string';
+		}
+	}
+
+	/**
+	 * Check permissions for updating general settings.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function update_item_permissions_check( $request ) {
+		return $this->check_permissions( $request, 'edit' );
+	}
+
+	/**
+	 * Get general settings.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$settings = $this->get_general_settings_data();
+		$response = rest_ensure_response( $settings );
+		return $response;
+	}
+
+	/**
+	 * Update general settings.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_item( $request ) {
+		$updated_settings = array();
+		
+		// Get all parameters from the request body
+		$params = $request->get_json_params();
+		
+		if ( ! is_array( $params ) || empty( $params ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				__( 'Invalid or empty request body.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Get valid setting IDs to prevent unauthorized updates
+		$valid_settings = $this->get_valid_setting_ids();
+
+		// Process each setting in the payload
+		foreach ( $params as $setting_id => $setting_value ) {
+			// Sanitize the setting ID
+			$setting_id = sanitize_text_field( $setting_id );
+
+			// Security check: only allow updating valid WooCommerce general settings
+			if ( ! in_array( $setting_id, $valid_settings, true ) ) {
+				continue;
+			}
+
+			// Sanitize the value based on the setting type
+			$sanitized_value = $this->sanitize_setting_value_by_id( $setting_id, $setting_value );
+			
+			// Additional validation for specific settings
+			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
+			if ( is_wp_error( $validation_result ) ) {
+				return $validation_result;
+			}
+
+			// Update the setting
+			$update_result = update_option( $setting_id, $sanitized_value );
+			if ( $update_result !== false ) {
+				$updated_settings[] = $setting_id;
+			}
+		}
+
+		// Log the update if settings were changed
+		if ( ! empty( $updated_settings ) ) {
+			do_action( 'woocommerce_settings_updated', $updated_settings, $this->rest_base );
+		}
+
+		// Return updated settings
+		$response_data = $this->get_general_settings_data();
+		$response = rest_ensure_response( $response_data );
+		
+		return $response;
+	}
+
+	/**
+	 * Get valid setting IDs that can be updated through this endpoint.
+	 *
+	 * @return array Array of valid setting IDs.
+	 */
+	private function get_valid_setting_ids() {
+		// Get general settings to determine valid IDs
+		$settings_general = new WC_Settings_General();
+		$settings = $settings_general->get_settings_for_section( '' );
+
+		$valid_ids = array();
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
+				$valid_ids[] = $setting['id'];
+			}
+		}
+
+		return $valid_ids;
+	}
+
+	/**
+	 * Validate a setting value before updating.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @param mixed  $value      Setting value.
+	 * @return bool|WP_Error True if valid, WP_Error if invalid.
+	 */
+	private function validate_setting_value( $setting_id, $value ) {
+		// Custom validation rules for specific settings
+		switch ( $setting_id ) {
+			case 'woocommerce_price_num_decimals':
+				if ( ! is_numeric( $value ) || $value < 0 || $value > 10 ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Number of decimals must be between 0 and 10.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+
+			case 'woocommerce_default_country':
+				// Validate country code format (e.g., "US" or "US:CA")
+				if ( ! empty( $value ) && ! preg_match( '/^[A-Z]{2}(:[A-Z0-9]+)?$/', $value ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid country/state format.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+
+			case 'woocommerce_allowed_countries':
+				$valid_options = array( 'all', 'all_except', 'specific' );
+				if ( ! in_array( $value, $valid_options, true ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid selling location option.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+
+			case 'woocommerce_ship_to_countries':
+				$valid_options = array( '', 'all', 'specific', 'disabled' );
+				if ( ! in_array( $value, $valid_options, true ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid shipping location option.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize setting value based on setting ID and type.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @param mixed  $value      Setting value.
+	 * @return mixed Sanitized value.
+	 */
+	private function sanitize_setting_value_by_id( $setting_id, $value ) {
+		// Get the setting type from WooCommerce settings
+		$setting_type = $this->get_setting_type( $setting_id );
+
+		switch ( $setting_type ) {
+			case 'text':
+				return sanitize_text_field( $value );
+			
+			case 'number':
+				return is_numeric( $value ) ? floatval( $value ) : 0;
+			
+			case 'select':
+			case 'single_select_country':
+				return sanitize_text_field( $value );
+			
+			case 'multiselect':
+			case 'multi_select_countries':
+				if ( is_array( $value ) ) {
+					return array_map( 'sanitize_text_field', $value );
+				}
+				// If it's a string, convert to array (for single values)
+				return array( sanitize_text_field( $value ) );
+			
+			case 'checkbox':
+				return wc_bool_to_string( $value );
+			
+			default:
+				return sanitize_text_field( $value );
+		}
+	}
+
+	/**
+	 * Get the type of a setting by its ID.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @return string Setting type.
+	 */
+	private function get_setting_type( $setting_id ) {
+		$settings_general = new WC_Settings_General();
+		$settings = $settings_general->get_settings_for_section( '' );
+
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && $setting['id'] === $setting_id ) {
+				return $setting['type'] ?? 'text';
+			}
+		}
+
+		return 'text'; // Default fallback
+	}
+
+	/**
+	 * Get general settings data by transforming WC_Settings_General data into REST API format.
+	 *
+	 * @return array
+	 */
+	private function get_general_settings_data() {
+		$settings_general = new WC_Settings_General();
+		$raw_settings = $settings_general->get_settings_for_section( '' );
+
+		// Transform raw settings into grouped format
+		$groups = array();
+		$current_group = null;
+		$current_group_key = null;
+
+		foreach ( $raw_settings as $setting ) {
+			$setting_type = $setting['type'] ?? '';
+
+			// Handle section titles
+			if ( 'title' === $setting_type ) {
+				$current_group_key = $this->get_group_key_from_id( $setting['id'] ?? '' );
+				$current_group = array(
+					'title'       => $setting['title'] ?? '',
+					'description' => $setting['desc'] ?? '',
+					'fields'      => array(),
+				);
+				continue;
+			}
+
+			// Handle section ends
+			if ( 'sectionend' === $setting_type ) {
+				if ( $current_group && $current_group_key ) {
+					$groups[ $current_group_key ] = $current_group;
+				}
+				$current_group = null;
+				$current_group_key = null;
+				continue;
+			}
+
+			// Skip non-field types
+			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
+				continue;
+			}
+
+			// Convert setting to field format
+			if ( $current_group && isset( $setting['id'] ) ) {
+				$field = $this->transform_setting_to_field( $setting );
+				if ( $field ) {
+					$current_group['fields'][] = $field;
+				}
+			}
+		}
+
+		return array(
+			'id'          => 'general',
+			'title'       => __( 'General', 'woocommerce' ),
+			'description' => __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' ),
+			'groups'      => $groups,
+		);
+	}
+
+	/**
+	 * Get group key from setting section ID.
+	 *
+	 * @param string $section_id Section ID.
+	 * @return string Group key.
+	 */
+	private function get_group_key_from_id( $section_id ) {
+		$group_map = array(
+			'store_address'   => 'store_address',
+			'general_options' => 'selling_locations',
+			'pricing_options' => 'currency_options',
+		);
+
+		return $group_map[ $section_id ] ?? $section_id;
+	}
+
+	/**
+	 * Transform a WooCommerce setting into REST API field format.
+	 *
+	 * @param array $setting WooCommerce setting array.
+	 * @return array|null Transformed field or null if should be skipped.
+	 */
+	private function transform_setting_to_field( $setting ) {
+		$setting_id = $setting['id'] ?? '';
+		$setting_type = $setting['type'] ?? 'text';
+
+		// Skip certain settings that shouldn't be exposed via REST API
+		$skip_settings = array(
+			'woocommerce_address_autocomplete_enabled',
+			'woocommerce_address_autocomplete_provider',
+			'woocommerce_calc_taxes',
+			'woocommerce_enable_coupons',
+			'woocommerce_calc_discounts_sequentially',
+		);
+
+		if ( in_array( $setting_id, $skip_settings, true ) ) {
+			return null;
+		}
+
+		$field = array(
+			'id'    => $setting_id,
+			'label' => $setting['title'] ?? $setting_id,
+			'type'  => $this->normalize_field_type( $setting_type ),
+			'value' => get_option( $setting_id, $setting['default'] ?? '' ),
+		);
+
+		// Add tip if available
+		if ( ! empty( $setting['desc'] ) && ! empty( $setting['desc_tip'] ) ) {
+			$field['tip'] = $setting['desc'];
+		}
+
+		// Add options for select fields
+		if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
+			$field['options'] = $setting['options'];
+		} else {
+			// Generate options for special field types that don't have them in the setting definition
+			$field['options'] = $this->get_field_options( $setting_type, $setting_id );
+		}
+
+		return $field;
+	}
+
+	/**
+	 * Get options for specific field types.
+	 *
+	 * @param string $field_type Field type.
+	 * @param string $field_id Field ID.
+	 * @return array Field options.
+	 */
+	private function get_field_options( $field_type, $field_id ) {
+		switch ( $field_type ) {
+			case 'single_select_country':
+				return $this->get_country_state_options();
+
+			case 'multi_select_countries':
+				return WC()->countries->get_countries();
+
+			case 'select':
+				// Handle specific select fields that need custom options
+				if ( 'woocommerce_currency' === $field_id ) {
+					return $this->get_currency_options();
+				}
+				break;
+		}
+
+		return array();
+	}
+
+	/**
+	 * Get country/state options for single select country field.
+	 *
+	 * @return array Country/state options.
+	 */
+	private function get_country_state_options() {
+		$countries = WC()->countries->get_countries();
+		$states = WC()->countries->get_states();
+		$country_state_options = array();
+		
+		foreach ( $countries as $country_code => $country_name ) {
+			$country_states = $states[ $country_code ] ?? array();
+			
+			if ( empty( $country_states ) ) {
+				$country_state_options[ $country_code ] = $country_name;
+			} else {
+				foreach ( $country_states as $state_code => $state_name ) {
+					$country_state_options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
+				}
+			}
+		}
+
+		return $country_state_options;
+	}
+
+	/**
+	 * Get currency options.
+	 *
+	 * @return array Currency options.
+	 */
+	private function get_currency_options() {
+		$currency_options = array();
+		$currencies = get_woocommerce_currencies();
+		
+		foreach ( $currencies as $code => $name ) {
+			$currency_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
+		}
+
+		return $currency_options;
+	}
+
+	/**
+	 * Normalize WooCommerce field types to REST API field types.
+	 *
+	 * @param string $wc_type WooCommerce field type.
+	 * @return string Normalized field type.
+	 */
+	private function normalize_field_type( $wc_type ) {
+		$type_map = array(
+			'single_select_country'   => 'select',
+			'multi_select_countries'  => 'multiselect',
+		);
+
+		return $type_map[ $wc_type ] ?? $wc_type;
+	}
+
+	/**
+	 * Get the schema for general settings, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'general_settings',
+			'type'       => 'object',
+			'properties' => array(
+				'id'     => array(
+					'description' => __( 'Unique identifier for the settings group.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'groups' => array(
+					'description' => __( 'Collection of setting groups.', 'woocommerce' ),
+					'type'        => 'object',
+					'context'     => array( 'view', 'edit' ),
+					'properties'  => array(
+						'store_address'     => array(
+							'description' => __( 'Store address settings.', 'woocommerce' ),
+							'type'        => 'object',
+							'properties'  => array(
+								'title'       => array(
+									'description' => __( 'Group title.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'description' => array(
+									'description' => __( 'Group description.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'fields'      => array(
+									'description' => __( 'Settings fields.', 'woocommerce' ),
+									'type'        => 'array',
+									'context'     => array( 'view', 'edit' ),
+									'items'       => $this->get_field_schema(),
+								),
+							),
+						),
+						'selling_locations' => array(
+							'description' => __( 'Selling and shipping location settings.', 'woocommerce' ),
+							'type'        => 'object',
+							'properties'  => array(
+								'title'       => array(
+									'description' => __( 'Group title.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'description' => array(
+									'description' => __( 'Group description.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'fields'      => array(
+									'description' => __( 'Settings fields.', 'woocommerce' ),
+									'type'        => 'array',
+									'context'     => array( 'view', 'edit' ),
+									'items'       => $this->get_field_schema(),
+								),
+							),
+						),
+						'currency_options'  => array(
+							'description' => __( 'Currency and pricing settings.', 'woocommerce' ),
+							'type'        => 'object',
+							'properties'  => array(
+								'title'       => array(
+									'description' => __( 'Group title.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'description' => array(
+									'description' => __( 'Group description.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'fields'      => array(
+									'description' => __( 'Settings fields.', 'woocommerce' ),
+									'type'        => 'array',
+									'context'     => array( 'view', 'edit' ),
+									'items'       => $this->get_field_schema(),
+								),
+							),
+						),
+
+					),
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the schema for individual setting fields.
+	 *
+	 * @return array
+	 */
+	private function get_field_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'      => array(
+					'description' => __( 'Setting field ID.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'label'   => array(
+					'description' => __( 'Setting field label.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'type'    => array(
+					'description' => __( 'Setting field type.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array( 'text', 'number', 'select', 'multiselect' ),
+					'context'     => array( 'view', 'edit' ),
+				),
+				'value'   => array(
+					'description' => __( 'Setting field value.', 'woocommerce' ),
+					'type'        => array( 'string', 'number', 'array' ),
+					'context'     => array( 'view', 'edit' ),
+				),
+				'options' => array(
+					'description' => __( 'Available options for select/multiselect fields.', 'woocommerce' ),
+					'type'        => 'object',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'tip'     => array(
+					'description' => __( 'Help text for the setting field.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+		);
+	}
+}
