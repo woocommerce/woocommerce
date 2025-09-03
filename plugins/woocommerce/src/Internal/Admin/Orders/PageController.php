@@ -149,7 +149,7 @@ class PageController {
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
-		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		add_action( 'load-toplevel_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
@@ -259,14 +259,46 @@ class PageController {
 
 		foreach ( $order_types as $order_type ) {
 			$post_type = get_post_type_object( $order_type );
+			$menu_name = $post_type->labels->menu_name;
+
+			// Add order count badge for shop_order
+			if ( 'shop_order' === $order_type && apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
+				if ( $order_count ) {
+					$menu_name .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+				}
+			}
+
+			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
+
+			// Create top-level Orders menu
+			add_menu_page(
+				$post_type->labels->name,
+				$menu_name,
+				$post_type->cap->edit_posts,
+				$page_slug,
+				array( $this, 'output' ),
+				'dashicons-list-view',
+				'55.6'
+			);
+
+			// Add submenu items
+			add_submenu_page(
+				$page_slug,
+				$post_type->labels->all_items,
+				__( 'All orders', 'woocommerce' ),
+				$post_type->cap->edit_posts,
+				$page_slug,
+				array( $this, 'output' )
+			);
 
 			add_submenu_page(
-				'woocommerce',
-				$post_type->labels->name,
-				$post_type->labels->menu_name,
-				$post_type->cap->edit_posts,
-				'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ),
-				array( $this, 'output' )
+				$page_slug,
+				$post_type->labels->add_new_item,
+				__( 'Add new order', 'woocommerce' ),
+				$post_type->cap->create_posts,
+				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . $page_slug ) ),
+				''
 			);
 		}
 
