@@ -77,7 +77,7 @@ class ProductSpecifications extends AbstractBlock {
 				);
 			}
 
-			wp_interactivity_state(
+			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(

@@ -1,24 +1,20 @@
 /**
  * External dependencies
  */
-import { getElement, store, getContext } from '@wordpress/interactivity';
+import {
+	getElement,
+	store,
+	getContext,
+	getConfig,
+} from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type {
-	ProductData,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { ProductData } from '@woocommerce/stores/woocommerce/cart';
 import { sanitize } from 'dompurify'; // eslint-disable-line import/named
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',
@@ -67,10 +63,16 @@ const productElementStore = store(
 					return undefined;
 				}
 
+				const { products } = getConfig( 'woocommerce' );
+
+				if ( ! products ) {
+					return undefined;
+				}
+
 				return (
-					wooState?.products?.[ productDataState.productId ]
-						?.variations?.[ productDataState?.variationId || 0 ] ||
-					wooState?.products?.[ productDataState.productId ]
+					products?.[ productDataState.productId ]?.variations?.[
+						productDataState?.variationId || 0
+					] || products?.[ productDataState.productId ]
 				);
 			},
 		},

@@ -6,9 +6,9 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
+	getConfig,
 } from '@wordpress/interactivity';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -165,12 +165,6 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
-
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -440,10 +434,12 @@ const productGallery = {
 				return;
 			}
 
+			const { products } = getConfig( 'woocommerce' );
+
 			const productData =
-				wooState?.products?.[ productId ]?.variations?.[
+				products?.[ productId ]?.variations?.[
 					productDataState?.variationId || 0
-				] || wooState?.products?.[ productId ];
+				] || products?.[ productId ];
 
 			const imageId = productData?.image_id;
 			if ( ! imageId ) {

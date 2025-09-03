@@ -82,6 +82,7 @@ class ProductPrice extends AbstractBlock {
 
 			$wrapper_attributes     = array();
 			$interactive_attributes = '';
+			$context_directive      = '';
 
 			if ( $is_interactive ) {
 				$variations_data           = $product->get_available_variations();
@@ -106,7 +107,7 @@ class ProductPrice extends AbstractBlock {
 				if ( ! $has_variation_price_html ) {
 					$is_interactive = false;
 				} else {
-					wp_interactivity_state(
+					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(
@@ -120,19 +121,21 @@ class ProductPrice extends AbstractBlock {
 
 					wp_enqueue_script_module( 'woocommerce/product-elements' );
 					$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-					$context                                   = array(
-						'productElementKey' => 'price_html',
+					$context_directive                         = wp_interactivity_data_wp_context(
+						array(
+							'productElementKey' => 'price_html',
+						)
 					);
-					$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 					$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 				}
 			}
 
 			return sprintf(
-				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s" %5$s>
-					%6$s
+				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price %3$s %4$s" style="%5$s" %6$s>
+					%7$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
+				$context_directive,
 				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
 				esc_attr( $styles_and_classes['classes'] ),
 				esc_attr( $styles_and_classes['styles'] ?? '' ),
