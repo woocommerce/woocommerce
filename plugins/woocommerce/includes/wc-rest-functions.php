@@ -466,5 +466,13 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  * @return bool True if the REST API v4 feature is enabled, false otherwise.
  */
 function wc_rest_api_v4_is_enabled(): bool {
+	// Container may not be initialized yet during early autoloading.
+	if ( ! function_exists( 'wc_get_container' ) || empty( $GLOBALS['wc_container'] ) ) {
+		return false;
+	}
+	$container = wc_get_container();
+	if ( ! is_object( $container ) ) {
+		return false;
+	}
 	return (bool) Features::is_enabled( 'rest-api-v4' );
 }

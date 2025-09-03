@@ -8,6 +8,8 @@
  * @since   2.6.0
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -309,9 +311,9 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) ) {
 			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
+				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			} else {
-				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+				$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			}
 		}
 
@@ -368,7 +370,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					$skus[] = $request['sku'];
 				}
 
-				$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					$args,
 					array(
 						'key'     => '_sku',
@@ -393,7 +395,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -404,12 +406,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -440,7 +442,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 		$args['orderby'] = $ordering_args['orderby'];
 		$args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
-			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
+			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		}
 
 		/*
@@ -646,8 +648,11 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
 					if ( is_wp_error( $upload ) ) {
-						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+						/**
+						 * Filter to check if it should suppress the image upload error, false by default.
+						 */
+						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 						} else {
 							continue;
 						}
@@ -659,7 +664,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
 					/* translators: %s: image ID */
-					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
+					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				if ( $is_new_upload && $attachment_id > 0 ) {
@@ -1150,7 +1155,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating );
+		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**

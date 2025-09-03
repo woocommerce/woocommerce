@@ -55,23 +55,27 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
 	 * @param string   $quantity_html The quantity HTML.
-	 * @param string   $wrapper_attributes Optional wrapper attributes.
+	 * @param array    $wrapper_attributes Optional wrapper attributes.
+	 * @param array    $input_attributes Optional input attributes.
 	 * @param int|null $child_product_id Optional child product ID.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '', $child_product_id = null ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $child_product_id = null ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInput' );
-			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
+			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options::actions.handleQuantityBlur' );
+
+			foreach ( $input_attributes as $attribute => $value ) {
+				$processor->set_attribute( $attribute, $value );
+			}
 		}
 
 		$quantity_html = $processor->get_updated_html();
@@ -80,12 +84,12 @@ class Utils {
 		if ( $child_product_id ) {
 			$context['childProductId'] = $child_product_id;
 		}
-		$context_attribute = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
+		$context_attribute = ! empty( $context ) ? ' ' . wp_interactivity_data_wp_context( $context ) : '';
 
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
 				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
-				$wrapper_attributes,
+				get_block_wrapper_attributes( $wrapper_attributes ),
 				$context_attribute,
 				$quantity_html
 			);
@@ -172,9 +176,10 @@ class Utils {
 	 * @return array The quantity constraints.
 	 */
 	public static function get_product_quantity_constraints( $product ) {
-		$min  = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
-		$max  = is_numeric( $product->get_max_purchase_quantity() ) ? $product->get_max_purchase_quantity() : -1;
-		$step = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
+		$min          = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
+		$max_quantity = $product->get_max_purchase_quantity();
+		$max          = is_numeric( $max_quantity ) && -1 !== $max_quantity ? $max_quantity : null;
+		$step         = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
 
 		return array(
 			'min'  => $min,

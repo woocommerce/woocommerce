@@ -387,6 +387,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantityInput ).toHaveValue( '6' );
 
 			await quantityInput.fill( '8' );
+			await quantityInput.blur();
 
 			await expect( increaseQuantityButton ).toBeDisabled();
 
@@ -396,6 +397,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'make sure quantities below min are not allowed even when manually filled but they persist in the input field', async () => {
 				await quantityInput.fill( '3' );
+				await quantityInput.blur();
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 				await expect( reduceQuantityButton ).toBeDisabled();
 				await expect( increaseQuantityButton ).toBeEnabled();
@@ -439,6 +441,78 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 		} );
 
+		await test.step( 'in variable products', async () => {
+			await page.goto( '/product/hoodie/' );
+
+			const quantityInput = page.getByRole( 'spinbutton', {
+				name: 'Product quantity',
+			} );
+
+			await expect( quantityInput ).toHaveValue( '1' );
+
+			const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+			const logoNoOption = page.locator( 'label:has-text("No")' );
+
+			await colorBlueOption.click();
+			await logoNoOption.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			const logoYesOption = page.locator( 'label:has-text("Yes")' );
+			await logoYesOption.click();
+
+			await expect( quantityInput ).toHaveValue( '4' );
+
+			await quantityInput.fill( '10' );
+			await quantityInput.blur();
+
+			await expect( quantityInput ).toHaveValue( '10' );
+
+			await logoNoOption.click();
+
+			await expect( quantityInput ).toHaveValue( '8' );
+
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+				exact: true,
+			} );
+
+			await test.step( 'verify 0 is reset in variable products', async () => {
+				await quantityInput.fill( '0' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify setting the input to an empty string resets the value to the min', async () => {
+				await quantityInput.fill( '' );
+				await quantityInput.blur();
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+
+			await test.step( 'verify letters are reset to min value in variable products', async () => {
+				// Playwright doesn't support filling a numeric input with a
+				// string, but we still want to test this case as users are able
+				// to type letters directly in the input field.
+				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
+					element.value = 'abc';
+					element.focus();
+					requestAnimationFrame( () => {
+						element.blur();
+					} );
+				} );
+				await expect( quantityInput ).toHaveValue( '4' );
+				await expect( addToCartButton ).not.toHaveClass(
+					/\bdisabled\b/
+				);
+			} );
+		} );
+
 		await test.step( 'in grouped products', async () => {
 			await page.goto( '/product/logo-collection/' );
 
@@ -457,6 +531,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await increaseQuantityButton.click();
 
 			await quantityInput.fill( '8' );
+			await quantityInput.blur();
 
 			await expect( increaseQuantityButton ).toBeDisabled();
 
@@ -470,6 +545,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantityInput ).toHaveValue( '6' );
 
 			await quantityInput.fill( '5' );
+			await quantityInput.blur();
 
 			await reduceQuantityButton.click();
 
@@ -487,6 +563,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'make sure quantities below min are not allowed even when manually filled but they persist in the input field', async () => {
 				await quantityInput.fill( '3' );
+				await quantityInput.blur();
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 				await expect( reduceQuantityButton ).toBeEnabled();
 				await expect( increaseQuantityButton ).toBeEnabled();

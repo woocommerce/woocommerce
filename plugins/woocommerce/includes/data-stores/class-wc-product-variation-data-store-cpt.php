@@ -363,42 +363,57 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function read_product_data( &$product ) {
 		$id = $product->get_id();
 
-		$product->set_props(
-			array(
-				'description'       => get_post_meta( $id, '_variation_description', true ),
-				'regular_price'     => get_post_meta( $id, '_regular_price', true ),
-				'sale_price'        => get_post_meta( $id, '_sale_price', true ),
-				'date_on_sale_from' => get_post_meta( $id, '_sale_price_dates_from', true ),
-				'date_on_sale_to'   => get_post_meta( $id, '_sale_price_dates_to', true ),
-				'manage_stock'      => get_post_meta( $id, '_manage_stock', true ),
-				'stock_status'      => get_post_meta( $id, '_stock_status', true ),
-				'low_stock_amount'  => get_post_meta( $id, '_low_stock_amount', true ),
-				'shipping_class_id' => current( $this->get_term_ids( $id, 'product_shipping_class' ) ),
-				'virtual'           => get_post_meta( $id, '_virtual', true ),
-				'downloadable'      => get_post_meta( $id, '_downloadable', true ),
-				'gallery_image_ids' => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-				'download_limit'    => get_post_meta( $id, '_download_limit', true ),
-				'download_expiry'   => get_post_meta( $id, '_download_expiry', true ),
-				'image_id'          => get_post_thumbnail_id( $id ),
-				'backorders'        => get_post_meta( $id, '_backorders', true ),
-				'sku'               => get_post_meta( $id, '_sku', true ),
-				'global_unique_id'  => get_post_meta( $id, '_global_unique_id', true ),
-				'stock_quantity'    => get_post_meta( $id, '_stock', true ),
-				'weight'            => get_post_meta( $id, '_weight', true ),
-				'length'            => get_post_meta( $id, '_length', true ),
-				'width'             => get_post_meta( $id, '_width', true ),
-				'height'            => get_post_meta( $id, '_height', true ),
-				'tax_class'         => ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : get_post_meta( $id, '_tax_class', true ),
-			)
+		$post_meta_values = get_post_meta( $id );
+
+		$meta_key_to_props = array(
+			'_variation_description'  => 'description',
+			'_regular_price'          => 'regular_price',
+			'_sale_price'             => 'sale_price',
+			'_sale_price_dates_from'  => 'date_on_sale_from',
+			'_sale_price_dates_to'    => 'date_on_sale_to',
+			'_manage_stock'           => 'manage_stock',
+			'_stock_status'           => 'stock_status',
+			'_virtual'                => 'virtual',
+			'_product_image_gallery'  => 'gallery_image_ids',
+			'_download_limit'         => 'download_limit',
+			'_download_expiry'        => 'download_expiry',
+			'_downloadable'           => 'downloadable',
+			'_sku'                    => 'sku',
+			'_global_unique_id'       => 'global_unique_id',
+			'_stock'                  => 'stock_quantity',
+			'_weight'                 => 'weight',
+			'_length'                 => 'length',
+			'_width'                  => 'width',
+			'_height'                 => 'height',
+			'_low_stock_amount'       => 'low_stock_amount',
+			'_backorders'             => 'backorders',
+			'_cogs_total_value'       => 'cogs_total_value',
+			'_cogs_value_is_additive' => 'cogs_value_is_additive',
+			'_tax_class'              => 'tax_class',
 		);
 
+		$variation_data = array();
+
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			$meta_value              = $post_meta_values[ $meta_key ][0] ?? '';
+			$variation_data[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+		}
+
+		$variation_data['gallery_image_ids'] = array_filter( explode( ',', $variation_data['gallery_image_ids'] ?? '' ) );
+		$variation_data['shipping_class_id'] = current( $this->get_term_ids( $id, 'product_shipping_class' ) );
+		$variation_data['image_id']          = get_post_thumbnail_id( $id );
+		$variation_data['tax_class']         = ! metadata_exists( 'post', $id, '_tax_class' ) ? 'parent' : $variation_data['tax_class'];
+
+		$product->set_props( $variation_data );
+
 		if ( $this->cogs_feature_is_enabled() ) {
-			$cogs_value = get_post_meta( $id, '_cogs_total_value', true );
-			$cogs_value = '' === $cogs_value ? null : (float) $cogs_value;
+			$cogs_value             = $variation_data['cogs_total_value'] ?? '';
+			$cogs_value             = '' === $cogs_value ? null : (float) $cogs_value;
+			$cogs_value_is_additive = 'yes' === ( $variation_data['cogs_value_is_additive'] ?? '' );
 			$product->set_props(
 				array(
 					'cogs_value'             => $cogs_value,
-					'cogs_value_is_additive' => 'yes' === get_post_meta( $id, '_cogs_value_is_additive', true ),
+					'cogs_value_is_additive' => $cogs_value_is_additive,
 				)
 			);
 		}
@@ -409,8 +424,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_price( $product->get_regular_price( 'edit' ) );
 		}
 
-		$parent_object   = get_post( $product->get_parent_id() );
-		$terms           = get_the_terms( $product->get_parent_id(), 'product_visibility' );
+		$parent_id       = $product->get_parent_id();
+		$parent_object   = get_post( $parent_id );
+		$terms           = get_the_terms( $parent_id, 'product_visibility' );
 		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
 		$exclude_search  = in_array( 'exclude-from-search', $term_names, true );
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
@@ -425,31 +441,45 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$catalog_visibility = CatalogVisibility::VISIBLE;
 		}
 
-		$product->set_parent_data(
-			array(
-				'title'              => $parent_object ? $parent_object->post_title : '',
-				'status'             => $parent_object ? $parent_object->post_status : '',
-				'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
-				'global_unique_id'   => get_post_meta( $product->get_parent_id(), '_global_unique_id', true ),
-				'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
-				'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
-				'stock_quantity'     => wc_stock_amount( get_post_meta( $product->get_parent_id(), '_stock', true ) ),
-				'weight'             => get_post_meta( $product->get_parent_id(), '_weight', true ),
-				'length'             => get_post_meta( $product->get_parent_id(), '_length', true ),
-				'width'              => get_post_meta( $product->get_parent_id(), '_width', true ),
-				'height'             => get_post_meta( $product->get_parent_id(), '_height', true ),
-				'tax_class'          => get_post_meta( $product->get_parent_id(), '_tax_class', true ),
-				'shipping_class_id'  => absint( current( $this->get_term_ids( $product->get_parent_id(), 'product_shipping_class' ) ) ),
-				'image_id'           => get_post_thumbnail_id( $product->get_parent_id() ),
-				'purchase_note'      => get_post_meta( $product->get_parent_id(), '_purchase_note', true ),
-				'catalog_visibility' => $catalog_visibility,
-			)
+		$parent_post_meta_values = get_post_meta( $parent_id );
+
+		$parent_meta_key_to_props = array(
+			'_sku'               => 'sku',
+			'_global_unique_id'  => 'global_unique_id',
+			'_manage_stock'      => 'manage_stock',
+			'_backorders'        => 'backorders',
+			'_stock'             => 'stock_quantity',
+			'_weight'            => 'weight',
+			'_length'            => 'length',
+			'_width'             => 'width',
+			'_height'            => 'height',
+			'_tax_class'         => 'tax_class',
+			'_purchase_note'     => 'purchase_note',
+			'_sold_individually' => 'sold_individually',
+			'_tax_status'        => 'tax_status',
+			'_crosssell_ids'     => '_crosssell_ids',
 		);
 
+		$parent_data = array();
+
+		foreach ( $parent_meta_key_to_props as $meta_key => $prop ) {
+			$meta_value           = $parent_post_meta_values[ $meta_key ][0] ?? '';
+			$parent_data[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+		}
+
+		$parent_data['title']              = $parent_object ? $parent_object->post_title : '';
+		$parent_data['status']             = $parent_object ? $parent_object->post_status : '';
+		$parent_data['shipping_class_id']  = absint( current( $this->get_term_ids( $parent_id, 'product_shipping_class' ) ) );
+		$parent_data['catalog_visibility'] = $catalog_visibility;
+		$parent_data['stock_quantity']     = wc_stock_amount( $parent_data['stock_quantity'] );
+		$parent_data['image_id']           = get_post_thumbnail_id( $parent_id );
+
+		$product->set_parent_data( $parent_data );
+
 		// Pull data from the parent when there is no user-facing way to set props.
-		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
-		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
-		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
+		$product->set_sold_individually( $parent_data['sold_individually'] );
+		$product->set_tax_status( $parent_data['tax_status'] );
+		$product->set_cross_sell_ids( $parent_data['_crosssell_ids'] );
 
 		if ( $this->cogs_feature_is_enabled() ) {
 			$this->load_cogs_data( $product );
