@@ -138,11 +138,10 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Creates a variable product with 6 variations.
 		$product      = WC_Helper_Product::create_variation_product();
 		$variation_id = $product->get_children()[0];
-		$variation    = wc_get_product( $variation_id );
 
 		// Sets an explicit modified date in the past using direct database update.
 		// This bypasses WooCommerce data store logic that overwrites custom dates.
-		$past_time_string = '2023-01-01T10:00:00';
+		$past_time_string = '2023-01-01 10:00:00'; // MySQL DATETIME format.
 		global $wpdb;
 		$wpdb->update(
 			$wpdb->posts,
