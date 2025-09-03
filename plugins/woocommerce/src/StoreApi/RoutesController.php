@@ -81,9 +81,13 @@ class RoutesController {
 	 * Register all Store API routes. This includes routes under specific version namespaces.
 	 */
 	public function register_all_routes() {
-		$this->register_routes( 'v1', self::$api_namespace );
-		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
-		$this->register_routes( 'private', 'wc/private' );
+		wc_rest_lazy_load_namespace( self::$api_namespace, function () {
+			$this->register_routes( 'v1', self::$api_namespace );
+			$this->register_routes( 'v1', self::$api_namespace . '/v1' );
+		} );
+		wc_rest_lazy_load_namespace( 'wc/private', function () {
+			$this->register_routes( 'private', 'wc/private' );
+		} );
 	}
 
 	/**
