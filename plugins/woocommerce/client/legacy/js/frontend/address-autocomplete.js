@@ -510,7 +510,12 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					const serverProvider = serverProviders.find(
 						( provider ) => provider.id === activeProvider.id
 					);
-					if ( serverProvider && serverProvider.branding_html ) {
+					const brandingHtml =
+						serverProvider &&
+						typeof serverProvider.branding_html === 'string'
+							? serverProvider.branding_html.trim()
+							: '';
+					if ( brandingHtml ) {
 						// Check if branding element already exists.
 						let brandingElement =
 							suggestionsContainer.querySelector(
