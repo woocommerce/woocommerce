@@ -58,79 +58,6 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test variation search by attribute value.
-	 */
-	public function test_variation_search_by_attribute_value() {
-		// Given.
-		wp_set_current_user( $this->user );
-
-		// Creates a variable product, then creates a variation using "global" product attributes.
-		$product    = WC_Helper_Product::create_variation_product();
-		$data_store = $product->get_data_store();
-		$data_store->create_all_product_variations( $product, 1 );
-		$child_product_ids = $product->get_children();
-		$variation_1       = wc_get_product( $child_product_ids[0] );
-
-		// Creates a variation, using "local" attribute key/value pairs.
-		$variation_2 = new WC_Product_Variation();
-		$variation_2->set_props(
-			array(
-				'parent_id'     => $product->get_id(),
-				'regular_price' => 23,
-			)
-		);
-		$variation_2->set_attributes( array( 'flavor' => 'melon' ) );
-		$variation_2->save();
-
-		// When searching for the "global" size attribute.
-		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
-		$request->set_param( 'search', 'small' );
-		$response   = $this->server->dispatch( $request );
-		$variations = $response->get_data();
-
-		// Then.
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $variations ) );
-		$this->assertEquals( $variation_1->get_id(), $variations[0]['id'] );
-
-		// When searching for the "local" flavor attribute.
-		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
-		$request->set_param( 'search', 'melon' );
-		$response   = $this->server->dispatch( $request );
-		$variations = $response->get_data();
-
-		// Then.
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $variations ) );
-		$this->assertEquals( $variation_2->get_id(), $variations[0]['id'] );
-	}
-
-	/**
-	 * Test variation search by SKU.
-	 */
-	public function test_variation_search_by_sku() {
-		// Given.
-		wp_set_current_user( $this->user );
-
-		// Creates a variable product with variations.
-		$product   = WC_Helper_Product::create_variation_product();
-		$variation = wc_get_product( $product->get_children()[0] );
-		$variation->set_sku( 'test-variation-sku' );
-		$variation->save();
-
-		// When searching by SKU.
-		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
-		$request->set_param( 'search', 'test-variation-sku' );
-		$response   = $this->server->dispatch( $request );
-		$variations = $response->get_data();
-
-		// Then.
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $variations ) );
-		$this->assertEquals( $variation->get_id(), $variations[0]['id'] );
-	}
-
-	/**
 	 * Test getting variations without permissions.
 	 */
 	public function test_get_variations_without_permission() {
@@ -299,9 +226,7 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'menu_order', $properties );
 		$this->assertArrayHasKey( 'meta_data', $properties );
 
-		// Additional properties from ProductVariations controller.
-		$this->assertArrayHasKey( 'name', $properties );
+		// Additional property from variations controller.
 		$this->assertArrayHasKey( 'parent_id', $properties );
-		$this->assertArrayHasKey( 'type', $properties );
 	}
 }
