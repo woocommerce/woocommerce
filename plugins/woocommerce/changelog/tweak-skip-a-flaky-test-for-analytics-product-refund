@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Skip a flaky test for core analytics sync order product refunds
+
+
