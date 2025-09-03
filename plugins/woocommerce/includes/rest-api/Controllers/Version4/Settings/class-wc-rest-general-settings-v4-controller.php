@@ -30,6 +30,25 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	protected $rest_base = 'settings/general';
 
 	/**
+	 * WC_Settings_General instance.
+	 *
+	 * @var WC_Settings_General
+	 */
+	protected $settings_general_instance;
+
+	/**
+	 * Get the WC_Settings_General instance.
+	 *
+	 * @return WC_Settings_General
+	 */
+	private function get_settings_general_instance() {
+		if ( is_null( $this->settings_general_instance ) ) {
+			$this->settings_general_instance = new WC_Settings_General();
+		}
+		return $this->settings_general_instance;
+	}
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -48,7 +67,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_update_args(),
 				),
-				'schema' => array( $this, 'get_public_item_schema' ),
+				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
 	}
@@ -60,7 +79,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return true;
 		return $this->check_permissions( $request, 'read' );
 	}
 
@@ -71,23 +89,22 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	private function get_update_args() {
 		$args = array();
-		
-		// Get valid setting IDs and their types
-		$settings_general = new WC_Settings_General();
-		$settings = $settings_general->get_settings_for_section( '' );
+
+		// Get valid setting IDs and their types.
+		$settings = $this->get_settings_general_instance()->get_settings_for_section( '' );
 
 		foreach ( $settings as $setting ) {
 			if ( isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
-				$setting_id = $setting['id'];
+				$setting_id   = $setting['id'];
 				$setting_type = $setting['type'] ?? 'text';
-				
+
 				$args[ $setting_id ] = array(
 					'description' => $setting['title'] ?? $setting_id,
 					'type'        => $this->map_wc_type_to_rest_type( $setting_type ),
 					'required'    => false,
 				);
 
-				// Add validation for specific setting types
+				// Add validation for specific setting types.
 				if ( 'number' === $setting_type ) {
 					$args[ $setting_id ]['minimum'] = 0;
 				}
@@ -135,8 +152,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	public function get_item( $request ) {
 		$settings = $this->get_general_settings_data();
-		$response = rest_ensure_response( $settings );
-		return $response;
+		return rest_ensure_response( $settings );
 	}
 
 	/**
@@ -147,10 +163,10 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	public function update_item( $request ) {
 		$updated_settings = array();
-		
-		// Get all parameters from the request body
+
+		// Get all parameters from the request body.
 		$params = $request->get_json_params();
-		
+
 		if ( ! is_array( $params ) || empty( $params ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
@@ -159,65 +175,54 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			);
 		}
 
-		// Get valid setting IDs to prevent unauthorized updates
-		$valid_settings = $this->get_valid_setting_ids();
+		// Get all general settings definitions.
+		$settings          = $this->get_settings_general_instance()->get_settings_for_section( '' );
+		$settings_by_id    = array_column( $settings, null, 'id' );
+		$valid_setting_ids = array_keys( $settings_by_id );
 
-		// Process each setting in the payload
+		// Process each setting in the payload.
 		foreach ( $params as $setting_id => $setting_value ) {
-			// Sanitize the setting ID
+			// Sanitize the setting ID.
 			$setting_id = sanitize_text_field( $setting_id );
 
-			// Security check: only allow updating valid WooCommerce general settings
-			if ( ! in_array( $setting_id, $valid_settings, true ) ) {
+			// Security check: only allow updating valid WooCommerce general settings.
+			if ( ! in_array( $setting_id, $valid_setting_ids, true ) ) {
 				continue;
 			}
 
-			// Sanitize the value based on the setting type
-			$sanitized_value = $this->sanitize_setting_value_by_id( $setting_id, $setting_value );
-			
-			// Additional validation for specific settings
+			// Sanitize the value based on the setting type.
+			$setting_definition = $settings_by_id[ $setting_id ];
+			$setting_type       = $setting_definition['type'] ?? 'text';
+			$sanitized_value    = $this->sanitize_setting_value( $setting_type, $setting_value );
+
+			// Additional validation for specific settings.
 			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
 			if ( is_wp_error( $validation_result ) ) {
 				return $validation_result;
 			}
 
-			// Update the setting
+			// Update the setting.
 			$update_result = update_option( $setting_id, $sanitized_value );
-			if ( $update_result !== false ) {
+			if ( $update_result ) {
 				$updated_settings[] = $setting_id;
 			}
 		}
 
-		// Log the update if settings were changed
+		// Log the update if settings were changed.
 		if ( ! empty( $updated_settings ) ) {
+			/**
+			* Fires when WooCommerce settings are updated.
+			*
+			* @param array $updated_settings Array of updated settings IDs.
+			* @param string $rest_base The REST base of the settings.
+			* @since 4.0.0
+			*/
 			do_action( 'woocommerce_settings_updated', $updated_settings, $this->rest_base );
 		}
 
-		// Return updated settings
+		// Return updated settings.
 		$response_data = $this->get_general_settings_data();
-		$response = rest_ensure_response( $response_data );
-		
-		return $response;
-	}
-
-	/**
-	 * Get valid setting IDs that can be updated through this endpoint.
-	 *
-	 * @return array Array of valid setting IDs.
-	 */
-	private function get_valid_setting_ids() {
-		// Get general settings to determine valid IDs
-		$settings_general = new WC_Settings_General();
-		$settings = $settings_general->get_settings_for_section( '' );
-
-		$valid_ids = array();
-		foreach ( $settings as $setting ) {
-			if ( isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
-				$valid_ids[] = $setting['id'];
-			}
-		}
-
-		return $valid_ids;
+		return rest_ensure_response( $response_data );
 	}
 
 	/**
@@ -228,7 +233,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return bool|WP_Error True if valid, WP_Error if invalid.
 	 */
 	private function validate_setting_value( $setting_id, $value ) {
-		// Custom validation rules for specific settings
+		// Custom validation rules for specific settings.
 		switch ( $setting_id ) {
 			case 'woocommerce_price_num_decimals':
 				if ( ! is_numeric( $value ) || $value < 0 || $value > 10 ) {
@@ -241,7 +246,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				break;
 
 			case 'woocommerce_default_country':
-				// Validate country code format (e.g., "US" or "US:CA")
+				// Validate country code format (e.g., "US" or "US:CA").
 				if ( ! empty( $value ) && ! preg_match( '/^[A-Z]{2}(:[A-Z0-9]+)?$/', $value ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
@@ -278,60 +283,38 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	}
 
 	/**
-	 * Sanitize setting value based on setting ID and type.
+	 * Sanitize setting value based on its type.
 	 *
-	 * @param string $setting_id Setting ID.
-	 * @param mixed  $value      Setting value.
+	 * @param string $setting_type Setting type.
+	 * @param mixed  $value        Setting value.
 	 * @return mixed Sanitized value.
 	 */
-	private function sanitize_setting_value_by_id( $setting_id, $value ) {
-		// Get the setting type from WooCommerce settings
-		$setting_type = $this->get_setting_type( $setting_id );
-
+	private function sanitize_setting_value( $setting_type, $value ) {
 		switch ( $setting_type ) {
 			case 'text':
 				return sanitize_text_field( $value );
-			
+
 			case 'number':
 				return is_numeric( $value ) ? floatval( $value ) : 0;
-			
+
 			case 'select':
 			case 'single_select_country':
 				return sanitize_text_field( $value );
-			
+
 			case 'multiselect':
 			case 'multi_select_countries':
 				if ( is_array( $value ) ) {
 					return array_map( 'sanitize_text_field', $value );
 				}
-				// If it's a string, convert to array (for single values)
+				// If it's a string, convert to array (for single values).
 				return array( sanitize_text_field( $value ) );
-			
+
 			case 'checkbox':
 				return wc_bool_to_string( $value );
-			
+
 			default:
 				return sanitize_text_field( $value );
 		}
-	}
-
-	/**
-	 * Get the type of a setting by its ID.
-	 *
-	 * @param string $setting_id Setting ID.
-	 * @return string Setting type.
-	 */
-	private function get_setting_type( $setting_id ) {
-		$settings_general = new WC_Settings_General();
-		$settings = $settings_general->get_settings_for_section( '' );
-
-		foreach ( $settings as $setting ) {
-			if ( isset( $setting['id'] ) && $setting['id'] === $setting_id ) {
-				return $setting['type'] ?? 'text';
-			}
-		}
-
-		return 'text'; // Default fallback
 	}
 
 	/**
@@ -340,21 +323,21 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_general_settings_data() {
-		$settings_general = new WC_Settings_General();
-		$raw_settings = $settings_general->get_settings_for_section( '' );
+		$settings_general = $this->get_settings_general_instance();
+		$raw_settings     = $settings_general->get_settings_for_section( '' );
 
-		// Transform raw settings into grouped format
-		$groups = array();
-		$current_group = null;
+		// Transform raw settings into grouped format.
+		$groups            = array();
+		$current_group     = null;
 		$current_group_key = null;
 
 		foreach ( $raw_settings as $setting ) {
 			$setting_type = $setting['type'] ?? '';
 
-			// Handle section titles
+			// Handle section titles.
 			if ( 'title' === $setting_type ) {
 				$current_group_key = $this->get_group_key_from_id( $setting['id'] ?? '' );
-				$current_group = array(
+				$current_group     = array(
 					'title'       => $setting['title'] ?? '',
 					'description' => $setting['desc'] ?? '',
 					'fields'      => array(),
@@ -362,22 +345,22 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				continue;
 			}
 
-			// Handle section ends
+			// Handle section ends.
 			if ( 'sectionend' === $setting_type ) {
 				if ( $current_group && $current_group_key ) {
 					$groups[ $current_group_key ] = $current_group;
 				}
-				$current_group = null;
+				$current_group     = null;
 				$current_group_key = null;
 				continue;
 			}
 
-			// Skip non-field types
+			// Skip non-field types.
 			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
 				continue;
 			}
 
-			// Convert setting to field format
+			// Convert setting to field format.
 			if ( $current_group && isset( $setting['id'] ) ) {
 				$field = $this->transform_setting_to_field( $setting );
 				if ( $field ) {
@@ -417,10 +400,11 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array|null Transformed field or null if should be skipped.
 	 */
 	private function transform_setting_to_field( $setting ) {
-		$setting_id = $setting['id'] ?? '';
+		$setting_id   = $setting['id'] ?? '';
 		$setting_type = $setting['type'] ?? 'text';
 
-		// Skip certain settings that shouldn't be exposed via REST API
+		// Skip certain settings that shouldn't be exposed via REST API.
+		// TODO: This is a temporary array until designs are finalized.
 		$skip_settings = array(
 			'woocommerce_address_autocomplete_enabled',
 			'woocommerce_address_autocomplete_provider',
@@ -440,16 +424,16 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'value' => get_option( $setting_id, $setting['default'] ?? '' ),
 		);
 
-		// Add tip if available
+		// Add tip if available.
 		if ( ! empty( $setting['desc'] ) && ! empty( $setting['desc_tip'] ) ) {
 			$field['tip'] = $setting['desc'];
 		}
 
-		// Add options for select fields
+		// Add options for select fields.
 		if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
 			$field['options'] = $setting['options'];
 		} else {
-			// Generate options for special field types that don't have them in the setting definition
+			// Generate options for special field types that don't have them in the setting definition.
 			$field['options'] = $this->get_field_options( $setting_type, $setting_id );
 		}
 
@@ -472,7 +456,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				return WC()->countries->get_countries();
 
 			case 'select':
-				// Handle specific select fields that need custom options
+				// Handle specific select fields that need custom options.
 				if ( 'woocommerce_currency' === $field_id ) {
 					return $this->get_currency_options();
 				}
@@ -488,13 +472,13 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array Country/state options.
 	 */
 	private function get_country_state_options() {
-		$countries = WC()->countries->get_countries();
-		$states = WC()->countries->get_states();
+		$countries             = WC()->countries->get_countries();
+		$states                = WC()->countries->get_states();
 		$country_state_options = array();
-		
+
 		foreach ( $countries as $country_code => $country_name ) {
 			$country_states = $states[ $country_code ] ?? array();
-			
+
 			if ( empty( $country_states ) ) {
 				$country_state_options[ $country_code ] = $country_name;
 			} else {
@@ -514,8 +498,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	private function get_currency_options() {
 		$currency_options = array();
-		$currencies = get_woocommerce_currencies();
-		
+		$currencies       = get_woocommerce_currencies();
+
 		foreach ( $currencies as $code => $name ) {
 			$currency_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
 		}
@@ -531,8 +515,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 */
 	private function normalize_field_type( $wc_type ) {
 		$type_map = array(
-			'single_select_country'   => 'select',
-			'multi_select_countries'  => 'multiselect',
+			'single_select_country'  => 'select',
+			'multi_select_countries' => 'multiselect',
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;
