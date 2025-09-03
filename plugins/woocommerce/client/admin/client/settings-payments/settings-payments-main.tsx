@@ -486,6 +486,7 @@ export const SettingsPaymentsMain = () => {
 		<Button
 			variant={ 'link' }
 			target="_blank"
+			rel="noopener noreferrer"
 			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 			className="more-payment-options-link"
 			onClick={ trackMorePaymentsOptionsClicked }

@@ -75,5 +75,16 @@ describe( 'SettingsPaymentsMain', () => {
 			'target',
 			'_blank'
 		);
+
+		// Verify security attributes are present for external links
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+			'rel',
+			expect.stringContaining( 'noopener' )
+		);
+
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+			'rel',
+			expect.stringContaining( 'noreferrer' )
+		);
 	} );
 } );
