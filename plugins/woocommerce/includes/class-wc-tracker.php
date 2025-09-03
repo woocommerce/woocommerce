@@ -288,6 +288,11 @@ class WC_Tracker {
 			return $data;
 		}
 
+		if ( 'no' === $data['enabled'] ) {
+			// If the feature is disabled, no need to go further, but we will still track which providers are available.
+			return $data;
+		}
+
 		$data['preferred_provider'] = $autocomplete_controller->get_preferred_provider();
 		return $data;
 	}
