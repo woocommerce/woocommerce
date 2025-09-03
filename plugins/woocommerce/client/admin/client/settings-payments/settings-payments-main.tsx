@@ -41,7 +41,7 @@ import {
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { getAdminSetting } from '~/utils/admin-settings';import { isFeatureEnabled } from '~/utils/features';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**

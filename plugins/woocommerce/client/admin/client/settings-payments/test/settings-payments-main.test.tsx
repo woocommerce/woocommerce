@@ -62,7 +62,9 @@ describe( 'SettingsPaymentsMain', () => {
 			</Router>
 		);
 
-		const morePaymentOptionsLink = screen.getByText( 'More payment options' );
+		const morePaymentOptionsLink = screen.getByText(
+			'More payment options'
+		);
 
 		// Verify the link has the correct href attribute for external navigation
 		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
