@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext, getConfig } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getConfig,
+	getElement,
+} from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
@@ -9,6 +14,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
+import { getProductData, dispatchChangeEvent } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -144,6 +150,7 @@ export type VariableProductAddToCartWithOptionsStore =
 			setDefaultSelectedAttribute: () => void;
 			setSelectedVariationId: () => void;
 			validateVariation: () => void;
+			watchQuantityConstraints: () => void;
 		};
 	};
 
@@ -303,6 +310,57 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						message: errorMessages?.variableProductOutOfStock || '',
 						group: 'variable-product',
 					} );
+				}
+			},
+			// Quantity constraints might change dynamically when switching
+			// variations. Based on this, we might need to update the quantity.
+			watchQuantityConstraints() {
+				const {
+					productId,
+					productType,
+					availableVariations,
+					selectedAttributes,
+					quantity,
+				} = getContext< Context >();
+				const { ref } = getElement();
+
+				if ( ! ( ref instanceof HTMLInputElement ) ) {
+					return;
+				}
+
+				// Let's not do anything if the user is typing in the input.
+				if ( ref === document.activeElement ) {
+					return;
+				}
+
+				const productObject = getProductData(
+					productId,
+					productType,
+					availableVariations,
+					selectedAttributes
+				);
+
+				const currentValue = quantity[ productObject?.id || productId ];
+
+				if ( productObject ) {
+					const { min, max } = productObject;
+
+					let newValue = currentValue;
+					if ( quantity[ productObject.id ] < min ) {
+						newValue = min;
+					} else if ( quantity[ productObject.id ] > max ) {
+						newValue = max;
+					}
+
+					if (
+						newValue !== ref.valueAsNumber ||
+						newValue !== quantity[ productObject.id ]
+					) {
+						actions.setQuantity( newValue );
+
+						ref.value = newValue.toString();
+						dispatchChangeEvent( ref );
+					}
 				}
 			},
 		},

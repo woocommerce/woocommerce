@@ -11,7 +11,7 @@ The v4 Products endpoint starts as a **copy-paste of the v3 implementation** and
 ## Architecture
 
 - **Namespace**: `wc/v4`
-- **Future Goal**: Eventually migrate to extend `WP_REST_Controller` directly instead of WooCommerce base classes
+- **Future Goal**: Migrate to extend WP_REST_Controller directly instead of WooCommerce base classes, and move the API codebase under the src directory with the Automattic\WooCommerce namespace.
 
 ## Development Philosophy
 
