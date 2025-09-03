@@ -488,15 +488,15 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 
 		$coupon->delete( true );
 
-		remove_filter( 'woocommerce_coupon_discount_types', array( $this, 'handle_woocommerce_coupon_discount_types' ) );
-		remove_filter( 'woocommerce_coupon_is_valid', array( $this, 'handle_woocommerce_coupon_is_valid' ) );
-		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'handle_woocommerce_coupon_get_discount_amount' ) );
-		remove_filter( 'woocommerce_coupon_is_valid_for_cart', array( $this, 'handle_woocommerce_coupon_is_valid_for_cart' ) );
+		remove_filter( 'woocommerce_coupon_discount_types', array( $this, 'handle_woocommerce_coupon_discount_types' ), 999 );
+		remove_filter( 'woocommerce_coupon_is_valid', array( $this, 'handle_woocommerce_coupon_is_valid' ), 999 );
+		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'handle_woocommerce_coupon_get_discount_amount' ), 999 );
+		remove_filter( 'woocommerce_coupon_is_valid_for_cart', array( $this, 'handle_woocommerce_coupon_is_valid_for_cart' ), 999 );
 
 		$order->recalculate_coupons();
 		$order->save();
 
-		$this->assertEquals( '998.00', $order->get_total() );
+		$this->assertEquals( '1000.00', $order->get_total() );
 	}
 
 	/**
