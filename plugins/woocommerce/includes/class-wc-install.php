@@ -533,7 +533,7 @@ class WC_Install {
 
 			$return_url = $_GET['return_url'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below before use.
 			if ( ! empty( $return_url ) ) {
-				// Try to go back to the previus page.
+				// Try to go back to the previous page.
 				if ( 'wc-admin-referer' === $return_url ) {
 					$return_url = preg_replace( '/^.*\/wp-admin\//i', '', wp_get_referer() ? wp_get_referer() : '' );
 
