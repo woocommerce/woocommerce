@@ -60,14 +60,15 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attributes = $this->parse_attributes( $attributes );
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		// `$attributes['style']` is the layout selector ("pills" | "dropdown"), not the block supports style object.
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'style' ) );
 
 		$field_style = $attributes['style'];
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => esc_attr( $classes_and_styles['classes'] ),
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'class' => $classes_and_styles['classes'],
+				'style' => $classes_and_styles['styles'],
 			)
 		);
 
@@ -161,17 +162,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				function () {
 					$context = wp_interactivity_get_context();
 
-					if ( isset( $_GET[ $context['name'] ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-						$selected_attribute = $this->get_default_selected_attribute( $context['name'], $context['options'] );
-
-						if ( $context['option']['value'] === $selected_attribute ) {
-							return true;
-						}
-					} else {
-						return $context['option']['isSelected'];
-					}
-
-					return false;
+					return $context['option']['value'] === $context['selectedValue'];
 				},
 			)
 		);
@@ -244,6 +235,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			$attribute_terms
 		);
 
+		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
@@ -255,8 +248,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'options' => $attribute_terms,
 				),
 			);
-
-			$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
 
 			if ( $attribute_term['value'] === $selected_attribute || ( ! isset( $_GET[ $attribute_slug ] ) && $attribute_term['isSelected'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$option_attributes['selected'] = 'selected';
