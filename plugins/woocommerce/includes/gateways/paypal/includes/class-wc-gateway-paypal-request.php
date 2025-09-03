@@ -355,7 +355,8 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	private function get_paypal_create_order_request_params( $order ) {
-		$currency = $order->get_currency();
+		$currency    = $order->get_currency();
+		$payee_email = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 
 		return array(
 			'intent'         => $this->get_paypal_order_intent(),
@@ -401,7 +402,7 @@ class WC_Gateway_Paypal_Request {
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $this->get_paypal_order_items( $order ),
 					'payee'      => array(
-						'email_address' => $this->gateway->get_option( 'email' ),
+						'email_address' => $payee_email,
 					),
 					'shipping'   => $this->get_paypal_order_shipping( $order ),
 				),
