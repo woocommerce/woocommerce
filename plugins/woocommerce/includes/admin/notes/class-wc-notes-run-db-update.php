@@ -68,7 +68,7 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * Retrieves the first notice of this type.
 	 *
-	 * @return int|void Note id or null in case no note was found.
+	 * @return Note Note or null in case no note was found.
 	 */
 	private static function get_current_notice() {
 		try {
@@ -82,29 +82,25 @@ class WC_Notes_Run_Db_Update {
 			return;
 		}
 
-		if ( count( $note_ids ) > 1 ) {
-			// Remove weird duplicates. Leave the first one.
-			$current_notice = array_shift( $note_ids );
-			foreach ( $note_ids as $note_id ) {
-				$note = new Note( $note_id );
-				$data_store->delete( $note );
-			}
-			return $current_notice;
+		$current_note_id = array_shift( $note_ids );
+
+		// Remove weird duplicates. Leave the first one.
+		foreach ( $note_ids as $note_id ) {
+			$note = new Note( $note_id );
+			$data_store->delete( $note );
 		}
 
-		return current( $note_ids );
+		return new Note( $current_note_id );
 	}
 
 	/**
 	 * Set this notice to an actioned one, so that it's no longer displayed.
 	 */
 	public static function set_notice_actioned() {
-		$note_id = self::get_current_notice();
-		if ( ! $note_id ) {
+		$note = self::get_current_notice();
+		if ( ! $note ) {
 			return;
 		}
-
-		$note = new Note( $note_id );
 
 		if ( Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
 			$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
@@ -126,7 +122,8 @@ class WC_Notes_Run_Db_Update {
 	 */
 	private static function note_up_to_date( $note, $update_url, $current_actions ) {
 		$actions = $note->get_actions();
-		return count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
+		return $note->get_id()
+			&& count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
 			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ), true );
 	}
 
@@ -135,11 +132,12 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * If a $note_id is given, the method updates the note instead of creating a new one.
 	 *
-	 * @param int|Note $note_id Note db record to update.
-	 * @return int Created/Updated note id
+	 * @param null|Note $note Note db record to update. NULL to create a new one.
 	 */
-	private static function update_needed_notice( $note_id = null ) {
-		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
+	private static function update_needed_notice( ?Note $note = null ) {
+		if ( is_null( $note ) ) {
+			$note = new Note();
+		}
 
 		$update_url =
 			add_query_arg(
@@ -199,8 +197,6 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		$note->save();
-
-		return $note->get_id();
 	}
 
 	/**
@@ -208,11 +204,9 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * This is the second out of 3 notices displayed to the user.
 	 *
-	 * @param int|Note $note_id Note id to update.
+	 * @param Note $note Note to update.
 	 */
-	private static function update_in_progress_notice( $note_id ) {
-		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
-
+	private static function update_in_progress_notice( Note $note ) {
 		// Same actions as in includes/admin/views/html-notice-updating.php. This just redirects, performs no action, so without nonce.
 		$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_run_update&status=pending' );
 		$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
@@ -231,8 +225,6 @@ class WC_Notes_Run_Db_Update {
 		);
 
 		$note->save();
-
-		return $note->get_id();
 	}
 
 	/**
@@ -240,11 +232,9 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * This is the last notice (3 out of 3 notices) displayed to the user.
 	 *
-	 * @param int|Note $note_id Note id to update.
+	 * @param Note $note Note to update.
 	 */
-	private static function update_done_notice( $note_id ) {
-		$note = ( $note_id instanceof Note ) ? $note_id : new Note( $note_id );
-
+	private static function update_done_notice( Note $note ) {
 		$hide_notices_url = html_entity_decode( // to convert &amp;s to normal &, otherwise produces invalid link.
 			add_query_arg(
 				array(
@@ -268,7 +258,7 @@ class WC_Notes_Run_Db_Update {
 
 		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
 		if ( self::note_up_to_date( $note, $hide_notices_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
-			return $note;
+			return;
 		}
 
 		$note->set_title( __( 'WooCommerce database update done', 'woocommerce' ) );
@@ -284,21 +274,22 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		$note->save();
-
-		return $note->get_id();
 	}
 
 	/**
 	 * Creates the db update note if needed.
 	 *
-	 * @return Note
+	 * @since 10.3.0
 	 */
 	public static function add_notice() {
-		$note_id = self::get_current_notice();
-		$note    = new Note( $note_id ?? '' );
+		$note = self::get_current_notice();
+		if ( ! $note ) {
+			$note = new Note();
+			$note->set_name( self::NOTE_NAME );
+			$note->save();
+		}
 
 		self::maybe_update_notice( $note );
-		return $note;
 	}
 
 	/**
@@ -330,24 +321,27 @@ class WC_Notes_Run_Db_Update {
 				return;
 			} else {
 				// Db update not needed && notice is unactioned -> Thank you note.
-				self::update_done_notice( $note_id );
+				self::update_done_notice( $note );
 				return;
 			}
 		} else {
 			// Db needs update &&.
 			if ( ! $note_id ) {
 				// Db needs update && no notice exists -> create one that shows Nudge to update.
-				$note_id = self::update_needed_notice();
+				self::update_needed_notice();
+				return;
 			}
+
+			$note = new Note( $note_id );
 
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				// Db needs update && db update is scheduled -> update note to In progress.
-				self::update_in_progress_notice( $note_id );
+				self::update_in_progress_notice( $note );
 			} else {
 				// Db needs update && db update is not scheduled -> Nudge to run the db update.
-				self::update_needed_notice( $note_id );
+				self::update_needed_notice( $note );
 			}
 		}
 	}
