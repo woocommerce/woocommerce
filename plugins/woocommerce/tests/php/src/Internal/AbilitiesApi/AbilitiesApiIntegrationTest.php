@@ -11,6 +11,13 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Array to track abilities registered during tests for cleanup.
+	 *
+	 * @var array
+	 */
+	private $registered_abilities = array();
+
+	/**
 	 * Set up the test environment.
 	 */
 	public function set_up() {
@@ -25,6 +32,19 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			 */
 			do_action( 'abilities_api_init' );
 		}
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public function tear_down() {
+		// Clean up any abilities registered during tests.
+		foreach ( $this->registered_abilities as $ability_id ) {
+			$this->cleanup_ability( $ability_id );
+		}
+		$this->registered_abilities = array();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -73,7 +93,8 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_can_register_ability() {
-		$ability_id = 'woocommerce-test/simple-test';
+		$ability_id                   = 'woocommerce-test/simple-test';
+		$this->registered_abilities[] = $ability_id;
 
 		$result = wp_register_ability(
 			$ability_id,
@@ -105,9 +126,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertInstanceOf( 'WP_Ability', $result, 'Ability registration should return a WP_Ability instance' );
-
-		// Clean up.
-		$this->cleanup_ability( $ability_id );
 	}
 
 	/**
@@ -116,9 +134,10 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_can_get_registered_ability() {
-		$ability_id = 'woocommerce-test/get-test';
+		$ability_id                   = 'woocommerce-test/get-test';
+		$this->registered_abilities[] = $ability_id;
 
-		// Register the ability. first.
+		// Register the ability first.
 		wp_register_ability(
 			$ability_id,
 			array(
@@ -142,9 +161,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WP_Ability', $ability, 'Retrieved object should be a WP_Ability instance' );
 		$this->assertEquals( $ability_id, $ability->get_name(), 'Ability name should match' );
 		$this->assertEquals( 'Get Test Ability', $ability->get_label(), 'Ability label should match' );
-
-		// Clean up.
-		$this->cleanup_ability( $ability_id );
 	}
 
 	/**
@@ -153,7 +169,8 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_can_execute_ability() {
-		$ability_id = 'woocommerce-test/execute-test';
+		$ability_id                   = 'woocommerce-test/execute-test';
+		$this->registered_abilities[] = $ability_id;
 
 		// Register the ability.
 		wp_register_ability(
@@ -194,9 +211,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result, 'Execution should return an array' );
 		$this->assertArrayHasKey( 'processed_value', $result, 'Result should have expected key' );
 		$this->assertEquals( 'Processed: test data', $result['processed_value'], 'Result should have expected value' );
-
-		// Clean up.
-		$this->cleanup_ability( $ability_id );
 	}
 
 	/**
@@ -205,8 +219,10 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_can_list_abilities() {
-		$ability_id_1 = 'woocommerce-test/list-test-1';
-		$ability_id_2 = 'woocommerce-test/list-test-2';
+		$ability_id_1                 = 'woocommerce-test/list-test-1';
+		$ability_id_2                 = 'woocommerce-test/list-test-2';
+		$this->registered_abilities[] = $ability_id_1;
+		$this->registered_abilities[] = $ability_id_2;
 
 		// Register two test abilities.
 		wp_register_ability(
@@ -248,10 +264,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 
 		$this->assertContains( $ability_id_1, $found_abilities, 'First test ability should be in the list' );
 		$this->assertContains( $ability_id_2, $found_abilities, 'Second test ability should be in the list' );
-
-		// Clean up.
-		$this->cleanup_ability( $ability_id_1 );
-		$this->cleanup_ability( $ability_id_2 );
 	}
 
 	/**
