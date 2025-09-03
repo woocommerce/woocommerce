@@ -32,6 +32,7 @@ class WC_Notes_Run_Db_Update {
 			return $note;
 		}
 
+		// If the legacy notice is not set, hide the note. This should not normally happen, but serves as a fallback.
 		if ( ! in_array( 'update', \WC_Admin_Notices::get_notices(), true ) ) {
 			$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
 			$note->save();
@@ -42,15 +43,19 @@ class WC_Notes_Run_Db_Update {
 		$needs_db_update = \WC_Install::needs_db_update();
 
 		if ( ! $needs_db_update ) {
+			// If there's no need to update the database and the note has not been actioned, update it to the thank you note.
 			if ( Note::E_WC_ADMIN_NOTE_ACTIONED !== $note->get_status() ) {
 				self::update_done_notice( $note );
 			}
 		} else {
+			// If a db update is needed...
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date ) {
+				// ... and scheduled, update the note to "in progress".
 				self::update_in_progress_notice( $note );
 			} else {
+				// ... and not scheduled, nudge to run the db update.
 				self::update_needed_notice( $note );
 			}
 		}
