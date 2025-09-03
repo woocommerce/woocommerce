@@ -261,48 +261,76 @@ class PageController {
 	public function register_menu(): void {
 		$order_types = wc_get_order_types( 'admin-menu' );
 
-		foreach ( $order_types as $order_type ) {
-			$post_type = get_post_type_object( $order_type );
+		// Check if shop_order exists in the order types
+		$has_shop_order = in_array( 'shop_order', $order_types, true );
+		$parent_slug = null;
+
+		if ( $has_shop_order ) {
+			// Process shop_order first to create top-level menu
+			$post_type = get_post_type_object( 'shop_order' );
 			$menu_name = $post_type->labels->menu_name;
 
 			// Add order count badge for shop_order
-			if ( 'shop_order' === $order_type && apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
 				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 				if ( $order_count ) {
 					$menu_name .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
 				}
 			}
 
-			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
+			$parent_slug = 'wc-orders';
 
 			// Create top-level Orders menu
 			add_menu_page(
 				$post_type->labels->name,
 				$menu_name,
 				$post_type->cap->edit_posts,
-				$page_slug,
+				$parent_slug,
 				array( $this, 'output' ),
 				'dashicons-text-page',
 				56
 			);
 
-			// Add submenu items
+			// Add submenu items for shop_order
 			add_submenu_page(
-				$page_slug,
+				$parent_slug,
 				$post_type->labels->all_items,
 				__( 'All orders', 'woocommerce' ),
 				$post_type->cap->edit_posts,
-				$page_slug,
+				$parent_slug,
 				array( $this, 'output' )
 			);
 
 			add_submenu_page(
-				$page_slug,
+				$parent_slug,
 				$post_type->labels->add_new_item,
 				__( 'Add new order', 'woocommerce' ),
 				$post_type->cap->create_posts,
-				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . $page_slug ) ),
+				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . $parent_slug ) ),
 				''
+			);
+		}
+
+		// Process remaining order types
+		foreach ( $order_types as $order_type ) {
+			// Skip shop_order if we already processed it
+			if ( 'shop_order' === $order_type && $has_shop_order ) {
+				continue;
+			}
+
+			$post_type = get_post_type_object( $order_type );
+			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
+
+			// Add as submenu under shop_order if it exists, otherwise under WooCommerce
+			$menu_parent = $has_shop_order ? $parent_slug : 'woocommerce';
+
+			add_submenu_page(
+				$menu_parent,
+				$post_type->labels->name,
+				$post_type->labels->menu_name,
+				$post_type->cap->edit_posts,
+				$page_slug,
+				array( $this, 'output' )
 			);
 		}
 
