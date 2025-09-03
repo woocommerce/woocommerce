@@ -186,6 +186,7 @@ class Server {
 			'shipping-zone-methods'    => 'WC_REST_Shipping_Zone_Methods_Controller',
 			'tax-classes'              => 'WC_REST_Tax_Classes_Controller',
 			'taxes'                    => 'WC_REST_Taxes_Controller',
+			'variations'               => 'WC_REST_Variations_Controller',
 			'webhooks'                 => 'WC_REST_Webhooks_Controller',
 			'system-status'            => 'WC_REST_System_Status_Controller',
 			'system-status-tools'      => 'WC_REST_System_Status_Tools_Controller',
