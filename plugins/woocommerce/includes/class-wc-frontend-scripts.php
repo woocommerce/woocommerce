@@ -669,7 +669,9 @@ class WC_Frontend_Scripts {
 							return array(
 								'id'            => sanitize_key( $provider->id ),
 								'name'          => sanitize_text_field( $provider->name ),
-								'branding_html' => trim( wp_kses( $provider->branding_html, wp_kses_allowed_html( 'post' ) ) ),
+								'branding_html' => wp_targeted_link_rel(
+									trim( wp_kses_post( (string) ( $provider->branding_html ?? '' ) ) )
+								),
 							);
 						},
 						$providers
