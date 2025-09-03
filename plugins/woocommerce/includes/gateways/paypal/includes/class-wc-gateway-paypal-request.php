@@ -447,12 +447,15 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items() as $item ) {
 			$items[] = array(
-				'name'        => $item->get_name(),
+				'name'        => $this->limit_length( $item->get_name(), 127 ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
-					// We want to use the subtotal (before discounts), as we are including the discount in the breakdown.
-					'value'         => $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
+					// Use the subtotal (before discounts).
+					'value'         => wc_format_decimal(
+						$order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
+						wc_get_price_decimals()
+					),
 				),
 			);
 		}
