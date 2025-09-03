@@ -4,11 +4,14 @@ export * from './formats';
 export * from './block-style';
 export * from './block-variations';
 
+/**
+ * Internal dependencies
+ */
 import {
 	resetBlockStyles,
 	resetBlockVariations,
 	resetFormats,
-	clearEmailFilters,
+	clearAllEmailHooks,
 	restoreAllModifiedBlockSettings,
 } from '.';
 
@@ -17,5 +20,5 @@ export function cleanupConfigurationChanges(): void {
 	resetBlockStyles();
 	resetBlockVariations();
 	resetFormats();
-	clearEmailFilters();
+	clearAllEmailHooks();
 }
