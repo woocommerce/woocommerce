@@ -486,6 +486,37 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					suggestionsList.appendChild( li );
 				} );
 
+				// Add branding HTML if available from the active provider.
+				const activeProvider =
+					window.wc.addressAutocomplete.activeProvider[ type ];
+				if ( activeProvider && activeProvider.id ) {
+					// Get the server provider data to access branding_html.
+					const serverProviders =
+						( window &&
+							window.wc_checkout_params &&
+							window.wc_checkout_params.address_providers ) ||
+						[];
+					const serverProvider = serverProviders.find(
+						( provider ) => provider.id === activeProvider.id
+					);
+					if ( serverProvider && serverProvider.branding_html ) {
+						// Check if branding element already exists.
+						let brandingElement =
+							suggestionsContainer.querySelector(
+								'.woocommerce-address-autocomplete-branding'
+							);
+						if ( ! brandingElement ) {
+							brandingElement = document.createElement( 'div' );
+							brandingElement.className =
+								'woocommerce-address-autocomplete-branding';
+							suggestionsContainer.appendChild( brandingElement );
+						}
+						// Update branding HTML content.
+						brandingElement.innerHTML =
+							serverProvider.branding_html;
+					}
+				}
+
 				disableBrowserAutofill( addressInput );
 				suggestionsContainer.style.display = 'block';
 				suggestionsContainer.style.marginTop =
@@ -545,6 +576,15 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 
 			suggestionsList.innerHTML = '';
+
+			// Clear branding element.
+			const brandingElement = suggestionsContainer.querySelector(
+				'.woocommerce-address-autocomplete-branding'
+			);
+			if ( brandingElement ) {
+				brandingElement.innerHTML = '';
+			}
+
 			suggestionsContainer.style.display = 'none';
 			addressInput.setAttribute( 'aria-expanded', 'false' );
 			addressInput.removeAttribute( 'aria-activedescendant' );
