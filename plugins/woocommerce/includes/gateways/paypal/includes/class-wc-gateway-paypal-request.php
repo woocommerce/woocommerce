@@ -190,8 +190,8 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
 	public function authorize_or_capture_payment( $order, $action_url, $action = 'capture' ) {
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		$paypal_debug_id = null;
+		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
 			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
 			return;
@@ -305,7 +305,7 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
-			// set custom status for successful capture response.
+			// Set custom status for successful capture response.
 			$order->update_meta_data( '_paypal_status', 'captured' );
 			$order->save();
 		} catch ( Exception $e ) {
@@ -437,7 +437,7 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Get the order items for the PayPal create-order request
+	 * Get the order items for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return array

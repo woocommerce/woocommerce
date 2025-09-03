@@ -443,8 +443,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function maybe_remove_fields( $form_fields ) {
-		// Additional details are added to the receiver email when subscriptions are enabled.
-		// We don't need this for Orders v2.
+		// Remove legacy setting fiels when using Orders v2.
 		if ( $this->should_use_orders_v2() ) {
 			foreach ( $form_fields as $key => $field ) {
 				if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
@@ -745,7 +744,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// We need a Jet be able to send authenticated requests to the proxy.
+		// We need a Jetpack connection to be able to send authenticated requests to the proxy.
 		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
 		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
 			return false;
