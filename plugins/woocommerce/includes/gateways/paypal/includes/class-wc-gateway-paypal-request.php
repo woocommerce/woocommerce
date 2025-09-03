@@ -28,6 +28,13 @@ class WC_Gateway_Paypal_Request {
 	private const PAYPAL_INVOICE_ID_MAX_LENGTH = 127;
 
 	/**
+	 * The maximum length of the order item name.
+	 *
+	 * @var int
+	 */
+	private const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
+
+	/**
 	 * Stores line items to send to PayPal.
 	 *
 	 * @var array
@@ -447,11 +454,11 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items() as $item ) {
 			$items[] = array(
-				'name'        => $this->limit_length( $item->get_name(), 127 ),
+				'name'        => $this->limit_length( $item->get_name(), self::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
-					// Use the subtotal (before discounts).
+					// Use the subtotal before discounts.
 					'value'         => wc_format_decimal(
 						$order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
 						wc_get_price_decimals()
