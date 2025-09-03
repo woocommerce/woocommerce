@@ -333,7 +333,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_approve_link( $http_code, $response_data ) {
 		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
-		if ( 200 === $http_code && isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
+		if ( isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
 			$rel = 'payer-action';
 		} else {
 			$rel = 'approve';
