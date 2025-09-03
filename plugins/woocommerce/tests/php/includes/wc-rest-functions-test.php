@@ -151,7 +151,7 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	public function test_removes_filter_to_prevent_recursion() {
 		$callback_called_times = 0;
 		$test_callback         = function () use ( &$callback_called_times ) {
-			++ $callback_called_times;
+			++$callback_called_times;
 		};
 
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );

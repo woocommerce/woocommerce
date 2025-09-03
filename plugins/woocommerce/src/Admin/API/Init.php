@@ -108,7 +108,6 @@ class Init {
 			 * @param array $controllers List of rest API controllers.
 			 *
 			 * @since 3.5.0
-			 *
 			 */
 			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 		}
@@ -186,7 +185,6 @@ class Init {
 				 * @param array $controllers List of rest API controllers.
 				 *
 				 * @since 3.5.0
-				 *
 				 */
 				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 			}
