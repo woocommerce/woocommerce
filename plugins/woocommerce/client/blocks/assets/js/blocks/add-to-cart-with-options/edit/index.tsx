@@ -21,7 +21,7 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
-import { useProduct } from '@woocommerce/entities';
+import { isExternalProduct, useProduct } from '@woocommerce/entities';
 
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context: { postId?: number } }
@@ -49,6 +49,8 @@ const AddToCartOptionsEdit = (
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
 
+	console.log( product );
+
 	return (
 		<>
 			<InspectorControls>
@@ -70,7 +72,9 @@ const AddToCartOptionsEdit = (
 						<button
 							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
 						>
-							{ __( 'Add to cart', 'woocommerce' ) }
+							{ product && isExternalProduct( product )
+								? product.button_text
+								: __( 'Add to cart', 'woocommerce' ) }
 						</button>
 					</Disabled>
 				</div>

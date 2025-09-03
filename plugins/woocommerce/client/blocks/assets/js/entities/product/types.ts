@@ -77,6 +77,7 @@ export interface SimpleProductResponse extends ProductEntityResponseBase {
  */
 export interface ExternalProductResponse extends ProductEntityResponseBase {
 	type: 'external';
+	button_text: string;
 }
 
 export type ProductEntityResponse =

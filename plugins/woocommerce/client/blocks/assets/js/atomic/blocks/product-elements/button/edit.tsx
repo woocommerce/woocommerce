@@ -24,6 +24,7 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
  */
 import Block from './block';
 import { BlockAttributes } from './types';
+import { useProduct } from '@woocommerce/entities';
 
 function WidthPanel( {
 	selectedWidth,
@@ -72,6 +73,7 @@ const Edit = ( {
 	context?: Context | undefined;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const { product } = useProduct( context?.postId );
 	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 	const { width } = attributes;
 
@@ -99,6 +101,11 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
+						product={ {
+							...product,
+							button_text: product?.button_text || '',
+						} }
+						isAdmin={ true }
 						blockClientId={ blockProps?.id }
 						className={ clsx( attributes.className, {
 							[ `has-custom-width wp-block-button__width-${ width }` ]:

@@ -29,6 +29,7 @@ import type {
 	AddToCartProductDetails,
 } from './types';
 import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 const getButtonText = ( {
 	cartQuantity,
@@ -57,6 +58,31 @@ const getButtonText = ( {
 	}
 
 	return productCartDetails?.text || __( 'Add to cart', 'woocommerce' );
+};
+
+const AddToCartButtonAdminSide = ( {
+	product,
+	isDescendantOfAddToCartWithOptions,
+}: {
+	product: ProductEntityResponse;
+	isDescendantOfAddToCartWithOptions: boolean | undefined;
+} ): JSX.Element => {
+	return (
+		<button
+			disabled={ false }
+			className={ clsx(
+				'wp-block-button__link',
+				'wp-element-button',
+				'add_to_cart_button',
+				'wc-block-components-product-button__button'
+			) }
+			style={ {} }
+		>
+			{ product.type === 'external'
+				? product?.button_text
+				: __( 'Add to cart', 'woocommerce' ) }
+		</button>
+	);
 };
 
 const AddToCartButton = ( {
@@ -207,7 +233,10 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 	const { className, textAlign, blockClientId } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { isLoading, product } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext( {
+		product: props.product,
+		isAdmin: props.isAdmin,
+	} );
 
 	return (
 		<div
@@ -229,22 +258,34 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 				/>
 			) : (
 				<>
-					{ product.id ? (
-						<AddToCartButton
-							product={ product }
-							style={ styleProps.style }
-							className={ styleProps.className }
+					{ props.isAdmin && (
+						<AddToCartButtonAdminSide
+							product={ product as ProductEntityResponse }
 							isDescendantOfAddToCartWithOptions={
 								props[
 									'woocommerce/isDescendantOfAddToCartWithOptions'
 								]
 							}
 						/>
+					) }
+					{ product && product?.id ? (
+						<AddToCartButton
+							product={ product }
+							style={ styleProps.style }
+							className={ styleProps.className }
+							isAdmin={ props.isAdmin }
+							isDescendantOfAddToCartWithOptions={
+								props[
+									'woocommerce/isDescendantOfAddToCartWithOptions'
+								]
+							}
+							productEntity={ props.product }
+						/>
 					) : (
 						<AddToCartButtonPlaceholder
 							style={ styleProps.style }
 							className={ styleProps.className }
-							isLoading={ isLoading }
+							isLoading={ isLoading ?? false }
 							blockClientId={ blockClientId }
 						/>
 					) }
