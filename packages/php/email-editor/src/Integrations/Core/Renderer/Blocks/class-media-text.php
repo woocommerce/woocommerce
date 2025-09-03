@@ -39,9 +39,9 @@ class Media_Text extends Abstract_Block_Renderer {
 			$text_content .= render_block( $block );
 		}
 
-		// If we don't have both media and text content, fall back to HTML parsing.
+		// If we don't have both media and text content, return empty.
 		if ( empty( $media_content ) || empty( $text_content ) ) {
-			return $this->fallback_html_parsing( $block_content, $block_attrs, $rendering_context );
+			return '';
 		}
 
 		// Build the email-friendly layout.
@@ -57,7 +57,7 @@ class Media_Text extends Abstract_Block_Renderer {
 	private function extract_media_from_html( string $block_content ): string {
 		// Extract media content (preserving any link wrapper).
 		$media_content = '';
-		if ( preg_match( '/<figure[^>]*>.*?<\/figure>/s', $block_content, $matches ) ) {
+		if ( preg_match( '/<figure[^>]*class="[^"]*\bwp-block-media-text__media\b[^"]*"[^>]*>.*?<\/figure>/s', $block_content, $matches ) ) {
 			$media_content = $matches[0];
 		}
 
@@ -84,9 +84,9 @@ class Media_Text extends Abstract_Block_Renderer {
 		$media_width        = $this->get_media_width_from_attributes( $block_attrs );
 		$text_width         = 100 - $media_width; // Text takes the remaining width.
 
-		// Handle image linking if linkDestination is set to "media".
+		// Handle image linking for both "media" and "attachment" linkDestination types.
 		$link_destination = $block_attrs['linkDestination'] ?? '';
-		if ( 'media' === $link_destination && ! empty( $block_attrs['href'] ) ) {
+		if ( in_array( $link_destination, array( 'media', 'attachment' ), true ) && ! empty( $block_attrs['href'] ) ) {
 			$media_content = $this->wrap_media_with_link( $media_content, $block_attrs['href'] );
 		}
 
@@ -109,51 +109,30 @@ class Media_Text extends Abstract_Block_Renderer {
 			'width' => '100%',
 		);
 
-		// Build table content.
-		$table_content = '<tr>';
+		// Build individual table cells.
+		$media_cell_attrs = array(
+			'style'  => sprintf( 'width: %d%%; padding: 10px; vertical-align: %s;', $media_width, $vertical_alignment ),
+			'valign' => $vertical_alignment,
+		);
+		$text_cell_attrs  = array(
+			'style'  => sprintf( 'width: %d%%; padding: 10px; vertical-align: %s;', $text_width, $vertical_alignment ),
+			'valign' => $vertical_alignment,
+		);
 
+		$media_cell = Table_Wrapper_Helper::render_table_cell( $media_content, $media_cell_attrs );
+		$text_cell  = Table_Wrapper_Helper::render_table_cell( $text_content, $text_cell_attrs );
+
+		// Order cells based on media position.
 		if ( 'right' === $media_position ) {
 			// Text first, then media.
-			$table_content .= '<td style="width: ' . $text_width . '%; padding: 10px; vertical-align: ' . $vertical_alignment . ';">' . $text_content . '</td>';
-			$table_content .= '<td style="width: ' . $media_width . '%; padding: 10px; vertical-align: ' . $vertical_alignment . ';">' . $media_content . '</td>';
+			$cells = $text_cell . $media_cell;
 		} else {
 			// Media first, then text (default left position).
-			$table_content .= '<td style="width: ' . $media_width . '%; padding: 10px; vertical-align: ' . $vertical_alignment . ';">' . $media_content . '</td>';
-			$table_content .= '<td style="width: ' . $text_width . '%; padding: 10px; vertical-align: ' . $vertical_alignment . ';">' . $text_content . '</td>';
+			$cells = $media_cell . $text_cell;
 		}
 
-		$table_content .= '</tr>';
-
-		return Table_Wrapper_Helper::render_table_wrapper( $table_content, $table_attrs );
-	}
-
-	/**
-	 * Fallback method to parse HTML content when innerBlocks are not available.
-	 *
-	 * @param string            $block_content Raw block content.
-	 * @param array             $block_attrs Block attributes.
-	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return string Rendered HTML.
-	 */
-	private function fallback_html_parsing( string $block_content, array $block_attrs, Rendering_Context $rendering_context ): string {
-		// Extract media content (preserving any link wrapper).
-		$media_content = '';
-		if ( preg_match( '/<figure[^>]*>.*?<\/figure>/s', $block_content, $matches ) ) {
-			$media_content = $matches[0];
-		}
-
-		// Extract the entire content area (everything between the content div).
-		$text_content = '';
-		if ( preg_match( '/<div[^>]*class="[^"]*wp-block-media-text__content[^"]*"[^>]*>(.*?)<\/div>/s', $block_content, $matches ) ) {
-			$text_content = $matches[1];
-		}
-
-		if ( empty( $media_content ) || empty( $text_content ) ) {
-			return $block_content; // Return original content if parsing fails.
-		}
-
-		// Build the email-friendly HTML structure using table layout.
-		return $this->build_email_layout( $media_content, $text_content, $block_attrs, $block_content, $rendering_context );
+		// Use render_cell = false to avoid wrapping in an extra <td>.
+		return Table_Wrapper_Helper::render_table_wrapper( $cells, $table_attrs, array(), array(), false );
 	}
 
 	/**

@@ -151,4 +151,43 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->media_renderer->render( $content, $parsed_media, $this->rendering_context );
 		$this->assertStringContainsString( 'wp-block-media-text editor-class-1 another-class', $rendered );
 	}
+
+	/**
+	 * Test it handles attachment linkDestination
+	 */
+	public function testItHandlesAttachmentLinkDestination(): void {
+		$parsed_media                             = $this->parsed_media;
+		$parsed_media['attrs']['linkDestination'] = 'attachment';
+		$parsed_media['attrs']['href']            = 'https://example.com/?attachment_id=123';
+
+		$rendered = $this->media_renderer->render( '', $parsed_media, $this->rendering_context );
+		$this->assertStringContainsString( 'href="https://example.com/?attachment_id=123"', $rendered );
+		$this->assertStringContainsString( 'Media content', $rendered );
+	}
+
+	/**
+	 * Test it handles media linkDestination
+	 */
+	public function testItHandlesMediaLinkDestination(): void {
+		$parsed_media                             = $this->parsed_media;
+		$parsed_media['attrs']['linkDestination'] = 'media';
+		$parsed_media['attrs']['href']            = 'https://example.com/image.jpg';
+
+		$rendered = $this->media_renderer->render( '', $parsed_media, $this->rendering_context );
+		$this->assertStringContainsString( 'href="https://example.com/image.jpg"', $rendered );
+		$this->assertStringContainsString( 'Media content', $rendered );
+	}
+
+	/**
+	 * Test it correctly extracts media from media column and ignores figures in text content
+	 */
+	public function testItIgnoresFiguresInTextContent(): void {
+		$parsed_media = $this->parsed_media;
+		// HTML with a figure in text content and proper media figure.
+		$parsed_media['innerHTML'] = '<figure class="wp-block-media-text__media"><img src="media-image.jpg" alt="Media Image" /></figure><div class="wp-block-media-text__content"><figure class="wp-block-image"><img src="text-image.jpg" alt="Text Image" /></figure><p>Text with image</p></div>';
+
+		$rendered = $this->media_renderer->render( '', $parsed_media, $this->rendering_context );
+		$this->assertStringContainsString( 'media-image.jpg', $rendered );
+		$this->assertStringNotContainsString( 'text-image.jpg', $rendered );
+	}
 }
