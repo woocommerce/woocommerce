@@ -132,6 +132,24 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/product/hoodie/' );
 
+		await test.step( 'increase and reduce quantity buttons work even when no variation is selected', async () => {
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of Hoodie'
+			);
+			await increaseQuantityButton.click();
+
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '2' );
+
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of Hoodie'
+			);
+			await reduceQuantityButton.click();
+
+			await expect( quantityInput ).toHaveValue( '1' );
+		} );
+
 		// The radio input is visually hidden and, thus, not clickable. That's
 		// why we need to select the <label> instead.
 		const logoNoOption = page.locator( 'label:has-text("No")' );
