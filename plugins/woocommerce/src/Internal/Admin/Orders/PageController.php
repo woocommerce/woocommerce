@@ -282,7 +282,7 @@ class PageController {
 				$post_type->cap->edit_posts,
 				$page_slug,
 				array( $this, 'output' ),
-				'dashicons-list-view',
+				'dashicons-text-page',
 				56
 			);
 
