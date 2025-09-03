@@ -1255,7 +1255,7 @@ describe( 'Address Suggestions Component', () => {
 			);
 		} );
 
-		test( 'should clear branding HTML when suggestions are hidden', async () => {
+		test( 'should hide branding HTML when suggestions are hidden', async () => {
 			// Show suggestions first
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
@@ -1271,6 +1271,7 @@ describe( 'Address Suggestions Component', () => {
 			expect( brandingElement.innerHTML ).toBe(
 				'<div class="provider-branding">Powered by Test Provider</div>'
 			);
+			expect( brandingElement.style.display ).toBe( 'block' );
 
 			// Hide suggestions
 			billingAddressInput.value = 'xy';
@@ -1280,7 +1281,9 @@ describe( 'Address Suggestions Component', () => {
 			brandingElement = suggestionsContainer.querySelector(
 				'.woocommerce-address-autocomplete-branding'
 			);
-			expect( brandingElement.innerHTML ).toBe( '' );
+			// Element should still exist but be hidden
+			expect( brandingElement ).toBeTruthy();
+			expect( brandingElement.style.display ).toBe( 'none' );
 		} );
 
 		test( 'should not create branding element when provider has no branding_html', async () => {
@@ -1356,6 +1359,36 @@ describe( 'Address Suggestions Component', () => {
 			expect( secondBrandingElement.innerHTML ).toBe(
 				'<div class="provider-branding">Powered by Test Provider</div>'
 			);
+		} );
+
+		test( 'should remove branding element when country changes', async () => {
+			// Show suggestions first
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const suggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			let brandingElement = suggestionsContainer.querySelector(
+				'.woocommerce-address-autocomplete-branding'
+			);
+			expect( brandingElement ).toBeTruthy();
+
+			// Change country
+			const billingCountry = document.getElementById( 'billing_country' );
+			const frOption = document.createElement( 'option' );
+			frOption.value = 'FR';
+			billingCountry.appendChild( frOption );
+			billingCountry.value = 'FR';
+			billingCountry.dispatchEvent( new Event( 'change' ) );
+
+			// Branding element should be removed completely
+			brandingElement = suggestionsContainer.querySelector(
+				'.woocommerce-address-autocomplete-branding'
+			);
+			expect( brandingElement ).toBeFalsy();
 		} );
 
 		test( 'should display branding HTML for both billing and shipping', async () => {
