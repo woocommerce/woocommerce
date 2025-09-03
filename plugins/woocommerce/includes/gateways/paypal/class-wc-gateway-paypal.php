@@ -177,7 +177,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
 
 			add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
-			add_action( 'woocommerce_paypal_show_legacy_settings', array( $this, 'should_show_legacy_settings' ) );
 
 			// Hook for plugin upgrades.
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
@@ -444,10 +443,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function maybe_remove_fields( $form_fields ) {
-		// Additional details are added to the receiver email when subscriptions are enabled.
-		// We don't need this for Orders v2.
+		// Remove legacy setting fiels when using Orders v2.
 		if ( $this->should_use_orders_v2() ) {
-			unset( $form_fields['receiver_email'] );
+			foreach ( $form_fields as $key => $field ) {
+				if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
+					unset( $form_fields[ $key ] );
+				}
+			}
 		}
 
 		if ( ! $this->should_use_orders_v2() ) {
@@ -746,7 +748,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// We need a Jet be able to send authenticated requests to the proxy.
+		// We need a Jetpack connection to be able to send authenticated requests to the proxy.
 		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
 		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
 			return false;
@@ -781,16 +783,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Whether to show legacy settings. Hooked into the
-	 * `woocommerce_paypal_show_legacy_settings` filter.
-	 *
-	 * @return bool
-	 */
-	public function should_show_legacy_settings() {
-		return ! $this->should_use_orders_v2();
-	}
-
-	/**
 	 * Whether the Transact onboarding is complete.
 	 *
 	 * @return bool
@@ -805,6 +797,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function set_transact_onboarding_complete() {
+		if ( $this->transact_onboarding_complete ) {
+			return;
+		}
+
 		$this->update_option( 'transact_onboarding_complete', 'yes' );
 		$this->transact_onboarding_complete = true;
 	}
