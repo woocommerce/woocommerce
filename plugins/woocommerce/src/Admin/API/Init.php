@@ -174,24 +174,24 @@ class Init {
 
 			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
+		}
 
-			$controllers = array_merge( $analytics_controllers, $controllers );
+		$controllers = array_merge( $analytics_controllers, $controllers );
 
-			if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
-				/**
-				 * Filter for the WooCommerce Admin REST controllers.
-				 *
-				 * @param array $controllers List of rest API controllers.
-				 *
-				 * @since 3.5.0
-				 */
-				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
-			}
+		if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
+			/**
+			 * Filter for the WooCommerce Admin REST controllers.
+			 *
+			 * @param array $controllers List of rest API controllers.
+			 *
+			 * @since 3.5.0
+			 */
+			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+		}
 
-			foreach ( $controllers as $controller ) {
-				$this->$controller = new $controller();
-				$this->$controller->register_routes();
-			}
+		foreach ( $controllers as $controller ) {
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
 		}
 	}
 
