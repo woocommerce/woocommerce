@@ -426,7 +426,7 @@ const { actions, state } = store<
 
 				// In grouped product children, we allow decreasing the value
 				// down to 0, even if the minimum value is greater than 0.
-				if ( productObject.type === 'grouped' && newValue < min ) {
+				if ( childProductId && newValue < min ) {
 					if ( currentValue > min ) {
 						newValue = min;
 					} else {
