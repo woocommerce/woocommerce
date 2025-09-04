@@ -179,6 +179,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$settings          = $this->get_settings_general_instance()->get_settings_for_section( '' );
 		$settings_by_id    = array_column( $settings, null, 'id' );
 		$valid_setting_ids = array_keys( $settings_by_id );
+		$validated_settings = array();
 
 		// Process each setting in the payload.
 		foreach ( $params as $setting_id => $setting_value ) {
@@ -201,8 +202,13 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				return $validation_result;
 			}
 
-			// Update the setting.
-			$update_result = update_option( $setting_id, $sanitized_value );
+			// Store validated values first
+			$validated_settings[ $setting_id ] = $sanitized_value;
+		}
+
+		// After validation loop, update all settings
+		foreach ( $validated_settings as $setting_id => $value ) {
+			$update_result = update_option( $setting_id, $value );
 			if ( $update_result ) {
 				$updated_settings[] = $setting_id;
 			}
