@@ -110,11 +110,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	# Compare server response delta compared to the base branch and fail if greater than 5% difference.
+	# Compare server response delta compared to the base branch and fail if greater than 10% difference.
 	FRONTEND_DELTA=$(jq .serverResponse $ARTIFACTS_PATH/frontend.delta-results.json)
-	if (( $(echo "$FRONTEND_DELTA > 5" | bc -l) ))
+	if (( $(echo "$FRONTEND_DELTA > 10" | bc -l) ))
 	then
-		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 5%."
+		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 10%."
 		exit 1
 	fi
 

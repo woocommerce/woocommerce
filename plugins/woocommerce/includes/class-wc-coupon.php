@@ -543,10 +543,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param string $discount_type Discount type.
 	 */
 	public function set_discount_type( $discount_type ) {
+		$this->set_discount_type_core( $discount_type, true );
+	}
+
+	/**
+	 * Set discount type, optionally disabling the type verification.
+	 *
+	 * @since 10.3.0
+	 * @param string $discount_type Discount type.
+	 * @param bool   $verify_discount_type Whether to verify if the discount type is valid.
+	 */
+	private function set_discount_type_core( $discount_type, bool $verify_discount_type ) {
 		if ( 'percent_product' === $discount_type ) {
 			$discount_type = 'percent'; // Backwards compatibility.
 		}
-		if ( ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
+		if ( $verify_discount_type && ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'discount_type', $discount_type );
@@ -1267,7 +1278,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		$this->set_id( $info[0] ?? 0 );
 		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type( $info[2] ?? 'fixed_cart' );
+		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
 		$this->set_amount( $info[3] ?? 0 );
 		$this->set_free_shipping( $info[4] ?? false );
 	}
