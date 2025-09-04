@@ -98,28 +98,23 @@ Create a JavaScript file that implements the client-side provider logic.
 
 #### Provider Object API
 
-### Description
-
-The provider object passed to `registerAddressAutocompleteProvider` registers a new address provider for the checkout process.
-
 ### Parameters
 
 - _id_ `string` - Unique identifier that must match the server-side provider ID.
 - _canSearch_ `function` - Function to determine if the provider supports searching in a given country.
-  - Parameters:
-    - _country_ `string` - Two-letter country code (e.g., 'US', 'GB').
-  - Returns: `boolean` - Whether the provider supports this country.
+    - Parameters:
+        - _country_ `string` - Two-letter country code (e.g., 'US', 'GB').
+    - Returns: `boolean` - Whether the provider supports this country.
 - _search_ `function` - Asynchronous function to search for address suggestions.
-  - Parameters:
-    - _query_ `string` - The text entered by the user (minimum 3 characters).
-    - _country_ `string` - Two-letter country code of the selected country.
-    - _type_ `string` - Address type, either 'billing' or 'shipping'.
-  - Returns: `Promise<Array>` - Promise resolving to array of suggestion objects.
+    - Parameters:
+        - _query_ `string` - The text entered by the user (minimum 3 characters).
+        - _country_ `string` - Two-letter country code of the selected country.
+        - _type_ `string` - Address type, either 'billing' or 'shipping'.
+    - Returns: `Promise<Array>` - Promise resolving to an array of suggestion objects.
 - _select_ `function` - Asynchronous function to retrieve complete address details.
-  - Parameters:
-    - _addressId_ `string` - The ID of the selected suggestion.
-  - Returns: `Promise<Object|null>` - Promise resolving to address object or null on error.
-
+    - Parameters:
+        - _addressId_ `string` - The ID of the selected suggestion.
+    - Returns: `Promise<Object|null>` - Promise resolving to an address object or null on error.
 ### Suggestion Object Format
 
 The `search` function must return suggestion objects with the following structure:
