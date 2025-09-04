@@ -19,7 +19,7 @@ class ControllerTests extends \WP_Test_REST_TestCase {
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
-		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+		$wp_rest_server->dispatch( new \WP_REST_Request( 'GET', '/' ) );
 	}
 
 	/**
