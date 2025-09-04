@@ -38,7 +38,9 @@ const data = JSON.stringify( {
 				Object.entries( performanceResults[ index ][ hash ] ?? {} ).map(
 					( [ key, value ] ) => [
 						metricsPrefix + key,
-						typeof value === 'object' ? value.q50 : value,
+						typeof value === 'object'
+							? value.q50
+							: Number( value ).toFixed( 3 ),
 					]
 				)
 			),
@@ -52,7 +54,9 @@ const data = JSON.stringify( {
 					performanceResults[ index ][ baseHash ] ?? {}
 				).map( ( [ key, value ] ) => [
 					metricsPrefix + key,
-					typeof value === 'object' ? value.q50 : value,
+					typeof value === 'object'
+						? value.q50
+						: Number( value ).toFixed( 3 ),
 				] )
 			),
 		};
