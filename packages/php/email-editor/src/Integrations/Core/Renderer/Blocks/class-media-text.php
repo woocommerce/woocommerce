@@ -84,9 +84,8 @@ class Media_Text extends Abstract_Block_Renderer {
 		$media_width        = $this->get_media_width_from_attributes( $block_attrs );
 		$text_width         = 100 - $media_width; // Text takes the remaining width.
 
-		// Handle image linking for both "media" and "attachment" linkDestination types.
-		$link_destination = $block_attrs['linkDestination'] ?? '';
-		if ( in_array( $link_destination, array( 'media', 'attachment' ), true ) && ! empty( $block_attrs['href'] ) ) {
+		// Handle image linking for any linkDestination type that has an href.
+		if ( ! empty( $block_attrs['href'] ) ) {
 			$media_content = $this->wrap_media_with_link( $media_content, $block_attrs['href'] );
 		}
 
