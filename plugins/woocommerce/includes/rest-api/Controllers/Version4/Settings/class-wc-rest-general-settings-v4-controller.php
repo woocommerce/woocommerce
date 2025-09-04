@@ -529,13 +529,25 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'title'      => 'general_settings',
 			'type'       => 'object',
 			'properties' => array(
-				'id'     => array(
+				'id'          => array(
 					'description' => __( 'Unique identifier for the settings group.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'groups' => array(
+				'title'       => array(
+					'description' => __( 'Settings title.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'description' => array(
+					'description' => __( 'Settings description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'groups'      => array(
 					'description' => __( 'Collection of setting groups.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
