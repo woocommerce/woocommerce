@@ -77,6 +77,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 		title "##[group]Benchmarking baseline"
 		# This one is important: we run the same tests in the same state as we did at head benchmarking.
+		echo "Switch benchmarking resources to $GITHUB_SHA so we run the same benchmarks"
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce/tests)
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../.github)
