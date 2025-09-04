@@ -26,43 +26,38 @@ const performanceResults = resultsFiles.map( ( { file } ) =>
 	JSON.parse( fs.readFileSync( path.join( ARTIFACTS_PATH, file ), 'utf8' ) )
 );
 
-const data = new TextEncoder().encode(
-	JSON.stringify( {
-		branch,
-		hash,
-		baseHash,
-		timestamp,
-		metrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
-			return {
-				...result,
-				...Object.fromEntries(
-					Object.entries(
-						performanceResults[ index ][ hash ] ?? {}
-					).map( ( [ key, value ] ) => [
+const data = JSON.stringify( {
+	branch,
+	hash,
+	baseHash,
+	timestamp,
+	metrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
+		return {
+			...result,
+			...Object.fromEntries(
+				Object.entries( performanceResults[ index ][ hash ] ?? {} ).map(
+					( [ key, value ] ) => [
 						metricsPrefix + key,
 						typeof value === 'object' ? value.q50 : value,
-					] )
-				),
-			};
-		}, {} ),
-		baseMetrics: resultsFiles.reduce(
-			( result, { metricsPrefix }, index ) => {
-				return {
-					...result,
-					...Object.fromEntries(
-						Object.entries(
-							performanceResults[ index ][ baseHash ] ?? {}
-						).map( ( [ key, value ] ) => [
-							metricsPrefix + key,
-							typeof value === 'object' ? value.q50 : value,
-						] )
-					),
-				};
-			},
-			{}
-		),
-	} )
-);
+					]
+				)
+			),
+		};
+	}, {} ),
+	baseMetrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
+		return {
+			...result,
+			...Object.fromEntries(
+				Object.entries(
+					performanceResults[ index ][ baseHash ] ?? {}
+				).map( ( [ key, value ] ) => [
+					metricsPrefix + key,
+					typeof value === 'object' ? value.q50 : value,
+				] )
+			),
+		};
+	}, {} ),
+} );
 
 const options = {
 	hostname: 'codehealth.vercel.app',
