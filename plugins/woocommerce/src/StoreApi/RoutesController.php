@@ -166,6 +166,5 @@ class RoutesController {
 		 * @since 10.3.0
 		 */
 		do_action( 'woocommerce_' . $namespace . '_rest_namespace_routes_registered' );
-
 	}
 }
