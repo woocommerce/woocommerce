@@ -34,7 +34,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		// Create a user with permissions.
 		$this->user_id = $this->factory->user->create(
 			array(
-				'role' => 'manage_woocommerce',
+				'role' => 'shop_manager',
 			)
 		);
 	}
