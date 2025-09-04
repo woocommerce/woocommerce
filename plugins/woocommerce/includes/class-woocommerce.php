@@ -233,6 +233,17 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Get the WooCommerce version.
+	 *
+	 * @since 10.3.0
+	 *
+	 * @return string The WooCommerce version.
+	 */
+	public function stable_version(): string {
+		return explode( '-', $this->version, 2 )[0];
+	}
+
+	/**
 	 * WooCommerce Constructor.
 	 */
 	public function __construct() {

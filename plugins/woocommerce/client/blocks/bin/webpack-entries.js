@@ -335,10 +335,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
-
-		// Templates
-		'wc-blocks-classic-template-revert-button-style':
-			'./assets/js/templates/revert-button/index.tsx',
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
@@ -382,10 +378,6 @@ const entries = {
 			'./assets/js/extensions/google-analytics/index.ts',
 		'wc-shipping-method-pickup-location':
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
-	},
-	editor: {
-		'wc-blocks-classic-template-revert-button':
-			'./assets/js/templates/revert-button/index.tsx',
 	},
 	cartAndCheckoutFrontend: {
 		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),

@@ -35,6 +35,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			$this->id             = 'customer_pos_completed_order';
 			$this->customer_email = true;
 			$this->title          = __( 'POS completed order', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-pos-completed-order.php';
 			$this->template_plain = 'emails/plain/customer-pos-completed-order.php';
 			$this->placeholders   = array(

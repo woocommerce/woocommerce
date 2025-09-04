@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Display warning message when user clicks on "Preview in new tab" without saving the edited changes
