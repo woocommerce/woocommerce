@@ -60,6 +60,8 @@ export type ProductData = {
 	};
 };
 
+type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
+
 export type Store = {
 	state: {
 		errorMessages?: {
@@ -74,8 +76,14 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: ClientCartItem ) => void;
-		batchAddCartItems: ( items: ClientCartItem[] ) => void;
+		addCartItem: (
+			args: ClientCartItem,
+			options?: CartUpdateOptions
+		) => void;
+		batchAddCartItems: (
+			items: ClientCartItem[],
+			options?: CartUpdateOptions
+		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -279,12 +287,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*addCartItem( {
-				id,
-				quantity,
-				variation,
-				updateOptimistically = true,
-			}: OptimisticCartItem ) {
+			*addCartItem(
+				{
+					id,
+					quantity,
+					variation,
+					updateOptimistically = true,
+				}: ClientCartItem,
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -350,11 +361,13 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						json,
-						quantityChanges
-					);
+					const infoNotices = showCartUpdatesNotices
+						? getInfoNoticesFromCartUpdates(
+								state.cart,
+								json,
+								quantityChanges
+						  )
+						: [];
 					const errorNotices = json.errors.map( generateErrorNotice );
 					yield actions.updateNotices(
 						[ ...infoNotices, ...errorNotices ],
@@ -381,7 +394,10 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*batchAddCartItems( items: OptimisticCartItem[] ) {
+			*batchAddCartItems(
+				items: ClientCartItem[],
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
@@ -481,11 +497,13 @@ const { state, actions } = store< Store >(
 							successfulResponses.length - 1
 						]?.body as Cart;
 
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							state.cart,
-							lastSuccessfulCartResponse,
-							quantityChanges
-						);
+						const infoNotices = showCartUpdatesNotices
+							? getInfoNoticesFromCartUpdates(
+									state.cart,
+									lastSuccessfulCartResponse,
+									quantityChanges
+							  )
+							: [];
 
 						// Generate notices for any error that successful
 						// responses may contain.

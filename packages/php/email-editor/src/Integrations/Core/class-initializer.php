@@ -23,6 +23,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_It
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Links;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Table;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Text;
 
 /**
@@ -49,6 +50,7 @@ class Initializer {
 		'core/social-links',
 		'core/site-logo',
 		'core/site-title',
+		'core/table',
 	);
 
 	/**
@@ -181,6 +183,9 @@ class Initializer {
 				break;
 			case 'core/social-links':
 				$renderer = new Social_Links();
+				break;
+			case 'core/table':
+				$renderer = new Table();
 				break;
 			default:
 				$renderer = new Fallback();
