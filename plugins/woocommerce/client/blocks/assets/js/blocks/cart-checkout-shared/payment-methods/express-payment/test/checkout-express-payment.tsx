@@ -65,6 +65,10 @@ jest.mock( '@woocommerce/settings', () => {
 	};
 } );
 
+jest.mock( '@wordpress/editor', () => ( {
+	store: {},
+} ) );
+
 const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
 
 describe( 'CheckoutExpressPayment', () => {

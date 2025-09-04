@@ -15,19 +15,22 @@ import {
 	Spinner,
 } from '@woocommerce/blocks-components';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 interface PlaceOrderButtonProps {
-	label: string;
-	fullWidth?: boolean;
+	label: React.ReactNode;
 	showPrice?: boolean;
 	priceSeparator?: string;
 }
 
 const PlaceOrderButton = ( {
 	label,
-	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
-}: PlaceOrderButtonProps ): JSX.Element => {
+}: PlaceOrderButtonProps ) => {
 	const {
 		onSubmit,
 		isCalculating,
@@ -39,44 +42,10 @@ const PlaceOrderButton = ( {
 	const { cartTotals, cartIsLoading } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
-	const buttonLabel = (
-		<div
-			className={
-				'wc-block-components-checkout-place-order-button__text'
-			}
-		>
-			{ label }
-			{ showPrice && (
-				<>
-					<style>
-						{ `.wp-block-woocommerce-checkout-actions-block {
-							.wc-block-components-checkout-place-order-button__separator {
-								&::after {
-									content: "${ priceSeparator }";
-								}
-							}
-						}` }
-					</style>
-					<div className="wc-block-components-checkout-place-order-button__separator" />
-					<div className="wc-block-components-checkout-place-order-button__price">
-						<FormattedMonetaryAmount
-							value={ cartTotals.total_price }
-							currency={ totalsCurrency }
-						/>
-					</div>
-				</>
-			) }
-		</div>
-	);
-
 	return (
 		<Button
 			className={ clsx(
 				'wc-block-components-checkout-place-order-button',
-				{
-					'wc-block-components-checkout-place-order-button--full-width':
-						fullWidth,
-				},
 				{
 					'wc-block-components-checkout-place-order-button--loading':
 						waitingForProcessing || waitingForRedirect,
@@ -98,7 +67,33 @@ const PlaceOrderButton = ( {
 					icon={ check }
 				/>
 			) }
-			{ buttonLabel }
+			<div
+				className={
+					'wc-block-components-checkout-place-order-button__text'
+				}
+			>
+				{ label }
+				{ showPrice && (
+					<>
+						<style>
+							{ `.wp-block-woocommerce-checkout-actions-block {
+							.wc-block-components-checkout-place-order-button__separator {
+								&::after {
+									content: "${ priceSeparator }";
+								}
+							}
+						}` }
+						</style>
+						<div className="wc-block-components-checkout-place-order-button__separator" />
+						<div className="wc-block-components-checkout-place-order-button__price">
+							<FormattedMonetaryAmount
+								value={ cartTotals.total_price }
+								currency={ totalsCurrency }
+							/>
+						</div>
+					</>
+				) }
+			</div>
 		</Button>
 	);
 };

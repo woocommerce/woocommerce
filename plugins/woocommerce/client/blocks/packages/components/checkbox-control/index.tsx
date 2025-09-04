@@ -12,9 +12,9 @@ import { forwardRef } from '@wordpress/element';
 import './style.scss';
 
 export type CheckboxControlProps = {
-	label?: string | React.ReactNode;
+	label?: ReactNode;
 	onChange: ( value: boolean ) => void;
-	children?: ReactNode | null | undefined;
+	children?: ReactNode;
 	hasError?: boolean;
 	errorId?: string;
 	errorMessage?: string;
@@ -74,7 +74,7 @@ export const CheckboxControl = forwardRef<
 						className="wc-block-components-checkbox__input"
 						type="checkbox"
 						onChange={ ( event ) =>
-							onChange( event.target.checked )
+							onChange?.( event.target.checked )
 						}
 						aria-invalid={ hasError === true }
 						checked={ checked }

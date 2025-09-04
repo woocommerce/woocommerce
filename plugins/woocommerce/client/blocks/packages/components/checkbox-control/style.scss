@@ -2,7 +2,6 @@
 	@include reset-color();
 	@include reset-typography();
 	line-height: 0;
-	margin-top: $gap;
 
 	// Validated checkbox is set to grid because we need to display the validation error below the checkbox, the flex
 	// layout doesn't allow for that without extra markup.
@@ -36,6 +35,9 @@
 		box-sizing: border-box;
 		height: 20px;
 		width: 20px;
+		// prevents input from shrinking when text next to it takes too much space
+		// to fit within the available width of the page
+		min-width: 20px;
 		margin: 0;
 		overflow: hidden;
 		position: static;
