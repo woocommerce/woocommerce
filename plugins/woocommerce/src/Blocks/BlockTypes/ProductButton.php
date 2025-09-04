@@ -48,6 +48,7 @@ class ProductButton extends AbstractBlock {
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
 		wp_enqueue_script( 'wp-a11y' );
+
 		if ( wp_is_block_theme() ) {
 			add_action(
 				'wp_enqueue_scripts',

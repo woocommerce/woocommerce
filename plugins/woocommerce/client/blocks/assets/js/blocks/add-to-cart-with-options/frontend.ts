@@ -404,7 +404,6 @@ const { actions, state } = store<
 					dispatchChangeEvent( inputElement );
 
 					const { messages } = getConfig( 'woocommerce' );
-
 					wp?.a11y?.speak( messages.quantityIncreasedText, 'polite' );
 				}
 			},
@@ -457,7 +456,6 @@ const { actions, state } = store<
 					dispatchChangeEvent( inputElement );
 
 					const { messages } = getConfig( 'woocommerce' );
-
 					wp?.a11y?.speak( messages.quantityDecreasedText, 'polite' );
 				}
 			},
