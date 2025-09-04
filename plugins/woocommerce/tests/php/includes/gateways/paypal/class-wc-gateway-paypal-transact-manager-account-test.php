@@ -193,7 +193,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_valid_merchant_account_cache' )
 		);
 
-		$this->assertEquals( $this->return_valid_merchant_account_cache(), $result );
+		$expected_merchant_account = $this->return_valid_merchant_account_cache();
+		$this->assertEquals( $expected_merchant_account['account'], $result );
 	}
 
 	/**
@@ -275,7 +276,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_valid_provider_account_cache' )
 		);
 
-		$this->assertEquals( $this->return_valid_provider_account_cache(), $result );
+		$expected_provider_account = $this->return_valid_provider_account_cache();
+		$this->assertEquals( $expected_provider_account['account'], $result );
 	}
 
 	/**
