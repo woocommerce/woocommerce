@@ -33,7 +33,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		git fetch --depth=1 --no-tags origin trunk
 		BASE_SHA=$(git rev-parse origin/trunk)
 
-		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
+		BASE_SHA=87134be3310babe89a1e7c263f07d2b400bbc41b
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
