@@ -8,13 +8,6 @@ jQuery(function ($) {
 		}
 
 		const buttons = paypal.Buttons( {
-			style: {
-				layout: 'vertical',
-				color: 'gold',
-				shape: 'rect',
-				label: 'paypal'
-			},
-
 			async createOrder() {
 				// TODO: Add createOrder logic here
 			},
