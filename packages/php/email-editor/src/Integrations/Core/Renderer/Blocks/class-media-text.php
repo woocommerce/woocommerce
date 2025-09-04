@@ -55,10 +55,10 @@ class Media_Text extends Abstract_Block_Renderer {
 	 * @return string Media HTML content or empty string if not found.
 	 */
 	private function extract_media_from_html( string $block_content ): string {
-		// Extract media content (preserving any link wrapper).
+		// Extract inner content from figure element (removing figure wrapper for email compatibility).
 		$media_content = '';
-		if ( preg_match( '/<figure[^>]*class="[^"]*\bwp-block-media-text__media\b[^"]*"[^>]*>.*?<\/figure>/s', $block_content, $matches ) ) {
-			$media_content = $matches[0];
+		if ( preg_match( '/<figure[^>]*class="[^"]*\bwp-block-media-text__media\b[^"]*"[^>]*>(.*?)<\/figure>/s', $block_content, $matches ) ) {
+			$media_content = trim( $matches[1] );
 		}
 
 		return $media_content;
@@ -115,7 +115,7 @@ class Media_Text extends Abstract_Block_Renderer {
 			'valign' => $vertical_alignment,
 		);
 		$text_cell_attrs  = array(
-			'style'  => sprintf( 'width: %d%%; padding: 10px; vertical-align: %s;', $text_width, $vertical_alignment ),
+			'style'  => sprintf( 'width: %d%%; padding: 0 8%%; vertical-align: %s;', $text_width, $vertical_alignment ),
 			'valign' => $vertical_alignment,
 		);
 
@@ -175,7 +175,7 @@ class Media_Text extends Abstract_Block_Renderer {
 	/**
 	 * Wrap media content with a link if it's not already wrapped.
 	 *
-	 * @param string $media_content The media content (figure element).
+	 * @param string $media_content The media content (inner content from figure element).
 	 * @param string $href The URL to link to.
 	 * @return string Media content wrapped with link.
 	 */
@@ -185,7 +185,7 @@ class Media_Text extends Abstract_Block_Renderer {
 			return $media_content;
 		}
 
-		// Wrap the figure element with a link.
+		// Wrap the media content with a link.
 		return '<a href="' . esc_url( $href ) . '">' . $media_content . '</a>';
 	}
 }
