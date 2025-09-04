@@ -442,7 +442,7 @@ const { actions, state } = store<
 					if (
 						( Number.isNaN( event.target.valueAsNumber ) ||
 							event.target.valueAsNumber === 0 ) &&
-						productObject?.type === 'grouped'
+						childProductId
 					) {
 						actions.setQuantity( 0 );
 						if ( Number.isNaN( event.target.valueAsNumber ) ) {
