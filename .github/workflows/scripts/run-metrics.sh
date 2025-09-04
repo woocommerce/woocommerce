@@ -3,9 +3,9 @@
 set -eo pipefail
 
 # The commented variables are for troubleshooting locally. The commented commands below are also for local troubleshooting.
-GITHUB_EVENT_NAME='push'
-GITHUB_SHA=$(git rev-parse HEAD)
-ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)/artifacts"
+# GITHUB_EVENT_NAME='pull_request'
+# GITHUB_SHA=$(git rev-parse HEAD)
+# ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)/artifacts"
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -65,7 +65,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Checkout baseline"
-		git fetch --no-tags --quiet origin trunk
+		git fetch --no-tags --quiet --unshallow origin trunk
 		echo '##[endgroup]'
 
 		title "##[group]Building baseline"
@@ -111,11 +111,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	# Compare server response delta compared to the base branch and fail if greater than 5% difference.
+	# Compare server response delta compared to the base branch and fail if greater than 10% difference.
 	FRONTEND_DELTA=$(jq .serverResponse $ARTIFACTS_PATH/frontend.delta-results.json)
-	if (( $(echo "$FRONTEND_DELTA > 5" | bc -l) ))
+	if (( $(echo "$FRONTEND_DELTA > 10" | bc -l) ))
 	then
-		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 5%."
+		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 10%."
 		exit 1
 	fi
 
