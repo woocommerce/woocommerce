@@ -123,7 +123,7 @@ class Init {
 		 *
 		 * @since 10.3.0
 		 */
-		do_action('woocommerce_wc-admin_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		do_action( 'woocommerce_wc-admin_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -207,7 +207,7 @@ class Init {
 		 *
 		 * @since 10.3.0
 		 */
-		do_action('woocommerce_wc-analytics_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		do_action( 'woocommerce_wc-analytics_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
