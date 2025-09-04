@@ -17,6 +17,7 @@
 		flex-direction: column;
 		gap: $gap-smallest;
 		font-style: normal;
+		margin: 0;
 
 		.wc-block-components-address-card__address-section {
 			&--primary {
@@ -25,6 +26,10 @@
 
 			&--secondary {
 				color: $universal-body-low-emphasis;
+
+				.has-dark-controls & {
+					color: $input-placeholder-dark;
+				}
 			}
 		}
 	}

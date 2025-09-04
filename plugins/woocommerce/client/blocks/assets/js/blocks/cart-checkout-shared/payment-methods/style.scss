@@ -27,30 +27,30 @@
 		border-width: 1px;
 	}
 
-	.wc-block-components-radio-control__option::after {
-		border-width: 0;
-	}
-
-	.wc-block-components-radio-control__label {
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-		border-width: 0;
-		// This label uses the font-regular-locked mixin in the base radio control
-		// component, which sets line-height to 20px. We're increasing it to 24px
-		// to match the image size defined below and keep them vertically aligned.
-		// Alternatively, we could change the img size to 20px, but some extensions
-		// have hardcoded elements with 24px size already (note: extensions fully
-		// control the rendering of the label).
-		line-height: 24px;
-	}
-
-	.wc-block-components-radio-control__label img {
-		height: 24px;
-		max-height: 24px;
-		max-width: 100%;
-		object-fit: contain;
-		object-position: left;
+	.wc-block-components-radio-control-accordion-option {
+		.wc-block-components-radio-control__option::after {
+			border-width: 0;
+		}
+		.wc-block-components-radio-control__label {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			border-width: 0;
+			// This label uses the font-regular-locked mixin in the base radio control
+			// component, which sets line-height to 20px. We're increasing it to 24px
+			// to match the image size defined below and keep them vertically aligned.
+			// Alternatively, we could change the img size to 20px, but some extensions
+			// have hardcoded elements with 24px size already (note: extensions fully
+			// control the rendering of the label).
+			line-height: 24px;
+		}
+		.wc-block-components-radio-control__label img {
+			height: 24px;
+			max-height: 24px;
+			max-width: 100%;
+			object-fit: contain;
+			object-position: left;
+		}
 	}
 
 	.wc-block-components-radio-control.disable-radio-control {
@@ -76,11 +76,5 @@
 	&:empty,
 	&:has(> *:only-child:empty) {
 		display: none;
-	}
-}
-
-.wc-block-checkout__order-notes {
-	.wc-block-components-checkout-step__content {
-		padding-bottom: 0;
 	}
 }
