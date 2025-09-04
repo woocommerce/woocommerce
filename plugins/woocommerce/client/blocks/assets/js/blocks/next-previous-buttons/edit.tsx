@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
+import { isRTL } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
 	useBlockProps,
@@ -65,6 +66,10 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 		...shadowProps.style,
 	};
 
+	const rtl = isRTL();
+	const LeftComponent = rtl ? NextIcon : PrevIcon;
+	const RightComponent = rtl ? PrevIcon : NextIcon;
+
 	return (
 		<div { ...blockProps }>
 			<button
@@ -72,10 +77,10 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 				style={ buttonStyles }
 				disabled
 			>
-				<PrevIcon className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left" />
+				<LeftComponent className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left" />
 			</button>
 			<button className={ buttonClassName } style={ buttonStyles }>
-				<NextIcon className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right" />
+				<RightComponent className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right" />
 			</button>
 		</div>
 	);

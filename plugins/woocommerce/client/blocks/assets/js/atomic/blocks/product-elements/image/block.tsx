@@ -20,6 +20,7 @@ import {
 	isEmpty,
 	ProductResponseItem,
 } from '@woocommerce/types';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -141,7 +142,11 @@ const Image = ( {
 
 type Props = BlockAttributes &
 	Pick< ProductImageContext, 'imageId' > &
-	HTMLAttributes< HTMLDivElement > & { style?: Record< string, unknown > };
+	HTMLAttributes< HTMLDivElement > & {
+		isAdmin?: boolean;
+		product?: ProductResponseItem | ProductEntityResponse;
+		isResolving?: boolean;
+	};
 
 type LegacyProps = Props & {
 	product?: ProductResponseItem;
@@ -173,12 +178,19 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		showProductLink = true,
 		style,
 		width,
+		isAdmin,
+		product: productEntity,
+		isResolving,
 		...restProps
 	} = props;
 
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext( {
+		isAdmin,
+		product: productEntity,
+		isResolving,
+	} );
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	const showFullSize = imageSizing !== ImageSizing.THUMBNAIL;

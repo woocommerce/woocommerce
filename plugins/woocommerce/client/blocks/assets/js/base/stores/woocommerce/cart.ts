@@ -27,13 +27,40 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	name: string;
 	type: string;
+	updateOptimistically?: boolean;
 };
 
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 	variation?: SelectedAttributes[];
 };
+
+export type ProductData = {
+	price_html?: string;
+	image_id?: number;
+	availability?: string;
+	sku?: string;
+	weight?: string;
+	dimensions?: string;
+	min?: number;
+	max?: number;
+	step?: number;
+	variations?: {
+		[ variationId: number ]: {
+			price_html?: string;
+			image_id?: number;
+			availability?: string;
+			sku?: string;
+			weight?: string;
+			dimensions?: string;
+			min?: number;
+			max?: number;
+			step?: number;
+		};
+	};
+};
+
+type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
@@ -46,23 +73,17 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
-		products?: {
-			[ productId: number ]: {
-				price_html?: string;
-				availability?: string;
-				variations?: {
-					[ variationId: number ]: {
-						price_html?: string;
-						availability: string;
-					};
-				};
-			};
-		};
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: ClientCartItem ) => void;
-		batchAddCartItems: ( items: ClientCartItem[] ) => void;
+		addCartItem: (
+			args: ClientCartItem,
+			options?: CartUpdateOptions
+		) => void;
+		batchAddCartItems: (
+			items: ClientCartItem[],
+			options?: CartUpdateOptions
+		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -79,6 +100,11 @@ type QuantityChanges = {
 type BatchResponse = {
 	responses: ApiResponse< Cart >[];
 };
+
+// Guard to distinguish between optimistic and cart items.
+function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
+	return 'name' in item;
+}
 
 function isApiErrorResponse(
 	res: Response,
@@ -122,11 +148,15 @@ const getInfoNoticesFromCartUpdates = (
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
 			old.key &&
+			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key ) &&
 			! pendingDelete.includes( old.key )
 	);
 
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		if ( ! isCartItem( item ) ) {
+			return false;
+		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
 		return old
 			? ! pendingQuantity.includes( item.key ) &&
@@ -257,7 +287,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*addCartItem( { id, quantity, variation }: OptimisticCartItem ) {
+			*addCartItem(
+				{
+					id,
+					quantity,
+					variation,
+					updateOptimistically = true,
+				}: ClientCartItem,
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -286,13 +324,22 @@ const { state, actions } = store< Store >(
 
 				// Optimistically updates the number of items in the cart.
 				if ( item ) {
-					item.quantity = quantity;
-					if ( item.key )
+					if ( item.key ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
+					}
+					if ( updateOptimistically ) {
+						item.quantity = quantity;
+					}
 				} else {
-					item = { id, quantity, variation } as OptimisticCartItem;
-					state.cart.items.push( item );
+					item = {
+						id,
+						quantity,
+						variation,
+					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
+					if ( updateOptimistically ) {
+						state.cart.items.push( item );
+					}
 				}
 
 				// Updates the database.
@@ -314,11 +361,13 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						json,
-						quantityChanges
-					);
+					const infoNotices = showCartUpdatesNotices
+						? getInfoNoticesFromCartUpdates(
+								state.cart,
+								json,
+								quantityChanges
+						  )
+						: [];
 					const errorNotices = json.errors.map( generateErrorNotice );
 					yield actions.updateNotices(
 						[ ...infoNotices, ...errorNotices ],
@@ -345,7 +394,10 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*batchAddCartItems( items: OptimisticCartItem[] ) {
+			*batchAddCartItems(
+				items: ClientCartItem[],
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
@@ -417,11 +469,19 @@ const { state, actions } = store< Store >(
 
 					const json: BatchResponse = yield res.json();
 
-					// Checks if any of the responses contain an error.
-					json.responses?.forEach( ( response ) => {
-						if ( isApiErrorResponse( res, response ) )
-							throw generateError( response );
-					} );
+					const errorResponses = Array.isArray( json.responses )
+						? json.responses.filter(
+								( response ) =>
+									response.status < 200 ||
+									response.status >= 300
+						  )
+						: [];
+
+					if ( errorResponses.length > 0 ) {
+						throw generateError(
+							errorResponses[ 0 ].body as ApiErrorResponse
+						);
+					}
 
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
@@ -431,25 +491,19 @@ const { state, actions } = store< Store >(
 						  )
 						: [];
 
-					const errorResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status < 200 ||
-									response.status >= 300
-						  )
-						: [];
-
 					// Only update the cart and trigger events if there is at least one successful response.
 					if ( successfulResponses.length > 0 ) {
 						const lastSuccessfulCartResponse = successfulResponses[
 							successfulResponses.length - 1
 						]?.body as Cart;
 
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							state.cart,
-							lastSuccessfulCartResponse,
-							quantityChanges
-						);
+						const infoNotices = showCartUpdatesNotices
+							? getInfoNoticesFromCartUpdates(
+									state.cart,
+									lastSuccessfulCartResponse,
+									quantityChanges
+							  )
+							: [];
 
 						// Generate notices for any error that successful
 						// responses may contain.

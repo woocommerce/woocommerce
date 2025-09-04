@@ -87,17 +87,46 @@ $min-product-width: 150px;
 /**
  * Carousel layout
  */
+
 .is-product-collection-layout-carousel {
 	overflow-x: auto;
-	// TODO: Ultimately we'll hide the scrollbar as there will be arrows to navigate.
-	// For now we keep the scrollbar visible for testing purposes.
-	// scrollbar-width: none;
+	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
 	scroll-padding: 0 30%;
 	position: relative; // Create new stacking context
+	container-type: inline-size;
+	container-name: carousel;
 
 	.wc-block-product {
 		scroll-snap-align: center;
-		min-width: $min-product-width;
+		flex-basis: 0;
+		// Show 2 products in 85% of available space.
+		min-width: 42.5%;
+		max-width: 400px;
+
+		@container carousel (min-width: 600px) {
+			// Show 3 products in 85.5% of available space.
+			min-width: 28.5%;
+		}
+
+		@container carousel (min-width: 782px) {
+			// Show 3 products in 87% of available space.
+			min-width: 29%;
+		}
+
+		@container carousel (min-width: 960px) {
+			// Show 4 products in 88% of available space.
+			min-width: 22%;
+		}
+
+		@container carousel (min-width: 1280px) {
+			// Show 5 products in 90% of available space.
+			min-width: 18%;
+		}
+
+		@container carousel (min-width: 1440px) {
+			// Show 6 products in 90% of available space.
+			min-width: 15%;
+		}
 	}
 }

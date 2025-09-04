@@ -32,7 +32,7 @@ jobs:
                           repo: context.repo.repo,
                           username: username,
                       } );
-                      const contributor = ( permission === 'read' || permission === 'none' ) && username !== 'gglobalstep';
+                      const contributor = ( permission === 'read' || permission === 'none' ) && username !== 'gglobalstep' && username !== 'linear[bot]';
                       core.setOutput( 'contributor', contributor ? 'yes' : 'no' );
 
             - name: Add community label
@@ -79,7 +79,7 @@ jobs:
           with:
               config: '.github/automate-team-review-assignment-config.yml'
               GITHUB_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
-    
+
     add-testing-instructions-review-comment:
       name: Remind reviewers to also review the testing instructions and test coverage
       if: ${{ github.event.pull_request && github.event.action == 'review_requested' }}
@@ -129,14 +129,14 @@ jobs:
               body: |
                   ## Testing Guidelines
                   Hi ${{ env.REVIEWERS }} ${{ env.TEAMS }},
-                  
+
                   Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
-                  
+
                   **Reminder:** PR reviewers are required to document testing performed. This includes:
                   - 🖼️ **Screenshots or screen recordings**.
                   - 📝 **List of functionality tested / steps followed**.
                   - 🌐 **Site details** (environment attributes such as hosting type, plugins, theme, store size, store age, and relevant settings).
                   - 🔍 **Any analysis performed**, such as assessing potential impacts on environment attributes and other plugins, conducting performance profiling, or using LLM/AI-based analysis.
-                  
+
                   ⚠️ Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public issue.
               edit-mode: replace

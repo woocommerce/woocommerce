@@ -212,7 +212,7 @@ describe( 'CheckoutExpressPayment', () => {
 	} );
 
 	describe( 'Processing states', () => {
-		it( 'should add accessibility attributes when isProcessing', () => {
+		it( 'should add conditional accessibility attributes when isProcessing', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
 				isProcessing: true,
@@ -235,17 +235,20 @@ describe( 'CheckoutExpressPayment', () => {
 				'.wc-block-components-express-payment--checkout'
 			);
 
+			// Always present attributes
 			expect( expressPaymentContainer ).toHaveAttribute(
 				'aria-disabled',
 				'true'
 			);
 			expect( expressPaymentContainer ).toHaveAttribute(
-				'aria-busy',
-				'true'
-			);
-			expect( expressPaymentContainer ).toHaveAttribute(
 				'aria-live',
 				'polite'
+			);
+
+			// Conditional attributes (only present when processing)
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-busy',
+				'true'
 			);
 			expect( expressPaymentContainer ).toHaveAttribute(
 				'aria-label',
@@ -253,7 +256,7 @@ describe( 'CheckoutExpressPayment', () => {
 			);
 		} );
 
-		it( 'should add disabled class when express payment method is active', () => {
+		it( 'should add conditional accessibility attributes when express payment method is active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: false,
 				isProcessing: false,
@@ -276,7 +279,77 @@ describe( 'CheckoutExpressPayment', () => {
 			const expressPaymentContainer = document.querySelector(
 				'.wc-block-components-express-payment--checkout'
 			);
+
+			// Always present attributes
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-disabled',
+				'true'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-live',
+				'polite'
+			);
+
+			// Conditional attributes (only present when express payment method is active)
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-busy',
+				'true'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-label',
+				expect.stringContaining( 'Processing express checkout' )
+			);
+
+			// Should have disabled class
 			expect( expressPaymentContainer ).toHaveClass(
+				'wc-block-components-express-payment--disabled'
+			);
+		} );
+
+		it( 'should not have conditional accessibility attributes when not processing', () => {
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: false,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: false,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+			} );
+
+			render( <CheckoutExpressPayment /> );
+
+			const expressPaymentContainer = document.querySelector(
+				'.wc-block-components-express-payment--checkout'
+			);
+
+			// Always present attributes
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-disabled',
+				'false'
+			);
+			expect( expressPaymentContainer ).toHaveAttribute(
+				'aria-live',
+				'polite'
+			);
+
+			// Conditional attributes should NOT be present when not processing
+			expect( expressPaymentContainer ).not.toHaveAttribute(
+				'aria-busy'
+			);
+			expect( expressPaymentContainer ).not.toHaveAttribute(
+				'aria-label'
+			);
+
+			// Should not have disabled class
+			expect( expressPaymentContainer ).not.toHaveClass(
 				'wc-block-components-express-payment--disabled'
 			);
 		} );
@@ -311,7 +384,7 @@ describe( 'CheckoutExpressPayment', () => {
 			expect( titleSkeleton ).toHaveLength( 1 );
 		} );
 
-		it( 'should render 1 skeleton buttons when calculating a partial update', () => {
+		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
 			mockUseSelect.mockReturnValueOnce( {
 				isCalculating: true,
 				isProcessing: false,
@@ -339,6 +412,36 @@ describe( 'CheckoutExpressPayment', () => {
 			expect(
 				screen.queryByTestId( 'express-payment-methods' )
 			).not.toBeInTheDocument();
+		} );
+
+		it( 'should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
+			mockUseSelect.mockReturnValueOnce( {
+				isCalculating: true,
+				isProcessing: false,
+				isAfterProcessing: false,
+				isBeforeProcessing: false,
+				isComplete: false,
+				hasError: false,
+				availableExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+				expressPaymentMethodsInitialized: true,
+				isExpressPaymentMethodActive: true,
+				registeredExpressPaymentMethods: {
+					stripe: { name: 'stripe' },
+				},
+			} );
+
+			render( <CheckoutExpressPayment /> );
+
+			const buttonSkeletons = screen.queryAllByLabelText(
+				'Loading express payment method…'
+			);
+
+			expect( buttonSkeletons ).toHaveLength( 0 ); // No skeleton buttons should be rendered when express payment method is active
+			expect(
+				screen.queryByTestId( 'express-payment-methods' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {

@@ -3352,6 +3352,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				'selected'         => false,
 				'required'         => false,
 				'name'             => '',
+				'aria-label'       => false,
 				'id'               => '',
 				'class'            => '',
 				'show_option_none' => __( 'Choose an option', 'woocommerce' ),
@@ -3381,7 +3382,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . ( $args['aria-label'] ? '" aria-label="' . esc_attr( $args['aria-label'] ) : '' ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -4306,7 +4307,7 @@ function wc_set_hooked_blocks_version() {
 		return;
 	}
 
-	add_option( $option_name, WC()->version );
+	add_option( $option_name, WC()->stable_version() );
 }
 
 /**
@@ -4378,7 +4379,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
 	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
-		add_option( $option_name, WC()->version );
+		add_option( $option_name, WC()->stable_version() );
 	}
 }
 

@@ -1,0 +1,169 @@
+name: 'Release: Open Issue Warning'
+on:
+  schedule:
+    - cron: '0 18 * * *' # Every day at 18h UTC
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read
+  issues: read
+
+jobs:
+  check-upcoming-release-events:
+    name: Check for upcoming release events
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+      - name: Check for release events
+        id: check-upcoming-release-build
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const ical = require('node-ical');
+
+            const now = new Date();
+            const eventWindowInMs = 3 * 24 * 60 * 60 * 1000;  // 72 h window
+            // We exclude feature freezes for now since the release DRI does not need to build at this step.
+            const pattern = /^WooCommerce \d+\.\d+\s+(?!Feature Freeze).*$/i;
+
+            try {
+              const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
+
+              const upcomingReleaseEvents = Object.values(events)
+                .filter(e => {
+                  if (e.type !== 'VEVENT') return false;
+            
+                  if (!e.start) return false;
+            
+                  const startDate = new Date(e.start);
+                  if (isNaN(startDate.getTime())) return false;
+            
+                  const diff = startDate - now;
+                  if (diff < 0 || diff > eventWindowInMs) return false; // Must be between now and 72h from now
+            
+                  return pattern.test(e.summary || '');
+                })
+                .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+              if (upcomingReleaseEvents.length > 0) {
+                const date = upcomingReleaseEvents[0].start.toISOString();
+                const version = upcomingReleaseEvents[0].summary.match(/\d+\.\d+/)[0];
+                console.log(`Found Release event: ${upcomingReleaseEvents[0].summary}`);
+                console.log(`Date: ${date}`);
+                console.log(`Version: ${version}`);
+                core.setOutput('release-event-found', 'true');
+                core.setOutput('version', version);
+                core.setOutput('release-event-date', date);
+                core.setOutput('release-event-title', upcomingReleaseEvents[0].summary);
+              } else {
+                console.log(`No Code Freeze events found in the specified range.`);
+                core.setOutput('release-event-found', 'false');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+      - name: Build Slack Message with Open Milestoned Issues
+        id: get-milestone-items
+        if: ${{ steps.check-upcoming-release-build.outputs.release-event-found == 'true' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const version = '${{ steps.check-upcoming-release-build.outputs.version }}';
+            const milestone = `${version}.0`;
+            
+            console.log(`Searching for open issues and PRs in milestone: ${milestone}`);
+            
+            try {
+              // Search for issues in the milestone
+              const searchQuery = `milestone:"${milestone}" state:open repo:${context.repo.owner}/${context.repo.repo}`;
+            
+              const searchResults = await github.rest.search.issuesAndPullRequests({
+                q: searchQuery,
+                per_page: 20,
+                advanced_search: true
+              });
+            
+              console.log(`Found ${searchResults.data.total_count} open items in milestone ${milestone}`);
+            
+              if (searchResults.data.total_count === 0) {
+                core.setOutput('slack-message', '');
+                core.setOutput('has-items', 'false');
+                return;
+              }
+            
+              const items = [];
+            
+              // Process each item to get detailed information
+              for (const item of searchResults.data.items) {
+                let waitingOn = [];
+            
+                // Get assignees
+                if (item.assignees && item.assignees.length > 0) {
+                  waitingOn.push(...item.assignees.map(a => a.login));
+                }
+            
+                // For PRs, also get requested reviewers
+                if (item.pull_request) {
+                  try {
+                    const reviewers = await github.rest.pulls.listRequestedReviewers({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: item.number
+                    });
+            
+                    if (reviewers.data.users && reviewers.data.users.length > 0) {
+                      waitingOn.push(...reviewers.data.users.map(r => r.login));
+                    }
+                  } catch (error) {
+                    console.log(`Failed to get reviewers for PR #${item.number}: ${error.message}`);
+                  }
+                }
+            
+                const uniqueWaitingOn = [...new Set(waitingOn)];
+                const createdDate = new Date(item.created_at).toISOString().split('T')[0];
+                const author = item.user ? item.user.login : 'unknown';
+            
+                const waitingOnText = uniqueWaitingOn.length > 0 ? 
+                  `Waiting on ${uniqueWaitingOn.join(', ')}` : 
+                  'No assignees/reviewers';
+            
+                const itemUrl = item.pull_request 
+                  ? `https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${item.number}`
+                  : `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${item.number}`;
+
+                const formattedItem = `• [#${item.number}] <${itemUrl}|${item.title}> (${author})\n  Created ${createdDate} · ${waitingOnText}`;
+            
+                items.push(formattedItem);
+              }
+
+              const releaseEventTitle = '${{ steps.check-upcoming-release-build.outputs.release-event-title }}';
+              const releaseEventDate = '${{ steps.check-upcoming-release-build.outputs.release-event-date }}';
+              const formattedDate = new Date(releaseEventDate).toISOString().split('T')[0];
+            
+              // Build the complete Slack message
+              const slackMessage = [
+                `🚨 Milestone ${milestone} has ${searchResults.data.total_count} open items for ${releaseEventTitle} on ${formattedDate}\n`,
+                ...items
+              ].join('\n');
+            
+              core.setOutput('slack-message', slackMessage);
+              core.setOutput('has-items', 'true');
+              console.log(`slack-message: ${slackMessage}`);
+            
+            } catch (error) {
+              console.error(`Error fetching milestone items: ${error.message}`);
+              core.setFailed(`Failed to fetch milestone items: ${error.message}`);
+            }
+
+      - name: Send Slack Message
+        if: ${{ steps.get-milestone-items.outputs.has-items == 'true' }}
+        uses: archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517 # v2.10.1
+        env:
+          SLACK_MESSAGE: ${{ steps.get-milestone-items.outputs.slack-message }}
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-optional-unfurl_links: false
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-text: |
+            ${{ env.SLACK_MESSAGE }}

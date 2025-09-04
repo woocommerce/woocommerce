@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useRef, useEffect, RawHTML } from '@wordpress/element';
-import { sanitizeHTML } from '@woocommerce/utils';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { useDispatch } from '@wordpress/data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
