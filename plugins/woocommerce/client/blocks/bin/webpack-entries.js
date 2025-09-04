@@ -19,6 +19,9 @@ const blocks = {
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',
 	},
+	'add-to-cart-with-options-variation-description': {
+		customDir: 'add-to-cart-with-options/variation-description',
+	},
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
 	},
