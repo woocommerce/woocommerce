@@ -33,7 +33,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		git fetch --depth=1 --no-tags origin trunk
 		BASE_SHA=$(git rev-parse origin/trunk)
 
-		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
+		BASE_SHA=048f45a9cca9946fb76300e964391d6f2fa65099
 		# 048f45a9cca9946fb76300e964391d6f2fa65099 (Fix frontend metrics not being sent to codevitals (#55880))
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
