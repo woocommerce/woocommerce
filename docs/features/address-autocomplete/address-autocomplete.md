@@ -63,7 +63,6 @@ class Custom_Address_Provider extends WC_Address_Provider {
      */
     public function __construct() {
         // Initialize any API clients or configurations.
-        $this->api_key = get_option( 'custom_provider_api_key' );
     }
 }
 ```
