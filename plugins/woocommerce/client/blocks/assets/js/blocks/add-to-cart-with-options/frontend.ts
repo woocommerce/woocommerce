@@ -514,14 +514,18 @@ const { actions, state } = store<
 				const id =
 					productDataState.variationId || productDataState.productId;
 
-				const productObject = getProductData(
-					id,
-					availableVariations,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
-					return;
+				let productType = 'simple';
+				if ( productDataState.variationId ) {
+					productType = 'variation';
+				} else {
+					const productObject = getProductData(
+						id,
+						availableVariations,
+						selectedAttributes
+					);
+					if ( productObject ) {
+						productType = productObject.type;
+					}
 				}
 
 				const newQuantity = getNewQuantity(
@@ -540,7 +544,7 @@ const { actions, state } = store<
 						id,
 						quantity: newQuantity,
 						variation: selectedAttributes,
-						type: productObject.type,
+						type: productType,
 					},
 					{
 						showCartUpdatesNotices: false,
