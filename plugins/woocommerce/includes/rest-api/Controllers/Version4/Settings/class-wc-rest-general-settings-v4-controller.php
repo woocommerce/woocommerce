@@ -176,9 +176,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		}
 
 		// Get all general settings definitions.
-		$settings          = $this->get_settings_general_instance()->get_settings_for_section( '' );
-		$settings_by_id    = array_column( $settings, null, 'id' );
-		$valid_setting_ids = array_keys( $settings_by_id );
+		$settings           = $this->get_settings_general_instance()->get_settings_for_section( '' );
+		$settings_by_id     = array_column( $settings, null, 'id' );
+		$valid_setting_ids  = array_keys( $settings_by_id );
 		$validated_settings = array();
 
 		// Process each setting in the payload.
@@ -202,11 +202,11 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				return $validation_result;
 			}
 
-			// Store validated values first
+			// Store validated values first.
 			$validated_settings[ $setting_id ] = $sanitized_value;
 		}
 
-		// After validation loop, update all settings
+		// After validation loop, update all settings.
 		foreach ( $validated_settings as $setting_id => $value ) {
 			$update_result = update_option( $setting_id, $value );
 			if ( $update_result ) {
@@ -313,7 +313,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					return array_map( 'sanitize_text_field', $value );
 				}
 
-				// Handle empty values and string inputs
+				// Handle empty values and string inputs.
 				if ( empty( $value ) ) {
 					return array();
 				}
@@ -400,7 +400,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$setting_type = $setting['type'] ?? 'text';
 
 		// Skip certain settings that shouldn't be exposed via REST API.
-		// TODO: This is a temporary array until designs are finalized.
+		// This is a temporary array until designs are finalized.
 		$skip_settings = array(
 			'woocommerce_address_autocomplete_enabled',
 			'woocommerce_address_autocomplete_provider',
