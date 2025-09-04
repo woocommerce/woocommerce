@@ -228,7 +228,7 @@ const { actions, state } = store<
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productDataState.productId || 0,
+					childProductId || productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
@@ -259,7 +259,7 @@ const { actions, state } = store<
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productDataState.productId || 0,
+					childProductId || productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
@@ -287,9 +287,7 @@ const { actions, state } = store<
 
 				// If selected quantity is invalid, add an error.
 				const id =
-					productDataState.variationId ||
-					productDataState.productId ||
-					0;
+					productDataState.variationId || productDataState.productId;
 				const productObject = getProductData(
 					id,
 					context.availableVariations,
@@ -326,9 +324,7 @@ const { actions, state } = store<
 					];
 
 					idsToUpdate.forEach( ( id ) => {
-						if ( id ) {
-							context.quantity[ id ] = value;
-						}
+						context.quantity[ id ] = value;
 					} );
 				} else {
 					const id =
@@ -384,7 +380,7 @@ const { actions, state } = store<
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productDataState.productId || 0,
+					childProductId || productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
@@ -420,7 +416,7 @@ const { actions, state } = store<
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productDataState.productId || 0,
+					childProductId || productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
@@ -464,7 +460,7 @@ const { actions, state } = store<
 
 				let min = 1;
 				const productObject = getProductData(
-					childProductId || productDataState.productId || 0,
+					childProductId || productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
@@ -520,10 +516,6 @@ const { actions, state } = store<
 
 				const id =
 					productDataState.variationId || productDataState.productId;
-
-				if ( ! id ) {
-					return;
-				}
 
 				const productObject = getProductData(
 					id,

@@ -285,7 +285,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{ lock: universalLock }
 					);
 				const matchedVariationId = matchedVariation?.variation_id;
-				productDataActions.setVariationId( matchedVariationId ?? null );
+				if ( typeof matchedVariationId === 'number' ) {
+					productDataActions.setVariationId( matchedVariationId );
+				}
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
@@ -330,10 +332,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Let's not do anything if the user is typing in the input.
-				if (
-					ref === document.activeElement ||
-					! productDataState.productId
-				) {
+				if ( ref === document.activeElement ) {
 					return;
 				}
 
