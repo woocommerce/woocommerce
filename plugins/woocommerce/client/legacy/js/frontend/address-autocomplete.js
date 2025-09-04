@@ -523,7 +523,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							);
 						if ( ! brandingElement ) {
 							brandingElement = document.createElement( 'div' );
-							brandingElement.removeAttribute( 'aria-hidden' );
 							brandingElement.className =
 								'woocommerce-address-autocomplete-branding';
 							suggestionsContainer.appendChild( brandingElement );
@@ -532,6 +531,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						brandingElement.innerHTML =
 							serverProvider.branding_html;
 						brandingElement.style.display = 'block';
+						brandingElement.removeAttribute( 'aria-hidden' );
 					}
 				}
 
@@ -601,7 +601,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			);
 			if ( brandingElement ) {
 				brandingElement.style.display = 'none';
-				brandingElement.style.setAttribute( 'aria-hidden', true );
+				brandingElement.setAttribute( 'aria-hidden', 'true' );
 			}
 
 			suggestionsContainer.style.display = 'none';
