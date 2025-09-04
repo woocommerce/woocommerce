@@ -184,7 +184,6 @@ const TestOrLiveAccountStep = () => {
 							</div>
 							<Button
 								variant="secondary"
-								isBusy={ isContinueButtonLoading }
 								disabled={ isContinueButtonLoading }
 								onClick={ () => {
 									navigateToNextStep();

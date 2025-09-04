@@ -47,7 +47,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.2.0';
+	public $version = '10.3.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -230,6 +230,17 @@ final class WooCommerce {
 	 */
 	public function legacy_rest_api_is_available() {
 		return class_exists( 'WC_Legacy_REST_API_Plugin', false );
+	}
+
+	/**
+	 * Get the WooCommerce version.
+	 *
+	 * @since 10.3.0
+	 *
+	 * @return string The WooCommerce version.
+	 */
+	public function stable_version(): string {
+		return explode( '-', $this->version, 2 )[0];
 	}
 
 	/**

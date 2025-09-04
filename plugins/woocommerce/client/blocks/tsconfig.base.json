@@ -139,9 +139,6 @@
 			"@woocommerce/e2e-utils": [
 				"tests/e2e/utils"
 			],
-			"@woocommerce/templates/*": [
-				"assets/js/templates/*"
-			],
 			"@wordpress/interactivity": [
 				"node_modules/@wordpress/interactivity/src/index.ts"
 			],
@@ -153,6 +150,9 @@
 			],
 			"@woocommerce/entities": [
 				"assets/js/entities"
+			],
+			"@woocommerce/sanitize": [
+				"node_modules/@woocommerce/sanitize/src/index.ts"
 			],
 		}
 	}

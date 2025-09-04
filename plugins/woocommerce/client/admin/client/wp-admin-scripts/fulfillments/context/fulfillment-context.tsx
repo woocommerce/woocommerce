@@ -93,7 +93,6 @@ export const FulfillmentProvider = ( {
 		}
 		_setFulfillment( {
 			id: fulfillment?.id ?? undefined,
-			fulfillment_id: fulfillment?.id ?? undefined,
 			entity_id: String( order.id ),
 			entity_type: WC_ORDER_CLASS,
 			is_fulfilled: fulfillment?.is_fulfilled ?? false,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactor EmailContent block rendering in the editor to use `<ServerSideRender />` instead of iframe
