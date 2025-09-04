@@ -336,7 +336,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			// Handle section titles.
 			if ( 'title' === $setting_type ) {
-				$current_group_key = $this->get_group_key_from_id( $setting['id'] ?? '' );
+				$current_group_key = $setting['id'] ?? '';
 				$current_group     = array(
 					'title'       => $setting['title'] ?? '',
 					'description' => $setting['desc'] ?? '',
@@ -375,22 +375,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'description' => __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' ),
 			'groups'      => $groups,
 		);
-	}
-
-	/**
-	 * Get group key from setting section ID.
-	 *
-	 * @param string $section_id Section ID.
-	 * @return string Group key.
-	 */
-	private function get_group_key_from_id( $section_id ) {
-		$group_map = array(
-			'store_address'   => 'store_address',
-			'general_options' => 'selling_locations',
-			'pricing_options' => 'currency_options',
-		);
-
-		return $group_map[ $section_id ] ?? $section_id;
 	}
 
 	/**
@@ -544,7 +528,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-						'store_address'     => array(
+						'store_address'   => array(
 							'description' => __( 'Store address settings.', 'woocommerce' ),
 							'type'        => 'object',
 							'properties'  => array(
@@ -566,7 +550,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 								),
 							),
 						),
-						'selling_locations' => array(
+						'general_options' => array(
 							'description' => __( 'Selling and shipping location settings.', 'woocommerce' ),
 							'type'        => 'object',
 							'properties'  => array(
@@ -588,7 +572,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 								),
 							),
 						),
-						'currency_options'  => array(
+						'pricing_options' => array(
 							'description' => __( 'Currency and pricing settings.', 'woocommerce' ),
 							'type'        => 'object',
 							'properties'  => array(
