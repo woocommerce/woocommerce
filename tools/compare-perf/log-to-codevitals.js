@@ -76,6 +76,7 @@ const options = {
 };
 
 const req = https.request( options, ( res ) => {
+	console.log( `hostname: ${ options.hostname }` );
 	console.log( `statusCode: ${ res.statusCode }` );
 
 	res.on( 'data', ( d ) => {
