@@ -65,7 +65,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						context.productType,
 						context.availableVariations,
 						context.selectedAttributes
 					);
@@ -91,8 +90,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 				const {
 					quantity,
+					availableVariations,
 					selectedAttributes,
-					productType,
 					groupedProductIds,
 				} = getContext< AddToCartWithOptionsStoreContext >();
 
@@ -108,11 +107,21 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						quantity[ childProductId ]
 					);
 
+					const productObject = getProductData(
+						Number( childProductId ),
+						availableVariations,
+						selectedAttributes
+					);
+
+					if ( ! productObject ) {
+						continue;
+					}
+
 					addedItems.push( {
 						id: childProductId,
 						quantity: newQuantity,
 						variation: selectedAttributes,
-						type: productType,
+						type: productObject.type,
 					} );
 				}
 

@@ -180,12 +180,13 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$default_quantity = $product->get_min_purchase_quantity();
 
+			$product_id = $product->get_id();
+
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => function () {
-						$context = wp_interactivity_get_context();
-						$product = wc_get_product( $context['productId'] );
+					'isFormValid' => function () use ( $product_id ) {
+						$product = wc_get_product( $product_id );
 
 						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
@@ -224,14 +225,24 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'type' => $product->get_type(),
+						),
+					),
+				)
+			);
+
 			$context = array(
-				'productId'        => $product->get_id(),
-				'productType'      => $product->get_type(),
 				'quantity'         => array( $product->get_id() => $default_quantity ),
 				'validationErrors' => array(),
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
+				$variation_data                = array();
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
@@ -244,7 +255,22 @@ class AddToCartWithOptions extends AbstractBlock {
 						'attributes'   => $variation->get_variation_attributes(),
 						'is_in_stock'  => $variation->is_in_stock(),
 					);
+
+					$variation_data[ $variation->get_id() ] = array(
+						'is_in_stock' => $variation->is_in_stock(),
+					);
 				}
+
+				wp_interactivity_config(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'variations' => $variation_data,
+							),
+						),
+					)
+				);
 			}
 
 			if ( $product->is_type( ProductType::GROUPED ) ) {
@@ -259,6 +285,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'min'  => $child_product_quantity_constraints['min'],
 							'max'  => $child_product_quantity_constraints['max'],
 							'step' => $child_product_quantity_constraints['step'],
+							'type' => $child_product->get_type(),
 						);
 					}
 				}

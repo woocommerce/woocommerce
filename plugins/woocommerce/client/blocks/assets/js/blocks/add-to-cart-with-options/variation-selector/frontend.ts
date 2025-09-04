@@ -321,12 +321,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
-				const {
-					productType,
-					availableVariations,
-					selectedAttributes,
-					quantity,
-				} = getContext< Context >();
+				const { availableVariations, selectedAttributes, quantity } =
+					getContext< Context >();
 				const { ref } = getElement();
 
 				if ( ! ( ref instanceof HTMLInputElement ) ) {
@@ -343,7 +339,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const productObject = getProductData(
 					productDataState.productId,
-					productType,
 					availableVariations,
 					selectedAttributes
 				);
