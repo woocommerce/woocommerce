@@ -193,7 +193,6 @@ class AddToCartWithOptions extends AbstractBlock {
 						}
 						return true;
 					},
-					'variationId' => null,
 				)
 			);
 

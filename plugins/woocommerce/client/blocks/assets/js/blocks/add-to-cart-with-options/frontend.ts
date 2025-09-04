@@ -227,8 +227,8 @@ const { actions, state } = store<
 					selectedAttributes,
 				} = getContext< Context >();
 
-				if ( childProductId && quantity[ childProductId ] > 0 ) {
-					return true;
+				if ( childProductId ) {
+					return quantity[ childProductId ] > 0;
 				}
 
 				const productObject = getProductData(
@@ -327,12 +327,10 @@ const { actions, state } = store<
 					const id =
 						context.childProductId || productDataState.productId;
 
-					if ( id ) {
-						context.quantity = {
-							...context.quantity,
-							[ id ]: value,
-						};
-					}
+					context.quantity = {
+						...context.quantity,
+						[ id ]: value,
+					};
 				}
 
 				actions.validateQuantity( value );
