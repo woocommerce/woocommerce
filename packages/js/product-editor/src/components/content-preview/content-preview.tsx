@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -14,11 +15,6 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-
-/**
- * Internal dependencies
- */
-import { sanitizeHTML } from '../../utils/sanitize-html';
 
 type ContentPreviewProps = {
 	content: string;
@@ -80,10 +76,12 @@ export function ContentPreview( { content }: ContentPreviewProps ) {
 					</style>
 					<div
 						className="woocommerce-content-preview__content"
-						dangerouslySetInnerHTML={ sanitizeHTML( content, {
-							tags: CONTENT_TAGS,
-							attr: CONTENT_ATTR,
-						} ) }
+						dangerouslySetInnerHTML={ {
+							__html: sanitizeHTML( content, {
+								tags: CONTENT_TAGS,
+								attr: CONTENT_ATTR,
+							} ),
+						} }
 					/>
 				</>
 			</Iframe>

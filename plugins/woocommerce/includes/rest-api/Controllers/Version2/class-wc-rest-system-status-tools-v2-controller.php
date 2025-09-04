@@ -548,9 +548,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 			case 'clear_sessions':
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
 				wp_cache_flush();
-				/* translators: %d: amount of sessions */
-				$message = __( 'Deleted all active sessions', 'woocommerce' );
+				/* translators: %d: number of saved carts */
+				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
 				break;
 
 			case 'install_pages':

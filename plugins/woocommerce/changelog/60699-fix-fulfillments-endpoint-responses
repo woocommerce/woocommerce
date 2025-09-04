@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the object wrappers around the fulfillments related REST API responses

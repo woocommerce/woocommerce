@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Classic template: Ensure related product images are lazy loaded.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix returning customer detection for guest orders with existing email addresses
