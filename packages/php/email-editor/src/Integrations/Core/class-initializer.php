@@ -16,6 +16,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Cover;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Gallery;
@@ -24,7 +25,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Cover;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Collection;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
@@ -57,6 +58,7 @@ class Initializer {
 		'core/site-logo',
 		'core/site-title',
 		'core/table',
+		'woocommerce/product-collection',
 	);
 
 	/**
@@ -237,6 +239,8 @@ class Initializer {
 				break;
 			case 'core/video':
 				$renderer = new Video();
+			case 'woocommerce/product-collection':
+				$renderer = new Product_Collection();
 				break;
 			default:
 				$renderer = new Fallback();
