@@ -34,8 +34,10 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		BASE_SHA=$(git rev-parse origin/trunk)
 
 		BASE_SHA=9d76114472b7bc17d39b21ffe22c36637169669a
-		# 048f45a9cca9946fb76300e964391d6f2fa65099 (Fix frontend metrics not being sent to codevitals (#55880))
 		# 9d76114472b7bc17d39b21ffe22c36637169669a next after 55f855a2e6d769b5ae44305b2772eb30d3e721df
+		# Worked, sequential pushes testing:
+		# - https://github.com/woocommerce/woocommerce/actions/runs/17462514966/job/49590309799?pr=60763
+		# -
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
