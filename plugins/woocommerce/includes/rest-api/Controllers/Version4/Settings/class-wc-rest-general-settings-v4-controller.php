@@ -306,8 +306,14 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				if ( is_array( $value ) ) {
 					return array_map( 'sanitize_text_field', $value );
 				}
+
+				// Handle empty values and string inputs
+				if ( empty( $value ) ) {
+					return array();
+				}
+
 				// If it's a string, convert to array (for single values).
-				return array( sanitize_text_field( $value ) );
+				return is_string( $value ) ? array( sanitize_text_field( $value ) ) : array();
 
 			case 'checkbox':
 				return wc_bool_to_string( $value );
