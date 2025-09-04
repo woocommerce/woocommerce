@@ -75,6 +75,8 @@ export const getProductData = (
 	let productId = id;
 	let productData: ProductData | undefined;
 
+	const { products } = getConfig( 'woocommerce' );
+
 	if (
 		productType === 'variable' &&
 		availableVariations &&
@@ -87,12 +89,12 @@ export const getProductData = (
 		if ( matchedVariation?.variation_id ) {
 			productId = matchedVariation.variation_id;
 			productData =
-				wooState?.products?.[ id ]?.variations?.[
+				products?.[ id ]?.variations?.[
 					matchedVariation?.variation_id
 				];
 		}
 	} else {
-		productData = wooState?.products?.[ productId ];
+		productData = products?.[ productId ];
 	}
 
 	if ( typeof productData !== 'object' || productData === null ) {
@@ -534,12 +536,17 @@ const { actions, state } = store<
 					{},
 					{ lock: universalLock }
 				);
-				yield wooActions.addCartItem( {
-					id,
-					quantity: newQuantity,
-					variation: selectedAttributes,
-					type: productType,
-				} );
+				yield wooActions.addCartItem(
+					{
+						id,
+						quantity: newQuantity,
+						variation: selectedAttributes,
+						type: productType,
+					},
+					{
+						showCartUpdatesNotices: false,
+					}
+				);
 			},
 			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
 				event.preventDefault();

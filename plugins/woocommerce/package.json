@@ -777,7 +777,7 @@
 		"eslint-config-wpcalypso": "5.0.0",
 		"eslint-plugin-jest": "23.20.0",
 		"eslint-plugin-playwright": "0.22.1",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"nodemon": "^3.0.2",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"rimraf": "5.0.5",
