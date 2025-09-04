@@ -53,6 +53,9 @@ class CartApplyCoupon extends ControllerTestCase {
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/wc/store/v1/cart/apply-coupon', $routes );
 	}

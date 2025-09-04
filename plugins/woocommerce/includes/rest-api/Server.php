@@ -39,17 +39,20 @@ class Server {
 	 */
 	public function register_rest_routes() {
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
-			wc_rest_lazy_load_namespace( $namespace, function () use ( $controllers, $namespace ) {
-				$container    = wc_get_container();
-				$legacy_proxy = $container->get( LegacyProxy::class );
-				foreach ( $controllers as $controller_name => $controller_class ) {
-					$this->controllers[ $namespace ][ $controller_name ] =
-						$container->has( $controller_class ) ?
-							$container->get( $controller_class ) :
-							$legacy_proxy->get_instance_of( $controller_class );
-					$this->controllers[ $namespace ][ $controller_name ]->register_routes();
+			wc_rest_lazy_load_namespace(
+				$namespace,
+				function () use ( $controllers, $namespace ) {
+					$container    = wc_get_container();
+					$legacy_proxy = $container->get( LegacyProxy::class );
+					foreach ( $controllers as $controller_name => $controller_class ) {
+						$this->controllers[ $namespace ][ $controller_name ] =
+							$container->has( $controller_class ) ?
+								$container->get( $controller_class ) :
+								$legacy_proxy->get_instance_of( $controller_class );
+						$this->controllers[ $namespace ][ $controller_name ]->register_routes();
+					}
 				}
-			} );
+			);
 		}
 	}
 

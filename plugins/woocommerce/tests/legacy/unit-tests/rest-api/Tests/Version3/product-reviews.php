@@ -29,6 +29,9 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_register_routes() {
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v3/products/reviews', $routes );
 		$this->assertArrayHasKey( '/wc/v3/products/reviews/(?P<id>[\d]+)', $routes );

@@ -67,6 +67,9 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/system_status', $routes );
 		$this->assertArrayHasKey( '/wc/v2/system_status/tools', $routes );

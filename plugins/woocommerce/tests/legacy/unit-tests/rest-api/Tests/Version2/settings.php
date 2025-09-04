@@ -35,6 +35,9 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/settings', $routes );
 		$this->assertArrayHasKey( '/wc/v2/settings/(?P<group_id>[\w-]+)', $routes );

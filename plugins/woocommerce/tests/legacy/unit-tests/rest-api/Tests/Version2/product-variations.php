@@ -28,6 +28,9 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_register_routes() {
+		// This namespace is lazy loaded, so we make a discovery request to trigger loading.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
+
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/products/(?P<product_id>[\d]+)/variations', $routes );
 		$this->assertArrayHasKey( '/wc/v2/products/(?P<product_id>[\d]+)/variations/(?P<id>[\d]+)', $routes );
