@@ -65,7 +65,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						context.availableVariations,
 						context.selectedAttributes
 					);
 					return (
@@ -88,12 +87,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const {
-					quantity,
-					availableVariations,
-					selectedAttributes,
-					groupedProductIds,
-				} = getContext< AddToCartWithOptionsStoreContext >();
+				const { quantity, selectedAttributes, groupedProductIds } =
+					getContext< AddToCartWithOptionsStoreContext >();
 
 				const addedItems: ClientCartItem[] = [];
 
@@ -109,7 +104,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 					const productObject = getProductData(
 						Number( childProductId ),
-						availableVariations,
 						selectedAttributes
 					);
 

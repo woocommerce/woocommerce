@@ -73,7 +73,6 @@ const getInputElementFromEvent = (
 
 export const getProductData = (
 	id: number,
-	availableVariations: AvailableVariation[],
 	selectedAttributes: SelectedAttributes[]
 ) => {
 	let productId = id;
@@ -81,9 +80,10 @@ export const getProductData = (
 
 	const { products } = getConfig( 'woocommerce' );
 
-	if ( availableVariations && selectedAttributes ) {
+	if ( selectedAttributes ) {
+		const variations = products?.[ id ].variations;
 		const matchedVariation = getMatchedVariation(
-			availableVariations,
+			variations,
 			selectedAttributes
 		);
 		if ( matchedVariation?.variation_id ) {
@@ -220,12 +220,8 @@ const { actions, state } = store<
 				return state.validationErrors.length === 0;
 			},
 			get allowsDecrease() {
-				const {
-					quantity,
-					childProductId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				if ( childProductId ) {
 					return quantity[ childProductId ] > 0;
@@ -233,7 +229,6 @@ const { actions, state } = store<
 
 				const productObject = getProductData(
 					productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
@@ -248,16 +243,11 @@ const { actions, state } = store<
 				return currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
-				const {
-					quantity,
-					childProductId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
@@ -287,7 +277,6 @@ const { actions, state } = store<
 					productDataState.variationId || productDataState.productId;
 				const productObject = getProductData(
 					id,
-					context.availableVariations,
 					context.selectedAttributes
 				);
 
@@ -368,15 +357,11 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const {
-					childProductId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
@@ -404,15 +389,11 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const {
-					childProductId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
@@ -447,16 +428,12 @@ const { actions, state } = store<
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const {
-					childProductId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				let min = 1;
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
@@ -506,7 +483,7 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { quantity, selectedAttributes, availableVariations } =
+				const { quantity, selectedAttributes } =
 					getContext< Context >();
 
 				const id =
@@ -518,7 +495,6 @@ const { actions, state } = store<
 				} else {
 					const productObject = getProductData(
 						id,
-						availableVariations,
 						selectedAttributes
 					);
 					if ( productObject ) {

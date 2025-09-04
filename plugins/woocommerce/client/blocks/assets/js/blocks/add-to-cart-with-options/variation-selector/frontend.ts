@@ -169,11 +169,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( ! context ) {
 					return null;
 				}
-				const { availableVariations, selectedAttributes } = context;
+				const { selectedAttributes } = context;
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
+
 				return matchedVariation?.variation_id || null;
 			},
 			get selectedAttributes(): SelectedAttributes[] {
@@ -271,10 +277,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			setSelectedVariationId: () => {
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
 
@@ -292,10 +303,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
 
@@ -323,7 +339,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
-				const { availableVariations, selectedAttributes, quantity } =
+				const { selectedAttributes, quantity } =
 					getContext< Context >();
 				const { ref } = getElement();
 
@@ -338,14 +354,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const productObject = getProductData(
 					productDataState.productId,
-					availableVariations,
 					selectedAttributes
 				);
 
-				const currentValue =
-					quantity[ productObject?.id || productDataState.productId ];
-
 				if ( productObject ) {
+					const currentValue = quantity[ productObject?.id ];
 					const { min, max } = productObject;
 
 					let newValue = currentValue;

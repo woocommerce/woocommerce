@@ -57,6 +57,8 @@ export type ProductData = {
 			min?: number;
 			max?: number;
 			step?: number;
+			attributes: Record< string, string >;
+			is_in_stock: boolean;
 		};
 	};
 };
