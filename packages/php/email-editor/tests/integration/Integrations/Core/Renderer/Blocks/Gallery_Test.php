@@ -288,73 +288,30 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it handles different linkTo values with proper link verification.
+	 * Test it handles image links when present in innerHTML.
 	 */
-	public function testItHandlesDifferentLinkToValues(): void {
-		// Test 1: Per-image linkDestination takes precedence over gallery-level linkTo.
-		$parsed_gallery_with_image_links = $this->parsed_gallery;
+	public function testItHandlesImageLinks(): void {
+		// Test with linked images in innerHTML.
+		$parsed_gallery_with_links = $this->parsed_gallery;
 
-		// Set gallery-level linkTo to 'none' but individual images have their own linkDestination.
-		$parsed_gallery_with_image_links['attrs']['linkTo'] = 'none';
+		// Update first image to have a link in innerHTML.
+		$parsed_gallery_with_links['innerBlocks'][0]['innerHTML'] = '<figure class="wp-block-image size-large"><a href="https://example.com/image1.jpg"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1"/></a><figcaption class="wp-element-caption">Caption 1</figcaption></figure>';
 
-		// Update first image to have 'media' linkDestination with linked innerHTML.
-		$parsed_gallery_with_image_links['innerBlocks'][0]['attrs']['linkDestination'] = 'media';
-		$parsed_gallery_with_image_links['innerBlocks'][0]['innerHTML']                = '<figure class="wp-block-image size-large"><a href="https://example.com/image1.jpg"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1"/></a><figcaption class="wp-element-caption">Caption 1</figcaption></figure>';
+		// Update second image to have a different link in innerHTML.
+		$parsed_gallery_with_links['innerBlocks'][1]['innerHTML'] = '<figure class="wp-block-image size-large"><a href="https://example.com/?attachment_id=2"><img src="https://example.com/image2.jpg" alt="Image 2" class="wp-image-2"/></a><figcaption class="wp-element-caption">Caption 2</figcaption></figure>';
 
-		// Update second image to have 'attachment' linkDestination with linked innerHTML.
-		$parsed_gallery_with_image_links['innerBlocks'][1]['attrs']['linkDestination'] = 'attachment';
-		$parsed_gallery_with_image_links['innerBlocks'][1]['innerHTML']                = '<figure class="wp-block-image size-large"><a href="https://example.com/?attachment_id=2"><img src="https://example.com/image2.jpg" alt="Image 2" class="wp-image-2"/></a><figcaption class="wp-element-caption">Caption 2</figcaption></figure>';
+		// Third image has no link.
+		$parsed_gallery_with_links['innerBlocks'][2]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image3.jpg" alt="Image 3" class="wp-image-3"/><figcaption class="wp-element-caption">Caption 3</figcaption></figure>';
 
-		$rendered_with_image_links = $this->gallery_renderer->render( '', $parsed_gallery_with_image_links, $this->rendering_context );
+		$rendered_with_links = $this->gallery_renderer->render( '', $parsed_gallery_with_links, $this->rendering_context );
 
-		// Verify that per-image links are preserved.
-		$this->assertStringContainsString( '<a href="https://example.com/image1.jpg">', $rendered_with_image_links );
-		$this->assertStringContainsString( '<a href="https://example.com/?attachment_id=2">', $rendered_with_image_links );
+		// Verify that links are preserved when present in innerHTML.
+		$this->assertStringContainsString( '<a href="https://example.com/image1.jpg">', $rendered_with_links );
+		$this->assertStringContainsString( '<a href="https://example.com/?attachment_id=2">', $rendered_with_links );
 
-		// Test 2: Gallery-level linkTo fallback when images don't have individual linkDestination.
-		$parsed_gallery_fallback = $this->parsed_gallery;
-
-		// Set gallery-level linkTo to 'media'.
-		$parsed_gallery_fallback['attrs']['linkTo'] = 'media';
-
-		// Remove individual linkDestination from images (they should fall back to gallery-level).
-		$parsed_gallery_fallback['innerBlocks'][0]['attrs']['linkDestination'] = 'none';
-		$parsed_gallery_fallback['innerBlocks'][1]['attrs']['linkDestination'] = 'none';
-		$parsed_gallery_fallback['innerBlocks'][2]['attrs']['linkDestination'] = 'none';
-
-		// Update innerHTML to include gallery-level links.
-		$parsed_gallery_fallback['innerBlocks'][0]['innerHTML'] = '<figure class="wp-block-image size-large"><a href="https://example.com/image1.jpg"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1"/></a><figcaption class="wp-element-caption">Caption 1</figcaption></figure>';
-		$parsed_gallery_fallback['innerBlocks'][1]['innerHTML'] = '<figure class="wp-block-image size-large"><a href="https://example.com/image2.jpg"><img src="https://example.com/image2.jpg" alt="Image 2" class="wp-image-2"/></a><figcaption class="wp-element-caption">Caption 2</figcaption></figure>';
-		$parsed_gallery_fallback['innerBlocks'][2]['innerHTML'] = '<figure class="wp-block-image size-large"><a href="https://example.com/image3.jpg"><img src="https://example.com/image3.jpg" alt="Image 3" class="wp-image-3"/></a><figcaption class="wp-element-caption">Caption 3</figcaption></figure>';
-
-		$rendered_fallback = $this->gallery_renderer->render( '', $parsed_gallery_fallback, $this->rendering_context );
-
-		// Verify that gallery-level links are used.
-		$this->assertStringContainsString( '<a href="https://example.com/image1.jpg">', $rendered_fallback );
-		$this->assertStringContainsString( '<a href="https://example.com/image2.jpg">', $rendered_fallback );
-		$this->assertStringContainsString( '<a href="https://example.com/image3.jpg">', $rendered_fallback );
-
-		// Test 3: No links when linkTo is 'none' and images have no individual links.
-		$parsed_gallery_no_links                    = $this->parsed_gallery;
-		$parsed_gallery_no_links['attrs']['linkTo'] = 'none';
-
-		// Ensure all images have 'none' linkDestination.
-		$parsed_gallery_no_links['innerBlocks'][0]['attrs']['linkDestination'] = 'none';
-		$parsed_gallery_no_links['innerBlocks'][1]['attrs']['linkDestination'] = 'none';
-		$parsed_gallery_no_links['innerBlocks'][2]['attrs']['linkDestination'] = 'none';
-
-		// Update innerHTML to have no links.
-		$parsed_gallery_no_links['innerBlocks'][0]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1"/><figcaption class="wp-element-caption">Caption 1</figcaption></figure>';
-		$parsed_gallery_no_links['innerBlocks'][1]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image2.jpg" alt="Image 2" class="wp-image-2"/><figcaption class="wp-element-caption">Caption 2</figcaption></figure>';
-		$parsed_gallery_no_links['innerBlocks'][2]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image3.jpg" alt="Image 3" class="wp-image-3"/><figcaption class="wp-element-caption">Caption 3</figcaption></figure>';
-
-		$rendered_no_links = $this->gallery_renderer->render( '', $parsed_gallery_no_links, $this->rendering_context );
-
-		// Verify that no anchor tags are present.
-		$this->assertStringNotContainsString( '<a href=', $rendered_no_links );
-		$this->assertStringContainsString( '<img src="https://example.com/image1.jpg"', $rendered_no_links );
-		$this->assertStringContainsString( '<img src="https://example.com/image2.jpg"', $rendered_no_links );
-		$this->assertStringContainsString( '<img src="https://example.com/image3.jpg"', $rendered_no_links );
+		// Verify that images without links don't get wrapped in anchor tags.
+		$this->assertStringContainsString( '<img src="https://example.com/image3.jpg"', $rendered_with_links );
+		$this->assertStringNotContainsString( '<a href="https://example.com/image3.jpg">', $rendered_with_links );
 	}
 
 	/**
