@@ -5,8 +5,15 @@
  * @package WooCommerce\RestApi\UnitTests
  * @since   4.0.0
  */
+
 declare(strict_types=1);
 
+/**
+ * General Settings V4 controller unit tests.
+ *
+ * @package WooCommerce\RestApi\UnitTests
+ * @since   4.0.0
+ */
 class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 	/**
