@@ -80,7 +80,7 @@ export const getProductData = (
 
 	const { products } = getConfig( 'woocommerce' );
 
-	if ( selectedAttributes ) {
+	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		const variations = products?.[ id ].variations;
 		const matchedVariation = getMatchedVariation(
 			variations,
@@ -273,10 +273,8 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 
 				// If selected quantity is invalid, add an error.
-				const id =
-					productDataState.variationId || productDataState.productId;
 				const productObject = getProductData(
-					id,
+					productDataState.productId,
 					context.selectedAttributes
 				);
 
