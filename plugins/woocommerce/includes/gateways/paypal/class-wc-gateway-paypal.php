@@ -22,6 +22,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -61,6 +65,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @var bool
 	 */
 	public $debug;
+
+	/**
+	 * The intent of the payment (capture or authorize).
+	 *
+	 * @var string
+	 */
+	public $intent;
 
 	/**
 	 * Email address to send payments to.
@@ -139,6 +150,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->title                        = $this->get_option( 'title' );
 		$this->description                  = $this->get_option( 'description' );
 		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->intent                       = 'sale' === $this->get_option( 'paymentaction', 'sale' ) ? 'capture' : 'authorize';
 		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
 		$this->email                        = $this->get_option( 'email' );
 		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
@@ -180,6 +192,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			// Hook for plugin upgrades.
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
+
+			if ( $this->should_use_orders_v2() ) {
+				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
+
+				// Render the buttons container to load the buttons via PayPal JS SDK.
+				// Classic checkout page.
+				add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+				// Classic cart page.
+				add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+				// Product page.
+				add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+			}
 		}
 	}
 
@@ -644,6 +669,74 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
 		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
+	}
+
+	/**
+	 * Enqueue scripts.
+	 */
+	public function enqueue_scripts() {
+		if ( 'no' === $this->enabled ) {
+			return;
+		}
+
+		$version           = Constants::get_constant( 'WC_VERSION' );
+		$is_page_supported = is_checkout() || is_cart() || is_product();
+		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$options           = $buttons->get_common_options();
+
+		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
+			return;
+		}
+
+		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+
+		// Add PayPal JS SDK script.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
+		wp_enqueue_script( 'paypal-standard-sdk' );
+
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery' ), $version, true );
+
+		wp_localize_script(
+			'wc-paypal-frontend',
+			'paypal_standard',
+			array(
+				'gateway_id'          => $this->id,
+				'ajax_url'            => admin_url( 'admin-ajax.php' ),
+				'wc_ajax_url'         => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+				'create_order_nonce'  => wp_create_nonce( 'create_order' ),
+				'capture_order_nonce' => wp_create_nonce( 'capture_order' ),
+			)
+		);
+
+		wp_enqueue_script( 'wc-paypal-frontend' );
+	}
+
+	/**
+	 * Add PayPal SDK attributes to the script.
+	 *
+	 * @param array $attrs Attributes.
+	 * @return array
+	 */
+	public function add_paypal_sdk_attributes( $attrs ) {
+		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
+			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$page_type = $buttons->get_page_type();
+
+			$attrs['data-page-type']              = $page_type;
+			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
+		}
+
+		return $attrs;
+	}
+
+	/**
+	 * Builds the PayPal payment fields area.
+	 *
+	 * @since 10.3.0
+	 */
+	public function render_buttons_container() {
+		echo '<div id="paypal-standard-container"></div>';
 	}
 
 	/**
