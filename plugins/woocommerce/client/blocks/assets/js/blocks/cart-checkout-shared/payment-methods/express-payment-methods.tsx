@@ -192,9 +192,9 @@ const ExpressPaymentMethods = () => {
 				) : null;
 			} )
 		) : (
-			<ExpressPayItem key="noneRegistered">
+			<div key="noneRegistered">
 				{ __( 'No registered Payment Methods', 'woocommerce' ) }
-			</ExpressPayItem>
+			</div>
 		);
 
 	return (
