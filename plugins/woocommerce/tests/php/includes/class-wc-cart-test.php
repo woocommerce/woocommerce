@@ -589,18 +589,18 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @textdox should clear store_api_draft_order from session when cart is empty
+	 * @testdox should clear store_api_draft_order from session when cart is empty
 	 */
 	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
 		$cart = WC()->cart;
 		WC()->session->set( 'store_api_draft_order', 123 );
 
 		$cart->set_session();
-		$this->assertEquals( null, WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
 	}
 
 	/**
-	 * @textdox should not clear store_api_draft_order from session when cart is not empty
+	 * @testdox should not clear store_api_draft_order from session when cart is not empty
 	 */
 	public function test_setting_session_should_not_clear_store_api_draft_order_when_cart_is_not_empty() {
 		$cart    = WC()->cart;
@@ -614,7 +614,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @textdox should clear store_api_draft_order from session when the cart is emptied
+	 * @testdox should clear store_api_draft_order from session when the cart is emptied
 	 */
 	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
 		$cart = WC()->cart;
@@ -624,6 +624,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$cart->empty_cart();
 
-		$this->assertEquals( null, WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
 	}
 }
