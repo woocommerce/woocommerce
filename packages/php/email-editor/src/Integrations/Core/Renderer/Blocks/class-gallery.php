@@ -31,6 +31,7 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Process inner blocks to get gallery images.
 		$gallery_images = array();
+
 		foreach ( $inner_blocks as $block ) {
 			if ( 'core/image' === $block['blockName'] ) {
 				$rendered_image = render_block( $block );
@@ -56,18 +57,14 @@ class Gallery extends Abstract_Block_Renderer {
 	 * @return string Image HTML with proper link handling.
 	 */
 	private function extract_image_with_link( string $rendered_image, array $block ): string {
-		// Check if the block has link destination information.
-		$block_attrs      = $block['attrs'] ?? array();
-		$link_destination = $block_attrs['linkDestination'] ?? 'none';
-
-		// If there's a link destination, extract the linked image directly from innerHTML.
-		if ( 'none' !== $link_destination && isset( $block['innerHTML'] ) ) {
+		// Check if there's a link in the original innerHTML.
+		if ( isset( $block['innerHTML'] ) ) {
 			$inner_html = $block['innerHTML'];
 
 			// Look for a link around the image in the original HTML.
-			if ( preg_match( '/<a[^>]*href="([^"]*)"[^>]*>(<img[^>]*>)<\/a>/', $inner_html, $link_matches ) ) {
+			if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $inner_html, $link_matches ) ) {
 				// Extract the linked image and caption separately.
-				$linked_image = '<a href="' . $link_matches[1] . '">' . $link_matches[2] . '</a>';
+				$linked_image = '<a href="' . esc_url( $link_matches[2] ) . '">' . $link_matches[3] . '</a>';
 
 				// Extract caption if it exists.
 				$caption = '';
@@ -95,11 +92,13 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Check if the image is wrapped in a link.
 		if ( preg_match( '/<a[^>]*href="([^"]*)"[^>]*>(<img[^>]*>)<\/a>/', $rendered_image, $link_matches ) ) {
-			// Image is linked - preserve the link.
-			$result .= '<a href="' . $link_matches[1] . '">' . $link_matches[2] . '</a>';
+			// Image is linked - preserve the link with sanitized href and img.
+			$sanitized_href = esc_url( $link_matches[1] );
+			$sanitized_img  = wp_kses_post( $link_matches[2] );
+			$result        .= '<a href="' . $sanitized_href . '">' . $sanitized_img . '</a>';
 		} elseif ( preg_match( '/<img[^>]*>/', $rendered_image, $img_matches ) ) {
-			// Image is not linked - just extract the img element.
-			$result .= $img_matches[0];
+			// Image is not linked - just extract the img element with sanitization.
+			$result .= wp_kses_post( $img_matches[0] );
 		}
 
 		// Extract the caption if it exists (handle both figcaption and span formats).
@@ -218,19 +217,17 @@ class Gallery extends Abstract_Block_Renderer {
 		$images_in_row = count( $row_images );
 		$row_cells     = '';
 
-		// If this row has fewer images than total columns, make the single image span full width.
-		if ( $images_in_row < $total_columns ) {
-			foreach ( $row_images as $image_html ) {
-				$cell_attrs = array(
-					'style'   => sprintf( 'width: 100%%; padding: %dpx; vertical-align: top; text-align: center;', $cell_padding ),
-					'valign'  => 'top',
-					'colspan' => $total_columns,
-				);
-				$row_cells .= Table_Wrapper_Helper::render_table_cell( $image_html, $cell_attrs );
-			}
+		// If there is exactly one image, span full width; otherwise distribute width evenly across the images in this row.
+		if ( 1 === $images_in_row ) {
+			$cell_attrs = array(
+				'style'   => sprintf( 'width: 100%%; padding: %dpx; vertical-align: top; text-align: center;', $cell_padding ),
+				'valign'  => 'top',
+				'colspan' => $total_columns,
+			);
+			$row_cells .= Table_Wrapper_Helper::render_table_cell( $row_images[0], $cell_attrs );
 		} else {
-			// Normal multi-column layout.
-			$cell_width_percent = 100 / $total_columns;
+			// Evenly distribute available width among the images in this row.
+			$cell_width_percent = 100 / $images_in_row;
 
 			foreach ( $row_images as $image_html ) {
 				$cell_attrs = array(
