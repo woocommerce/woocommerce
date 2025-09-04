@@ -548,77 +548,30 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'readonly'    => true,
 				),
 				'groups'      => array(
-					'description' => __( 'Collection of setting groups.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'store_address'   => array(
-							'description' => __( 'Store address settings.', 'woocommerce' ),
-							'type'        => 'object',
-							'properties'  => array(
-								'title'       => array(
-									'description' => __( 'Group title.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'description' => array(
-									'description' => __( 'Group description.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'fields'      => array(
-									'description' => __( 'Settings fields.', 'woocommerce' ),
-									'type'        => 'array',
-									'context'     => array( 'view', 'edit' ),
-									'items'       => $this->get_field_schema(),
-								),
+					'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view', 'edit' ),
+					'additionalProperties' => array(
+						'type'        => 'object',
+						'description' => __( 'Settings group.', 'woocommerce' ),
+						'properties'  => array(
+							'title'       => array(
+								'description' => __( 'Group title.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'description' => array(
+								'description' => __( 'Group description.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'fields'      => array(
+								'description' => __( 'Settings fields.', 'woocommerce' ),
+								'type'        => 'array',
+								'context'     => array( 'view', 'edit' ),
+								'items'       => $this->get_field_schema(),
 							),
 						),
-						'general_options' => array(
-							'description' => __( 'Selling and shipping location settings.', 'woocommerce' ),
-							'type'        => 'object',
-							'properties'  => array(
-								'title'       => array(
-									'description' => __( 'Group title.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'description' => array(
-									'description' => __( 'Group description.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'fields'      => array(
-									'description' => __( 'Settings fields.', 'woocommerce' ),
-									'type'        => 'array',
-									'context'     => array( 'view', 'edit' ),
-									'items'       => $this->get_field_schema(),
-								),
-							),
-						),
-						'pricing_options' => array(
-							'description' => __( 'Currency and pricing settings.', 'woocommerce' ),
-							'type'        => 'object',
-							'properties'  => array(
-								'title'       => array(
-									'description' => __( 'Group title.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'description' => array(
-									'description' => __( 'Group description.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'fields'      => array(
-									'description' => __( 'Settings fields.', 'woocommerce' ),
-									'type'        => 'array',
-									'context'     => array( 'view', 'edit' ),
-									'items'       => $this->get_field_schema(),
-								),
-							),
-						),
-
 					),
 				),
 			),
