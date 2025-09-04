@@ -114,6 +114,7 @@ Create a JavaScript file that implements the client-side provider logic.
     - Parameters:
         - _addressId_ `string` - The ID of the selected suggestion.
     - Returns: `Promise<Object|null>` - Promise resolving to an address object or null on error.
+
 ### Suggestion Object Format
 
 The `search` function must return suggestion objects with the following structure:
@@ -123,6 +124,7 @@ The `search` function must return suggestion objects with the following structur
 - _matchedSubstrings_ `array` (optional) - Array of text ranges to highlight in the label.
     - _offset_ `number` - Starting position of matched text.
     - _length_ `number` - Length of matched text.
+
 ### Address Object Format
 
 The `select` function must return address objects with these WooCommerce field names:
