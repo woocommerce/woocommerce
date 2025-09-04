@@ -127,9 +127,8 @@ The `search` function must return suggestion objects with the following structur
 - _id_ `string` - Unique identifier for this suggestion.
 - _label_ `string` - Display text shown to the user.
 - _matchedSubstrings_ `array` (optional) - Array of text ranges to highlight in the label.
-  - _offset_ `number` - Starting position of matched text.
-  - _length_ `number` - Length of matched text.
-
+    - _offset_ `number` - Starting position of matched text.
+    - _length_ `number` - Length of matched text.
 ### Address Object Format
 
 The `select` function must return address objects with these WooCommerce field names:
