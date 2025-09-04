@@ -154,6 +154,12 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -316,7 +322,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
 				const {
-					productId,
 					productType,
 					availableVariations,
 					selectedAttributes,
@@ -329,18 +334,22 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Let's not do anything if the user is typing in the input.
-				if ( ref === document.activeElement ) {
+				if (
+					ref === document.activeElement ||
+					! productDataState.productId
+				) {
 					return;
 				}
 
 				const productObject = getProductData(
-					productId,
+					productDataState.productId,
 					productType,
 					availableVariations,
 					selectedAttributes
 				);
 
-				const currentValue = quantity[ productObject?.id || productId ];
+				const currentValue =
+					quantity[ productObject?.id || productDataState.productId ];
 
 				if ( productObject ) {
 					const { min, max } = productObject;

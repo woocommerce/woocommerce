@@ -10,6 +10,7 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -46,6 +47,12 @@ const universalLock =
 
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -224,7 +231,6 @@ const { actions, state } = store<
 					quantity,
 					childProductId,
 					productType,
-					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
@@ -237,7 +243,7 @@ const { actions, state } = store<
 				}
 
 				const productObject = getProductData(
-					childProductId || productId,
+					childProductId || productDataState.productId || 0,
 					productType,
 					availableVariations,
 					selectedAttributes
@@ -258,13 +264,12 @@ const { actions, state } = store<
 					quantity,
 					childProductId,
 					productType,
-					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
+					childProductId || productDataState.productId || 0,
 					productType,
 					availableVariations,
 					selectedAttributes
@@ -292,8 +297,10 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 
 				// If selected quantity is invalid, add an error.
-				const { variationId } = state;
-				const id = variationId || context.productId;
+				const id =
+					productDataState.variationId ||
+					productDataState.productId ||
+					0;
 				const productObject = getProductData(
 					id,
 					context.productType,
@@ -325,18 +332,26 @@ const { actions, state } = store<
 					const variationIds = context.availableVariations.map(
 						( variation ) => variation.variation_id
 					);
-					const idsToUpdate = [ context.productId, ...variationIds ];
+					const idsToUpdate = [
+						productDataState.productId,
+						...variationIds,
+					];
 
 					idsToUpdate.forEach( ( id ) => {
-						context.quantity[ id ] = value;
+						if ( id ) {
+							context.quantity[ id ] = value;
+						}
 					} );
 				} else {
-					const id = context.childProductId || context.productId;
+					const id =
+						context.childProductId || productDataState.productId;
 
-					context.quantity = {
-						...context.quantity,
-						[ id ]: value,
-					};
+					if ( id ) {
+						context.quantity = {
+							...context.quantity,
+							[ id ]: value,
+						};
+					}
 				}
 
 				actions.validateQuantity( value );
@@ -377,13 +392,12 @@ const { actions, state } = store<
 				const {
 					childProductId,
 					productType,
-					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
+					childProductId || productDataState.productId || 0,
 					productType,
 					availableVariations,
 					selectedAttributes
@@ -416,13 +430,12 @@ const { actions, state } = store<
 				const {
 					childProductId,
 					productType,
-					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
+					childProductId || productDataState.productId || 0,
 					productType,
 					availableVariations,
 					selectedAttributes
@@ -462,7 +475,6 @@ const { actions, state } = store<
 				const {
 					childProductId,
 					productType,
-					productId,
 					availableVariations,
 					selectedAttributes,
 				} = getContext< Context >();
@@ -485,7 +497,7 @@ const { actions, state } = store<
 				// 0 or NaN.
 				let min = 1;
 				const productObject = getProductData(
-					childProductId || productId,
+					childProductId || productDataState.productId || 0,
 					productType,
 					availableVariations,
 					selectedAttributes
@@ -520,11 +532,16 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { productId, quantity, selectedAttributes, productType } =
+				const { quantity, selectedAttributes, productType } =
 					getContext< Context >();
 
-				const { variationId } = state;
-				const id = variationId || productId;
+				const id =
+					productDataState.variationId || productDataState.productId;
+
+				if ( ! id ) {
+					return;
+				}
+
 				const newQuantity = getNewQuantity(
 					id,
 					quantity[ id ],
