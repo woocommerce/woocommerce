@@ -227,18 +227,15 @@ const { actions, state } = store<
 					selectedAttributes,
 				} = getContext< Context >();
 
+				if ( childProductId && quantity[ childProductId ] > 0 ) {
+					return true;
+				}
+
 				const productObject = getProductData(
-					childProductId || productDataState.productId,
+					productDataState.productId,
 					availableVariations,
 					selectedAttributes
 				);
-
-				if (
-					productObject?.type === 'grouped' &&
-					quantity[ childProductId ] > 0
-				) {
-					return true;
-				}
 
 				if ( ! productObject ) {
 					return true;
