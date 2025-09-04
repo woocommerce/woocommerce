@@ -91,6 +91,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 		productGalleryPageObject,
 		editor,
 	} ) => {
+		const variationDescription =
+			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
 		// This way we can test that sibling blocks update with the variation data.
 		let cliOutput = await wpCLI(
@@ -107,7 +109,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			`wc product update ${ hoodieProductId } --manage_stock=true --stock_quantity=100 --user=1`
 		);
 		await wpCLI(
-			`wc product_variation update ${ hoodieProductId } ${ hoodieProductVariationId } --manage_stock=true --in_stock=false --weight=2 --user=1`
+			`wc product_variation update ${ hoodieProductId } ${ hoodieProductVariationId } --manage_stock=true --in_stock=false --weight=2 --description="${ variationDescription }" --user=1`
 		);
 
 		await pageObject.updateSingleProductTemplate();
@@ -166,6 +168,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '1.5 lbs' )
 			).toBeVisible();
+			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
 				await productGalleryPageObject.getVisibleLargeImageId();
 			expect( visibleImage ).toBe( '34' );
@@ -183,7 +186,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					.getByLabel( 'Additional Information', { exact: true } )
 					.getByText( '2 lbs' )
 			).toBeVisible();
-
+			await expect(
+				page.getByText( variationDescription )
+			).toBeVisible();
 			await expect( async () => {
 				const newVisibleLargeImageId =
 					await productGalleryPageObject.getVisibleLargeImageId();
