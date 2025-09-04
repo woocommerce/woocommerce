@@ -41,8 +41,8 @@ jQuery(function ($) {
 		});
 	}
 
-	// Re-render when WooCommerce updates the checkout.
-	$( document.body ).on( 'updated_checkout payment_method_selected', function () {
+	// Re-render when cart is updated and the html is rerendered on the Cart page.
+	$( document.body ).on( 'updated_cart_totals', function () {
 		// If the container was replaced, re-render PayPal buttons
 		const buttonsContainer = document.getElementById( containerSelector );
 		if ( buttonsContainer && ! buttonsContainer.querySelector( 'iframe' ) ) {
