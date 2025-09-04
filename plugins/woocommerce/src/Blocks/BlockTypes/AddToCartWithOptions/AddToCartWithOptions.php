@@ -26,6 +26,18 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options';
 
 	/**
+	 * Enqueue frontend assets for this block.
+	 *
+	 * @param array    $attributes Any attributes that currently are available from the block.
+	 * @param string   $content    The block content.
+	 * @param WP_Block $block      The block object.
+	 */
+	protected function enqueue_assets( array $attributes, $content, $block ) {
+		parent::enqueue_assets( $attributes, $content, $block );
+		wp_enqueue_script( 'wp-a11y' );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -220,6 +232,17 @@ class AddToCartWithOptions extends AbstractBlock {
 							),
 							$product->get_name()
 						),
+					),
+				)
+			);
+
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'messages' => array(
+						'quantityIncreasedText' => __( 'Quantity increased', 'woocommerce' ),
+						'quantityDecreasedText' => __( 'Quantity decreased', 'woocommerce' ),
+						'addedToCartText'       => __( 'Added to cart', 'woocommerce' ),
 					),
 				)
 			);

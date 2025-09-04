@@ -402,6 +402,10 @@ const { actions, state } = store<
 					actions.setQuantity( updatedValue );
 					inputElement.value = updatedValue.toString();
 					dispatchChangeEvent( inputElement );
+
+					const { messages } = getConfig( 'woocommerce' );
+
+					wp?.a11y?.speak( messages.quantityIncreasedText, 'polite' );
 				}
 			},
 			decreaseQuantity: (
@@ -451,6 +455,10 @@ const { actions, state } = store<
 
 					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
+
+					const { messages } = getConfig( 'woocommerce' );
+
+					wp?.a11y?.speak( messages.quantityDecreasedText, 'polite' );
 				}
 			},
 			// We need to listen to blur events instead of change events because
