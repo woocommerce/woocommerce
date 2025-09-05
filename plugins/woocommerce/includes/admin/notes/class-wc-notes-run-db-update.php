@@ -68,7 +68,7 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * Retrieves the first notice of this type.
 	 *
-	 * @return Note Note or null in case no note was found.
+	 * @return Note|null Note or null in case no note was found.
 	 */
 	private static function get_current_notice() {
 		try {
