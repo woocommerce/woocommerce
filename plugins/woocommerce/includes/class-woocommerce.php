@@ -849,6 +849,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
 		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
+		
+		// Include cache optimization classes
+		include_once WC_ABSPATH . 'includes/class-wc-cache-optimization.php';
 	}
 
 	/**
