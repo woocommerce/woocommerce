@@ -41,6 +41,78 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	);
 
 	/**
+	 * Initialize the block.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
+		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
+	}
+
+	/**
+	 * Current item (product or category) for context
+	 *
+	 * @var \WP_Term|\WC_Product|null
+	 */
+	private $current_item = null;
+
+	/**
+	 * Update context for inner blocks to provide postId and postType.
+	 *
+	 * @param array    $context Block context.
+	 * @param array    $parsed_block Block attributes.
+	 * @param WP_Block $parent_block Block instance.
+	 *
+	 * @return array Updated block context.
+	 */
+	public function update_context( $context, $parsed_block, $parent_block ) {
+		// Check if this is a core block inside a featured item block
+		if ( $parent_block && 
+			 isset( $parent_block->name ) && 
+			 ( $parent_block->name === 'woocommerce/featured-product' || $parent_block->name === 'woocommerce/featured-category' ) &&
+			 isset( $parent_block->attributes ) ) {
+			
+			// Get the item from parent block attributes
+			$item = $this->get_item( $parent_block->attributes );
+			
+			if ( $item instanceof \WC_Product ) {
+				// Manipulate global post for core blocks
+				if ( 'core/post-title' === $parsed_block['blockName'] ) {
+					global $post;
+					$post = get_post( $item->get_id() );
+					
+					if ( $post instanceof \WP_Post ) {
+						setup_postdata( $post );
+					}
+				}
+				
+				$context['postId'] = $item->get_id();
+				$context['postType'] = 'product';
+				$this->current_item = $item;
+			}
+		}
+		
+		return $context;
+	}
+
+	/**
+	 * Restore global post data after rendering core/post-title.
+	 *
+	 * @param string    $block_content The block content.
+	 * @param array     $parsed_block The full block, including name and attributes.
+	 * @param \WP_Block $block_instance The block instance.
+	 *
+	 * @return string
+	 */
+	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
+		if ( $this->current_item ) {
+			wp_reset_postdata();
+		}
+		
+		return $block_content;
+	}
+
+	/**
 	 * Returns the featured item.
 	 *
 	 * @param array $attributes Block attributes. Default empty array.
@@ -121,15 +193,17 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		if ( isset( $block->parsed_block['innerBlocks'] ) && is_array( $block->parsed_block['innerBlocks'] ) ) {
 			foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
 				$block_name = isset( $inner_block['blockName'] ) ? $inner_block['blockName'] : '';
-				if ( in_array( $block_name, array( 'core/post-title', 'core/heading', 'woocommerce/category-title' ), true ) ) {
+				if ( in_array( $block_name, array( 'core/post-title', 'core/heading', 'woocommerce/category-title', 'woocommerce/product-title' ), true ) ) {
 					$attributes['useLegacyTitle'] = false;
 					break;
 				}
 			}
 		}
 
-		// Render InnerBlocks content exactly as authored.
-		$output .= $content;
+		// Render InnerBlocks content wrapped in __inner-blocks div to match editor structure
+		if ( ! empty( $content ) ) {
+			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
+		}
 		// Render additional attributes (e.g. description/price) for legacy compatibility.
 		$output .= $this->render_attributes( $item, $attributes );
 		$output .= '</div>';
