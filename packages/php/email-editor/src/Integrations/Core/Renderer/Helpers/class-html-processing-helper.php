@@ -93,6 +93,45 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Normalize rel attribute by lowercasing, deduplicating tokens, and ensuring required tokens.
+	 *
+	 * @param string|null $rel_value Current rel attribute value.
+	 * @param bool        $require_security_tokens Whether to require noopener and noreferrer tokens.
+	 * @return string Normalized rel attribute value.
+	 */
+	private static function normalize_rel_attribute( ?string $rel_value, bool $require_security_tokens = false ): string {
+		$allowed_tokens  = array( 'noopener', 'noreferrer', 'nofollow', 'external' );
+		$required_tokens = $require_security_tokens ? array( 'noopener', 'noreferrer' ) : array();
+
+		// If no rel value and no required tokens, return empty.
+		if ( null === $rel_value && empty( $required_tokens ) ) {
+			return '';
+		}
+
+		// Start with required tokens.
+		$tokens = $required_tokens;
+
+		// If rel value exists, parse and normalize it.
+		if ( null !== $rel_value ) {
+			$existing_tokens = preg_split( '/\s+/', trim( $rel_value ) );
+			if ( false !== $existing_tokens ) {
+				// Normalize existing tokens: lowercase, remove empty, filter allowed.
+				$normalized_existing = array_filter(
+					array_map( 'strtolower', $existing_tokens ),
+					function ( $token ) use ( $allowed_tokens ) {
+						return ! empty( $token ) && in_array( $token, $allowed_tokens, true );
+					}
+				);
+				// Merge with required tokens, removing duplicates.
+				$tokens = array_unique( array_merge( $tokens, $normalized_existing ) );
+			}
+		}
+
+		// Return normalized rel attribute or empty string if no valid tokens.
+		return empty( $tokens ) ? '' : implode( ' ', $tokens );
+	}
+
+	/**
 	 * Validate and sanitize specific caption attributes for security.
 	 *
 	 * @param \WP_HTML_Tag_Processor $html HTML tag processor.
@@ -115,24 +154,26 @@ class Html_Processing_Helper {
 			case 'target':
 				// Allow only common safe targets.
 				$allowed_targets = array( '_blank', '_self' );
-				if ( ! in_array( strtolower( (string) $attr_value ), $allowed_targets, true ) ) {
+				$target_value    = strtolower( (string) $attr_value );
+				if ( ! in_array( $target_value, $allowed_targets, true ) ) {
 					$html->remove_attribute( $attr_name );
+				} elseif ( '_blank' === $target_value ) {
+					// When target is "_blank", ensure rel attribute has noopener and noreferrer.
+					$current_rel    = $html->get_attribute( 'rel' );
+					$rel_value      = is_string( $current_rel ) ? $current_rel : null;
+					$normalized_rel = self::normalize_rel_attribute( $rel_value, true );
+					$html->set_attribute( 'rel', $normalized_rel );
 				}
 				break;
 
 			case 'rel':
-				// Keep only safe relationship tokens.
-				$tokens         = preg_split( '/\s+/', (string) $attr_value );
-				$allowed_tokens = array( 'noopener', 'noreferrer', 'nofollow', 'external' );
-				if ( false === $tokens ) {
+				// Normalize rel attribute: lowercase, deduplicate, preserve safe tokens.
+				$rel_value      = is_string( $attr_value ) ? $attr_value : null;
+				$normalized_rel = self::normalize_rel_attribute( $rel_value, false );
+				if ( empty( $normalized_rel ) ) {
 					$html->remove_attribute( $attr_name );
 				} else {
-					$safe_tokens = array_values( array_intersect( array_map( 'strtolower', $tokens ), $allowed_tokens ) );
-					if ( empty( $safe_tokens ) ) {
-						$html->remove_attribute( $attr_name );
-					} else {
-						$html->set_attribute( $attr_name, implode( ' ', $safe_tokens ) );
-					}
+					$html->set_attribute( $attr_name, $normalized_rel );
 				}
 				break;
 
@@ -250,10 +291,12 @@ class Html_Processing_Helper {
 			'strong' => array(),
 			'em'     => array(),
 			'a'      => array(
-				'href'   => array(),
-				'title'  => array(),
-				'target' => array(),
-				'rel'    => array(),
+				'href'      => array(),
+				'title'     => array(),
+				'target'    => array(),
+				'rel'       => array(),
+				'data-type' => array(),
+				'data-id'   => array(),
 			),
 			'mark'   => array(),
 			'kbd'    => array(),
@@ -261,8 +304,10 @@ class Html_Processing_Helper {
 			'sub'    => array(),
 			'sup'    => array(),
 			'span'   => array(
-				'style' => array(),
-				'class' => array(),
+				'style'     => array(),
+				'class'     => array(),
+				'data-type' => array(),
+				'data-id'   => array(),
 			),
 			'br'     => array(),
 		);
