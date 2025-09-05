@@ -38,7 +38,7 @@ class BlockTemplatesController {
 	 * Dequeue legacy scripts that have no usage with block themes.
 	 */
 	public function dequeue_legacy_scripts() {
-		if( ! wp_is_block_theme() ) {
+		if ( ! wp_is_block_theme() ) {
 			return;
 		}
 
