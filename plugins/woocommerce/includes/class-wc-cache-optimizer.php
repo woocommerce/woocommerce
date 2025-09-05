@@ -40,6 +40,13 @@ class WC_Cache_Optimizer {
 	private $options = array();
 
 	/**
+	 * Track cookies that were blocked during this request.
+	 *
+	 * @var array
+	 */
+	private $blocked_cookies = array();
+
+	/**
 	 * Get single instance of the class.
 	 *
 	 * @return WC_Cache_Optimizer
@@ -166,7 +173,19 @@ class WC_Cache_Optimizer {
 
 		// For cart cookies, check if we're in a context that requires them
 		if ( in_array( $name, array( 'woocommerce_items_in_cart', 'woocommerce_cart_hash' ), true ) ) {
-			return $this->requires_cookies_for_context();
+			$should_allow = $this->requires_cookies_for_context();
+			
+			// Track blocked cookies for debug info
+			if ( ! $should_allow ) {
+				$this->blocked_cookies[] = array(
+					'name' => $name,
+					'value' => $value,
+					'reason' => 'Context does not require cookies',
+					'timestamp' => time(),
+				);
+			}
+			
+			return $should_allow;
 		}
 
 		// Allow other cookies by default
@@ -311,9 +330,13 @@ class WC_Cache_Optimizer {
 		}
 
 		$status = $this->get_status();
+		$cookie_info = $this->get_cookie_debug_info();
 
-		echo '<div id="wc-cache-debug" style="position: fixed; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 10px; font-size: 12px; z-index: 9999;">';
-		echo '<strong>WooCommerce Cache Debug:</strong><br>';
+		echo '<div id="wc-cache-debug" style="position: fixed; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 10px; font-size: 12px; z-index: 9999; max-width: 400px; max-height: 80vh; overflow-y: auto;">';
+		echo '<strong>WooCommerce Cache Debug:</strong><br><br>';
+		
+		// Show optimization status
+		echo '<strong>Optimization Status:</strong><br>';
 		foreach ( $status as $key => $value ) {
 			if ( is_bool( $value ) ) {
 				$value = $value ? 'Yes' : 'No';
@@ -322,7 +345,89 @@ class WC_Cache_Optimizer {
 			}
 			echo esc_html( $key ) . ': ' . esc_html( $value ) . '<br>';
 		}
+		
+		echo '<br><strong>Cookie Information:</strong><br>';
+		foreach ( $cookie_info as $key => $value ) {
+			echo esc_html( $key ) . ': ' . esc_html( $value ) . '<br>';
+		}
+		
 		echo '</div>';
+	}
+
+	/**
+	 * Get detailed cookie debug information.
+	 *
+	 * @return array
+	 */
+	private function get_cookie_debug_info() {
+		$info = array();
+		
+		// Check WooCommerce-specific cookies
+		$wc_cookies = array(
+			'woocommerce_items_in_cart',
+			'woocommerce_cart_hash',
+			'woocommerce_recently_viewed',
+		);
+		
+		// Check session cookies
+		$session_cookies = array();
+		foreach ( $_COOKIE as $name => $value ) {
+			if ( strpos( $name, 'wp_woocommerce_session_' ) === 0 ) {
+				$session_cookies[] = $name;
+			}
+		}
+		
+		// Count total cookies
+		$total_cookies = count( $_COOKIE );
+		$wc_cookie_count = 0;
+		$session_cookie_count = count( $session_cookies );
+		
+		// Check which WooCommerce cookies are present
+		$present_wc_cookies = array();
+		foreach ( $wc_cookies as $cookie ) {
+			if ( isset( $_COOKIE[ $cookie ] ) ) {
+				$present_wc_cookies[] = $cookie;
+				$wc_cookie_count++;
+			}
+		}
+		
+		$info['Total Cookies'] = $total_cookies;
+		$info['WC Cart Cookies'] = $wc_cookie_count . ' (' . implode( ', ', $present_wc_cookies ) . ')';
+		$info['Session Cookies'] = $session_cookie_count . ' (' . implode( ', ', $session_cookies ) . ')';
+		
+		// Show cookie values (truncated for security)
+		if ( ! empty( $present_wc_cookies ) ) {
+			$info['Cart Cookie Values'] = '';
+			foreach ( $present_wc_cookies as $cookie ) {
+				$value = $_COOKIE[ $cookie ];
+				$truncated = strlen( $value ) > 20 ? substr( $value, 0, 20 ) . '...' : $value;
+				$info['Cart Cookie Values'] .= $cookie . ': ' . $truncated . '<br>';
+			}
+		}
+		
+		// Check if cookies were blocked by optimization
+		$blocked_cookies = $this->get_blocked_cookies_info();
+		if ( ! empty( $blocked_cookies ) ) {
+			$info['Blocked Cookies'] = implode( ', ', $blocked_cookies );
+		}
+		
+		return $info;
+	}
+
+	/**
+	 * Get information about cookies that were blocked by optimization.
+	 *
+	 * @return array
+	 */
+	private function get_blocked_cookies_info() {
+		$blocked = array();
+		
+		// Show actually blocked cookies from this request
+		foreach ( $this->blocked_cookies as $blocked_cookie ) {
+			$blocked[] = $blocked_cookie['name'] . ' (' . $blocked_cookie['reason'] . ')';
+		}
+		
+		return $blocked;
 	}
 
 	/**
@@ -409,6 +514,7 @@ class WC_Cache_Optimizer {
 			'is_logged_in' => is_user_logged_in(),
 			'has_cart_cookies' => isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ),
 			'is_product_with_cart' => is_product() && $this->has_add_to_cart_form(),
+			'blocked_cookies_count' => count( $this->blocked_cookies ),
 		);
 	}
 }
