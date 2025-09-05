@@ -771,6 +771,11 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/admin/woocommerce-legacy-reports.php';
 		}
 
+		/**
+		 * Cache optimization classes - available in both admin and frontend.
+		 */
+		include_once WC_ABSPATH . 'includes/class-wc-cache-optimization.php';
+
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
 		$in_post_editor = doing_action( 'load-post.php' ) || doing_action( 'load-post-new.php' );
 
@@ -849,9 +854,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
 		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
-		
-		// Include cache optimization classes
-		include_once WC_ABSPATH . 'includes/class-wc-cache-optimization.php';
 	}
 
 	/**
