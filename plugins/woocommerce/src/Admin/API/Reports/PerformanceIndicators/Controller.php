@@ -134,7 +134,7 @@ class Controller extends GenericController {
 
 			return $response;
 		};
-		
+
 		add_filter( 'woocommerce_rest_prepare_report', $remove_self_link_from_prepared_internal_response );
 		$response = rest_do_request( $request );
 		remove_filter( 'woocommerce_rest_prepare_report', $remove_self_link_from_prepared_internal_response );
