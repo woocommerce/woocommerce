@@ -296,21 +296,16 @@ class Html_Processing_Helper {
 		// Remove dangerous content: script, style, and other executable elements.
 		$caption_html = (string) preg_replace( '/<(script|style|iframe|object|embed|form|input|button)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
 
-		// Remove dangerous attributes that could execute code.
-		$caption_html = (string) preg_replace( '/\s+(on\w+|javascript:|data:)\s*=\s*["\'][^"\']*["\']/i', '', $caption_html );
-
-		// Remove any remaining dangerous attributes.
-		$caption_html = (string) preg_replace( '/\s+(on\w+|javascript:|data:)\s*=\s*[^\s>]+/i', '', $caption_html );
-
 		// Use a more conservative approach - only validate attributes, don't modify tags.
 		$allowed_tags = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
 
 		$html = new \WP_HTML_Tag_Processor( $caption_html );
 
+		// First pass: Process attributes for allowed tags only.
 		while ( $html->next_tag() ) {
 			$tag_name = $html->get_tag();
 
-			// Skip processing for disallowed tags - just leave them as-is.
+			// Skip processing for disallowed tags.
 			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
 				continue;
 			}
@@ -325,6 +320,18 @@ class Html_Processing_Helper {
 			}
 		}
 
-		return $html->get_updated_html();
+		// Second pass: Remove disallowed tags using a simple regex approach.
+		$final_html = $html->get_updated_html();
+
+		// Create a regex pattern to match disallowed tags.
+		$allowed_tags_pattern = implode( '|', array_map( 'preg_quote', $allowed_tags ) );
+
+		// Remove disallowed opening and closing tags, keeping only their content.
+		$final_html = (string) preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>(.*?)<\/(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>/s', '$1', $final_html );
+
+		// Remove disallowed self-closing tags.
+		$final_html = (string) preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*\/>/s', '', $final_html );
+
+		return $final_html;
 	}
 }
