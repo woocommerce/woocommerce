@@ -70,8 +70,8 @@ const CartExpressPayment = () => {
 	 * unordered list to display each option.
 	 *
 	 * When only one express payment option is available, this will use a
-	 * non-sematic DIV for both the wrapper and the individual items. This
-	 * it to prevent accessibility issues caused by a list of one (which isn't
+	 * non-semantic DIV for both the wrapper and the individual items. This
+	 * is to prevent accessibility issues caused by a list of one (which isn't
 	 * a list).
 	 */
 	const ExpressPayWrapper = availableExpressPaymentsCount > 1 ? 'ul' : 'div';
