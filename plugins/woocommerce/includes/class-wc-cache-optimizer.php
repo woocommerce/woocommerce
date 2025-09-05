@@ -221,18 +221,21 @@ class WC_Cache_Optimizer {
 			return true;
 		}
 
-		// Require cookies if user is logged in (they might have saved cart)
-		if ( is_user_logged_in() ) {
-			return true;
-		}
-
 		// Require cookies if there are existing cart cookies (user has items in cart)
 		if ( isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ) ) {
 			return true;
 		}
 
+		// Require cookies if user is logged in AND has items in cart
+		// This handles the case where a logged-in user has a saved cart
+		if ( is_user_logged_in() && ! WC()->cart->is_empty() ) {
+			return true;
+		}
+
 		// Note: Product pages with add-to-cart buttons don't need cookies
 		// because add-to-cart works via AJAX and cookies are set after the action
+		// Note: Logged-in users browsing static pages don't need cart cookies
+		// unless they have items in their cart
 
 		// Default to not requiring cookies for better caching
 		return false;
@@ -276,15 +279,13 @@ class WC_Cache_Optimizer {
 			}
 		}
 
-		// Check if user is logged in
-		if ( is_user_logged_in() ) {
-			return true;
-		}
-
-		// Check if cart has items
+		// Check if cart has items (this makes the page dynamic)
 		if ( ! WC()->cart->is_empty() ) {
 			return true;
 		}
+
+		// Note: Being logged in doesn't automatically make a page dynamic
+		// Logged-in users can browse cacheable pages like products and blog posts
 
 		return false;
 	}
