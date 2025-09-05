@@ -107,9 +107,5 @@
 	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"providesContext": {
-		"postId": "productId",
-		"postType": "postType"
-	}
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

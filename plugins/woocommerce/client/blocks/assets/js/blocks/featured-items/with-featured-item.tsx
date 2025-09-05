@@ -42,6 +42,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -225,65 +226,54 @@ export const withFeaturedItem =
 
 		const renderInnerBlocks = () => {
 			if ( product ) {
-				// Debug: Log the product context
-				console.log( 'Featured Product - providing context:', {
-					productId: product?.id,
-					productName: product?.name,
-					postType: 'product',
-				} );
-				
 				return (
-					<ProductDataContextProvider
-						product={ product }
-						isLoading={ isLoading }
+					<BlockContextProvider
+						value={ { postId: product.id, postType: 'product' } }
 					>
-						<BlockContextProvider
-							value={ {
-								postId: product?.id,
-								postType: 'product',
-							} }
-						>
-							<div className={ `${ className }__inner-blocks` }>
-								<InnerBlocks
-									allowedBlocks={ [
+						<div className={ `${ className }__inner-blocks` }>
+							<InnerBlocks
+								allowedBlocks={ [
+									'core/post-title',
+									'core/buttons',
+									'core/heading',
+								] }
+								template={ [
+									[
 										'core/post-title',
+										{
+											isLink: true,
+											level: 2,
+											textAlign: 'center',
+											__woocommerceNamespace:
+												PRODUCT_TITLE_VARIATION_NAME,
+										},
+									],
+									[
 										'core/buttons',
-										'core/heading',
-									] }
-									template={ [
-										[
-											'core/post-title',
-											{
-												level: 2,
-												isLink: true,
+										{
+											layout: {
+												type: 'flex',
+												justifyContent: 'center',
 											},
-										],
+										},
 										[
-											'core/buttons',
-											{
-												layout: {
-													type: 'flex',
-													justifyContent: 'center',
-												},
-											},
 											[
-												[
-													'core/button',
-													{
-														text: __(
-															'Shop now',
-															'woocommerce'
-														),
-														url: product.permalink,
-													},
-												],
+												'core/button',
+												{
+													text: __(
+														'Shop now',
+														'woocommerce'
+													),
+													url: product.permalink,
+												},
 											],
 										],
-									] }
-								/>
-							</div>
-						</BlockContextProvider>
-					</ProductDataContextProvider>
+									],
+								] }
+								templateLock={ false }
+							/>
+						</div>
+					</BlockContextProvider>
 				);
 			}
 
@@ -296,7 +286,10 @@ export const withFeaturedItem =
 							'core/buttons',
 						] }
 						template={ [
-							[ 'woocommerce/category-title', { level: 2 } ],
+							[
+								'woocommerce/category-title',
+								{ level: 2, textAlign: 'center' },
+							],
 							[
 								'core/buttons',
 								{
@@ -319,6 +312,7 @@ export const withFeaturedItem =
 								],
 							],
 						] }
+						templateLock={ false }
 					/>
 				</div>
 			);
