@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
  *
  * @since 10.4.0
  */
-class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
+class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 	/**
 	 * Array to track abilities registered during tests for cleanup.
@@ -21,8 +21,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	 * Set up before each test
 	 */
 	public function set_up() {
-		parent::set_up();
-
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
 		 * The bootstrap file has an ABSPATH check that ensures it only loads in a proper
@@ -40,12 +38,7 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
 		}
 
-		// Reset REST server for clean state.
-		global $wp_rest_server;
-		$wp_rest_server = null;
-
-		// Create fresh REST server instance (automatically triggers rest_api_init).
-		rest_get_server();
+		parent::set_up();
 	}
 
 	/**
@@ -72,10 +65,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			unset( $wp_actions['abilities_api_init'] );
 		}
 
-		// Reset REST server.
-		global $wp_rest_server;
-		$wp_rest_server = null;
-		
 		// Reset user.
 		wp_set_current_user( 0 );
 		
@@ -220,8 +209,7 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		// Ensure the bootstrap file has been loaded by checking for the class.
 		$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
 
-		$server = rest_get_server();
-		$routes = $server->get_routes();
+		$routes = $this->server->get_routes();
 
 		// Check for abilities list endpoint.
 		$this->assertArrayHasKey( '/wp/v2/abilities', $routes, 'Abilities list endpoint should be registered' );
@@ -275,8 +263,7 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/abilities' );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
-		$server   = rest_get_server();
-		$response = $server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status(), 'REST API should return 200 status' );
 
@@ -358,8 +345,7 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
 
-		$server   = rest_get_server();
-		$response = $server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status(), 'REST API execution should return 200 status' );
 
