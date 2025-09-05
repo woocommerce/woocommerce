@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-details-section-description",
+	"title": "Product details section description",
+	"category": "woocommerce",
+	"description": "The product details section description.",
+	"keywords": [
+		"products",
+		"section",
+		"description"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"content": {
+			"type": "string",
+			"role": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"usesContext": [ "selectedTab" ],
+	"editorStyle": "file:./editor.css"
+}
