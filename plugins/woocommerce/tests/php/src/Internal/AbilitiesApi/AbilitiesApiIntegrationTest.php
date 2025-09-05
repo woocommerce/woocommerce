@@ -18,10 +18,10 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	private $registered_abilities = array();
 
 	/**
-	 * Set up the test class environment once before all tests.
+	 * Set up before each test
 	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
+	public function set_up() {
+		parent::set_up();
 
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
@@ -35,15 +35,15 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			}
 		}
 
-		// Trigger the abilities API initialization if it hasn't been done yet.
-		if ( did_action( 'abilities_api_init' ) === 0 ) {
-			do_action( 'abilities_api_init' );
-		}
+		// Reset REST server for clean state.
+		global $wp_rest_server;
+		$wp_rest_server = null;
 
-		// Ensure REST API initialization happens for the abilities API.
+		// Create fresh REST server instance.
 		rest_get_server();
-		do_action( 'rest_api_init' );
 
+		// Register REST routes.
+		do_action( 'rest_api_init' );
 	}
 
 	/**
@@ -56,6 +56,27 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		}
 		$this->registered_abilities = array();
 
+		// Reset abilities registry singleton to allow fresh abilities_api_init in next test.
+		if ( class_exists( 'WP_Abilities_Registry' ) ) {
+			$reflection = new \ReflectionClass( 'WP_Abilities_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
+		// Reset action counter to allow abilities_api_init to fire again.
+		global $wp_actions;
+		if ( isset( $wp_actions['abilities_api_init'] ) ) {
+			unset( $wp_actions['abilities_api_init'] );
+		}
+
+		// Reset REST server.
+		global $wp_rest_server;
+		$wp_rest_server = null;
+		
+		// Reset user.
+		wp_set_current_user( 0 );
+		
 		parent::tear_down();
 	}
 
@@ -100,47 +121,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that we can register a simple ability.
-	 *
-	 * @group abilities-api
-	 */
-	public function test_can_register_ability() {
-		$ability_id                   = 'woocommerce-test/simple-test';
-		$this->registered_abilities[] = $ability_id;
-
-		$result = wp_register_ability(
-			$ability_id,
-			array(
-				'label'            => 'Simple Test Ability',
-				'description'      => 'A simple test ability for unit testing',
-				'input_schema'     => array(
-					'type'       => 'object',
-					'properties' => array(
-						'message' => array(
-							'type' => 'string',
-						),
-					),
-				),
-				'output_schema'    => array(
-					'type'       => 'object',
-					'properties' => array(
-						'result' => array(
-							'type' => 'string',
-						),
-					),
-				),
-				'execute_callback' => function ( $input ) {
-					return array(
-						'result' => 'Test executed with: ' . ( $input['message'] ?? 'no message' ),
-					);
-				},
-			)
-		);
-
-		$this->assertInstanceOf( 'WP_Ability', $result, 'Ability registration should return a WP_Ability instance' );
-	}
-
-	/**
 	 * Test that we can retrieve a registered ability.
 	 *
 	 * @group abilities-api
@@ -149,22 +129,24 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/get-test';
 		$this->registered_abilities[] = $ability_id;
 
-		// Register the ability first.
-		wp_register_ability(
-			$ability_id,
-			array(
-				'label'            => 'Get Test Ability',
-				'description'      => 'A test ability for testing retrieval',
-				'input_schema'     => array( 'type' => 'object' ),
-				'output_schema'    => array( 'type' => 'object' ),
-				'execute_callback' => function ( $input ) {
-					return array(
-						'success' => true,
-						'input'   => $input,
-					);
-				},
-			)
-		);
+		// Hook ability registration to the init action.
+		add_action( 'abilities_api_init', function() use ( $ability_id ) {
+			wp_register_ability(
+				$ability_id,
+				array(
+					'label'            => 'Get Test Ability',
+					'description'      => 'A test ability for testing retrieval',
+					'input_schema'     => array( 'type' => 'object' ),
+					'output_schema'    => array( 'type' => 'object' ),
+					'execute_callback' => function ( $input ) {
+						return array(
+							'success' => true,
+							'input'   => $input,
+						);
+					},
+				)
+			);
+		});
 
 		// Test retrieval.
 		$ability = wp_get_ability( $ability_id );
@@ -184,35 +166,37 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/execute-test';
 		$this->registered_abilities[] = $ability_id;
 
-		// Register the ability.
-		wp_register_ability(
-			$ability_id,
-			array(
-				'label'            => 'Execute Test Ability',
-				'description'      => 'A test ability for testing execution',
-				'input_schema'     => array(
-					'type'       => 'object',
-					'properties' => array(
-						'input_value' => array(
-							'type' => 'string',
+		// Hook ability registration to the init action.
+		add_action( 'abilities_api_init', function() use ( $ability_id ) {
+			wp_register_ability(
+				$ability_id,
+				array(
+					'label'            => 'Execute Test Ability',
+					'description'      => 'A test ability for testing execution',
+					'input_schema'     => array(
+						'type'       => 'object',
+						'properties' => array(
+							'input_value' => array(
+								'type' => 'string',
+							),
 						),
 					),
-				),
-				'output_schema'    => array(
-					'type'       => 'object',
-					'properties' => array(
-						'processed_value' => array(
-							'type' => 'string',
+					'output_schema'    => array(
+						'type'       => 'object',
+						'properties' => array(
+							'processed_value' => array(
+								'type' => 'string',
+							),
 						),
 					),
-				),
-				'execute_callback' => function ( $input ) {
-					return array(
-						'processed_value' => 'Processed: ' . ( $input['input_value'] ?? 'empty' ),
-					);
-				},
-			)
-		);
+					'execute_callback' => function ( $input ) {
+						return array(
+							'processed_value' => 'Processed: ' . ( $input['input_value'] ?? 'empty' ),
+						);
+					},
+				)
+			);
+		});
 
 		// Get and execute the ability.
 		$ability = wp_get_ability( $ability_id );
@@ -256,32 +240,34 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
 
-		// Register test abilities.
-		wp_register_ability(
-			$ability_id_1,
-			array(
-				'label'            => 'REST Fetch Test 1',
-				'description'      => 'First ability for REST API testing',
-				'input_schema'     => array( 'type' => 'object' ),
-				'output_schema'    => array( 'type' => 'object' ),
-				'execute_callback' => function ( $input ) {
-					return array( 'input' => $input );
-				},
-			)
-		);
+		// Hook ability registration to the init action.
+		add_action( 'abilities_api_init', function() use ( $ability_id_1, $ability_id_2 ) {
+			wp_register_ability(
+				$ability_id_1,
+				array(
+					'label'            => 'REST Fetch Test 1',
+					'description'      => 'First ability for REST API testing',
+					'input_schema'     => array( 'type' => 'object' ),
+					'output_schema'    => array( 'type' => 'object' ),
+					'execute_callback' => function ( $input ) {
+						return array( 'input' => $input );
+					},
+				)
+			);
 
-		wp_register_ability(
-			$ability_id_2,
-			array(
-				'label'            => 'REST Fetch Test 2',
-				'description'      => 'Second ability for REST API testing',
-				'input_schema'     => array( 'type' => 'object' ),
-				'output_schema'    => array( 'type' => 'object' ),
-				'execute_callback' => function ( $input ) {
-					return array( 'input' => $input );
-				},
-			)
-		);
+			wp_register_ability(
+				$ability_id_2,
+				array(
+					'label'            => 'REST Fetch Test 2',
+					'description'      => 'Second ability for REST API testing',
+					'input_schema'     => array( 'type' => 'object' ),
+					'output_schema'    => array( 'type' => 'object' ),
+					'execute_callback' => function ( $input ) {
+						return array( 'input' => $input );
+					},
+				)
+			);
+		});
 
 		// Create REST request.
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/abilities' );
@@ -321,37 +307,39 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/rest-execute-test';
 		$this->registered_abilities[] = $ability_id;
 
-		// Register test ability.
-		wp_register_ability(
-			$ability_id,
-			array(
-				'label'            => 'REST Execute Test',
-				'description'      => 'Test ability for REST API execution',
-				'input_schema'     => array(
-					'type'       => 'object',
-					'properties' => array(
-						'test_value' => array(
-							'type' => 'string',
+		// Hook ability registration to the init action.
+		add_action( 'abilities_api_init', function() use ( $ability_id ) {
+			wp_register_ability(
+				$ability_id,
+				array(
+					'label'            => 'REST Execute Test',
+					'description'      => 'Test ability for REST API execution',
+					'input_schema'     => array(
+						'type'       => 'object',
+						'properties' => array(
+							'test_value' => array(
+								'type' => 'string',
+							),
 						),
 					),
-				),
-				'output_schema'    => array(
-					'type'       => 'object',
-					'properties' => array(
-						'result' => array(
-							'type' => 'string',
+					'output_schema'    => array(
+						'type'       => 'object',
+						'properties' => array(
+							'result' => array(
+								'type' => 'string',
+							),
 						),
 					),
-				),
-				'execute_callback' => function ( $input ) {
-					$test_value = isset( $input['test_value'] ) ? $input['test_value'] : 'default';
-					return array(
-						'result'     => 'Executed with: ' . $test_value,
-						'input_echo' => $input,
-					);
-				},
-			)
-		);
+					'execute_callback' => function ( $input ) {
+						$test_value = isset( $input['test_value'] ) ? $input['test_value'] : 'default';
+						return array(
+							'result'     => 'Executed with: ' . $test_value,
+							'input_echo' => $input,
+						);
+					},
+				)
+			);
+		});
 
 		// Create REST request for execution.
 		$request = new \WP_REST_Request( 'POST', '/wp/v2/abilities/' . $ability_id . '/run' );
@@ -392,30 +380,34 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
 
-		// Register two test abilities.
-		wp_register_ability(
-			$ability_id_1,
-			array(
-				'label'            => 'List Test 1',
-				'description'      => 'First test ability',
-				'input_schema'     => array( 'type' => 'object' ),
-				'output_schema'    => array( 'type' => 'object' ),
-				'execute_callback' => function ( $input ) {
-					return array( 'input' => $input ); },
-			)
-		);
+		// Hook ability registration to the init action.
+		add_action( 'abilities_api_init', function() use ( $ability_id_1, $ability_id_2 ) {
+			wp_register_ability(
+				$ability_id_1,
+				array(
+					'label'            => 'List Test 1',
+					'description'      => 'First test ability',
+					'input_schema'     => array( 'type' => 'object' ),
+					'output_schema'    => array( 'type' => 'object' ),
+					'execute_callback' => function ( $input ) {
+						return array( 'input' => $input ); 
+					},
+				)
+			);
 
-		wp_register_ability(
-			$ability_id_2,
-			array(
-				'label'            => 'List Test 2',
-				'description'      => 'Second test ability',
-				'input_schema'     => array( 'type' => 'object' ),
-				'output_schema'    => array( 'type' => 'object' ),
-				'execute_callback' => function ( $input ) {
-					return array( 'input' => $input ); },
-			)
-		);
+			wp_register_ability(
+				$ability_id_2,
+				array(
+					'label'            => 'List Test 2',
+					'description'      => 'Second test ability',
+					'input_schema'     => array( 'type' => 'object' ),
+					'output_schema'    => array( 'type' => 'object' ),
+					'execute_callback' => function ( $input ) {
+						return array( 'input' => $input ); 
+					},
+				)
+			);
+		});
 
 		// Get all abilities.
 		$abilities = wp_get_abilities();
