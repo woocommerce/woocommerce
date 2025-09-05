@@ -271,7 +271,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'data-wp-context'    => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
+						'selectedValue' => $selected_attribute,
 					),
 					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
 					'data-wp-on--change' => 'actions.handleDropdownChange',
