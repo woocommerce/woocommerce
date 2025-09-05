@@ -69,25 +69,28 @@ class WC_Cache_Optimizer {
 	 * Initialize the cache optimizer.
 	 */
 	private function init() {
-		// Check if optimization should be enabled
+		// Load configuration first (needed for both admin and frontend)
+		$this->load_options();
+
+		// Always initialize admin hooks
+		$this->init_admin_hooks();
+
+		// Check if optimization should be enabled for frontend
 		$this->enabled = $this->should_enable_optimization();
 		
 		if ( ! $this->enabled ) {
 			return;
 		}
 
-		// Load configuration
-		$this->load_options();
-
-		// Initialize hooks
-		$this->init_hooks();
+		// Initialize frontend hooks
+		$this->init_frontend_hooks();
 
 		// Replace default cart session handler
 		$this->replace_cart_session_handler();
 	}
 
 	/**
-	 * Check if cache optimization should be enabled.
+	 * Check if cache optimization should be enabled for frontend.
 	 *
 	 * @return bool
 	 */
@@ -95,15 +98,13 @@ class WC_Cache_Optimizer {
 		// Enable by default, but allow filtering
 		$enabled = apply_filters( 'woocommerce_cache_optimization_enabled', true );
 
-		// Disable in admin
-		if ( is_admin() ) {
-			$enabled = false;
-		}
-
 		// Disable if explicitly disabled via constant
 		if ( defined( 'WC_DISABLE_CACHE_OPTIMIZATION' ) && WC_DISABLE_CACHE_OPTIMIZATION ) {
 			$enabled = false;
 		}
+
+		// Note: We don't disable in admin anymore since admin functionality
+		// is now handled separately from frontend optimization
 
 		return $enabled;
 	}
@@ -130,9 +131,17 @@ class WC_Cache_Optimizer {
 	}
 
 	/**
-	 * Initialize hooks.
+	 * Initialize admin hooks.
 	 */
-	private function init_hooks() {
+	private function init_admin_hooks() {
+		// Add admin menu
+		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+	}
+
+	/**
+	 * Initialize frontend hooks.
+	 */
+	private function init_frontend_hooks() {
 		// Add cache-friendly headers
 		add_action( 'wp', array( $this, 'add_cache_headers' ), 5 );
 
@@ -145,9 +154,6 @@ class WC_Cache_Optimizer {
 		if ( $this->options['debug_mode'] ) {
 			add_action( 'wp_footer', array( $this, 'add_debug_info' ) );
 		}
-
-		// Add admin menu
-		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 	}
 
 	/**
