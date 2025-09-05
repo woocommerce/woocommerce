@@ -25,6 +25,7 @@
 			text-overflow: ellipsis;
 			overflow: hidden;
 			white-space: nowrap;
+			color: var(--wc-form-color-text, #444);
 
 			&:last-child {
 				border-bottom: none;
