@@ -214,6 +214,171 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that REST API endpoints are registered.
+	 *
+	 * @group abilities-api
+	 */
+	public function test_rest_endpoints_are_registered() {
+		// Ensure the bootstrap file has been loaded by checking for the class.
+		$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+
+		/**
+		 * Initialize REST API for testing.
+		 *
+		 * Fires when preparing to serve a REST API request.
+		 *
+		 * @since 4.4.0
+		 */
+		do_action( 'rest_api_init' );
+
+		$server = rest_get_server();
+		$routes = $server->get_routes();
+
+		// Check for abilities list endpoint.
+		$this->assertArrayHasKey( '/wp/v2/abilities', $routes, 'Abilities list endpoint should be registered' );
+
+		// Check for ability run endpoint - look for the exact pattern from the controller.
+		$run_endpoint = '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
+		$this->assertArrayHasKey( $run_endpoint, $routes, 'Ability run endpoint should be registered' );
+	}
+
+	/**
+	 * Test fetching abilities via REST API.
+	 *
+	 * @group abilities-api
+	 */
+	public function test_rest_fetch_abilities() {
+		$ability_id_1                 = 'woocommerce-test/rest-fetch-1';
+		$ability_id_2                 = 'woocommerce-test/rest-fetch-2';
+		$this->registered_abilities[] = $ability_id_1;
+		$this->registered_abilities[] = $ability_id_2;
+
+		// Register test abilities.
+		wp_register_ability(
+			$ability_id_1,
+			array(
+				'label'            => 'REST Fetch Test 1',
+				'description'      => 'First ability for REST API testing',
+				'input_schema'     => array( 'type' => 'object' ),
+				'output_schema'    => array( 'type' => 'object' ),
+				'execute_callback' => function ( $input ) {
+					return array( 'input' => $input );
+				},
+			)
+		);
+
+		wp_register_ability(
+			$ability_id_2,
+			array(
+				'label'            => 'REST Fetch Test 2',
+				'description'      => 'Second ability for REST API testing',
+				'input_schema'     => array( 'type' => 'object' ),
+				'output_schema'    => array( 'type' => 'object' ),
+				'execute_callback' => function ( $input ) {
+					return array( 'input' => $input );
+				},
+			)
+		);
+
+		// Create REST request.
+		$request = new \WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		// Set up authentication for admin user.
+		wp_set_current_user( 1 );
+		$server   = rest_get_server();
+		$response = $server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'REST API should return 200 status' );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data, 'Response should be an array' );
+
+		// Find our test abilities in the response.
+		$found_abilities = array();
+		foreach ( $data as $ability_data ) {
+			if ( isset( $ability_data['name'] ) && in_array( $ability_data['name'], array( $ability_id_1, $ability_id_2 ), true ) ) {
+				$found_abilities[] = $ability_data['name'];
+
+				// Verify ability structure.
+				$this->assertArrayHasKey( 'label', $ability_data, 'Ability should have label' );
+				$this->assertArrayHasKey( 'description', $ability_data, 'Ability should have description' );
+			}
+		}
+
+		$this->assertCount( 2, $found_abilities, 'Should find both test abilities in REST response' );
+		$this->assertContains( $ability_id_1, $found_abilities, 'First test ability should be in REST response' );
+		$this->assertContains( $ability_id_2, $found_abilities, 'Second test ability should be in REST response' );
+	}
+
+	/**
+	 * Test executing abilities via REST API.
+	 *
+	 * @group abilities-api
+	 */
+	public function test_rest_execute_ability() {
+		$ability_id                   = 'woocommerce-test/rest-execute-test';
+		$this->registered_abilities[] = $ability_id;
+
+		// Register test ability.
+		wp_register_ability(
+			$ability_id,
+			array(
+				'label'            => 'REST Execute Test',
+				'description'      => 'Test ability for REST API execution',
+				'input_schema'     => array(
+					'type'       => 'object',
+					'properties' => array(
+						'test_value' => array(
+							'type' => 'string',
+						),
+					),
+				),
+				'output_schema'    => array(
+					'type'       => 'object',
+					'properties' => array(
+						'result' => array(
+							'type' => 'string',
+						),
+					),
+				),
+				'execute_callback' => function ( $input ) {
+					$test_value = isset( $input['test_value'] ) ? $input['test_value'] : 'default';
+					return array(
+						'result'     => 'Executed with: ' . $test_value,
+						'input_echo' => $input,
+					);
+				},
+			)
+		);
+
+		// Create REST request for execution.
+		$request = new \WP_REST_Request( 'POST', '/wp/v2/abilities/' . $ability_id . '/run' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'input' => array(
+						'test_value' => 'REST API test data',
+					),
+				)
+			)
+		);
+		// Set up authentication for admin user.
+		wp_set_current_user( 1 );
+
+		$server   = rest_get_server();
+		$response = $server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'REST API execution should return 200 status' );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data, 'Response should be an array' );
+		$this->assertArrayHasKey( 'result', $data, 'Response should contain result' );
+		$this->assertEquals( 'Executed with: REST API test data', $data['result'], 'Result should match expected value' );
+		$this->assertArrayHasKey( 'input_echo', $data, 'Response should echo input' );
+		$this->assertEquals( 'REST API test data', $data['input_echo']['test_value'], 'Input should be echoed correctly' );
+	}
+
+	/**
 	 * Test that we can list registered abilities.
 	 *
 	 * @group abilities-api
