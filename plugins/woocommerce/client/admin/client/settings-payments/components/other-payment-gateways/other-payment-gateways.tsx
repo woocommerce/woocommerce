@@ -368,7 +368,7 @@ export const OtherPaymentGateways = ( {
 			>
 				<div className="other-payment-gateways__header__title">
 					<span>
-						{ __( 'Other payment options', 'woocommerce' ) }
+						{ __( 'More payment options', 'woocommerce' ) }
 					</span>
 					{ ! isExpanded && <>{ collapsedImages }</> }
 				</div>
