@@ -310,20 +310,16 @@ class WC_Cache_Optimizer {
 			return;
 		}
 
-		$status = array(
-			'Cache Optimization' => $this->enabled ? 'Enabled' : 'Disabled',
-			'Dynamic Page' => $this->is_dynamic_page() ? 'Yes' : 'No',
-			'Cart Empty' => WC()->cart->is_empty() ? 'Yes' : 'No',
-			'User Logged In' => is_user_logged_in() ? 'Yes' : 'No',
-		);
-
-		if ( WC()->cart->session && method_exists( WC()->cart->session, 'get_cache_optimization_status' ) ) {
-			$status = array_merge( $status, WC()->cart->session->get_cache_optimization_status() );
-		}
+		$status = $this->get_status();
 
 		echo '<div id="wc-cache-debug" style="position: fixed; bottom: 10px; right: 10px; background: #000; color: #fff; padding: 10px; font-size: 12px; z-index: 9999;">';
 		echo '<strong>WooCommerce Cache Debug:</strong><br>';
 		foreach ( $status as $key => $value ) {
+			if ( is_bool( $value ) ) {
+				$value = $value ? 'Yes' : 'No';
+			} elseif ( is_array( $value ) ) {
+				$value = print_r( $value, true );
+			}
 			echo esc_html( $key ) . ': ' . esc_html( $value ) . '<br>';
 		}
 		echo '</div>';
