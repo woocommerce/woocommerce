@@ -258,6 +258,7 @@ export const withFeaturedItem =
 										{
 											showDescriptionIfEmpty: true,
 											summaryLength: 80,
+											textAlign: 'center',
 										},
 									],
 									[
