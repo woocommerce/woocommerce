@@ -264,6 +264,43 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test field filtering with _fields parameter.
+	 */
+	public function test_get_variations_with_fields_filtering() {
+		// Given.
+		wp_set_current_user( $this->user );
+		$product = WC_Helper_Product::create_variation_product();
+
+		// When requesting only 3 specific fields.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( '_fields', 'id,sku,parent_id' );
+		$response = $this->server->dispatch( $request );
+
+		// Then.
+		$this->assertSame( 200, $response->get_status() );
+		$variations = $response->get_data();
+		$this->assertGreaterThan( 0, count( $variations ) );
+
+		$variation = $variations[0];
+
+		// Should have requested fields.
+		$this->assertArrayHasKey( 'id', $variation );
+		$this->assertArrayHasKey( 'sku', $variation );
+		$this->assertArrayHasKey( 'parent_id', $variation );
+		$this->assertSame( $product->get_id(), $variation['parent_id'] );
+
+		// Should not have other fields.
+		$this->assertArrayNotHasKey( 'name', $variation );
+		$this->assertArrayNotHasKey( 'description', $variation );
+		$this->assertArrayNotHasKey( 'attributes', $variation );
+		$this->assertArrayNotHasKey( 'date_created', $variation );
+		$this->assertArrayNotHasKey( 'price', $variation );
+
+		// The variation should have the exact number of requested fields.
+		$this->assertCount( 3, $variation );
+	}
+
+	/**
 	 * Test the variation schema.
 	 */
 	public function test_variation_schema() {
