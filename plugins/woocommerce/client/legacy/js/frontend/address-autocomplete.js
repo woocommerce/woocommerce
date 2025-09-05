@@ -528,8 +528,44 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							suggestionsContainer.appendChild( brandingElement );
 						}
 						// Update branding HTML content and make sure it's visible.
-						brandingElement.innerHTML =
-							serverProvider.branding_html;
+						// Sanitize the HTML using DOMPurify if available
+						if ( typeof DOMPurify !== 'undefined' ) {
+							// Allow common HTML tags and attributes for branding
+							const sanitizedHtml = DOMPurify.sanitize(
+								serverProvider.branding_html,
+								{
+									ALLOWED_TAGS: [
+										'img',
+										'span',
+										'div',
+										'a',
+										'b',
+										'i',
+										'em',
+										'strong',
+										'br',
+									],
+									ALLOWED_ATTR: [
+										'href',
+										'target',
+										'rel',
+										'src',
+										'alt',
+										'style',
+										'class',
+										'id',
+										'width',
+										'height',
+									],
+									ALLOW_DATA_ATTR: false,
+								}
+							);
+							brandingElement.innerHTML = sanitizedHtml;
+						} else {
+							// Fallback to server-side sanitized HTML if DOMPurify is not available
+							brandingElement.innerHTML =
+								serverProvider.branding_html;
+						}
 						brandingElement.style.display = 'flex';
 						brandingElement.removeAttribute( 'aria-hidden' );
 					}
