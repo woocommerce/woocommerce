@@ -35,6 +35,12 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			}
 		}
 
+		// Trigger the abilities API initialization if it hasn't been done yet.
+		if ( did_action( 'abilities_api_init' ) === 0 ) {
+			do_action( 'abilities_api_init' );
+		}
+
+		// Ensure REST API initialization happens for the abilities API.
 		rest_get_server();
 		do_action( 'rest_api_init' );
 
