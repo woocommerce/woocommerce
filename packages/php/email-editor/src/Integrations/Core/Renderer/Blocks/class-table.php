@@ -236,7 +236,7 @@ class Table extends Abstract_Block_Renderer {
 
 				// Add striped styling for tbody rows (first row gets background, then alternates).
 				if ( $is_striped_table && 'tbody' === $current_section && 1 === $row_count % 2 ) {
-					$email_cell_styles .= '; background-color: #f8f9fa;';
+					$email_cell_styles .= ' background-color: #f8f9fa;';
 				}
 
 				$new_cell_style = $existing_style ? $existing_style . '; ' . $email_cell_styles : $email_cell_styles;
@@ -330,12 +330,12 @@ class Table extends Abstract_Block_Renderer {
 
 		// Add thicker bottom border to all TH elements (headers).
 		if ( 'TH' === $tag_name ) {
-			$base_styles .= "; border-bottom: 3px solid {$border_color};";
+			$base_styles .= " border-bottom: 3px solid {$border_color};";
 		}
 
 		// Add thicker top border to footer cells (TD elements in tfoot).
 		if ( 'TD' === $tag_name && 'tfoot' === $current_section ) {
-			$base_styles .= "; border-top: 3px solid {$border_color};";
+			$base_styles .= " border-top: 3px solid {$border_color};";
 		}
 
 		return $base_styles;

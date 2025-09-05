@@ -69,7 +69,7 @@ class Html_Processing_Helper {
 	}
 
 	/**
-	 * Sanitize color value to ensure it's a valid hex color.
+	 * Sanitize color value to ensure it's a valid hex color or CSS variable.
 	 *
 	 * @param string $color The color value to sanitize.
 	 * @return string Sanitized color value.
@@ -83,7 +83,12 @@ class Html_Processing_Helper {
 			return $color;
 		}
 
-		// If not a valid hex color, return a safe default.
+		// Check if it's a CSS variable (var(--variable-name)).
+		if ( preg_match( '/^var\(--[a-zA-Z0-9\-_]+\)$/', $color ) ) {
+			return $color;
+		}
+
+		// If not a valid color format, return a safe default.
 		return '#000000';
 	}
 
