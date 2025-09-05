@@ -270,7 +270,6 @@ class Html_Processing_Helper {
 	 */
 	public static function get_caption_css_properties(): array {
 		return array(
-			'color',
 			'font-family',
 			'font-size',
 			'font-weight',
