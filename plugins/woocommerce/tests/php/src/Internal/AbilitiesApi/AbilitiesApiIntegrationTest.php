@@ -31,7 +31,7 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
 			if ( file_exists( $bootstrap_file ) ) {
-				require_once $bootstrap_file;
+				require $bootstrap_file;
 			}
 		}
 
