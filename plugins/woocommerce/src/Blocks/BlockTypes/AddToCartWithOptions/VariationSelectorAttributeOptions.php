@@ -249,7 +249,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				),
 			);
 
-			if ( $attribute_term['value'] === $selected_attribute || ( ! isset( $_GET[ $attribute_slug ] ) && $attribute_term['isSelected'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( $attribute_term['value'] === $selected_attribute ) {
 				$option_attributes['selected'] = 'selected';
 			}
 
