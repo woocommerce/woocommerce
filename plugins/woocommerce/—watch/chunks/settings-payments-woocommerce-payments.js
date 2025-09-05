@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunk_wcAdmin_webpackJsonp=globalThis.webpackChunk_wcAdmin_webpackJsonp||[]).push([[2985],{98614:(s,e,n)=>{n.r(e),n.d(e,{SettingsPaymentsWoopayments:()=>t,default:()=>c});var a=n(39793);const t=()=>(0,a.jsx)("div",{className:"settings-payments-woocommerce-payments__container",children:(0,a.jsx)("h1",{children:"WooPayments settings"})}),c=t}}]);

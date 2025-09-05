@@ -1,5 +1,0 @@
-/**
- * https://github.com/csnover/TraceKit
- * @license MIT
- * @namespace TraceKit
- */
