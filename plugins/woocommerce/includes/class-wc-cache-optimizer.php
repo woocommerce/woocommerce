@@ -137,39 +137,100 @@ class WC_Cache_Optimizer {
 	}
 
 	/**
-	 * Replace the default cart session handler with optimized version.
+	 * Initialize cache optimization for cart cookies.
 	 */
 	private function replace_cart_session_handler() {
 		if ( ! $this->options['optimize_cart_cookies'] ) {
 			return;
 		}
 
-		// Hook into WooCommerce initialization
-		add_action( 'woocommerce_init', array( $this, 'replace_cart_session' ), 5 );
+		// Use the existing WooCommerce filter system to control cookie behavior
+		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'maybe_disable_cart_cookies' ), 10, 5 );
 	}
 
 	/**
-	 * Replace cart session handler.
+	 * Conditionally disable cart cookies based on context.
+	 *
+	 * @param bool   $enabled Whether cookie should be set.
+	 * @param string $name    Cookie name.
+	 * @param string $value   Cookie value.
+	 * @param int    $expire  Cookie expiration.
+	 * @param bool   $secure  Whether cookie is secure.
+	 * @return bool
 	 */
-	public function replace_cart_session() {
-		if ( ! class_exists( 'WC_Cache_Optimized_Cart_Session' ) ) {
-			require_once WC_ABSPATH . 'includes/class-wc-cache-optimized-cart-session.php';
+	public function maybe_disable_cart_cookies( $enabled, $name, $value, $expire, $secure ) {
+		// Always allow session cookies (they're essential for security)
+		if ( strpos( $name, 'wp_woocommerce_session_' ) === 0 ) {
+			return $enabled;
 		}
 
-		// Replace the cart session
-		remove_action( 'woocommerce_cart_loaded_from_session', array( WC()->cart, 'get_cart_from_session' ) );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'load_optimized_cart_session' ) );
+		// For cart cookies, check if we're in a context that requires them
+		if ( in_array( $name, array( 'woocommerce_items_in_cart', 'woocommerce_cart_hash' ), true ) ) {
+			return $this->requires_cookies_for_context();
+		}
+
+		// Allow other cookies by default
+		return $enabled;
 	}
 
 	/**
-	 * Load optimized cart session.
+	 * Check if cookies are required for the current context.
+	 *
+	 * @return bool
 	 */
-	public function load_optimized_cart_session() {
-		// Create optimized session handler
-		$optimized_session = new WC_Cache_Optimized_Cart_Session( WC()->cart );
+	private function requires_cookies_for_context() {
+		// Always require cookies for non-cacheable pages
+		if ( $this->is_dynamic_page() ) {
+			return true;
+		}
+
+		// Always require cookies for AJAX requests
+		if ( wp_doing_ajax() ) {
+			return true;
+		}
+
+		// Require cookies if user is logged in (they might have saved cart)
+		if ( is_user_logged_in() ) {
+			return true;
+		}
+
+		// Require cookies if there are existing cart cookies (user has items in cart)
+		if ( isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ) ) {
+			return true;
+		}
+
+		// Check if this is a product page with add-to-cart functionality
+		if ( is_product() && $this->has_add_to_cart_form() ) {
+			return true;
+		}
+
+		// Default to not requiring cookies for better caching
+		return false;
+	}
+
+	/**
+	 * Check if current product page has add-to-cart form.
+	 *
+	 * @return bool
+	 */
+	private function has_add_to_cart_form() {
+		global $product;
 		
-		// Replace the session in the cart object
-		WC()->cart->session = $optimized_session;
+		if ( ! $product ) {
+			return false;
+		}
+
+		// Check if product is purchasable
+		if ( ! $product->is_purchasable() ) {
+			return false;
+		}
+
+		// Check if product is in stock
+		if ( ! $product->is_in_stock() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -347,6 +408,11 @@ class WC_Cache_Optimizer {
 			'enabled' => $this->enabled,
 			'options' => $this->options,
 			'dynamic_page' => $this->is_dynamic_page(),
+			'requires_cookies' => $this->requires_cookies_for_context(),
+			'is_ajax' => wp_doing_ajax(),
+			'is_logged_in' => is_user_logged_in(),
+			'has_cart_cookies' => isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ),
+			'is_product_with_cart' => is_product() && $this->has_add_to_cart_form(),
 		);
 	}
 }

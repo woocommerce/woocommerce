@@ -47,10 +47,9 @@ The system determines when cookies are required based on:
 
 ## Files Added
 
-1. **`class-wc-cache-optimized-cart-session.php`**: Extended cart session handler with cache optimization
-2. **`class-wc-cache-optimizer.php`**: Main optimization controller and configuration
-3. **`class-wc-cache-optimization.php`**: Integration and initialization
-4. **Modified `class-woocommerce.php`**: Added cache optimization includes
+1. **`class-wc-cache-optimizer.php`**: Main optimization controller and configuration
+2. **`class-wc-cache-optimization.php`**: Integration and initialization
+3. **Modified `class-woocommerce.php`**: Added cache optimization includes
 
 ## Configuration
 
