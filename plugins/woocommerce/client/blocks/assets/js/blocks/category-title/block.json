@@ -1,0 +1,42 @@
+{
+	"name": "woocommerce/category-title",
+	"title": "Category Title",
+	"description": "Displays the current category title and lets permitted users edit it.",
+	"category": "woocommerce",
+	"icon": "category",
+	"apiVersion": 3,
+	"textdomain": "woocommerce",
+	"attributes": {
+		"level": {
+			"type": "number",
+			"default": 2
+		},
+		"textAlign": {
+			"type": "string"
+		},
+		"isLink": {
+			"type": "boolean",
+			"default": false
+		},
+		"rel": {
+			"type": "string",
+			"default": ""
+		},
+		"linkTarget": {
+			"type": "string",
+			"default": "_self"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"typography": true,
+		"color": {
+			"text": true
+		},
+		"spacing": {
+			"margin": true
+		}
+	},
+	"usesContext": [ "termId", "termTaxonomy" ]
+}

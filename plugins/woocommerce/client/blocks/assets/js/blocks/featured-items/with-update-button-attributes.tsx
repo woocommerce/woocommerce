@@ -42,14 +42,34 @@ export const withUpdateButtonAttributes =
 			( item as WP_REST_API_Category )?.link ||
 			( item as ProductResponseItem )?.permalink;
 
-		const block = useSelect( ( select ) => {
-			return select( 'core/block-editor' ).getBlock( clientId );
-		} );
-		const innerBlock = block?.innerBlocks[ 0 ]?.innerBlocks[ 0 ];
-		const buttonBlockId = innerBlock?.clientId || '';
+		const block = useSelect(
+			( select: any ) => {
+				return select( 'core/block-editor' ).getBlock( clientId );
+			},
+			[ clientId ]
+		);
+		const findFirstButton = ( node?: any ): any | undefined => {
+			if ( ! node ) return undefined;
+			if (
+				node.name === 'core/button' ||
+				node.blockName === 'core/button'
+			) {
+				return node;
+			}
+			const children: any[] = node.innerBlocks || [];
+			for ( const child of children ) {
+				const found = findFirstButton( child );
+				if ( found ) return found;
+			}
+			return undefined;
+		};
+
+		const innerRoot = block?.innerBlocks?.[ 0 ];
+		const innerButton = findFirstButton( innerRoot );
+		const buttonBlockId = innerButton?.clientId || '';
 		const currentButtonAttributes = useMemo(
-			() => innerBlock?.attributes || {},
-			[ innerBlock ]
+			() => innerButton?.attributes || {},
+			[ innerButton ]
 		);
 		const { url } = currentButtonAttributes;
 

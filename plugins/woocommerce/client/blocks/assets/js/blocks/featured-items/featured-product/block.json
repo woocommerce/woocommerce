@@ -99,9 +99,17 @@
 		"showPrice": {
 			"type": "boolean",
 			"default": true
+		},
+		"useLegacyTitle": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"providesContext": {
+		"postId": "productId",
+		"postType": "postType"
+	}
 }

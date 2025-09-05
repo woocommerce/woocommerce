@@ -6,6 +6,13 @@
 import type { BlockAlignment } from '@wordpress/blocks';
 import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
+import {
+	InnerBlocks,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	BlockContextProvider,
+} from '@wordpress/block-editor';
+import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import clsx from 'clsx';
 import {
 	useCallback,
@@ -32,6 +39,7 @@ import {
 	getBackgroundImageStyles,
 	getClassPrefixFromName,
 } from './utils';
+import { __ } from '@wordpress/i18n';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -195,17 +203,7 @@ export const withFeaturedItem =
 			[ setAttributes ]
 		);
 
-		const renderButton = () => {
-			const { categoryId, linkText, productId } = attributes;
-
-			return (
-				<CallToAction
-					itemId={ categoryId || productId }
-					linkText={ linkText }
-					permalink={ ( category || product ).permalink as string }
-				/>
-			);
-		};
+		const renderButton = () => null;
 
 		const renderNoItemButton = () => {
 			return (
@@ -220,6 +218,100 @@ export const withFeaturedItem =
 						{ noSelectionButtonLabel }
 					</button>
 				</>
+			);
+		};
+
+		const renderInnerBlocks = () => {
+			if ( product ) {
+				return (
+					<ProductDataContextProvider
+						product={ product }
+						isLoading={ isLoading }
+					>
+						<BlockContextProvider
+							value={ {
+								postId: product?.id,
+								postType: 'product',
+							} }
+						>
+							<div className={ `${ className }__inner-blocks` }>
+								<InnerBlocks
+									allowedBlocks={ [
+										'woocommerce/product-title',
+										'core/buttons',
+										'core/heading',
+									] }
+									template={ [
+										[
+											'woocommerce/product-title',
+											{
+												headingLevel: 2,
+												showProductLink: true,
+											},
+										],
+										[
+											'core/buttons',
+											{
+												layout: {
+													type: 'flex',
+													justifyContent: 'center',
+												},
+											},
+											[
+												[
+													'core/button',
+													{
+														text: __(
+															'Shop now',
+															'woocommerce'
+														),
+														url: product.permalink,
+													},
+												],
+											],
+										],
+									] }
+								/>
+							</div>
+						</BlockContextProvider>
+					</ProductDataContextProvider>
+				);
+			}
+
+			return (
+				<div className={ `${ className }__inner-blocks` }>
+					<InnerBlocks
+						allowedBlocks={ [
+							'woocommerce/category-title',
+							'core/heading',
+							'core/buttons',
+						] }
+						template={ [
+							[ 'woocommerce/category-title', { level: 2 } ],
+							[
+								'core/buttons',
+								{
+									layout: {
+										type: 'flex',
+										justifyContent: 'center',
+									},
+								},
+								[
+									[
+										'core/button',
+										{
+											text: __(
+												'Shop now',
+												'woocommerce'
+											),
+											url: category.permalink,
+										},
+									],
+								],
+							],
+						] }
+					/>
+				</div>
 			);
 		};
 
@@ -267,7 +359,7 @@ export const withFeaturedItem =
 				styleProps.className
 			);
 
-			const containerStyle = {
+			const containerStyle: React.CSSProperties = {
 				borderRadius: style?.border?.radius,
 				color: textColor
 					? `var(--wp--preset--color--${ textColor })`
@@ -337,12 +429,7 @@ export const withFeaturedItem =
 										style={ backgroundImageStyle }
 									/>
 								) ) }
-							<h2
-								className={ `${ className }__title` }
-								dangerouslySetInnerHTML={ {
-									__html: item.name,
-								} }
-							/>
+							{ renderInnerBlocks() }
 							{ ! isEmpty( product?.variation ) && (
 								<h3
 									className={ `${ className }__variation` }
