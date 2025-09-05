@@ -57,6 +57,81 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	private $current_item = null;
 
 	/**
+	 * Current featured item ID (product or category) for context
+	 *
+	 * @var int
+	 */
+	protected $featured_item_id = 0;
+
+	/**
+	 * Featured Item inner blocks names.
+	 * This is used to map all the inner blocks for a Featured Item block.
+	 *
+	 * @var array
+	 */
+	protected $featured_item_inner_blocks_names = [];
+
+	/**
+	 * Extract the inner block names for the Featured Item block. This way it's possible
+	 * to map all the inner blocks for a Featured Item block and manipulate the data as needed.
+	 *
+	 * @param array $block The Featured Item block or its inner blocks.
+	 * @param array $result Array of inner block names.
+	 *
+	 * @return array Array containing all the inner block names of a Featured Item block.
+	 */
+	protected function extract_featured_item_inner_block_names( $block, &$result = [] ) {
+		if ( isset( $block['blockName'] ) ) {
+			$result[] = $block['blockName'];
+		}
+
+		if ( 'woocommerce/product-template' === $block['blockName'] || 'core/post-template' === $block['blockName'] ) {
+			return $result;
+		}
+
+		if ( isset( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $inner_block ) {
+				$this->extract_featured_item_inner_block_names( $inner_block, $result );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Replace the global post for the Featured Item inner blocks and reset it after.
+	 *
+	 * This is needed because some of the inner blocks may use the global post
+	 * instead of fetching the product through the context, so even if the
+	 * context is passed to the inner block, it will still use the global post.
+	 *
+	 * @param array $block Block attributes.
+	 * @param array $context Block context.
+	 */
+	protected function replace_post_for_featured_item_inner_block( $block, &$context ) {
+		if ( $this->featured_item_inner_blocks_names ) {
+			$block_name = end( $this->featured_item_inner_blocks_names );
+
+			if ( $block_name === $block['blockName'] ) {
+				array_pop( $this->featured_item_inner_blocks_names );
+				
+				// Handle core blocks that need global post manipulation
+				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
+					global $post;
+					$post = get_post( $this->featured_item_id );
+					
+					if ( $post instanceof \WP_Post ) {
+						setup_postdata( $post );
+					}
+				}
+				
+				$context['postId'] = $this->featured_item_id;
+				$context['postType'] = 'product';
+				$this->current_item = wc_get_product( $this->featured_item_id );
+			}
+		}
+	}
+
+	/**
 	 * Update context for inner blocks to provide postId and postType.
 	 *
 	 * @param array    $context Block context.
@@ -66,31 +141,22 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return array Updated block context.
 	 */
 	public function update_context( $context, $parsed_block, $parent_block ) {
-		// Check if this is a core block inside a featured item block
-		if ( $parent_block && 
-			 isset( $parent_block->name ) && 
-			 ( $parent_block->name === 'woocommerce/featured-product' || $parent_block->name === 'woocommerce/featured-category' ) &&
-			 isset( $parent_block->attributes ) ) {
-			
-			// Get the item from parent block attributes
-			$item = $this->get_item( $parent_block->attributes );
-			
-			if ( $item instanceof \WC_Product ) {
-				// Manipulate global post for core blocks
-				if ( 'core/post-title' === $parsed_block['blockName'] ) {
-					global $post;
-					$post = get_post( $item->get_id() );
-					
-					if ( $post instanceof \WP_Post ) {
-						setup_postdata( $post );
-					}
-				}
+		// Check if this is a featured item block and extract all inner block names
+		if ( ( 'woocommerce/featured-product' === $parsed_block['blockName'] || 'woocommerce/featured-category' === $parsed_block['blockName'] )
+			&& isset( $parsed_block['attrs'] ) ) {
 				
-				$context['postId'] = $item->get_id();
-				$context['postType'] = 'product';
-				$this->current_item = $item;
+			$item = $this->get_item( $parsed_block['attrs'] );
+			if ( $item instanceof \WC_Product ) {
+				$this->featured_item_id = $item->get_id();
+				
+				$this->featured_item_inner_blocks_names = array_reverse(
+					$this->extract_featured_item_inner_block_names( $parsed_block )
+				);
 			}
 		}
+
+		// Replace post context for featured item inner blocks
+		$this->replace_post_for_featured_item_inner_block( $parsed_block, $context );
 		
 		return $context;
 	}
