@@ -138,6 +138,10 @@
 			left: -$gap-large;
 			top: 0;
 			bottom: 0;
+
+			.has-dark-controls & {
+				border-left-color: $input-border-dark;
+			}
 		}
 
 		.wc-block-components-checkout-step__description::before {
