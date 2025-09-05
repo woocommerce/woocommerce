@@ -225,39 +225,13 @@ class WC_Cache_Optimizer {
 			return true;
 		}
 
-		// Check if this is a product page with add-to-cart functionality
-		if ( is_product() && $this->has_add_to_cart_form() ) {
-			return true;
-		}
+		// Note: Product pages with add-to-cart buttons don't need cookies
+		// because add-to-cart works via AJAX and cookies are set after the action
 
 		// Default to not requiring cookies for better caching
 		return false;
 	}
 
-	/**
-	 * Check if current product page has add-to-cart form.
-	 *
-	 * @return bool
-	 */
-	private function has_add_to_cart_form() {
-		global $product;
-		
-		if ( ! $product ) {
-			return false;
-		}
-
-		// Check if product is purchasable
-		if ( ! $product->is_purchasable() ) {
-			return false;
-		}
-
-		// Check if product is in stock
-		if ( ! $product->is_in_stock() ) {
-			return false;
-		}
-
-		return true;
-	}
 
 	/**
 	 * Add cache-friendly headers.
@@ -558,7 +532,7 @@ class WC_Cache_Optimizer {
 			'is_ajax' => wp_doing_ajax(),
 			'is_logged_in' => is_user_logged_in(),
 			'has_cart_cookies' => isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ),
-			'is_product_with_cart' => is_product() && $this->has_add_to_cart_form(),
+			'is_product_page' => is_product(),
 			'blocked_cookies_count' => count( $this->blocked_cookies ),
 		);
 	}
