@@ -11,9 +11,11 @@ import './editor.scss';
 import Block from './block';
 import { register } from '../register';
 import { example } from './example';
+import deprecated from './deprecated';
 import metadata from './block.json';
 
 register( Block, example, metadata, {
+	deprecated,
 	icon: {
 		src: (
 			<Icon

@@ -235,6 +235,8 @@ export const withFeaturedItem =
 									'core/post-title',
 									'core/buttons',
 									'core/heading',
+									'woocommerce/product-price',
+									'woocommerce/product-summary',
 								] }
 								template={ [
 									[
@@ -245,6 +247,17 @@ export const withFeaturedItem =
 											textAlign: 'center',
 											__woocommerceNamespace:
 												PRODUCT_TITLE_VARIATION_NAME,
+										},
+									],
+									[
+										'woocommerce/product-price',
+										{ textAlign: 'center' },
+									],
+									[
+										'woocommerce/product-summary',
+										{
+											showDescriptionIfEmpty: true,
+											summaryLength: 80,
 										},
 									],
 									[
@@ -278,7 +291,10 @@ export const withFeaturedItem =
 
 			return (
 				<BlockContextProvider
-					value={ { termId: category.term_id, termTaxonomy: 'product_cat' } }
+					value={ {
+						termId: category.term_id,
+						termTaxonomy: 'product_cat',
+					} }
 				>
 					<div className={ `${ className }__inner-blocks` }>
 						<InnerBlocks
@@ -446,14 +462,6 @@ export const withFeaturedItem =
 									className={ `${ className }__variation` }
 									dangerouslySetInnerHTML={ {
 										__html: product.variation,
-									} }
-								/>
-							) }
-							{ showPrice && (
-								<div
-									className={ `${ className }__price` }
-									dangerouslySetInnerHTML={ {
-										__html: product.price_html,
 									} }
 								/>
 							) }
