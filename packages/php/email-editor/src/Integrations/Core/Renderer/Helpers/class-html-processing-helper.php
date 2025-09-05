@@ -148,6 +148,17 @@ class Html_Processing_Helper {
 				// Only allow http, https, mailto, and tel protocols.
 				if ( ! preg_match( '/^(https?:\/\/|mailto:|tel:)/i', (string) $attr_value ) ) {
 					$html->remove_attribute( $attr_name );
+					break;
+				}
+
+				// Sanitize and normalize the URL using WordPress's esc_url_raw.
+				$sanitized_url = esc_url_raw( (string) $attr_value );
+				if ( empty( $sanitized_url ) ) {
+					// If esc_url_raw returns empty, the URL was invalid - remove the attribute.
+					$html->remove_attribute( $attr_name );
+				} else {
+					// Set the attribute to the sanitized/normalized value.
+					$html->set_attribute( $attr_name, $sanitized_url );
 				}
 				break;
 
@@ -283,44 +294,33 @@ class Html_Processing_Helper {
 			return $caption_html;
 		}
 
-		// Hard-drop executable/style content before further processing.
-		$caption_html = (string) preg_replace( '/<(script|style)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
+		// Remove dangerous content: script, style, and other executable elements.
+		$caption_html = (string) preg_replace( '/<(script|style|iframe|object|embed|form|input|button)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
 
-		// Use wp_kses for proper tag removal and sanitization.
-		$allowed_tags = array(
-			'strong' => array(),
-			'em'     => array(),
-			'a'      => array(
-				'href'      => array(),
-				'title'     => array(),
-				'target'    => array(),
-				'rel'       => array(),
-				'data-type' => array(),
-				'data-id'   => array(),
-			),
-			'mark'   => array(),
-			'kbd'    => array(),
-			's'      => array(),
-			'sub'    => array(),
-			'sup'    => array(),
-			'span'   => array(
-				'style'     => array(),
-				'class'     => array(),
-				'data-type' => array(),
-				'data-id'   => array(),
-			),
-			'br'     => array(),
-		);
+		// Remove dangerous attributes that could execute code.
+		$caption_html = (string) preg_replace( '/\s+(on\w+|javascript:|data:)\s*=\s*["\'][^"\']*["\']/i', '', $caption_html );
 
-		$sanitized_html = wp_kses( $caption_html, $allowed_tags );
+		// Remove any remaining dangerous attributes.
+		$caption_html = (string) preg_replace( '/\s+(on\w+|javascript:|data:)\s*=\s*[^\s>]+/i', '', $caption_html );
 
-		// Additional validation for specific attributes.
-		$html = new \WP_HTML_Tag_Processor( $sanitized_html );
+		// Use a more conservative approach - only validate attributes, don't modify tags.
+		$allowed_tags = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
+
+		$html = new \WP_HTML_Tag_Processor( $caption_html );
+
 		while ( $html->next_tag() ) {
+			$tag_name = $html->get_tag();
+
+			// Skip processing for disallowed tags - just leave them as-is.
+			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
+				continue;
+			}
+
+			// Only process attributes for allowed tags.
 			$attributes = $html->get_attribute_names_with_prefix( '' );
 			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attr_name ) {
-					// Validate specific attributes for security.
+					// Validate and sanitize each attribute individually.
 					self::validate_caption_attribute( $html, $attr_name );
 				}
 			}
