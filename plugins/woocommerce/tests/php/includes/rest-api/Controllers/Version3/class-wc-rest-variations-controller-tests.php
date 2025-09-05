@@ -11,7 +11,7 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	protected $user;
+	protected int $user;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -67,8 +67,8 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'name', $variation );
 		$this->assertArrayHasKey( 'parent_id', $variation );
 		$this->assertArrayHasKey( 'type', $variation );
-		$this->assertEquals( 'variation', $variation['type'] );
-		$this->assertEquals( $product->get_id(), $variation['parent_id'] );
+		$this->assertSame( 'variation', $variation['type'] );
+		$this->assertSame( $product->get_id(), $variation['parent_id'] );
 	}
 
 	/**
@@ -138,8 +138,10 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$headers = $response->get_headers();
 		$this->assertArrayHasKey( 'X-WP-Total', $headers );
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
-		$this->assertEquals( 18, $headers['X-WP-Total'] ); // 3 variable products * 6 variations per product.
-		$this->assertEquals( 9, $headers['X-WP-TotalPages'] );
+		$total       = (int) $headers['X-WP-Total'];
+		$total_pages = (int) $headers['X-WP-TotalPages'];
+		$this->assertSame( 18, $total ); // 3 variable products * 6 variations per product.
+		$this->assertSame( 9, $total_pages );
 	}
 
 	/**
@@ -310,5 +312,6 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Additional property from variations controller.
 		$this->assertArrayHasKey( 'parent_id', $properties );
+		$this->assertEquals( 'integer', $properties['parent_id']['type'] );
 	}
 }
