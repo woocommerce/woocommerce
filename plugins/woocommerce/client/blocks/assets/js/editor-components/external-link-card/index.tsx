@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, external } from '@wordpress/icons';
 import { VisuallyHidden } from '@wordpress/components';
-import { sanitizeHTML } from '@woocommerce/utils';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { Alert } from '@woocommerce/icons';
 
 /**
