@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 import {
 	revertMigration,
 	getUpgradeStatus,
@@ -93,6 +94,7 @@ const ProductCollectionInspectorControls = (
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
+	const isEmailEditor = useIsEmailEditor();
 	useCarouselLayoutAdjustments( clientId, attributes );
 	useEmailPaginationAdjustments( clientId, attributes );
 
@@ -186,9 +188,13 @@ const ProductCollectionInspectorControls = (
 						trackInteraction={ trackInteraction }
 					/>
 				) }
-				<LayoutOptionsControl { ...displayControlProps } />
-				<WidthOptionsControl { ...dimensionsControlProps } />
-				{ showProductsPerPageControl && (
+				{ ! isEmailEditor && (
+					<LayoutOptionsControl { ...displayControlProps } />
+				) }
+				{ ! isEmailEditor && (
+					<WidthOptionsControl { ...dimensionsControlProps } />
+				) }
+				{ showProductsPerPageControl && ! isEmailEditor && (
 					<ProductsPerPageControl
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
@@ -200,7 +206,7 @@ const ProductCollectionInspectorControls = (
 				{ showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
-				{ showMaxPagesToShowControl && (
+				{ showMaxPagesToShowControl && ! isEmailEditor && (
 					<MaxPagesToShowControl { ...queryControlProps } />
 				) }
 			</ToolsPanel>
