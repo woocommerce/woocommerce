@@ -109,16 +109,24 @@ class WC_Cache_Optimizer {
 	}
 
 	/**
-	 * Load configuration options.
+	 * Load configuration options from database with fallback to defaults.
 	 */
 	private function load_options() {
-		$this->options = apply_filters( 'woocommerce_cache_optimization_options', array(
+		// Default options
+		$default_options = array(
 			'optimize_cart_cookies' => true,
 			'optimize_session_cookies' => false, // Keep session cookies for security
 			'disable_cart_fragments_on_static_pages' => true,
 			'cache_friendly_ajax' => true,
 			'debug_mode' => false,
-		) );
+		);
+
+		// Get options from database, merge with defaults
+		$saved_options = get_option( 'woocommerce_cache_optimization_options', array() );
+		$this->options = wp_parse_args( $saved_options, $default_options );
+
+		// Allow filtering of the final options
+		$this->options = apply_filters( 'woocommerce_cache_optimization_options', $this->options );
 	}
 
 	/**
@@ -138,8 +146,7 @@ class WC_Cache_Optimizer {
 			add_action( 'wp_footer', array( $this, 'add_debug_info' ) );
 		}
 
-		// Add admin settings
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		// Add admin menu
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 	}
 
@@ -430,12 +437,6 @@ class WC_Cache_Optimizer {
 		return $blocked;
 	}
 
-	/**
-	 * Register admin settings.
-	 */
-	public function register_settings() {
-		register_setting( 'woocommerce_cache_optimization', 'woocommerce_cache_optimization_options' );
-	}
 
 	/**
 	 * Add admin menu.
@@ -455,13 +456,18 @@ class WC_Cache_Optimizer {
 	 * Admin page callback.
 	 */
 	public function admin_page() {
-		$options = get_option( 'woocommerce_cache_optimization_options', $this->options );
+		// Handle form submission
+		if ( isset( $_POST['submit'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'woocommerce_cache_optimization-options' ) ) {
+			$this->save_admin_options();
+		}
+
+		$options = $this->options;
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'WooCommerce Cache Optimization', 'woocommerce' ); ?></h1>
 			
-			<form method="post" action="options.php">
-				<?php settings_fields( 'woocommerce_cache_optimization' ); ?>
+			<form method="post" action="">
+				<?php wp_nonce_field( 'woocommerce_cache_optimization-options' ); ?>
 				
 				<table class="form-table">
 					<tr>
@@ -471,6 +477,7 @@ class WC_Cache_Optimizer {
 								<input type="checkbox" name="woocommerce_cache_optimization_options[optimize_cart_cookies]" value="1" <?php checked( $options['optimize_cart_cookies'] ); ?> />
 								<?php esc_html_e( 'Only set cart cookies when necessary for functionality', 'woocommerce' ); ?>
 							</label>
+							<p class="description"><?php esc_html_e( 'This is the main optimization feature that prevents cart cookies from being set on static pages.', 'woocommerce' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -480,6 +487,7 @@ class WC_Cache_Optimizer {
 								<input type="checkbox" name="woocommerce_cache_optimization_options[disable_cart_fragments_on_static_pages]" value="1" <?php checked( $options['disable_cart_fragments_on_static_pages'] ); ?> />
 								<?php esc_html_e( 'Disable cart fragments AJAX on pages that don\'t need them', 'woocommerce' ); ?>
 							</label>
+							<p class="description"><?php esc_html_e( 'Reduces unnecessary AJAX requests on static pages like blog posts and product listings.', 'woocommerce' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -489,14 +497,51 @@ class WC_Cache_Optimizer {
 								<input type="checkbox" name="woocommerce_cache_optimization_options[debug_mode]" value="1" <?php checked( $options['debug_mode'] ); ?> />
 								<?php esc_html_e( 'Show debug information on frontend (admin only)', 'woocommerce' ); ?>
 							</label>
+							<p class="description"><?php esc_html_e( 'Shows detailed cache optimization status and cookie information on the frontend for administrators.', 'woocommerce' ); ?></p>
 						</td>
 					</tr>
 				</table>
 				
 				<?php submit_button(); ?>
 			</form>
+
+			<div class="card" style="max-width: 600px; margin-top: 20px;">
+				<h3><?php esc_html_e( 'Current Status', 'woocommerce' ); ?></h3>
+				<?php
+				$status = $this->get_status();
+				?>
+				<p><strong><?php esc_html_e( 'Optimization:', 'woocommerce' ); ?></strong> <?php echo $status['enabled'] ? esc_html__( 'Enabled', 'woocommerce' ) : esc_html__( 'Disabled', 'woocommerce' ); ?></p>
+				<p><strong><?php esc_html_e( 'Current Page Type:', 'woocommerce' ); ?></strong> <?php echo $status['dynamic_page'] ? esc_html__( 'Dynamic (requires cookies)', 'woocommerce' ) : esc_html__( 'Static (cacheable)', 'woocommerce' ); ?></p>
+				<p><strong><?php esc_html_e( 'Cookies Required:', 'woocommerce' ); ?></strong> <?php echo $status['requires_cookies'] ? esc_html__( 'Yes', 'woocommerce' ) : esc_html__( 'No', 'woocommerce' ); ?></p>
+				<?php if ( $status['blocked_cookies_count'] > 0 ) : ?>
+					<p><strong><?php esc_html_e( 'Blocked Cookies:', 'woocommerce' ); ?></strong> <?php echo esc_html( $status['blocked_cookies_count'] ); ?></p>
+				<?php endif; ?>
+			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Save admin options.
+	 */
+	private function save_admin_options() {
+		$options = array();
+		
+		// Sanitize and save options
+		$options['optimize_cart_cookies'] = isset( $_POST['woocommerce_cache_optimization_options']['optimize_cart_cookies'] );
+		$options['disable_cart_fragments_on_static_pages'] = isset( $_POST['woocommerce_cache_optimization_options']['disable_cart_fragments_on_static_pages'] );
+		$options['debug_mode'] = isset( $_POST['woocommerce_cache_optimization_options']['debug_mode'] );
+		
+		// Keep other options unchanged
+		$existing_options = get_option( 'woocommerce_cache_optimization_options', array() );
+		$options = wp_parse_args( $options, $existing_options );
+		
+		update_option( 'woocommerce_cache_optimization_options', $options );
+		
+		// Reload options
+		$this->load_options();
+		
+		echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved successfully!', 'woocommerce' ) . '</p></div>';
 	}
 
 	/**
