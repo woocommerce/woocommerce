@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { createReduxStore, register } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -38,13 +39,6 @@ const actionTypes = {
 	SET_FULFILLMENT: 'SET_FULFILLMENT',
 	DELETE_FULFILLMENT: 'DELETE_FULFILLMENT',
 } as const;
-
-interface ResponseWithFulfillment {
-	fulfillment: Fulfillment & { id: number };
-}
-interface ResponseWithFulfillments {
-	fulfillments: Fulfillment[];
-}
 
 interface OrderState {
 	order: Order | null;
@@ -106,22 +100,24 @@ const publicActions = {
 		(
 			orderId: number,
 			fulfillment: Fulfillment,
-			notify_customer: boolean
+			notifyCustomer: boolean
 		) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
-				const saved = await apiFetch< ResponseWithFulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments?notify_customer=${ notify_customer }`,
+				const saved = await apiFetch< Fulfillment >( {
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'POST',
 					data: fulfillment,
 				} );
-				dispatch.setFulfillment(
-					orderId,
-					saved.fulfillment.id,
-					saved.fulfillment
-				);
+				if ( ! saved.id ) {
+					throw new Error( 'Fulfillment ID is missing in response' );
+				}
+				dispatch.setFulfillment( orderId, saved.id, saved );
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
@@ -144,17 +140,24 @@ const publicActions = {
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
+			if ( ! fulfillment.id ) {
+				dispatch.setError( orderId, 'Fulfillment ID is required' );
+				dispatch.setLoading( orderId, false );
+				return;
+			}
 			try {
-				const updated = await apiFetch< ResponseWithFulfillment >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }?notify_customer=${ notifyCustomer }`,
+				const updated = await apiFetch< Fulfillment >( {
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'PUT',
 					data: fulfillment,
 				} );
-				dispatch.setFulfillment(
-					orderId,
-					updated.fulfillment.id,
-					updated.fulfillment
-				);
+				if ( ! updated.id ) {
+					throw new Error( 'Fulfillment ID is missing in response' );
+				}
+				dispatch.setFulfillment( orderId, updated.id, updated );
 			} catch ( error: unknown ) {
 				dispatch.setError(
 					orderId,
@@ -169,13 +172,16 @@ const publicActions = {
 		},
 
 	deleteFulfillment:
-		( orderId: number, fulfillmentId: number, notify_customer: boolean ) =>
+		( orderId: number, fulfillmentId: number, notifyCustomer: boolean ) =>
 		async ( { dispatch }: { dispatch: typeof actions } ) => {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
 				await apiFetch( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }?notify_customer=${ notify_customer }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }`,
+						{ notify_customer: notifyCustomer }
+					),
 					method: 'DELETE',
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
@@ -357,11 +363,10 @@ const resolvers = {
 			dispatch.setLoading( orderId, true );
 			dispatch.setError( orderId, null );
 			try {
-				const { fulfillments } =
-					await apiFetch< ResponseWithFulfillments >( {
-						path: `/wc/v3/orders/${ orderId }/fulfillments`,
-						method: 'GET',
-					} );
+				const fulfillments = await apiFetch< Fulfillment[] >( {
+					path: `/wc/v3/orders/${ orderId }/fulfillments`,
+					method: 'GET',
+				} );
 				dispatch.setFulfillments( orderId, fulfillments );
 			} catch ( error: unknown ) {
 				dispatch.setError(

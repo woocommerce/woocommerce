@@ -155,11 +155,16 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
-			yield actions.addCartItem( {
-				id: state.productId,
-				quantity: state.quantity + context.quantityToAdd,
-				type: context.productType,
-			} );
+			yield actions.addCartItem(
+				{
+					id: state.productId,
+					quantity: state.quantity + context.quantityToAdd,
+					type: context.productType,
+				},
+				{
+					showCartUpdatesNotices: false,
+				}
+			);
 
 			context.displayViewCart = true;
 		},

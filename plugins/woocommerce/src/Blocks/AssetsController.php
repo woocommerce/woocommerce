@@ -118,6 +118,13 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
 
+		// Sanitize.
+		$this->api->register_script(
+			'wc-sanitize',
+			'assets/client/admin/sanitize/index.js',
+			array()
+		);
+
 		// Customer Effort Score.
 		$this->api->register_script(
 			'wc-customer-effort-score',

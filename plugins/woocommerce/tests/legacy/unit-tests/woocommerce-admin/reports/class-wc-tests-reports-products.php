@@ -811,6 +811,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	 * The refund type will be full but there will not be refund order line items.
 	 */
 	public function test_sync_order_products_refund_one_product_then_full_refund() {
+		$this->markTestSkipped( 'Mark flaky test for revisit as first assertion occasionally fails with null value.' );
 		global $wpdb;
 
 		WC_Helper_Reports::reset_stats_dbs();

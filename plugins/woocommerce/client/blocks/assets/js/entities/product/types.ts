@@ -41,9 +41,9 @@ interface ProductEntityResponseBase {
 	 * Experimental price fields for grouped products
 	 */
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_min_price?: string;
+	min_price?: string;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_max_price?: string;
+	max_price?: string;
 }
 
 /**
@@ -53,9 +53,9 @@ export interface GroupedProductResponse extends ProductEntityResponseBase {
 	type: 'grouped';
 	grouped_products: number[];
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_min_price: string;
+	min_price: string;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_max_price: string;
+	max_price: string;
 }
 
 /**
