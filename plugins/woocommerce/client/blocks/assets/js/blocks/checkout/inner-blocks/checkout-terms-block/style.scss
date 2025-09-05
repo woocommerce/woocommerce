@@ -6,6 +6,10 @@
 		padding-top: $gap-larger;
 		border-top: 1px solid $universal-border-light;
 
+		.has-dark-controls & {
+			border-top-color: $input-border-dark;
+		}
+
 		@include cart-checkout-below-large-container {
 			padding-top: 0;
 			border-top: 0;
