@@ -221,26 +221,110 @@ class WC_Cache_Optimizer {
 			return true;
 		}
 
-		// Require cookies if there are existing cart cookies (user has items in cart)
-		if ( isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ) ) {
-			return true;
-		}
-
-		// Require cookies if user is logged in AND has items in cart
-		// This handles the case where a logged-in user has a saved cart
-		if ( is_user_logged_in() && ! WC()->cart->is_empty() ) {
+		// Check if current page actually needs cart information
+		if ( $this->page_needs_cart_info() ) {
 			return true;
 		}
 
 		// Note: Product pages with add-to-cart buttons don't need cookies
 		// because add-to-cart works via AJAX and cookies are set after the action
-		// Note: Logged-in users browsing static pages don't need cart cookies
-		// unless they have items in their cart
+		// Note: Static pages like blog posts don't need cart cookies even if user has items
 
 		// Default to not requiring cookies for better caching
 		return false;
 	}
 
+
+	/**
+	 * Check if current page needs cart information.
+	 *
+	 * @return bool
+	 */
+	private function page_needs_cart_info() {
+		// Pages that need cart information
+		$cart_related_pages = array(
+			'cart',
+			'checkout',
+			'my-account',
+			'order-received',
+			'order-pay',
+		);
+
+		// Check if we're on a cart-related page
+		foreach ( $cart_related_pages as $page ) {
+			if ( is_wc_endpoint_url( $page ) || is_page( $page ) ) {
+				return true;
+			}
+		}
+
+		// Check if page has cart widget or cart fragments
+		if ( $this->page_has_cart_widget() ) {
+			return true;
+		}
+
+		// Check if page has cart-related shortcodes
+		if ( $this->page_has_cart_shortcodes() ) {
+			return true;
+		}
+
+		// Check if user has items in cart AND is on a page that might show cart info
+		if ( ( isset( $_COOKIE['woocommerce_items_in_cart'] ) || isset( $_COOKIE['woocommerce_cart_hash'] ) || ( is_user_logged_in() && ! WC()->cart->is_empty() ) ) ) {
+			// Only require cookies on pages that might display cart information
+			if ( is_shop() || is_product_category() || is_product_tag() || is_product() || is_home() || is_front_page() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if current page has cart widget.
+	 *
+	 * @return bool
+	 */
+	private function page_has_cart_widget() {
+		// Check if cart widget is active
+		if ( is_active_widget( false, false, 'woocommerce_widget_cart' ) ) {
+			return true;
+		}
+
+		// Check if mini cart is present in theme
+		if ( has_action( 'woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_thumbnail' ) ) {
+			// This is a heuristic - if WooCommerce templates are being used, cart might be present
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if current page has cart-related shortcodes.
+	 *
+	 * @return bool
+	 */
+	private function page_has_cart_shortcodes() {
+		global $post;
+		
+		if ( ! $post ) {
+			return false;
+		}
+
+		$cart_shortcodes = array(
+			'woocommerce_cart',
+			'woocommerce_checkout',
+			'woocommerce_my_account',
+			'woocommerce_order_tracking',
+		);
+
+		foreach ( $cart_shortcodes as $shortcode ) {
+			if ( has_shortcode( $post->post_content, $shortcode ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Add cache-friendly headers.
