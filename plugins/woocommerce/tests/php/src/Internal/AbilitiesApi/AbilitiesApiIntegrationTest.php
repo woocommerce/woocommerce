@@ -18,10 +18,10 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	private $registered_abilities = array();
 
 	/**
-	 * Set up the test environment.
+	 * Set up the test class environment once before all tests.
 	 */
-	public function set_up() {
-		parent::set_up();
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
 
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
@@ -35,15 +35,9 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			}
 		}
 
-		// Trigger the abilities API initialization if it hasn't been done yet.
-		if ( did_action( 'abilities_api_init' ) === 0 ) {
-			/**
-			 * This action is documented in vendor/wordpress/abilities-api/bootstrap.php
-			 *
-			 * @since 11.0.0
-			 */
-			do_action( 'abilities_api_init' );
-		}
+		rest_get_server();
+		do_action( 'rest_api_init' );
+
 	}
 
 	/**
@@ -233,15 +227,6 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	public function test_rest_endpoints_are_registered() {
 		// Ensure the bootstrap file has been loaded by checking for the class.
 		$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
-
-		/**
-		 * Initialize REST API for testing.
-		 *
-		 * Fires when preparing to serve a REST API request.
-		 *
-		 * @since 4.4.0
-		 */
-		do_action( 'rest_api_init' );
 
 		$server = rest_get_server();
 		$routes = $server->get_routes();
