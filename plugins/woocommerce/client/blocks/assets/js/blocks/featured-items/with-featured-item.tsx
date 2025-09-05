@@ -40,6 +40,8 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -223,6 +225,13 @@ export const withFeaturedItem =
 
 		const renderInnerBlocks = () => {
 			if ( product ) {
+				// Debug: Log the product context
+				console.log( 'Featured Product - providing context:', {
+					productId: product?.id,
+					productName: product?.name,
+					postType: 'product',
+				} );
+				
 				return (
 					<ProductDataContextProvider
 						product={ product }
@@ -237,16 +246,16 @@ export const withFeaturedItem =
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
 									allowedBlocks={ [
-										'woocommerce/product-title',
+										'core/post-title',
 										'core/buttons',
 										'core/heading',
 									] }
 									template={ [
 										[
-											'woocommerce/product-title',
+											'core/post-title',
 											{
-												headingLevel: 2,
-												showProductLink: true,
+												level: 2,
+												isLink: true,
 											},
 										],
 										[
