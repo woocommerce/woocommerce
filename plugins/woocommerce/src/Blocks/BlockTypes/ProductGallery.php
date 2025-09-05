@@ -174,7 +174,7 @@ class ProductGallery extends AbstractBlock {
 				}
 
 				if ( $has_variation_images ) {
-					wp_interactivity_state(
+					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(

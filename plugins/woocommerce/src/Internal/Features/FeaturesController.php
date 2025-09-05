@@ -516,6 +516,17 @@ class FeaturesController {
 				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
+			'rest-api-v4'                 => array(
+				'name'               => __( 'REST API v4 (experimental)', 'woocommerce' ),
+				'description'        => __(
+					'Enable the new WooCommerce REST API v4.',
+					'woocommerce'
+				),
+				'enabled_by_default' => false,
+				'disable_ui'         => true,
+				'is_legacy'          => false,
+				'is_experimental'    => true,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {

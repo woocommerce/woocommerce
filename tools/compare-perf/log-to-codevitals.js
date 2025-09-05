@@ -40,7 +40,7 @@ const data = new TextEncoder().encode(
 						performanceResults[ index ][ hash ] ?? {}
 					).map( ( [ key, value ] ) => [
 						metricsPrefix + key,
-						value,
+						typeof value === 'object' ? value.q50 : value,
 					] )
 				),
 			};
@@ -54,7 +54,7 @@ const data = new TextEncoder().encode(
 							performanceResults[ index ][ baseHash ] ?? {}
 						).map( ( [ key, value ] ) => [
 							metricsPrefix + key,
-							value,
+							typeof value === 'object' ? value.q50 : value,
 						] )
 					),
 				};
@@ -65,7 +65,7 @@ const data = new TextEncoder().encode(
 );
 
 const options = {
-	hostname: 'www.codevitals.run',
+	hostname: 'codehealth.vercel.app',
 	port: 443,
 	path: '/api/log?token=' + token,
 	method: 'POST',
@@ -76,6 +76,7 @@ const options = {
 };
 
 const req = https.request( options, ( res ) => {
+	console.log( `hostname: ${ options.hostname }` );
 	console.log( `statusCode: ${ res.statusCode }` );
 
 	res.on( 'data', ( d ) => {

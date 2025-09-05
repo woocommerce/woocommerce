@@ -341,7 +341,6 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -353,6 +352,10 @@ class WC_Install {
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
 		add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
+
+		// DB update notice.
+		add_filter( 'woocommerce_get_note_from_db', array( \WC_Notes_Run_Db_Update::class, 'maybe_update_notice' ), 10 );
+		add_action( 'woocommerce_hide_update_notice', array( __CLASS__, 'remove_update_db_notice' ) );
 	}
 
 	/**
@@ -419,14 +422,52 @@ class WC_Install {
 	 * Add WC Admin based db update notice.
 	 *
 	 * @since 4.0.0
+	 * @deprecated 10.3.0
 	 */
 	public static function wc_admin_db_update_notice() {
 		if (
 			WC()->is_wc_admin_active()
 			&& false !== get_option( 'woocommerce_admin_install_timestamp' )
-			&& ! self::is_db_auto_update_enabled()
 		) {
 			new WC_Notes_Run_Db_Update();
+		}
+	}
+
+	/**
+	 * Adds the db update notice.
+	 *
+	 * @since 10.3.0
+	 */
+	private static function add_update_db_notice() {
+		if ( ! \WC_Admin_Notices::has_notice( 'update' ) ) {
+			\WC_Admin_Notices::add_notice( 'update', true );
+		}
+
+		try {
+			if ( WC()->is_wc_admin_active() && false !== get_option( 'woocommerce_admin_install_timestamp' ) ) {
+				\WC_Notes_Run_Db_Update::add_notice();
+			}
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( 'Error adding db update note: ' . $e->getMessage(), array( 'source' => 'wc-updater' ) );
+		}
+	}
+
+	/**
+	 * Removes the db update notice.
+	 *
+	 * @since 10.3.0
+	 */
+	public static function remove_update_db_notice() {
+		if ( \WC_Admin_Notices::has_notice( 'update' ) ) {
+			\WC_Admin_Notices::remove_notice( 'update', true );
+		}
+
+		try {
+			if ( WC()->is_wc_admin_active() && false !== get_option( 'woocommerce_admin_install_timestamp' ) ) {
+				\WC_Notes_Run_Db_Update::set_notice_actioned();
+			}
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( 'Error removing db update note: ' . $e->getMessage(), array( 'source' => 'wc-updater' ) );
 		}
 	}
 
@@ -493,11 +534,27 @@ class WC_Install {
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update', true );
+			self::add_update_db_notice();
 
-			if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
-				$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+			$return_url = $_GET['return_url'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below before use.
+			if ( ! empty( $return_url ) ) {
+				// Try to go back to the previous page.
+				if ( 'wc-admin-referer' === $return_url ) {
+					$return_url = preg_replace( '/^' . preg_quote( untrailingslashit( admin_url() ), '/' ) . '\/?/i', '', wp_get_referer() ? wp_get_referer() : '' );
+
+					if ( $return_url && false === strpos( $return_url, 'do_update_woocommerce' ) ) {
+						$return_url = remove_query_arg(
+							array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ),
+							admin_url( $return_url )
+						);
+					} else {
+						$return_url = admin_url( 'admin.php?page=wc-settings' );
+					}
+				}
+
+				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url ); // WPCS: input var ok.
+				exit;
 			}
 		}
 	}
@@ -652,6 +709,7 @@ class WC_Install {
 		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
 
 		WC_Admin_Notices::remove_all_notices();
+		self::remove_update_db_notice();
 	}
 
 	/**
@@ -740,7 +798,7 @@ class WC_Install {
 				wc_get_logger()->info( 'Automatic database update triggered.', array( 'source' => 'wc-updater' ) );
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update', true );
+				self::add_update_db_notice();
 			}
 		} else {
 			self::update_db_version();
@@ -854,8 +912,7 @@ class WC_Install {
 
 			// Revert back to nudge so updates are not missed.
 			if ( self::is_db_auto_update_enabled() ) {
-				WC_Admin_Notices::add_notice( 'update', true );
-				WC()->is_wc_admin_active() && new WC_Notes_Run_Db_Update();
+				self::add_update_db_notice();
 			}
 
 			return;
