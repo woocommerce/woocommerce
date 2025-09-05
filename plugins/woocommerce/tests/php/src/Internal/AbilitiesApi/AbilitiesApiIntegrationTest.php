@@ -23,6 +23,18 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 	public function set_up() {
 		parent::set_up();
 
+		/*
+		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
+		 * The bootstrap file has an ABSPATH check that ensures it only loads in a proper
+		 * WordPress context, which may require manual loading in test environments.
+		 */
+		if ( ! function_exists( 'wp_register_ability' ) ) {
+			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
+			if ( file_exists( $bootstrap_file ) ) {
+				require_once $bootstrap_file;
+			}
+		}
+
 		// Trigger the abilities API initialization if it hasn't been done yet.
 		if ( did_action( 'abilities_api_init' ) === 0 ) {
 			/**
