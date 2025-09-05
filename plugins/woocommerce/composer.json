@@ -49,7 +49,7 @@
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "1.4.2",
-		"wordpress/abilities-api": "^0.1.0"
+		"wordpress/abilities-api": "^0.1.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

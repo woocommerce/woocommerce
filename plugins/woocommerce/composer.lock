@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c23ecbc30653f08c0f4cf6b744006f18",
+    "content-hash": "41e229864536946c8f7731eb30d57f2a",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1564,16 +1564,16 @@
         },
         {
             "name": "wordpress/abilities-api",
-            "version": "v0.1.0",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/abilities-api.git",
-                "reference": "e0423b48ff6f2b92b2677c731d6ca1ccc493f97f"
+                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/e0423b48ff6f2b92b2677c731d6ca1ccc493f97f",
-                "reference": "e0423b48ff6f2b92b2677c731d6ca1ccc493f97f",
+                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/21af812bc2dc3677aa71b3a6875dc5407a477adf",
+                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf",
                 "shasum": ""
             },
             "require": {
@@ -1634,7 +1634,7 @@
                 "issues": "https://github.com/WordPress/abilities-api/issues",
                 "source": "https://github.com/WordPress/abilities-api"
             },
-            "time": "2025-08-29T04:47:50+00:00"
+            "time": "2025-09-05T07:28:21+00:00"
         }
     ],
     "packages-dev": [
