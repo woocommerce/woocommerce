@@ -98,10 +98,6 @@
 		"showDesc": {
 			"type": "boolean",
 			"default": true
-		},
-		"useLegacyTitle": {
-			"type": "boolean",
-			"default": true
 		}
 	},
 	"textdomain": "woocommerce",

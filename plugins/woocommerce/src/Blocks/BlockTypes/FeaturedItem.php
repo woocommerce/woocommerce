@@ -189,21 +189,10 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			}
 		}
 
-		// Determine if explicit title inner blocks exist; if so, disable legacy title fallback.
-		if ( isset( $block->parsed_block['innerBlocks'] ) && is_array( $block->parsed_block['innerBlocks'] ) ) {
-			foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-				$block_name = isset( $inner_block['blockName'] ) ? $inner_block['blockName'] : '';
-				if ( in_array( $block_name, array( 'core/post-title', 'core/heading', 'woocommerce/category-title', 'woocommerce/product-title' ), true ) ) {
-					$attributes['useLegacyTitle'] = false;
-					break;
-				}
-			}
-		}
-
-		// Render InnerBlocks content wrapped in __inner-blocks div to match editor structure
 		if ( ! empty( $content ) ) {
 			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
 		}
+
 		// Render additional attributes (e.g. description/price) for legacy compatibility.
 		$output .= $this->render_attributes( $item, $attributes );
 		$output .= '</div>';
