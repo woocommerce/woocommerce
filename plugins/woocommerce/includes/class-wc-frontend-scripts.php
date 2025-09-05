@@ -384,7 +384,7 @@ class WC_Frontend_Scripts {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$scripts['wc-address-autocomplete'] = array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
 				'version' => $version,
 			);
 		}
