@@ -79,7 +79,6 @@ interface WithInspectorControlsProductProps< T >
 	extends WithInspectorControlsRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
-	showPrice: boolean;
 }
 
 type WithInspectorControlsProps< T extends EditorBlock< T > > =
@@ -307,6 +306,7 @@ export const withInspectorControls =
 			mediaSrc,
 			overlayColor,
 			overlayGradient,
+			showDesc,
 			backgroundColor,
 			style,
 		} = attributes;
@@ -321,19 +321,6 @@ export const withInspectorControls =
 			customGradientAttribute: 'overlayGradient',
 		} );
 
-		const contentPanel =
-			name === BLOCK_NAMES.featuredProduct ? (
-				<ToggleControl
-					label={ __( 'Show price', 'woocommerce' ) }
-					checked={ showPrice }
-					onChange={ () =>
-						setAttributes( {
-							showPrice: ! showPrice,
-						} )
-					}
-				/>
-			) : undefined;
-
 		const { backgroundImageSrc } = useBackgroundImage( {
 			item,
 			mediaId,
@@ -346,7 +333,7 @@ export const withInspectorControls =
 				<InspectorControls
 					alt={ alt }
 					backgroundImageSrc={ backgroundImageSrc }
-					contentPanel={ contentPanel }
+					contentPanel={ undefined }
 					dimRatio={ dimRatio }
 					focalPoint={ focalPoint }
 					hasParallax={ hasParallax }
