@@ -193,6 +193,75 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test variation search by global/local attribute key/value.
+	 */
+	public function test_variation_search_by_attribute() {
+		// Given.
+		wp_set_current_user( $this->user );
+
+		// Creates a variable product, then creates a variation using "global" product attributes.
+		$product           = WC_Helper_Product::create_variation_product();
+		$child_product_ids = $product->get_children();
+		$this->assertCount( 6, $child_product_ids );
+		$variation_1 = wc_get_product( $child_product_ids[0] ); // 'size' => 'small' attribute.
+
+		// Creates a variation, using "local" attribute key/value pairs.
+		$variation_2 = new WC_Product_Variation();
+		$variation_2->set_props(
+			array(
+				'parent_id'     => $product->get_id(),
+				'regular_price' => 23,
+			)
+		);
+		$variation_2->set_attributes( array( 'material' => 'wool' ) );
+		$variation_2->save();
+
+		// When searching for the "global" attribute value.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'search', 'small' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $variations ) );
+		$this->assertEquals( $variation_1->get_id(), $variations[0]['id'] );
+
+		// When searching for the "global" attribute key.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'search', 'size' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 6, count( $variations ) );
+		$this->assertContains( $variation_1->get_id(), array_column( $variations, 'id' ) );
+
+		// When searching for the "local" attribute value.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'search', 'wool' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $variations ) );
+		$this->assertEquals( $variation_2->get_id(), $variations[0]['id'] );
+
+		// When searching for the "local" attribute key.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+		$request->set_param( 'search', 'material' );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $variations ) );
+		$this->assertEquals( $variation_2->get_id(), $variations[0]['id'] );
+	}
+
+	/**
 	 * Test the variation schema.
 	 */
 	public function test_variation_schema() {
