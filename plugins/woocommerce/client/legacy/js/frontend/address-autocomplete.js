@@ -530,7 +530,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						// Update branding HTML content and make sure it's visible.
 						brandingElement.innerHTML =
 							serverProvider.branding_html;
-						brandingElement.style.display = 'block';
+						brandingElement.style.display = 'flex';
 						brandingElement.removeAttribute( 'aria-hidden' );
 					}
 				}
