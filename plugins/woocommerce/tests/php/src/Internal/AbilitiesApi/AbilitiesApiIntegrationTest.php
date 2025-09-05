@@ -35,15 +35,17 @@ class AbilitiesApiIntegrationTest extends \WC_Unit_Test_Case {
 			}
 		}
 
+		// Ensure REST API routes are registered (hook may be cleared by parent tear_down).
+		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
+		}
+
 		// Reset REST server for clean state.
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
-		// Create fresh REST server instance.
+		// Create fresh REST server instance (automatically triggers rest_api_init).
 		rest_get_server();
-
-		// Register REST routes.
-		do_action( 'rest_api_init' );
 	}
 
 	/**
