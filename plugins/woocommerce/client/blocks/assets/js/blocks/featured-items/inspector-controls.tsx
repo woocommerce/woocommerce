@@ -39,8 +39,7 @@ type InspectorControlRequiredKeys =
 	| 'imageFit'
 	| 'isRepeated'
 	| 'overlayColor'
-	| 'overlayGradient'
-	| 'showDesc';
+	| 'overlayGradient';
 
 interface InspectorControlsRequiredAttributes
 	extends LooselyMustHave<
@@ -100,7 +99,6 @@ export const InspectorControls = ( {
 	overlayGradient,
 	setAttributes,
 	setGradient,
-	showDesc,
 	backgroundColorVisibilityStatus,
 	backgroundColor,
 }: InspectorControlsProps ) => {
@@ -113,16 +111,6 @@ export const InspectorControls = ( {
 	return (
 		<>
 			<GutenbergInspectorControls key="inspector">
-				<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Show description', 'woocommerce' ) }
-						checked={ showDesc }
-						onChange={ () =>
-							setAttributes( { showDesc: ! showDesc } )
-						}
-					/>
-					{ contentPanel }
-				</PanelBody>
 				{ !! backgroundImageSrc && (
 					<>
 						{ focalPointPickerExists && (
@@ -319,8 +307,6 @@ export const withInspectorControls =
 			mediaSrc,
 			overlayColor,
 			overlayGradient,
-			showDesc,
-			showPrice,
 			backgroundColor,
 			style,
 		} = attributes;
@@ -370,7 +356,6 @@ export const withInspectorControls =
 					overlayGradient={ overlayGradient }
 					setAttributes={ setAttributes }
 					setGradient={ setGradient }
-					showDesc={ showDesc }
 					backgroundColorVisibilityStatus={
 						backgroundColorVisibilityStatus
 					}
