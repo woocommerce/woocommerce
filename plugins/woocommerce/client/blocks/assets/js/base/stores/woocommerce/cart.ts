@@ -383,7 +383,9 @@ const { state, actions } = store< Store >(
 					} );
 
 					const { messages } = getConfig( 'woocommerce' );
-					wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+					if ( messages?.addedToCartText ) {
+						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+					}
 
 					// Dispatches the event to sync the @wordpress/data store.
 					emitSyncEvent( { quantityChanges } );
@@ -532,7 +534,12 @@ const { state, actions } = store< Store >(
 						} );
 
 						const { messages } = getConfig( 'woocommerce' );
-						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+						if ( messages?.addedToCartText ) {
+							wp?.a11y?.speak(
+								messages.addedToCartText,
+								'polite'
+							);
+						}
 
 						// Dispatches the event to sync the @wordpress/data store.
 						emitSyncEvent( { quantityChanges } );
