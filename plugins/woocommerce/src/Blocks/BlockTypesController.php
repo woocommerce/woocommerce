@@ -439,6 +439,7 @@ final class BlockTypesController {
 			'CartLink',
 			'CatalogSorting',
 			'CategoryTitle',
+			'CategoryDescription',
 			'ClassicTemplate',
 			'ClassicShortcode',
 			'ComingSoon',

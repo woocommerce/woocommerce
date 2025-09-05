@@ -90,12 +90,9 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
-		},
-		"showDesc": {
-			"type": "boolean",
-			"default": true
 		}
 	},
+	"hasInnerBlocks": true,
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",

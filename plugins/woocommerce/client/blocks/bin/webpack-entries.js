@@ -59,6 +59,7 @@ const blocks = {
 	'attribute-filter': {},
 	breadcrumbs: {},
 	'catalog-sorting': {},
+	'category-description': {},
 	'category-title': {},
 	'coming-soon': {},
 	'customer-account': {},

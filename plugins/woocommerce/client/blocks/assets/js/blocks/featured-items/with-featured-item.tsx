@@ -278,43 +278,52 @@ export const withFeaturedItem =
 			}
 
 			return (
-				<div className={ `${ className }__inner-blocks` }>
-					<InnerBlocks
-						allowedBlocks={ [
-							'woocommerce/category-title',
-							'core/heading',
-							'core/buttons',
-						] }
-						template={ [
-							[
+				<BlockContextProvider
+					value={ { termId: category.term_id, termTaxonomy: 'product_cat' } }
+				>
+					<div className={ `${ className }__inner-blocks` }>
+						<InnerBlocks
+							allowedBlocks={ [
 								'woocommerce/category-title',
-								{ level: 2, textAlign: 'center' },
-							],
-							[
+								'woocommerce/category-description',
+								'core/heading',
 								'core/buttons',
-								{
-									layout: {
-										type: 'flex',
-										justifyContent: 'center',
-									},
-								},
+							] }
+							template={ [
 								[
-									[
-										'core/button',
-										{
-											text: __(
-												'Shop now',
-												'woocommerce'
-											),
-											url: category.permalink,
+									'woocommerce/category-title',
+									{ level: 2, textAlign: 'center' },
+								],
+								[
+									'woocommerce/category-description',
+									{ textAlign: 'center' },
+								],
+								[
+									'core/buttons',
+									{
+										layout: {
+											type: 'flex',
+											justifyContent: 'center',
 										},
+									},
+									[
+										[
+											'core/button',
+											{
+												text: __(
+													'Shop now',
+													'woocommerce'
+												),
+												url: category.permalink,
+											},
+										],
 									],
 								],
-							],
-						] }
-						templateLock={ false }
-					/>
-				</div>
+							] }
+							templateLock={ false }
+						/>
+					</div>
+				</BlockContextProvider>
 			);
 		};
 
@@ -438,23 +447,6 @@ export const withFeaturedItem =
 									className={ `${ className }__variation` }
 									dangerouslySetInnerHTML={ {
 										__html: product.variation,
-									} }
-								/>
-							) }
-							{ showDesc && (
-								<div
-									className={ `${ className }__description` }
-									dangerouslySetInnerHTML={ {
-										__html:
-											category?.description ||
-											product?.short_description ||
-											// Returning max 400 character to match the frontend block logic in PHP: see https://github.com/woocommerce/woocommerce/blob/027bf00f291967608abbbd6408193c970dffdd2a/plugins/woocommerce/src/Blocks/BlockTypes/FeaturedProduct.php#L88
-											( product?.description?.length > 0
-												? trimCharacters(
-														product.description,
-														400
-												  )
-												: '' ),
 									} }
 								/>
 							) }

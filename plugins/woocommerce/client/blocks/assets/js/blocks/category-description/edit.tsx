@@ -1,0 +1,101 @@
+/**
+ * External dependencies
+ */
+import clsx from 'clsx';
+import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore, useEntityProp } from '@wordpress/core-data';
+import {
+	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
+	AlignmentControl,
+	BlockControls,
+	InspectorControls,
+	useBlockProps,
+	PlainText,
+} from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+
+interface Props {
+	attributes: {
+		textAlign?: string;
+	};
+	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
+	context: {
+		termId?: number;
+		termTaxonomy?: string;
+	};
+}
+
+export default function Edit( { attributes, setAttributes, context }: Props ) {
+	const { textAlign } = attributes;
+	const { termId, termTaxonomy } = context;
+
+	const userCanEdit = useSelect(
+		( select ) => {
+			if ( ! termId ) return false;
+			return ( select( coreStore ) as any ).canUser( 'update', {
+				kind: 'taxonomy',
+				name: termTaxonomy || 'product_cat',
+				id: termId,
+			} );
+		},
+		[ termId, termTaxonomy ]
+	);
+
+	const [ rawDescription = '', setDescription, fullDescription ] = (
+		useEntityProp as any
+	 )( 'taxonomy', termTaxonomy || 'product_cat', 'description', termId );
+
+	const blockProps = useBlockProps( {
+		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
+	} );
+
+	const PlainTextAny = PlainText as any;
+
+	let descriptionElement: JSX.Element = (
+		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
+	);
+
+	if ( termId ) {
+		descriptionElement = userCanEdit ? (
+			<PlainTextAny
+				tagName="p"
+				placeholder={ __( 'No description', 'woocommerce' ) as string }
+				value={ rawDescription }
+				onChange={ ( v: string ) =>
+					( setDescription as ( v: string ) => void )( v )
+				}
+				__experimentalVersion={ 2 }
+				{ ...blockProps }
+			/>
+		) : (
+			<p
+				{ ...blockProps }
+				dangerouslySetInnerHTML={ {
+					__html:
+						( fullDescription as any )?.rendered || rawDescription,
+				} }
+			/>
+		);
+	}
+
+	return (
+		<>
+			{ /* @ts-expect-error BlockControls typing */ }
+			<BlockControls group="block">
+				<AlignmentControl
+					value={ textAlign }
+					onChange={ ( nextAlign: string ) =>
+						setAttributes( { textAlign: nextAlign || '' } )
+					}
+				/>
+			</BlockControls>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					{ /* Add any additional settings here if needed */ }
+				</PanelBody>
+			</InspectorControls>
+			{ descriptionElement }
+		</>
+	);
+}

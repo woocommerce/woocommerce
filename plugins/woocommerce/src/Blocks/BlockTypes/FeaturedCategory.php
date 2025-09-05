@@ -82,24 +82,25 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render_attributes( $category, $attributes ) {
-		$desc_str = sprintf(
-			'<div class="wc-block-featured-category__description">%s</div>',
-			wc_format_content( wp_kses_post( $category->description ) )
-		);
-
-		// Legacy title for backward compatibility when no inner title blocks exist.
-		$legacy_title = sprintf(
-			'<h2 class="wc-block-featured-category__title">%s</h2>',
-			wp_kses_post( $category->name )
-		);
-
 		$output = '';
-		// Title is now provided by inner blocks; keep legacy if no title blocks exist after splitting in parent.
-		if ( ! empty( $attributes['useLegacyTitle'] ) ) {
+
+		// Backwards compatibility: Only render legacy attributes if they exist as boolean values
+		// This allows us to distinguish between old blocks (with boolean props) and new blocks (without these props)
+		if ( array_key_exists( 'showDesc', $attributes ) && is_bool( $attributes['showDesc'] ) ) {
+			$legacy_title = sprintf(
+				'<h2 class="wc-block-featured-category__title">%s</h2>',
+				wp_kses_post( $category->name )
+			);
+
 			$output .= $legacy_title;
-		}
-		if ( $attributes['showDesc'] ) {
-			$output .= $desc_str;
+
+			if ( $attributes['showDesc'] ) {
+				$desc_str = sprintf(
+					'<div class="wc-block-featured-category__description">%s</div>',
+					wc_format_content( wp_kses_post( $category->description ) )
+				);
+				$output .= $desc_str;
+			}
 		}
 
 		return $output;
