@@ -82,17 +82,22 @@ class FeaturedCategory extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render_attributes( $category, $attributes ) {
-		$title = sprintf(
-			'<h2 class="wc-block-featured-category__title">%s</h2>',
-			wp_kses_post( $category->name )
-		);
-
 		$desc_str = sprintf(
 			'<div class="wc-block-featured-category__description">%s</div>',
 			wc_format_content( wp_kses_post( $category->description ) )
 		);
 
-		$output = $title;
+		// Legacy title for backward compatibility when no inner title blocks exist.
+		$legacy_title = sprintf(
+			'<h2 class="wc-block-featured-category__title">%s</h2>',
+			wp_kses_post( $category->name )
+		);
+
+		$output = '';
+		// Title is now provided by inner blocks; keep legacy if no title blocks exist after splitting in parent.
+		if ( ! empty( $attributes['useLegacyTitle'] ) ) {
+			$output .= $legacy_title;
+		}
 		if ( $attributes['showDesc'] ) {
 			$output .= $desc_str;
 		}
