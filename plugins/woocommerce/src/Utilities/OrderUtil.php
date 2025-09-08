@@ -257,4 +257,14 @@ final class OrderUtil {
 
 		return $status;
 	}
+
+	/**
+	 * Checks if the new full refund data is used.
+	 *
+	 * @return bool
+	 */
+	public static function uses_new_full_refund_data() {
+		$db_version = get_option( 'woocommerce_db_version', null );
+		return version_compare( $db_version, '10.2.0', '>=' ) && 'no' === get_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
+	}
 }
