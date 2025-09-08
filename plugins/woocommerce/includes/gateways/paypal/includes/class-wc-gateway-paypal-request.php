@@ -85,6 +85,7 @@ class WC_Gateway_Paypal_Request {
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT      = 'payment/capture';
 	private const WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT    = 'payment/authorize';
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT = 'payment/capture_auth';
+	private const WPCOM_PROXY_PAYMENT_CAPTURE_ORDER_ENDPOINT = 'payment/capture_order';
 
 	/**
 	 * Constructor.
@@ -319,6 +320,71 @@ class WC_Gateway_Paypal_Request {
 			WC_Gateway_Paypal::log( $e->getMessage() );
 			$note_message = sprintf(
 				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
+			);
+			if ( $paypal_debug_id ) {
+				$note_message .= sprintf(
+					/* translators: %s: PayPal debug ID */
+					__( '. PayPal debug ID: %s', 'woocommerce' ),
+					$paypal_debug_id
+				);
+			}
+			$order->add_order_note( $note_message );
+		}
+	}
+
+	/**
+	 * Capture a PayPal payment by order ID.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string   $paypal_order_id The PayPal order ID.
+	 * @return void
+	 * @throws Exception If the PayPal payment capture fails.
+	 */
+	public function capture_payment_for_order( $order, $paypal_order_id ) {
+		if ( ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot capture payment.' );
+			return;
+		}
+
+		// Skip if the payment is already captured.
+		$paypal_status = $order->get_meta( '_paypal_status', true );
+		if ( 'captured' === $paypal_status || 'completed' === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$paypal_debug_id = null;
+	
+		try {
+			$request_body = array(
+				'test_mode'        => $this->gateway->testmode,
+				'paypal_order_id' => $paypal_order_id,
+			);
+			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_ORDER_ENDPOINT, $request_body );
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'PayPal capture payment request failed for order. PayPal order ID: ' . $paypal_order_id . ' . Response error: ' . $response->get_error_message() );
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
+
+			//temp
+			WC_Gateway_Paypal::log( 'PayPal capture payment response data: ' . wp_json_encode( $response_data ) );
+
+			if ( 200 !== $http_code && 201 !== $http_code ) {
+				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
+				throw new Exception( 'PayPal capture payment failed for order. PayPal order ID: ' . $paypal_order_id . ' . Response status: ' . $http_code . '. Response body: ' . $body );
+			}
+
+			$order->update_meta_data( '_paypal_status', 'captured' );
+			$order->save();
+		} catch ( Exception $e ) {
+			WC_Gateway_Paypal::log( $e->getMessage() );
+			$note_message = sprintf(
+				__( 'PayPal capture payment failed for order. PayPal order ID: %1$s', 'woocommerce' ),
+				$paypal_order_id
 			);
 			if ( $paypal_debug_id ) {
 				$note_message .= sprintf(

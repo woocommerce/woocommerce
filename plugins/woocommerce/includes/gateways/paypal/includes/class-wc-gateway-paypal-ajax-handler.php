@@ -23,6 +23,7 @@ class WC_Gateway_Paypal_Ajax_Handler {
 	 */
 	public function __construct() {
 		add_action( 'wc_ajax_create_order', [ $this, 'ajax_create_order' ] );
+        add_action( 'wc_ajax_capture_order', [ $this, 'ajax_capture_order' ] );
 	}
 
 	/**
@@ -73,6 +74,46 @@ class WC_Gateway_Paypal_Ajax_Handler {
         $order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
         $order->save();
 
-		wp_send_json( [ 'paypal_order_id' => $paypal_order['id'] ?? null ] );
+		wp_send_json( [ 'paypal_order_id' => $paypal_order['id'] ?? null, 'order_id' => $order_id ] );
+    }
+
+    public function ajax_capture_order() {
+        wc_get_logger()->debug( 'capture_order ajax-----' );
+        check_ajax_referer( 'capture_order', 'security' );
+        $paypal_order_id = $_POST['order_id'];
+    
+        $order = $this->find_woocommerce_order_by_paypal_order_id( $paypal_order_id );
+       
+        if ( ! $order ) {
+            wp_send_json( [ 'error' => [ __( 'Order not found.', 'woocommerce' ) ] ] );
+        }
+    
+        $paypal_request = new WC_Gateway_Paypal_Request( $this );
+        $response = $paypal_request->capture_payment_for_order( $order, $paypal_order_id );
+    
+        $response['return_url'] = esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) );
+    
+        wp_send_json( $response );
+    }
+    
+    /**
+     * Find WooCommerce order by PayPal order ID.
+     * 
+     * @param string $paypal_order_id The PayPal order ID.
+     * @return WC_Order|null The WooCommerce order object if found, otherwise null.
+     */
+    private function find_woocommerce_order_by_paypal_order_id( $paypal_order_id ) {
+        $orders = wc_get_orders([
+            'meta_key' => 'paypal_order_id',
+            'meta_value' => $paypal_order_id,
+            'limit' => 1,
+            'return' => 'ids'
+        ]);
+        
+        if ( ! empty( $orders ) ) {
+            return wc_get_order( $orders[0] );
+        }
+        
+        return null;
     }
 }
