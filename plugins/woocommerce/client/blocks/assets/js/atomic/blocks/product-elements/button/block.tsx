@@ -242,7 +242,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 	} );
 
 	const showNewAddToCartButton =
-		props.isAdmin && isExperimentalWcRestApiV4Enabled();
+		product?.id && props.isAdmin && isExperimentalWcRestApiV4Enabled();
 
 	return (
 		<div
