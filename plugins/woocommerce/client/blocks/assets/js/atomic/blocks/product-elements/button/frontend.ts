@@ -144,10 +144,14 @@ const productButtonStore = {
 			return state.quantity > 0;
 		},
 		get productId() {
-			return (
-				productDataState?.variationId ||
-				getContext< Context >().productId
-			);
+			const { productId } = getContext< Context >();
+
+			const isDescendantOfAddToCartWithOptions =
+				productId === productDataState?.productId;
+
+			return isDescendantOfAddToCartWithOptions
+				? productDataState?.variationId || productId
+				: productId;
 		},
 	},
 	actions: {
