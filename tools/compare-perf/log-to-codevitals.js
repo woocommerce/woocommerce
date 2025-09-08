@@ -26,6 +26,14 @@ const performanceResults = resultsFiles.map( ( { file } ) =>
 	JSON.parse( fs.readFileSync( path.join( ARTIFACTS_PATH, file ), 'utf8' ) )
 );
 
+const keys = [
+	'totalBlockingTime',
+	'largestContentfulPaint',
+	'serverResponse',
+	'firstPaint',
+];
+// untested: "domContentLoaded", "loaded", "firstContentfulPaint","firstBlock"
+
 const data = JSON.stringify( {
 	branch,
 	hash,
@@ -35,14 +43,16 @@ const data = JSON.stringify( {
 		return {
 			...result,
 			...Object.fromEntries(
-				Object.entries( performanceResults[ index ][ hash ] ?? {} ).map(
-					( [ key, value ] ) => [
+				Object.entries( performanceResults[ index ][ hash ] ?? {} )
+					.map( ( [ key, value ] ) => [
 						metricsPrefix + key,
 						typeof value === 'object'
 							? value.q50
 							: Number( value ).toFixed( 3 ),
-					]
-				)
+					] )
+					.filter( ( [ key ] ) => {
+						return keys.includes( key );
+					} )
 			),
 		};
 	}, {} ),
@@ -50,14 +60,16 @@ const data = JSON.stringify( {
 		return {
 			...result,
 			...Object.fromEntries(
-				Object.entries(
-					performanceResults[ index ][ baseHash ] ?? {}
-				).map( ( [ key, value ] ) => [
-					metricsPrefix + key,
-					typeof value === 'object'
-						? value.q50
-						: Number( value ).toFixed( 3 ),
-				] )
+				Object.entries( performanceResults[ index ][ baseHash ] ?? {} )
+					.map( ( [ key, value ] ) => [
+						metricsPrefix + key,
+						typeof value === 'object'
+							? value.q50
+							: Number( value ).toFixed( 3 ),
+					] )
+					.filter( ( [ key ] ) => {
+						return keys.includes( key );
+					} )
 			),
 		};
 	}, {} ),
@@ -78,6 +90,7 @@ const req = https.request( options, ( res ) => {
 	console.log( `hostname: ${ options.hostname }` );
 	console.log( `statusCode: ${ res.statusCode }` );
 	console.log( `statusMessage: ${ res.statusMessage }` );
+	console.log( data );
 
 	res.on( 'data', ( d ) => {
 		process.stdout.write( d );
