@@ -622,6 +622,43 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox should clear shipping data from session when cart products are not shippable
+	 */
+	public function test_setting_session_should_clear_shipping_data_when_cart_products_are_not_shippable() {
+		$this->simulate_two_packages();
+
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->set( 'shipping_method_counts', array( 123 ) );
+		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+		WC()->session->save_data();
+
+		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
+		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
+		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$this->assertNotEmpty( $shipping_method_counts );
+		$this->assertNotEmpty( $previous_shipping_methods );
+		$this->assertNotEmpty( $shipping_for_package_0 );
+		$this->assertNotEmpty( $shipping_for_package_1 );
+
+		$virtual_product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+
+		$cart = WC()->cart;
+		$cart->add_to_cart( $virtual_product->get_id() );
+
+		$cart->set_session();
+
+		$this->assertNull( WC()->session->get( 'shipping_method_counts' ) );
+		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+	}
+
+	/**
 	 * @testdox should clear shipping data from session when the cart is not empty
 	 */
 	public function test_setting_session_should_not_clear_shipping_data_when_cart_is_not_empty() {

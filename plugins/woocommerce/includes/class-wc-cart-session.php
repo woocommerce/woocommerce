@@ -414,7 +414,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
-		if ( empty( $cart ) ) {
+		if ( ! $this->cart->needs_shipping() ) {
 			$wc_session->set( 'shipping_method_counts', null );
 			$wc_session->set( 'previous_shipping_methods', null );
 			$this->remove_shipping_for_package_from_session();
