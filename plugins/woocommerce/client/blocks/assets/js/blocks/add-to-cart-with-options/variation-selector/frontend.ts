@@ -133,7 +133,6 @@ const isAttributeValueValid = ( {
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			variationId: number | null;
 			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
@@ -164,24 +163,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get variationId(): number | null {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return null;
-				}
-				const { selectedAttributes } = context;
-				const { products } = getConfig( 'woocommerce' );
-
-				const variations =
-					products?.[ productDataState.productId ].variations;
-
-				const matchedVariation = getMatchedVariation(
-					variations,
-					selectedAttributes
-				);
-
-				return matchedVariation?.variation_id || null;
-			},
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
