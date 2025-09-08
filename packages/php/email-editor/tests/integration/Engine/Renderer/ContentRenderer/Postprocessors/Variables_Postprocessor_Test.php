@@ -6,7 +6,8 @@
  */
 
 declare(strict_types = 1);
-namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\Postprocessors;
+
+namespace Automattic\WooCommerce\EmailEditor\Tests\Integration\Engine\Renderer\ContentRenderer\Postprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;

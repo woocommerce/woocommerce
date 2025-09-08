@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -75,7 +76,7 @@ class Server {
 				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
 				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
 				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
-				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && $this->is_v4_feature_enabled() ) ? $this->get_v4_controllers() : array(),
+				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && ( class_exists( \Automattic\WooCommerce\Admin\Features\Features::class ) && Features::is_enabled( 'rest-api-v4' ) ) ) ? $this->get_v4_controllers() : array(),
 				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
 			)
 		);
@@ -192,6 +193,7 @@ class Server {
 			'shipping-zone-methods'    => 'WC_REST_Shipping_Zone_Methods_Controller',
 			'tax-classes'              => 'WC_REST_Tax_Classes_Controller',
 			'taxes'                    => 'WC_REST_Taxes_Controller',
+			'variations'               => 'WC_REST_Variations_Controller',
 			'webhooks'                 => 'WC_REST_Webhooks_Controller',
 			'system-status'            => 'WC_REST_System_Status_Controller',
 			'system-status-tools'      => 'WC_REST_System_Status_Tools_Controller',
@@ -211,8 +213,9 @@ class Server {
 	 */
 	protected function get_v4_controllers() {
 		return array(
-			'ping'     => 'WC_REST_Ping_V4_Controller',
-			'products' => 'WC_REST_Products_V4_Controller',
+			'ping'         => 'WC_REST_Ping_V4_Controller',
+			'fulfillments' => 'WC_REST_Fulfillments_V4_Controller',
+			'products'     => 'WC_REST_Products_V4_Controller',
 		);
 	}
 
@@ -225,15 +228,6 @@ class Server {
 		return array(
 			'tracker' => 'WC_REST_Telemetry_Controller',
 		);
-	}
-
-	/**
-	 * Check if the REST API v4 feature is enabled.
-	 *
-	 * @return bool
-	 */
-	private function is_v4_feature_enabled() {
-		return function_exists( 'wc_rest_api_v4_is_enabled' ) && wc_rest_api_v4_is_enabled();
 	}
 
 	/**

@@ -516,20 +516,3 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 		add_filter( 'rest_pre_dispatch', $callback_filter, 0, 3 );
 	}
 }
-
-/**
- * Check if the WooCommerce REST API v4 feature is enabled.
- *
- * @return bool True if the REST API v4 feature is enabled, false otherwise.
- */
-function wc_rest_api_v4_is_enabled(): bool {
-	// Container may not be initialized yet during early autoloading.
-	if ( ! function_exists( 'wc_get_container' ) || empty( $GLOBALS['wc_container'] ) ) {
-		return false;
-	}
-	$container = wc_get_container();
-	if ( ! is_object( $container ) ) {
-		return false;
-	}
-	return (bool) Features::is_enabled( 'rest-api-v4' );
-}
