@@ -9,7 +9,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  * Internal dependencies
  */
 import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
-import type { VariableProductAddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/variation-selector/frontend';
+import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -48,12 +48,11 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const { state: addToCartWithOptionsState } =
-	store< VariableProductAddToCartWithOptionsStore >(
-		'woocommerce/add-to-cart-with-options',
-		{},
-		{ lock: universalLock }
-	);
+const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
+	'woocommerce/add-to-cart-with-options',
+	{},
+	{ lock: universalLock }
+);
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',

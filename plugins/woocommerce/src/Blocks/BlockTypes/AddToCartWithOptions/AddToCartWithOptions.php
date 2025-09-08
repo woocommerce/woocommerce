@@ -249,11 +249,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					// instead of the variation's min purchase quantity. That's because we use the same
 					// input for all variations, so we want quantities to be in sync.
 					$context['quantity'][ $variation->get_id() ] = $default_quantity;
-					$context['availableVariations'][]            = array(
-						'variation_id' => $variation->get_id(),
-						'attributes'   => $variation->get_variation_attributes(),
-						'is_in_stock'  => $variation->is_in_stock(),
-					);
 
 					$variation_data[ $variation->get_id() ] = array(
 						'is_in_stock' => $variation->is_in_stock(),

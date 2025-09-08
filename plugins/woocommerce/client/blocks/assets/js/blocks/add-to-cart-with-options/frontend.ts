@@ -263,8 +263,6 @@ const { actions, state } = store<
 					return;
 				}
 
-				const context = getContext< Context >();
-
 				// If selected quantity is invalid, add an error.
 				const productObject = getProductData(
 					productDataState.productId,
