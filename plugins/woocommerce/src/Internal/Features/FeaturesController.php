@@ -238,6 +238,7 @@ class FeaturesController {
 			'order'                               => 10,
 			'default_plugin_compatibility' => 'compatible',
 			'skip_compatibility_checks'    => false,
+			'learn_more_url'               => '',
 		);
 
 		if ( empty( $args['default_plugin_compatibility'] ) ) {
@@ -487,10 +488,11 @@ class FeaturesController {
 			),
 			'block_email_editor'          => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
-				'description'        => __(
-					'Enable the block-based email editor for transactional emails. <a href="https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256" target="_blank">Learn more</a>',
+				'description'               => __(
+					'Enable the block-based email editor for transactional emails.',
 					'woocommerce'
 				),
+				'learn_more_url'            => 'https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256',
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -1350,6 +1352,14 @@ class FeaturesController {
 		);
 
 		$feature_setting = wp_parse_args( $setting_definition, $feature_setting_defaults );
+
+		if ( ! empty( $feature['learn_more_url'] ) ) {
+			$feature_setting['desc'] .= sprintf(
+				'<span class="learn-more-link"><a href="%s" target="_blank">%s</a></span>',
+				esc_attr( $feature['learn_more_url'] ),
+				esc_html__( 'Learn more', 'woocommerce' )
+			);
+		}
 
 		/**
 		 * Allows to modify feature setting that will be used to render in the feature page.
