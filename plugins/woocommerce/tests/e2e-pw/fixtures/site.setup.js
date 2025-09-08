@@ -15,9 +15,9 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		const ORDER_DATASTORE = process.env.ORDER_DATASTORE || 'hpos';
 		console.log( `ORDER_DATASTORE: ${ ORDER_DATASTORE }` );
 
-		if ( 'posts' === ORDER_DATASTORE ) {
+		if ( ORDER_DATASTORE === 'posts' ) {
 			const hposSettingRetries = 5;
-			const value = 'posts' === ORDER_DATASTORE ? 'no' : 'yes';
+			const value = ORDER_DATASTORE === 'posts' ? 'no' : 'yes';
 			let hposConfigured = false;
 
 			for ( let i = 0; i < hposSettingRetries; i++ ) {

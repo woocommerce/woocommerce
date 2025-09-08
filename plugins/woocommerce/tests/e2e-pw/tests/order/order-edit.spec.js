@@ -91,7 +91,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
-		if ( 'posts' === process.env.ORDER_DATASTORE ) {
+		if ( process.env.ORDER_DATASTORE === 'posts' ) {
 			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
 		} else {
 			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
