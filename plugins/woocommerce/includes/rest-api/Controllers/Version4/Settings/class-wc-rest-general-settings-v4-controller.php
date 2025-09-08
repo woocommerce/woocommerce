@@ -326,19 +326,12 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			case 'select':
 			case 'single_select_country':
-				return strtoupper( sanitize_text_field( $value ) );
+				return sanitize_text_field( $value );
 
 			case 'multiselect':
 			case 'multi_select_countries':
 				if ( is_array( $value ) ) {
-					return array_values(
-						array_map(
-							static function ( $v ) {
-								return strtoupper( sanitize_text_field( (string) $v ) );
-							},
-							$value
-						)
-					);
+					return array_map( 'sanitize_text_field', $value );
 				}
 
 				// Handle empty values and string inputs.
@@ -347,7 +340,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				}
 
 				// If it's a string, convert to array (for single values).
-				return is_string( $value ) ? array( strtoupper( sanitize_text_field( $value ) ) ) : array();
+				return is_string( $value ) ? array( sanitize_text_field( $value ) ) : array();
 
 			case 'checkbox':
 				return wc_bool_to_string( $value );
