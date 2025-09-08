@@ -3,7 +3,7 @@
  * Tests for Order List Tables in WooCommerce Admin
  */
 
-declare( strict_types = 1);
+declare( strict_types = 1 );
 
 require_once WC_ABSPATH . '/includes/admin/list-tables/class-wc-admin-list-table-orders.php';
 
@@ -11,6 +11,19 @@ require_once WC_ABSPATH . '/includes/admin/list-tables/class-wc-admin-list-table
  * WC Admin List Table Orders test
  */
 class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'This test is not compatible with HPOS.' );
+		}
+
+		parent::setUp();
+	}
+
+
 	/**
 	 * Test that the order search custom fields logic works as expected. The list table makes use of wc_order_search to
 	 * get the order ids and inject into the query. We'll confirm that works and that results are expected.
