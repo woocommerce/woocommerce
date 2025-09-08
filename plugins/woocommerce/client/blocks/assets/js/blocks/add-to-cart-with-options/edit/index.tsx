@@ -11,6 +11,7 @@ import {
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { isExternalProduct, useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -20,7 +21,6 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
-import { isExternalProduct, useProduct } from '@woocommerce/entities';
 
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context: { postId?: number } }
