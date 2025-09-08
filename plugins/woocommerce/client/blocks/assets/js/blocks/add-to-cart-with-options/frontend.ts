@@ -289,11 +289,11 @@ const { actions, state } = store<
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
 				const { products } = getConfig( 'woocommerce' );
-				const variationIds = Object.keys(
-					products?.[ productDataState.productId ].variations
-				);
+				const variations =
+					products?.[ productDataState.productId ].variations;
 
-				if ( variationIds ) {
+				if ( variations ) {
+					const variationIds = Object.keys( variations );
 					// Set the quantity for all variations, so when switching
 					// variations the quantity persists.
 					const idsToUpdate = [
