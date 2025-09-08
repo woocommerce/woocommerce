@@ -485,7 +485,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					li.setAttribute( 'aria-label', suggestion.label );
 					li.id = `suggestion-item-${ type }-${ index }`;
 					li.dataset.id = suggestion.id;
-					li.setAttribute( 'tabindex', '-1' );
 
 					li.textContent = ''; // Clear existing content.
 					const labelParts = getHighlightedLabel(
