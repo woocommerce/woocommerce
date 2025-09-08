@@ -336,6 +336,12 @@ class Analytics {
 
 		if ( $refunded_orders ) {
 			foreach ( $refunded_orders as $refunded_order ) {
+				/**
+				 * Trigger an action to schedule the data import for old refunded order items.
+				 *
+				 * @param int $order_id The ID of the order to be synced.
+				 * @since 10.2.0
+				 */
 				do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
 			}
 		}
