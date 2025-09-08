@@ -27,7 +27,7 @@ const performanceResults = resultsFiles.map( ( { file } ) =>
 );
 
 const keys = [
-	// 'totalBlockingTime',
+	'totalBlockingTime',
 	'largestContentfulPaint',
 	'serverResponse',
 	'firstPaint',
@@ -57,7 +57,7 @@ const data = JSON.stringify( {
 						metricsPrefix + key,
 						typeof value === 'object'
 							? value.q50
-							: Number( value ).toFixed( 3 ),
+							: Number( value || 0.00001 ).toFixed( 5 ),
 					] )
 			),
 		};
@@ -77,7 +77,7 @@ const data = JSON.stringify( {
 						metricsPrefix + key,
 						typeof value === 'object'
 							? value.q50
-							: Number( value ).toFixed( 3 ),
+							: Number( value || 0.00001 ).toFixed( 5 ),
 					] )
 			),
 		};
