@@ -587,4 +587,108 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		$coupon->delete( true );
 	}
+
+	/**
+	 * @testdox should clear shipping data from session when the cart is empty
+	 */
+	public function test_setting_session_should_clear_shipping_data_when_cart_is_empty() {
+		$this->simulate_two_packages();
+
+		WC()->session->set( 'shipping_method_counts', array( 123 ) );
+		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+
+		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
+		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
+		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$this->assertNotEmpty( $shipping_method_counts );
+		$this->assertNotEmpty( $previous_shipping_methods );
+		$this->assertNotEmpty( $shipping_for_package_0 );
+		$this->assertNotEmpty( $shipping_for_package_1 );
+
+		$cart = WC()->cart;
+		$cart->set_session();
+
+		$this->assertNull( WC()->session->get( 'shipping_method_counts' ) );
+		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+	}
+
+	/**
+	 * @testdox should clear shipping data from session when the cart is not empty
+	 */
+	public function test_setting_session_should_not_clear_shipping_data_when_cart_is_not_empty() {
+		$this->simulate_two_packages();
+
+		WC()->session->set( 'shipping_method_counts', array( 123 ) );
+		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$cart = WC()->cart;
+		$cart->add_to_cart( $product->get_id() );
+
+		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
+		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
+		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$this->assertNotEmpty( $previous_shipping_methods );
+		$this->assertNotEmpty( $shipping_method_counts );
+		$this->assertNotEmpty( $shipping_for_package_0 );
+		$this->assertNotEmpty( $shipping_for_package_1 );
+
+		$cart->set_session();
+
+		$this->assertNotEmpty( WC()->session->get( 'shipping_method_counts' ) );
+		$this->assertNotEmpty( WC()->session->get( 'previous_shipping_methods' ) );
+		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
+		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
+	}
+
+	/**
+	 * @testdox should clear shipping data from session when the cart is emptied
+	 */
+	public function test_emptying_the_cart_should_clear_shipping_data() {
+		$this->simulate_two_packages();
+
+		WC()->session->set( 'shipping_method_counts', array( 123 ) );
+		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
+		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+
+		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
+		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
+		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
+		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$this->assertNotEmpty( $shipping_method_counts );
+		$this->assertNotEmpty( $previous_shipping_methods );
+		$this->assertNotEmpty( $shipping_for_package_0 );
+		$this->assertNotEmpty( $shipping_for_package_1 );
+
+		$cart = WC()->cart;
+		$cart->empty_cart();
+
+		$this->assertNull( WC()->session->get( 'shipping_method_counts' ) );
+		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
+		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+	}
+
+	/**
+	 * Simulate two shipping packages.
+	 */
+	private function simulate_two_packages() {
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			function ( $packages ) {
+				$packages[] = $packages[0];
+				return $packages;
+			}
+		);
+	}
 }

@@ -316,6 +316,9 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_tax_totals', null );
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
+		$wc_session->set( 'shipping_method_counts', null );
+		$wc_session->set( 'previous_shipping_methods', null );
+		$this->remove_shipping_for_package_from_session();
 	}
 
 	/**
@@ -411,6 +414,11 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		if ( empty( $cart ) ) {
+			$wc_session->set( 'shipping_method_counts', null );
+			$wc_session->set( 'previous_shipping_methods', null );
+			$this->remove_shipping_for_package_from_session();
+		}
 
 		/**
 		 * Fires when cart is updated.
@@ -643,5 +651,18 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
+	}
+
+	/**
+	 * Remove shipping data for all packages from session.
+	 *
+	 * @return void
+	 */
+	private function remove_shipping_for_package_from_session() {
+		$wc_session = WC()->session;
+
+		foreach ( array_keys( WC()->cart->get_shipping_packages() ) as $package_key ) {
+			$wc_session->set( 'shipping_for_package_' . $package_key, null );
+		}
 	}
 }
