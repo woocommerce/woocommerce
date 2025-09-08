@@ -71,12 +71,6 @@
 	},
 	"config": {
 		"ci": {
-			"lint": {
-				"command": "lint",
-				"changes": [
-					"js/**/*.{js,ts,tsx,scss}"
-				]
-			},
 			"tests": [
 				{
 					"name": "JavaScript",
