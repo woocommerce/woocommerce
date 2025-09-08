@@ -53,9 +53,10 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'description'        => __( 'Allows entering cost of goods sold information for products.', 'woocommerce' ),
-			'is_experimental'    => false,
-			'enabled_by_default' => false,
+			'description'                  => __( 'Allows entering cost of goods sold information for products.', 'woocommerce' ),
+			'is_experimental'              => false,
+			'enabled_by_default'           => false,
+			'default_plugin_compatibility' => 'compatible',
 		);
 
 		$features_controller->add_feature_definition(
