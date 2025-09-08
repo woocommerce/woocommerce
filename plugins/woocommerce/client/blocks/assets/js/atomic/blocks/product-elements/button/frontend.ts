@@ -77,10 +77,11 @@ const productButtonStore = {
 				return products[ 0 ]?.quantity || 0;
 			}
 
-			const selectedAttributes =
-				addToCartWithOptionsState?.selectedAttributes;
 			const selectedVariableProduct = products.find( ( item ) =>
-				doesCartItemMatchAttributes( item, selectedAttributes )
+				doesCartItemMatchAttributes(
+					item,
+					productDataState.selectedAttributes
+				)
 			);
 
 			return selectedVariableProduct?.quantity || 0;

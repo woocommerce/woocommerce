@@ -1,11 +1,18 @@
 /**
  * External dependencies
  */
-import { getContext, store } from '@wordpress/interactivity';
+import { getConfig, getContext, store } from '@wordpress/interactivity';
+import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+
+/**
+ * Internal dependencies
+ */
+import { getMatchedVariation } from '../../utils/variations/get-matched-variation';
 
 type ProductRef = {
 	productId: number;
 	variationId: number | null;
+	selectedAttributes: SelectedAttributes[];
 };
 
 export type Context = ProductRef;
@@ -17,7 +24,9 @@ type ServerState = {
 const productDataStore = store< {
 	state: ProductRef & ServerState;
 	actions: {
-		setVariationId: ( variationId: number ) => void;
+		setAttribute: ( attribute: string, value: string ) => void;
+		removeAttribute: ( attribute: string ) => void;
+		setSelectedVariationId: () => void;
 	};
 } >(
 	'woocommerce/product-data',
@@ -43,21 +52,85 @@ const productDataStore = store< {
 					productDataStore?.state?.templateState?.variationId
 				);
 			},
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >(
+					'woocommerce/single-product'
+				);
+
+				return (
+					context?.selectedAttributes ||
+					productDataStore?.state?.templateState?.selectedAttributes
+				);
+			},
 		},
 		actions: {
-			setVariationId: ( variationId: number ) => {
+			setAttribute( attribute: string, value: string ) {
+				const selectedAttributes =
+					productDataStore.state.selectedAttributes;
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+
+				if ( value === '' ) {
+					if ( index >= 0 ) {
+						selectedAttributes.splice( index, 1 );
+					}
+					return;
+				}
+
+				if ( index >= 0 ) {
+					selectedAttributes[ index ] = {
+						attribute,
+						value,
+					};
+				} else {
+					selectedAttributes.push( {
+						attribute,
+						value,
+					} );
+				}
+			},
+			removeAttribute( attribute: string ) {
+				const selectedAttributes =
+					productDataStore.state.selectedAttributes;
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+				if ( index >= 0 ) {
+					selectedAttributes.splice( index, 1 );
+				}
+			},
+			setSelectedVariationId: () => {
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataStore.state.productId ].variations;
+
+				const matchedVariation = getMatchedVariation(
+					variations,
+					productDataStore.state.selectedAttributes
+				);
+
+				const matchedVariationId = matchedVariation?.variation_id;
+
+				if ( typeof matchedVariationId !== 'number' ) {
+					return;
+				}
+
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
 				if ( context?.variationId !== undefined ) {
-					context.variationId = variationId;
+					context.variationId = matchedVariationId;
 				} else if (
 					productDataStore?.state?.templateState?.variationId !==
 					undefined
 				) {
 					productDataStore.state.templateState.variationId =
-						variationId;
+						matchedVariationId;
 				}
 			},
 		},
