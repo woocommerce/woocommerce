@@ -35,20 +35,23 @@ class AbilitiesClient {
 	 * @return bool True if successfully enabled, false otherwise.
 	 */
 	public static function enable( bool $with_debug = false ): bool {
-		// Only enable once
+		// Only enable once.
 		if ( self::$enabled ) {
 			return true;
 		}
 
-		// Check if abilities API is available
+		// Check if abilities API is available.
 		if ( ! function_exists( 'wp_abilities_register_client_assets' ) ) {
 			return false;
 		}
 
-		// Hook into admin_enqueue_scripts to register and enqueue when needed
-		add_action( 'admin_enqueue_scripts', function() use ( $with_debug ) {
-			self::enqueue_for_admin( $with_debug );
-		} );
+		// Hook into admin_enqueue_scripts to register and enqueue when needed.
+		add_action(
+			'admin_enqueue_scripts',
+			function () use ( $with_debug ) {
+				self::enqueue_for_admin( $with_debug );
+			}
+		);
 
 		self::$enabled = true;
 		return true;
@@ -69,23 +72,23 @@ class AbilitiesClient {
 	 * @param bool $with_debug Whether to add debug logging.
 	 */
 	private static function enqueue_for_admin( bool $with_debug ): void {
-		// Only enqueue on admin pages
+		// Only enqueue on admin pages.
 		if ( ! is_admin() ) {
 			return;
 		}
 
-		// Register the client assets
+		// Register the client assets.
 		wp_abilities_register_client_assets();
 
-		// Check if registration was successful
+		// Check if registration was successful.
 		if ( ! wp_script_is( 'wp-abilities', 'registered' ) ) {
 			return;
 		}
 
-		// Enqueue the script
+		// Enqueue the script.
 		wp_enqueue_script( 'wp-abilities' );
 
-		// Add debug script if requested
+		// Add debug script if requested.
 		if ( $with_debug ) {
 			self::add_debug_logging();
 		}
