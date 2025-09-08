@@ -114,7 +114,8 @@ const productDataStore = store< {
 				}
 
 				const variations =
-					products[ productDataStore.state.productId ].variations;
+					products[ productDataStore.state.productId ].variations ||
+					[];
 
 				const matchedVariation = getMatchedVariation(
 					variations,
