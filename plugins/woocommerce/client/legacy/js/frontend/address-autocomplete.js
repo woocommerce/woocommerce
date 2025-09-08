@@ -482,6 +482,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				safeSuggestions.forEach( ( suggestion, index ) => {
 					const li = document.createElement( 'li' );
 					li.setAttribute( 'role', 'option' );
+					li.setAttribute( 'aria-label', suggestion.label );
 					li.id = `suggestion-item-${ type }-${ index }`;
 					li.dataset.id = suggestion.id;
 					li.setAttribute( 'tabindex', '-1' );
